@@ -14,6 +14,10 @@ npm run balance      # simulate hundreds of lifetimes per player archetype (DETA
 
 New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. RESET replays the onboarding. `gallery.html` shows every sprite.
 
+## Save / load / transfer
+
+ARCHIVE → **SAVE / LOAD** makes a transfer code (`NL1.…`, about 1–2 KB) holding everything: the netling, lineage, dex, codex, style and progress. Copy it or download it as a file, then paste or load it on another device. Codes are compressed and checksummed, so a damaged paste is rejected rather than half-loaded; loading shows what's inside and asks before replacing this device. The netling keeps living on the old device too; whichever you keep playing is the real one.
+
 ## Install / offline
 
 It's a PWA: use the browser's "Install app" (desktop Chrome) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline.
@@ -30,6 +34,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/main.js` | UI wiring, save/load (`localStorage`), prefs, notifications |
 | `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
+| `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |
 | `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
 | `src/archive.js` | Lineage records and the form dex (ARCHIVE button) |
 | `src/notify.js`, `sw.js`, `manifest.webmanifest` | PWA + notifications |

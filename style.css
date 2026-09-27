@@ -869,6 +869,106 @@ body.intro-active .brand .prefs {
   }
 }
 
+/* --- save / load -------------------------------------------------------------- */
+
+.archive-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.transfer-body {
+  overflow-y: auto;
+  min-height: 0;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transfer-body h3 {
+  margin: 8px 0 0;
+  font-weight: normal;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  font-size: 18px;
+}
+
+.tx-note {
+  margin: 0;
+  font-size: 15px;
+  color: #5d7a80;
+}
+
+.tx-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tx-row > * {
+  flex: 1;
+}
+
+.transfer textarea {
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  width: 100%;
+  resize: vertical;
+  padding: 6px 8px;
+  color: var(--text);
+  background: #05050a;
+  border: 1px solid var(--shell-edge);
+  word-break: break-all;
+}
+
+.transfer button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.file-btn {
+  font-size: 18px;
+  color: var(--cyan);
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  background: #0c0b16;
+}
+
+.tx-preview {
+  padding: 8px 10px;
+  border: 1px solid var(--yellow);
+  font-size: 16px;
+}
+
+.tx-preview.error {
+  border-color: var(--magenta);
+  color: var(--magenta);
+}
+
+.tx-preview dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 4px 0 8px;
+}
+
+.tx-preview dt {
+  color: #5d7a80;
+}
+
+.tx-preview dd {
+  margin: 0;
+}
+
+.tx-preview .danger {
+  width: 100%;
+  color: var(--magenta);
+  border-color: var(--magenta);
+}
+
 /* --- field manual ------------------------------------------------------------ */
 
 .help-body {

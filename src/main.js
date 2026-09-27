@@ -26,6 +26,7 @@ import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, re
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
+import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from './transfer.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
@@ -181,7 +182,10 @@ function recordForm() {
 }
 setMuted(!prefs.sound);
 
+let importing = false; // stops autosave from overwriting an import before the reload
+
 function save() {
+  if (importing) return;
   store.set(SAVE_KEY, state);
 }
 
@@ -975,6 +979,115 @@ function finishOnboarding() {
   }
   $('open-archive').classList.add('nudge');
   setTimeout(() => $('open-archive').classList.remove('nudge'), 9000);
+}
+
+// --- save / load -------------------------------------------------------------------
+
+const transfer = $('transfer');
+let pendingImport = null;
+
+function collectData() {
+  save();
+  return Object.fromEntries(TRANSFER_KEYS.map((k) => [k, store.get(`netling.${k}`)]).filter(([, v]) => v !== null && v !== undefined));
+}
+
+$('open-transfer').addEventListener('click', () => {
+  archive.close();
+  $('import-preview').hidden = true;
+  transfer.showModal();
+});
+$('close-transfer').addEventListener('click', () => transfer.close());
+
+$('make-code').addEventListener('click', async () => {
+  const code = await encodeSave(collectData());
+  $('export-code').value = code;
+  $('copy-code').disabled = false;
+  $('download-code').disabled = false;
+  sfx('select', state.quirk.pitch);
+});
+
+$('copy-code').addEventListener('click', async () => {
+  const box = $('export-code');
+  try {
+    await navigator.clipboard.writeText(box.value);
+    $('copy-code').textContent = 'COPIED';
+  } catch {
+    // Clipboard can be blocked; leave the code selected so it can be copied by hand.
+    box.select();
+    $('copy-code').textContent = 'SELECTED: COPY IT';
+  }
+  setTimeout(() => ($('copy-code').textContent = 'COPY'), 2000);
+});
+
+$('download-code').addEventListener('click', () => {
+  const blob = new Blob([$('export-code').value], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `netling-v${state.generation}-${new Date().toISOString().slice(0, 10)}.txt`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+
+$('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  $('import-code').value = (await file.text()).slice(0, 200_000);
+  e.target.value = '';
+  checkImport();
+});
+
+$('check-code').addEventListener('click', checkImport);
+
+async function checkImport() {
+  const box = $('import-preview');
+  box.hidden = false;
+  box.className = 'tx-preview';
+  try {
+    pendingImport = await decodeSave($('import-code').value);
+  } catch (err) {
+    pendingImport = null;
+    box.className = 'tx-preview error';
+    box.textContent = err.message ?? 'could not read that code.';
+    sfx('error', state.quirk.pitch);
+    return;
+  }
+  const info = describeSave(pendingImport);
+  const dl = document.createElement('dl');
+  for (const [k, v] of [
+    ['netling', info.netling],
+    ['generations', info.generations],
+    ['dex', `${info.dex}/8`],
+    ['codex', info.codex],
+    ['style items', info.style],
+    ['saved', info.exportedAt ? new Date(info.exportedAt).toLocaleString() : 'unknown'],
+  ]) {
+    const dt = document.createElement('dt');
+    dt.textContent = k;
+    const dd = document.createElement('dd');
+    dd.textContent = v;
+    dl.append(dt, dd);
+  }
+  const warn = document.createElement('p');
+  warn.className = 'tx-note';
+  warn.textContent = 'Loading replaces everything on this device. Make a code for this one first if you want to keep it.';
+  const go = document.createElement('button');
+  go.type = 'button';
+  go.className = 'danger';
+  go.textContent = 'REPLACE THIS DEVICE';
+  go.addEventListener('click', applyImport);
+  box.replaceChildren(dl, warn, go);
+}
+
+function applyImport() {
+  if (!pendingImport) return;
+  importing = true;
+  for (const k of TRANSFER_KEYS) {
+    const v = pendingImport.data[k];
+    if (v === undefined) localStorage.removeItem(`netling.${k}`);
+    else store.set(`netling.${k}`, v);
+  }
+  store.set(SKEW_KEY, 0);
+  location.reload();
 }
 
 // --- NL-0 ------------------------------------------------------------------------
