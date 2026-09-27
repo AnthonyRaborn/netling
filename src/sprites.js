@@ -289,6 +289,25 @@ export const SPRITES = {
   bang: ['#', '#', '#', '.', '#'],
 };
 
+// 7x7 inventory icons. '#' = item color, 'o' = dim fill, '+' = highlight.
+export const ITEM_SPRITES = {
+  coolant: ['..###..', '.#ooo#.', '.#+oo#.', '.#ooo#.', '.#+oo#.', '.#ooo#.', '..###..'],
+  antivirus: ['.#####.', '#ooooo#', '#oo+oo#', '#o+++o#', '#oo+oo#', '.#ooo#.', '..###..'],
+  voucher: ['.......', '#######', '#o+o+o#', '##ooo##', '#o+o+o#', '#######', '.......'],
+  blackice: ['...#...', '..#o#..', '.#oo+#.', '#ooo+o#', '.#ooo#.', '..#o#..', '...#...'],
+  booster: ['...#...', '.#.#.#.', '#..#..#', '.#.#.#.', '...#...', '..###..', '.#####.'],
+  memory: ['#.#.#.#', '.#####.', '##o+o##', '.#ooo#.', '##o+o##', '.#####.', '#.#.#.#'],
+};
+
+export const ITEM_COLORS = {
+  coolant: '#05d9e8',
+  antivirus: '#39ff14',
+  voucher: '#f9f002',
+  blackice: '#ff2a6d',
+  booster: '#b967ff',
+  memory: '#c7f9ff',
+};
+
 // Frame lookup per form; falls back to frame A for missing sleep/dead poses.
 export function formSprite(form, pose) {
   const a = SPRITES[`${form}A`] ?? SPRITES.bitlingA;

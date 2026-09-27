@@ -359,6 +359,72 @@ button:active {
   text-shadow: none;
 }
 
+.inventory {
+  margin-top: 12px;
+}
+
+.inv-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.inv-slot {
+  aspect-ratio: 1;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #0a0a12;
+  border: 1px dashed var(--shell-edge);
+  border-radius: 4px;
+  text-shadow: none;
+}
+
+.inv-slot.filled {
+  border-style: solid;
+  border-color: var(--dim);
+}
+
+.inv-slot[aria-pressed='true'] {
+  border-color: var(--yellow);
+  box-shadow: 0 0 8px rgba(249, 240, 2, 0.4);
+}
+
+.inv-slot:disabled {
+  cursor: default;
+}
+
+.inv-slot canvas {
+  width: 60%;
+  image-rendering: pixelated;
+}
+
+.inv-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--shell-edge);
+  background: #0a0a12;
+}
+
+.inv-text {
+  flex: 1;
+  font-size: 16px;
+  color: var(--dim);
+  line-height: 1.15;
+}
+
+.inv-text b {
+  font-weight: normal;
+  color: var(--text);
+}
+
+.inv-detail button {
+  padding: 4px 12px;
+}
+
 .event-bar {
   display: flex;
   align-items: center;

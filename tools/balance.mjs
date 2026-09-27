@@ -30,6 +30,19 @@ export const ARCHETYPES = {
 
 function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
+  const useItem = (id) => {
+    const slot = s.inventory.indexOf(id);
+    if (slot < 0 || p.noItems) return false;
+    return doAct('use', { slot }).ok;
+  };
+  // Items first: they can resolve things more cheaply than actions.
+  if (s.event?.type === 'trace' && p.trace !== 'hide') useItem('voucher');
+  if (s.stats.heat > 70) useItem('coolant');
+  if (ctx.gapToNext >= 240 && !(s.buffs?.shieldUntilAge > s.ageMin)) useItem('antivirus');
+  if (s.virus) useItem('antivirus');
+  if ((p.hot || s.stats.sync < 30) && !s.asleep) useItem('blackice');
+  if (p.gamer && !s.buffs?.boost) useItem('booster');
+  ctx.itemsHeld = Math.max(ctx.itemsHeld ?? 0, s.inventory.length);
   if (s.event?.type === 'trace') {
     let choice = p.trace;
     if (choice === 'mix') choice = rng() < 0.5 ? 'hide' : 'comply';
@@ -125,6 +138,7 @@ export function simulate(p, seed) {
     axes: { ...s.axes },
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
+    itemsHeld: ctx.itemsHeld ?? 0,
     mistakeKinds,
     traces,
     tracesIgnored,
@@ -171,10 +185,12 @@ export function summarize(results) {
       return `allegiance ${mean(a.map((x) => x.axes.allegiance))} (|${mean(a.map((x) => Math.abs(x.axes.allegiance)))}|), stability ${mean(a.map((x) => x.axes.stability))}, wins ${mean(a.map((x) => x.wins))}, mistakes ${mean(a.map((x) => x.mistakes))}`;
     })(),
     traces: `${mean(results.map((r) => r.traces))} (${mean(results.map((r) => r.tracesIgnored))} ignored)`,
+    itemsHeld: mean(results.map((r) => r.itemsHeld)),
   };
 }
 
 const runs = Number(process.argv[2] ?? 300);
+if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems = true;
 const filter = process.argv[3];
 if (import.meta.url === `file://${process.argv[1]}`) {
   for (const [name, p] of Object.entries(ARCHETYPES)) {
@@ -188,7 +204,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  adults: ${sum.adults}`);
     if (process.env.DETAIL) {
       console.log(`  mistakes/run: ${sum.mistakeKinds}`);
-      console.log(`  at adult: ${sum.atAdult} · traces ${sum.traces}`);
+      console.log(`  at adult: ${sum.atAdult} · traces ${sum.traces} · peak items held ${sum.itemsHeld}`);
     }
   }
 }

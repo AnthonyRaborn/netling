@@ -58,6 +58,15 @@
 
       <p id="readout" class="readout"></p>
 
+      <div class="inventory" aria-label="Inventory">
+        <div id="inv-slots" class="inv-slots"></div>
+        <div id="inv-detail" class="inv-detail" hidden>
+          <div class="inv-text"><b id="inv-name"></b> <span id="inv-desc"></span></div>
+          <button type="button" id="inv-use">USE</button>
+          <button type="button" id="inv-cancel" class="pref">KEEP</button>
+        </div>
+      </div>
+
       <div id="event-bar" class="event-bar" role="alert" hidden>
         <span class="event-label">CORP TRACE <b id="event-timer"></b></span>
         <button type="button" data-act="hide">HIDE</button>

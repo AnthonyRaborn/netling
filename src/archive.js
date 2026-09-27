@@ -1,5 +1,5 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
-import { SPECIES, FORMS, FORM_MODS, TRAITS } from './sim.js';
+import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES } from './sim.js';
 
 export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
 
@@ -57,6 +57,7 @@ export function deathRecord(state) {
     mistakes: state.careMistakes,
     trait: state.trait,
     fragmentTrait: f?.trait ?? null,
+    keepsake: f?.keepsake ?? null,
     palette: state.quirk?.palette ?? 0,
     bornAt: state.bornAt,
     diedAt: state.diedAt,
@@ -74,6 +75,7 @@ export function lineageRows(lineage, current) {
     mistakes: e.mistakes,
     trait: e.trait ? TRAITS[e.trait].name : null,
     fragment: e.fragmentTrait ? TRAITS[e.fragmentTrait].name : null,
+    keepsake: e.keepsake ? ITEMS[e.keepsake].name : null,
     palette: e.palette ?? 0,
     dead: true,
   }));
@@ -105,6 +107,7 @@ export function dexEntries(dex) {
       text: found ? DEX_LORE[id] : `hint: ${DEX_HINTS[id]}`,
       perk: found ? FORM_MODS[id]?.desc ?? null : null,
       trait: found && FORMS[id] ? TRAITS[FORMS[id].trait].name : null,
+      keepsake: found && KEEPSAKES[id] ? ITEMS[KEEPSAKES[id]].name : null,
     };
   });
 }

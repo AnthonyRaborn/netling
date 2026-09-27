@@ -41,6 +41,41 @@ export const CFG = {
 
 export const GAME_IDS = ['breach', 'dodge', 'tune'];
 
+export const INVENTORY_SLOTS = 6;
+export const ITEM_CFG = {
+  winDropChance: 0.25,
+  hideDropChance: 0.3,
+  complyDropChance: 0.3,
+  shieldMinutes: 360,
+  blackIceVirusChance: 0.25,
+};
+
+// awake: can only be used while it's awake.
+export const ITEMS = {
+  coolant: { name: 'Coolant cell', desc: 'Instantly vents 50 Heat. Works while asleep.' },
+  antivirus: { name: 'Antivirus patch', desc: 'Cures any virus and shields against new ones for 6h.' },
+  voucher: { name: 'Corp voucher', desc: 'Full Charge, and waves off the current or next corp trace. Leans corp.' },
+  blackice: { name: 'Black ICE shard', desc: '+40 Sync, +20 Heat, may carry a virus. Leans indie and unstable.', awake: true },
+  booster: { name: 'Signal booster', desc: 'Your next mini-game win counts double.', awake: true },
+  memory: { name: 'Memory shard', desc: 'Rewrites one of its quirks at random.' },
+};
+
+// Weighted drop tables per source.
+const DROPS = {
+  win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, memory: 1 },
+  hide: { blackice: 2, memory: 1, coolant: 1 },
+  comply: { voucher: 3, antivirus: 1 },
+};
+
+// What each adult form leaves behind for the next generation.
+export const KEEPSAKES = {
+  chrome: 'voucher',
+  firewall: 'antivirus',
+  daemon: 'coolant',
+  glitch: 'blackice',
+  ghost: 'memory',
+};
+
 export const FORMS = {
   chrome: { name: 'Chrome', trait: 'licensed' },
   firewall: { name: 'Firewall', trait: 'hardened' },
@@ -151,6 +186,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     games: freshGames(),
     event: null,
     lastSurgeAt: null,
+    inventory: fragment?.keepsake ? [fragment.keepsake] : [],
+    buffs: { shieldUntilAge: 0, traceSkip: false, boost: false },
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
@@ -230,7 +267,7 @@ function step(s, t, rng) {
   }
   s.sinceFed++;
 
-  if (!s.virus) {
+  if (!s.virus && !shielded(s)) {
     let perHour = CFG.virusBasePerHour + CFG.virusPerCachePerHour * s.cache;
     if (s.trait === 'hardened') perHour *= 0.5;
     perHour *= mod(s, 'virusMult');
@@ -239,7 +276,7 @@ function step(s, t, rng) {
       s.virusMin = 0;
       log(s, t, '> !! virus signature detected.');
     }
-  } else {
+  } else if (s.virus) {
     s.virusMin++;
   }
 
@@ -282,6 +319,11 @@ function stepEvents(s, t, rng) {
   }
   if (s.asleep) return;
   if (s.trait !== 'untraceable' && rng() < CFG.traceChancePerHour / 60) {
+    if (s.buffs?.traceSkip) {
+      s.buffs.traceSkip = false;
+      log(s, t, '> corp trace waved off by voucher.');
+      return;
+    }
     s.event = { type: 'trace', startedAge: s.ageMin };
     log(s, t, `> !! corp trace incoming. ${CFG.traceWindowMin}m to respond.`);
   } else if (rng() < CFG.surgeChancePerHour / 60) {
@@ -290,6 +332,28 @@ function stepEvents(s, t, rng) {
     s.lastSurgeAt = t;
     log(s, t, '> !! power surge. running hot.');
   }
+}
+
+export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
+
+function rollTable(table, rng) {
+  const entries = Object.entries(table);
+  let r = rng() * entries.reduce((a, [, w]) => a + w, 0);
+  for (const [id, w] of entries) {
+    if ((r -= w) < 0) return id;
+  }
+  return entries[entries.length - 1][0];
+}
+
+// Adds an item if there's room. Returns a log suffix.
+export function grantItem(s, id) {
+  if (s.inventory.length >= INVENTORY_SLOTS) return ` found ${ITEMS[id].name}, but inventory is full.`;
+  s.inventory.push(id);
+  return ` found: ${ITEMS[id].name}.`;
+}
+
+function maybeDrop(s, source, chance, rng) {
+  return rng() < chance ? grantItem(s, rollTable(DROPS[source], rng)) : '';
 }
 
 export function traceMinutesLeft(s) {
@@ -342,6 +406,8 @@ export function migrate(s) {
   s.event ??= null;
   s.lastSurgeAt ??= null;
   s.teenForm ??= s.stage === 'teen' ? s.form : null;
+  s.inventory ??= [];
+  s.buffs ??= { shieldUntilAge: 0, traceSkip: false, boost: false };
   return s;
 }
 
@@ -350,7 +416,7 @@ function flatline(s, t, cause) {
   s.deathCause = cause;
   s.diedAt = t;
   const form = FORMS[s.form] ? s.form : leaningForm(s);
-  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk } };
+  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
@@ -361,6 +427,16 @@ export function blockReason(s, action) {
   if (s.asleep && ['corp', 'scav', 'play', 'cool'].includes(action)) return 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
+  return null;
+}
+
+// Why an item in a slot can't be used right now, or null.
+export function itemBlockReason(s, slot) {
+  const base = blockReason(s, 'use');
+  if (base) return base;
+  const id = s.inventory?.[slot];
+  if (!id) return 'empty slot.';
+  if (ITEMS[id].awake && s.asleep) return 'in low-power mode.';
   return null;
 }
 
@@ -390,7 +466,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         st.sync = clamp(st.sync + (action === 'corp' ? 5 : -5));
         if (action === 'scav') msg += ' it looks disgusted.';
       }
-      if (action === 'scav' && !s.virus) {
+      if (action === 'scav' && !s.virus && !shielded(s)) {
         const chance = (s.trait === 'hardened' ? 0.06 : 0.12) * mod(s, 'virusMult');
         if (rng() < chance) {
           s.virus = true;
@@ -407,13 +483,20 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       if (s.form === 'glitch') gain = 10 + Math.floor(rng() * 31);
       if (s.trait === 'volatile') gain *= 1.5;
+      const boosted = won && s.buffs.boost;
+      if (boosted) {
+        gain *= 2;
+        s.buffs.boost = false;
+      }
       st.sync = clamp(st.sync + gain);
       st.charge = clamp(st.charge - 6);
       st.heat = clamp(st.heat + 12);
       if (st.heat > 70) s.axes.stability -= 0.5;
       s.games[game].played++;
-      if (won) s.games[game].won++;
-      res = ok(won ? `${game}: won. sync up.` : `${game}: lost. it had fun anyway.`, won ? 'win' : 'lose');
+      if (won) s.games[game].won += boosted ? 2 : 1;
+      let msg = won ? `${game}: won${boosted ? ' (boosted x2)' : ''}. sync up.` : `${game}: lost. it had fun anyway.`;
+      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance, rng);
+      res = ok(msg, won ? 'win' : 'lose');
       break;
     }
     case 'hide': {
@@ -421,7 +504,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       st.charge = clamp(st.charge - 10);
       st.heat = clamp(st.heat + 10);
       s.axes.allegiance -= 1;
-      res = ok('rerouted through proxies. trace lost.', 'patch');
+      res = ok(`rerouted through proxies. trace lost.${maybeDrop(s, 'hide', ITEM_CFG.hideDropChance, rng)}`, 'patch');
       break;
     }
     case 'comply': {
@@ -429,7 +512,17 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       st.integrity = clamp(st.integrity - 5);
       st.sync = clamp(st.sync - 10);
       s.axes.allegiance += 1;
-      res = ok('handshake accepted. corp scan complete.', 'feed');
+      res = ok(`handshake accepted. corp scan complete.${maybeDrop(s, 'comply', ITEM_CFG.complyDropChance, rng)}`, 'feed');
+      break;
+    }
+    case 'use': {
+      const slot = opts.slot;
+      const blockedItem = itemBlockReason(s, slot);
+      if (blockedItem) return fail(blockedItem);
+      const id = s.inventory[slot];
+      const msg = useItem(s, id, rng);
+      s.inventory.splice(slot, 1);
+      res = ok(msg, 'patch');
       break;
     }
     case 'patch': {
@@ -464,6 +557,54 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
   }
   log(s, now, `> ${res.msg}`);
   return res;
+}
+
+function useItem(s, id, rng) {
+  const st = s.stats;
+  const name = ITEMS[id].name.toLowerCase();
+  switch (id) {
+    case 'coolant':
+      st.heat = clamp(st.heat - 50);
+      return `${name} vented. heat down.`;
+    case 'antivirus': {
+      const cured = s.virus;
+      s.virus = false;
+      s.buffs.shieldUntilAge = s.ageMin + ITEM_CFG.shieldMinutes;
+      return `${name} applied.${cured ? ' virus purged.' : ''} shielded for 6h.`;
+    }
+    case 'voucher':
+      st.charge = 100;
+      s.axes.allegiance += 1;
+      if (s.event?.type === 'trace') {
+        s.event = null;
+        return `${name} redeemed. charge full. trace waved off.`;
+      }
+      s.buffs.traceSkip = true;
+      return `${name} redeemed. charge full. next trace pre-cleared.`;
+    case 'blackice': {
+      st.sync = clamp(st.sync + 40);
+      st.heat = clamp(st.heat + 20);
+      s.axes.allegiance -= 1;
+      s.axes.stability -= 1;
+      if (!s.virus && !shielded(s) && rng() < ITEM_CFG.blackIceVirusChance) {
+        s.virus = true;
+        s.virusMin = 0;
+        return `${name} jacked in. sync surging. !! it carried a virus.`;
+      }
+      return `${name} jacked in. sync surging.`;
+    }
+    case 'booster':
+      s.buffs.boost = true;
+      return `${name} armed. next win counts double.`;
+    case 'memory': {
+      const keys = ['palette', 'pitch', 'idle', 'favPacket'];
+      const key = keys[Math.floor(rng() * keys.length)];
+      const before = s.quirk[key];
+      for (let i = 0; i < 8 && s.quirk[key] === before; i++) s.quirk[key] = rollQuirk(rng)[key];
+      return `${name} decoded. its ${key === 'favPacket' ? 'favorite packet' : key} changed.`;
+    }
+  }
+  return 'nothing happened.';
 }
 
 const ok = (msg, sfx) => ({ ok: true, msg, sfx });

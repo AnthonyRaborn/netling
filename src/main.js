@@ -8,6 +8,9 @@ import {
   traceMinutesLeft,
   alertReason,
   bedtimeHour,
+  itemBlockReason,
+  ITEMS,
+  INVENTORY_SLOTS,
   CFG,
   TRAITS,
   FORMS,
@@ -20,7 +23,7 @@ import {
 import { renderLCD } from './render.js';
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
-import { drawSprite, formSprite } from './sprites.js';
+import { drawSprite, formSprite, ITEM_SPRITES, ITEM_COLORS } from './sprites.js';
 import { sfx, unlockAudio, setMuted } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 
@@ -135,6 +138,7 @@ function updateHUD() {
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
+  renderInventory();
   const traceLeft = traceMinutesLeft(state);
   $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
   $('event-timer').textContent = `${traceLeft}m`;
@@ -181,7 +185,7 @@ function showFlatline() {
   $('fl-cause').textContent = state.deathCause;
   $('fl-age').textContent = fmtAge(state.ageMin);
   $('fl-faults').textContent = `${state.careMistakes}/${CFG.maxMistakes}`;
-  $('fl-trait').textContent = `${TRAITS[f.trait].name} — ${TRAITS[f.trait].desc}`;
+  $('fl-trait').textContent = `${TRAITS[f.trait].name} — ${TRAITS[f.trait].desc}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
   $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[state.form] ? '' : ' (unrealized)'}`;
   $('fl-next').textContent = `COMPILE v${state.generation + 1}.0`;
   overlay.hidden = false;
@@ -204,6 +208,7 @@ document.querySelectorAll('[data-act]').forEach((btn) => {
     const res = act(state, btn.dataset.act, now());
     sfx(res.sfx, state.quirk.pitch);
     if (!res.ok) flashStatus(res.msg);
+    else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
     save();
     updateHUD();
   });
@@ -243,7 +248,7 @@ function startGame(id) {
       showPanel('controls');
       tick(state, now());
       const res = act(state, 'play', now(), Math.random, { game: id, won });
-      if (!res.ok) flashStatus(res.msg);
+      if (!res.ok || res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
       save();
       updateHUD();
     },
@@ -267,6 +272,79 @@ document.addEventListener('keydown', (e) => {
   if (!key || e.repeat) return;
   e.preventDefault();
   session.input(key);
+});
+
+// --- inventory ------------------------------------------------------------------
+
+let selectedSlot = null;
+let lastInvKey = '';
+
+function itemIcon(id) {
+  const c = document.createElement('canvas');
+  c.width = 7;
+  c.height = 7;
+  drawSprite(c.getContext('2d'), ITEM_SPRITES[id], 0, 0, {
+    '#': ITEM_COLORS[id],
+    o: '#1c3a3f',
+    '+': '#f5f5f5',
+  });
+  return c;
+}
+
+function renderInventory() {
+  const inv = state.inventory ?? [];
+  if (selectedSlot !== null && !inv[selectedSlot]) selectedSlot = null;
+  const key = `${inv.join(',')}|${selectedSlot}`;
+  if (key !== lastInvKey) {
+    lastInvKey = key;
+    const slots = [];
+    for (let i = 0; i < INVENTORY_SLOTS; i++) {
+      const id = inv[i];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = id ? 'inv-slot filled' : 'inv-slot';
+      b.disabled = !id;
+      b.setAttribute('aria-label', id ? ITEMS[id].name : 'empty slot');
+      b.setAttribute('aria-pressed', i === selectedSlot);
+      if (id) {
+        b.title = ITEMS[id].name;
+        b.append(itemIcon(id));
+        b.addEventListener('click', () => {
+          selectedSlot = selectedSlot === i ? null : i;
+          sfx('move', state.quirk.pitch);
+          renderInventory();
+        });
+      }
+      slots.push(b);
+    }
+    $('inv-slots').replaceChildren(...slots);
+  }
+  const detail = $('inv-detail');
+  detail.hidden = selectedSlot === null;
+  if (selectedSlot !== null) {
+    const id = inv[selectedSlot];
+    $('inv-name').textContent = ITEMS[id].name;
+    $('inv-desc').textContent = ITEMS[id].desc;
+    const blocked = itemBlockReason(state, selectedSlot);
+    $('inv-use').disabled = Boolean(blocked);
+    $('inv-use').title = blocked ?? '';
+  }
+}
+
+$('inv-use').addEventListener('click', () => {
+  if (selectedSlot === null) return;
+  unlockAudio();
+  tick(state, now());
+  const res = act(state, 'use', now(), Math.random, { slot: selectedSlot });
+  sfx(res.sfx, state.quirk.pitch);
+  if (!res.ok) flashStatus(res.msg);
+  selectedSlot = null;
+  save();
+  updateHUD();
+});
+$('inv-cancel').addEventListener('click', () => {
+  selectedSlot = null;
+  renderInventory();
 });
 
 // --- archive --------------------------------------------------------------------
@@ -326,6 +404,7 @@ function renderArchive() {
         [
           `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
           r.trait || r.fragment ? `inherited ${r.trait ?? '—'}${r.fragment ? ` · left ${r.fragment}` : ''}` : null,
+          r.keepsake ? `keepsake: ${r.keepsake}` : null,
         ],
         r.dead ? '' : 'running',
       ),
@@ -345,7 +424,11 @@ function renderArchive() {
       row(
         thumb(e.id, 0, { locked: !e.found }),
         [bold(e.name), ` · ${e.stage}`],
-        [e.text, e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null, e.trait ? `fragment: ${e.trait}` : null],
+        [
+          e.text,
+          e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null,
+          e.trait ? `fragment: ${e.trait}${e.keepsake ? ` + ${e.keepsake}` : ''}` : null,
+        ],
         e.found ? '' : 'locked',
       ),
     ),
