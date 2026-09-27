@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
-import { createScript, isSleepHour } from '../src/sim.js';
+import { createScript, isSleepHour, tick } from '../src/sim.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -103,9 +103,12 @@ async function animating(page) {
   return frames.size > 1;
 }
 
-// A settled netling (past onboarding), awake at this hour wherever the test runs.
+// A settled netling (past onboarding), awake at this hour wherever the test runs. It is simulated up
+// to now here, with no random events, so the page has no minutes to catch up on: a random corp trace
+// on load would otherwise block hibernation and similar actions now and then.
 function awakeNetling(overrides = {}) {
-  const save = createScript({ now: Date.now() - 10 * 60_000 });
+  const now = Date.now();
+  const save = createScript({ now: now - 10 * 60_000 });
   const hour = new Date().getHours();
   for (let offset = -2; offset <= 12; offset++) {
     if (!isSleepHour(hour, offset) && !isSleepHour((hour + 1) % 24, offset)) {
@@ -113,6 +116,7 @@ function awakeNetling(overrides = {}) {
       break;
     }
   }
+  tick(save, now, () => 0.999);
   return Object.assign(save, overrides);
 }
 
@@ -471,7 +475,7 @@ await scenario('hibernate from the system dialog', async ({ open }) => {
   const page = await open(BASE, seed());
   await page.click('#open-archive');
   await page.click('#open-transfer');
-  assert(!(await page.locator('#hibernate-btn').isDisabled()), 'hibernate unavailable');
+  assert(!(await page.locator('#hibernate-btn').isDisabled()), `hibernate unavailable: ${await page.textContent('#hibernate-note')}`);
   await page.click('#hibernate-btn');
   await page.click('#hibernate-btn');
   await page.waitForTimeout(300);
