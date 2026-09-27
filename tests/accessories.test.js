@@ -108,3 +108,16 @@ test('drawProp places props on the LCD floor at the right edge', () => {
   drawProp(ctx, 'boombox', 40, 0);
   assert.ok(calls.every(([x, y]) => x >= 30 && x < 40 && y >= 16 && y <= 20));
 });
+
+import { accessoryColors } from '../src/accessories.js';
+
+test('party hat colors: defaults, custom picks, and junk rejected', () => {
+  assert.deepEqual(accessoryColors('partyhat'), ['#ff2a6d', '#f9f002']);
+  assert.deepEqual(accessoryColors('partyhat', ['#00ff00', '#123abc']), ['#00ff00', '#123abc']);
+  assert.deepEqual(accessoryColors('partyhat', ['red', 'url(x)']), ['#ff2a6d', '#f9f002']);
+  assert.equal(accessoryColors('cap'), null, 'not recolorable');
+  const seen = new Set();
+  const hat = ACCESSORIES.find((x) => x.id === 'partyhat');
+  hat.draw((x, y, c) => seen.add(c), anchorsFor(SPRITES.bitlingA), 0, 0, ['#00ff00', '#123abc']);
+  assert.ok(seen.has('#00ff00') && seen.has('#123abc'));
+});

@@ -315,9 +315,14 @@ ACCESSORIES.push(
     rarity: 'common',
     source: 'earned',
     hint: 'a gift for a first birthday.',
-    draw: (px, a, frame) => {
+    colors: [
+      ['stripe', '#ff2a6d'],
+      ['stripe', '#f9f002'],
+    ],
+    draw: (px, a, frame, time, colors) => {
       // a cheap hologram: the stripes swap every frame
-      const [c1, c2] = frame % 2 ? ['#ff2a6d', '#f9f002'] : ['#f9f002', '#ff2a6d'];
+      const [s1, s2] = colors ?? ['#ff2a6d', '#f9f002'];
+      const [c1, c2] = frame % 2 ? [s1, s2] : [s2, s1];
       for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 1, x % 2 ? c1 : c2);
       for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, a.headTop - 2, x % 2 ? c2 : c1);
       px(a.cx, a.headTop - 3, c1);
@@ -451,6 +456,14 @@ for (const x of PROPS) x.slot = 'prop';
 export const STYLE_ITEMS = [...ACCESSORIES, ...PROPS];
 
 export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
+
+// Recolorable accessories declare colors: [[label, default], ...]. Custom picks must be #rrggbb.
+const HEX = /^#[0-9a-f]{6}$/i;
+export function accessoryColors(id, custom) {
+  const x = accessoryById(id);
+  if (!x?.colors) return null;
+  return x.colors.map(([, def], i) => (HEX.test(custom?.[i] ?? '') ? custom[i] : def));
+}
 export const accessoryRegions = (x) => x.regions ?? null;
 
 export const accessoryById = (id) => STYLE_ITEMS.find((x) => x.id === id);
@@ -469,7 +482,7 @@ export function rollAccessory(exclude, rng, region = null) {
 }
 
 // Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark.
-export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0) {
+export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null) {
   const acc = accessoryById(id);
   if (!acc) return;
   const a = anchorsFor(sprite);
@@ -477,7 +490,7 @@ export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, t
     ctx.fillStyle = dim ? '#1c3a3f' : color;
     ctx.fillRect(ox + x, oy + y, 1, 1);
   };
-  acc.draw(px, a, frame, time);
+  acc.draw(px, a, frame, time, accessoryColors(id, custom));
 }
 
 // Props stand on the LCD floor at the right edge. Returns nothing if the prop has nothing to draw.

@@ -26,7 +26,7 @@ import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, re
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
-import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint } from './accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
@@ -674,8 +674,48 @@ function renderWardrobe() {
 function accessorySection() {
   return [
     ...styleItemSection('accessory', 'ACCESSORY', ACCESSORIES),
+    ...colorSection(),
     ...styleItemSection('prop', 'PROP', PROPS),
   ];
+}
+
+// Color pickers for the equipped accessory, if it's recolorable.
+function colorSection() {
+  const id = wardrobe.accessory;
+  const acc = ownedAccessories.includes(id) ? accessoryById(id) : null;
+  if (!acc?.colors) return [];
+  const current = accessoryColors(id, wardrobe.colors?.[id]);
+  const row = document.createElement('div');
+  row.className = 'color-row';
+  const label = document.createElement('span');
+  label.textContent = `${acc.name.toLowerCase()} colors`;
+  row.append(label);
+  acc.colors.forEach(([name], i) => {
+    const input = document.createElement('input');
+    input.type = 'color';
+    input.value = current[i];
+    input.setAttribute('aria-label', `${acc.name} ${name} ${i + 1}`);
+    input.addEventListener('input', () => {
+      const next = [...current];
+      next[i] = input.value;
+      current[i] = input.value;
+      wardrobe = { ...wardrobe, colors: { ...wardrobe.colors, [id]: next } };
+      store.set(WARDROBE_KEY, wardrobe);
+    });
+    row.append(input);
+  });
+  const reset = document.createElement('button');
+  reset.type = 'button';
+  reset.className = 'pref';
+  reset.textContent = 'RESET';
+  reset.addEventListener('click', () => {
+    const { [id]: _, ...rest } = wardrobe.colors ?? {};
+    wardrobe = { ...wardrobe, colors: rest };
+    store.set(WARDROBE_KEY, wardrobe);
+    renderWardrobe();
+  });
+  row.append(reset);
+  return [row];
 }
 
 // One wardrobe section for owned style items (worn accessories or ground props).
@@ -1197,6 +1237,7 @@ let lastFrame = performance.now();
   } else {
     renderLCD(canvas, state, time, {
       accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
+      accessoryColors: wardrobe.colors?.[wardrobe.accessory] ?? null,
       prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
       propExtra: wardrobe.prop === 'plush' ? plushCache : null,
       flash: time < flashUntil,

@@ -1016,6 +1016,30 @@ body.intro-active .brand .prefs {
   font-size: 15px;
 }
 
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--shell-edge);
+  font-size: 16px;
+  color: #5d7a80;
+}
+
+.color-row span {
+  flex: 1;
+}
+
+.color-row input[type='color'] {
+  width: 34px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--dim);
+  background: none;
+  cursor: pointer;
+}
+
 /* shells */
 .device.shell-matte {
   background: linear-gradient(160deg, #141417, #0b0b0e 60%, #050506);
