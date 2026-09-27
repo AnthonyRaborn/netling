@@ -41,8 +41,9 @@ const TYPE_HINT = {
 };
 
 export class RunView {
-  constructor(pet, { rng = Math.random, sound = () => {}, onChange = () => {}, onClose = () => {}, onGame = () => {} }) {
+  constructor(pet, { rng = Math.random, now = Date.now, sound = () => {}, onChange = () => {}, onClose = () => {}, onGame = () => {} }) {
     this.pet = pet;
+    this.now = now; // game time (test mode runs it fast)
     this.rng = rng;
     this.sound = sound;
     this.onChange = onChange;
@@ -162,7 +163,7 @@ export class RunView {
 
   close() {
     const run = this.run;
-    closeRun(this.pet, Date.now());
+    closeRun(this.pet, this.now());
     this.onChange();
     this.onClose(run);
   }

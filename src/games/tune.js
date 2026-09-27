@@ -4,7 +4,7 @@ import { clear, text, timerBar, DIM, W, H } from './common.js';
 const ROUNDS = 3;
 const NEEDED = 2;
 const ROUND_TIME = 6;
-const TOLERANCE = 0.12;
+const TOLERANCE = 0.15;
 const SWEEP_SPEEDS = [1.6, 2.2, 2.9];
 
 export class Tune {

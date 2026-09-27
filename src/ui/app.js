@@ -2,7 +2,7 @@
 // the storage gate, and small DOM helpers. Everything here is plain data or a function;
 // nothing touches the page until main.js boots.
 import { createScript, migrate } from '../sim.js';
-import { createStore, KEYS } from '../storage.js';
+import { createStore, KEYS, TEST_PREFIX } from '../storage.js';
 import {
   cleanSave,
   cleanLineage,
@@ -15,12 +15,15 @@ import {
   cleanPrefs,
   cleanOnboarding,
   cleanLock,
+  cleanTestClock,
+  cleanTestMode,
   num,
+  TEST_SPEEDS,
 } from '../sanitize.js';
 import { FRAGMENTS } from '../netrun/codex.js';
 
 export const $ = (id) => document.getElementById(id);
-export const DEV = new URLSearchParams(location.search).has('dev');
+export const DEV_URL = new URLSearchParams(location.search).has('dev');
 
 export const app = {
   state: null, // the live netling (sim.js)
@@ -37,6 +40,7 @@ export const app = {
   firstLaunch: false,
   corruptSave: null, // the raw text of a save that couldn't be used
   skew: 0,
+  testClock: null, // test mode: { simAt, realAt, speed }
   session: null, // the running mini-game or netrun view
 
   // Storage gate: see canWrite() below.
@@ -48,16 +52,17 @@ export const app = {
 
   // Render bookkeeping.
   lastStage: null,
-  lastLogLen: 0,
+  lastLogKey: '',
   lastAttention: false,
   flashUntil: 0,
   surgeUntil: 0,
+  anim: null, // { kind, start }: see playAnim
   lastSurgeAt: null,
   plushCache: null,
 };
 
 // While the netling is on another device, only settings may change.
-const WRITABLE_WHILE_LOCKED = new Set([KEYS.lock, KEYS.prefs, KEYS.iosHint, KEYS.corruptSave]);
+const WRITABLE_WHILE_LOCKED = new Set([KEYS.lock, KEYS.prefs, KEYS.iosHint, KEYS.corruptSave, KEYS.testMode]);
 
 function canWrite(key) {
   if (!app.claimed || app.inactive || app.leaving) return false;
@@ -73,9 +78,42 @@ function onWriteError() {
   flashStatus('storage is full or blocked: progress is not being saved.', 5000);
 }
 
-export const store = createStore(() => localStorage, { canWrite, onError: onWriteError });
+// The real data. Test mode's switch lives here, read before anything else.
+export const realStore = createStore(() => localStorage, { canWrite, onError: onWriteError });
+export const testMode = cleanTestMode(realStore.get(KEYS.testMode));
 
-export const now = () => Date.now() + app.skew;
+// Test mode: a separate netling (and lineage, codex, style...) in its own storage namespace,
+// on a clock that can run up to a full life per hour. The real netling keeps living in real
+// time meanwhile, untouched. Turned on and off in ARCHIVE > SYSTEM (revealed by tapping the logo).
+export const TEST = testMode.on;
+export const DEV = DEV_URL || TEST; // time-skip buttons
+export const store = TEST ? createStore(() => localStorage, { canWrite, onError: onWriteError, namespace: TEST_PREFIX }) : realStore;
+
+// Game time. In test mode it runs `speed` times as fast from its anchor, including while closed.
+function clock() {
+  const c = app.testClock;
+  return c ? c.simAt + (Date.now() - c.realAt) * c.speed : Date.now();
+}
+export const now = () => clock() + app.skew;
+
+// Re-anchors the test clock, so changing speed doesn't jump the time already reached.
+export function setTestSpeed(speed) {
+  if (!TEST || !TEST_SPEEDS.includes(speed)) return;
+  app.testClock = { simAt: clock(), realAt: Date.now(), speed };
+  store.set(KEYS.testClock, app.testClock);
+  if (realStore.set(KEYS.testMode, { ...testMode, speed })) testMode.speed = speed;
+}
+
+// Switches test mode on or off (or reveals its controls) and reloads into it.
+// Leaving pauses the test clock, so the test netling picks up where it was.
+export function setTestMode(next) {
+  if (TEST && next.on === false) store.set(KEYS.testClock, { ...app.testClock, simAt: clock(), realAt: null });
+  if (!realStore.set(KEYS.testMode, { ...testMode, ...next })) return false;
+  if (next.on === undefined) return Boolean(Object.assign(testMode, next));
+  app.leaving = true; // this mode's state must not be saved into the other one
+  location.replace(location.pathname + location.search);
+  return true;
+}
 export const codexComplete = () => FRAGMENTS.every((f) => app.codex.includes(f.id));
 
 export function save() {
@@ -85,6 +123,13 @@ export function save() {
 // Read and check everything in storage. Writes nothing: the tab may not be the caretaker yet.
 export function loadAll() {
   app.skew = DEV ? num(store.get(KEYS.skew), 0) : 0;
+  if (TEST) {
+    // First run starts at real time; a paused clock resumes; a new speed re-anchors.
+    const t = Date.now();
+    const c = cleanTestClock(store.get(KEYS.testClock));
+    const reached = !c ? t : c.realAt === null ? c.simAt : c.simAt + (t - c.realAt) * c.speed;
+    app.testClock = !c || c.realAt === null || c.speed !== testMode.speed ? { simAt: reached, realAt: t, speed: testMode.speed } : c;
+  }
   app.codex = cleanCodex(store.get(KEYS.codex));
   app.lineage = cleanLineage(store.get(KEYS.lineage));
   app.dex = cleanDex(store.get(KEYS.dex));
@@ -106,6 +151,12 @@ export function loadAll() {
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;
   app.lastSurgeAt = state.lastSurgeAt;
+}
+
+// A short reaction on the LCD to the last action (drawn by render.js).
+export function playAnim(kind) {
+  app.anim = { kind, start: performance.now() };
+  document.getElementById('lcd').dataset.anim = kind; // lets tests see what played
 }
 
 let statusTimer;

@@ -5,7 +5,7 @@ import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from '../transfer
 import { encodeQR, drawQR } from '../qr.js';
 import { sfx, unlockAudio, setVolume } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, armed, flashStatus, now, save, store } from './app.js';
+import { $, app, armed, flashStatus, now, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
 import { advance } from './life.js';
 
@@ -52,7 +52,9 @@ function oldSave() {
 function renderOldSave() {
   const old = oldSave();
   $('old-save').hidden = !old;
-  const base = 'Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.';
+  const base = TEST
+    ? 'Erases the test data (test netling, lineage, codex, style) and starts the test over. Your real netling is untouched.'
+    : 'Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.';
   $('restart-note').textContent = old ? `${base} That includes the set-aside save above, so download it first if you want it.` : base;
   if (!old) return;
   const when = old.at ? ` on ${new Date(old.at).toLocaleString()}` : '';
@@ -83,11 +85,42 @@ export function openSystem() {
   $('volume-value').textContent = `${Math.round(app.prefs.volume * 100)}%`;
   $('import-preview').hidden = true;
   renderHibernateNote();
+  renderTestMode();
   $('transfer').showModal();
 }
 
 // A mini-game or netrun on screen must finish first: hibernating would freeze the pad under the
 // overlay, and a transfer would leave it running on a locked device.
+// --- test mode ---
+
+function renderTestMode() {
+  $('test-mode').hidden = !(TEST || testMode.revealed);
+  $('test-speed').value = String(testMode.speed);
+  $('test-toggle').textContent = TEST ? 'LEAVE TEST MODE' : 'ENTER TEST MODE';
+  $('test-note').textContent = TEST
+    ? 'You are in test mode: a separate netling on a faster clock. It keeps running at this speed while the app is closed, and pauses while you are back on your real netling. RESTART below erases only the test data. Your real netling is untouched.'
+    : 'A separate netling (with its own lineage, codex and style) on a faster clock, for testing. Your real netling keeps living in real time meanwhile and is untouched.';
+}
+
+export function renderTestBadge() {
+  $('test-badge').hidden = !TEST;
+  if (TEST) $('test-badge').textContent = `TEST ${app.testClock.speed}x`;
+}
+
+// Seven quick taps on the logo reveal (or hide) the test mode controls.
+function watchLogoTaps() {
+  let taps = [];
+  document.querySelector('.logo').addEventListener('click', () => {
+    const t = performance.now();
+    taps = [...taps.filter((x) => t - x < 4000), t];
+    if (taps.length < 7 || TEST) return;
+    taps = [];
+    const revealed = !testMode.revealed;
+    if (!setTestMode({ revealed })) return;
+    flashStatus(revealed ? 'test mode unlocked: ARCHIVE > SYSTEM.' : 'test mode hidden.');
+  });
+}
+
 function sessionBlockReason() {
   if (!app.session) return null;
   return app.state.run ? 'finish the netrun first.' : 'finish the game first.';
@@ -97,7 +130,7 @@ function sessionBlockReason() {
 
 async function transferOut() {
   const btn = $('transfer-out');
-  const busy = sessionBlockReason();
+  const busy = TEST ? 'not in test mode: a test netling stays on this device.' : sessionBlockReason();
   if (busy) {
     sfx('error', app.state.quirk.pitch);
     return flashStatus(busy);
@@ -353,6 +386,18 @@ export function initSystem() {
     save();
     advance();
   });
+
+  $('test-speed').addEventListener('change', () => {
+    if (!TEST) return; // picked before entering: applied on the way in
+    setTestSpeed(Number($('test-speed').value));
+    renderTestBadge();
+    flashStatus(`test clock: ${app.testClock.speed}x.`);
+  });
+  $('test-toggle').addEventListener('click', () => {
+    if (TEST) return void setTestMode({ on: false });
+    if (!setTestMode({ on: true, speed: Number($('test-speed').value) })) flashStatus("couldn't switch: storage is blocked.");
+  });
+  watchLogoTaps();
 
   const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isStandalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;

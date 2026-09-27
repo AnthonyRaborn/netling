@@ -17,7 +17,9 @@ npm run balance      # simulate hundreds of lifetimes per player archetype (DETA
 
 `npm run smoke` needs Playwright, which the app itself doesn't depend on: `npm install --no-save playwright && npx playwright install chromium`. CI (`.github/workflows/test.yml`) runs both test suites on every pull request and push to `main`.
 
-New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. RESET replays the onboarding. `gallery.html` shows every sprite.
+New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons.
+
+**Test mode** (for playtesting, including in the installed app): tap the NETLING logo 7 times, then ARCHIVE > SYSTEM > TEST MODE. It switches to a separate netling (with its own lineage, codex and style, stored under `netling-test.*`) on a clock running at 1x, 24x (a day per hour) or 168x (a full 7-day life per hour), with the dev buttons shown. The real netling keeps living in real time and is never touched; the test clock pauses while you're back on it. A yellow TEST badge shows the speed. At 168x the 15-minute grace before a care mistake is about 5 real seconds, so it's for watching a life play out; 24x is playable. Transfer out is off in test mode, and RESTART there erases only the test data. RESET replays the onboarding. `gallery.html` shows every sprite.
 
 ## System: transfer, hibernate, restart
 
@@ -50,7 +52,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 |---|---|
 | `src/sim.js` | All game rules. Pure functions of `(state, time, rng)`; minute-by-minute `tick()` |
 | `src/render.js`, `src/sprites.js` | 40×28 LCD renderer and code-drawn pixel sprites |
-| `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune + intro/result session wrapper |
+| `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune, Packet Feast + intro/result session wrapper |
 | `src/main.js` | Boot: load saved data, claim the caretaker tab, wire the UI, run the clock and render loop |
 | `src/ui/` | The UI, one module per area: `hud` (vitals, log, inventory), `life` (tick, evolution, flatline, care buttons), `play` (mini-games, netruns), `style` (unlocks, wardrobe), `archive`, `onboarding` (intro, field manual), `system` (transfer, import, hibernate, restart), `tabs` (one active tab). `ui/app.js` holds the shared state |
 | `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
@@ -70,10 +72,14 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 ## Rules at a glance
 
 - **Stats:** Charge, Sync, Integrity, Heat, Cache. A need left unmet for 15 minutes (60 for sleeping with the lights on) is a care mistake; 10 mistakes, 2 hours at zero Integrity, or 7 days of age ends the run.
+- **Rest:** it sleeps at night on its own; stats drain at 33% of the awake rate with the lights off, 50% with them on. **NAP** rests it on demand for up to 2 hours at 35% drain (time still passes; it can't eat, play or jack in), with 4 hours awake before the next nap. Lights off while it's awake darkens the screen and makes it bored (Sync drains faster).
 - **Evolution:** Bitling → teen at 24h (Kernel for good care, Stub otherwise) → adult at 72h, chosen by two hidden axes:
   - *Allegiance* (corp packets, complying with traces ↔ scavenged data, hiding) → **Chrome** / **Firewall**
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
-  - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each game).
+  - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each of the four games).
+- **Mini-games:** PLAY picks one of four: Breach Protocol, Firewall Dodge, Signal Tune, and **Packet Feast** (move under clean packets to eat 15 of them in 20 seconds; two corrupted bites lose). A win gives more Sync than a loss; Packet Feast also gives Charge (+10 for a win, +3 for a loss, before the usual play cost of 6), without starting digestion. Netrun ICE picks from all four.
+- **Events:** at random while it's awake, besides power surges (instant: +Heat, +Charge), a timed alert bar may open. A **corp trace**: HIDE or COMPLY within 2 hours, or lose Integrity and lean corp. An **intrusion** (crosshair icon): DEFEND within 1 hour by winning a random mini-game, or it installs a virus (-10 Integrity); an antivirus shield bounces them. A **memory overflow** (overflowing chip icon, likelier with cache files): PURGE within 45 minutes, or it crashes (-15 Integrity, cache full) and reboots, unable to act for 20 minutes. One event at a time; hibernation waits for it.
+- **Reactions:** care actions and items play a short animation on the screen (eating, patch, purge, cool, item sparkle, a hop after a game), and a refused action shakes its head under a red X.
 - **Items:** 6-slot inventory. Mini-game wins (25%), hiding (30%) and complying (30%) can drop items; each adult form leaves a keepsake item for the next generation. Coolant cell, Antivirus patch (6h shield), Corp voucher (full Charge + waves off a trace), Black ICE shard (big Sync, risky), Signal booster (next win x2), Memory shard (rewrites a quirk). Tap a slot, then USE.
 - **Netrun:** jack in (awake, 30+ Charge, 4h cooldown) and pick a path across a fogged node map. Moves cost Charge and add Heat (90+ Heat also burns Integrity). Caches may hold items, ICE is a mini-game that bites on a loss, Relays recharge and let you bank loot, the Exit banks everything plus a bonus. Hitting 0 Integrity or Charge disconnects: loot lost, a care mistake (never the fatal one), emergency reboot. Choice nodes: Checkpoints (hide/comply/voucher, lean the allegiance axis), Markets (spend Charge on items), Anomalies (risky events that lean the axes). Adult forms get run abilities, listed in the Dex. Regions: Public Net (any stage), Corp Grid and Darknet Bazaar (teen+), Old Web Ruins (adult), and a hidden fifth region. Runs also recover **codex fragments** (22, 4–5 per region) in story order, shared across generations and readable in the Archive's CODEX tab; like loot, they're lost on a disconnect. A clean jack-out re-syncs half the Integrity the run cost; each region has its own sound. `npm run balance` includes netruns in the lifetime simulation (`NO_RUNS=1` to compare). Completing the codex earns **Root Access** from NL-0: a netling's first premature flatline is reversed (old age is not); after a rescue NL-0 rests for one generation, and new scripts can roll NL-0's origin palette. `ROOT=1 npm run balance` measures it. `node tools/netrun-balance.mjs` checks risk/reward.
 - **Style:** the Archive's STYLE tab holds cosmetic shells, screen tints, screen effects, sound packs (home sounds; netruns keep region voices) and a device label (earned when the first netling dies), unlocked by raising forms, finishing codex regions, full-life streaks, mini-game win streaks, care habits and netrun feats. Locked items show only a hint. **Accessories** (20, common to very rare) fit every form via anchors computed from each sprite; they're mostly bought at netrun markets for Charge, and rarely found in caches, exits and ICE wins (lost on disconnect like loot). Half are regional: corp mods in the Corp Grid, street mods in the Darknet Bazaar, relics in the Old Web Ruins, and one companion only in The Deep. **Props** (cyberdeck, boom box, mini device, plush) sit on the ground beside the pet in their own slot. Some items are **earned**, never sold: a party hat when your first netling hatches, a bandage for surviving a disconnect or an NL-0 rescue, a plush of your previous netling after the first goodbye, and a secret for collecting every shell. Purely visual; shared across generations.
@@ -81,13 +87,13 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 
 ## Balance targets
 
-`tools/balance.mjs` plays full lifetimes with scripted players. Current results (500 runs each):
+`tools/balance.mjs` plays full lifetimes with scripted players (they never nap). Try settings without editing the game with `CFG='{"drainPerHour":{"charge":15},"teenAtMin":1200}' npm run balance`. Current results (300 runs each):
 
 | Player | Check-ins | Reaches adult | Full 7-day life |
 |---|---|---|---|
-| attentive | hourly, 7:00–23:00 | 100% | 99% |
-| casual | 6 a day | 87% | 66% |
-| worker | before work, lunch, evenings | 72% | 29% |
+| attentive | hourly, 7:00–23:00 | 97% | 93% |
+| casual | 6 a day | 77% | 50% |
+| worker | before work, lunch, evenings | 59% | 19% |
 | neglectful | twice a day | 2% | 0% (dies ~day 1) |
 
-Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 96%, running hot and sloppy → Glitch 69%, tidy and neutral → Daemon 77%, balanced + 22 wins → Ghost 98%. Ghost by accident: ≤1%.
+Deliberate strategies each reach their form: all-corp + comply → Chrome 99%, all-scavenged + hide → Firewall 95%, running hot and sloppy → Glitch 62%, tidy and neutral → Daemon 76%, balanced + 22 wins → Ghost 97%. Ghost by accident: up to 6% (the most attentive players).

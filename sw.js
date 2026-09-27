@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh when online, fully playable offline.
-const CACHE = 'netling-v25';
+const CACHE = 'netling-v32';
 const SHELL = [
   './',
   'index.html',
@@ -42,6 +42,7 @@ const SHELL = [
   'src/games/breach.js',
   'src/games/dodge.js',
   'src/games/tune.js',
+  'src/games/feast.js',
 ];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

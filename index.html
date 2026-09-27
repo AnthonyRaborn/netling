@@ -19,6 +19,7 @@
     <main class="device">
       <header class="brand">
         <span class="logo">NETLING</span>
+        <span id="test-badge" class="test-badge" hidden></span>
         <span class="prefs">
           <button type="button" id="pref-sound" class="pref" aria-pressed="true">SND ON</button>
           <button type="button" id="pref-alerts" class="pref" aria-pressed="false">ALERTS OFF</button>
@@ -80,9 +81,11 @@
       </div>
 
       <div id="event-bar" class="event-bar" role="alert" hidden>
-        <span class="event-label">CORP TRACE <b id="event-timer"></b></span>
-        <button type="button" data-act="hide">HIDE</button>
-        <button type="button" data-act="comply">COMPLY</button>
+        <span class="event-label"><span id="event-name">CORP TRACE</span> <b id="event-timer"></b></span>
+        <button type="button" data-act="hide" data-event="trace">HIDE</button>
+        <button type="button" data-act="comply" data-event="trace">COMPLY</button>
+        <button type="button" id="event-defend" data-event="attack">DEFEND</button>
+        <button type="button" data-act="purge" data-event="overflow">PURGE</button>
       </div>
 
       <nav id="controls" class="controls" aria-label="Actions">
@@ -93,6 +96,7 @@
         <button type="button" data-act="cool">COOL</button>
         <button type="button" data-act="purge">PURGE</button>
         <button type="button" id="btn-netrun" class="netrun">NETRUN</button>
+        <button type="button" data-act="nap" id="btn-nap" class="nap">NAP</button>
         <button type="button" data-act="lights" id="btn-lights" class="lights">LIGHTS OFF</button>
       </nav>
 
@@ -100,6 +104,7 @@
         <button type="button" data-game="breach">BREACH</button>
         <button type="button" data-game="dodge">DODGE</button>
         <button type="button" data-game="tune">TUNE</button>
+        <button type="button" data-game="feast">FEAST</button>
         <button type="button" id="picker-back" class="wide">BACK</button>
       </nav>
 
@@ -154,6 +159,8 @@
         <button type="button" data-skip="480">+8h</button>
         <button type="button" id="dev-evolve">EVO</button>
         <button type="button" id="dev-trace">TRACE</button>
+        <button type="button" id="dev-attack">ATTACK</button>
+        <button type="button" id="dev-overflow">OVERFLOW</button>
         <button type="button" id="dev-reset">RESET</button>
       </div>
     </main>
@@ -227,6 +234,19 @@
         <h3>HIBERNATE</h3>
         <p class="tx-note" id="hibernate-note"></p>
         <button type="button" id="hibernate-btn">HIBERNATE</button>
+
+        <div id="test-mode" hidden>
+          <h3>TEST MODE</h3>
+          <p class="tx-note" id="test-note"></p>
+          <div class="tx-row">
+            <select id="test-speed" aria-label="Test mode speed">
+              <option value="1">1x (real time)</option>
+              <option value="24">24x (a day per hour)</option>
+              <option value="168">168x (a life per hour)</option>
+            </select>
+            <button type="button" id="test-toggle">ENTER TEST MODE</button>
+          </div>
+        </div>
 
         <h3>RESTART</h3>
         <p class="tx-note" id="restart-note">Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.</p>

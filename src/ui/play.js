@@ -1,5 +1,5 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, tick } from '../sim.js';
+import { act, blockReason, tick, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
@@ -8,7 +8,7 @@ import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
 import { FRAGMENTS } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, flashStatus, now, save, store } from './app.js';
+import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
 import { checkUnlocks, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
@@ -30,7 +30,7 @@ export function dropSession(err) {
   if (run) {
     try {
       if (run.phase !== 'done') abortRun(app.state);
-      closeRun(app.state, Date.now());
+      closeRun(app.state, now());
       bumpProgress(run);
     } catch {
       app.state.run = null;
@@ -70,6 +70,7 @@ function bumpProgress(run) {
 
 export function openRun() {
   app.session = new RunView(app.state, {
+    now,
     sound: (name) => {
       const tone = REGIONS[app.state.run?.region]?.sound ?? { mult: 1, wave: 'square' };
       sfx(name, app.state.quirk.pitch * tone.mult, tone.wave);
@@ -102,6 +103,7 @@ function jackIn(region) {
   const blocked = runBlockReason(app.state, region, app.codex);
   if (blocked) {
     sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
     return flashStatus(blocked);
   }
   startRun(app.state, region, Math.random, app.codex, app.ownedAccessories);
@@ -153,8 +155,39 @@ function startGame(id) {
         app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
         countGame();
       }
+      playAnim(res.ok ? 'play' : 'refuse');
       if (!res.ok) flashStatus(res.msg);
       else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
+      save();
+      updateHUD();
+    },
+  });
+  showPanel('pad');
+}
+
+// DEFEND: an intrusion is fought off with a random mini-game, like netrun ICE. It counts toward
+// game unlocks but not win streaks or the netling's own game record.
+function startDefense() {
+  unlockAudio();
+  if (app.session) return;
+  tick(app.state, now());
+  const blocked = blockReason(app.state, 'defend');
+  if (blocked) {
+    sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
+    return flashStatus(blocked);
+  }
+  const game = GAME_IDS[Math.floor(Math.random() * GAME_IDS.length)];
+  app.session = new GameSession(game, {
+    sound: (name) => sfx(name, app.state.quirk.pitch),
+    onFinish: (won) => {
+      app.session = null;
+      countGame();
+      showPanel('controls');
+      tick(app.state, now());
+      const res = act(app.state, 'defend', now(), Math.random, { won });
+      playAnim(res.ok && won ? 'patch' : 'refuse');
+      flashStatus(res.msg, 3000);
       save();
       updateHUD();
     },
@@ -171,6 +204,7 @@ export function initPlay() {
     const blocked = blockReason(app.state, 'play');
     if (blocked) {
       sfx('error', app.state.quirk.pitch);
+      playAnim('refuse');
       return flashStatus(blocked);
     }
     sfx('select', app.state.quirk.pitch);
@@ -187,6 +221,7 @@ export function initPlay() {
     const blocked = runBlockReason(app.state, 'public', app.codex);
     if (blocked) {
       sfx('error', app.state.quirk.pitch);
+      playAnim('refuse');
       return flashStatus(blocked);
     }
     sfx('select', app.state.quirk.pitch);
@@ -194,6 +229,7 @@ export function initPlay() {
     showPanel('regions');
   });
   $('regions-back').addEventListener('click', () => showPanel('controls'));
+  $('event-defend').addEventListener('click', startDefense);
 
   document.querySelectorAll('[data-key]').forEach((btn) =>
     btn.addEventListener('pointerdown', (e) => {

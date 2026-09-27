@@ -16,6 +16,7 @@ import {
   PACKETS,
   QUIRK_KEYS,
   CFG,
+  EVENTS,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
@@ -211,7 +212,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
   const buffs = isObj(raw.buffs) ? raw.buffs : {};
   const games = isObj(raw.games) ? raw.games : {};
   const runStats = isObj(raw.runStats) ? raw.runStats : {};
-  const event = isObj(raw.event) && raw.event.type === 'trace' ? { type: 'trace', startedAge: num(raw.event.startedAge, 0, 0) } : null;
+  const event = isObj(raw.event) && has(EVENTS, raw.event.type) ? { type: raw.event.type, startedAge: num(raw.event.startedAge, 0, 0) } : null;
   const hibernation = isObj(raw.hibernation) && Number.isFinite(raw.hibernation.since) ? { ...(strict ? {} : raw.hibernation), since: raw.hibernation.since } : null;
 
   const s = {
@@ -231,6 +232,9 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     virusMin: num(raw.virusMin, 0, 0),
     sinceFed: num(raw.sinceFed, CFG.digestMinutes, 0),
     asleep: bool(raw.asleep),
+    nap: isObj(raw.nap) && Number.isFinite(raw.nap.startedAge) ? { startedAge: Math.max(0, raw.nap.startedAge) } : null,
+    lastNapEndAge: numOrNull(raw.lastNapEndAge),
+    rebootUntilAge: numOrNull(raw.rebootUntilAge),
     lightsOn: bool(raw.lightsOn, true),
     careMistakes: int(raw.careMistakes, 0, 0, 1000),
     zeroMin: { charge: num(zero.charge, 0, 0), sync: num(zero.sync, 0, 0), heat: num(zero.heat, 0, 0), lights: num(zero.lights, 0, 0) },
@@ -352,6 +356,18 @@ export const cleanOnboarding = (raw) => oneOf(raw, ONBOARDING_STEPS, null);
 export function cleanLock(raw) {
   if (!isObj(raw) || typeof raw.code !== 'string' || !raw.code) return null;
   return { code: raw.code, at: num(raw.at, 0, 0), generation: int(raw.generation, 1, 1, 1e6) };
+}
+
+// Test mode (see ui/app.js). speed is a clock multiplier: 1x, a day per hour, or a life per hour.
+export const TEST_SPEEDS = [1, 24, 168];
+export function cleanTestMode(raw) {
+  const t = isObj(raw) ? raw : {};
+  return { on: bool(t.on), revealed: bool(t.revealed), speed: oneOf(t.speed, TEST_SPEEDS, TEST_SPEEDS.at(-1)) };
+}
+// realAt null: paused (test mode is off).
+export function cleanTestClock(raw) {
+  if (!isObj(raw) || !Number.isFinite(raw.simAt) || !(raw.realAt === null || Number.isFinite(raw.realAt))) return null;
+  return { simAt: raw.simAt, realAt: raw.realAt, speed: oneOf(raw.speed, TEST_SPEEDS, TEST_SPEEDS.at(-1)) };
 }
 
 // Every transferable key, by its short name (see TRANSFER_KEYS in transfer.js).

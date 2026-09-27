@@ -8,6 +8,7 @@ import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
+import { FRAGMENTS } from '../src/netrun/codex.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -164,7 +165,7 @@ await scenario('fresh launch: intro -> manual -> nudge -> tutorial run', async (
 await scenario('home: care actions, games, archive, system dialog', async ({ open }) => {
   const page = await open(BASE, seed());
   assert(!(await visible(page, '#intro')), 'intro shown for settled save');
-  for (const a of ['corp', 'cool', 'purge']) await page.click(`[data-act="${a}"]`);
+  for (const a of ['corp', 'cool', 'purge']) await page.click(`#controls [data-act="${a}"]`);
   await page.click('#btn-play');
   assert(await visible(page, '#picker'), 'game picker not shown');
   await page.click('[data-game="breach"]');
@@ -560,6 +561,198 @@ await scenario('fits a Steam Deck screen without scrolling; phones keep one colu
   assert((await layout()) !== 'grid', 'phone got the two-column layout');
   await page.click('#btn-play');
   assert(await visible(page, '#picker'), 'phone layout: PLAY does nothing');
+});
+
+await scenario('nap: starts, blocks play, wakes early', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.click('#btn-nap');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).nap, 'nap not saved');
+  assert((await page.textContent('#btn-nap')) === 'WAKE UP', 'button did not change');
+  assert(/napping/.test(await page.textContent('#readout')), 'readout does not say it is napping');
+  await page.click('#btn-play');
+  assert(/napping/.test(await page.textContent('#status')), 'play not refused while napping');
+  await page.click('#btn-nap');
+  await page.waitForTimeout(300);
+  const s = await saved(page);
+  assert(s.nap === null && s.lastNapEndAge !== null, 'wake did not end the nap');
+  await page.click('#btn-nap');
+  assert(/nap again/.test(await page.textContent('#status')), 'no cooldown after a nap');
+});
+
+await scenario('lights off darkens the screen while it is awake', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const corner = () => page.evaluate(() => [...document.getElementById('lcd').getContext('2d').getImageData(4, 4, 1, 1).data].slice(0, 3).join());
+  const lit = await corner();
+  await page.click('#btn-lights');
+  await page.waitForTimeout(300);
+  const dark = await corner();
+  assert(lit !== dark, `screen unchanged with the lights off (${lit})`);
+});
+
+await scenario('the log keeps every stored line, wraps long ones, and scrolls', async ({ open }) => {
+  const s = awakeNetling();
+  for (let i = 0; i < 60; i++) s.log.push({ t: Date.now(), msg: `> netrun (Darknet Bazaar): jacked out with ${i} items and 1 fragment. re-synced +12 integrity.` });
+  s.log = s.log.slice(-50); // full: new lines replace old ones, so the length stays the same
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  const log = await page.evaluate(() => {
+    const l = document.getElementById('log');
+    const li = l.lastElementChild;
+    return { lines: l.children.length, scrolls: l.scrollHeight > l.clientHeight, atBottom: l.scrollHeight - l.scrollTop - l.clientHeight < 8, wrapped: li.getBoundingClientRect().height > 30, clipped: li.scrollWidth > li.clientWidth };
+  });
+  assert(log.lines === s.log.length, `showing ${log.lines} of ${s.log.length} lines`);
+  assert(log.scrolls && log.atBottom, `not scrolled to the newest line: ${JSON.stringify(log)}`);
+  assert(log.wrapped && !log.clipped, `long line not wrapped: ${JSON.stringify(log)}`);
+  await page.click('#btn-lights');
+  await page.waitForTimeout(300);
+  const last = await page.evaluate(() => document.getElementById('log').lastElementChild.textContent);
+  assert(/lights off/.test(last), `a full log stopped updating: ${last}`);
+});
+
+await scenario('field manual hides root until the codex is complete', async ({ open }) => {
+  const terms = async (page) => {
+    await page.click('#open-help');
+    return page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+  };
+  const before = await terms(await open(BASE, seed()));
+  assert(!before.includes('root') && before.some((t) => /^r.+t$/.test(t)), `root not hidden: ${before}`);
+  assert(before.includes('file icons'), `cache files not explained: ${before}`);
+  assert(before.includes('quirks'), `quirks not explained: ${before}`);
+});
+
+await scenario('field manual shows root once the codex is complete', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': FRAGMENTS.map((f) => f.id) }));
+  await page.evaluate(() => document.getElementById('transmission').open && document.getElementById('transmission').close());
+  await page.click('#open-help');
+  const terms = await page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+  assert(terms.includes('root'), `root still hidden: ${terms}`);
+});
+
+await scenario('test mode: hidden until 7 logo taps, separate fast netling, real one untouched', async ({ open }) => {
+  const real = awakeNetling();
+  const test = awakeNetling({ generation: 5 });
+  const page = await open(BASE, seed({ 'netling.save': real, 'netling-test.save': test, 'netling-test.onboarding': 'done', 'netling-test.helpSeen': true }));
+  const realBefore = await page.evaluate(() => localStorage.getItem('netling.save'));
+
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(!(await visible(page, '#test-mode')), 'test mode visible before the gesture');
+  await page.click('#close-transfer');
+  for (let i = 0; i < 7; i++) await page.click('.logo');
+  assert(/test mode unlocked/.test(await page.textContent('#status')), 'gesture did nothing');
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(await visible(page, '#test-mode'), 'test mode still hidden after the gesture');
+  await page.selectOption('#test-speed', '168');
+  await page.click('#test-toggle');
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1500);
+
+  assert((await page.textContent('#test-badge')) === 'TEST 168x', 'no test badge');
+  assert(await visible(page, '#dev'), 'time-skip buttons missing in test mode');
+  const age0 = (await saved(page, 'netling-test.save')).ageMin;
+  await page.waitForTimeout(4000); // ~11 game minutes at 168x
+  const age1 = (await saved(page, 'netling-test.save')).ageMin;
+  assert(age1 - age0 >= 8, `test clock not fast: ${age0} -> ${age1}`);
+  assert((await saved(page, 'netling-test.save')).generation === 5, 'not the test netling');
+  // Nothing the test netling does reaches the real save.
+  await page.click('[data-act="lights"]');
+  await page.waitForTimeout(1200);
+  assert((await page.evaluate(() => localStorage.getItem('netling.save'))) === realBefore, 'test mode wrote the real save');
+
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.click('#transfer-out');
+  assert(/not in test mode/.test(await page.textContent('#status')), 'transfer out allowed in test mode');
+  await page.click('#test-toggle'); // leave
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1500);
+  assert(!(await visible(page, '#test-badge')), 'still badged after leaving');
+  assert((await saved(page)).generation === real.generation, 'real netling not back');
+  const clock = await saved(page, 'netling-test.testClock');
+  assert(clock?.realAt === null && clock.speed === 168, `test clock not paused: ${JSON.stringify(clock)}`);
+
+  // Away for a while, then back: it resumes where it paused (at 168x, 4s away would be ~11 minutes).
+  const ageAtLeave = (await saved(page, 'netling-test.save')).ageMin;
+  await page.waitForTimeout(4000);
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.selectOption('#test-speed', '24');
+  await page.click('#test-toggle');
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1200);
+  assert((await page.textContent('#test-badge')) === 'TEST 24x', 'speed choice not applied');
+  const ageBack = (await saved(page, 'netling-test.save')).ageMin;
+  // Up to one save interval (~3 game minutes at 168x) passes between the last save and the pause.
+  assert(ageBack - ageAtLeave <= 4, `test clock ran while paused: ${ageAtLeave} -> ${ageBack}`);
+});
+
+await scenario('actions play a reaction on the screen; refusals shake it off', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ cache: 2, stats: { charge: 40, sync: 70, integrity: 90, heat: 20 }, inventory: ['booster'] }) }));
+  const played = () => page.evaluate(() => document.getElementById('lcd').dataset.anim);
+  await page.click('[data-act="corp"]');
+  assert((await played()) === 'eat', `feeding played ${await played()}`);
+  await page.click('#controls [data-act="purge"]');
+  assert((await played()) === 'purge', `purge played ${await played()}`);
+  await page.click('[data-act="cool"]'); // heat 20: already cool
+  assert((await played()) === 'refuse', `a refused cool played ${await played()}`);
+  assert(/already running cool/.test(await page.textContent('#status')), 'refusal text gone');
+  await page.click('#inv-slots .inv-slot.filled');
+  await page.click('#inv-use');
+  assert((await played()) === 'item', `item use played ${await played()}`);
+});
+
+await scenario('Packet Feast is in the PLAY menu and pays Charge', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stats: { charge: 50, sync: 70, integrity: 90, heat: 20 } }) }));
+  await page.click('#btn-play');
+  await page.click('[data-game="feast"]');
+  assert(await visible(page, '#pad'), 'FEAST did not start');
+  await page.keyboard.press('Enter'); // past the intro card
+  await page.keyboard.press('Escape'); // quit: a loss
+  await page.waitForTimeout(2500);
+  const s = await saved(page);
+  assert(s.games.feast.played === 1, 'feast not recorded');
+  assert(Math.round(s.stats.charge) === 50 - 6 + 3, `charge after a lost feast: ${s.stats.charge}`);
+  assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'play', 'no reaction after the game');
+});
+
+await scenario('intrusion: DEFEND launches a mini-game; losing it installs a virus', async ({ open }) => {
+  const s = awakeNetling();
+  s.event = { type: 'attack', startedAge: s.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#event-bar'), 'no alert bar');
+  assert((await page.textContent('#event-name')) === 'INTRUSION', `label: ${await page.textContent('#event-name')}`);
+  assert(await visible(page, '#event-defend'), 'no DEFEND button');
+  assert(!(await visible(page, '#event-bar [data-act="hide"]')), 'trace buttons shown for an intrusion');
+  await page.click('#event-defend');
+  assert(await visible(page, '#pad'), 'DEFEND did not start a game');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape'); // quit: the defense fails
+  await page.waitForTimeout(2500);
+  const after = await saved(page);
+  assert(after.event === null && after.virus === true, `defense loss not applied: ${JSON.stringify({ event: after.event, virus: after.virus })}`);
+  assert(!(await visible(page, '#event-bar')), 'alert bar still up');
+});
+
+await scenario('overflow: PURGE from the alert bar contains it', async ({ open }) => {
+  const s = awakeNetling({ cache: 0 });
+  s.event = { type: 'overflow', startedAge: s.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert((await page.textContent('#event-name')) === 'MEMORY OVERFLOW', 'wrong label');
+  await page.click('#event-bar [data-act="purge"]');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).event === null, 'overflow not contained');
+  assert(/overflow contained/.test(await page.textContent('#log')), 'not logged');
+});
+
+await scenario('after a crash it reboots: care is blocked and the readout says so', async ({ open }) => {
+  const s = awakeNetling();
+  s.rebootUntilAge = s.ageMin + 15;
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(/rebooting/.test(await page.textContent('#readout')), 'readout does not show the reboot');
+  await page.click('[data-act="corp"]');
+  assert(/rebooting/.test(await page.textContent('#status')), 'feeding allowed while rebooting');
+  assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'refuse', 'no refusal reaction');
 });
 
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {

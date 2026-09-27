@@ -1,9 +1,9 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, tick, traceMinutesLeft, CFG, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
-import { $, app, armed, disarm, flashStatus, now, save } from './app.js';
+import { $, app, armed, disarm, flashStatus, now, playAnim, save } from './app.js';
 import { renderNudge } from './onboarding.js';
 import { renderHibernation } from './system.js';
 
@@ -38,20 +38,35 @@ export function updateHUD() {
   }
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
+  if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
+  if (rebootMinutesLeft(state) > 0) $('readout').textContent += ` · rebooting, ${rebootMinutesLeft(state)}m left`;
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
+  $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
+  $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;
   renderInventory();
   renderNudge();
   renderHibernation();
-  const traceLeft = traceMinutesLeft(state);
-  $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
-  $('event-timer').textContent = `${traceLeft}m`;
-  document.body.classList.toggle('asleep', state.asleep);
+  // The timed event, if any, with the buttons that answer it.
+  const eventLeft = eventMinutesLeft(state);
+  const type = state.event?.type;
+  $('event-bar').hidden = !(eventLeft > 0 && isAlive(state));
+  if (type) {
+    $('event-name').textContent = EVENTS[type].label;
+    $('event-timer').textContent = `${eventLeft}m`;
+    document.querySelectorAll('#event-bar [data-event]').forEach((b) => (b.hidden = b.dataset.event !== type));
+  }
+  document.body.classList.toggle('asleep', resting(state));
 
+  // Redrawn when a line is added (the log is capped, so its length alone stops changing).
   const logEl = $('log');
-  if (state.log.length !== app.lastLogLen || logEl.childElementCount === 0) {
-    app.lastLogLen = state.log.length;
+  const last = state.log[state.log.length - 1];
+  const logKey = `${state.log.length}|${last?.t}|${last?.msg}`;
+  if (logKey !== app.lastLogKey || logEl.childElementCount === 0) {
+    app.lastLogKey = logKey;
+    // Follow new lines unless the player has scrolled up to read older ones.
+    const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 8;
     logEl.replaceChildren(
-      ...state.log.slice(-8).map((e) => {
+      ...state.log.map((e) => {
         const li = document.createElement('li');
         const t = new Date(e.t);
         li.textContent = `${t.toTimeString().slice(0, 5)} ${e.msg}`;
@@ -59,6 +74,7 @@ export function updateHUD() {
         return li;
       }),
     );
+    if (atBottom) logEl.scrollTop = logEl.scrollHeight;
   }
 
   // Chirp (or notify, when backgrounded) each time a new need appears.
@@ -75,6 +91,9 @@ export function pushAlert(title, body) {
 }
 
 // --- inventory ---
+
+// Items that do what a care action does look the same on screen.
+const ITEM_ANIMS = { coolant: 'cool', antivirus: 'patch', voucher: 'eat' };
 
 let selectedSlot = null;
 let lastInvKey = '';
@@ -138,8 +157,10 @@ export function initInventory() {
     if (selectedSlot === null) return;
     unlockAudio();
     tick(app.state, now());
+    const id = app.state.inventory[selectedSlot];
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
+    playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');
     if (!res.ok) flashStatus(res.msg);
     selectedSlot = null;
     save();

@@ -6,8 +6,14 @@ export const SAVE_VERSION = 1;
 
 export const CFG = {
   bootMinutes: 3,
-  drainPerHour: { charge: 12, sync: 10 },
-  sleepDrainMult: 0.5,
+  drainPerHour: { charge: 14, sync: 12 },
+  sleepDrainMult: 0.5, // asleep with the lights on: restless
+  sleepDarkDrainMult: 0.33, // asleep in the dark: real rest
+  // Naps: a short rest on demand. Drains slow down but time still passes; a cooldown stops
+  // back-to-back naps from covering the whole day.
+  napDrainMult: 0.35,
+  napMaxMin: 120,
+  napCooldownMin: 240,
   heatDriftPerHour: 3,
   heatCoolWhileAsleepPerHour: 10,
   cacheChancePerMin: 1 / 150, // only while digesting (recently fed) and awake
@@ -36,14 +42,35 @@ export const CFG = {
   ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
+  // Packet Feast: it ate, so it gets some Charge too (digestion isn't reset: no cache files).
+  feastWinCharge: 10,
+  feastLoseCharge: 3,
   traceChancePerHour: 0.08,
   traceWindowMin: 120,
   traceIgnoredIntegrity: 15,
   traceIgnoredAllegiance: 1,
   surgeChancePerHour: 0.03,
+  // Virus attack: an intrusion to DEFEND against (a mini-game) before it lands.
+  attackChancePerHour: 0.04,
+  attackWindowMin: 60,
+  attackLandedIntegrity: 10,
+  attackRepelledStability: 1,
+  // Memory overflow: PURGE before the buffers burst, or it crashes and reboots.
+  overflowChancePerHour: 0.02,
+  overflowPerCachePerHour: 0.02, // each cache file makes it likelier
+  overflowWindowMin: 45,
+  overflowCrashIntegrity: 15,
+  rebootMin: 20,
 };
 
-export const GAME_IDS = ['breach', 'dodge', 'tune'];
+// Timed events: what the alert bar calls them and how long there is to respond.
+export const EVENTS = {
+  trace: { label: 'CORP TRACE', window: 'traceWindowMin' },
+  attack: { label: 'INTRUSION', window: 'attackWindowMin' },
+  overflow: { label: 'MEMORY OVERFLOW', window: 'overflowWindowMin' },
+};
+
+export const GAME_IDS = ['breach', 'dodge', 'tune', 'feast'];
 
 export const INVENTORY_SLOTS = 6;
 export const ITEM_CFG = {
@@ -112,6 +139,8 @@ export const FORM_MODS = {
 const mod = (s, key, fallback = 1) => FORM_MODS[s.form]?.[key] ?? fallback;
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
+// Asleep for the night, or napping: either way it rests and can't eat, play or run.
+export const resting = (s) => s.asleep || Boolean(s.nap);
 
 export const TRAITS = {
   licensed: { name: 'Licensed', desc: 'Corp packets restore +25% Charge' },
@@ -188,6 +217,9 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     virusMin: 0,
     sinceFed: CFG.digestMinutes,
     asleep: false,
+    nap: null,
+    lastNapEndAge: null,
+    rebootUntilAge: null,
     lightsOn: true,
     careMistakes: 0,
     zeroMin: { charge: 0, sync: 0, heat: 0, lights: 0 },
@@ -266,6 +298,9 @@ function step(s, t, rng) {
   }
 
   const shouldSleep = isSleepHour(new Date(t).getHours(), s.quirk.sleepOffset);
+  if (s.nap && (shouldSleep || s.ageMin - s.nap.startedAge >= CFG.napMaxMin)) {
+    endNap(s, t, shouldSleep ? null : '> nap over. back online.');
+  }
   if (shouldSleep && !s.asleep) {
     s.asleep = true;
     log(s, t, '> entering low-power mode. kill the lights.');
@@ -276,16 +311,17 @@ function step(s, t, rng) {
   }
 
   const st = s.stats;
-  let rate = s.asleep ? CFG.sleepDrainMult : 1;
-  if (s.asleep && s.trait === 'persistent') rate *= 0.7;
+  const rest = resting(s);
+  let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
+  if (rest && s.trait === 'persistent') rate *= 0.7;
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
-  const dark = !s.asleep && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
+  const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
   st.heat = clamp(
-    st.heat + (s.asleep ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
+    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );
 
-  if (!s.asleep && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
+  if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
     s.cache++;
     log(s, t, '> corrupted cache file written.');
   }
@@ -314,7 +350,7 @@ function step(s, t, rng) {
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
-  else if (!s.asleep && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
+  else if (!rest && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
 
   stepEvents(s, t, rng);
 
@@ -332,16 +368,24 @@ function step(s, t, rng) {
 
 function stepEvents(s, t, rng) {
   const st = s.stats;
-  if (s.event?.type === 'trace') {
-    if (s.ageMin - s.event.startedAge >= CFG.traceWindowMin) {
-      s.event = null;
+  if (s.event) {
+    if (eventMinutesLeft(s) > 0) return;
+    const type = s.event.type;
+    s.event = null;
+    if (type === 'trace') {
       st.integrity = clamp(st.integrity - CFG.traceIgnoredIntegrity);
       s.axes.allegiance += CFG.traceIgnoredAllegiance;
       log(s, t, '> !! trace completed. corp harvested its data.');
+    } else if (type === 'attack') {
+      infect(s, CFG.attackLandedIntegrity);
+      log(s, t, `> !! intrusion landed. virus installed. -${CFG.attackLandedIntegrity} integrity.`);
+    } else if (type === 'overflow') {
+      crash(s);
+      log(s, t, `> !! buffers burst. crashed: -${CFG.overflowCrashIntegrity} integrity, cache full. rebooting...`);
     }
     return;
   }
-  if (s.asleep) return;
+  if (resting(s)) return;
   if (s.trait !== 'untraceable' && rng() < CFG.traceChancePerHour / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
@@ -350,6 +394,16 @@ function stepEvents(s, t, rng) {
     }
     s.event = { type: 'trace', startedAge: s.ageMin };
     log(s, t, `> !! corp trace incoming. ${CFG.traceWindowMin}m to respond.`);
+  } else if (!s.virus && rng() < CFG.attackChancePerHour / 60) {
+    if (shielded(s)) {
+      log(s, t, '> intrusion attempt bounced off the antivirus shield.');
+      return;
+    }
+    s.event = { type: 'attack', startedAge: s.ageMin };
+    log(s, t, `> !! intrusion attempt. DEFEND within ${CFG.attackWindowMin}m.`);
+  } else if (rng() < (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache) / 60) {
+    s.event = { type: 'overflow', startedAge: s.ageMin };
+    log(s, t, `> !! memory overflow. PURGE within ${CFG.overflowWindowMin}m.`);
   } else if (rng() < CFG.surgeChancePerHour / 60) {
     st.heat = clamp(st.heat + 25);
     st.charge = clamp(st.charge + 10);
@@ -357,6 +411,20 @@ function stepEvents(s, t, rng) {
     log(s, t, '> !! power surge. running hot.');
   }
 }
+
+function infect(s, damage) {
+  s.virus = true;
+  s.virusMin = 0;
+  s.stats.integrity = clamp(s.stats.integrity - damage);
+}
+
+function crash(s) {
+  s.stats.integrity = clamp(s.stats.integrity - CFG.overflowCrashIntegrity);
+  s.cache = CFG.maxCache;
+  s.rebootUntilAge = s.ageMin + CFG.rebootMin;
+}
+
+export const rebootMinutesLeft = (s) => Math.max(0, (s.rebootUntilAge ?? 0) - s.ageMin);
 
 export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
 
@@ -380,8 +448,14 @@ function maybeDrop(s, source, chance, rng) {
   return rng() < chance ? grantItem(s, rollTable(DROPS[source], rng)) : '';
 }
 
+// Minutes left to respond to the current timed event (0 when there is none).
+export function eventMinutesLeft(s) {
+  const e = s.event && EVENTS[s.event.type];
+  return e ? CFG[e.window] - (s.ageMin - s.event.startedAge) : 0;
+}
+
 export function traceMinutesLeft(s) {
-  return s.event?.type === 'trace' ? CFG.traceWindowMin - (s.ageMin - s.event.startedAge) : 0;
+  return s.event?.type === 'trace' ? eventMinutesLeft(s) : 0;
 }
 
 function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
@@ -427,6 +501,7 @@ export function migrate(s) {
   s.form ??= 'bitling';
   s.evolvedAt ??= null;
   s.games ??= freshGames();
+  for (const id of GAME_IDS) s.games[id] ??= { played: 0, won: 0 }; // games added since it was saved
   s.event ??= null;
   s.lastSurgeAt ??= null;
   s.teenForm ??= s.stage === 'teen' ? s.form : null;
@@ -440,6 +515,9 @@ export function migrate(s) {
   s.lastWakeAt ??= null;
   s.lastRunEndAge ??= null;
   s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
+  s.nap ??= null;
+  s.lastNapEndAge ??= null;
+  s.rebootUntilAge ??= null;
   return s;
 }
 
@@ -468,14 +546,41 @@ function flatline(s, t, cause) {
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
+// --- naps ---------------------------------------------------------------------------------
+
+function endNap(s, t, msg) {
+  s.nap = null;
+  s.lastNapEndAge = s.ageMin;
+  if (msg) log(s, t, msg);
+}
+
+export const napMinutesLeft = (s) => (s.nap ? Math.max(0, CFG.napMaxMin - (s.ageMin - s.nap.startedAge)) : 0);
+
+export function napCooldownLeft(s) {
+  if (s.lastNapEndAge == null) return 0;
+  return Math.max(0, s.lastNapEndAge + CFG.napCooldownMin - s.ageMin);
+}
+
+// Why a nap can't start right now, or null (waking from one is always allowed).
+export function napBlockReason(s) {
+  if (s.nap) return null;
+  if (s.asleep) return 'already asleep.';
+  if (s.run) return 'finish the netrun first.';
+  const cd = napCooldownLeft(s);
+  if (cd > 0) return `not tired yet. ${cd >= 60 ? `${Math.ceil(cd / 60)}h` : `${cd}m`} until it can nap again.`;
+  return null;
+}
+
 // Why an action can't happen right now, or null. The UI checks 'play' before launching a game.
 export function blockReason(s, action) {
   if (s.stage === 'dead') return 'no signal.';
   if (s.hibernation) return 'hibernating.';
   if (s.stage === 'script' && action !== 'lights') return 'still compiling...';
-  if (s.asleep && ['corp', 'scav', 'play', 'cool'].includes(action)) return 'in low-power mode.';
+  if (rebootMinutesLeft(s) > 0 && action !== 'lights') return `rebooting. ${rebootMinutesLeft(s)}m left.`;
+  if (resting(s) && ['corp', 'scav', 'play', 'cool'].includes(action)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
+  if (action === 'defend' && s.event?.type !== 'attack') return 'no intrusion to defend against.';
   return null;
 }
 
@@ -485,7 +590,8 @@ export function hibernateBlockReason(s, now) {
   if (!isAlive(s)) return s.stage === 'script' ? 'still compiling...' : 'no signal.';
   if (s.hibernation) return 'already hibernating.';
   if (s.run) return 'finish the netrun first.';
-  if (s.event?.type === 'trace') return 'deal with the corp trace first.';
+  if (s.event) return `deal with the ${EVENTS[s.event.type].label.toLowerCase()} first.`;
+  if (rebootMinutesLeft(s) > 0) return 'still rebooting.';
   if (s.lastWakeAt !== null && now - s.lastWakeAt < CFG.hibernateCooldownMin * MIN) {
     const h = Math.ceil((CFG.hibernateCooldownMin * MIN - (now - s.lastWakeAt)) / (60 * MIN));
     return `still groggy from the last one. ${h}h until it can hibernate again.`;
@@ -521,7 +627,7 @@ export function itemBlockReason(s, slot) {
   if (base) return base;
   const id = s.inventory?.[slot];
   if (!id) return 'empty slot.';
-  if (ITEMS[id].awake && s.asleep) return 'in low-power mode.';
+  if (ITEMS[id].awake && resting(s)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   return null;
 }
 
@@ -574,7 +680,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         s.buffs.boost = false;
       }
       st.sync = clamp(st.sync + gain);
-      st.charge = clamp(st.charge - 6);
+      st.charge = clamp(st.charge - 6 + (game === 'feast' ? (won ? CFG.feastWinCharge : CFG.feastLoseCharge) : 0));
       st.heat = clamp(st.heat + 12);
       if (st.heat > 70) s.axes.stability -= 0.5;
       s.games[game].played++;
@@ -632,15 +738,46 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       break;
     }
     case 'purge': {
+      if (s.event?.type === 'overflow') {
+        s.event = null;
+        s.cache = 0;
+        s.axes.stability += 0.5;
+        res = ok('buffers flushed. overflow contained.', 'purge');
+        break;
+      }
       if (s.cache === 0) return fail('cache is clean.');
       s.cache = 0;
       s.axes.stability += 0.5;
       res = ok('cache purged.', 'purge');
       break;
     }
+    case 'defend': {
+      // The DEFEND mini-game's result, like 'play' but for an intrusion.
+      s.event = null;
+      if (opts.won) {
+        s.axes.stability += CFG.attackRepelledStability;
+        res = ok('intrusion repelled.', 'win');
+      } else {
+        infect(s, CFG.attackLandedIntegrity);
+        res = ok(`defense breached. virus installed. -${CFG.attackLandedIntegrity} integrity.`, 'lose');
+      }
+      break;
+    }
+    case 'nap': {
+      if (s.nap) {
+        endNap(s, now, null);
+        res = ok('woke it from its nap.', 'boot');
+        break;
+      }
+      const blockedNap = napBlockReason(s);
+      if (blockedNap) return fail(blockedNap);
+      s.nap = { startedAge: s.ageMin };
+      res = ok(`napping. up to ${CFG.napMaxMin / 60}h of low drain.`, 'lights');
+      break;
+    }
     case 'lights': {
       s.lightsOn = !s.lightsOn;
-      const msg = s.lightsOn ? 'lights on.' : s.asleep ? 'lights off.' : "lights off. it's awake and bored in the dark.";
+      const msg = s.lightsOn ? 'lights on.' : resting(s) ? 'lights off.' : "lights off. it's awake and bored in the dark.";
       res = ok(msg, 'lights');
       break;
     }
@@ -707,6 +844,8 @@ export function alertReason(s) {
   if (!isAlive(s)) return null;
   const st = s.stats;
   if (s.event?.type === 'trace') return { key: 'trace', msg: `Corp trace incoming. ${traceMinutesLeft(s)}m to respond.` };
+  if (s.event?.type === 'attack') return { key: 'attack', msg: `Intrusion attempt. DEFEND within ${eventMinutesLeft(s)}m.` };
+  if (s.event?.type === 'overflow') return { key: 'overflow', msg: `Memory overflow. PURGE within ${eventMinutesLeft(s)}m.` };
   if (s.virus) return { key: 'virus', msg: 'Virus detected. Patch it before Integrity collapses.' };
   if (st.charge < 20) return { key: 'charge', msg: 'Charge is running low.' };
   if (st.sync < 20) return { key: 'sync', msg: 'Sync is fading. It wants to play.' };
@@ -726,7 +865,7 @@ export function needsAttention(s) {
     st.heat > 80 ||
     s.cache >= 2 ||
     s.virus ||
-    s.event?.type === 'trace' ||
+    Boolean(s.event) ||
     (s.asleep && s.lightsOn)
   );
 }
