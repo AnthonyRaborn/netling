@@ -7,6 +7,7 @@ import {
   isAlive,
   traceMinutesLeft,
   alertReason,
+  bedtimeHour,
   CFG,
   TRAITS,
   FORMS,
@@ -114,7 +115,7 @@ function updateHUD() {
   const trait = state.trait ? TRAITS[state.trait].name : '—';
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
-    `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
+    `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';

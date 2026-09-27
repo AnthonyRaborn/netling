@@ -16,6 +16,9 @@ export const CFG = {
   virusBasePerHour: 0.02,
   virusPerCachePerHour: 0.03,
   mistakeGraceMin: 15,
+  lightsGraceMin: 60, // it's asleep with the lights on for this long before it counts
+  darkAwakeSyncMult: 2, // lights off while it's awake: bored in the dark
+  uptimeStabilityPerHour: 0.1, // awake hours with nothing wrong build stability
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
   lifespanMin: 7 * 24 * 60,
@@ -24,12 +27,15 @@ export const CFG = {
   teenGoodCareMaxMistakes: 2,
   sleepStart: 22,
   sleepEnd: 7,
-  ghostBand: 3,
-  ghostMinGameWins: 9, // and at least one win in every mini-game
+  ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
+  ghostMinGameWins: 22,
+  ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
   traceChancePerHour: 0.08,
-  traceWindowMin: 30,
+  traceWindowMin: 120,
+  traceIgnoredIntegrity: 15,
+  traceIgnoredAllegiance: 1,
   surgeChancePerHour: 0.03,
 };
 
@@ -161,6 +167,10 @@ function log(s, t, msg) {
   if (s.log.length > 50) s.log.splice(0, s.log.length - 50);
 }
 
+export function bedtimeHour(s) {
+  return (CFG.sleepStart + (s.quirk?.sleepOffset ?? 0) + 24) % 24;
+}
+
 export function isSleepHour(hour, offset = 0) {
   const start = (CFG.sleepStart + offset + 24) % 24;
   const end = (CFG.sleepEnd + offset + 24) % 24;
@@ -207,7 +217,8 @@ function step(s, t, rng) {
   let rate = s.asleep ? CFG.sleepDrainMult : 1;
   if (s.asleep && s.trait === 'persistent') rate *= 0.7;
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * mod(s, 'syncDrainMult'));
+  const dark = !s.asleep && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
   st.heat = clamp(
     st.heat + (s.asleep ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );
@@ -241,13 +252,14 @@ function step(s, t, rng) {
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
+  else if (!s.asleep && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
 
   stepEvents(s, t, rng);
 
   checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
   checkMistake(s, t, 'sync', st.sync <= 0, 'sync lost');
   checkMistake(s, t, 'heat', st.heat >= 100, 'thermal overload');
-  checkMistake(s, t, 'lights', s.asleep && s.lightsOn, 'no rest with the lights on');
+  checkMistake(s, t, 'lights', s.asleep && s.lightsOn, 'no rest with the lights on', CFG.lightsGraceMin);
 
   s.integrityZeroMin = st.integrity <= 0 ? s.integrityZeroMin + 1 : 0;
 
@@ -261,8 +273,8 @@ function stepEvents(s, t, rng) {
   if (s.event?.type === 'trace') {
     if (s.ageMin - s.event.startedAge >= CFG.traceWindowMin) {
       s.event = null;
-      st.integrity = clamp(st.integrity - 20);
-      s.axes.allegiance += 2;
+      st.integrity = clamp(st.integrity - CFG.traceIgnoredIntegrity);
+      s.axes.allegiance += CFG.traceIgnoredAllegiance;
       log(s, t, '> !! trace completed. corp harvested its data.');
     }
     return;
@@ -283,14 +295,14 @@ export function traceMinutesLeft(s) {
   return s.event?.type === 'trace' ? CFG.traceWindowMin - (s.ageMin - s.event.startedAge) : 0;
 }
 
-function checkMistake(s, t, key, cond, label) {
+function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   if (!cond) {
     s.zeroMin[key] = 0;
     s.flagged[key] = false;
     return;
   }
   s.zeroMin[key]++;
-  if (s.zeroMin[key] >= CFG.mistakeGraceMin && !s.flagged[key]) {
+  if (s.zeroMin[key] >= grace && !s.flagged[key]) {
     s.flagged[key] = true;
     s.careMistakes++;
     s.axes.stability -= 2;
@@ -301,7 +313,7 @@ function checkMistake(s, t, key, cond, label) {
 // Which adult form the current axes lean toward.
 export function leaningForm(s) {
   const { allegiance: a, stability: b } = s.axes;
-  if (Math.abs(a) < CFG.ghostBand && Math.abs(b) < CFG.ghostBand && s.careMistakes <= 1 && ghostWinsMet(s)) {
+  if (Math.abs(a) < CFG.ghostBand && b >= 0 && s.careMistakes <= 1 && ghostWinsMet(s)) {
     return 'ghost';
   }
   if (Math.abs(a) >= Math.abs(b)) return a >= 0 ? 'chrome' : 'firewall';
@@ -310,7 +322,7 @@ export function leaningForm(s) {
 
 export function ghostWinsMet(s) {
   const wins = GAME_IDS.map((id) => s.games?.[id]?.won ?? 0);
-  return wins.every((w) => w > 0) && wins.reduce((a, b) => a + b, 0) >= CFG.ghostMinGameWins;
+  return wins.every((w) => w >= CFG.ghostMinWinsEach) && wins.reduce((a, b) => a + b, 0) >= CFG.ghostMinGameWins;
 }
 
 function evolve(s, t, stage, form) {
@@ -440,7 +452,8 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'lights': {
       s.lightsOn = !s.lightsOn;
-      res = ok(s.lightsOn ? 'lights on.' : 'lights off.', 'lights');
+      const msg = s.lightsOn ? 'lights on.' : s.asleep ? 'lights off.' : "lights off. it's awake and bored in the dark.";
+      res = ok(msg, 'lights');
       break;
     }
     default:

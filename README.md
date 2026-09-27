@@ -9,6 +9,7 @@ No build step, no dependencies: vanilla JS modules + canvas.
 ```bash
 npm run serve        # http://localhost:5174
 npm test             # simulation + mini-game logic
+npm run balance      # simulate hundreds of lifetimes per player archetype (DETAIL=1 for more)
 ```
 
 Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. `gallery.html` shows every sprite.
@@ -32,9 +33,22 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 
 ## Rules at a glance
 
-- **Stats:** Charge, Sync, Integrity, Heat, Cache. A need left unmet for 15 minutes is a care mistake; 10 mistakes, 2 hours at zero Integrity, or 7 days of age ends the run.
+- **Stats:** Charge, Sync, Integrity, Heat, Cache. A need left unmet for 15 minutes (60 for sleeping with the lights on) is a care mistake; 10 mistakes, 2 hours at zero Integrity, or 7 days of age ends the run.
 - **Evolution:** Bitling → teen at 24h (Kernel for good care, Stub otherwise) → adult at 72h, chosen by two hidden axes:
   - *Allegiance* (corp packets, complying with traces ↔ scavenged data, hiding) → **Chrome** / **Firewall**
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
-  - **Ghost** is secret: balanced axes, ≤1 mistake, and 9+ mini-game wins including each game.
+  - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each game).
 - **Lineage:** each generation inherits its predecessor's form trait and one of its quirks.
+
+## Balance targets
+
+`tools/balance.mjs` plays full lifetimes with scripted players. Current results (500 runs each):
+
+| Player | Check-ins | Reaches adult | Full 7-day life |
+|---|---|---|---|
+| attentive | hourly, 7:00–23:00 | 100% | 99% |
+| casual | 6 a day | 87% | 66% |
+| worker | before work, lunch, evenings | 72% | 29% |
+| neglectful | twice a day | 2% | 0% (dies ~day 1) |
+
+Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 96%, running hot and sloppy → Glitch 69%, tidy and neutral → Daemon 77%, balanced + 22 wins → Ghost 98%. Ghost by accident: ≤1%.

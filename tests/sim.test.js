@@ -39,7 +39,7 @@ test('a stat stuck at zero past the grace period is one care mistake', () => {
 
 test('sleeping with the lights on is a care mistake', () => {
   const s = booted();
-  tick(s, Date.UTC(2026, 8, 26, 22, 30), noRng);
+  tick(s, Date.UTC(2026, 8, 26, 22, 0) + (CFG.lightsGraceMin + 5) * MIN, noRng);
   assert.equal(s.asleep, true);
   assert.ok(s.careMistakes >= 1);
 });
@@ -90,10 +90,13 @@ test('leaning form follows the dominant axis', () => {
   assert.equal(leaningForm(s), 'daemon');
   s.axes = { allegiance: 1, stability: -8 };
   assert.equal(leaningForm(s), 'glitch');
-  s.axes = { allegiance: 1, stability: -1 };
+  s.axes = { allegiance: 1, stability: 0.5 };
   s.careMistakes = 0;
-  s.games = { breach: { played: 3, won: 3 }, dodge: { played: 3, won: 3 }, tune: { played: 3, won: 3 } };
+  const n = Math.ceil(CFG.ghostMinGameWins / 3) + CFG.ghostMinWinsEach;
+  s.games = { breach: { played: n, won: n }, dodge: { played: n, won: n }, tune: { played: n, won: n } };
   assert.equal(leaningForm(s), 'ghost');
+  s.axes.stability = -3;
+  assert.equal(leaningForm(s), 'glitch', 'an unstable netling never ghosts');
 });
 
 test('next generation inherits the trait and exactly one quirk key', () => {
@@ -185,10 +188,11 @@ test('ghost needs enough mini-game wins across every game', () => {
   const s = booted();
   s.axes = { allegiance: 0, stability: 0 };
   assert.notEqual(leaningForm(s), 'ghost', 'no wins yet');
-  s.games = { breach: { played: 9, won: 9 }, dodge: { played: 1, won: 0 }, tune: { played: 0, won: 0 } };
+  const many = CFG.ghostMinGameWins;
+  s.games = { breach: { played: many, won: many }, dodge: { played: 1, won: 0 }, tune: { played: 0, won: 0 } };
   assert.notEqual(leaningForm(s), 'ghost', 'wins not spread across games');
-  s.games.dodge.won = 1;
-  s.games.tune.won = 1;
+  s.games.dodge.won = CFG.ghostMinWinsEach;
+  s.games.tune.won = CFG.ghostMinWinsEach;
   assert.equal(leaningForm(s), 'ghost');
 });
 
@@ -210,8 +214,8 @@ test('an ignored trace harvests integrity and pushes allegiance corp-ward', () =
   const integrity = s.stats.integrity;
   tick(s, s.lastTick + CFG.traceWindowMin * MIN, noRng);
   assert.equal(s.event, null);
-  assert.ok(s.stats.integrity < integrity - 10);
-  assert.equal(s.axes.allegiance, 2);
+  assert.ok(s.stats.integrity < integrity - CFG.traceIgnoredIntegrity + 5);
+  assert.equal(s.axes.allegiance, CFG.traceIgnoredAllegiance);
 });
 
 test('hiding from a trace resolves it and leans indie', () => {
