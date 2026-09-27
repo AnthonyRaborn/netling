@@ -17,6 +17,22 @@ buf.width = LCD_W;
 buf.height = LCD_H;
 const bctx = buf.getContext('2d');
 
+// Walking idle: every few seconds it picks a new spot and walks there, then waits.
+// A pure function of time, so it needs no state and survives reloads.
+const WALK_SEGMENT_MS = 5000;
+const WALK_MOVE_MS = 2200;
+const spot = (k) => {
+  const h = Math.imul(k ^ 0x9e3779b9, 0x85ebca6b) >>> 0;
+  return { x: ((h % 17) - 8), y: ((h >>> 8) % 101) / 100 };
+};
+function wanderPos(time) {
+  const k = Math.floor(time / WALK_SEGMENT_MS);
+  const t = Math.min(1, (time - k * WALK_SEGMENT_MS) / WALK_MOVE_MS);
+  const a = spot(k - 1);
+  const b = spot(k);
+  return { x: Math.round(a.x + (b.x - a.x) * t), y: a.y + (b.y - a.y) * t, moving: t < 1 && a.x !== b.x };
+}
+
 export function renderLCD(canvas, s, time, opts = {}) {
   const pal = PALETTES[s.quirk.palette] ?? PALETTES[0];
   const colors = { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
@@ -53,17 +69,25 @@ export function renderLCD(canvas, s, time, opts = {}) {
     let y = 20 - sprite.length;
     if (rest) {
       y = 21 - sprite.length;
-    } else if (s.quirk.idle === 'sway') {
-      // Wanders around the screen: side to side, and up and down as far as a hat still fits
+    } else {
+      // Every idle wanders the screen: side to side, and up and down as far as a hat still fits
       // above it (tall adults have little room) and the cache icons below.
-      x += Math.round(Math.sin(time / 1500) * 8);
       const up = Math.max(0, Math.min(3, y - 4));
       const down = 1;
-      y += Math.round(((Math.sin(time / 2300) + 1) / 2) * (up + down)) - up;
-    } else if (s.quirk.idle === 'hover') {
-      y += Math.round(Math.sin(time / 600) * 2) - 1;
-    } else {
-      y += frame ? 0 : -1;
+      const depth = (period) => Math.round(((Math.sin(time / period) + 1) / 2) * (up + down)) - up;
+      if (s.quirk.idle === 'sway') {
+        x += Math.round(Math.sin(time / 1500) * 8);
+        y += depth(2300);
+      } else if (s.quirk.idle === 'hover') {
+        // Drifts slowly while it floats.
+        x += Math.round(Math.sin(time / 2600) * 7);
+        y += Math.round(Math.sin(time / 600) * 2) - 1;
+      } else {
+        // Walks from spot to spot in hops, pausing between.
+        const walk = wanderPos(time);
+        x += walk.x;
+        y += Math.round(walk.y * (up + down)) - up + (walk.moving && !frame ? -1 : 0);
+      }
     }
 
     let spriteColors = colors;
