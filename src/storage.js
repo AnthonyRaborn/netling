@@ -23,6 +23,7 @@ export const KEYS = {
   skew: 'netling.devSkew',
   iosHint: 'netling.iosHintSeen',
   corruptSave: 'netling.corruptSave',
+  tabLease: 'netling.tabLease', // written by lease.js directly: it decides who may write
 };
 
 // getBackend: returns a Storage-like object (getItem/setItem/removeItem/key/length). It may throw,

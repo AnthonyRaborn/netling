@@ -103,7 +103,7 @@ export async function decodeSave(code, now = Date.now()) {
   if (payload?.v !== 1 || typeof payload.data !== 'object' || payload.data === null) {
     throw new TransferError('this code is from a different version.');
   }
-  const save = cleanSave(payload.data.save, now);
+  const save = cleanSave(payload.data.save, now, { strict: true }); // outside data keeps only known fields
   if (!save) throw new TransferError('this code has no netling in it.');
   const data = { save };
   for (const k of TRANSFER_KEYS) {

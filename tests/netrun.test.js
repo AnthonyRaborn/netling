@@ -159,6 +159,18 @@ test('checkpoint: hide leans indie, comply confiscates loot, voucher passes clea
   assert.deepEqual(s.inventory, []);
 });
 
+test('a voucher used up mid-checkpoint is not charged against another item', () => {
+  const { s, next } = runInto('baby', 'checkpoint');
+  s.inventory.push('voucher', 'coolant', 'antivirus');
+  moveTo(s, next.id, noRng);
+  s.inventory.splice(0, 1); // the inventory stays usable while the choice is open
+  const res = choose(s, 'voucher', noRng);
+  assert.equal(res.ok, false);
+  assert.deepEqual(s.inventory, ['coolant', 'antivirus']);
+  assert.equal(s.run.phase, 'choice', 'the checkpoint is still waiting');
+  assert.equal(s.run.pending.options.find((o) => o.id === 'voucher').disabled, true);
+});
+
 test('chrome and ghost pass checkpoints automatically', () => {
   for (const form of ['chrome', 'ghost']) {
     const { s, next } = runInto('adult', 'checkpoint');

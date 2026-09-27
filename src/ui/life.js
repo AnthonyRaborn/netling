@@ -3,7 +3,7 @@ import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../
 import { deathRecord } from '../archive.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, flashStatus, loadLineage, now, save, store } from './app.js';
+import { $, app, codexComplete, flashStatus, now, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
 import { checkUnlocks, countAct, grantStyle, plushExtra } from './style.js';
@@ -37,7 +37,8 @@ function onFlatline() {
   const state = app.state;
   sfx('flatline', state.quirk.pitch);
   pushAlert('FLATLINE', `netling.v${state.generation}.0 is gone: ${state.deathCause}.`);
-  store.set(KEYS.lineage, [...loadLineage(), deathRecord(state)]);
+  app.lineage.push(deathRecord(state));
+  store.set(KEYS.lineage, app.lineage);
   showFlatline();
   grantStyle('plush', 'a keepsake: a plush of your last netling.');
   app.plushCache = plushExtra();

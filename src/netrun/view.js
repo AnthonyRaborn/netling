@@ -116,6 +116,7 @@ export class RunView {
         const opt = opts[this.choiceCursor];
         if (opt.disabled) return this.sound('error');
         const res = choose(this.pet, opt.id, this.rng);
+        if (!res.ok) return this.sound('error');
         this.sound(res.result === 'disconnected' ? 'lose' : res.result === 'jacked' ? 'win' : 'select');
         this.choiceCursor = 0;
         this.afterAction();

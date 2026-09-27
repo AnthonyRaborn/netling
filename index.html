@@ -212,6 +212,15 @@
         <h3>STORAGE</h3>
         <p class="tx-note" id="storage-note"></p>
 
+        <div id="old-save" hidden>
+          <h3>SET-ASIDE SAVE</h3>
+          <p class="tx-note" id="old-save-note"></p>
+          <div class="tx-row">
+            <button type="button" id="old-save-download">DOWNLOAD IT</button>
+            <button type="button" id="old-save-delete" class="pref">DELETE</button>
+          </div>
+        </div>
+
         <h3>SOUND</h3>
         <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
 
@@ -220,7 +229,7 @@
         <button type="button" id="hibernate-btn">HIBERNATE</button>
 
         <h3>RESTART</h3>
-        <p class="tx-note">Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.</p>
+        <p class="tx-note" id="restart-note">Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.</p>
         <button type="button" id="restart-btn" class="danger-btn">RESTART COMPLETELY</button>
       </section>
     </dialog>

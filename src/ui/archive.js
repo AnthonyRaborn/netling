@@ -7,7 +7,7 @@ import { codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
 import { drawSprite, formSprite } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, flashStatus, loadLineage, save, store } from './app.js';
+import { $, app, codexComplete, flashStatus, save, store } from './app.js';
 import { checkUnlocks, renderWardrobe } from './style.js';
 import { fmtAge } from './hud.js';
 
@@ -135,7 +135,7 @@ function renderRecord(lineage) {
 }
 
 function renderArchive() {
-  const lineage = loadLineage();
+  const { lineage } = app;
   renderRecord(lineage);
   const rows = lineageRows(lineage, app.state);
   $('lineage-list').replaceChildren(

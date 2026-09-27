@@ -5,7 +5,7 @@ import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from '../transfer
 import { encodeQR, drawQR } from '../qr.js';
 import { sfx, unlockAudio, setVolume } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, armed, flashStatus, loadLineage, now, save, store } from './app.js';
+import { $, app, armed, flashStatus, now, save, store } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
 import { advance } from './life.js';
 
@@ -20,7 +20,7 @@ function collectData() {
   save();
   const data = {
     save: { ...app.state, log: app.state.log.slice(-EXPORT_LOG_LINES) },
-    lineage: loadLineage(),
+    lineage: app.lineage,
     dex: app.dex,
     codex: app.codex,
     wardrobe: app.wardrobe,
@@ -32,6 +32,33 @@ function collectData() {
     helpSeen: store.get(KEYS.helpSeen) ?? undefined,
   };
   return Object.fromEntries(TRANSFER_KEYS.filter((k) => data[k] !== undefined).map((k) => [k, data[k]]));
+}
+
+function downloadText(name, text, type = 'text/plain') {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// A save that couldn't be read at load time, kept as { at, raw } (older builds stored the bare text).
+function oldSave() {
+  const v = store.get(KEYS.corruptSave);
+  if (typeof v === 'string') return { at: null, raw: v };
+  return v && typeof v.raw === 'string' ? { at: Number.isFinite(v.at) ? v.at : null, raw: v.raw } : null;
+}
+
+function renderOldSave() {
+  const old = oldSave();
+  $('old-save').hidden = !old;
+  const base = 'Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.';
+  $('restart-note').textContent = old ? `${base} That includes the set-aside save above, so download it first if you want it.` : base;
+  if (!old) return;
+  const when = old.at ? ` on ${new Date(old.at).toLocaleString()}` : '';
+  $('old-save-note').textContent =
+    `A saved netling on this device couldn't be read${when}, so it was set aside and a new one compiled. ` +
+    `Download it to keep a copy (${Math.ceil(old.raw.length / 1024)} KB of raw save data).`;
 }
 
 const importUrl = (code) => `${location.origin}${location.pathname}#import=${code}`;
@@ -51,6 +78,7 @@ function codeFrom(text) {
 export function openSystem() {
   $('archive').close();
   renderStorageNote();
+  renderOldSave();
   $('volume').value = Math.round(app.prefs.volume * 100);
   $('volume-value').textContent = `${Math.round(app.prefs.volume * 100)}%`;
   $('import-preview').hidden = true;
@@ -254,12 +282,19 @@ export function initSystem() {
   });
 
   $('lock-download').addEventListener('click', () => {
-    const blob = new Blob([app.lock.code], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `netling-v${app.lock.generation}-${new Date(app.lock.at).toISOString().slice(0, 10)}.txt`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    downloadText(`netling-v${app.lock.generation}-${new Date(app.lock.at).toISOString().slice(0, 10)}.txt`, app.lock.code);
+  });
+
+  $('old-save-download').addEventListener('click', () => {
+    const old = oldSave();
+    if (!old) return renderOldSave();
+    const day = new Date(old.at ?? Date.now()).toISOString().slice(0, 10);
+    downloadText(`netling-set-aside-save-${day}.json`, old.raw, 'application/json');
+  });
+  $('old-save-delete').addEventListener('click', () => {
+    if (!armed($('old-save-delete'), 'SURE? DELETE IT', 'DELETE')) return;
+    if (!store.remove(KEYS.corruptSave)) flashStatus("couldn't delete it: storage is blocked.");
+    renderOldSave();
   });
 
   // Re-export: the same code again (nothing changed while locked), redrawn fresh.
