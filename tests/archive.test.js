@@ -67,3 +67,10 @@ test('dex hides undiscovered forms behind hints', () => {
   assert.equal(chrome.name, '???');
   assert.match(chrome.text, /^hint:/);
 });
+
+test('dex lists run abilities for discovered adult forms only', () => {
+  const entries = dexEntries(['firewall']);
+  assert.match(entries.find((e) => e.id === 'firewall').runAbility, /ICE/);
+  assert.equal(entries.find((e) => e.id === 'daemon').runAbility, null);
+  assert.equal(dexEntries(['kernel']).find((e) => e.id === 'kernel').runAbility, null);
+});

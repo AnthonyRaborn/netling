@@ -1,5 +1,6 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
 import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES } from './sim.js';
+import { FORM_ABILITIES } from './netrun/run.js';
 
 export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
 
@@ -108,6 +109,7 @@ export function dexEntries(dex) {
       perk: found ? FORM_MODS[id]?.desc ?? null : null,
       trait: found && FORMS[id] ? TRAITS[FORMS[id].trait].name : null,
       keepsake: found && KEEPSAKES[id] ? ITEMS[KEEPSAKES[id]].name : null,
+      runAbility: found ? FORM_ABILITIES[id] ?? null : null,
     };
   });
 }

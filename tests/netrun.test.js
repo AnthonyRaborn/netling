@@ -4,7 +4,7 @@ import { createScript, tick, mulberry32, CFG, MIN } from '../src/sim.js';
 import { generateMap, nodeById } from '../src/netrun/map.js';
 import { REGIONS } from '../src/netrun/regions.js';
 import {
-  startRun, moveTo, resolveIce, relayChoice, jackOut, abortRun, closeRun, runOptions, runBlockReason, RUN_CFG,
+  startRun, moveTo, resolveIce, relayChoice, choose, jackOut, abortRun, closeRun, runOptions, runBlockReason, visibleNodeIds, RUN_CFG,
 } from '../src/netrun/run.js';
 
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -97,7 +97,8 @@ test('a disconnect normally costs one care mistake', () => {
 test('relay offers a safe exit; aborting forfeits loot only', () => {
   const s = pet();
   startRun(s, 'public', mulberry32(4));
-  s.run.phase = 'relay';
+  s.run.phase = 'choice';
+  s.run.pending = { kind: 'relay', options: [{ id: 'continue' }, { id: 'out' }] };
   s.run.loot = ['voucher'];
   relayChoice(s, 'out');
   assert.deepEqual(s.inventory, ['voucher']);
@@ -118,10 +119,108 @@ test('walking a whole run always ends at the exit with a result', () => {
     startRun(s, 'public', rng);
     for (let steps = 0; steps < 20 && s.run.phase !== 'done'; steps++) {
       if (s.run.phase === 'ice') resolveIce(s, true, rng);
-      else if (s.run.phase === 'relay') relayChoice(s, 'continue');
+      else if (s.run.phase === 'choice') choose(s, s.run.pending.options.find((o) => !o.disabled && o.id !== 'out').id, rng);
       else moveTo(s, runOptions(s.run)[0].id, rng);
+      s.stats.integrity = Math.max(s.stats.integrity, 50); // this test is about pathing, not survival
     }
     assert.equal(s.run.phase, 'done', `seed ${seed}`);
     assert.equal(nodeById(s.run.map, s.run.pos).type, 'exit');
+  }
+});
+
+// Build a run whose next node is a given type.
+function runInto(stage, type, seed = 4) {
+  const s = pet(stage);
+  startRun(s, 'public', mulberry32(seed));
+  const next = runOptions(s.run)[0];
+  next.type = type;
+  return { s, next };
+}
+
+test('checkpoint: hide leans indie, comply confiscates loot, voucher passes clean', () => {
+  let { s, next } = runInto('baby', 'checkpoint');
+  moveTo(s, next.id, noRng);
+  assert.equal(s.run.phase, 'choice');
+  assert.equal(s.run.pending.options.find((o) => o.id === 'voucher').disabled, true);
+  choose(s, 'hide', noRng);
+  assert.equal(s.axes.allegiance, -1);
+
+  ({ s, next } = runInto('baby', 'checkpoint'));
+  s.run.loot = ['coolant'];
+  moveTo(s, next.id, noRng);
+  choose(s, 'comply', noRng);
+  assert.deepEqual(s.run.loot, []);
+  assert.equal(s.axes.allegiance, 1);
+
+  ({ s, next } = runInto('baby', 'checkpoint'));
+  s.inventory.push('voucher');
+  moveTo(s, next.id, noRng);
+  choose(s, 'voucher', noRng);
+  assert.deepEqual(s.inventory, []);
+});
+
+test('chrome and ghost pass checkpoints automatically', () => {
+  for (const form of ['chrome', 'ghost']) {
+    const { s, next } = runInto('adult', 'checkpoint');
+    s.form = form;
+    const res = moveTo(s, next.id, noRng);
+    assert.equal(res.auto, true);
+    assert.equal(s.run.phase, 'map');
+  }
+});
+
+test('market trades charge for an item', () => {
+  const { s, next } = runInto('baby', 'market');
+  moveTo(s, next.id, noRng);
+  const charge = s.stats.charge;
+  const offer = s.run.pending.offers[0];
+  choose(s, 'buy0', noRng);
+  assert.deepEqual(s.run.loot, [offer]);
+  assert.equal(s.stats.charge, charge - RUN_CFG.marketPrice);
+});
+
+test('anomalies resolve and stats stay in range', () => {
+  for (let seed = 1; seed <= 60; seed++) {
+    const { s, next } = runInto('baby', 'anomaly', seed);
+    moveTo(s, next.id, mulberry32(seed));
+    const opt = s.run.pending.options[seed % 2];
+    const res = choose(s, opt.id, mulberry32(seed));
+    assert.ok(res.ok, `seed ${seed}`);
+    for (const v of Object.values(s.stats)) assert.ok(v >= 0 && v <= 100, `seed ${seed}: stat out of range`);
+  }
+});
+
+test('firewall halves ICE damage; glitch phases through the first ICE', () => {
+  const { s: fw } = runInto('adult', 'ice');
+  fw.form = 'firewall';
+  fw.run.phase = 'ice';
+  const before = fw.stats.integrity;
+  resolveIce(fw, false, noRng);
+  assert.equal(before - fw.stats.integrity, Math.round(REGIONS.public.iceDamage * RUN_CFG.firewallIceMult));
+
+  const { s: gl, next } = runInto('adult', 'ice');
+  gl.form = 'glitch';
+  const res = moveTo(gl, next.id, noRng);
+  assert.equal(res.phased, true);
+  assert.equal(gl.run.phase, 'map');
+});
+
+test('daemon sees two steps ahead, ghost sees everything, a baby only adjacent nodes', () => {
+  const base = pet('baby');
+  startRun(base, 'public', mulberry32(4));
+  const adjacent = visibleNodeIds(base).size;
+  base.stage = 'adult';
+  base.form = 'daemon';
+  assert.ok(visibleNodeIds(base).size > adjacent);
+  base.form = 'ghost';
+  assert.equal(visibleNodeIds(base).size, base.run.map.nodes.length);
+});
+
+test('market offers are always two different items', () => {
+  for (let seed = 1; seed <= 100; seed++) {
+    const { s, next } = runInto('baby', 'market', seed);
+    moveTo(s, next.id, mulberry32(seed));
+    const [a, b] = s.run.pending.offers;
+    assert.notEqual(a, b, `seed ${seed}`);
   }
 });

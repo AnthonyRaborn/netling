@@ -2,6 +2,7 @@
 import { grantItem, isAlive, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
 import { REGIONS, regionOpen } from './regions.js';
+import { ANOMALIES } from './anomalies.js';
 
 export const RUN_CFG = {
   cooldownMin: 240,
@@ -18,7 +19,24 @@ export const RUN_CFG = {
   // Disconnection hurts but can't kill: it reboots to this Integrity and never deals the final care mistake.
   rebootIntegrity: 15,
   disconnectSync: 20,
+  hideCharge: 8,
+  hideHeat: 8,
+  hideCaughtChance: 0.25,
+  caughtDamage: 15,
+  complyDamage: 5,
+  marketPrice: 12,
+  firewallIceMult: 0.5,
 };
+
+// Adult form abilities, applied automatically.
+export const FORM_ABILITIES = {
+  chrome: 'Corp credentials: checkpoints wave it through.',
+  firewall: 'Hardened: ICE deals half damage.',
+  daemon: 'Lookahead: sees node types two steps ahead.',
+  glitch: 'Phase: slips through the first ICE of each run.',
+  ghost: 'Unseen: sees every node; checkpoints never notice it.',
+};
+const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
@@ -54,8 +72,10 @@ export function startRun(pet, region, rng) {
     pos: map.nodes[0].id,
     visited: [map.nodes[0].id],
     loot: [],
-    phase: 'map', // map | ice | relay | done
-    pending: null, // ice: { game }
+    phase: 'map', // map | ice | choice | done
+    pending: null, // ice: { game } | choice: { kind, title, text, options, ... }
+    revealed: [],
+    phased: false,
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
@@ -100,6 +120,11 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'cache', item: null };
     }
     case 'ice': {
+      if (ability(pet) === 'glitch' && !run.phased) {
+        run.phased = true;
+        note(run, 'glitched straight through the ICE.');
+        return { ok: true, kind: 'ice', phased: true };
+      }
       const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
       run.phase = 'ice';
       run.pending = { game };
@@ -108,9 +133,68 @@ export function moveTo(pet, nodeId, rng) {
     case 'relay': {
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
-      run.phase = 'relay';
       note(run, 'relay found. recharged and vented.');
+      openChoice(run, {
+        kind: 'relay',
+        title: 'RELAY',
+        text: 'recharged and vented. safe place to bank your loot.',
+        options: [
+          { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
+          { id: 'out', label: `JACK OUT (${run.loot.length})`, hint: 'bank loot, end run' },
+        ],
+      });
       return { ok: true, kind: 'relay' };
+    }
+    case 'checkpoint': {
+      const form = ability(pet);
+      if (form === 'chrome' || form === 'ghost') {
+        note(run, form === 'chrome' ? 'checkpoint: credentials accepted.' : 'checkpoint: it never saw you.');
+        return { ok: true, kind: 'checkpoint', auto: true };
+      }
+      const hasVoucher = pet.inventory.includes('voucher');
+      openChoice(run, {
+        kind: 'checkpoint',
+        title: 'CORP CHECKPOINT',
+        text: 'a scanner sweeps the node. identify yourself.',
+        options: [
+          { id: 'hide', label: 'HIDE', hint: `-${RUN_CFG.hideCharge} chg, may get scorched` },
+          { id: 'comply', label: 'COMPLY', hint: 'they may confiscate loot' },
+          { id: 'voucher', label: 'VOUCHER', hint: hasVoucher ? 'spend one, pass clean' : 'none in inventory', disabled: !hasVoucher },
+        ],
+      });
+      return { ok: true, kind: 'checkpoint' };
+    }
+    case 'market': {
+      const table = region.market ?? region.loot;
+      const offers = [weighted(table, rng)];
+      for (let i = 0; i < 10 && offers.length < 2; i++) {
+        const next = weighted(table, rng);
+        if (next !== offers[0]) offers.push(next);
+      }
+      const price = RUN_CFG.marketPrice;
+      const affordable = st.charge > price + 5;
+      openChoice(run, {
+        kind: 'market',
+        title: 'BLACK MARKET',
+        text: `a vendor process. ${price} charge per item.`,
+        offers,
+        options: [
+          ...offers.map((id, i) => ({ id: `buy${i}`, label: ITEMS[id].name.toUpperCase(), hint: `-${price} chg`, disabled: !affordable })),
+          { id: 'leave', label: 'LEAVE', hint: 'buy nothing' },
+        ],
+      });
+      return { ok: true, kind: 'market' };
+    }
+    case 'anomaly': {
+      const ev = ANOMALIES[Math.floor(rng() * ANOMALIES.length)];
+      openChoice(run, {
+        kind: 'anomaly',
+        event: ev.id,
+        title: ev.title,
+        text: ev.text,
+        options: ev.options.map(({ id, label, hint }) => ({ id, label, hint })),
+      });
+      return { ok: true, kind: 'anomaly', event: ev.id };
     }
     case 'exit': {
       const bonus = weighted(region.loot, rng);
@@ -138,20 +222,115 @@ export function resolveIce(pet, won, rng) {
     }
     return { ok: true, won };
   }
-  st.integrity = clamp(st.integrity - REGIONS[run.region].iceDamage);
+  const dmg = Math.round(REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1));
+  st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
-  note(run, `ICE bit back. -${REGIONS[run.region].iceDamage} integrity.`);
+  note(run, `ICE bit back. -${dmg} integrity.`);
   if (st.integrity <= 0) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
 }
 
-// Relay choice: 'continue' back to the map, or jack out.
-export function relayChoice(pet, choice) {
+function openChoice(run, pending) {
+  run.phase = 'choice';
+  run.pending = pending;
+}
+
+// Resolve the open choice node. Returns { ok, msg, result? }.
+export function choose(pet, optionId, rng) {
   const run = pet.run;
-  if (run.phase !== 'relay') return { ok: false };
-  if (choice === 'out') return jackOut(pet);
+  if (run.phase !== 'choice') return { ok: false, msg: 'nothing to choose.' };
+  const p = run.pending;
+  const opt = p.options.find((o) => o.id === optionId);
+  if (!opt || opt.disabled) return { ok: false, msg: 'not available.' };
+  const st = pet.stats;
   run.phase = 'map';
-  return { ok: true };
+  run.pending = null;
+  const region = REGIONS[run.region];
+  const lean = (a, b) => {
+    pet.axes.allegiance += a;
+    pet.axes.stability += b;
+  };
+  const loot = (fixed) => {
+    const item = fixed ?? weighted(region.loot, rng);
+    run.loot.push(item);
+    return `+${ITEMS[item].name}.`;
+  };
+  const hurt = (n, why) => {
+    st.integrity = clamp(st.integrity - n);
+    return `${why} -${n} integrity.`;
+  };
+  let msg = '';
+
+  if (p.kind === 'relay') {
+    if (optionId === 'out') return jackOut(pet);
+    return { ok: true };
+  }
+  if (p.kind === 'checkpoint') {
+    if (optionId === 'hide') {
+      st.charge = clamp(st.charge - RUN_CFG.hideCharge);
+      st.heat = clamp(st.heat + RUN_CFG.hideHeat);
+      lean(-1, 0);
+      msg = rng() < RUN_CFG.hideCaughtChance ? hurt(RUN_CFG.caughtDamage, 'slipped past, but got scorched.') : 'slipped past the scanner.';
+    } else if (optionId === 'comply') {
+      lean(1, 0);
+      if (run.loot.length) {
+        const taken = run.loot.splice(Math.floor(rng() * run.loot.length), 1)[0];
+        msg = `scanned. confiscated: ${ITEMS[taken].name}.`;
+      } else {
+        msg = `scanned. ${hurt(RUN_CFG.complyDamage, 'invasive probe.')}`;
+      }
+    } else {
+      pet.inventory.splice(pet.inventory.indexOf('voucher'), 1);
+      lean(1, 0);
+      msg = 'voucher accepted. waved through.';
+    }
+  } else if (p.kind === 'market') {
+    if (optionId === 'leave') {
+      msg = 'left the market.';
+    } else {
+      const item = p.offers[Number(optionId.slice(3))];
+      st.charge = clamp(st.charge - RUN_CFG.marketPrice);
+      run.loot.push(item);
+      lean(-0.5, 0);
+      msg = `bought ${ITEMS[item].name}.`;
+    }
+  } else if (p.kind === 'anomaly') {
+    const ev = ANOMALIES.find((e) => e.id === p.event);
+    const reveal = (depth) => {
+      for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
+    };
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal });
+    st.charge = clamp(st.charge);
+    st.heat = clamp(st.heat);
+    st.sync = clamp(st.sync);
+  }
+  note(run, msg);
+  if (st.integrity <= 0) return disconnect(pet, 'integrity collapsed mid-run.');
+  if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
+  return { ok: true, msg };
+}
+
+// Kept for older callers: relay decisions go through choose().
+export const relayChoice = (pet, choice) => choose(pet, choice === 'out' ? 'out' : 'continue');
+
+function nodesWithin(run, fromId, depth) {
+  let frontier = [fromId];
+  const out = new Set();
+  for (let d = 0; d < depth; d++) {
+    frontier = frontier.flatMap((id) => nodeById(run.map, id).edges);
+    frontier.forEach((id) => out.add(id));
+  }
+  return [...out];
+}
+
+// Which node types the player can see: visited, adjacent, revealed, plus form sight.
+export function visibleNodeIds(pet) {
+  const run = pet.run;
+  const ids = new Set([...run.visited, ...run.revealed, ...nodeById(run.map, run.pos).edges]);
+  const form = ability(pet);
+  if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
+  if (form === 'daemon') nodesWithin(run, run.pos, 2).forEach((id) => ids.add(id));
+  return ids;
 }
 
 function endRun(pet, result) {

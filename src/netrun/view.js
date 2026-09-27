@@ -4,17 +4,29 @@ import { GameSession } from '../games/session.js';
 import { clear, text, DIM, W, H } from '../games/common.js';
 import { nodeById } from './map.js';
 import { REGIONS } from './regions.js';
-import { moveTo, resolveIce, relayChoice, abortRun, closeRun, runOptions, RUN_CFG } from './run.js';
+import { moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, RUN_CFG } from './run.js';
 import { ITEMS } from '../sim.js';
 
 const MAP_TOP = 24;
 const MAP_BOTTOM = 212;
-const TYPE_LABEL = { entry: 'ENTRY', cache: 'DATA CACHE', ice: 'ICE', relay: 'RELAY', exit: 'EXIT NODE' };
+const TYPE_LABEL = {
+  entry: 'ENTRY',
+  cache: 'DATA CACHE',
+  ice: 'ICE',
+  relay: 'RELAY',
+  exit: 'EXIT NODE',
+  checkpoint: 'CHECKPOINT',
+  market: 'MARKET',
+  anomaly: 'ANOMALY',
+};
 const TYPE_HINT = {
   cache: 'might hold an item.',
   ice: 'a mini-game. lose and it bites.',
   relay: 'recharge, vent heat, safe jack-out.',
   exit: 'bank everything + a bonus.',
+  checkpoint: 'corp scan. hide, comply, or pay.',
+  market: 'spend charge on items.',
+  anomaly: 'something strange. choose wisely.',
 };
 
 export class RunView {
@@ -25,7 +37,7 @@ export class RunView {
     this.onChange = onChange;
     this.onClose = onClose;
     this.cursor = 0;
-    this.relayCursor = 0;
+    this.choiceCursor = 0;
     this.toast = null;
     this.abortArmed = 0;
     this.game = null;
@@ -82,13 +94,17 @@ export class RunView {
       if (key === 'a') this.close();
       return;
     }
-    if (run.phase === 'relay') {
+    if (run.phase === 'choice') {
+      const opts = run.pending.options;
       if (key === 'left' || key === 'right') {
-        this.relayCursor = 1 - this.relayCursor;
+        this.choiceCursor = (this.choiceCursor + (key === 'left' ? opts.length - 1 : 1)) % opts.length;
         this.sound('move');
       } else if (key === 'a') {
-        relayChoice(this.pet, this.relayCursor === 0 ? 'continue' : 'out');
-        this.sound(this.relayCursor === 0 ? 'select' : 'win');
+        const opt = opts[this.choiceCursor];
+        if (opt.disabled) return this.sound('error');
+        const res = choose(this.pet, opt.id, this.rng);
+        this.sound(res.result === 'disconnected' ? 'lose' : res.result === 'jacked' ? 'win' : 'select');
+        this.choiceCursor = 0;
         this.afterAction();
       }
       return;
@@ -107,6 +123,8 @@ export class RunView {
         this.sound('lose');
       } else if (res.kind === 'exit') {
         this.sound('win');
+      } else if (res.kind === 'relay' || this.run.phase === 'choice') {
+        this.sound('alert');
       } else {
         this.sound(res.item ? 'feed' : 'select');
       }
@@ -148,7 +166,7 @@ export class RunView {
     const map = run.map;
     const opts = run.phase === 'map' ? this.options() : [];
     const nodePal = REGIONS[run.region].palette; // node colors stay fixed so types read at a glance
-    const visible = new Set([...run.visited, ...opts.map((n) => n.id)]);
+    const visible = visibleNodeIds(this.pet);
 
     // edges
     for (const n of map.nodes) {
@@ -194,21 +212,33 @@ export class RunView {
     ctx.fillStyle = 'rgba(3, 9, 10, 0.85)';
     ctx.fillRect(0, MAP_BOTTOM + 8, W, H - MAP_BOTTOM - 8);
     const toast = this.toast && performance.now() < this.toast.until ? this.toast.msg : null;
-    if (run.phase === 'relay') {
-      text(ctx, 'RELAY: recharged and vented.', 12, 234, { size: 20, color: '#39ff14' });
-      const labels = ['CONTINUE', `JACK OUT (${run.loot.length})`];
-      labels.forEach((l, i) => {
-        const on = i === this.relayCursor;
-        text(ctx, on ? `[${l}]` : ` ${l} `, 12 + i * 150, 258, { size: 22, color: on ? '#f9f002' : DIM });
-      });
-    } else if (toast) {
+    if (run.phase === 'choice') this.drawChoice(ctx, pal);
+    else if (toast) {
       text(ctx, toast.length > 46 ? `${toast.slice(0, 45)}…` : toast, 12, 234, { size: 20, color: '#f9f002' });
     } else if (sel) {
       text(ctx, `> ${TYPE_LABEL[sel.type]}`, 12, 234, { size: 22, color: '#c7f9ff' });
       text(ctx, TYPE_HINT[sel.type] ?? '', 150, 234, { size: 18, color: DIM });
     }
-    if (run.phase !== 'relay') this.drawHud(ctx, pal);
+    this.drawHud(ctx, pal);
     text(ctx, REGIONS[run.region].name.toUpperCase(), 12, 12, { size: 18, color: DIM });
+  }
+
+  drawChoice(ctx, pal) {
+    const p = this.run.pending;
+    ctx.fillStyle = 'rgba(3, 9, 10, 0.92)';
+    ctx.fillRect(28, 30, W - 56, 176);
+    ctx.strokeStyle = '#f9f002';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(28.5, 30.5, W - 57, 175);
+    text(ctx, p.title, 44, 52, { size: 26, color: '#f9f002', glow: '#f9f002' });
+    text(ctx, p.text.length > 44 ? `${p.text.slice(0, 43)}…` : p.text, 44, 78, { size: 18, color: DIM });
+    p.options.forEach((o, i) => {
+      const on = i === this.choiceCursor;
+      const color = o.disabled ? '#2f4f54' : on ? '#f9f002' : '#c7f9ff';
+      text(ctx, `${on ? '>' : ' '} ${o.label}`, 44, 108 + i * 26, { size: 22, color });
+    });
+    const sel = p.options[this.choiceCursor];
+    text(ctx, sel?.hint ?? '', 12, 234, { size: 18, color: sel?.disabled ? '#2f4f54' : '#c7f9ff' });
   }
 
   drawHud(ctx, pal) {
@@ -285,6 +315,26 @@ function drawNode(ctx, type, x, y, pal, spent) {
       ctx.stroke();
       ctx.fillStyle = '#39ff14';
       ctx.fillRect(x - 1, y - 5, 2, 10);
+      break;
+    case 'checkpoint':
+      ctx.fillStyle = '#f9f002';
+      ctx.fillRect(x - 8, y - 8, 16, 3);
+      ctx.fillRect(x - 8, y + 5, 16, 3);
+      ctx.fillRect(x - 2, y - 3, 4, 6);
+      break;
+    case 'market':
+      ctx.strokeStyle = '#b967ff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 8, y - 6, 16, 12);
+      ctx.fillStyle = '#b967ff';
+      ctx.fillRect(x - 3, y - 10, 6, 4);
+      break;
+    case 'anomaly':
+      ctx.font = "22px 'VT323', monospace";
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('?', x, y);
       break;
     case 'exit':
       ctx.strokeStyle = '#f9f002';

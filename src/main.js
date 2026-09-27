@@ -464,6 +464,7 @@ function renderArchive() {
         [
           e.text,
           e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null,
+          e.runAbility ? { cls: 'perk', text: `netrun: ${e.runAbility}` } : null,
           e.trait ? `fragment: ${e.trait}${e.keepsake ? ` + ${e.keepsake}` : ''}` : null,
         ],
         e.found ? '' : 'locked',
