@@ -72,6 +72,20 @@ export const REGIONS = {
   },
 };
 
+// The first-run tutorial: a fixed, gentle map inside the Public Net. Not in the region picker.
+REGIONS.tutorial = {
+  ...REGIONS.public,
+  name: 'Public Net',
+  tutorial: true,
+  codexRegion: 'public', // its exit hands over the first Public Net fragment
+  iceDamage: 10,
+  loot: { coolant: 1 },
+  cacheFind: 1,
+  exitFragment: 1,
+  noStyleDrops: true, // the party hat should be the first accessory
+  noCooldown: true,
+};
+
 export const REGION_ORDER = ['public', 'corp', 'bazaar', 'ruins', 'deep'];
 export const STAGE_ORDER = ['baby', 'teen', 'adult'];
 

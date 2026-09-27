@@ -68,6 +68,7 @@ export function runCooldownLeft(pet) {
 export function runBlockReason(pet, region = 'public', codex = []) {
   if (!isAlive(pet)) return pet.stage === 'script' ? 'still compiling...' : 'no signal.';
   if (pet.run) return null; // resuming
+  if (REGIONS[region].tutorial) return null; // the first run is always allowed
   if (pet.asleep) return 'in low-power mode.';
   const lock = regionLock(region, pet.stage, codex);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
@@ -110,6 +111,7 @@ function note(run, msg) {
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
 function takeAccessory(run, rng) {
+  if (REGIONS[run.region].noStyleDrops) return '';
   const id = rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region);
   if (!id) return '';
   run.accessories.push(id);
@@ -117,7 +119,7 @@ function takeAccessory(run, rng) {
 }
 
 function takeFragment(run) {
-  const id = nextFragment(run.region, [...run.known, ...run.fragments]);
+  const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
   if (!id) return '';
   run.fragments.push(id);
   return ` codex fragment: "${fragmentById(id).title}".`;
@@ -146,7 +148,7 @@ export function moveTo(pet, nodeId, rng) {
   switch (node.type) {
     case 'cache': {
       const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(run) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
-      if (rng() < RUN_CFG.cacheFindChance) {
+      if (rng() < (region.cacheFind ?? RUN_CFG.cacheFindChance)) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
         note(run, `cache cracked: ${ITEMS[item].name}.${frag}`);
@@ -247,7 +249,7 @@ export function moveTo(pet, nodeId, rng) {
     case 'exit': {
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
-      const frag = (rng() < RUN_CFG.exitFragmentChance ? takeFragment(run) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
+      const frag = (rng() < (region.exitFragment ?? RUN_CFG.exitFragmentChance) ? takeFragment(run) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
       note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}.${frag}`);
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
@@ -393,7 +395,7 @@ function endRun(pet, result) {
   const run = pet.run;
   run.phase = 'done';
   run.result = result;
-  pet.lastRunEndAge = pet.ageMin;
+  if (!REGIONS[run.region].noCooldown) pet.lastRunEndAge = pet.ageMin;
   pet.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   pet.runStats.runs++;
   pet.runStats[result]++;

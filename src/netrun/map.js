@@ -8,7 +8,15 @@ function weighted(table, rng) {
   return entries[entries.length - 1][0];
 }
 
+// Fixed tutorial path: entry -> cache -> ICE -> relay -> exit.
+function tutorialMap() {
+  const types = ['entry', 'cache', 'ice', 'relay', 'exit'];
+  const nodes = types.map((type, i) => ({ id: i, layer: i, type, edges: i < types.length - 1 ? [i + 1] : [] }));
+  return { region: 'tutorial', nodes, layerCount: nodes.length };
+}
+
 export function generateMap(regionId, rng) {
+  if (regionId === 'tutorial') return tutorialMap();
   const region = REGIONS[regionId];
   const layers = [];
   let id = 0;

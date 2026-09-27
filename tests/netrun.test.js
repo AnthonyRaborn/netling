@@ -326,3 +326,26 @@ test('accessories are lost on disconnect, and nothing is offered once all are ow
   moveTo(t, next.id, () => 0); // every chance fires
   assert.equal(t.run.pending.accOffer, null);
 });
+
+test('the tutorial run is fixed, gentle, gives an item and the first fragment, and leaves no cooldown', () => {
+  const s = pet('baby');
+  s.asleep = true;
+  s.stats.charge = 10;
+  assert.equal(runBlockReason(s, 'tutorial'), null, 'allowed even asleep and low');
+  s.stats.charge = 70;
+  startRun(s, 'tutorial', mulberry32(1));
+  assert.deepEqual(s.run.map.nodes.map((n) => n.type), ['entry', 'cache', 'ice', 'relay', 'exit']);
+  moveTo(s, 1, noRng); // cache: guaranteed item
+  assert.deepEqual(s.run.loot, ['coolant']);
+  moveTo(s, 2, noRng);
+  const before = s.stats.integrity;
+  resolveIce(s, false, noRng);
+  assert.equal(before - s.stats.integrity, REGIONS.tutorial.iceDamage);
+  moveTo(s, 3, noRng);
+  choose(s, 'continue', noRng);
+  const res = moveTo(s, 4, noRng);
+  assert.equal(res.result, 'jacked');
+  assert.deepEqual(s.codexInbox, ['public-1']);
+  assert.equal(s.lastRunEndAge, null, 'no cooldown after the tutorial');
+  assert.equal(s.accessoryInbox.length, 0, 'no style drops before the party hat');
+});

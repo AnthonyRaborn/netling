@@ -139,7 +139,7 @@ function nextNotice() {
 // Saves from before these items existed get what they've already earned.
 function backfillEarned() {
   const lineage = store.get(LINEAGE_KEY) ?? [];
-  if (state.stage !== 'script' || lineage.length) grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
+  if (onboarding === 'done' && (state.stage !== 'script' || lineage.length)) grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
   if (lineage.length) grantStyle('plush', 'a keepsake: a plush of your last netling.');
   if (state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
 }
@@ -188,10 +188,7 @@ function save() {
 function advance() {
   tick(state, now());
   if (state.stage !== lastStage) {
-    if (state.stage === 'baby') {
-      sfx('boot', state.quirk.pitch);
-      grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
-    }
+    if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
     if (state.stage === 'teen' || state.stage === 'adult') {
       flashUntil = performance.now() + 2400;
       sfx('evolve', state.quirk.pitch);
@@ -243,6 +240,7 @@ function updateHUD() {
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   renderInventory();
+  renderNudge();
   const traceLeft = traceMinutesLeft(state);
   $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
   $('event-timer').textContent = `${traceLeft}m`;
@@ -366,6 +364,7 @@ function openRun() {
     onGame: () => countGame(),
     onClose: (run) => {
       session = null;
+      if (run?.region === 'tutorial') finishOnboarding();
       if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
       if (run?.result === 'jacked') {
         if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
@@ -431,6 +430,7 @@ $('btn-netrun').addEventListener('click', () => {
   unlockAudio();
   tick(state, now());
   if (state.run) return openRun(); // resume
+  if (onboarding === 'nudge') return startTutorial();
   const blocked = runBlockReason(state, 'public', codex);
   if (blocked) {
     sfx('error', state.quirk.pitch);
@@ -470,6 +470,10 @@ $('pad-quit').addEventListener('click', () => session?.forfeit());
 
 const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ' ': 'a', Enter: 'a', z: 'a', x: 'a' };
 document.addEventListener('keydown', (e) => {
+  if (onboarding === 'intro' && !$('intro').hidden && [' ', 'Enter', 'z', 'x'].includes(e.key)) {
+    e.preventDefault();
+    return advanceIntro();
+  }
   if (!session) return;
   if (e.key === 'Escape') return session.forfeit();
   const key = KEYMAP[e.key];
@@ -809,16 +813,129 @@ function renderHelp() {
   $('help-body').replaceChildren(tip, ...body);
 }
 
-function openHelp() {
+function openHelp({ readme = false } = {}) {
   renderHelp();
+  $('help-title').textContent = readme ? 'FIELD_MANUAL.txt' : 'FIELD MANUAL';
+  if (readme) {
+    const p = document.createElement('p');
+    p.textContent = '// unpacked from netling.v1.0.sh. you just compiled something alive. keep it that way.';
+    $('help-body').prepend(p);
+  }
   $('help').showModal();
   store.set(HELP_KEY, true);
 }
-$('open-help').addEventListener('click', openHelp);
+$('open-help').addEventListener('click', () => openHelp());
 $('close-help').addEventListener('click', () => $('help').close());
 $('help').addEventListener('click', (e) => {
   if (e.target === $('help')) $('help').close();
 });
+
+// --- onboarding -------------------------------------------------------------------
+// intro (terminal) -> readme (field manual) -> nudge (go explore) -> tutorial (first run) -> done
+
+const ONBOARD_KEY = 'netling.onboarding';
+let onboarding = store.get(ONBOARD_KEY) ?? (firstLaunch ? 'intro' : 'done');
+
+function setOnboarding(step) {
+  onboarding = step;
+  store.set(ONBOARD_KEY, step);
+  renderNudge();
+}
+
+const INTRO_LINES = [
+  ['runner@sprawl:~$ ls /mnt/sector7f', ''],
+  ['cleanup.sh   netling.v1.0.sh   notes.txt', ''],
+  ['runner@sprawl:~$ ./', ''],
+  ['  [tab]', ''],
+  ['runner@sprawl:~$ ./netling.v1.0.sh', 'hl'],
+  ['', ''],
+  ["...that wasn't cleanup.sh.", 'warn'],
+  ['', ''],
+  ['> compiling netling.v1.0 ...', 'hl'],
+  ['> unpacking FIELD_MANUAL.txt', ''],
+];
+let introTimer = null;
+let introShown = 0;
+
+function startIntro() {
+  introShown = 0;
+  document.body.classList.add('intro-active');
+  $('intro').hidden = false;
+  $('intro-next').hidden = true;
+  $('intro-text').replaceChildren();
+  typeNextLine();
+}
+
+function typeNextLine() {
+  if (introShown >= INTRO_LINES.length) {
+    $('intro-next').hidden = false;
+    return;
+  }
+  const [line, cls] = INTRO_LINES[introShown++];
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = `${line}\n`;
+  $('intro-text').append(span);
+  sfx('move', 520);
+  introTimer = setTimeout(typeNextLine, line ? 520 : 260);
+}
+
+function advanceIntro() {
+  if (onboarding !== 'intro') return;
+  unlockAudio();
+  if (introShown < INTRO_LINES.length) {
+    // tap skips the typing
+    clearTimeout(introTimer);
+    while (introShown < INTRO_LINES.length) typeNextLine();
+    clearTimeout(introTimer);
+    return;
+  }
+  $('intro').hidden = true;
+  document.body.classList.remove('intro-active');
+  // The script compiles for real: a fresh netling that boots on the next tick.
+  state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: codexComplete() });
+  lastStage = state.stage;
+  lastLogLen = 0;
+  save();
+  advance();
+  setOnboarding('readme');
+  setTimeout(() => openHelp({ readme: true }), 700);
+}
+$('intro').addEventListener('click', advanceIntro);
+
+$('help').addEventListener('close', () => {
+  if (onboarding === 'readme') {
+    setOnboarding('nudge');
+    sfx('alert', state.quirk.pitch);
+  }
+});
+
+// The netling asks to go exploring; NETRUN glows until the first run.
+function renderNudge() {
+  const nudging = onboarding === 'nudge' && isAlive(state) && !session;
+  $('speech').hidden = !nudging;
+  if (nudging) $('speech').textContent = 'the net is out there... take me?';
+  $('btn-netrun').classList.toggle('nudge', nudging);
+}
+
+function startTutorial() {
+  startRun(state, 'tutorial', Math.random, codex, ownedAccessories);
+  setOnboarding('tutorial');
+  sfx('boot', state.quirk.pitch);
+  save();
+  openRun();
+}
+
+function finishOnboarding() {
+  setOnboarding('done');
+  if (!ownedAccessories.includes('partyhat')) {
+    grantStyle('partyhat', 'a gift: party hat. accessories live in ARCHIVE > STYLE.');
+    wardrobe = { ...wardrobe, accessory: 'partyhat' };
+    store.set(WARDROBE_KEY, wardrobe);
+  }
+  $('open-archive').classList.add('nudge');
+  setTimeout(() => $('open-archive').classList.remove('nudge'), 9000);
+}
 
 // --- NL-0 ------------------------------------------------------------------------
 
@@ -1047,6 +1164,8 @@ if (DEV) {
     overlay.hidden = true;
     save();
     updateHUD();
+    setOnboarding('intro');
+    startIntro();
   });
 }
 
@@ -1056,7 +1175,9 @@ document.addEventListener('visibilitychange', () => {
 
 checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
-if (firstLaunch && !store.get(HELP_KEY)) setTimeout(openHelp, 1200); // after the CRT power-on
+store.set(ONBOARD_KEY, onboarding);
+if (onboarding === 'intro') startIntro();
+else if (onboarding === 'readme') setTimeout(() => openHelp({ readme: true }), 700);
 let plushCache = plushExtra();
 advance();
 drainCodexInbox();

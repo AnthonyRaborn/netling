@@ -12,7 +12,7 @@ npm test             # simulation + mini-game logic
 npm run balance      # simulate hundreds of lifetimes per player archetype (DETAIL=1 for more)
 ```
 
-Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. `gallery.html` shows every sprite.
+New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. RESET replays the onboarding. `gallery.html` shows every sprite.
 
 ## Install / offline
 

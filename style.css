@@ -798,6 +798,77 @@ button:active {
   border-color: #b967ff;
 }
 
+/* --- onboarding ------------------------------------------------------------------ */
+
+.intro {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #03090a;
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.intro pre {
+  margin: 0;
+  flex: 1;
+  font: inherit;
+  font-size: 17px;
+  line-height: 1.25;
+  color: #6fd6e0;
+  white-space: pre-wrap;
+}
+
+.intro .hl {
+  color: var(--yellow);
+}
+
+.intro .warn {
+  color: var(--magenta);
+}
+
+.intro-next {
+  margin: 0;
+  color: var(--yellow);
+  text-align: right;
+  animation: flicker 1.2s infinite;
+}
+
+/* while the intro terminal runs, only the screen is live */
+body.intro-active .device > :not(.screen):not(.brand),
+body.intro-active .brand .prefs {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.speech {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 86%;
+  padding: 4px 10px;
+  background: rgba(3, 9, 10, 0.9);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-size: 17px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.nudge {
+  animation: nudge 1s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  50% {
+    box-shadow: 0 0 16px rgba(249, 240, 2, 0.8);
+    background: rgba(249, 240, 2, 0.15);
+  }
+}
+
 /* --- field manual ------------------------------------------------------------ */
 
 .help-body {

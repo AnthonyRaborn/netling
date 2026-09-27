@@ -21,6 +21,15 @@ const TYPE_LABEL = {
   market: 'MARKET',
   anomaly: 'ANOMALY',
 };
+// First-run captions, keyed by the node the cursor is on (or the open choice).
+const TUTORIAL_TIPS = {
+  cache: ['moves cost charge. ◀ ▶ picks a node, A moves.', 'caches can hold items. this one does.'],
+  ice: ['ICE guards the net. beat the mini-game,', 'or it bites into integrity.'],
+  relay: ['relays recharge and cool you down.', 'you can bank your loot here, or push on.'],
+  exit: ['the exit banks everything you found,', 'plus a bonus. take it home.'],
+  relayChoice: ['CONTINUE to reach the exit.', 'JACK OUT would end the run safely here.'],
+};
+
 const TYPE_HINT = {
   cache: 'might hold an item.',
   ice: 'a mini-game. lose and it bites.',
@@ -218,6 +227,7 @@ export class RunView {
     ctx.fillStyle = 'rgba(3, 9, 10, 0.85)';
     ctx.fillRect(0, MAP_BOTTOM + 8, W, H - MAP_BOTTOM - 8);
     const toast = this.toast && performance.now() < this.toast.until ? this.toast.msg : null;
+    const tutorial = REGIONS[run.region].tutorial;
     if (run.phase === 'choice') this.drawChoice(ctx, pal);
     else if (toast) {
       text(ctx, toast.length > 46 ? `${toast.slice(0, 45)}…` : toast, 12, 234, { size: 20, color: '#f9f002' });
@@ -227,6 +237,20 @@ export class RunView {
     }
     this.drawHud(ctx, pal);
     text(ctx, REGIONS[run.region].name.toUpperCase(), 12, 12, { size: 18, color: DIM });
+    if (tutorial) this.drawTutorialTip(ctx, sel, toast);
+  }
+
+  drawTutorialTip(ctx, sel, toast) {
+    const run = this.run;
+    const tip = run.phase === 'choice' && run.pending.kind === 'relay' ? TUTORIAL_TIPS.relayChoice : sel && !toast ? TUTORIAL_TIPS[sel.type] : null;
+    if (!tip) return;
+    const top = run.phase === 'choice' ? 170 : 150;
+    ctx.fillStyle = 'rgba(3, 9, 10, 0.88)';
+    ctx.fillRect(16, top, W - 32, 50);
+    ctx.strokeStyle = '#f9f002';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(16.5, top + 0.5, W - 33, 49);
+    tip.forEach((line, i) => text(ctx, line, 26, top + 15 + i * 20, { size: 18, color: '#f9f002' }));
   }
 
   drawChoice(ctx, pal) {
