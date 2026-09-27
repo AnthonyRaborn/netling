@@ -49,7 +49,9 @@ function fromBase64Url(text) {
 // data: { key: parsedValue } for TRANSFER_KEYS.
 export async function encodeSave(data, exportedAt = Date.now()) {
   const payload = { v: 1, exportedAt, data: Object.fromEntries(TRANSFER_KEYS.filter((k) => data[k] !== undefined).map((k) => [k, data[k]])) };
-  const json = new TextEncoder().encode(JSON.stringify(payload));
+  // Fractional values (stats, axes) are rounded: long float tails barely compress and don't matter.
+  const round = (k, v) => (typeof v === 'number' && !Number.isInteger(v) ? Math.round(v * 100) / 100 : v);
+  const json = new TextEncoder().encode(JSON.stringify(payload, round));
   const packed = await pipe(json, new CompressionStream('deflate-raw'));
   return `${PREFIX}.${toBase64Url(packed)}.${crc32(json)}`;
 }

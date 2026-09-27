@@ -9,6 +9,10 @@ import {
   alertReason,
   bedtimeHour,
   itemBlockReason,
+  hibernate,
+  wake,
+  hibernateBlockReason,
+  wakeAvailableAt,
   ITEMS,
   INVENTORY_SLOTS,
   CFG,
@@ -27,6 +31,7 @@ import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
 import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from './transfer.js';
+import { encodeQR, drawQR } from './qr.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
@@ -183,13 +188,16 @@ function recordForm() {
 setMuted(!prefs.sound);
 
 let importing = false; // stops autosave from overwriting an import before the reload
+const LOCK_KEY = 'netling.lock';
+let lock = store.get(LOCK_KEY); // { code, at, generation } while the netling is on another device
 
 function save() {
-  if (importing) return;
+  if (importing || lock) return;
   store.set(SAVE_KEY, state);
 }
 
 function advance() {
+  if (lock) return; // the netling is on another device
   tick(state, now());
   if (state.stage !== lastStage) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
@@ -245,6 +253,7 @@ function updateHUD() {
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   renderInventory();
   renderNudge();
+  renderHibernation();
   const traceLeft = traceMinutesLeft(state);
   $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
   $('event-timer').textContent = `${traceLeft}m`;
@@ -981,53 +990,119 @@ function finishOnboarding() {
   setTimeout(() => $('open-archive').classList.remove('nudge'), 9000);
 }
 
-// --- save / load -------------------------------------------------------------------
+// --- system: transfer, import, hibernate, restart ------------------------------------------
 
 const transfer = $('transfer');
 let pendingImport = null;
 
+// Only the recent log travels: it's most of the payload, and a smaller code means a sparser QR.
+const EXPORT_LOG_LINES = 10;
+
 function collectData() {
   save();
-  return Object.fromEntries(TRANSFER_KEYS.map((k) => [k, store.get(`netling.${k}`)]).filter(([, v]) => v !== null && v !== undefined));
+  const data = Object.fromEntries(TRANSFER_KEYS.map((k) => [k, store.get(`netling.${k}`)]).filter(([, v]) => v !== null && v !== undefined));
+  if (data.save?.log) data.save = { ...data.save, log: data.save.log.slice(-EXPORT_LOG_LINES) };
+  return data;
 }
 
-$('open-transfer').addEventListener('click', () => {
+const importUrl = (code) => `${location.origin}${location.pathname}#import=${code}`;
+
+function openSystem() {
   archive.close();
   $('import-preview').hidden = true;
+  renderHibernateNote();
   transfer.showModal();
-});
+}
+$('open-transfer').addEventListener('click', openSystem);
 $('close-transfer').addEventListener('click', () => transfer.close());
 
-$('make-code').addEventListener('click', async () => {
-  const code = await encodeSave(collectData());
-  $('export-code').value = code;
-  $('copy-code').disabled = false;
-  $('download-code').disabled = false;
-  sfx('select', state.quirk.pitch);
-});
-
-$('copy-code').addEventListener('click', async () => {
-  const box = $('export-code');
-  try {
-    await navigator.clipboard.writeText(box.value);
-    $('copy-code').textContent = 'COPIED';
-  } catch {
-    // Clipboard can be blocked; leave the code selected so it can be copied by hand.
-    box.select();
-    $('copy-code').textContent = 'SELECTED: COPY IT';
+// --- transfer out: export and lock ---
+$('transfer-out').addEventListener('click', async () => {
+  const btn = $('transfer-out');
+  if (btn.dataset.armed !== '1') {
+    btn.dataset.armed = '1';
+    btn.textContent = 'CONFIRM: LOCK THIS DEVICE';
+    setTimeout(() => {
+      btn.dataset.armed = '';
+      btn.textContent = 'TRANSFER OUT';
+    }, 4000);
+    return;
   }
-  setTimeout(() => ($('copy-code').textContent = 'COPY'), 2000);
+  const code = await encodeSave(collectData());
+  lock = { code, at: Date.now(), generation: state.generation };
+  store.set(LOCK_KEY, lock);
+  transfer.close();
+  sfx('patch', state.quirk.pitch);
+  showLock();
 });
 
-$('download-code').addEventListener('click', () => {
-  const blob = new Blob([$('export-code').value], { type: 'text/plain' });
+function showLock() {
+  document.body.classList.add('locked');
+  $('lock').hidden = false;
+  $('lock-note').textContent = `netling.v${lock.generation}.0 left this device on ${new Date(lock.at).toLocaleString()}. Load it on the other device.`;
+  $('lock-code').value = lock.code;
+  try {
+    drawQR($('lock-qr'), encodeQR(importUrl(lock.code)), 3);
+    $('lock-qr').hidden = false;
+  } catch {
+    $('lock-qr').hidden = true; // too big for a QR; the code still works
+  }
+}
+
+$('lock-copy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(lock.code);
+    $('lock-copy').textContent = 'COPIED';
+  } catch {
+    $('lock-code').select();
+    $('lock-copy').textContent = 'SELECTED: COPY IT';
+  }
+  setTimeout(() => ($('lock-copy').textContent = 'COPY CODE'), 2000);
+});
+
+$('lock-download').addEventListener('click', () => {
+  const blob = new Blob([lock.code], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `netling-v${state.generation}-${new Date().toISOString().slice(0, 10)}.txt`;
+  a.download = `netling-v${lock.generation}-${new Date(lock.at).toISOString().slice(0, 10)}.txt`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 
+// Re-export: the same code again (nothing changed while locked), redrawn fresh.
+$('lock-reexport').addEventListener('click', () => {
+  showLock();
+  sfx('select', 660);
+});
+
+// Reload: bring a code here (this device's own, or another).
+$('lock-reload').addEventListener('click', () => {
+  $('import-code').value = lock.code;
+  openSystem();
+  checkImport();
+});
+
+$('lock-restart').addEventListener('click', () => restartEverything($('lock-restart')));
+$('restart-btn').addEventListener('click', () => restartEverything($('restart-btn')));
+
+// Two presses, a few seconds apart at most, then everything is wiped.
+function restartEverything(btn) {
+  if (btn.dataset.armed !== '1') {
+    btn.dataset.armed = '1';
+    const label = btn.textContent;
+    btn.textContent = 'PRESS AGAIN TO ERASE ALL';
+    setTimeout(() => {
+      btn.dataset.armed = '';
+      btn.textContent = label;
+    }, 4000);
+    return;
+  }
+  importing = true;
+  for (const k of Object.keys(localStorage)) if (k.startsWith('netling.')) localStorage.removeItem(k);
+  location.replace(location.pathname + location.search);
+}
+
+// --- bring one here ---
 $('import-file').addEventListener('change', async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -1042,13 +1117,16 @@ async function checkImport() {
   const box = $('import-preview');
   box.hidden = false;
   box.className = 'tx-preview';
+  const raw = $('import-code').value.trim();
+  // Accept a pasted QR link as well as a bare code.
+  const code = raw.includes('#import=') ? decodeURIComponent(raw.split('#import=')[1]) : raw;
   try {
-    pendingImport = await decodeSave($('import-code').value);
+    pendingImport = await decodeSave(code);
   } catch (err) {
     pendingImport = null;
     box.className = 'tx-preview error';
     box.textContent = err.message ?? 'could not read that code.';
-    sfx('error', state.quirk.pitch);
+    sfx('error', 660);
     return;
   }
   const info = describeSave(pendingImport);
@@ -1069,11 +1147,13 @@ async function checkImport() {
   }
   const warn = document.createElement('p');
   warn.className = 'tx-note';
-  warn.textContent = 'Loading replaces everything on this device. Make a code for this one first if you want to keep it.';
+  warn.textContent = lock
+    ? 'Loading unlocks this device with the netling in this code.'
+    : 'Loading replaces everything on this device. Transfer this one out first if you want to keep it.';
   const go = document.createElement('button');
   go.type = 'button';
-  go.className = 'danger';
-  go.textContent = 'REPLACE THIS DEVICE';
+  go.className = 'danger-btn';
+  go.textContent = lock ? 'LOAD AND UNLOCK' : 'REPLACE THIS DEVICE';
   go.addEventListener('click', applyImport);
   box.replaceChildren(dl, warn, go);
 }
@@ -1086,8 +1166,68 @@ function applyImport() {
     if (v === undefined) localStorage.removeItem(`netling.${k}`);
     else store.set(`netling.${k}`, v);
   }
+  localStorage.removeItem(LOCK_KEY);
   store.set(SKEW_KEY, 0);
-  location.reload();
+  location.replace(location.pathname + location.search);
+}
+
+// A scanned QR opens the game with #import=<code>: go straight to the import preview.
+function importFromUrl() {
+  if (!location.hash.startsWith('#import=')) return;
+  const code = decodeURIComponent(location.hash.slice('#import='.length));
+  history.replaceState(null, '', location.pathname + location.search);
+  $('import-code').value = code;
+  openSystem();
+  checkImport();
+}
+
+// --- hibernate ---
+function renderHibernateNote() {
+  const blocked = hibernateBlockReason(state, now());
+  $('hibernate-note').textContent = blocked
+    ? `Freezes its clock for a long break. Not now: ${blocked}`
+    : `Freezes its clock for a long break: nothing drains, nothing ages. It has to stay under for at least ${CFG.hibernateMinMin / 60} hours, and needs ${CFG.hibernateCooldownMin / 1440} days to recover after waking.`;
+  $('hibernate-btn').disabled = Boolean(blocked);
+}
+
+$('hibernate-btn').addEventListener('click', () => {
+  const btn = $('hibernate-btn');
+  if (btn.dataset.armed !== '1') {
+    btn.dataset.armed = '1';
+    btn.textContent = `CONFIRM: AT LEAST ${CFG.hibernateMinMin / 60}H`;
+    setTimeout(() => {
+      btn.dataset.armed = '';
+      btn.textContent = 'HIBERNATE';
+    }, 4000);
+    return;
+  }
+  const res = hibernate(state, now());
+  if (!res.ok) return flashStatus(res.msg);
+  save();
+  transfer.close();
+  sfx('lights', state.quirk.pitch);
+  updateHUD();
+});
+
+$('wake-btn').addEventListener('click', () => {
+  const res = wake(state, now());
+  if (!res.ok) return flashStatus(res.msg);
+  sfx('boot', state.quirk.pitch);
+  save();
+  advance();
+});
+
+function renderHibernation() {
+  const h = state.hibernation;
+  document.body.classList.toggle('frozen', Boolean(h));
+  $('hibernating').hidden = !h;
+  if (!h) return;
+  const readyAt = wakeAvailableAt(state);
+  const waitMin = Math.max(0, Math.ceil((readyAt - now()) / MIN));
+  $('hibernate-status').textContent =
+    `hibernating since ${new Date(h.since).toLocaleString()}.` +
+    (waitMin > 0 ? ` it can wake in ${fmtAge(waitMin)}.` : ' it can wake whenever you are ready.');
+  $('wake-btn').disabled = waitMin > 0;
 }
 
 // --- NL-0 ------------------------------------------------------------------------
@@ -1328,6 +1468,8 @@ document.addEventListener('visibilitychange', () => {
 
 checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
+if (lock) showLock();
+importFromUrl();
 store.set(ONBOARD_KEY, onboarding);
 if (onboarding === 'intro') startIntro();
 else if (onboarding === 'readme') setTimeout(() => openHelp({ readme: true }), 700);

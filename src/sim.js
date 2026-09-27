@@ -25,6 +25,10 @@ export const CFG = {
   teenAtMin: 24 * 60,
   adultAtMin: 72 * 60,
   teenGoodCareMaxMistakes: 2,
+  // Hibernation: a long pause that freezes the clock. Minimum stay and cooldown keep it for
+  // vacations, not for skipping a work day.
+  hibernateMinMin: 24 * 60,
+  hibernateCooldownMin: 3 * 24 * 60,
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
@@ -231,8 +235,9 @@ export function isSleepHour(hour, offset = 0) {
   return start > end ? hour >= start || hour < end : hour >= start && hour < end;
 }
 
-// Advance the simulation to `now`, one minute at a time.
+// Advance the simulation to `now`, one minute at a time. Hibernation freezes the clock.
 export function tick(s, now, rng = Math.random) {
+  if (s.hibernation) return s;
   const minutes = Math.floor((now - s.lastTick) / MIN);
   for (let i = 0; i < minutes && s.stage !== 'dead'; i++) {
     step(s, s.lastTick + (i + 1) * MIN, rng);
@@ -428,6 +433,8 @@ export function migrate(s) {
   s.rootAccess ??= false;
   s.rootUsed ??= false;
   s.rootCooling ??= false;
+  s.hibernation ??= null;
+  s.lastWakeAt ??= null;
   s.lastRunEndAge ??= null;
   s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   return s;
@@ -461,11 +468,48 @@ function flatline(s, t, cause) {
 // Why an action can't happen right now, or null. The UI checks 'play' before launching a game.
 export function blockReason(s, action) {
   if (s.stage === 'dead') return 'no signal.';
+  if (s.hibernation) return 'hibernating.';
   if (s.stage === 'script' && action !== 'lights') return 'still compiling...';
   if (s.asleep && ['corp', 'scav', 'play', 'cool'].includes(action)) return 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
   return null;
+}
+
+// --- hibernation ---------------------------------------------------------------------------
+
+export function hibernateBlockReason(s, now) {
+  if (!isAlive(s)) return s.stage === 'script' ? 'still compiling...' : 'no signal.';
+  if (s.hibernation) return 'already hibernating.';
+  if (s.run) return 'finish the netrun first.';
+  if (s.event?.type === 'trace') return 'deal with the corp trace first.';
+  if (s.lastWakeAt !== null && now - s.lastWakeAt < CFG.hibernateCooldownMin * MIN) {
+    const h = Math.ceil((CFG.hibernateCooldownMin * MIN - (now - s.lastWakeAt)) / (60 * MIN));
+    return `still groggy from the last one. ${h}h until it can hibernate again.`;
+  }
+  return null;
+}
+
+export function hibernate(s, now, rng = Math.random) {
+  tick(s, now, rng); // settle everything up to this moment
+  const blocked = hibernateBlockReason(s, now);
+  if (blocked) return fail(blocked);
+  s.hibernation = { since: now };
+  log(s, now, '> entering hibernation. clock frozen.');
+  return ok('hibernating.', 'lights');
+}
+
+export const wakeAvailableAt = (s) => (s.hibernation ? s.hibernation.since + CFG.hibernateMinMin * MIN : null);
+
+export function wake(s, now) {
+  if (!s.hibernation) return fail('not hibernating.');
+  if (now < wakeAvailableAt(s)) return fail('too soon to wake it.');
+  const days = Math.round((now - s.hibernation.since) / (24 * 60 * MIN));
+  s.hibernation = null;
+  s.lastTick = now; // the frozen stretch never happened
+  s.lastWakeAt = now;
+  log(s, now, `> resumed from hibernation after ${days} day${days === 1 ? '' : 's'}.`);
+  return ok('awake again.', 'boot');
 }
 
 // Why an item in a slot can't be used right now, or null.

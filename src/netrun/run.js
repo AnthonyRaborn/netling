@@ -68,6 +68,7 @@ export function runCooldownLeft(pet) {
 export function runBlockReason(pet, region = 'public', codex = []) {
   if (!isAlive(pet)) return pet.stage === 'script' ? 'still compiling...' : 'no signal.';
   if (pet.run) return null; // resuming
+  if (pet.hibernation) return 'hibernating.';
   if (REGIONS[region].tutorial) return null; // the first run is always allowed
   if (pet.asleep) return 'in low-power mode.';
   const lock = regionLock(region, pet.stage, codex);

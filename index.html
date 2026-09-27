@@ -64,6 +64,10 @@
       </section>
 
       <p id="readout" class="readout"></p>
+      <section id="hibernating" class="hibernating" hidden>
+        <p id="hibernate-status"></p>
+        <button type="button" id="wake-btn">WAKE</button>
+      </section>
 
       <div class="inventory" aria-label="Inventory">
         <div id="inv-slots" class="inv-slots"></div>
@@ -112,6 +116,24 @@
 
       <ul id="log" class="log" aria-live="polite"></ul>
 
+      <section id="lock" class="lock" hidden aria-labelledby="lock-title">
+        <h2 id="lock-title">IN TRANSIT</h2>
+        <p id="lock-note" class="tx-note"></p>
+        <canvas id="lock-qr" class="lock-qr" aria-label="Transfer QR code"></canvas>
+        <p class="tx-note">Scan with the other device's camera, or copy the code.</p>
+        <textarea id="lock-code" readonly rows="3" aria-label="Transfer code"></textarea>
+        <div class="tx-row">
+          <button type="button" id="lock-copy">COPY CODE</button>
+          <button type="button" id="lock-download">DOWNLOAD FILE</button>
+        </div>
+        <div class="tx-row">
+          <button type="button" id="lock-reexport">RE-EXPORT</button>
+          <button type="button" id="lock-reload">RELOAD</button>
+          <button type="button" id="lock-restart" class="danger-btn">RESTART</button>
+        </div>
+      </section>
+
+
       <div id="dev" class="dev" hidden>
         <span>DEV</span>
         <button type="button" data-skip="15">+15m</button>
@@ -127,7 +149,7 @@
       <header>
         <h2 id="archive-title">ARCHIVE</h2>
         <span class="archive-actions">
-          <button type="button" id="open-transfer" class="pref">SAVE / LOAD</button>
+          <button type="button" id="open-transfer" class="pref">SYSTEM</button>
           <button type="button" id="close-archive" class="pref" aria-label="Close archive">CLOSE</button>
         </span>
       </header>
@@ -157,27 +179,29 @@
 
     <dialog id="transfer" class="archive transfer" aria-labelledby="transfer-title">
       <header>
-        <h2 id="transfer-title">SAVE / LOAD</h2>
+        <h2 id="transfer-title">SYSTEM</h2>
         <button type="button" id="close-transfer" class="pref">CLOSE</button>
       </header>
       <section class="transfer-body">
-        <h3>TAKE IT WITH YOU</h3>
-        <p class="tx-note">A code holds everything: your netling, lineage, dex, codex and style. Paste it on another device, or keep the file as a backup.</p>
-        <div class="tx-row">
-          <button type="button" id="make-code">GENERATE CODE</button>
-          <button type="button" id="download-code" disabled>DOWNLOAD FILE</button>
-        </div>
-        <textarea id="export-code" readonly rows="4" placeholder="your code appears here" aria-label="Your transfer code"></textarea>
-        <button type="button" id="copy-code" class="pref" disabled>COPY</button>
-        <p class="tx-note">Your netling keeps living on this device too. Whichever device you keep playing is the real one.</p>
+        <h3>TRANSFER OUT</h3>
+        <p class="tx-note">Moves everything (netling, lineage, dex, codex, style) to another device as a code or QR. This device locks until you load it back or restart.</p>
+        <button type="button" id="transfer-out">TRANSFER OUT</button>
 
         <h3>BRING ONE HERE</h3>
-        <textarea id="import-code" rows="4" placeholder="paste a code" aria-label="Transfer code to load"></textarea>
+        <textarea id="import-code" rows="3" placeholder="paste a code" aria-label="Transfer code to load"></textarea>
         <div class="tx-row">
           <button type="button" id="check-code">CHECK CODE</button>
           <label class="file-btn">LOAD FILE<input type="file" id="import-file" accept=".txt,text/plain" hidden /></label>
         </div>
         <div id="import-preview" class="tx-preview" hidden></div>
+
+        <h3>HIBERNATE</h3>
+        <p class="tx-note" id="hibernate-note"></p>
+        <button type="button" id="hibernate-btn">HIBERNATE</button>
+
+        <h3>RESTART</h3>
+        <p class="tx-note">Erases everything on this device (netling, lineage, codex, style) and starts over from the beginning.</p>
+        <button type="button" id="restart-btn" class="danger-btn">RESTART COMPLETELY</button>
       </section>
     </dialog>
 

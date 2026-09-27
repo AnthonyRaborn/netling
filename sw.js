@@ -1,5 +1,5 @@
 // Network-first service worker: always fresh when online, fully playable offline.
-const CACHE = 'netling-v19';
+const CACHE = 'netling-v20';
 const SHELL = [
   './',
   'index.html',
@@ -17,6 +17,7 @@ const SHELL = [
   'src/cosmetics.js',
   'src/accessories.js',
   'src/transfer.js',
+  'src/qr.js',
   'src/netrun/regions.js',
   'src/netrun/map.js',
   'src/netrun/run.js',

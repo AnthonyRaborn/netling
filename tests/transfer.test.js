@@ -48,3 +48,11 @@ test('describeSave summarizes what an import would bring', async () => {
   assert.equal(info.generations, 2);
   assert.equal(info.codex, 1);
 });
+
+test('fractional numbers are rounded to two places in transit', async () => {
+  const data = sample();
+  data.save.stats.charge = 40.799999999999685;
+  const back = await decodeSave(await encodeSave(data));
+  assert.equal(back.data.save.stats.charge, 40.8);
+  assert.equal(back.data.save.bornAt, data.save.bornAt, 'integers untouched');
+});
