@@ -157,9 +157,12 @@ export function rollQuirk(rng, { origin = false } = {}) {
 }
 
 // A new generation: fresh quirk, with one quirk key copied from the fragment.
-// rootAccess: the codex is complete, so NL-0 watches over this generation.
+// rootAccess: the codex is complete, so NL-0 watches over this generation,
+// unless NL-0 spent itself rescuing the previous one: then it rests for a generation.
 export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false }) {
-  const quirk = rollQuirk(rng, { origin: rootAccess });
+  const rootCooling = rootAccess && Boolean(fragment?.rootUsed);
+  if (rootCooling) rootAccess = false;
+  const quirk = rollQuirk(rng, { origin: rootAccess || rootCooling });
   let inheritedQuirk = null;
   if (fragment?.quirk) {
     inheritedQuirk = pick(QUIRK_KEYS, rng);
@@ -195,12 +198,16 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     run: null,
     rootAccess,
     rootUsed: false,
+    rootCooling,
     lastRunEndAge: null,
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
-    log: [{ t: now, msg: `> compiling netling.v${generation}.0 ...` }],
+    log: [
+      { t: now, msg: `> compiling netling.v${generation}.0 ...` },
+      ...(rootCooling ? [{ t: now, msg: '> NL-0: i reached for the last one. i need to rest. be careful with this one.' }] : []),
+    ],
     deathCause: null,
     diedAt: null,
     fragment: null,
@@ -420,6 +427,7 @@ export function migrate(s) {
   s.run ??= null;
   s.rootAccess ??= false;
   s.rootUsed ??= false;
+  s.rootCooling ??= false;
   s.lastRunEndAge ??= null;
   s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   return s;
@@ -446,7 +454,7 @@ function flatline(s, t, cause) {
   s.deathCause = cause;
   s.diedAt = t;
   const form = FORMS[s.form] ? s.form : leaningForm(s);
-  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] };
+  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 

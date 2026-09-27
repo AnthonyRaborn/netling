@@ -99,10 +99,10 @@ function checkIn(s, p, now, rng, ctx) {
   if (wantDark === s.lightsOn) doAct('lights');
 }
 
-export function simulate(p, seed) {
+export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT) } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
-  const s = createScript({ now: t0, rng, rootAccess: Boolean(process.env.ROOT) });
+  const s = createScript({ now: t0, rng, rootAccess });
   const ctx = { games: 0, lastOfDay: false, codex: [] };
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -160,6 +160,7 @@ export function simulate(p, seed) {
     axes: { ...s.axes },
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
+    rootUsed: s.rootUsed,
     itemsHeld: ctx.itemsHeld ?? 0,
     runs: ctx.runs ?? 0,
     runDisconnects: ctx.runDisconnects ?? 0,

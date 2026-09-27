@@ -59,6 +59,7 @@ export function deathRecord(state) {
     trait: state.trait,
     fragmentTrait: f?.trait ?? null,
     keepsake: f?.keepsake ?? null,
+    rescued: Boolean(state.rootUsed),
     palette: state.quirk?.palette ?? 0,
     bornAt: state.bornAt,
     diedAt: state.diedAt,
@@ -77,6 +78,7 @@ export function lineageRows(lineage, current) {
     trait: e.trait ? TRAITS[e.trait].name : null,
     fragment: e.fragmentTrait ? TRAITS[e.fragmentTrait].name : null,
     keepsake: e.keepsake ? ITEMS[e.keepsake].name : null,
+    rescued: Boolean(e.rescued),
     palette: e.palette ?? 0,
     dead: true,
   }));

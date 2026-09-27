@@ -45,3 +45,41 @@ test('the origin palette only rolls with root access', () => {
   assert.ok(!rolls(false).includes(origin));
   assert.ok(rolls(true).includes(origin));
 });
+
+function rescuedThenDied() {
+  const s = booted(true);
+  s.careMistakes = CFG.maxMistakes;
+  tick(s, s.lastTick + MIN, noRng); // rescued
+  s.careMistakes = CFG.maxMistakes;
+  tick(s, s.lastTick + MIN, noRng); // dies for real
+  return s;
+}
+
+test('after a rescue, NL-0 rests for the next generation, then returns', () => {
+  const parent = rescuedThenDied();
+  assert.equal(parent.fragment.rootUsed, true);
+
+  const child = createScript({ now: T0, generation: 2, fragment: parent.fragment, rootAccess: true });
+  assert.equal(child.rootAccess, false);
+  assert.equal(child.rootCooling, true);
+  assert.match(child.log.at(-1).msg, /NL-0/);
+
+  // The cooling generation dies without needing (or getting) a rescue.
+  child.stage = 'baby';
+  child.careMistakes = CFG.maxMistakes;
+  tick(child, child.lastTick + MIN, noRng);
+  assert.equal(child.stage, 'dead');
+  assert.equal(child.fragment.rootUsed, false);
+
+  const grandchild = createScript({ now: T0, generation: 3, fragment: child.fragment, rootAccess: true });
+  assert.equal(grandchild.rootAccess, true);
+  assert.equal(grandchild.rootCooling, false);
+});
+
+test('an unused rescue carries straight into the next generation', () => {
+  const s = booted(true);
+  s.ageMin = CFG.lifespanMin - 1;
+  tick(s, s.lastTick + MIN, noRng);
+  const next = createScript({ now: T0, generation: 2, fragment: s.fragment, rootAccess: true });
+  assert.equal(next.rootAccess, true);
+});

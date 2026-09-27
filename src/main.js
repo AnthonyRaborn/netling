@@ -160,8 +160,8 @@ function updateHUD() {
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
     `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
-  if (state.rootAccess && state.stage !== 'script') {
-    $('readout').textContent += ` · root ${state.rootUsed ? 'spent' : 'ready'}`;
+  if (state.stage !== 'script' && (state.rootAccess || state.rootCooling)) {
+    $('readout').textContent += ` · root ${state.rootCooling ? 'cooling' : state.rootUsed ? 'spent' : 'ready'}`;
   }
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
@@ -527,6 +527,7 @@ function renderArchive() {
           `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
           r.trait || r.fragment ? `inherited ${r.trait ?? '—'}${r.fragment ? ` · left ${r.fragment}` : ''}` : null,
           r.keepsake ? `keepsake: ${r.keepsake}` : null,
+          r.rescued ? { cls: 'perk', text: 'pulled back once by NL-0' } : null,
         ],
         r.dead ? '' : 'running',
       ),
