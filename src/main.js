@@ -20,7 +20,9 @@ import {
   SAVE_VERSION,
   MIN,
 } from './sim.js';
-import { renderLCD } from './render.js';
+import { renderLCD, setLcdTint } from './render.js';
+import { setGameBg } from './games/common.js';
+import { COSMETICS, SLOTS, cosmeticById, unlockedIds, resolveWardrobe, recordGame } from './cosmetics.js';
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
@@ -37,6 +39,9 @@ const SKEW_KEY = 'netling.devSkew';
 const PREFS_KEY = 'netling.prefs';
 const DEX_KEY = 'netling.dex';
 const CODEX_KEY = 'netling.codex';
+const WARDROBE_KEY = 'netling.wardrobe';
+const PROGRESS_KEY = 'netling.progress';
+const UNLOCKED_KEY = 'netling.unlocked';
 const DEV = new URLSearchParams(location.search).has('dev');
 
 const store = {
@@ -94,6 +99,7 @@ function drainCodexInbox() {
   state.codexInbox = [];
   store.set(CODEX_KEY, codex);
   if (fresh.length) flashStatus(`codex updated: ${fresh.map((id) => `"${fragmentById(id).title}"`).join(', ')}.`);
+  checkUnlocks();
   if (!wasComplete && codexComplete()) {
     state.rootAccess = true; // the current netling is covered from this moment
     save();
@@ -125,6 +131,7 @@ function advance() {
     }
     if (state.stage === 'dead') onFlatline();
     recordForm();
+    checkUnlocks();
     lastStage = state.stage;
   }
   if (state.lastSurgeAt !== lastSurgeAt) {
@@ -205,6 +212,7 @@ function onFlatline() {
   lineage.push(deathRecord(state));
   store.set(LINEAGE_KEY, lineage);
   showFlatline();
+  checkUnlocks();
 }
 
 function showFlatline() {
@@ -282,8 +290,15 @@ function openRun() {
       save();
       updateHUD();
     },
-    onClose: () => {
+    onClose: (run) => {
       session = null;
+      if (run?.result === 'jacked') {
+        if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
+        const at = run.map.nodes.find((n) => n.id === run.pos);
+        if (run.region === 'deep' && at?.type === 'exit') progress.deepExits = (progress.deepExits ?? 0) + 1;
+        store.set(PROGRESS_KEY, progress);
+      }
+      checkUnlocks();
       $('pad-quit').textContent = 'QUIT (ESC)';
       showPanel('controls');
       save();
@@ -357,6 +372,9 @@ function startGame(id) {
     sound: (name) => sfx(name, state.quirk.pitch),
     onFinish: (won) => {
       session = null;
+      progress.streaks = recordGame(progress.streaks, id, won);
+      store.set(PROGRESS_KEY, progress);
+      checkUnlocks();
       showPanel('controls');
       tick(state, now());
       const res = act(state, 'play', now(), Math.random, { game: id, won });
@@ -459,6 +477,91 @@ $('inv-cancel').addEventListener('click', () => {
   renderInventory();
 });
 
+// --- wardrobe ------------------------------------------------------------------
+
+const progress = { streaks: {}, cleanJackouts: 0, deepExits: 0, ...store.get(PROGRESS_KEY) };
+let unlocked = store.get(UNLOCKED_KEY) ?? [];
+let freshUnlocks = new Set();
+let wardrobe = store.get(WARDROBE_KEY) ?? {};
+
+function unlockContext() {
+  return { dex, codex, lineage: store.get(LINEAGE_KEY) ?? [], generation: state.generation, progress };
+}
+
+// Announce anything newly earned. First run of a save just records what's already earned.
+function checkUnlocks({ silent = false } = {}) {
+  const now = unlockedIds(unlockContext());
+  const fresh = now.filter((id) => !unlocked.includes(id));
+  if (!fresh.length) return;
+  unlocked = [...new Set([...unlocked, ...now])];
+  store.set(UNLOCKED_KEY, unlocked);
+  if (silent) return;
+  fresh.forEach((id) => freshUnlocks.add(id));
+  const names = fresh.map((id) => {
+    const [slot, cid] = id.split(':');
+    return cosmeticById(slot, cid).name.toLowerCase();
+  });
+  flashStatus(`style unlocked: ${names.join(', ')}.`);
+  sfx('win', state.quirk.pitch);
+}
+
+function applyWardrobe() {
+  const w = resolveWardrobe(wardrobe, unlocked);
+  const device = document.querySelector('.device');
+  device.className = `device shell-${w.shell}`;
+  const tint = cosmeticById('tint', w.tint);
+  setLcdTint(tint.lcd, tint.dark);
+  setGameBg(tint.lcd);
+  document.querySelector('.screen').className = `screen fx-${w.effect}`;
+}
+
+function renderWardrobe() {
+  const w = resolveWardrobe(wardrobe, unlocked);
+  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0);
+  $('wardrobe-count').textContent = `${unlocked.length}/${total}`;
+  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT' };
+  $('wardrobe-list').replaceChildren(
+    ...SLOTS.flatMap((slot) => {
+      const h = document.createElement('h3');
+      h.textContent = labels[slot];
+      const grid = document.createElement('div');
+      grid.className = 'wardrobe-grid';
+      for (const c of COSMETICS[slot]) {
+        const key = `${slot}:${c.id}`;
+        const open = unlocked.includes(key);
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `cosmetic${open ? '' : ' locked'}${freshUnlocks.has(key) ? ' new' : ''}`;
+        b.setAttribute('aria-pressed', open && w[slot] === c.id);
+        const sw = document.createElement('span');
+        sw.className = 'sw';
+        sw.style.background = open ? c.swatch ?? 'transparent' : 'transparent';
+        if (slot === 'effect') sw.textContent = open ? '~' : '';
+        const name = document.createElement('span');
+        name.textContent = open ? c.name : '???';
+        const hint = document.createElement('span');
+        hint.className = 'ch';
+        hint.textContent = open ? (w[slot] === c.id ? 'equipped' : 'tap to equip') : c.hint;
+        b.append(sw, name, hint);
+        if (open) {
+          b.addEventListener('click', () => {
+            wardrobe = { ...w, [slot]: c.id };
+            store.set(WARDROBE_KEY, wardrobe);
+            freshUnlocks.delete(key);
+            applyWardrobe();
+            sfx('select', state.quirk.pitch);
+            renderWardrobe();
+          });
+        } else {
+          b.disabled = true;
+        }
+        grid.append(b);
+      }
+      return [h, grid];
+    }),
+  );
+}
+
 // --- NL-0 ------------------------------------------------------------------------
 
 function showTransmission() {
@@ -540,6 +643,7 @@ function renderArchive() {
     $('lineage-list').replaceChildren(li);
   }
 
+  renderWardrobe();
   $('codex-gift').hidden = !codexComplete();
   const groups = codexByRegion(codex, REGION_ORDER);
   $('codex-count').textContent = `${codex.length}/${FRAGMENTS.length}`;
@@ -589,7 +693,7 @@ function renderArchive() {
 }
 
 function selectTab(name) {
-  for (const t of ['lineage', 'dex', 'codex']) {
+  for (const t of ['lineage', 'dex', 'codex', 'wardrobe']) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
@@ -606,6 +710,7 @@ archive.addEventListener('click', (e) => {
 $('tab-btn-lineage').addEventListener('click', () => selectTab('lineage'));
 $('tab-btn-dex').addEventListener('click', () => selectTab('dex'));
 $('tab-btn-codex').addEventListener('click', () => selectTab('codex'));
+$('tab-btn-wardrobe').addEventListener('click', () => selectTab('wardrobe'));
 
 // --- settings -------------------------------------------------------------------
 
@@ -691,6 +796,8 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) advance();
 });
 
+checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
+applyWardrobe();
 advance();
 drainCodexInbox();
 if (state.stage === 'dead') showFlatline();

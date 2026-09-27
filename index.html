@@ -29,6 +29,7 @@
       <div class="screen">
         <canvas id="lcd" width="400" height="280" aria-label="Netling display"></canvas>
         <div class="scanlines"></div>
+        <div class="fx-layer"></div>
         <div class="crt-glare"></div>
         <div id="status" class="status" role="status"></div>
         <section id="flatline" class="flatline" hidden>
@@ -125,12 +126,16 @@
         <button type="button" role="tab" id="tab-btn-lineage" aria-selected="true" aria-controls="tab-lineage">LINEAGE</button>
         <button type="button" role="tab" id="tab-btn-dex" aria-selected="false" aria-controls="tab-dex">DEX <span id="dex-count"></span></button>
         <button type="button" role="tab" id="tab-btn-codex" aria-selected="false" aria-controls="tab-codex">CODEX <span id="codex-count"></span></button>
+        <button type="button" role="tab" id="tab-btn-wardrobe" aria-selected="false" aria-controls="tab-wardrobe">STYLE <span id="wardrobe-count"></span></button>
       </div>
       <section id="tab-lineage" role="tabpanel" aria-labelledby="tab-btn-lineage">
         <ol id="lineage-list" class="lineage"></ol>
       </section>
       <section id="tab-dex" role="tabpanel" aria-labelledby="tab-btn-dex" hidden>
         <ul id="dex-grid" class="dex"></ul>
+      </section>
+      <section id="tab-wardrobe" role="tabpanel" aria-labelledby="tab-btn-wardrobe" hidden>
+        <div id="wardrobe-list" class="wardrobe"></div>
       </section>
       <section id="tab-codex" role="tabpanel" aria-labelledby="tab-btn-codex" hidden>
         <div id="codex-gift" class="gift" hidden>

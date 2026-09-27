@@ -78,7 +78,7 @@ body {
 .pref {
   font-size: 14px;
   padding: 2px 8px;
-  color: var(--dim);
+  color: #5d7a80; /* fixed: buttons sit on their own dark fill, whatever the shell */
   border-color: var(--shell-edge);
   text-shadow: none;
 }
@@ -559,7 +559,7 @@ button:active {
 
 .tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin: 12px 0;
 }
@@ -796,6 +796,186 @@ button:active {
 .transmission button {
   color: #e8e8ff;
   border-color: #b967ff;
+}
+
+/* --- wardrobe ------------------------------------------------------------------ */
+
+.wardrobe h3 {
+  margin: 12px 0 6px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  font-size: 18px;
+}
+
+.wardrobe h3:first-child {
+  margin-top: 0;
+}
+
+.wardrobe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.cosmetic {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 2px 8px;
+  align-items: center;
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 16px;
+  color: var(--text);
+  border-color: var(--shell-edge);
+  text-shadow: none;
+}
+
+.cosmetic .sw {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--dim);
+  grid-row: span 2;
+}
+
+.cosmetic .ch {
+  font-size: 14px;
+  color: var(--dim);
+  line-height: 1.1;
+}
+
+.cosmetic[aria-pressed='true'] {
+  border-color: var(--yellow);
+  box-shadow: 0 0 8px rgba(249, 240, 2, 0.35);
+}
+
+.cosmetic.locked {
+  border-style: dashed;
+  color: var(--dim);
+  cursor: default;
+}
+
+.cosmetic.new::after {
+  content: 'NEW';
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--yellow);
+}
+
+/* shells */
+.device.shell-matte {
+  background: linear-gradient(160deg, #141417, #0b0b0e 60%, #050506);
+  border-color: #26262c;
+  box-shadow: 0 0 0 1px #000, 0 0 24px rgba(0, 0, 0, 0.8);
+}
+.device.shell-chrome {
+  background: linear-gradient(160deg, #b9c0cc, #6d7482 45%, #3a3f49);
+  border-color: #d6dbe4;
+}
+/* light shells: darken the dim label color so HUD text stays readable */
+.device.shell-chrome,
+.device.shell-gold {
+  --dim: #1c2129;
+}
+.device.shell-chrome .logo {
+  color: #1a1d24;
+  text-shadow: 1px 1px 0 #e8ecf2;
+}
+.device.shell-brick {
+  background:
+    linear-gradient(transparent 92%, rgba(0, 0, 0, 0.35) 92%) 0 0 / 100% 18px,
+    linear-gradient(90deg, transparent 94%, rgba(0, 0, 0, 0.35) 94%) 0 0 / 36px 36px,
+    linear-gradient(160deg, #6a2530, #4a1820 60%, #2a0d12);
+  border-color: #8a3040;
+}
+.device.shell-crimson {
+  background: linear-gradient(160deg, #4a0d18, #2a060d 60%, #120306);
+  border-color: #7a1426;
+  box-shadow: 0 0 0 1px #000, 0 0 32px rgba(255, 20, 60, 0.3);
+}
+.device.shell-shifted {
+  background: linear-gradient(160deg, #1d3040, #10202b 60%, #081018);
+  border-color: #2a5a70;
+  box-shadow:
+    -3px 0 0 rgba(255, 42, 109, 0.5),
+    3px 0 0 rgba(5, 217, 232, 0.5),
+    0 0 32px rgba(5, 217, 232, 0.2);
+}
+.device.shell-clear {
+  background: rgba(200, 200, 255, 0.06);
+  border-color: rgba(200, 200, 255, 0.35);
+  backdrop-filter: blur(3px);
+}
+.device.shell-gold {
+  background: linear-gradient(160deg, #d8b04a, #9c7a22 50%, #5a440e);
+  border-color: #f0d078;
+}
+.device.shell-gold .logo {
+  color: #2a1e04;
+  text-shadow: 1px 1px 0 #f5dc8c;
+}
+.device.shell-holo {
+  background: linear-gradient(120deg, #3a1030, #10304a, #3a3a10, #10304a, #3a1030) 0 0 / 300% 300%;
+  animation: holo-shift 8s linear infinite;
+  border-color: #c7f9ff;
+}
+@keyframes holo-shift {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+/* screen effects */
+.fx-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.screen.fx-clean .scanlines {
+  display: none;
+}
+.screen.fx-interlace .scanlines {
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0 2px, transparent 2px 4px);
+  animation: interlace 0.12s steps(2) infinite;
+}
+@keyframes interlace {
+  50% {
+    transform: translateY(2px);
+  }
+}
+.screen.fx-rain .fx-layer {
+  background:
+    repeating-linear-gradient(to bottom, rgba(57, 255, 20, 0.14) 0 6px, transparent 6px 14px) 12% 0 / 3px 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgba(57, 255, 20, 0.1) 0 4px, transparent 4px 18px) 37% 0 / 3px 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgba(57, 255, 20, 0.12) 0 8px, transparent 8px 16px) 63% 0 / 3px 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgba(57, 255, 20, 0.1) 0 5px, transparent 5px 20px) 88% 0 / 3px 100% no-repeat;
+  animation: rain 1.6s linear infinite;
+}
+@keyframes rain {
+  to {
+    background-position-y: 56px, 72px, 64px, 80px;
+  }
+}
+.screen.fx-bloom #lcd {
+  filter: brightness(1.15) saturate(1.2) drop-shadow(0 0 6px rgba(5, 217, 232, 0.55));
+}
+.screen.fx-curved {
+  border-radius: 28px / 22px;
+}
+.screen.fx-curved .fx-layer {
+  box-shadow: inset 0 0 60px 18px rgba(0, 0, 0, 0.85);
+}
+.screen.fx-static .fx-layer {
+  background: repeating-radial-gradient(circle at 17% 32%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 3px);
+  animation: static-jitter 0.18s steps(3) infinite;
+}
+@keyframes static-jitter {
+  33% {
+    background-position: 3px 1px;
+  }
+  66% {
+    background-position: -2px 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,8 +3,13 @@ import { PALETTES, CFG, needsAttention, isAlive } from './sim.js';
 
 export const LCD_W = 40;
 export const LCD_H = 28;
-const LCD_BG = '#0b2226';
-const LCD_BG_DARK = '#03090a';
+// The wardrobe's screen tint swaps these.
+let LCD_BG = '#0b2226';
+let LCD_BG_DARK = '#03090a';
+export function setLcdTint(bg, dark) {
+  LCD_BG = bg;
+  LCD_BG_DARK = dark;
+}
 
 const buf = document.createElement('canvas');
 buf.width = LCD_W;

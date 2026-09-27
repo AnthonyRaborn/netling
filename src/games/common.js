@@ -2,7 +2,10 @@
 
 export const W = 400;
 export const H = 280;
-export const BG = '#0b2226';
+export let BG = '#0b2226'; // follows the wardrobe's screen tint
+export function setGameBg(color) {
+  BG = color;
+}
 export const DIM = '#2f6b73';
 export const FONT = "'VT323', monospace";
 

@@ -148,9 +148,10 @@ export class RunView {
   }
 
   close() {
+    const run = this.run;
     closeRun(this.pet, Date.now());
     this.onChange();
-    this.onClose();
+    this.onClose(run);
   }
 
   update(dt) {
