@@ -289,3 +289,40 @@ test('Daemon and Firewall each have a fragment; the Bazaar still ends on the gra
   assert.equal(nextFragment('bazaar', ['bazaar-1', 'bazaar-2', 'bazaar-3']), 'bazaar-5');
   assert.equal(nextFragment('bazaar', ['bazaar-1', 'bazaar-2', 'bazaar-3', 'bazaar-5']), 'bazaar-4');
 });
+
+import { ACCESSORIES } from '../src/accessories.js';
+
+test('markets can offer an unowned accessory, bought for charge and banked on jack-out', () => {
+  let found = false;
+  for (let seed = 1; seed <= 40 && !found; seed++) {
+    const { s, next } = runInto('baby', 'market', seed);
+    s.run.knownAcc = ['cap'];
+    moveTo(s, next.id, mulberry32(seed));
+    const acc = s.run.pending.accOffer;
+    if (!acc) continue;
+    found = true;
+    assert.notEqual(acc, 'cap', 'never offers an owned accessory');
+    const charge = s.stats.charge;
+    choose(s, 'buyacc', noRng);
+    assert.equal(s.stats.charge, charge - RUN_CFG.accPrice);
+    jackOut(s);
+    assert.deepEqual(s.accessoryInbox, [acc]);
+  }
+  assert.ok(found, 'some market offered an accessory');
+});
+
+test('accessories are lost on disconnect, and nothing is offered once all are owned', () => {
+  const s = pet();
+  startRun(s, 'public', mulberry32(4));
+  s.run.accessories = ['halo'];
+  s.run.phase = 'ice';
+  s.stats.integrity = 1;
+  resolveIce(s, false, noRng);
+  assert.deepEqual(s.run.accessories, []);
+  assert.equal(s.accessoryInbox, undefined);
+
+  const { s: t, next } = runInto('baby', 'market', 7);
+  t.run.knownAcc = ACCESSORIES.map((x) => x.id);
+  moveTo(t, next.id, () => 0); // every chance fires
+  assert.equal(t.run.pending.accOffer, null);
+});

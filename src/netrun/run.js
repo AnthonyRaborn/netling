@@ -3,6 +3,7 @@ import { grantItem, isAlive, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
 import { REGIONS, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
+import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES } from './anomalies.js';
 
 export const RUN_CFG = {
@@ -28,6 +29,12 @@ export const RUN_CFG = {
   complyDamage: 5,
   marketPrice: 12,
   cacheFragmentChance: 0.15,
+  // Accessories: mostly bought at markets, rarely found.
+  accPrice: 20,
+  marketAccChance: 0.5,
+  cacheAccChance: 0.03,
+  iceWinAccChance: 0.05,
+  exitAccChance: 0.08,
   exitFragmentChance: 0.6,
   echoFragmentChance: 0.5,
   firewallIceMult: 0.5,
@@ -70,7 +77,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   return null;
 }
 
-export function startRun(pet, region, rng, codex = []) {
+export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
   const map = generateMap(region, rng);
   pet.run = {
     region,
@@ -86,6 +93,8 @@ export function startRun(pet, region, rng, codex = []) {
     startStats: { ...pet.stats },
     tally: { nodes: 0, iceWon: 0, iceLost: 0 },
     fragments: [], // found this run; banked on jack-out like loot
+    knownAcc: [...ownedAccessories],
+    accessories: [], // found or bought this run; banked on jack-out like loot
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
@@ -100,6 +109,13 @@ function note(run, msg) {
 }
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
+function takeAccessory(run, rng) {
+  const id = rollAccessory([...run.knownAcc, ...run.accessories], rng);
+  if (!id) return '';
+  run.accessories.push(id);
+  return ` accessory: ${accessoryById(id).name}!`;
+}
+
 function takeFragment(run) {
   const id = nextFragment(run.region, [...run.known, ...run.fragments]);
   if (!id) return '';
@@ -129,7 +145,7 @@ export function moveTo(pet, nodeId, rng) {
   const region = REGIONS[run.region];
   switch (node.type) {
     case 'cache': {
-      const frag = rng() < RUN_CFG.cacheFragmentChance ? takeFragment(run) : '';
+      const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(run) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
       if (rng() < RUN_CFG.cacheFindChance) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
@@ -193,14 +209,25 @@ export function moveTo(pet, nodeId, rng) {
       }
       const price = region.marketPrice ?? RUN_CFG.marketPrice;
       const affordable = st.charge > price + 5;
+      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng) : null;
+      const accAffordable = st.charge > RUN_CFG.accPrice + 5;
       openChoice(run, {
         kind: 'market',
         title: 'BLACK MARKET',
         text: `a vendor process. ${price} charge per item.`,
         offers,
         price,
+        accOffer,
         options: [
           ...offers.map((id, i) => ({ id: `buy${i}`, label: ITEMS[id].name.toUpperCase(), hint: `-${price} chg`, disabled: !affordable })),
+          ...(accOffer
+            ? [{
+                id: 'buyacc',
+                label: `${accessoryById(accOffer).name.toUpperCase()} (STYLE)`,
+                hint: `-${RUN_CFG.accPrice} chg · ${accessoryById(accOffer).rarity === 'common' ? 'accessory' : 'rare accessory'}`,
+                disabled: !accAffordable,
+              }]
+            : []),
           { id: 'leave', label: 'LEAVE', hint: 'buy nothing' },
         ],
       });
@@ -220,7 +247,7 @@ export function moveTo(pet, nodeId, rng) {
     case 'exit': {
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
-      const frag = rng() < RUN_CFG.exitFragmentChance ? takeFragment(run) : '';
+      const frag = (rng() < RUN_CFG.exitFragmentChance ? takeFragment(run) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
       note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}.${frag}`);
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
@@ -236,12 +263,13 @@ export function resolveIce(pet, won, rng) {
   const st = pet.stats;
   if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
   if (won) {
+    const acc = rng() < RUN_CFG.iceWinAccChance ? takeAccessory(run, rng) : '';
     if (rng() < RUN_CFG.iceWinLootChance) {
       const item = weighted(REGIONS[run.region].loot, rng);
       run.loot.push(item);
-      note(run, `ICE shattered. salvaged ${ITEMS[item].name}.`);
+      note(run, `ICE shattered. salvaged ${ITEMS[item].name}.${acc}`);
     } else {
-      note(run, 'ICE shattered.');
+      note(run, `ICE shattered.${acc}`);
     }
     return { ok: true, won };
   }
@@ -310,6 +338,10 @@ export function choose(pet, optionId, rng) {
   } else if (p.kind === 'market') {
     if (optionId === 'leave') {
       msg = 'left the market.';
+    } else if (optionId === 'buyacc') {
+      st.charge = clamp(st.charge - RUN_CFG.accPrice);
+      run.accessories.push(p.accOffer);
+      msg = `bought ${accessoryById(p.accOffer).name} for your style.`;
     } else {
       const item = p.offers[Number(optionId.slice(3))];
       st.charge = clamp(st.charge - p.price);
@@ -388,6 +420,7 @@ export function jackOut(pet) {
   );
   // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
   pet.codexInbox = [...(pet.codexInbox ?? []), ...run.fragments];
+  pet.accessoryInbox = [...(pet.accessoryInbox ?? []), ...(run.accessories ?? [])];
   endRun(pet, 'jacked');
   return { ok: true, result: 'jacked', kept, lost, fragments: [...run.fragments] };
 }
@@ -405,6 +438,7 @@ export function disconnect(pet, why) {
   note(run, `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
   run.fragments = [];
+  run.accessories = [];
   endRun(pet, 'disconnected');
   return { ok: true, result: 'disconnected' };
 }
@@ -413,6 +447,7 @@ export function disconnect(pet, why) {
 export function abortRun(pet) {
   pet.run.loot = [];
   pet.run.fragments = [];
+  pet.run.accessories = [];
   note(pet.run, 'run aborted. loot abandoned.');
   endRun(pet, 'aborted');
   return { ok: true, result: 'aborted' };

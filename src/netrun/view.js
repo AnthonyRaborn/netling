@@ -7,6 +7,7 @@ import { REGIONS } from './regions.js';
 import { moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, RUN_CFG } from './run.js';
 import { ITEMS } from '../sim.js';
 import { fragmentById } from './codex.js';
+import { accessoryById } from '../accessories.js';
 
 const MAP_TOP = 24;
 const MAP_BOTTOM = 212;
@@ -283,6 +284,7 @@ export class RunView {
       ? [
           ...run.loot.map((id) => [`+ ${ITEMS[id].name}`, '#c7f9ff']),
           ...run.fragments.map((id) => [`+ codex: ${fragmentById(id).title}`, '#f9f002']),
+          ...(run.accessories ?? []).map((id) => [`+ style: ${accessoryById(id).name}`, '#b967ff']),
         ]
       : [[run.result === 'disconnected' ? 'loot and fragments lost.' : 'loot abandoned.', '#ff2a6d']];
     if (good && !lines.length) lines.push(['came back empty-handed.', DIM]);

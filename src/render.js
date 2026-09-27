@@ -1,4 +1,5 @@
 import { SPRITES, drawSprite, formSprite } from './sprites.js';
+import { drawAccessory } from './accessories.js';
 import { PALETTES, CFG, needsAttention, isAlive } from './sim.js';
 
 export const LCD_W = 40;
@@ -70,6 +71,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
 
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
+    if (opts.accessory && !(opts.flash && Math.floor(time / 120) % 2)) {
+      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dark);
+    }
     bctx.globalAlpha = 1;
 
     if (s.asleep) {

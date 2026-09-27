@@ -11,15 +11,21 @@
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
       figure { margin: 0; }
       canvas { width: 100%; image-rendering: pixelated; border: 2px solid #2a2240; border-radius: 6px; display: block; }
+      .acc { display: grid; grid-template-columns: 80px repeat(10, 1fr); gap: 4px; align-items: center; }
+      .acc span { color: #5d7a80; font-size: 15px; }
+      .acc canvas { border-width: 1px; border-radius: 2px; }
       figcaption { color: #5d7a80; margin-top: 4px; }
     </style>
   </head>
   <body>
     <h1>SPRITE GALLERY</h1>
     <div class="grid" id="grid"></div>
+    <h1 style="margin-top: 24px">ACCESSORIES</h1>
+    <div id="acc" class="acc"></div>
     <script type="module">
       import { renderLCD } from './src/render.js';
       import { createScript, SPECIES, FORM_MODS } from './src/sim.js';
+      import { ACCESSORIES } from './src/accessories.js';
 
       const poses = Object.keys(SPECIES).flatMap((form) => [
         { form, stage: SPECIES[form].stage, asleep: false },
@@ -38,8 +44,21 @@
         document.getElementById('grid').append(fig);
         return { s, canvas };
       });
+      const acc = document.getElementById('acc');
+      acc.append(document.createElement('span'), ...ACCESSORIES.map((x) => Object.assign(document.createElement('span'), { textContent: x.name })));
+      for (const form of Object.keys(SPECIES)) {
+        acc.append(Object.assign(document.createElement('span'), { textContent: SPECIES[form].name }));
+        for (const x of ACCESSORIES) {
+          const s = createScript({ now: Date.now() });
+          Object.assign(s, { form, stage: SPECIES[form].stage, lightsOn: true });
+          s.quirk.idle = 'bounce';
+          const canvas = Object.assign(document.createElement('canvas'), { width: 160, height: 112 });
+          acc.append(canvas);
+          cells.push({ s, canvas, accessory: x.id });
+        }
+      }
       (function loop(t) {
-        for (const { s, canvas } of cells) renderLCD(canvas, s, t);
+        for (const { s, canvas, accessory } of cells) renderLCD(canvas, s, t, { accessory });
         requestAnimationFrame(loop);
       })(0);
     </script>

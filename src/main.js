@@ -26,6 +26,7 @@ import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, re
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
+import { ACCESSORIES, RARITY, accessoryById } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
@@ -42,6 +43,7 @@ const CODEX_KEY = 'netling.codex';
 const WARDROBE_KEY = 'netling.wardrobe';
 const PROGRESS_KEY = 'netling.progress';
 const UNLOCKED_KEY = 'netling.unlocked';
+const ACCESSORY_KEY = 'netling.accessories';
 const DEV = new URLSearchParams(location.search).has('dev');
 
 const store = {
@@ -88,6 +90,21 @@ const prefs = { sound: true, alerts: false, ...store.get(PREFS_KEY) };
 const dex = store.get(DEX_KEY) ?? [];
 for (const form of formsSeenIn(state, store.get(LINEAGE_KEY) ?? [])) discover(dex, form);
 store.set(DEX_KEY, dex);
+
+const ownedAccessories = store.get(ACCESSORY_KEY) ?? [];
+
+// Bank accessories a finished run left on the pet into the shared collection.
+function drainAccessoryInbox() {
+  const inbox = state.accessoryInbox ?? [];
+  if (!inbox.length) return;
+  const fresh = inbox.filter((id) => !ownedAccessories.includes(id));
+  ownedAccessories.push(...fresh);
+  state.accessoryInbox = [];
+  store.set(ACCESSORY_KEY, ownedAccessories);
+  if (fresh.length) {
+    setTimeout(() => flashStatus(`style: ${fresh.map((id) => accessoryById(id).name.toLowerCase()).join(', ')} added. equip it in the archive.`), 1900);
+  }
+}
 
 // Bank fragments a finished run left on the pet into the shared codex.
 function drainCodexInbox() {
@@ -288,6 +305,7 @@ function openRun() {
     },
     onChange: () => {
       drainCodexInbox();
+      drainAccessoryInbox();
       save();
       updateHUD();
     },
@@ -318,7 +336,7 @@ function jackIn(region) {
     sfx('error', state.quirk.pitch);
     return flashStatus(blocked);
   }
-  startRun(state, region, Math.random, codex);
+  startRun(state, region, Math.random, codex, ownedAccessories);
   sfx('boot', state.quirk.pitch * REGIONS[region].sound.mult, REGIONS[region].sound.wave);
   save();
   openRun();
@@ -543,8 +561,8 @@ function applyWardrobe() {
 
 function renderWardrobe() {
   const w = resolveWardrobe(wardrobe, unlocked);
-  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1; // + device label
-  $('wardrobe-count').textContent = `${unlocked.length}/${total}`;
+  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + ACCESSORIES.length; // + label + accessories
+  $('wardrobe-count').textContent = `${unlocked.length + ownedAccessories.length}/${total}`;
   const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
@@ -586,8 +604,46 @@ function renderWardrobe() {
       }
       return [h, grid];
     }),
+    ...accessorySection(),
     ...labelSection(),
   );
+}
+
+function accessorySection() {
+  const h = document.createElement('h3');
+  h.textContent = 'ACCESSORY';
+  const grid = document.createElement('div');
+  grid.className = 'wardrobe-grid';
+  const current = ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : 'none';
+  const entries = [{ id: 'none', name: 'None' }, ...ACCESSORIES];
+  for (const x of entries) {
+    const owned = x.id === 'none' || ownedAccessories.includes(x.id);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `cosmetic${owned ? '' : ' locked'}`;
+    b.setAttribute('aria-pressed', owned && current === x.id);
+    const sw = document.createElement('span');
+    sw.className = 'sw';
+    sw.textContent = owned && x.id !== 'none' ? '✦' : '';
+    const name = document.createElement('span');
+    name.textContent = owned ? x.name : '???';
+    const hint = document.createElement('span');
+    hint.className = 'ch';
+    hint.textContent = owned ? (current === x.id ? 'equipped' : 'tap to equip') : RARITY[x.rarity].hint;
+    b.append(sw, name, hint);
+    if (owned) {
+      b.addEventListener('click', () => {
+        wardrobe = { ...wardrobe, accessory: x.id };
+        store.set(WARDROBE_KEY, wardrobe);
+        sfx('select', state.quirk.pitch);
+        renderWardrobe();
+      });
+    } else {
+      b.disabled = true;
+    }
+    grid.append(b);
+  }
+  return [h, grid];
 }
 
 function labelSection() {
@@ -865,6 +921,7 @@ checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
 advance();
 drainCodexInbox();
+drainAccessoryInbox();
 if (state.stage === 'dead') showFlatline();
 else if (state.run) openRun(); // resume a run after a reload
 setInterval(advance, 1000);
@@ -878,6 +935,7 @@ let lastFrame = performance.now();
     session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);
   } else {
     renderLCD(canvas, state, time, {
+      accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
       flash: time < flashUntil,
       surge: time < surgeUntil,
       calm: reducedMotion.matches,
