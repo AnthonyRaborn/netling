@@ -224,3 +224,60 @@ test('market offers are always two different items', () => {
     assert.notEqual(a, b, `seed ${seed}`);
   }
 });
+
+import { regionLock, REGION_ORDER } from '../src/netrun/regions.js';
+import { FRAGMENTS, nextFragment, codexByRegion } from '../src/netrun/codex.js';
+
+test('region access follows stage, and The Deep needs the last Ruins fragment', () => {
+  assert.equal(regionLock('public', 'baby'), null);
+  assert.match(regionLock('corp', 'baby'), /teen/);
+  assert.equal(regionLock('bazaar', 'teen'), null);
+  assert.match(regionLock('ruins', 'teen'), /adult/);
+  assert.match(regionLock('deep', 'adult', []), /hidden/);
+  assert.equal(regionLock('deep', 'adult', ['ruins-4']), null);
+  const s = pet('baby');
+  assert.match(runBlockReason(s, 'corp'), /Corp Grid/);
+});
+
+test('every region generates valid maps', () => {
+  for (const region of REGION_ORDER) {
+    for (let seed = 1; seed <= 50; seed++) {
+      const map = generateMap(region, mulberry32(seed));
+      const reach = new Set([map.nodes[0].id]);
+      for (const n of map.nodes) if (reach.has(n.id)) n.edges.forEach((e) => reach.add(e));
+      assert.equal(reach.size, map.nodes.length, `${region} seed ${seed}`);
+    }
+  }
+});
+
+test('fragments drop in order, never repeat, and bank on jack-out', () => {
+  assert.equal(nextFragment('public', []), 'public-1');
+  assert.equal(nextFragment('public', ['public-1']), 'public-2');
+  assert.equal(nextFragment('public', ['public-1', 'public-2', 'public-3', 'public-4']), null);
+
+  const s = pet('adult');
+  startRun(s, 'public', mulberry32(3), ['public-1']);
+  const exit = s.run.map.nodes.find((n) => n.type === 'exit');
+  const before = s.run.map.nodes.find((n) => n.edges.includes(exit.id));
+  s.run.pos = before.id;
+  const res = moveTo(s, exit.id, () => 0); // every roll succeeds
+  assert.deepEqual(res.fragments, ['public-2']);
+});
+
+test('disconnecting loses fragments found this run', () => {
+  const s = pet();
+  startRun(s, 'public', mulberry32(4));
+  s.run.fragments = ['public-1'];
+  s.run.phase = 'ice';
+  s.stats.integrity = 1;
+  resolveIce(s, false, noRng);
+  assert.deepEqual(s.run.fragments, []);
+});
+
+test('codex groups fragments by region with missing placeholders', () => {
+  const rows = codexByRegion(['public-1', 'corp-2'], REGION_ORDER);
+  assert.equal(rows.length, REGION_ORDER.length);
+  assert.equal(rows[0].found, 1);
+  assert.equal(rows[0].entries[1].missing, true);
+  assert.equal(FRAGMENTS.length, REGION_ORDER.length * 4);
+});

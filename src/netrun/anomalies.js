@@ -1,5 +1,5 @@
 // Anomaly events. Each option's apply(ctx) mutates the pet/run through helpers and returns a log line.
-// ctx: { pet, run, rng, loot(n?), hurt(n), lean(allegiance, stability), reveal(depth) }
+// ctx: { pet, run, rng, loot(item?), hurt(n, why), lean(allegiance, stability), reveal(depth), fragment(chance) }
 
 export const ANOMALIES = [
   {
@@ -100,10 +100,10 @@ export const ANOMALIES = [
       {
         id: 'listen',
         label: 'LISTEN',
-        hint: '+15 sync',
+        hint: '+15 sync, it may remember something',
         apply: (c) => {
           c.pet.stats.sync += 15;
-          return 'it hummed a tune your netling almost knows.';
+          return `it hummed a tune your netling almost knows.${c.fragment(0.5)}`;
         },
       },
       { id: 'move', label: 'MOVE ON', hint: 'nothing happens', apply: () => 'the echo faded.' },

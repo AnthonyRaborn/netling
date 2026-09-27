@@ -28,7 +28,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/render.js`, `src/sprites.js` | 40×28 LCD renderer and code-drawn pixel sprites |
 | `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune + intro/result session wrapper |
 | `src/main.js` | UI wiring, save/load (`localStorage`), prefs, notifications |
-| `src/netrun/` | Netrun regions, map generation, rules, and the run view |
+| `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/archive.js` | Lineage records and the form dex (ARCHIVE button) |
 | `src/notify.js`, `sw.js`, `manifest.webmanifest` | PWA + notifications |
 | `tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite |
@@ -41,7 +41,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
   - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each game).
 - **Items:** 6-slot inventory. Mini-game wins (25%), hiding (30%) and complying (30%) can drop items; each adult form leaves a keepsake item for the next generation. Coolant cell, Antivirus patch (6h shield), Corp voucher (full Charge + waves off a trace), Black ICE shard (big Sync, risky), Signal booster (next win x2), Memory shard (rewrites a quirk). Tap a slot, then USE.
-- **Netrun:** jack in (awake, 30+ Charge, 4h cooldown) and pick a path across a fogged node map. Moves cost Charge and add Heat (90+ Heat also burns Integrity). Caches may hold items, ICE is a mini-game that bites on a loss, Relays recharge and let you bank loot, the Exit banks everything plus a bonus. Hitting 0 Integrity or Charge disconnects: loot lost, a care mistake (never the fatal one), emergency reboot. Choice nodes: Checkpoints (hide/comply/voucher, lean the allegiance axis), Markets (spend Charge on items), Anomalies (risky events that lean the axes). Adult forms get run abilities, listed in the Dex. Babies get the Public Net only. `node tools/netrun-balance.mjs` checks risk/reward.
+- **Netrun:** jack in (awake, 30+ Charge, 4h cooldown) and pick a path across a fogged node map. Moves cost Charge and add Heat (90+ Heat also burns Integrity). Caches may hold items, ICE is a mini-game that bites on a loss, Relays recharge and let you bank loot, the Exit banks everything plus a bonus. Hitting 0 Integrity or Charge disconnects: loot lost, a care mistake (never the fatal one), emergency reboot. Choice nodes: Checkpoints (hide/comply/voucher, lean the allegiance axis), Markets (spend Charge on items), Anomalies (risky events that lean the axes). Adult forms get run abilities, listed in the Dex. Regions: Public Net (any stage), Corp Grid and Darknet Bazaar (teen+), Old Web Ruins (adult), and a hidden fifth region. Runs also recover **codex fragments**, 4 per region in story order, shared across generations and readable in the Archive's CODEX tab; like loot, they're lost on a disconnect. `node tools/netrun-balance.mjs` checks risk/reward.
 - **Lineage:** each generation inherits its predecessor's form trait and one of its quirks. The **ARCHIVE** lists every generation and a dex of the 8 forms; undiscovered forms show only a silhouette and a hint.
 
 ## Balance targets

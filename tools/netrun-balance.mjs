@@ -34,14 +34,14 @@ function decide(pet, style, rng) {
   return p.options[Math.floor(rng() * p.options.length)].id;
 }
 
-function play(style, seed) {
+function play(style, seed, region = 'public') {
   const rng = mulberry32(seed);
   const pet = createScript({ now: 0, rng });
-  pet.stage = style.form ? 'adult' : 'baby';
+  pet.stage = style.form || style.stage === 'adult' ? 'adult' : style.stage ?? 'baby';
   if (style.form) pet.form = style.form;
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 }, style.start);
   const start = { ...pet.stats };
-  startRun(pet, 'public', rng);
+  startRun(pet, region, rng);
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 30) {
     const run = pet.run;
@@ -64,14 +64,30 @@ function play(style, seed) {
     intSpent: start.integrity - pet.stats.integrity,
     chargeSpent: start.charge - pet.stats.charge,
     mistakes: pet.careMistakes,
+    fragments: pet.run.result === 'jacked' ? pet.run.fragments.length : 0,
     allegiance: pet.axes.allegiance,
     stability: pet.axes.stability,
   };
 }
 
 const n = Number(process.argv[2] ?? 2000);
+const region = process.argv[3] ?? 'public';
+if (region === 'all') {
+  // Careful and skilled adults (teens for the teen regions) across every region.
+  const { REGION_ORDER, REGIONS } = await import('../src/netrun/regions.js');
+  for (const r of REGION_ORDER) {
+    for (const [name, style] of [['careful', STYLES.careful], ['skilled', STYLES.skilled], ['firewall', STYLES.firewall]]) {
+      const st = { ...style, stage: REGIONS[r].minStage === 'teen' && !style.form ? 'teen' : 'adult' };
+      const rs = Array.from({ length: n }, (_, i) => play(st, i + 1, r));
+      const pct = (f) => `${Math.round((100 * rs.filter(f).length) / n)}%`;
+      const avg = (k) => (rs.reduce((a, x) => a + x[k], 0) / n).toFixed(2);
+      console.log(`${r.padEnd(7)} ${name.padEnd(8)} disconnected ${pct((x) => x.result === 'disconnected').padStart(4)} · items ${avg('banked')} · fragments/run ${avg('fragments')} · int spent ${avg('intSpent')}`);
+    }
+  }
+  process.exit(0);
+}
 for (const [name, style] of Object.entries(STYLES)) {
-  const rs = Array.from({ length: n }, (_, i) => play(style, i + 1));
+  const rs = Array.from({ length: n }, (_, i) => play(style, i + 1, region));
   const pct = (f) => `${Math.round((100 * rs.filter(f).length) / n)}%`;
   const avg = (k) => (rs.reduce((a, r) => a + r[k], 0) / n).toFixed(1);
   console.log(

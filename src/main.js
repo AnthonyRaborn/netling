@@ -25,6 +25,8 @@ import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
 import { runBlockReason, startRun } from './netrun/run.js';
+import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
+import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
 import { drawSprite, formSprite, ITEM_SPRITES, ITEM_COLORS } from './sprites.js';
 import { sfx, unlockAudio, setMuted } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -34,6 +36,7 @@ const LINEAGE_KEY = 'netling.lineage';
 const SKEW_KEY = 'netling.devSkew';
 const PREFS_KEY = 'netling.prefs';
 const DEX_KEY = 'netling.dex';
+const CODEX_KEY = 'netling.codex';
 const DEV = new URLSearchParams(location.search).has('dev');
 
 const store = {
@@ -77,6 +80,19 @@ const prefs = { sound: true, alerts: false, ...store.get(PREFS_KEY) };
 const dex = store.get(DEX_KEY) ?? [];
 for (const form of formsSeenIn(state, store.get(LINEAGE_KEY) ?? [])) discover(dex, form);
 store.set(DEX_KEY, dex);
+
+const codex = store.get(CODEX_KEY) ?? [];
+
+// Bank fragments a finished run left on the pet into the shared codex.
+function drainCodexInbox() {
+  const inbox = state.codexInbox ?? [];
+  if (!inbox.length) return;
+  const fresh = inbox.filter((id) => !codex.includes(id));
+  codex.push(...fresh);
+  state.codexInbox = [];
+  store.set(CODEX_KEY, codex);
+  if (fresh.length) flashStatus(`codex updated: ${fresh.map((id) => `"${fragmentById(id).title}"`).join(', ')}.`);
+}
 
 function recordForm() {
   if (state.stage === 'script' || state.stage === 'dead') return;
@@ -222,6 +238,7 @@ function showPanel(name) {
   $('controls').hidden = name !== 'controls';
   $('picker').hidden = name !== 'picker';
   $('pad').hidden = name !== 'pad';
+  $('regions').hidden = name !== 'regions';
 }
 
 $('btn-play').addEventListener('click', () => {
@@ -248,6 +265,7 @@ function openRun() {
   session = new RunView(state, {
     sound: (name) => sfx(name, state.quirk.pitch),
     onChange: () => {
+      drainCodexInbox();
       save();
       updateHUD();
     },
@@ -263,19 +281,62 @@ function openRun() {
   showPanel('pad');
 }
 
-$('btn-netrun').addEventListener('click', () => {
-  unlockAudio();
+function jackIn(region) {
   tick(state, now());
-  const blocked = runBlockReason(state, 'public');
+  const blocked = runBlockReason(state, region, codex);
   if (blocked) {
     sfx('error', state.quirk.pitch);
     return flashStatus(blocked);
   }
-  if (!state.run) startRun(state, 'public', Math.random);
+  startRun(state, region, Math.random, codex);
   sfx('boot', state.quirk.pitch);
   save();
   openRun();
+}
+
+function renderRegions() {
+  $('region-list').replaceChildren(
+    ...REGION_ORDER.map((id) => {
+      const r = REGIONS[id];
+      const lock = regionLock(id, state.stage, codex);
+      const secret = lock && r.requires;
+      const found = FRAGMENTS.filter((f) => f.region === id && codex.includes(f.id)).length;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'region';
+      b.disabled = Boolean(lock);
+      b.style.borderLeftColor = r.palette.main;
+      const name = document.createElement('span');
+      name.className = 'rname';
+      name.textContent = secret ? '???' : r.name.toUpperCase();
+      name.style.color = lock ? '' : r.palette.main;
+      const frag = document.createElement('span');
+      frag.className = 'rfrag';
+      frag.textContent = secret ? '' : `codex ${found}/4`;
+      const meta = document.createElement('span');
+      meta.className = 'rmeta';
+      meta.textContent = lock ?? r.blurb;
+      b.append(name, frag, meta);
+      b.addEventListener('click', () => jackIn(id));
+      return b;
+    }),
+  );
+}
+
+$('btn-netrun').addEventListener('click', () => {
+  unlockAudio();
+  tick(state, now());
+  if (state.run) return openRun(); // resume
+  const blocked = runBlockReason(state, 'public', codex);
+  if (blocked) {
+    sfx('error', state.quirk.pitch);
+    return flashStatus(blocked);
+  }
+  sfx('select', state.quirk.pitch);
+  renderRegions();
+  showPanel('regions');
 });
+$('regions-back').addEventListener('click', () => showPanel('controls'));
 
 function startGame(id) {
   session = new GameSession(id, {
@@ -454,6 +515,34 @@ function renderArchive() {
     $('lineage-list').replaceChildren(li);
   }
 
+  const groups = codexByRegion(codex, REGION_ORDER);
+  $('codex-count').textContent = `${codex.length}/${FRAGMENTS.length}`;
+  $('codex-list').replaceChildren(
+    ...groups.flatMap((g) => {
+      const r = REGIONS[g.region];
+      const secret = r.requires && !codex.includes(r.requires) && g.found === 0;
+      const h = document.createElement('h3');
+      h.textContent = secret ? '??? ' : `${r.name.toUpperCase()} `;
+      const count = document.createElement('span');
+      count.textContent = `${g.found}/${g.total}`;
+      h.append(count);
+      const items = g.entries.map((e) => {
+        const d = document.createElement('div');
+        if (e.missing) {
+          d.className = 'frag missing';
+          d.textContent = '[ fragment missing ]';
+        } else {
+          d.className = 'frag';
+          const b = document.createElement('b');
+          b.textContent = e.title;
+          d.append(b, e.text);
+        }
+        return d;
+      });
+      return [h, ...items];
+    }),
+  );
+
   const entries = dexEntries(dex);
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
   $('dex-grid').replaceChildren(
@@ -474,7 +563,7 @@ function renderArchive() {
 }
 
 function selectTab(name) {
-  for (const t of ['lineage', 'dex']) {
+  for (const t of ['lineage', 'dex', 'codex']) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
@@ -490,6 +579,7 @@ archive.addEventListener('click', (e) => {
 });
 $('tab-btn-lineage').addEventListener('click', () => selectTab('lineage'));
 $('tab-btn-dex').addEventListener('click', () => selectTab('dex'));
+$('tab-btn-codex').addEventListener('click', () => selectTab('codex'));
 
 // --- settings -------------------------------------------------------------------
 
@@ -576,6 +666,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 advance();
+drainCodexInbox();
 if (state.stage === 'dead') showFlatline();
 else if (state.run) openRun(); // resume a run after a reload
 setInterval(advance, 1000);

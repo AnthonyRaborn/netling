@@ -1,7 +1,8 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
 import { grantItem, isAlive, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
-import { REGIONS, regionOpen } from './regions.js';
+import { REGIONS, regionLock } from './regions.js';
+import { nextFragment, fragmentById } from './codex.js';
 import { ANOMALIES } from './anomalies.js';
 
 export const RUN_CFG = {
@@ -25,6 +26,9 @@ export const RUN_CFG = {
   caughtDamage: 15,
   complyDamage: 5,
   marketPrice: 12,
+  cacheFragmentChance: 0.15,
+  exitFragmentChance: 0.6,
+  echoFragmentChance: 0.5,
   firewallIceMult: 0.5,
 };
 
@@ -53,18 +57,19 @@ export function runCooldownLeft(pet) {
 }
 
 // Why a run can't start, or null.
-export function runBlockReason(pet, region = 'public') {
+export function runBlockReason(pet, region = 'public', codex = []) {
   if (!isAlive(pet)) return pet.stage === 'script' ? 'still compiling...' : 'no signal.';
   if (pet.run) return null; // resuming
   if (pet.asleep) return 'in low-power mode.';
-  if (!regionOpen(region, pet.stage)) return `${REGIONS[region].name} needs a more evolved netling.`;
+  const lock = regionLock(region, pet.stage, codex);
+  if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);
   if (cd > 0) return `uplink cooling down. ${Math.ceil(cd / 60)}h left.`;
   if (pet.stats.charge < RUN_CFG.minCharge) return `needs ${RUN_CFG.minCharge}+ charge to jack in.`;
   return null;
 }
 
-export function startRun(pet, region, rng) {
+export function startRun(pet, region, rng, codex = []) {
   const map = generateMap(region, rng);
   pet.run = {
     region,
@@ -76,6 +81,8 @@ export function startRun(pet, region, rng) {
     pending: null, // ice: { game } | choice: { kind, title, text, options, ... }
     revealed: [],
     phased: false,
+    known: [...codex], // codex at jack-in, so fragments never repeat
+    fragments: [], // found this run; banked on jack-out like loot
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
@@ -87,6 +94,14 @@ export const runOptions = (run) => nodeById(run.map, run.pos).edges.map((id) => 
 
 function note(run, msg) {
   run.messages.push(msg);
+}
+
+// Picks up the region's next unread fragment, if any. Returns a log suffix.
+function takeFragment(run) {
+  const id = nextFragment(run.region, [...run.known, ...run.fragments]);
+  if (!id) return '';
+  run.fragments.push(id);
+  return ` codex fragment: "${fragmentById(id).title}".`;
 }
 
 // Move to an adjacent node and trigger it. Returns the node's encounter.
@@ -110,14 +125,15 @@ export function moveTo(pet, nodeId, rng) {
   const region = REGIONS[run.region];
   switch (node.type) {
     case 'cache': {
+      const frag = rng() < RUN_CFG.cacheFragmentChance ? takeFragment(run) : '';
       if (rng() < RUN_CFG.cacheFindChance) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
-        note(run, `cache cracked: ${ITEMS[item].name}.`);
-        return { ok: true, kind: 'cache', item };
+        note(run, `cache cracked: ${ITEMS[item].name}.${frag}`);
+        return { ok: true, kind: 'cache', item, fragment: Boolean(frag) };
       }
-      note(run, 'cache was empty.');
-      return { ok: true, kind: 'cache', item: null };
+      note(run, frag ? `cache held no items.${frag}` : 'cache was empty.');
+      return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
     }
     case 'ice': {
       if (ability(pet) === 'glitch' && !run.phased) {
@@ -171,13 +187,14 @@ export function moveTo(pet, nodeId, rng) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
       }
-      const price = RUN_CFG.marketPrice;
+      const price = region.marketPrice ?? RUN_CFG.marketPrice;
       const affordable = st.charge > price + 5;
       openChoice(run, {
         kind: 'market',
         title: 'BLACK MARKET',
         text: `a vendor process. ${price} charge per item.`,
         offers,
+        price,
         options: [
           ...offers.map((id, i) => ({ id: `buy${i}`, label: ITEMS[id].name.toUpperCase(), hint: `-${price} chg`, disabled: !affordable })),
           { id: 'leave', label: 'LEAVE', hint: 'buy nothing' },
@@ -197,9 +214,10 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'anomaly', event: ev.id };
     }
     case 'exit': {
-      const bonus = weighted(region.loot, rng);
-      run.loot.push(bonus);
-      note(run, `exit node. bonus: ${ITEMS[bonus].name}.`);
+      const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
+      run.loot.push(...bonus);
+      const frag = rng() < RUN_CFG.exitFragmentChance ? takeFragment(run) : '';
+      note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}.${frag}`);
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
   }
@@ -289,7 +307,7 @@ export function choose(pet, optionId, rng) {
       msg = 'left the market.';
     } else {
       const item = p.offers[Number(optionId.slice(3))];
-      st.charge = clamp(st.charge - RUN_CFG.marketPrice);
+      st.charge = clamp(st.charge - p.price);
       run.loot.push(item);
       lean(-0.5, 0);
       msg = `bought ${ITEMS[item].name}.`;
@@ -299,7 +317,8 @@ export function choose(pet, optionId, rng) {
     const reveal = (depth) => {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
-    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal });
+    const fragment = (chance) => (rng() < chance ? takeFragment(run) : '');
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
     st.sync = clamp(st.sync);
@@ -351,9 +370,17 @@ export function jackOut(pet) {
     if (grantItem(pet, item).includes('full')) lost.push(item);
     else kept.push(item);
   }
-  note(run, `jacked out with ${kept.length} item${kept.length === 1 ? '' : 's'}.${lost.length ? ` ${lost.length} lost: inventory full.` : ''}`);
+  const frags = run.fragments.length;
+  note(
+    run,
+    `jacked out with ${kept.length} item${kept.length === 1 ? '' : 's'}` +
+      `${frags ? ` and ${frags} fragment${frags === 1 ? '' : 's'}` : ''}.` +
+      `${lost.length ? ` ${lost.length} lost: inventory full.` : ''}`,
+  );
+  // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
+  pet.codexInbox = [...(pet.codexInbox ?? []), ...run.fragments];
   endRun(pet, 'jacked');
-  return { ok: true, result: 'jacked', kept, lost };
+  return { ok: true, result: 'jacked', kept, lost, fragments: [...run.fragments] };
 }
 
 export function disconnect(pet, why) {
@@ -368,6 +395,7 @@ export function disconnect(pet, why) {
   if (mistake) pet.careMistakes++;
   note(run, `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
+  run.fragments = [];
   endRun(pet, 'disconnected');
   return { ok: true, result: 'disconnected' };
 }
@@ -375,6 +403,7 @@ export function disconnect(pet, why) {
 // Bail out: forfeit the loot, no other penalty.
 export function abortRun(pet) {
   pet.run.loot = [];
+  pet.run.fragments = [];
   note(pet.run, 'run aborted. loot abandoned.');
   endRun(pet, 'aborted');
   return { ok: true, result: 'aborted' };

@@ -559,7 +559,7 @@ button:active {
 
 .tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   margin: 12px 0;
 }
@@ -634,6 +634,87 @@ button:active {
 
 .dex .perk {
   color: var(--yellow);
+}
+
+.regions {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.region-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.region {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  text-align: left;
+  padding: 8px 10px;
+  border-left-width: 4px;
+}
+
+.region .rname {
+  font-size: 20px;
+}
+
+.region .rmeta {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  color: var(--dim);
+  text-shadow: none;
+}
+
+.region .rfrag {
+  font-size: 15px;
+  color: var(--dim);
+  text-shadow: none;
+}
+
+.region:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.codex h3 {
+  margin: 12px 0 6px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  font-size: 18px;
+}
+
+.codex h3:first-child {
+  margin-top: 0;
+}
+
+.codex h3 span {
+  color: var(--dim);
+}
+
+.frag {
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #0a0a12;
+  border: 1px solid var(--shell-edge);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.frag b {
+  display: block;
+  font-weight: normal;
+  color: var(--yellow);
+  font-size: 15px;
+}
+
+.frag.missing {
+  color: var(--dim);
+  border-style: dashed;
 }
 
 .empty {

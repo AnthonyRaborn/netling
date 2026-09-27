@@ -1,11 +1,12 @@
 // Draws a netrun on the full-res screen and routes pad input. Same interface as GameSession:
 // input(key), update(dt), draw(ctx, pal, time), forfeit().
 import { GameSession } from '../games/session.js';
-import { clear, text, DIM, W, H } from '../games/common.js';
+import { text, DIM, W, H } from '../games/common.js';
 import { nodeById } from './map.js';
 import { REGIONS } from './regions.js';
 import { moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, RUN_CFG } from './run.js';
 import { ITEMS } from '../sim.js';
+import { fragmentById } from './codex.js';
 
 const MAP_TOP = 24;
 const MAP_BOTTOM = 212;
@@ -160,7 +161,8 @@ export class RunView {
     if (this.game) return this.game.draw(ctx, pal, time);
     const run = this.run;
     if (!run) return;
-    clear(ctx);
+    ctx.fillStyle = REGIONS[run.region].palette.bg;
+    ctx.fillRect(0, 0, W, H);
     if (run.phase === 'done') return this.drawSummary(ctx, pal);
 
     const map = run.map;
@@ -260,10 +262,12 @@ export class RunView {
     text(ctx, title, W / 2, 60, { size: 40, align: 'center', color: good ? pal.main : pal.accent, glow: good ? pal.main : pal.accent });
     const last = run.messages[run.messages.length - 1] ?? '';
     text(ctx, last.length > 50 ? `${last.slice(0, 49)}…` : last, W / 2, 110, { size: 20, align: 'center', color: DIM });
-    if (good && run.loot.length) {
-      run.loot.slice(0, 6).forEach((id, i) => {
-        text(ctx, `+ ${ITEMS[id].name}`, W / 2, 146 + i * 22, { size: 20, align: 'center', color: '#c7f9ff' });
-      });
+    if (good) {
+      const lines = [
+        ...run.loot.map((id) => [`+ ${ITEMS[id].name}`, '#c7f9ff']),
+        ...run.fragments.map((id) => [`+ codex: ${fragmentById(id).title}`, '#f9f002']),
+      ];
+      lines.slice(0, 6).forEach(([t, c], i) => text(ctx, t, W / 2, 142 + i * 20, { size: 19, align: 'center', color: c }));
     }
     text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
   }
