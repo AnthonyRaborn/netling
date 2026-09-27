@@ -231,6 +231,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     virusMin: num(raw.virusMin, 0, 0),
     sinceFed: num(raw.sinceFed, CFG.digestMinutes, 0),
     asleep: bool(raw.asleep),
+    nap: isObj(raw.nap) && Number.isFinite(raw.nap.startedAge) ? { startedAge: Math.max(0, raw.nap.startedAge) } : null,
+    lastNapEndAge: numOrNull(raw.lastNapEndAge),
     lightsOn: bool(raw.lightsOn, true),
     careMistakes: int(raw.careMistakes, 0, 0, 1000),
     zeroMin: { charge: num(zero.charge, 0, 0), sync: num(zero.sync, 0, 0), heat: num(zero.heat, 0, 0), lights: num(zero.lights, 0, 0) },

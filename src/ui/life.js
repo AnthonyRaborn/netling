@@ -63,7 +63,7 @@ export function initLife() {
     const prev = app.state;
     app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: codexComplete() });
     app.lastStage = app.state.stage;
-    app.lastLogLen = 0;
+    app.lastLogKey = '';
     $('flatline').hidden = true;
     sfx('boot', app.state.quirk.pitch);
     save();

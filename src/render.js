@@ -1,6 +1,6 @@
 import { SPRITES, drawSprite, formSprite } from './sprites.js';
 import { drawAccessory, drawProp } from './accessories.js';
-import { PALETTES, CFG, needsAttention, isAlive } from './sim.js';
+import { PALETTES, CFG, needsAttention, isAlive, resting } from './sim.js';
 
 export const LCD_W = 40;
 export const LCD_H = 28;
@@ -20,9 +20,13 @@ const bctx = buf.getContext('2d');
 export function renderLCD(canvas, s, time, opts = {}) {
   const pal = PALETTES[s.quirk.palette] ?? PALETTES[0];
   const colors = { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
-  const dark = s.asleep && !s.lightsOn;
+  const rest = resting(s); // asleep or napping
+  // Lights off darkens the room; the pet itself only dims when it's resting in the dark.
+  const dark = !s.lightsOn && s.stage !== 'dead';
+  const dimPet = dark && rest;
 
-  bctx.fillStyle = dark ? LCD_BG_DARK : LCD_BG;
+  const bg = dark ? LCD_BG_DARK : LCD_BG;
+  bctx.fillStyle = bg;
   bctx.fillRect(0, 0, LCD_W, LCD_H);
 
   const frame = Math.floor(time / 500) % 2;
@@ -44,13 +48,18 @@ export function renderLCD(canvas, s, time, opts = {}) {
     bctx.fillRect(0, 23, LCD_W, 1);
   } else {
     const hasSleepPose = Boolean(SPRITES[`${s.form}Sleep`]);
-    const sprite = formSprite(s.form, s.asleep ? 'sleep' : frame ? 'b' : 'a');
+    const sprite = formSprite(s.form, rest ? 'sleep' : frame ? 'b' : 'a');
     let x = Math.floor((LCD_W - sprite[0].length) / 2);
     let y = 20 - sprite.length;
-    if (s.asleep) {
+    if (rest) {
       y = 21 - sprite.length;
     } else if (s.quirk.idle === 'sway') {
+      // Wanders around the screen: side to side, and up and down as far as a hat still fits
+      // above it (tall adults have little room) and the cache icons below.
       x += Math.round(Math.sin(time / 1500) * 8);
+      const up = Math.max(0, Math.min(3, y - 4));
+      const down = 1;
+      y += Math.round(((Math.sin(time / 2300) + 1) / 2) * (up + down)) - up;
     } else if (s.quirk.idle === 'hover') {
       y += Math.round(Math.sin(time / 600) * 2) - 1;
     } else {
@@ -58,9 +67,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
     }
 
     let spriteColors = colors;
-    if (s.asleep) {
+    if (rest) {
       // Forms without a dedicated sleep pose close their eyes by painting them body-colored.
-      spriteColors = dark
+      spriteColors = dimPet
         ? { '#': '#1c3a3f', o: hasSleepPose ? '#0f2528' : '#1c3a3f', '+': '#1c3a3f' }
         : { ...colors, o: hasSleepPose ? pal.accent : pal.main };
     }
@@ -73,21 +82,21 @@ export function renderLCD(canvas, s, time, opts = {}) {
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
     if (opts.accessory && !(opts.flash && Math.floor(time / 120) % 2)) {
-      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dark, time, opts.accessoryColors);
+      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors);
     }
     bctx.globalAlpha = 1;
 
-    if (s.asleep) {
-      const zc = { '#': dark ? '#2f6b73' : pal.main };
+    if (rest) {
+      const zc = { '#': dimPet ? '#2f6b73' : pal.main };
       drawSprite(bctx, SPRITES.z, 30, 3 + frame, zc);
     }
-    if (!dark) {
+    if (!dimPet) {
       for (let i = 0; i < s.cache; i++) {
         drawSprite(bctx, SPRITES.cache, 2 + i * 5, 22, { '#': pal.main, o: pal.accent });
       }
-      if (s.virus) drawSprite(bctx, SPRITES.virus, 2, 2, { '#': pal.accent, o: LCD_BG });
+      if (s.virus) drawSprite(bctx, SPRITES.virus, 2, 2, { '#': pal.accent, o: bg });
       if (s.event?.type === 'trace' && frame) {
-        drawSprite(bctx, SPRITES.eye, s.virus ? 9 : 2, 2, { '#': '#f9f002', o: LCD_BG });
+        drawSprite(bctx, SPRITES.eye, s.virus ? 9 : 2, 2, { '#': '#f9f002', o: bg });
       }
     }
     if (needsAttention(s) && frame) {

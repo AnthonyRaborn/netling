@@ -332,10 +332,15 @@ button:active {
 }
 
 .controls .lights {
-  grid-column: span 2;
   color: var(--magenta);
   border-color: var(--magenta);
   text-shadow: 0 0 6px rgba(255, 42, 109, 0.6);
+}
+
+.controls .nap {
+  color: #b967ff;
+  border-color: #b967ff;
+  text-shadow: 0 0 6px rgba(185, 103, 255, 0.5);
 }
 
 .controls .netrun {
@@ -478,20 +483,28 @@ button:active {
   margin: 14px 0 0;
   padding: 8px 10px;
   height: 172px;
-  overflow: hidden;
   background: #05050a;
   border: 1px solid var(--shell-edge);
   font-size: 16px;
   color: #6fd6e0;
+  /* The whole stored log, newest at the bottom; scroll up for older lines. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--shell-edge) transparent;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+}
+
+/* Few lines still sit at the bottom, as on a terminal. */
+.log li:first-child {
+  margin-top: auto;
 }
 
 .log li {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
+  padding-left: 1em;
+  text-indent: -1em; /* wrapped lines indent under the timestamp */
 }
 
 .log li.warn {

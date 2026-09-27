@@ -1,5 +1,5 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { grantItem, isAlive, log, GAME_IDS, ITEMS, CFG } from '../sim.js';
+import { grantItem, isAlive, log, resting, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
 import { REGIONS, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
@@ -70,7 +70,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   if (pet.run) return null; // resuming
   if (pet.hibernation) return 'hibernating.';
   if (REGIONS[region].tutorial) return null; // the first run is always allowed
-  if (pet.asleep) return 'in low-power mode.';
+  if (resting(pet)) return pet.nap ? 'napping. wake it first.' : 'in low-power mode.';
   const lock = regionLock(region, pet.stage, codex);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);

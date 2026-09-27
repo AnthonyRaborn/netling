@@ -48,7 +48,7 @@ export const app = {
 
   // Render bookkeeping.
   lastStage: null,
-  lastLogLen: 0,
+  lastLogKey: '',
   lastAttention: false,
   flashUntil: 0,
   surgeUntil: 0,

@@ -8,6 +8,7 @@ import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
+import { FRAGMENTS } from '../src/netrun/codex.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -560,6 +561,69 @@ await scenario('fits a Steam Deck screen without scrolling; phones keep one colu
   assert((await layout()) !== 'grid', 'phone got the two-column layout');
   await page.click('#btn-play');
   assert(await visible(page, '#picker'), 'phone layout: PLAY does nothing');
+});
+
+await scenario('nap: starts, blocks play, wakes early', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.click('#btn-nap');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).nap, 'nap not saved');
+  assert((await page.textContent('#btn-nap')) === 'WAKE UP', 'button did not change');
+  assert(/napping/.test(await page.textContent('#readout')), 'readout does not say it is napping');
+  await page.click('#btn-play');
+  assert(/napping/.test(await page.textContent('#status')), 'play not refused while napping');
+  await page.click('#btn-nap');
+  await page.waitForTimeout(300);
+  const s = await saved(page);
+  assert(s.nap === null && s.lastNapEndAge !== null, 'wake did not end the nap');
+  await page.click('#btn-nap');
+  assert(/nap again/.test(await page.textContent('#status')), 'no cooldown after a nap');
+});
+
+await scenario('lights off darkens the screen while it is awake', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const corner = () => page.evaluate(() => [...document.getElementById('lcd').getContext('2d').getImageData(4, 4, 1, 1).data].slice(0, 3).join());
+  const lit = await corner();
+  await page.click('#btn-lights');
+  await page.waitForTimeout(300);
+  const dark = await corner();
+  assert(lit !== dark, `screen unchanged with the lights off (${lit})`);
+});
+
+await scenario('the log keeps every stored line, wraps long ones, and scrolls', async ({ open }) => {
+  const s = awakeNetling();
+  for (let i = 0; i < 60; i++) s.log.push({ t: Date.now(), msg: `> netrun (Darknet Bazaar): jacked out with ${i} items and 1 fragment. re-synced +12 integrity.` });
+  s.log = s.log.slice(-50); // full: new lines replace old ones, so the length stays the same
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  const log = await page.evaluate(() => {
+    const l = document.getElementById('log');
+    const li = l.lastElementChild;
+    return { lines: l.children.length, scrolls: l.scrollHeight > l.clientHeight, atBottom: l.scrollHeight - l.scrollTop - l.clientHeight < 8, wrapped: li.getBoundingClientRect().height > 30, clipped: li.scrollWidth > li.clientWidth };
+  });
+  assert(log.lines === s.log.length, `showing ${log.lines} of ${s.log.length} lines`);
+  assert(log.scrolls && log.atBottom, `not scrolled to the newest line: ${JSON.stringify(log)}`);
+  assert(log.wrapped && !log.clipped, `long line not wrapped: ${JSON.stringify(log)}`);
+  await page.click('#btn-lights');
+  await page.waitForTimeout(300);
+  const last = await page.evaluate(() => document.getElementById('log').lastElementChild.textContent);
+  assert(/lights off/.test(last), `a full log stopped updating: ${last}`);
+});
+
+await scenario('field manual hides root until the codex is complete', async ({ open }) => {
+  const terms = async (page) => {
+    await page.click('#open-help');
+    return page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+  };
+  const before = await terms(await open(BASE, seed()));
+  assert(!before.includes('root') && before.some((t) => /^r.+t$/.test(t)), `root not hidden: ${before}`);
+});
+
+await scenario('field manual shows root once the codex is complete', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': FRAGMENTS.map((f) => f.id) }));
+  await page.evaluate(() => document.getElementById('transmission').open && document.getElementById('transmission').close());
+  await page.click('#open-help');
+  const terms = await page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+  assert(terms.includes('root'), `root still hidden: ${terms}`);
 });
 
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {

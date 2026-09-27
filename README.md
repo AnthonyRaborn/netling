@@ -70,6 +70,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 ## Rules at a glance
 
 - **Stats:** Charge, Sync, Integrity, Heat, Cache. A need left unmet for 15 minutes (60 for sleeping with the lights on) is a care mistake; 10 mistakes, 2 hours at zero Integrity, or 7 days of age ends the run.
+- **Rest:** it sleeps at night on its own; stats drain at 25% of the awake rate with the lights off, 50% with them on. **NAP** rests it on demand for up to 2 hours at 35% drain (time still passes; it can't eat, play or jack in), with 4 hours awake before the next nap. Lights off while it's awake darkens the screen and makes it bored (Sync drains faster).
 - **Evolution:** Bitling → teen at 24h (Kernel for good care, Stub otherwise) → adult at 72h, chosen by two hidden axes:
   - *Allegiance* (corp packets, complying with traces ↔ scavenged data, hiding) → **Chrome** / **Firewall**
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
@@ -81,13 +82,13 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 
 ## Balance targets
 
-`tools/balance.mjs` plays full lifetimes with scripted players. Current results (500 runs each):
+`tools/balance.mjs` plays full lifetimes with scripted players (they never nap). Current results (300 runs each):
 
 | Player | Check-ins | Reaches adult | Full 7-day life |
 |---|---|---|---|
-| attentive | hourly, 7:00–23:00 | 100% | 99% |
-| casual | 6 a day | 87% | 66% |
-| worker | before work, lunch, evenings | 72% | 29% |
-| neglectful | twice a day | 2% | 0% (dies ~day 1) |
+| attentive | hourly, 7:00–23:00 | 98% | 95% |
+| casual | 6 a day | 88% | 67% |
+| worker | before work, lunch, evenings | 78% | 54% |
+| neglectful | twice a day | 7% | 0% (dies ~day 1) |
 
-Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 96%, running hot and sloppy → Glitch 69%, tidy and neutral → Daemon 77%, balanced + 22 wins → Ghost 98%. Ghost by accident: ≤1%.
+Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 99%, running hot and sloppy → Glitch 55%, tidy and neutral → Daemon 83%, balanced + 22 wins → Ghost 98%. Ghost by accident: ≤1%.

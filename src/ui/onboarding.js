@@ -14,15 +14,24 @@ import { advance } from './life.js';
 // Built from the live config so the numbers never drift from the rules.
 function renderHelp() {
   const d = CFG.drainPerHour;
+  const pct = (mult) => `${Math.round(mult * 100)}%`;
   const sections = [
     [
       'STATS',
       [
-        ['CHG · Charge', `Power. Drains about ${d.charge}/hr awake, half that asleep. Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
+        ['CHG · Charge', `Power. Drains about ${d.charge}/hr awake, much slower while it rests (see REST). Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
         ['SYN · Sync', `Its bond with you. Drains about ${d.sync}/hr. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
         ['INT · Integrity', 'Its health. Viruses, a full cache, overheating and an empty Charge all wear it down. It slowly recovers when nothing is wrong.', `At zero for ${CFG.flatlineIntegrityMin / 60} hours, it flatlines.`],
-        ['HEAT', 'Rises while it is awake, when it plays, on netruns and in power surges. COOL vents it; it cools on its own while asleep.', 'At 85+ it damages Integrity; at 100 it is a fault.'],
+        ['HEAT', 'Rises while it is awake, when it plays, on netruns and in power surges. COOL vents it; it cools on its own while it rests.', 'At 85+ it damages Integrity; at 100 it is a fault.'],
         ['CACHE', 'Corrupted files it writes after eating, up to four. PURGE clears them.', '3+ files damage Integrity and make viruses more likely.'],
+      ],
+    ],
+    [
+      'REST',
+      [
+        ['Sleep', `It sleeps at night on its own. With the LIGHTS OFF its stats drain at ${pct(CFG.sleepDarkDrainMult)} of the awake rate; with them on, ${pct(CFG.sleepDrainMult)}, and it can't settle.`, `Lights left on for ${CFG.lightsGraceMin} minutes is a fault.`],
+        ['NAP', `A rest on demand, up to ${CFG.napMaxMin / 60} hours: stats drain at ${pct(CFG.napDrainMult)} while time keeps passing. It can't eat, play or jack in while napping; WAKE UP ends it early.`, `After a nap it needs ${CFG.napCooldownMin / 60} hours awake before the next one.`],
+        ['Lights off, awake', 'The screen goes dark and it gets bored: Sync drains faster.'],
       ],
     ],
     [
@@ -32,7 +41,10 @@ function renderHelp() {
         ['age · bed', 'How long it has been running, and the hour it goes to sleep.'],
         ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
         ['trait', 'What it inherited from the netling before it.'],
-        ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."],
+        // Hidden until earned: the codex holds the secret.
+        codexComplete()
+          ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]
+          : ['r\u2593\u2592t', '\u2591\u2592\u2593 [sector corrupted] \u2593\u2592\u2591', 'unrecoverable. for now.'],
       ],
     ],
     [
@@ -41,7 +53,7 @@ function renderHelp() {
         ['!', 'It needs something. Check the bars.'],
         ['virus icon', 'Infected. PATCH it before Integrity collapses.'],
         ['eye', 'A corp trace. HIDE or COMPLY before the timer runs out.'],
-        ['Z', 'Asleep. Turn the LIGHTS OFF.'],
+        ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
       ],
     ],
   ];
@@ -143,7 +155,7 @@ export function advanceIntro() {
   // The script compiles for real: a fresh netling that boots on the next tick.
   app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: codexComplete() });
   app.lastStage = app.state.stage;
-  app.lastLogLen = 0;
+  app.lastLogKey = '';
   save();
   advance();
   setOnboarding('readme');

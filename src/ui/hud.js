@@ -1,5 +1,5 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, tick, traceMinutesLeft, CFG, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, resting, tick, traceMinutesLeft, CFG, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
@@ -38,20 +38,28 @@ export function updateHUD() {
   }
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
+  if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
+  $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
+  $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;
   renderInventory();
   renderNudge();
   renderHibernation();
   const traceLeft = traceMinutesLeft(state);
   $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
   $('event-timer').textContent = `${traceLeft}m`;
-  document.body.classList.toggle('asleep', state.asleep);
+  document.body.classList.toggle('asleep', resting(state));
 
+  // Redrawn when a line is added (the log is capped, so its length alone stops changing).
   const logEl = $('log');
-  if (state.log.length !== app.lastLogLen || logEl.childElementCount === 0) {
-    app.lastLogLen = state.log.length;
+  const last = state.log[state.log.length - 1];
+  const logKey = `${state.log.length}|${last?.t}|${last?.msg}`;
+  if (logKey !== app.lastLogKey || logEl.childElementCount === 0) {
+    app.lastLogKey = logKey;
+    // Follow new lines unless the player has scrolled up to read older ones.
+    const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 8;
     logEl.replaceChildren(
-      ...state.log.slice(-8).map((e) => {
+      ...state.log.map((e) => {
         const li = document.createElement('li');
         const t = new Date(e.t);
         li.textContent = `${t.toTimeString().slice(0, 5)} ${e.msg}`;
@@ -59,6 +67,7 @@ export function updateHUD() {
         return li;
       }),
     );
+    if (atBottom) logEl.scrollTop = logEl.scrollHeight;
   }
 
   // Chirp (or notify, when backgrounded) each time a new need appears.

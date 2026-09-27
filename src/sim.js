@@ -7,7 +7,13 @@ export const SAVE_VERSION = 1;
 export const CFG = {
   bootMinutes: 3,
   drainPerHour: { charge: 12, sync: 10 },
-  sleepDrainMult: 0.5,
+  sleepDrainMult: 0.5, // asleep with the lights on: restless
+  sleepDarkDrainMult: 0.25, // asleep in the dark: real rest
+  // Naps: a short rest on demand. Drains slow down but time still passes; a cooldown stops
+  // back-to-back naps from covering the whole day.
+  napDrainMult: 0.35,
+  napMaxMin: 120,
+  napCooldownMin: 240,
   heatDriftPerHour: 3,
   heatCoolWhileAsleepPerHour: 10,
   cacheChancePerMin: 1 / 150, // only while digesting (recently fed) and awake
@@ -112,6 +118,8 @@ export const FORM_MODS = {
 const mod = (s, key, fallback = 1) => FORM_MODS[s.form]?.[key] ?? fallback;
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
+// Asleep for the night, or napping: either way it rests and can't eat, play or run.
+export const resting = (s) => s.asleep || Boolean(s.nap);
 
 export const TRAITS = {
   licensed: { name: 'Licensed', desc: 'Corp packets restore +25% Charge' },
@@ -188,6 +196,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     virusMin: 0,
     sinceFed: CFG.digestMinutes,
     asleep: false,
+    nap: null,
+    lastNapEndAge: null,
     lightsOn: true,
     careMistakes: 0,
     zeroMin: { charge: 0, sync: 0, heat: 0, lights: 0 },
@@ -266,6 +276,9 @@ function step(s, t, rng) {
   }
 
   const shouldSleep = isSleepHour(new Date(t).getHours(), s.quirk.sleepOffset);
+  if (s.nap && (shouldSleep || s.ageMin - s.nap.startedAge >= CFG.napMaxMin)) {
+    endNap(s, t, shouldSleep ? null : '> nap over. back online.');
+  }
   if (shouldSleep && !s.asleep) {
     s.asleep = true;
     log(s, t, '> entering low-power mode. kill the lights.');
@@ -276,16 +289,17 @@ function step(s, t, rng) {
   }
 
   const st = s.stats;
-  let rate = s.asleep ? CFG.sleepDrainMult : 1;
-  if (s.asleep && s.trait === 'persistent') rate *= 0.7;
+  const rest = resting(s);
+  let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
+  if (rest && s.trait === 'persistent') rate *= 0.7;
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
-  const dark = !s.asleep && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
+  const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
   st.heat = clamp(
-    st.heat + (s.asleep ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
+    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );
 
-  if (!s.asleep && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
+  if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
     s.cache++;
     log(s, t, '> corrupted cache file written.');
   }
@@ -314,7 +328,7 @@ function step(s, t, rng) {
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
-  else if (!s.asleep && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
+  else if (!rest && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
 
   stepEvents(s, t, rng);
 
@@ -341,7 +355,7 @@ function stepEvents(s, t, rng) {
     }
     return;
   }
-  if (s.asleep) return;
+  if (resting(s)) return;
   if (s.trait !== 'untraceable' && rng() < CFG.traceChancePerHour / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
@@ -440,6 +454,8 @@ export function migrate(s) {
   s.lastWakeAt ??= null;
   s.lastRunEndAge ??= null;
   s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
+  s.nap ??= null;
+  s.lastNapEndAge ??= null;
   return s;
 }
 
@@ -468,12 +484,37 @@ function flatline(s, t, cause) {
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
+// --- naps ---------------------------------------------------------------------------------
+
+function endNap(s, t, msg) {
+  s.nap = null;
+  s.lastNapEndAge = s.ageMin;
+  if (msg) log(s, t, msg);
+}
+
+export const napMinutesLeft = (s) => (s.nap ? Math.max(0, CFG.napMaxMin - (s.ageMin - s.nap.startedAge)) : 0);
+
+export function napCooldownLeft(s) {
+  if (s.lastNapEndAge == null) return 0;
+  return Math.max(0, s.lastNapEndAge + CFG.napCooldownMin - s.ageMin);
+}
+
+// Why a nap can't start right now, or null (waking from one is always allowed).
+export function napBlockReason(s) {
+  if (s.nap) return null;
+  if (s.asleep) return 'already asleep.';
+  if (s.run) return 'finish the netrun first.';
+  const cd = napCooldownLeft(s);
+  if (cd > 0) return `not tired yet. ${cd >= 60 ? `${Math.ceil(cd / 60)}h` : `${cd}m`} until it can nap again.`;
+  return null;
+}
+
 // Why an action can't happen right now, or null. The UI checks 'play' before launching a game.
 export function blockReason(s, action) {
   if (s.stage === 'dead') return 'no signal.';
   if (s.hibernation) return 'hibernating.';
   if (s.stage === 'script' && action !== 'lights') return 'still compiling...';
-  if (s.asleep && ['corp', 'scav', 'play', 'cool'].includes(action)) return 'in low-power mode.';
+  if (resting(s) && ['corp', 'scav', 'play', 'cool'].includes(action)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
   return null;
@@ -521,7 +562,7 @@ export function itemBlockReason(s, slot) {
   if (base) return base;
   const id = s.inventory?.[slot];
   if (!id) return 'empty slot.';
-  if (ITEMS[id].awake && s.asleep) return 'in low-power mode.';
+  if (ITEMS[id].awake && resting(s)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   return null;
 }
 
@@ -638,9 +679,21 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       res = ok('cache purged.', 'purge');
       break;
     }
+    case 'nap': {
+      if (s.nap) {
+        endNap(s, now, null);
+        res = ok('woke it from its nap.', 'boot');
+        break;
+      }
+      const blockedNap = napBlockReason(s);
+      if (blockedNap) return fail(blockedNap);
+      s.nap = { startedAge: s.ageMin };
+      res = ok(`napping. up to ${CFG.napMaxMin / 60}h of low drain.`, 'lights');
+      break;
+    }
     case 'lights': {
       s.lightsOn = !s.lightsOn;
-      const msg = s.lightsOn ? 'lights on.' : s.asleep ? 'lights off.' : "lights off. it's awake and bored in the dark.";
+      const msg = s.lightsOn ? 'lights on.' : resting(s) ? 'lights off.' : "lights off. it's awake and bored in the dark.";
       res = ok(msg, 'lights');
       break;
     }
