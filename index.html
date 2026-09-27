@@ -23,6 +23,7 @@
           <button type="button" id="pref-sound" class="pref" aria-pressed="true">SND ON</button>
           <button type="button" id="pref-alerts" class="pref" aria-pressed="false">ALERTS OFF</button>
           <button type="button" id="open-archive" class="pref archive-btn">ARCHIVE</button>
+          <button type="button" id="open-help" class="pref" aria-label="Field manual">?</button>
         </span>
       </header>
 
@@ -47,11 +48,11 @@
       </div>
 
       <section class="hud" aria-label="Vitals">
-        <div class="stat"><label>CHG</label><div id="bar-charge" class="bar"></div></div>
-        <div class="stat"><label>SYN</label><div id="bar-sync" class="bar"></div></div>
-        <div class="stat"><label>INT</label><div id="bar-integrity" class="bar"></div></div>
-        <div class="stat"><label>HEAT</label><div id="bar-heat" class="bar heat"></div></div>
-        <div class="stat">
+        <div class="stat" title="Charge: power. Feed it."><label>CHG</label><div id="bar-charge" class="bar" role="meter" aria-label="Charge"></div></div>
+        <div class="stat" title="Sync: its bond with you. Play with it."><label>SYN</label><div id="bar-sync" class="bar" role="meter" aria-label="Sync"></div></div>
+        <div class="stat" title="Integrity: its health. At zero too long, it flatlines."><label>INT</label><div id="bar-integrity" class="bar" role="meter" aria-label="Integrity"></div></div>
+        <div class="stat" title="Heat: running hot hurts it. Cool it down."><label>HEAT</label><div id="bar-heat" class="bar heat" role="meter" aria-label="Heat"></div></div>
+        <div class="stat" title="Cache: corrupted files. Purge them.">
           <label>CACHE</label>
           <div id="cache-pips" class="pips"><i></i><i></i><i></i><i></i></div>
         </div>
@@ -144,6 +145,14 @@
         </div>
         <div id="codex-list" class="codex"></div>
       </section>
+    </dialog>
+
+    <dialog id="help" class="archive help" aria-labelledby="help-title">
+      <header>
+        <h2 id="help-title">FIELD MANUAL</h2>
+        <button type="button" id="close-help" class="pref">CLOSE</button>
+      </header>
+      <section id="help-body" class="help-body"></section>
     </dialog>
 
     <dialog id="transmission" class="archive transmission" aria-labelledby="transmission-title">

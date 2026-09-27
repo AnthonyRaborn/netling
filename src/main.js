@@ -65,6 +65,7 @@ let skew = DEV ? store.get(SKEW_KEY) ?? 0 : 0;
 const now = () => Date.now() + skew;
 
 let state = store.get(SAVE_KEY);
+const firstLaunch = !state;
 const codex = store.get(CODEX_KEY) ?? [];
 const codexComplete = () => FRAGMENTS.every((f) => codex.includes(f.id));
 
@@ -747,6 +748,78 @@ function labelSection() {
   return [h, row];
 }
 
+// --- field manual -----------------------------------------------------------------
+
+const HELP_KEY = 'netling.helpSeen';
+
+// Built from the live config so the numbers never drift from the rules.
+function renderHelp() {
+  const d = CFG.drainPerHour;
+  const sections = [
+    [
+      'STATS',
+      [
+        ['CHG · Charge', `Power. Drains about ${d.charge}/hr awake, half that asleep. Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
+        ['SYN · Sync', `Its bond with you. Drains about ${d.sync}/hr. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
+        ['INT · Integrity', 'Its health. Viruses, a full cache, overheating and an empty Charge all wear it down. It slowly recovers when nothing is wrong.', `At zero for ${CFG.flatlineIntegrityMin / 60} hours, it flatlines.`],
+        ['HEAT', 'Rises while it is awake, when it plays, on netruns and in power surges. COOL vents it; it cools on its own while asleep.', 'At 85+ it damages Integrity; at 100 it is a fault.'],
+        ['CACHE', 'Corrupted files it writes after eating, up to four. PURGE clears them.', '3+ files damage Integrity and make viruses more likely.'],
+      ],
+    ],
+    [
+      'THE READOUT',
+      [
+        ['v1.0 Kernel', 'Generation number and its current form.'],
+        ['age · bed', 'How long it has been running, and the hour it goes to sleep.'],
+        ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
+        ['trait', 'What it inherited from the netling before it.'],
+        ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."],
+      ],
+    ],
+    [
+      'ON THE SCREEN',
+      [
+        ['!', 'It needs something. Check the bars.'],
+        ['virus icon', 'Infected. PATCH it before Integrity collapses.'],
+        ['eye', 'A corp trace. HIDE or COMPLY before the timer runs out.'],
+        ['Z', 'Asleep. Turn the LIGHTS OFF.'],
+      ],
+    ],
+  ];
+  const body = sections.flatMap(([title, rows]) => {
+    const h = document.createElement('h3');
+    h.textContent = title;
+    const dl = document.createElement('dl');
+    for (const [term, desc, note] of rows) {
+      const dt = document.createElement('dt');
+      dt.textContent = term;
+      const dd = document.createElement('dd');
+      dd.textContent = desc;
+      if (note) {
+        const small = document.createElement('small');
+        small.textContent = note;
+        dd.append(small);
+      }
+      dl.append(dt, dd);
+    }
+    return [h, dl];
+  });
+  const tip = document.createElement('p');
+  tip.textContent = 'It lives in real time, even while this page is closed. Hover a stat for a reminder.';
+  $('help-body').replaceChildren(tip, ...body);
+}
+
+function openHelp() {
+  renderHelp();
+  $('help').showModal();
+  store.set(HELP_KEY, true);
+}
+$('open-help').addEventListener('click', openHelp);
+$('close-help').addEventListener('click', () => $('help').close());
+$('help').addEventListener('click', (e) => {
+  if (e.target === $('help')) $('help').close();
+});
+
 // --- NL-0 ------------------------------------------------------------------------
 
 function showTransmission() {
@@ -983,6 +1056,7 @@ document.addEventListener('visibilitychange', () => {
 
 checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
+if (firstLaunch && !store.get(HELP_KEY)) setTimeout(openHelp, 1200); // after the CRT power-on
 let plushCache = plushExtra();
 advance();
 drainCodexInbox();
