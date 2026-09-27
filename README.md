@@ -34,7 +34,13 @@ Only one tab looks after the netling at a time (Web Locks, or a lease in `localS
 
 ## Install / offline
 
-It's a PWA: use the browser's "Install app" (desktop Chrome) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline.
+It's a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari, macOS 14+) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
+
+On wide, short screens (Steam Deck, laptops) the screen sits beside the controls so everything fits without scrolling; phones and tall windows keep the one-column layout.
+
+**Controllers** work with no setup: in mini-games and netruns the d-pad or left stick moves, A confirms and B quits; elsewhere the d-pad moves between buttons, A presses and B backs out or closes a dialog. Browsers only see a controller after one of its buttons is pressed on the page.
+
+**Deploying:** `.github/workflows/pages.yml` publishes the game to GitHub Pages whenever the test workflow passes on `main` (Settings > Pages > Source: GitHub Actions, once). Only the files the game loads are published. [`docs/PLATFORMS.md`](docs/PLATFORMS.md) covers native apps.
 
 Notifications (toggle **ALERTS** in the header) fire while the app is open or backgrounded. A fully closed app can't be woken without a push server; that's out of scope for this static build.
 
@@ -50,7 +56,8 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
 | `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading. Imported codes keep only fields the game knows |
 | `src/lease.js` | The one-active-tab rule for browsers without Web Locks |
-| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery |
+| `src/ui/gamepad.js` | Controller input (Gamepad API): game controls in sessions, focus navigation in menus |
+| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery, controllers, screen sizes |
 | `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
 | `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |

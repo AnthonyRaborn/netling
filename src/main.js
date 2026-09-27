@@ -14,6 +14,7 @@ import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboar
 import { dropSession, initPlay, openRun } from './ui/play.js';
 import { importFromUrl, initSystem, protectStorage, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
+import { initGamepad } from './ui/gamepad.js';
 import { advance, initLife, showFlatline } from './ui/life.js';
 
 loadAll();
@@ -27,6 +28,7 @@ initArchive();
 initOnboarding();
 initSystem();
 initTabs();
+initGamepad();
 
 // --- settings ---
 

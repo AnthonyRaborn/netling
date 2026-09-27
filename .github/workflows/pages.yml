@@ -1,0 +1,44 @@
+name: pages
+
+# Publishes the game to GitHub Pages after the test workflow passes on main.
+# One-time setup: Settings > Pages > Source: GitHub Actions.
+on:
+  workflow_run:
+    workflows: [test]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Only a green test run on a push to main deploys (a manual run deploys main as it is).
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      # Only what the game loads: tests, tools and docs stay out. gallery.html (every sprite) is a spoiler.
+      - name: Collect site files
+        run: |
+          mkdir -p _site
+          cp -r index.html style.css sw.js manifest.webmanifest icons src _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

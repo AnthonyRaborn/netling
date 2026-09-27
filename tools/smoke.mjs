@@ -492,6 +492,76 @@ await scenario('system actions wait for a running mini-game; a refused result ex
   assert(/not enough charge/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
 });
 
+// Plugs in a fake controller: window.__pad is what navigator.getGamepads() reports.
+const FAKE_PAD = `(() => {
+  window.__pad = { buttons: Array.from({ length: 17 }, () => ({ pressed: false })), axes: [0, 0] };
+  navigator.getGamepads = () => [window.__pad];
+  dispatchEvent(new Event('gamepadconnected'));
+})()`;
+const PAD_BUTTONS = { a: 0, b: 1, up: 12, down: 13, left: 14, right: 15 };
+async function padPress(page, name) {
+  await page.evaluate((i) => (window.__pad.buttons[i].pressed = true), PAD_BUTTONS[name]);
+  await page.waitForTimeout(80);
+  await page.evaluate((i) => (window.__pad.buttons[i].pressed = false), PAD_BUTTONS[name]);
+  await page.waitForTimeout(80);
+}
+const focused = (page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.dataset.act || document.activeElement?.dataset.game || document.activeElement?.tagName);
+
+await scenario('a controller moves through menus and plays a mini-game', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.addScriptTag({ content: FAKE_PAD });
+  await padPress(page, 'down'); // nothing focused yet: focus lands on the first control
+  assert((await focused(page)) === 'pref-sound', `first focus: ${await focused(page)}`);
+  await page.focus('[data-act="corp"]');
+  await padPress(page, 'right');
+  assert((await focused(page)) === 'scav', `right from CORP: ${await focused(page)}`);
+  await padPress(page, 'down');
+  assert((await focused(page)) === 'cool', `down from SCAV: ${await focused(page)}`);
+
+  // B backs out of the game picker; A starts a game; B quits it.
+  await page.focus('#btn-play');
+  await padPress(page, 'a');
+  assert(await visible(page, '#picker'), 'A did not open the picker');
+  await padPress(page, 'b');
+  assert(await visible(page, '#controls'), 'B did not leave the picker');
+  await page.focus('#btn-play');
+  await padPress(page, 'a');
+  await page.focus('[data-game="tune"]');
+  await padPress(page, 'a');
+  assert(await visible(page, '#pad'), 'A did not start the game');
+  await padPress(page, 'a'); // past the intro card
+  await padPress(page, 'left');
+  await padPress(page, 'b'); // quit: counts as a loss
+  await page.waitForTimeout(2500);
+  assert(await visible(page, '#controls'), 'game did not end');
+  assert((await saved(page)).games.tune.played === 1, 'game not recorded');
+
+  // B closes a dialog.
+  await page.focus('#open-archive');
+  await padPress(page, 'a');
+  assert(await page.locator('#archive').evaluate((d) => d.open), 'A did not open the archive');
+  await padPress(page, 'b');
+  assert(!(await page.locator('#archive').evaluate((d) => d.open)), 'B did not close the archive');
+});
+
+await scenario('fits a Steam Deck screen without scrolling; phones keep one column', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const fits = () => page.evaluate(() => document.documentElement.scrollHeight <= innerHeight);
+  const layout = () => page.evaluate(() => getComputedStyle(document.querySelector('.device')).display);
+  for (const [w, h] of [[1280, 800], [1366, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    assert((await layout()) === 'grid', `${w}x${h}: not the two-column layout`);
+    assert(await fits(), `${w}x${h}: home screen scrolls`);
+    await page.click('#btn-netrun');
+    assert(await fits(), `${w}x${h}: region list scrolls`);
+    await page.click('#regions-back');
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert((await layout()) !== 'grid', 'phone got the two-column layout');
+  await page.click('#btn-play');
+  assert(await visible(page, '#picker'), 'phone layout: PLAY does nothing');
+});
+
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {
   const page = await open(
     BASE,

@@ -53,6 +53,10 @@ function sendInput(fn) {
   }
 }
 
+// Pad, keyboard and controller input for the running session.
+export const sendKey = (key) => app.session && sendInput((s) => s.input(key));
+export const quitSession = () => app.session && sendInput((s) => s.forfeit());
+
 function bumpProgress(run) {
   const progress = app.progress;
   if (run?.result) progress.runs = { ...progress.runs, [run.result]: (progress.runs?.[run.result] ?? 0) + 1 };
@@ -194,10 +198,10 @@ export function initPlay() {
   document.querySelectorAll('[data-key]').forEach((btn) =>
     btn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      if (app.session) sendInput((s) => s.input(btn.dataset.key));
+      sendKey(btn.dataset.key);
     }),
   );
-  $('pad-quit').addEventListener('click', () => app.session && sendInput((s) => s.forfeit()));
+  $('pad-quit').addEventListener('click', quitSession);
 
   document.addEventListener('keydown', (e) => {
     if (introWaiting() && [' ', 'Enter', 'z', 'x'].includes(e.key)) {
@@ -205,10 +209,10 @@ export function initPlay() {
       return advanceIntro();
     }
     if (!app.session) return;
-    if (e.key === 'Escape') return sendInput((s) => s.forfeit());
+    if (e.key === 'Escape') return quitSession();
     const key = KEYMAP[e.key];
     if (!key || e.repeat) return;
     e.preventDefault();
-    sendInput((s) => s.input(key));
+    sendKey(key);
   });
 }
