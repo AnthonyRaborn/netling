@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "TZ=UTC node --test --test-timeout=20000 tests/",
+    "test": "TZ=UTC node --test --test-timeout=20000 'tests/*.test.js'",
     "serve": "python3 -m http.server 5174",
     "balance": "node tools/balance.mjs"
   }

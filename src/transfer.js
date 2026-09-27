@@ -1,8 +1,12 @@
 // Save transfer codes: every piece of Netling's local data, compressed into one pasteable string.
 // Format: NL1.<base64url(deflate(json))>.<crc32 hex>
-import { SAVE_VERSION, SPECIES } from './sim.js';
+import { SPECIES } from './sim.js';
+import { CLEANERS, cleanSave } from './sanitize.js';
 
 const PREFIX = 'NL1';
+// Real codes are a few KB. The caps stop a hostile code from hanging the tab.
+export const MAX_CODE_CHARS = 512 * 1024;
+export const MAX_JSON_BYTES = 4 * 1024 * 1024;
 // Everything a player would expect to move with them. Dev-only keys stay behind.
 export const TRANSFER_KEYS = [
   'save',
@@ -29,9 +33,27 @@ function crc32(bytes) {
   return ((c ^ 0xffffffff) >>> 0).toString(16).padStart(8, '0');
 }
 
-async function pipe(bytes, stream) {
-  const out = new Blob([bytes]).stream().pipeThrough(stream);
-  return new Uint8Array(await new Response(out).arrayBuffer());
+async function pipe(bytes, stream, maxBytes = Infinity) {
+  const reader = new Blob([bytes]).stream().pipeThrough(stream).getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new RangeError('too large');
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    out.set(c, at);
+    at += c.length;
+  }
+  return out;
 }
 
 function toBase64Url(bytes) {
@@ -59,13 +81,15 @@ export async function encodeSave(data, exportedAt = Date.now()) {
 export class TransferError extends Error {}
 
 // Returns { exportedAt, data } or throws TransferError with a player-facing message.
-export async function decodeSave(code) {
+// Every key in data has been checked and repaired (see sanitize.js), so it is safe to store.
+export async function decodeSave(code, now = Date.now()) {
   const clean = String(code ?? '').replace(/\s+/g, '');
+  if (clean.length > MAX_CODE_CHARS) throw new TransferError('that code is far too long to be a netling code.');
   const parts = clean.split('.');
   if (parts.length !== 3 || parts[0] !== PREFIX) throw new TransferError("that doesn't look like a netling code.");
   let json;
   try {
-    json = await pipe(fromBase64Url(parts[1]), new DecompressionStream('deflate-raw'));
+    json = await pipe(fromBase64Url(parts[1]), new DecompressionStream('deflate-raw'), MAX_JSON_BYTES);
   } catch {
     throw new TransferError('the code is damaged. copy all of it and try again.');
   }
@@ -79,12 +103,15 @@ export async function decodeSave(code) {
   if (payload?.v !== 1 || typeof payload.data !== 'object' || payload.data === null) {
     throw new TransferError('this code is from a different version.');
   }
-  const save = payload.data.save;
-  if (!save || typeof save !== 'object' || save.saveVersion !== SAVE_VERSION || !SPECIES[save.form ?? 'bitling']) {
-    throw new TransferError('this code has no netling in it.');
+  const save = cleanSave(payload.data.save, now);
+  if (!save) throw new TransferError('this code has no netling in it.');
+  const data = { save };
+  for (const k of TRANSFER_KEYS) {
+    if (k === 'save' || !Object.hasOwn(payload.data, k)) continue;
+    const v = CLEANERS[k](payload.data[k]);
+    if (v !== null) data[k] = v;
   }
-  const data = Object.fromEntries(Object.entries(payload.data).filter(([k]) => TRANSFER_KEYS.includes(k)));
-  return { exportedAt: payload.exportedAt, data };
+  return { exportedAt: Number.isFinite(payload.exportedAt) ? payload.exportedAt : null, data };
 }
 
 // A short summary for the confirm step.

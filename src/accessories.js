@@ -481,7 +481,7 @@ export const STYLE_ITEMS = [...ACCESSORIES, ...PROPS];
 export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
 
 // Recolorable accessories declare colors: [[label, default], ...]. Custom picks must be #rrggbb.
-const HEX = /^#[0-9a-f]{6}$/i;
+export const HEX = /^#[0-9a-f]{6}$/i;
 export function accessoryColors(id, custom) {
   const x = accessoryById(id);
   if (!x?.colors) return null;

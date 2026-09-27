@@ -19,7 +19,7 @@ New saves open with a short onboarding: an accidental script run, the field manu
 ARCHIVE → **SYSTEM**:
 
 - **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
-- **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected. Loading previews what's inside first.
+- **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected, and everything inside is checked and repaired before it's stored. Loading previews what's inside first, and either all of it is written or none of it is (a full disk changes nothing).
 - **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day.
 - **Restart** erases everything and replays the onboarding.
 - **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage). iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
@@ -40,7 +40,10 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/sim.js` | All game rules. Pure functions of `(state, time, rng)`; minute-by-minute `tick()` |
 | `src/render.js`, `src/sprites.js` | 40×28 LCD renderer and code-drawn pixel sprites |
 | `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune + intro/result session wrapper |
-| `src/main.js` | UI wiring, save/load (`localStorage`), prefs, notifications |
+| `src/main.js` | Boot: load saved data, claim the caretaker tab, wire the UI, run the clock and render loop |
+| `src/ui/` | The UI, one module per area: `hud` (vitals, log, inventory), `life` (tick, evolution, flatline, care buttons), `play` (mini-games, netruns), `style` (unlocks, wardrobe), `archive`, `onboarding` (intro, field manual), `system` (transfer, import, hibernate, restart), `tabs` (one active tab). `ui/app.js` holds the shared state |
+| `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
+| `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading |
 | `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
 | `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |
