@@ -132,9 +132,9 @@ export const PALETTES = [
 ];
 const BASE_PALETTES = PALETTES.length - 1;
 
-const IDLES = ['bounce', 'sway', 'hover'];
-const PACKETS = ['corp', 'scav'];
-const QUIRK_KEYS = ['palette', 'pitch', 'idle', 'favPacket', 'sleepOffset'];
+export const IDLES = ['bounce', 'sway', 'hover'];
+export const PACKETS = ['corp', 'scav'];
+export const QUIRK_KEYS = ['palette', 'pitch', 'idle', 'favPacket', 'sleepOffset'];
 
 export function mulberry32(seed) {
   let a = seed >>> 0;

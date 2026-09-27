@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeSave, decodeSave, describeSave, TransferError, TRANSFER_KEYS } from '../src/transfer.js';
+import { encodeSave, decodeSave, describeSave, TransferError, TRANSFER_KEYS, MAX_CODE_CHARS, MAX_JSON_BYTES } from '../src/transfer.js';
 import { createScript } from '../src/sim.js';
 
 const sample = () => ({
@@ -55,4 +55,48 @@ test('fractional numbers are rounded to two places in transit', async () => {
   const back = await decodeSave(await encodeSave(data));
   assert.equal(back.data.save.stats.charge, 40.8);
   assert.equal(back.data.save.bornAt, data.save.bornAt, 'integers untouched');
+});
+
+test('every key in an imported code is checked and repaired before it can be stored', async () => {
+  const save = createScript({ now: 1_000_000 });
+  save.quirk = 'x';
+  save.inventory = ['coolant', 'bogus'];
+  const back = await decodeSave(
+    await encodeSave({
+      save,
+      lineage: [7, { form: 'dragon' }],
+      dex: 'kernel',
+      codex: {},
+      wardrobe: [1, 2],
+      progress: 'lots',
+      unlocked: ['shell:matte', 'everything'],
+      accessories: { 0: 'partyhat' },
+      prefs: { volume: 'loud' },
+      onboarding: 42,
+    }),
+    1_000_000,
+  );
+  const d = back.data;
+  assert.equal(typeof d.save.quirk.pitch, 'number');
+  assert.deepEqual(d.save.inventory, ['coolant']);
+  assert.equal(d.lineage.length, 1);
+  assert.equal(d.lineage[0].form, null);
+  assert.deepEqual(d.dex, []);
+  assert.deepEqual(d.codex, []);
+  assert.deepEqual(d.wardrobe, {});
+  assert.equal(d.progress.gamesPlayed, 0);
+  assert.deepEqual(d.unlocked, ['shell:matte']);
+  assert.deepEqual(d.accessories, []);
+  assert.equal(d.prefs.volume, 0.8);
+  assert.equal('onboarding' in d, false, 'an unusable onboarding step is left out');
+});
+
+test('oversized codes are rejected before they can hang the page', async () => {
+  const { deflateRawSync } = await import('node:zlib');
+  // A tiny code that inflates past the cap (a "zip bomb").
+  const json = `{"v":1,"data":{"save":"${'a'.repeat(MAX_JSON_BYTES + 10)}"}}`;
+  const packed = deflateRawSync(Buffer.from(json)).toString('base64url');
+  assert.ok(packed.length < 20_000);
+  await assert.rejects(decodeSave(`NL1.${packed}.00000000`), TransferError);
+  await assert.rejects(decodeSave(`NL1.${'A'.repeat(MAX_CODE_CHARS)}.00000000`), /too long/);
 });
