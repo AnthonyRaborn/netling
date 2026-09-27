@@ -102,7 +102,7 @@ function checkIn(s, p, now, rng, ctx) {
 export function simulate(p, seed) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
-  const s = createScript({ now: t0, rng });
+  const s = createScript({ now: t0, rng, rootAccess: Boolean(process.env.ROOT) });
   const ctx = { games: 0, lastOfDay: false, codex: [] };
   const lastCheck = Math.max(...p.checks);
   let minute = 0;

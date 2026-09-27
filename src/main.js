@@ -58,7 +58,10 @@ let skew = DEV ? store.get(SKEW_KEY) ?? 0 : 0;
 const now = () => Date.now() + skew;
 
 let state = store.get(SAVE_KEY);
-if (!state || state.saveVersion !== SAVE_VERSION) state = createScript({ now: now() });
+const codex = store.get(CODEX_KEY) ?? [];
+const codexComplete = () => FRAGMENTS.every((f) => codex.includes(f.id));
+
+if (!state || state.saveVersion !== SAVE_VERSION) state = createScript({ now: now(), rootAccess: codexComplete() });
 migrate(state);
 
 const $ = (id) => document.getElementById(id);
@@ -81,17 +84,21 @@ const dex = store.get(DEX_KEY) ?? [];
 for (const form of formsSeenIn(state, store.get(LINEAGE_KEY) ?? [])) discover(dex, form);
 store.set(DEX_KEY, dex);
 
-const codex = store.get(CODEX_KEY) ?? [];
-
 // Bank fragments a finished run left on the pet into the shared codex.
 function drainCodexInbox() {
   const inbox = state.codexInbox ?? [];
   if (!inbox.length) return;
+  const wasComplete = codexComplete();
   const fresh = inbox.filter((id) => !codex.includes(id));
   codex.push(...fresh);
   state.codexInbox = [];
   store.set(CODEX_KEY, codex);
   if (fresh.length) flashStatus(`codex updated: ${fresh.map((id) => `"${fragmentById(id).title}"`).join(', ')}.`);
+  if (!wasComplete && codexComplete()) {
+    state.rootAccess = true; // the current netling is covered from this moment
+    save();
+    showTransmission();
+  }
 }
 
 function recordForm() {
@@ -153,6 +160,9 @@ function updateHUD() {
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
     `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
+  if (state.rootAccess && state.stage !== 'script') {
+    $('readout').textContent += ` · root ${state.rootUsed ? 'spent' : 'ready'}`;
+  }
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
@@ -210,7 +220,7 @@ function showFlatline() {
 }
 
 $('fl-next').addEventListener('click', () => {
-  state = createScript({ now: now(), generation: state.generation + 1, fragment: state.fragment });
+  state = createScript({ now: now(), generation: state.generation + 1, fragment: state.fragment, rootAccess: codexComplete() });
   lastStage = state.stage;
   lastLogLen = 0;
   overlay.hidden = true;
@@ -449,6 +459,16 @@ $('inv-cancel').addEventListener('click', () => {
   renderInventory();
 });
 
+// --- NL-0 ------------------------------------------------------------------------
+
+function showTransmission() {
+  sfx('evolve', 220, 'sine');
+  if (archive.open) archive.close();
+  $('transmission').showModal();
+}
+$('close-transmission').addEventListener('click', () => $('transmission').close());
+$('replay-transmission').addEventListener('click', showTransmission);
+
 // --- archive --------------------------------------------------------------------
 
 const archive = $('archive');
@@ -519,6 +539,7 @@ function renderArchive() {
     $('lineage-list').replaceChildren(li);
   }
 
+  $('codex-gift').hidden = !codexComplete();
   const groups = codexByRegion(codex, REGION_ORDER);
   $('codex-count').textContent = `${codex.length}/${FRAGMENTS.length}`;
   $('codex-list').replaceChildren(
@@ -657,7 +678,7 @@ if (DEV) {
   $('dev-reset').addEventListener('click', () => {
     skew = 0;
     store.set(SKEW_KEY, 0);
-    state = createScript({ now: now() });
+    state = createScript({ now: now(), rootAccess: codexComplete() });
     lastStage = state.stage;
     overlay.hidden = true;
     save();

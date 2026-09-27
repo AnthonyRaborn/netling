@@ -123,7 +123,10 @@ export const PALETTES = [
   { name: 'acid', main: '#f9f002', accent: '#ff2a6d' },
   { name: 'toxic', main: '#39ff14', accent: '#05d9e8' },
   { name: 'ultra', main: '#b967ff', accent: '#f9f002' },
+  // NL-0's colors: only rolls for netlings compiled with root access.
+  { name: 'origin', main: '#e8e8ff', accent: '#b967ff' },
 ];
+const BASE_PALETTES = PALETTES.length - 1;
 
 const IDLES = ['bounce', 'sway', 'hover'];
 const PACKETS = ['corp', 'scav'];
@@ -143,9 +146,9 @@ export function mulberry32(seed) {
 const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
 const clamp = (v, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, v));
 
-export function rollQuirk(rng) {
+export function rollQuirk(rng, { origin = false } = {}) {
   return {
-    palette: Math.floor(rng() * PALETTES.length),
+    palette: Math.floor(rng() * (origin ? PALETTES.length : BASE_PALETTES)),
     pitch: 440 + Math.round(rng() * 440),
     idle: pick(IDLES, rng),
     favPacket: pick(PACKETS, rng),
@@ -154,8 +157,9 @@ export function rollQuirk(rng) {
 }
 
 // A new generation: fresh quirk, with one quirk key copied from the fragment.
-export function createScript({ now, generation = 1, fragment = null, rng = Math.random }) {
-  const quirk = rollQuirk(rng);
+// rootAccess: the codex is complete, so NL-0 watches over this generation.
+export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false }) {
+  const quirk = rollQuirk(rng, { origin: rootAccess });
   let inheritedQuirk = null;
   if (fragment?.quirk) {
     inheritedQuirk = pick(QUIRK_KEYS, rng);
@@ -189,6 +193,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     inventory: fragment?.keepsake ? [fragment.keepsake] : [],
     buffs: { shieldUntilAge: 0, traceSkip: false, boost: false },
     run: null,
+    rootAccess,
+    rootUsed: false,
     lastRunEndAge: null,
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
     trait: fragment?.trait ?? null,
@@ -412,12 +418,30 @@ export function migrate(s) {
   s.inventory ??= [];
   s.buffs ??= { shieldUntilAge: 0, traceSkip: false, boost: false };
   s.run ??= null;
+  s.rootAccess ??= false;
+  s.rootUsed ??= false;
   s.lastRunEndAge ??= null;
   s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   return s;
 }
 
+// NL-0 pulls a netling back from its first premature flatline. Old age still wins.
+function rootRescue(s, t, cause) {
+  if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle') return false;
+  s.rootUsed = true;
+  const st = s.stats;
+  st.integrity = Math.max(st.integrity, 25);
+  st.charge = Math.max(st.charge, 25);
+  st.sync = Math.max(st.sync, 25);
+  s.virus = false;
+  s.integrityZeroMin = 0;
+  s.careMistakes = Math.min(s.careMistakes, CFG.maxMistakes - 1);
+  log(s, t, `> NL-0: not yet. (${cause} reversed. root access spent for this generation.)`);
+  return true;
+}
+
 function flatline(s, t, cause) {
+  if (rootRescue(s, t, cause)) return;
   s.stage = 'dead';
   s.deathCause = cause;
   s.diedAt = t;
@@ -606,7 +630,7 @@ function useItem(s, id, rng) {
       const keys = ['palette', 'pitch', 'idle', 'favPacket'];
       const key = keys[Math.floor(rng() * keys.length)];
       const before = s.quirk[key];
-      for (let i = 0; i < 8 && s.quirk[key] === before; i++) s.quirk[key] = rollQuirk(rng)[key];
+      for (let i = 0; i < 8 && s.quirk[key] === before; i++) s.quirk[key] = rollQuirk(rng, { origin: s.rootAccess })[key];
       return `${name} decoded. its ${key === 'favPacket' ? 'favorite packet' : key} changed.`;
     }
   }
