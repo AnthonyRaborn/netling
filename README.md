@@ -4,6 +4,8 @@ A cyberpunk, Tamagotchi-style virtual pet. It lives in real time (even while clo
 
 No build step, no dependencies: vanilla JS modules + canvas.
 
+> **AI disclosure:** this game was made with AI. Most of its code, tests, pixel art and text were written by an AI model (Anthropic's Claude, through Claude Code) under human direction and review. It's a hobby project: review anything you reuse from it.
+
 ## Run
 
 ```bash
@@ -21,9 +23,9 @@ New saves open with a short onboarding: an accidental script run, the field manu
 
 ARCHIVE → **SYSTEM**:
 
-- **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
+- **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. The lock is for moving a netling, not copy protection: it only stops *this* device from playing. Codes work offline, so nothing marks one as used: the same code can be loaded on more than one device, and reloading it here brings the netling back even if the other device already loaded it. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
 - **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected, and everything inside is checked and repaired before it's stored. Loading previews what's inside first, and either all of it is written or none of it is (a full disk changes nothing).
-- **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day.
+- **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day. Hibernating and transferring out both wait until a running mini-game or netrun is finished.
 - **Restart** erases everything and replays the onboarding.
 - **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage), and warns if a save has failed (a full or blocked disk). If a saved netling ever can't be read, it's set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download. iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
 - **Volume** slider (the header's SND toggle still mutes).
@@ -32,7 +34,13 @@ Only one tab looks after the netling at a time (Web Locks, or a lease in `localS
 
 ## Install / offline
 
-It's a PWA: use the browser's "Install app" (desktop Chrome) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline.
+It's a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari, macOS 14+) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
+
+On wide, short screens (Steam Deck, laptops) the screen sits beside the controls so everything fits without scrolling; phones and tall windows keep the one-column layout.
+
+**Controllers** work with no setup: in mini-games and netruns the d-pad or left stick moves, A confirms and B quits; elsewhere the d-pad moves between buttons, A presses and B backs out or closes a dialog. Browsers only see a controller after one of its buttons is pressed on the page.
+
+**Deploying:** `.github/workflows/pages.yml` publishes the game to GitHub Pages whenever the test workflow passes on `main` (Settings > Pages > Source: GitHub Actions, once). Only the files the game loads are published. [`docs/PLATFORMS.md`](docs/PLATFORMS.md) covers native apps.
 
 Notifications (toggle **ALERTS** in the header) fire while the app is open or backgrounded. A fully closed app can't be woken without a push server; that's out of scope for this static build.
 
@@ -48,7 +56,8 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
 | `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading. Imported codes keep only fields the game knows |
 | `src/lease.js` | The one-active-tab rule for browsers without Web Locks |
-| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery |
+| `src/ui/gamepad.js` | Controller input (Gamepad API): game controls in sessions, focus navigation in menus |
+| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery, controllers, screen sizes |
 | `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
 | `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |

@@ -1,5 +1,5 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { grantItem, isAlive, GAME_IDS, ITEMS, CFG } from '../sim.js';
+import { grantItem, isAlive, log, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
 import { REGIONS, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
@@ -466,6 +466,6 @@ export function closeRun(pet, t) {
   const run = pet.run;
   if (!run) return;
   const last = run.messages[run.messages.length - 1] ?? '';
-  pet.log.push({ t, msg: `> netrun (${REGIONS[run.region].name}): ${last}` });
+  log(pet, t, `> netrun (${REGIONS[run.region].name}): ${last}`);
   pet.run = null;
 }

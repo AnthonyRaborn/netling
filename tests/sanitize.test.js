@@ -77,7 +77,7 @@ test('a save with wrong types everywhere is repaired into something the game can
   const now = T0;
   const s = cleanSave(junk, now);
   assert.equal(s.generation, 1);
-  assert.equal(s.lastTick, now + 86_400_000);
+  assert.equal(s.lastTick, now);
   assert.deepEqual(s.stats, { charge: 70, sync: 0, integrity: 100, heat: 20 });
   assert.ok(s.quirk.palette >= 0 && s.quirk.palette < PALETTES.length && Number.isFinite(s.quirk.pitch));
   assert.equal(s.trait, null);
@@ -264,4 +264,10 @@ test('strict cleaning (imported codes) keeps only fields the game knows', () => 
   const json = JSON.stringify(strict);
   assert.ok(!json.includes('junk'), json.slice(0, 200));
   assert.equal(strict.run.pending.offers.length, s.run.pending.offers.length);
+});
+
+test('repaired defaults match a fresh netling', () => {
+  const s = cleanSave({ saveVersion: 1, stage: 'baby', form: 'bitling', cache: 99 }, T0);
+  assert.equal(s.sinceFed, CFG.digestMinutes); // not "just fed", so no phantom cache files
+  assert.equal(s.cache, CFG.maxCache);
 });

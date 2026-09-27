@@ -121,17 +121,20 @@ export function flashStatus(msg, ms = 1800) {
 // Each button keeps one timer, so a stale one can't disarm a newer first press early.
 const armTimers = new WeakMap();
 export function armed(btn, confirmLabel, idleLabel, ms = 4000) {
-  clearTimeout(armTimers.get(btn));
-  const disarm = () => {
-    btn.dataset.armed = '';
-    btn.textContent = idleLabel;
-  };
   if (btn.dataset.armed === '1') {
-    disarm();
+    disarm(btn, idleLabel);
     return true;
   }
+  clearTimeout(armTimers.get(btn));
   btn.dataset.armed = '1';
   btn.textContent = confirmLabel;
-  armTimers.set(btn, setTimeout(disarm, ms));
+  armTimers.set(btn, setTimeout(() => disarm(btn, idleLabel), ms));
   return false;
+}
+
+// Cancels a pending first press, e.g. when what the button acts on has changed.
+export function disarm(btn, idleLabel) {
+  clearTimeout(armTimers.get(btn));
+  btn.dataset.armed = '';
+  btn.textContent = idleLabel;
 }

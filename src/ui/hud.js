@@ -3,7 +3,7 @@ import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, tick, traceMin
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
-import { $, app, armed, flashStatus, now, save } from './app.js';
+import { $, app, armed, disarm, flashStatus, now, save } from './app.js';
 import { renderNudge } from './onboarding.js';
 import { renderHibernation } from './system.js';
 
@@ -97,6 +97,8 @@ function renderInventory() {
   const key = `${inv.join(',')}|${selectedSlot}`;
   if (key !== lastInvKey) {
     lastInvKey = key;
+    // A DISCARD confirm belongs to the item it was pressed for: a new selection starts over.
+    disarm($('inv-discard'), 'DISCARD');
     const slots = [];
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
       const id = inv[i];

@@ -15,6 +15,7 @@ import {
   IDLES,
   PACKETS,
   QUIRK_KEYS,
+  CFG,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
@@ -203,7 +204,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
   const form = raw.form ?? 'bitling';
   if (!STAGES.includes(stage) || !has(SPECIES, form)) return null;
 
-  const lastTick = num(raw.lastTick, now, 0, now + 86_400_000); // far-future clocks would freeze it
+  const lastTick = num(raw.lastTick, now, 0, now); // a future time (clock set back) would freeze it
   const zero = isObj(raw.zeroMin) ? raw.zeroMin : {};
   const flagged = isObj(raw.flagged) ? raw.flagged : {};
   const axes = isObj(raw.axes) ? raw.axes : {};
@@ -225,10 +226,10 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     lastTick,
     ageMin: int(raw.ageMin, 0, 0),
     stats: cleanStats(raw.stats),
-    cache: int(raw.cache, 0, 0, 4),
+    cache: int(raw.cache, 0, 0, CFG.maxCache),
     virus: bool(raw.virus),
     virusMin: num(raw.virusMin, 0, 0),
-    sinceFed: num(raw.sinceFed, 0, 0),
+    sinceFed: num(raw.sinceFed, CFG.digestMinutes, 0),
     asleep: bool(raw.asleep),
     lightsOn: bool(raw.lightsOn, true),
     careMistakes: int(raw.careMistakes, 0, 0, 1000),

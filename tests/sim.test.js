@@ -247,3 +247,13 @@ test('alertReason picks the most urgent need', () => {
   s.stage = 'dead';
   assert.equal(alertReason(s), null);
 });
+
+test('a clock set backwards resumes from the new time instead of pausing', () => {
+  const s = booted();
+  const t = s.lastTick;
+  tick(s, t - 3 * 60 * MIN, noRng); // device clock moved back 3 hours
+  assert.equal(s.lastTick, t - 3 * 60 * MIN);
+  const age = s.ageMin;
+  tick(s, s.lastTick + 10 * MIN, noRng);
+  assert.equal(s.ageMin, age + 10); // time counts again right away
+});
