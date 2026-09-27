@@ -220,7 +220,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
 
 const freshGames = () => Object.fromEntries(GAME_IDS.map((id) => [id, { played: 0, won: 0 }]));
 
-function log(s, t, msg) {
+export function log(s, t, msg) {
   s.log.push({ t, msg });
   if (s.log.length > 50) s.log.splice(0, s.log.length - 50);
 }
@@ -236,8 +236,11 @@ export function isSleepHour(hour, offset = 0) {
 }
 
 // Advance the simulation to `now`, one minute at a time. Hibernation freezes the clock.
+// A clock that went backwards (device time changed) resumes from `now` instead of pausing
+// until it catches up.
 export function tick(s, now, rng = Math.random) {
   if (s.hibernation) return s;
+  if (now < s.lastTick) s.lastTick = now;
   const minutes = Math.floor((now - s.lastTick) / MIN);
   for (let i = 0; i < minutes && s.stage !== 'dead'; i++) {
     step(s, s.lastTick + (i + 1) * MIN, rng);

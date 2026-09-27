@@ -86,10 +86,22 @@ export function openSystem() {
   $('transfer').showModal();
 }
 
+// A mini-game or netrun on screen must finish first: hibernating would freeze the pad under the
+// overlay, and a transfer would leave it running on a locked device.
+function sessionBlockReason() {
+  if (!app.session) return null;
+  return app.state.run ? 'finish the netrun first.' : 'finish the game first.';
+}
+
 // --- transfer out: export and lock ---
 
 async function transferOut() {
   const btn = $('transfer-out');
+  const busy = sessionBlockReason();
+  if (busy) {
+    sfx('error', app.state.quirk.pitch);
+    return flashStatus(busy);
+  }
   if (!armed(btn, 'CONFIRM: LOCK THIS DEVICE', 'TRANSFER OUT')) return;
   const code = await encodeSave(collectData());
   const lock = { code, at: Date.now(), generation: app.state.generation };
@@ -206,7 +218,7 @@ export function importFromUrl() {
 // --- hibernate ---
 
 function renderHibernateNote() {
-  const blocked = hibernateBlockReason(app.state, now());
+  const blocked = sessionBlockReason() ?? hibernateBlockReason(app.state, now());
   $('hibernate-note').textContent = blocked
     ? `Freezes its clock for a long break. Not now: ${blocked}`
     : `Freezes its clock for a long break: nothing drains, nothing ages. It has to stay under for at least ${CFG.hibernateMinMin / 60} hours, and needs ${CFG.hibernateCooldownMin / 1440} days to recover after waking.`;
@@ -323,6 +335,8 @@ export function initSystem() {
   $('check-code').addEventListener('click', checkImport);
 
   $('hibernate-btn').addEventListener('click', () => {
+    const busy = sessionBlockReason();
+    if (busy) return flashStatus(busy);
     if (!armed($('hibernate-btn'), `CONFIRM: AT LEAST ${CFG.hibernateMinMin / 60}H`, 'HIBERNATE')) return;
     const res = hibernate(app.state, now());
     if (!res.ok) return flashStatus(res.msg);

@@ -361,3 +361,15 @@ test('the tutorial run is fixed, gentle, gives an item and the first fragment, a
   assert.equal(s.lastRunEndAge, null, 'no cooldown after the tutorial');
   assert.equal(s.accessoryInbox.length, 0, 'no style drops before the party hat');
 });
+
+test('closing a run keeps the log at its usual length', () => {
+  const s = createScript({ now: T0, rng: mulberry32(3) });
+  tick(s, T0 + CFG.bootMinutes * MIN, noRng);
+  for (let i = 0; i < 60; i++) s.log.push({ t: T0, msg: `> line ${i}` });
+  s.log.splice(0, s.log.length - 50);
+  startRun(s, 'tutorial', noRng);
+  abortRun(s);
+  closeRun(s, T0);
+  assert.equal(s.log.length, 50);
+  assert.match(s.log.at(-1).msg, /^> netrun/);
+});

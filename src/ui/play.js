@@ -141,12 +141,16 @@ function startGame(id) {
     sound: (name) => sfx(name, app.state.quirk.pitch),
     onFinish: (won) => {
       app.session = null;
-      app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
-      countGame();
       showPanel('controls');
       tick(app.state, now());
+      // It can refuse the result: it fell asleep, ran out of charge or flatlined mid-game.
       const res = act(app.state, 'play', now(), Math.random, { game: id, won });
-      if (!res.ok || res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
+      if (res.ok) {
+        app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
+        countGame();
+      }
+      if (!res.ok) flashStatus(res.msg);
+      else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
       save();
       updateHUD();
     },

@@ -4,6 +4,8 @@ A cyberpunk, Tamagotchi-style virtual pet. It lives in real time (even while clo
 
 No build step, no dependencies: vanilla JS modules + canvas.
 
+> **AI disclosure:** this game was made with AI. Most of its code, tests, pixel art and text were written by an AI model (Anthropic's Claude, through Claude Code) under human direction and review. It's a hobby project: review anything you reuse from it.
+
 ## Run
 
 ```bash
@@ -21,9 +23,9 @@ New saves open with a short onboarding: an accidental script run, the field manu
 
 ARCHIVE → **SYSTEM**:
 
-- **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
+- **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. The lock is for moving a netling, not copy protection: it only stops *this* device from playing. Codes work offline, so nothing marks one as used: the same code can be loaded on more than one device, and reloading it here brings the netling back even if the other device already loaded it. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
 - **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected, and everything inside is checked and repaired before it's stored. Loading previews what's inside first, and either all of it is written or none of it is (a full disk changes nothing).
-- **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day.
+- **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day. Hibernating and transferring out both wait until a running mini-game or netrun is finished.
 - **Restart** erases everything and replays the onboarding.
 - **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage), and warns if a save has failed (a full or blocked disk). If a saved netling ever can't be read, it's set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download. iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
 - **Volume** slider (the header's SND toggle still mutes).
