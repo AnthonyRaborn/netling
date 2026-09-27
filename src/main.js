@@ -22,7 +22,7 @@ import {
 } from './sim.js';
 import { renderLCD, setLcdTint } from './render.js';
 import { setGameBg } from './games/common.js';
-import { COSMETICS, SLOTS, cosmeticById, unlockedIds, resolveWardrobe, recordGame } from './cosmetics.js';
+import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, recordGame, sanitizeLabel } from './cosmetics.js';
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
@@ -30,7 +30,7 @@ import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
 import { drawSprite, formSprite, ITEM_SPRITES, ITEM_COLORS } from './sprites.js';
-import { sfx, unlockAudio, setMuted } from './audio.js';
+import { sfx, unlockAudio, setMuted, setSoundPack } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 
 const SAVE_KEY = 'netling.save';
@@ -243,6 +243,7 @@ document.querySelectorAll('[data-act]').forEach((btn) => {
     tick(state, now());
     const res = act(state, btn.dataset.act, now());
     sfx(res.sfx, state.quirk.pitch);
+    if (res.ok) countAct(btn.dataset.act);
     if (!res.ok) flashStatus(res.msg);
     else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
     save();
@@ -373,6 +374,7 @@ function startGame(id) {
     onFinish: (won) => {
       session = null;
       progress.streaks = recordGame(progress.streaks, id, won);
+      progress.gamesPlayed = (progress.gamesPlayed ?? 0) + 1;
       store.set(PROGRESS_KEY, progress);
       checkUnlocks();
       showPanel('controls');
@@ -479,7 +481,13 @@ $('inv-cancel').addEventListener('click', () => {
 
 // --- wardrobe ------------------------------------------------------------------
 
-const progress = { streaks: {}, cleanJackouts: 0, deepExits: 0, ...store.get(PROGRESS_KEY) };
+const progress = { streaks: {}, acts: {}, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, ...store.get(PROGRESS_KEY) };
+
+function countAct(action) {
+  progress.acts = { ...progress.acts, [action]: (progress.acts?.[action] ?? 0) + 1 };
+  store.set(PROGRESS_KEY, progress);
+  checkUnlocks();
+}
 let unlocked = store.get(UNLOCKED_KEY) ?? [];
 let freshUnlocks = new Set();
 let wardrobe = store.get(WARDROBE_KEY) ?? {};
@@ -490,14 +498,22 @@ function unlockContext() {
 
 // Announce anything newly earned. First run of a save just records what's already earned.
 function checkUnlocks({ silent = false } = {}) {
-  const now = unlockedIds(unlockContext());
+  const ctx = unlockContext();
+  const now = [...unlockedIds(ctx), ...(LABEL.check(ctx) ? ['label'] : [])];
   const fresh = now.filter((id) => !unlocked.includes(id));
   if (!fresh.length) return;
   unlocked = [...new Set([...unlocked, ...now])];
   store.set(UNLOCKED_KEY, unlocked);
-  if (silent) return;
-  fresh.forEach((id) => freshUnlocks.add(id));
-  const names = fresh.map((id) => {
+  // Free items (e.g. defaults added in an update) join quietly.
+  const earned = fresh.filter((id) => {
+    if (id === 'label') return true;
+    const [slot, cid] = id.split(':');
+    return !cosmeticById(slot, cid).free;
+  });
+  if (silent || !earned.length) return;
+  earned.forEach((id) => freshUnlocks.add(id));
+  const names = earned.map((id) => {
+    if (id === 'label') return 'device label';
     const [slot, cid] = id.split(':');
     return cosmeticById(slot, cid).name.toLowerCase();
   });
@@ -513,13 +529,17 @@ function applyWardrobe() {
   setLcdTint(tint.lcd, tint.dark);
   setGameBg(tint.lcd);
   document.querySelector('.screen').className = `screen fx-${w.effect}`;
+  const pack = cosmeticById('sound', w.sound);
+  setSoundPack(pack.wave, pack.mult);
+  const label = unlocked.includes('label') ? sanitizeLabel(wardrobe.label) : LABEL.fallback;
+  document.querySelector('.logo').textContent = label;
 }
 
 function renderWardrobe() {
   const w = resolveWardrobe(wardrobe, unlocked);
-  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0);
+  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1; // + device label
   $('wardrobe-count').textContent = `${unlocked.length}/${total}`;
-  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT' };
+  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
       const h = document.createElement('h3');
@@ -537,6 +557,7 @@ function renderWardrobe() {
         sw.className = 'sw';
         sw.style.background = open ? c.swatch ?? 'transparent' : 'transparent';
         if (slot === 'effect') sw.textContent = open ? '~' : '';
+        if (slot === 'sound') sw.textContent = open ? '♪' : '';
         const name = document.createElement('span');
         name.textContent = open ? c.name : '???';
         const hint = document.createElement('span');
@@ -549,7 +570,7 @@ function renderWardrobe() {
             store.set(WARDROBE_KEY, wardrobe);
             freshUnlocks.delete(key);
             applyWardrobe();
-            sfx('select', state.quirk.pitch);
+            sfx(slot === 'sound' ? 'feed' : 'select', state.quirk.pitch); // sound packs preview themselves
             renderWardrobe();
           });
         } else {
@@ -559,7 +580,45 @@ function renderWardrobe() {
       }
       return [h, grid];
     }),
+    ...labelSection(),
   );
+}
+
+function labelSection() {
+  const h = document.createElement('h3');
+  h.textContent = 'DEVICE LABEL';
+  const row = document.createElement('div');
+  row.className = 'label-row';
+  if (!unlocked.includes('label')) {
+    const hint = document.createElement('div');
+    hint.className = 'cosmetic locked';
+    hint.textContent = `??? ${LABEL.hint}`;
+    row.append(hint);
+    return [h, row];
+  }
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.maxLength = LABEL.max;
+  input.value = sanitizeLabel(wardrobe.label);
+  input.setAttribute('aria-label', 'Device label');
+  input.spellcheck = false;
+  const set = document.createElement('button');
+  set.type = 'button';
+  set.textContent = 'SET';
+  const commit = () => {
+    wardrobe = { ...wardrobe, label: sanitizeLabel(input.value) };
+    store.set(WARDROBE_KEY, wardrobe);
+    input.value = wardrobe.label;
+    applyWardrobe();
+    sfx('select', state.quirk.pitch);
+  };
+  set.addEventListener('click', commit);
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation(); // keep game keys out of the text box
+    if (e.key === 'Enter') commit();
+  });
+  row.append(input, set);
+  return [h, row];
 }
 
 // --- NL-0 ------------------------------------------------------------------------

@@ -2,6 +2,11 @@
 
 let ctx = null;
 let muted = false;
+// The wardrobe's sound pack; calls that name their own wave (netrun regions, NL-0) ignore it.
+let pack = { wave: 'square', mult: 1 };
+export function setSoundPack(wave, mult) {
+  pack = { wave, mult };
+}
 
 export function setMuted(value) {
   muted = value;
@@ -44,9 +49,13 @@ const PATTERNS = {
   flatline: [[1, 0]],
 };
 
-export function sfx(name, pitch = 660, wave = 'square') {
+export function sfx(name, pitch = 660, wave) {
   const pat = PATTERNS[name];
   if (!pat || muted) return;
+  if (wave === undefined) {
+    wave = pack.wave;
+    pitch *= pack.mult;
+  }
   if (name === 'flatline') return blip(pitch, 0, 2.5, 'sine', 0.08);
   // softer waves need a little more volume to sit at the same loudness
   const vol = wave === 'sine' ? 0.1 : wave === 'triangle' ? 0.09 : 0.06;

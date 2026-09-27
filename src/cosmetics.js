@@ -15,8 +15,9 @@ function fullLifeStreak(ctx) {
   return best;
 }
 const streak = (ctx, game) => ctx.progress.streaks?.[game]?.best ?? 0;
+const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[a] ?? 0), 0);
 
-export const SLOTS = ['shell', 'tint', 'effect'];
+export const SLOTS = ['shell', 'tint', 'effect', 'sound'];
 
 export const COSMETICS = {
   shell: [
@@ -48,9 +49,37 @@ export const COSMETICS = {
     { id: 'curved', name: 'Deep curve', hint: 'hold the signal and never lose it.', check: (c) => streak(c, 'tune') >= 10 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
   ],
+  // Home sounds only; netruns keep each region's own voice.
+  sound: [
+    { id: 'beep', name: 'Beep', wave: 'square', mult: 1, free: true },
+    { id: 'soft', name: 'Soft', wave: 'sine', mult: 1, free: true },
+    { id: 'bass', name: '8-bit bass', wave: 'square', mult: 0.5, hint: 'a hundred meals.', check: (c) => acts(c, 'corp', 'scav') >= 100 },
+    { id: 'glass', name: 'Glass', wave: 'sine', mult: 2, hint: 'catch it before it spreads, twenty times.', check: (c) => acts(c, 'patch') >= 20 },
+    { id: 'chime', name: 'Chime', wave: 'triangle', mult: 1.25, hint: 'answer when they call, ten times.', check: (c) => acts(c, 'comply') >= 10 },
+    { id: 'buzz', name: 'Buzz', wave: 'sawtooth', mult: 0.9, hint: 'vanish when they call, ten times.', check: (c) => acts(c, 'hide') >= 10 },
+    { id: 'arcade', name: 'Arcade', wave: 'triangle', mult: 0.75, hint: 'fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 50 },
+  ],
 };
 
-export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines' };
+// The device label: naming the line is earned by losing the first netling.
+export const LABEL = {
+  max: 10,
+  fallback: 'NETLING',
+  hint: 'lose one before you name the line.',
+  check: (c) => c.lineage.length >= 1,
+};
+
+export function sanitizeLabel(raw) {
+  const clean = String(raw ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9 .\-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, LABEL.max);
+  return clean || LABEL.fallback;
+}
+
+export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep' };
 
 export const cosmeticById = (slot, id) => COSMETICS[slot].find((c) => c.id === id);
 

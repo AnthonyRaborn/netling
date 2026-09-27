@@ -57,3 +57,24 @@ test('streaks count consecutive wins and keep the best', () => {
   for (const won of [true, true, true, false, true]) s = recordGame(s, 'dodge', won);
   assert.deepEqual(s.dodge, { cur: 1, best: 3 });
 });
+
+import { sanitizeLabel, LABEL } from '../src/cosmetics.js';
+
+test('sound packs unlock from action counts and games played', () => {
+  const ctx = { ...empty, progress: { acts: { corp: 60, scav: 40, patch: 5, hide: 10 }, gamesPlayed: 49 } };
+  const ids = unlockedIds(ctx);
+  assert.ok(ids.includes('sound:bass'));
+  assert.ok(ids.includes('sound:buzz'));
+  assert.ok(!ids.includes('sound:glass'));
+  assert.ok(!ids.includes('sound:arcade'));
+  assert.ok(ids.includes('sound:beep') && ids.includes('sound:soft'), 'free packs');
+});
+
+test('device label is earned by the first lost netling and sanitized', () => {
+  assert.equal(LABEL.check(empty), false);
+  assert.equal(LABEL.check({ ...empty, lineage: [{ cause: 'neglect' }] }), true);
+  assert.equal(sanitizeLabel('  kernel  line!!  '), 'KERNEL LIN');
+  assert.equal(sanitizeLabel('<script>'), 'SCRIPT');
+  assert.equal(sanitizeLabel('!!!'), 'NETLING');
+  assert.equal(sanitizeLabel('nl-0.v2'), 'NL-0.V2');
+});

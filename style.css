@@ -862,6 +862,35 @@ button:active {
   color: var(--yellow);
 }
 
+.label-row {
+  display: flex;
+  gap: 6px;
+}
+
+.label-row input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  color: var(--magenta);
+  background: #05050a;
+  border: 1px solid var(--shell-edge);
+  border-radius: 4px;
+}
+
+.label-row input:focus {
+  outline: 1px solid var(--magenta);
+}
+
+.label-row .locked {
+  flex: 1;
+  display: block;
+  font-size: 15px;
+}
+
 /* shells */
 .device.shell-matte {
   background: linear-gradient(160deg, #141417, #0b0b0e 60%, #050506);
