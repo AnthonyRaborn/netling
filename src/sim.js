@@ -25,7 +25,15 @@ export const CFG = {
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 3,
+  ghostMinGameWins: 9, // and at least one win in every mini-game
+  playWinSync: 25,
+  playLoseSync: 8,
+  traceChancePerHour: 0.08,
+  traceWindowMin: 30,
+  surgeChancePerHour: 0.03,
 };
+
+export const GAME_IDS = ['breach', 'dodge', 'tune'];
 
 export const FORMS = {
   chrome: { name: 'Chrome', trait: 'licensed' },
@@ -133,6 +141,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     flagged: { charge: false, sync: false, heat: false, lights: false },
     integrityZeroMin: 0,
     axes: { allegiance: 0, stability: 0 },
+    games: freshGames(),
+    event: null,
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
@@ -142,6 +152,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     fragment: null,
   };
 }
+
+const freshGames = () => Object.fromEntries(GAME_IDS.map((id) => [id, { played: 0, won: 0 }]));
 
 function log(s, t, msg) {
   s.log.push({ t, msg });
@@ -229,6 +241,8 @@ function step(s, t, rng) {
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
 
+  stepEvents(s, t, rng);
+
   checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
   checkMistake(s, t, 'sync', st.sync <= 0, 'sync lost');
   checkMistake(s, t, 'heat', st.heat >= 100, 'thermal overload');
@@ -239,6 +253,32 @@ function step(s, t, rng) {
   if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse');
   else if (s.careMistakes >= CFG.maxMistakes) flatline(s, t, 'neglect');
   else if (s.ageMin >= CFG.lifespanMin) flatline(s, t, 'end of life cycle');
+}
+
+function stepEvents(s, t, rng) {
+  const st = s.stats;
+  if (s.event?.type === 'trace') {
+    if (s.ageMin - s.event.startedAge >= CFG.traceWindowMin) {
+      s.event = null;
+      st.integrity = clamp(st.integrity - 20);
+      s.axes.allegiance += 2;
+      log(s, t, '> !! trace completed. corp harvested its data.');
+    }
+    return;
+  }
+  if (s.asleep) return;
+  if (s.trait !== 'untraceable' && rng() < CFG.traceChancePerHour / 60) {
+    s.event = { type: 'trace', startedAge: s.ageMin };
+    log(s, t, `> !! corp trace incoming. ${CFG.traceWindowMin}m to respond.`);
+  } else if (rng() < CFG.surgeChancePerHour / 60) {
+    st.heat = clamp(st.heat + 25);
+    st.charge = clamp(st.charge + 10);
+    log(s, t, '> !! power surge. running hot.');
+  }
+}
+
+export function traceMinutesLeft(s) {
+  return s.event?.type === 'trace' ? CFG.traceWindowMin - (s.ageMin - s.event.startedAge) : 0;
 }
 
 function checkMistake(s, t, key, cond, label) {
@@ -259,9 +299,16 @@ function checkMistake(s, t, key, cond, label) {
 // Which adult form the current axes lean toward.
 export function leaningForm(s) {
   const { allegiance: a, stability: b } = s.axes;
-  if (Math.abs(a) < CFG.ghostBand && Math.abs(b) < CFG.ghostBand && s.careMistakes <= 1) return 'ghost';
+  if (Math.abs(a) < CFG.ghostBand && Math.abs(b) < CFG.ghostBand && s.careMistakes <= 1 && ghostWinsMet(s)) {
+    return 'ghost';
+  }
   if (Math.abs(a) >= Math.abs(b)) return a >= 0 ? 'chrome' : 'firewall';
   return b >= 0 ? 'daemon' : 'glitch';
+}
+
+export function ghostWinsMet(s) {
+  const wins = GAME_IDS.map((id) => s.games?.[id]?.won ?? 0);
+  return wins.every((w) => w > 0) && wins.reduce((a, b) => a + b, 0) >= CFG.ghostMinGameWins;
 }
 
 function evolve(s, t, stage, form) {
@@ -275,6 +322,8 @@ function evolve(s, t, stage, form) {
 export function migrate(s) {
   s.form ??= 'bitling';
   s.evolvedAt ??= null;
+  s.games ??= freshGames();
+  s.event ??= null;
   return s;
 }
 
@@ -287,13 +336,21 @@ function flatline(s, t, cause) {
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
-// Player actions. Returns { ok, msg, sfx }.
-export function act(s, action, now, rng = Math.random) {
-  if (s.stage === 'dead') return fail('no signal.');
-  if (s.stage === 'script' && action !== 'lights') return fail('still compiling...');
+// Why an action can't happen right now, or null. The UI checks 'play' before launching a game.
+export function blockReason(s, action) {
+  if (s.stage === 'dead') return 'no signal.';
+  if (s.stage === 'script' && action !== 'lights') return 'still compiling...';
+  if (s.asleep && ['corp', 'scav', 'play', 'cool'].includes(action)) return 'in low-power mode.';
+  if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
+  if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
+  return null;
+}
+
+// Player actions. Returns { ok, msg, sfx }. 'play' takes { game, won } from the finished mini-game.
+export function act(s, action, now, rng = Math.random, opts = {}) {
+  const blocked = blockReason(s, action);
+  if (blocked) return fail(blocked);
   const st = s.stats;
-  const awakeOnly = ['corp', 'scav', 'play', 'cool'];
-  if (s.asleep && awakeOnly.includes(action)) return fail('in low-power mode.');
 
   let res;
   switch (action) {
@@ -327,14 +384,34 @@ export function act(s, action, now, rng = Math.random) {
       break;
     }
     case 'play': {
-      if (st.charge < 10) return fail('not enough charge to play.');
-      let gain = s.form === 'glitch' ? 10 + Math.floor(rng() * 31) : 20;
+      const { game, won = false } = opts;
+      if (!GAME_IDS.includes(game)) return fail('unknown game.');
+      let gain = won ? CFG.playWinSync : CFG.playLoseSync;
+      if (s.form === 'glitch') gain = 10 + Math.floor(rng() * 31);
       if (s.trait === 'volatile') gain *= 1.5;
       st.sync = clamp(st.sync + gain);
       st.charge = clamp(st.charge - 6);
       st.heat = clamp(st.heat + 12);
       if (st.heat > 70) s.axes.stability -= 0.5;
-      res = ok('ping-pong over localhost. sync up.', 'play');
+      s.games[game].played++;
+      if (won) s.games[game].won++;
+      res = ok(won ? `${game}: won. sync up.` : `${game}: lost. it had fun anyway.`, won ? 'win' : 'lose');
+      break;
+    }
+    case 'hide': {
+      s.event = null;
+      st.charge = clamp(st.charge - 10);
+      st.heat = clamp(st.heat + 10);
+      s.axes.allegiance -= 1;
+      res = ok('rerouted through proxies. trace lost.', 'patch');
+      break;
+    }
+    case 'comply': {
+      s.event = null;
+      st.integrity = clamp(st.integrity - 5);
+      st.sync = clamp(st.sync - 10);
+      s.axes.allegiance += 1;
+      res = ok('handshake accepted. corp scan complete.', 'feed');
       break;
     }
     case 'patch': {
@@ -378,6 +455,12 @@ export function needsAttention(s) {
   if (!isAlive(s)) return false;
   const st = s.stats;
   return (
-    st.charge < 20 || st.sync < 20 || st.heat > 80 || s.cache >= 2 || s.virus || (s.asleep && s.lightsOn)
+    st.charge < 20 ||
+    st.sync < 20 ||
+    st.heat > 80 ||
+    s.cache >= 2 ||
+    s.virus ||
+    s.event?.type === 'trace' ||
+    (s.asleep && s.lightsOn)
   );
 }

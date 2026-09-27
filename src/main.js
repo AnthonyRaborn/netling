@@ -1,5 +1,22 @@
-import { act, createScript, tick, migrate, isAlive, CFG, TRAITS, FORMS, SPECIES, FORM_MODS, SAVE_VERSION, MIN } from './sim.js';
+import {
+  act,
+  blockReason,
+  createScript,
+  tick,
+  migrate,
+  isAlive,
+  traceMinutesLeft,
+  CFG,
+  TRAITS,
+  FORMS,
+  SPECIES,
+  FORM_MODS,
+  PALETTES,
+  SAVE_VERSION,
+  MIN,
+} from './sim.js';
 import { renderLCD } from './render.js';
+import { GameSession } from './games/session.js';
 import { sfx, unlockAudio } from './audio.js';
 
 const SAVE_KEY = 'netling.save';
@@ -38,6 +55,7 @@ let lastLogLen = 0;
 let lastStage = state.stage;
 let lastAttention = false;
 let flashUntil = 0;
+let session = null;
 
 function save() {
   store.set(SAVE_KEY, state);
@@ -86,6 +104,9 @@ function updateHUD() {
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
+  const traceLeft = traceMinutesLeft(state);
+  $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
+  $('event-timer').textContent = `${traceLeft}m`;
   document.body.classList.toggle('asleep', state.asleep);
 
   if (state.log.length !== lastLogLen || logEl.childElementCount === 0) {
@@ -108,7 +129,9 @@ function updateHUD() {
 
 function needsAlert() {
   const s = state;
-  return s.stats.charge < 20 || s.stats.sync < 20 || s.virus || (s.asleep && s.lightsOn);
+  return (
+    s.stats.charge < 20 || s.stats.sync < 20 || s.virus || s.event?.type === 'trace' || (s.asleep && s.lightsOn)
+  );
 }
 
 function onFlatline() {
@@ -160,6 +183,66 @@ document.querySelectorAll('[data-act]').forEach((btn) => {
   });
 });
 
+// --- mini-games ---------------------------------------------------------------
+
+function showPanel(name) {
+  $('controls').hidden = name !== 'controls';
+  $('picker').hidden = name !== 'picker';
+  $('pad').hidden = name !== 'pad';
+}
+
+$('btn-play').addEventListener('click', () => {
+  unlockAudio();
+  tick(state, now());
+  const blocked = blockReason(state, 'play');
+  if (blocked) {
+    sfx('error', state.quirk.pitch);
+    return flashStatus(blocked);
+  }
+  sfx('select', state.quirk.pitch);
+  showPanel('picker');
+});
+
+$('picker-back').addEventListener('click', () => showPanel('controls'));
+
+document.querySelectorAll('[data-game]').forEach((btn) =>
+  btn.addEventListener('click', () => startGame(btn.dataset.game)),
+);
+
+function startGame(id) {
+  session = new GameSession(id, {
+    sound: (name) => sfx(name, state.quirk.pitch),
+    onFinish: (won) => {
+      session = null;
+      showPanel('controls');
+      tick(state, now());
+      const res = act(state, 'play', now(), Math.random, { game: id, won });
+      if (!res.ok) flashStatus(res.msg);
+      save();
+      updateHUD();
+    },
+  });
+  showPanel('pad');
+}
+
+document.querySelectorAll('[data-key]').forEach((btn) =>
+  btn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    session?.input(btn.dataset.key);
+  }),
+);
+$('pad-quit').addEventListener('click', () => session?.forfeit());
+
+const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ' ': 'a', Enter: 'a', z: 'a', x: 'a' };
+document.addEventListener('keydown', (e) => {
+  if (!session) return;
+  if (e.key === 'Escape') return session.forfeit();
+  const key = KEYMAP[e.key];
+  if (!key || e.repeat) return;
+  e.preventDefault();
+  session.input(key);
+});
+
 let statusTimer;
 function flashStatus(msg) {
   const el = $('status');
@@ -190,6 +273,12 @@ if (DEV) {
     state.lastTick += (skip - 1) * MIN;
     advance();
   });
+  $('dev-trace').addEventListener('click', () => {
+    if (!isAlive(state)) return;
+    state.event = { type: 'trace', startedAge: state.ageMin };
+    save();
+    updateHUD();
+  });
   $('dev-reset').addEventListener('click', () => {
     skew = 0;
     store.set(SKEW_KEY, 0);
@@ -209,7 +298,15 @@ advance();
 if (state.stage === 'dead') showFlatline();
 setInterval(advance, 1000);
 
+let lastFrame = performance.now();
 (function loop(time) {
-  renderLCD(canvas, state, time, { flash: time < flashUntil });
+  const dt = Math.min(0.1, (time - lastFrame) / 1000);
+  lastFrame = time;
+  if (session) {
+    session.update(dt);
+    session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);
+  } else {
+    renderLCD(canvas, state, time, { flash: time < flashUntil });
+  }
   requestAnimationFrame(loop);
 })(performance.now());

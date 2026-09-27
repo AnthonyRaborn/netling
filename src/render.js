@@ -76,6 +76,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
         drawSprite(bctx, SPRITES.cache, 2 + i * 5, 22, { '#': pal.main, o: pal.accent });
       }
       if (s.virus) drawSprite(bctx, SPRITES.virus, 2, 2, { '#': pal.accent, o: LCD_BG });
+      if (s.event?.type === 'trace' && frame) {
+        drawSprite(bctx, SPRITES.eye, s.virus ? 9 : 2, 2, { '#': '#f9f002', o: LCD_BG });
+      }
     }
     if (needsAttention(s) && frame) {
       drawSprite(bctx, SPRITES.bang, 37, 2, { '#': '#f9f002' });

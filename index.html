@@ -46,14 +46,34 @@
 
       <p id="readout" class="readout"></p>
 
-      <nav class="controls" aria-label="Actions">
+      <div id="event-bar" class="event-bar" role="alert" hidden>
+        <span class="event-label">CORP TRACE <b id="event-timer"></b></span>
+        <button type="button" data-act="hide">HIDE</button>
+        <button type="button" data-act="comply">COMPLY</button>
+      </div>
+
+      <nav id="controls" class="controls" aria-label="Actions">
         <button type="button" data-act="corp">CORP PKT</button>
         <button type="button" data-act="scav">SCAV DATA</button>
-        <button type="button" data-act="play">PLAY</button>
+        <button type="button" id="btn-play">PLAY</button>
         <button type="button" data-act="patch">PATCH</button>
         <button type="button" data-act="cool">COOL</button>
         <button type="button" data-act="purge">PURGE</button>
         <button type="button" data-act="lights" id="btn-lights" class="wide">LIGHTS OFF</button>
+      </nav>
+
+      <nav id="picker" class="controls" aria-label="Mini-games" hidden>
+        <button type="button" data-game="breach">BREACH</button>
+        <button type="button" data-game="dodge">DODGE</button>
+        <button type="button" data-game="tune">TUNE</button>
+        <button type="button" id="picker-back" class="wide">BACK</button>
+      </nav>
+
+      <nav id="pad" class="controls pad" aria-label="Game controls" hidden>
+        <button type="button" data-key="left" aria-label="Left">&#9664;</button>
+        <button type="button" data-key="a" class="pad-a">A</button>
+        <button type="button" data-key="right" aria-label="Right">&#9654;</button>
+        <button type="button" id="pad-quit" class="wide">QUIT (ESC)</button>
       </nav>
 
       <ul id="log" class="log" aria-live="polite"></ul>
@@ -64,6 +84,7 @@
         <button type="button" data-skip="60">+1h</button>
         <button type="button" data-skip="480">+8h</button>
         <button type="button" id="dev-evolve">EVO</button>
+        <button type="button" id="dev-trace">TRACE</button>
         <button type="button" id="dev-reset">RESET</button>
       </div>
     </main>

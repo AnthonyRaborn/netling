@@ -92,6 +92,7 @@ test('leaning form follows the dominant axis', () => {
   assert.equal(leaningForm(s), 'glitch');
   s.axes = { allegiance: 1, stability: -1 };
   s.careMistakes = 0;
+  s.games = { breach: { played: 3, won: 3 }, dodge: { played: 3, won: 3 }, tune: { played: 3, won: 3 } };
   assert.equal(leaningForm(s), 'ghost');
 });
 
@@ -178,4 +179,54 @@ test('migrate backfills evolution fields on old saves', () => {
   migrate(s);
   assert.equal(s.form, 'bitling');
   assert.equal(s.evolvedAt, null);
+});
+
+test('ghost needs enough mini-game wins across every game', () => {
+  const s = booted();
+  s.axes = { allegiance: 0, stability: 0 };
+  assert.notEqual(leaningForm(s), 'ghost', 'no wins yet');
+  s.games = { breach: { played: 9, won: 9 }, dodge: { played: 1, won: 0 }, tune: { played: 0, won: 0 } };
+  assert.notEqual(leaningForm(s), 'ghost', 'wins not spread across games');
+  s.games.dodge.won = 1;
+  s.games.tune.won = 1;
+  assert.equal(leaningForm(s), 'ghost');
+});
+
+test('play records the mini-game result and rewards wins more', () => {
+  const a = booted();
+  const b = booted();
+  a.stats.sync = b.stats.sync = 30;
+  act(a, 'play', a.lastTick, noRng, { game: 'breach', won: true });
+  act(b, 'play', b.lastTick, noRng, { game: 'breach', won: false });
+  assert.deepEqual(a.games.breach, { played: 1, won: 1 });
+  assert.deepEqual(b.games.breach, { played: 1, won: 0 });
+  assert.ok(a.stats.sync > b.stats.sync);
+  assert.equal(act(a, 'play', a.lastTick, noRng, { game: 'pong' }).ok, false);
+});
+
+test('an ignored trace harvests integrity and pushes allegiance corp-ward', () => {
+  const s = booted();
+  s.event = { type: 'trace', startedAge: s.ageMin };
+  const integrity = s.stats.integrity;
+  tick(s, s.lastTick + CFG.traceWindowMin * MIN, noRng);
+  assert.equal(s.event, null);
+  assert.ok(s.stats.integrity < integrity - 10);
+  assert.equal(s.axes.allegiance, 2);
+});
+
+test('hiding from a trace resolves it and leans indie', () => {
+  const s = booted();
+  assert.equal(act(s, 'hide', s.lastTick).ok, false, 'nothing to hide from');
+  s.event = { type: 'trace', startedAge: s.ageMin };
+  assert.ok(act(s, 'hide', s.lastTick).ok);
+  assert.equal(s.event, null);
+  assert.equal(s.axes.allegiance, -1);
+});
+
+test('untraceable netlings never get traced', () => {
+  const s = booted({ fragment: { trait: 'untraceable', quirk: null } });
+  s.quirk.sleepOffset = 0;
+  const alwaysRoll = () => 0; // every random check fires
+  tick(s, s.lastTick + 60 * MIN, alwaysRoll);
+  assert.notEqual(s.event?.type, 'trace');
 });
