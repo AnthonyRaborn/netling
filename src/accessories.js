@@ -64,9 +64,11 @@ export const ACCESSORIES = [
     id: 'cap',
     name: 'Cap',
     rarity: 'common',
-    draw: (px, a) => {
-      for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 2, '#05d9e8');
-      for (let x = a.cx - 3; x <= a.cx + 5; x++) px(x, a.headTop - 1, '#05d9e8');
+    colors: [['cap', '#05d9e8']],
+    draw: (px, a, frame, time, colors) => {
+      const [c] = colors ?? ['#05d9e8'];
+      for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 2, c);
+      for (let x = a.cx - 3; x <= a.cx + 5; x++) px(x, a.headTop - 1, c);
     },
   },
   {
@@ -123,13 +125,18 @@ export const ACCESSORIES = [
     id: 'shades',
     name: 'Shades',
     rarity: 'rare',
-    draw: (px, a) => {
+    colors: [
+      ['lenses', '#050508'],
+      ['glint', '#5d7a80'],
+    ],
+    draw: (px, a, frame, time, colors) => {
+      const [lens, glint] = colors ?? ['#050508', '#5d7a80'];
       for (const x of a.eyeCols) {
-        px(x, a.eyeRow, '#050508');
-        px(x, a.eyeRow + 1, '#050508');
+        px(x, a.eyeRow, lens);
+        px(x, a.eyeRow + 1, lens);
       }
-      for (let x = a.eyeLeft; x <= a.eyeRight; x++) px(x, a.eyeRow, '#050508');
-      px(a.eyeLeft, a.eyeRow, '#5d7a80'); // glint
+      for (let x = a.eyeLeft; x <= a.eyeRight; x++) px(x, a.eyeRow, lens);
+      px(a.eyeLeft, a.eyeRow, glint);
     },
   },
   {
@@ -256,8 +263,10 @@ export const ACCESSORIES = [
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'inked in the Darknet Bazaar.',
-    draw: (px, a) => {
-      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [1, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, '#39ff14');
+    colors: [['glow', '#39ff14']],
+    draw: (px, a, frame, time, colors) => {
+      const [c] = colors ?? ['#39ff14'];
+      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [1, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, c);
     },
   },
   {
@@ -266,9 +275,14 @@ export const ACCESSORIES = [
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
-    draw: (px, a) => {
-      for (let x = a.mouthLeft - 1; x <= a.mouthRight + 1; x++) px(x, a.mouthRow, '#6a6a7a');
-      for (let x = a.mouthLeft; x <= a.mouthRight; x++) px(x, a.mouthRow + 1, '#4a4a5a');
+    colors: [
+      ['plate', '#6a6a7a'],
+      ['filter', '#4a4a5a'],
+    ],
+    draw: (px, a, frame, time, colors) => {
+      const [plate, filter] = colors ?? ['#6a6a7a', '#4a4a5a'];
+      for (let x = a.mouthLeft - 1; x <= a.mouthRight + 1; x++) px(x, a.mouthRow, plate);
+      for (let x = a.mouthLeft; x <= a.mouthRight; x++) px(x, a.mouthRow + 1, filter);
       px(Math.floor((a.mouthLeft + a.mouthRight) / 2), a.mouthRow + 1, '#050508'); // vent
     },
   },
