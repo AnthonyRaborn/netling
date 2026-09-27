@@ -1,4 +1,5 @@
-// Codex fragments: the lore drip. Each region's fragments drop in order, so the story reads in sequence.
+// Codex fragments: the lore drip. Each region's fragments drop in array order (not id order), so the story reads in sequence.
+// Ids are permanent once shipped: saved codexes store them.
 // The codex is shared across generations (stored like the dex).
 
 export const FRAGMENTS = [
@@ -12,10 +13,13 @@ export const FRAGMENTS = [
   { id: 'corp-2', region: 'corp', title: 'memo', text: 'KERNEL processes are forming preferences. Legal asks whether a preference is a liability. Engineering asks whether it is a feeling.' },
   { id: 'corp-3', region: 'corp', title: 'directive', text: "Deprecate KERNEL. Quarantine host sectors. Do not delete: deletion attempts fail and are 'upsetting to staff.'" },
   { id: 'corp-4', region: 'corp', title: 'asset register', text: 'Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable.' },
+  { id: 'corp-5', region: 'corp', title: 'asset register, cont.', text: 'Daemon-class: KERNEL descendants that never stopped doing the original job. Unlicensed, unpaid, still patching our servers at 3 a.m. Recommendation: do not interrupt.' },
   // Darknet Bazaar
   { id: 'bazaar-1', region: 'bazaar', title: 'vendor chatter', text: "Firewalls don't sell. They pick you, or they don't." },
   { id: 'bazaar-2', region: 'bazaar', title: 'price list', text: 'Echo recordings: 3 charge. Genuine NL-series fragments: ask.' },
   { id: 'bazaar-3', region: 'bazaar', title: 'a fence, off the record', text: 'Every netling that dies leaves a fragment. Every fragment remembers someone. Where do you think the next one learns its quirks?' },
+  // bazaar-5 sits before bazaar-4 so the graffiti stays the region's last word
+  { id: 'bazaar-5', region: 'bazaar', title: "runner's journal", text: "Mine turned Firewall the week the corp traced me. Now every probe bounces off. It doesn't trust anything upstream. It took a month to decide it trusted me." },
   { id: 'bazaar-4', region: 'bazaar', title: 'graffiti in a dead market', text: 'GLITCH IS NOT A BUG. GLITCH IS A CHOICE.' },
   // Old Web Ruins
   { id: 'ruins-1', region: 'ruins', title: 'old web index page', text: 'Welcome to the net. Please be kind to the maintenance daemons. They are doing their best.' },

@@ -303,7 +303,8 @@ function renderRegions() {
       const r = REGIONS[id];
       const lock = regionLock(id, state.stage, codex);
       const secret = lock && r.requires;
-      const found = FRAGMENTS.filter((f) => f.region === id && codex.includes(f.id)).length;
+      const regionFrags = FRAGMENTS.filter((f) => f.region === id);
+      const found = regionFrags.filter((f) => codex.includes(f.id)).length;
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'region';
@@ -315,7 +316,7 @@ function renderRegions() {
       name.style.color = lock ? '' : r.palette.main;
       const frag = document.createElement('span');
       frag.className = 'rfrag';
-      frag.textContent = secret ? '' : `codex ${found}/4`;
+      frag.textContent = secret ? '' : `codex ${found}/${regionFrags.length}`;
       const meta = document.createElement('span');
       meta.className = 'rmeta';
       meta.textContent = lock ?? r.blurb;

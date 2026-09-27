@@ -279,5 +279,13 @@ test('codex groups fragments by region with missing placeholders', () => {
   assert.equal(rows.length, REGION_ORDER.length);
   assert.equal(rows[0].found, 1);
   assert.equal(rows[0].entries[1].missing, true);
-  assert.equal(FRAGMENTS.length, REGION_ORDER.length * 4);
+  assert.equal(new Set(FRAGMENTS.map((f) => f.id)).size, FRAGMENTS.length, 'ids are unique');
+  for (const f of FRAGMENTS) assert.ok(REGION_ORDER.includes(f.region), `${f.id} has a real region`);
+});
+
+test('Daemon and Firewall each have a fragment; the Bazaar still ends on the graffiti', () => {
+  assert.match(FRAGMENTS.find((f) => f.id === 'corp-5').text, /Daemon-class/);
+  assert.match(FRAGMENTS.find((f) => f.id === 'bazaar-5').text, /Firewall/);
+  assert.equal(nextFragment('bazaar', ['bazaar-1', 'bazaar-2', 'bazaar-3']), 'bazaar-5');
+  assert.equal(nextFragment('bazaar', ['bazaar-1', 'bazaar-2', 'bazaar-3', 'bazaar-5']), 'bazaar-4');
 });
