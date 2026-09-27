@@ -28,6 +28,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/render.js`, `src/sprites.js` | 40×28 LCD renderer and code-drawn pixel sprites |
 | `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune + intro/result session wrapper |
 | `src/main.js` | UI wiring, save/load (`localStorage`), prefs, notifications |
+| `src/archive.js` | Lineage records and the form dex (ARCHIVE button) |
 | `src/notify.js`, `sw.js`, `manifest.webmanifest` | PWA + notifications |
 | `tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite |
 
@@ -38,7 +39,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
   - *Allegiance* (corp packets, complying with traces ↔ scavenged data, hiding) → **Chrome** / **Firewall**
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
   - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each game).
-- **Lineage:** each generation inherits its predecessor's form trait and one of its quirks.
+- **Lineage:** each generation inherits its predecessor's form trait and one of its quirks. The **ARCHIVE** lists every generation and a dex of the 8 forms; undiscovered forms show only a silhouette and a hint.
 
 ## Balance targets
 

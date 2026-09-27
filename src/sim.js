@@ -131,6 +131,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     generation,
     stage: 'script',
     form: 'bitling',
+    teenForm: null,
     evolvedAt: null,
     bornAt: now,
     lastTick: now,
@@ -328,6 +329,7 @@ export function ghostWinsMet(s) {
 function evolve(s, t, stage, form) {
   s.stage = stage;
   s.form = form;
+  if (stage === 'teen') s.teenForm = form;
   s.evolvedAt = t;
   log(s, t, `> recompiling... netling is now ${SPECIES[form].name.toUpperCase()}.`);
 }
@@ -339,6 +341,7 @@ export function migrate(s) {
   s.games ??= freshGames();
   s.event ??= null;
   s.lastSurgeAt ??= null;
+  s.teenForm ??= s.stage === 'teen' ? s.form : null;
   return s;
 }
 

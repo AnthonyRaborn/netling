@@ -54,6 +54,8 @@ body {
 
 .brand {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: space-between;
   align-items: baseline;
   margin-bottom: 12px;
@@ -79,6 +81,11 @@ body {
   color: var(--dim);
   border-color: var(--shell-edge);
   text-shadow: none;
+}
+
+.archive-btn {
+  color: var(--yellow);
+  border-color: var(--yellow);
 }
 
 .pref[aria-pressed='true'] {
@@ -431,6 +438,129 @@ button:active {
   50% {
     opacity: 0.55;
   }
+}
+
+/* --- archive ----------------------------------------------------------------- */
+
+.archive {
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 48px));
+  padding: 16px;
+  background: linear-gradient(160deg, #1d1830, var(--shell) 60%, #0d0b15);
+  color: var(--text);
+  border: 2px solid var(--shell-edge);
+  border-radius: 16px;
+  box-shadow: 0 0 32px rgba(255, 42, 109, 0.25);
+  font-family: inherit;
+  font-size: 18px;
+}
+
+.archive[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.archive::backdrop {
+  background: rgba(3, 3, 8, 0.8);
+}
+
+.archive header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.archive h2 {
+  margin: 0;
+  font-weight: normal;
+  letter-spacing: 4px;
+  color: var(--yellow);
+  text-shadow: 0 0 8px rgba(249, 240, 2, 0.5);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.tabs [aria-selected='false'] {
+  color: var(--dim);
+  border-color: var(--shell-edge);
+  text-shadow: none;
+}
+
+.archive section {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.lineage,
+.dex {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lineage li,
+.dex li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  background: #0a0a12;
+  border: 1px solid var(--shell-edge);
+}
+
+.lineage li.running {
+  border-color: var(--cyan);
+}
+
+.thumb {
+  width: 56px;
+  height: 56px;
+  background: var(--lcd);
+  display: grid;
+  place-items: center;
+}
+
+.thumb canvas {
+  width: 48px;
+  image-rendering: pixelated;
+}
+
+.row-title {
+  color: var(--text);
+}
+
+.row-title b {
+  font-weight: normal;
+  color: var(--cyan);
+}
+
+.row-meta {
+  color: var(--dim);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.dex li.locked .row-title {
+  color: var(--dim);
+}
+
+.dex .perk {
+  color: var(--yellow);
+}
+
+.empty {
+  color: var(--dim);
+  text-align: center;
+  padding: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {

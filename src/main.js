@@ -19,6 +19,8 @@ import {
 } from './sim.js';
 import { renderLCD } from './render.js';
 import { GameSession } from './games/session.js';
+import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
+import { drawSprite, formSprite } from './sprites.js';
 import { sfx, unlockAudio, setMuted } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 
@@ -26,6 +28,7 @@ const SAVE_KEY = 'netling.save';
 const LINEAGE_KEY = 'netling.lineage';
 const SKEW_KEY = 'netling.devSkew';
 const PREFS_KEY = 'netling.prefs';
+const DEX_KEY = 'netling.dex';
 const DEV = new URLSearchParams(location.search).has('dev');
 
 const store = {
@@ -65,6 +68,18 @@ let surgeUntil = 0;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 const prefs = { sound: true, alerts: false, ...store.get(PREFS_KEY) };
+
+const dex = store.get(DEX_KEY) ?? [];
+for (const form of formsSeenIn(state, store.get(LINEAGE_KEY) ?? [])) discover(dex, form);
+store.set(DEX_KEY, dex);
+
+function recordForm() {
+  if (state.stage === 'script' || state.stage === 'dead') return;
+  if (discover(dex, state.form)) {
+    store.set(DEX_KEY, dex);
+    if (state.form !== 'bitling') flashStatus(`dex updated: ${SPECIES[state.form].name}.`);
+  }
+}
 setMuted(!prefs.sound);
 
 function save() {
@@ -81,6 +96,7 @@ function advance() {
       pushAlert('Netling is evolving', `It recompiled into ${SPECIES[state.form].name.toUpperCase()}.`);
     }
     if (state.stage === 'dead') onFlatline();
+    recordForm();
     lastStage = state.stage;
   }
   if (state.lastSurgeAt !== lastSurgeAt) {
@@ -153,15 +169,8 @@ function pushAlert(title, body) {
 function onFlatline() {
   sfx('flatline', state.quirk.pitch);
   pushAlert('FLATLINE', `netling.v${state.generation}.0 is gone: ${state.deathCause}.`);
-  const f = state.fragment;
   const lineage = store.get(LINEAGE_KEY) ?? [];
-  lineage.push({
-    generation: state.generation,
-    ageMin: state.ageMin,
-    cause: state.deathCause,
-    form: f.form,
-    diedAt: state.diedAt,
-  });
+  lineage.push(deathRecord(state));
   store.set(LINEAGE_KEY, lineage);
   showFlatline();
 }
@@ -259,6 +268,107 @@ document.addEventListener('keydown', (e) => {
   e.preventDefault();
   session.input(key);
 });
+
+// --- archive --------------------------------------------------------------------
+
+const archive = $('archive');
+
+function thumb(form, paletteIdx, { dead = false, locked = false } = {}) {
+  const wrap = document.createElement('div');
+  wrap.className = 'thumb';
+  if (!form) return wrap;
+  const sprite = formSprite(form, 'a');
+  const c = document.createElement('canvas');
+  c.width = 16;
+  c.height = 16;
+  const pal = PALETTES[paletteIdx] ?? PALETTES[0];
+  const colors = locked
+    ? { '#': '#1c3a3f', o: '#1c3a3f', '+': '#1c3a3f' }
+    : dead
+      ? { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' }
+      : { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
+  drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);
+  wrap.append(c);
+  return wrap;
+}
+
+function row(thumbEl, title, lines, className = '') {
+  const li = document.createElement('li');
+  li.className = className;
+  const body = document.createElement('div');
+  const t = document.createElement('div');
+  t.className = 'row-title';
+  t.append(...title);
+  body.append(t);
+  for (const line of lines.filter(Boolean)) {
+    const m = document.createElement('div');
+    m.className = typeof line === 'string' ? 'row-meta' : `row-meta ${line.cls}`;
+    m.textContent = typeof line === 'string' ? line : line.text;
+    body.append(m);
+  }
+  li.append(thumbEl, body);
+  return li;
+}
+
+function bold(text) {
+  const b = document.createElement('b');
+  b.textContent = text;
+  return b;
+}
+
+function renderArchive() {
+  const rows = lineageRows(store.get(LINEAGE_KEY) ?? [], state);
+  $('lineage-list').replaceChildren(
+    ...rows.map((r) =>
+      row(
+        thumb(r.form, r.palette, { dead: r.dead }),
+        [bold(r.version), ` ${r.formLabel}`],
+        [
+          `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
+          r.trait || r.fragment ? `inherited ${r.trait ?? '—'}${r.fragment ? ` · left ${r.fragment}` : ''}` : null,
+        ],
+        r.dead ? '' : 'running',
+      ),
+    ),
+  );
+  if (!rows.length) {
+    const li = document.createElement('li');
+    li.className = 'empty';
+    li.textContent = 'no generations yet.';
+    $('lineage-list').replaceChildren(li);
+  }
+
+  const entries = dexEntries(dex);
+  $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
+  $('dex-grid').replaceChildren(
+    ...entries.map((e) =>
+      row(
+        thumb(e.id, 0, { locked: !e.found }),
+        [bold(e.name), ` · ${e.stage}`],
+        [e.text, e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null, e.trait ? `fragment: ${e.trait}` : null],
+        e.found ? '' : 'locked',
+      ),
+    ),
+  );
+}
+
+function selectTab(name) {
+  for (const t of ['lineage', 'dex']) {
+    $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
+    $(`tab-${t}`).hidden = t !== name;
+  }
+}
+
+$('open-archive').addEventListener('click', () => {
+  renderArchive();
+  archive.showModal();
+});
+$('close-archive').addEventListener('click', () => archive.close());
+archive.addEventListener('click', (e) => {
+  if (e.target === archive) archive.close(); // backdrop click
+});
+$('tab-btn-lineage').addEventListener('click', () => selectTab('lineage'));
+$('tab-btn-dex').addEventListener('click', () => selectTab('dex'));
 
 // --- settings -------------------------------------------------------------------
 

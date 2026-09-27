@@ -22,6 +22,7 @@
         <span class="prefs">
           <button type="button" id="pref-sound" class="pref" aria-pressed="true">SND ON</button>
           <button type="button" id="pref-alerts" class="pref" aria-pressed="false">ALERTS OFF</button>
+          <button type="button" id="open-archive" class="pref archive-btn">ARCHIVE</button>
         </span>
       </header>
 
@@ -99,6 +100,23 @@
         <button type="button" id="dev-reset">RESET</button>
       </div>
     </main>
+
+    <dialog id="archive" class="archive" aria-labelledby="archive-title">
+      <header>
+        <h2 id="archive-title">ARCHIVE</h2>
+        <button type="button" id="close-archive" class="pref" aria-label="Close archive">CLOSE</button>
+      </header>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-btn-lineage" aria-selected="true" aria-controls="tab-lineage">LINEAGE</button>
+        <button type="button" role="tab" id="tab-btn-dex" aria-selected="false" aria-controls="tab-dex">DEX <span id="dex-count"></span></button>
+      </div>
+      <section id="tab-lineage" role="tabpanel" aria-labelledby="tab-btn-lineage">
+        <ol id="lineage-list" class="lineage"></ol>
+      </section>
+      <section id="tab-dex" role="tabpanel" aria-labelledby="tab-btn-dex" hidden>
+        <ul id="dex-grid" class="dex"></ul>
+      </section>
+    </dialog>
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
