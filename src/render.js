@@ -72,7 +72,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
     if (opts.accessory && !(opts.flash && Math.floor(time / 120) % 2)) {
-      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dark);
+      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dark, time);
     }
     bctx.globalAlpha = 1;
 

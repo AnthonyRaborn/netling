@@ -26,7 +26,7 @@ import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, re
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
-import { ACCESSORIES, RARITY, accessoryById } from './accessories.js';
+import { ACCESSORIES, accessoryById, accessoryHint } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
@@ -629,7 +629,7 @@ function accessorySection() {
     name.textContent = owned ? x.name : '???';
     const hint = document.createElement('span');
     hint.className = 'ch';
-    hint.textContent = owned ? (current === x.id ? 'equipped' : 'tap to equip') : RARITY[x.rarity].hint;
+    hint.textContent = owned ? (current === x.id ? 'equipped' : 'tap to equip') : accessoryHint(x);
     b.append(sw, name, hint);
     if (owned) {
       b.addEventListener('click', () => {

@@ -110,7 +110,7 @@ function note(run, msg) {
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
 function takeAccessory(run, rng) {
-  const id = rollAccessory([...run.knownAcc, ...run.accessories], rng);
+  const id = rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region);
   if (!id) return '';
   run.accessories.push(id);
   return ` accessory: ${accessoryById(id).name}!`;
@@ -209,7 +209,7 @@ export function moveTo(pet, nodeId, rng) {
       }
       const price = region.marketPrice ?? RUN_CFG.marketPrice;
       const affordable = st.charge > price + 5;
-      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng) : null;
+      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region) : null;
       const accAffordable = st.charge > RUN_CFG.accPrice + 5;
       openChoice(run, {
         kind: 'market',

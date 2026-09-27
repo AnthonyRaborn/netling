@@ -30,6 +30,10 @@ export function anchorsFor(sprite) {
   const mid = Math.min(bottom, eyeRow + Math.max(2, Math.round((bottom - eyeRow) / 2)));
   const head = spans[headTop];
   const body = spans[mid] ?? head;
+  // Mouth: first row below the eyes with highlight pixels ('+'); otherwise a guess.
+  let mouthRow = sprite.findIndex((row, i) => i > eyeRow && row.includes('+'));
+  if (mouthRow < 0) mouthRow = Math.min(bottom, eyeRow + 2);
+  const mouthCols = [...sprite[mouthRow]].map((ch, i) => (ch === '+' ? i : -1)).filter((i) => i >= 0);
   const a = {
     top,
     headTop,
@@ -43,12 +47,16 @@ export function anchorsFor(sprite) {
     bodyLeft: body.left,
     bodyRight: body.right,
     cx: Math.floor((head.left + head.right) / 2),
+    mouthRow,
+    mouthLeft: mouthCols.length ? mouthCols[0] : Math.floor((head.left + head.right) / 2) - 1,
+    mouthRight: mouthCols.length ? mouthCols[mouthCols.length - 1] : Math.floor((head.left + head.right) / 2) + 1,
   };
   cache.set(sprite, a);
   return a;
 }
 
-// Each draw(px, a, frame) paints with px(x, y, color) in sprite-local coordinates.
+// Each draw(px, a, frame, time) paints with px(x, y, color) in sprite-local coordinates.
+// regions: where it can be found (markets and drops); omitted means anywhere. hint overrides the rarity hint.
 export const ACCESSORIES = [
   {
     id: 'cap',
@@ -163,13 +171,149 @@ export const ACCESSORIES = [
       if (frame % 2) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(a.cx + dx, y + dy, '#05d9e8');
     },
   },
+
+  // --- regional ------------------------------------------------------------------------
+  {
+    id: 'barcode',
+    name: 'Corp barcode',
+    rarity: 'common',
+    regions: ['corp'],
+    hint: 'stamped on assets in the Corp Grid.',
+    draw: (px, a) => {
+      const x0 = a.bodyRight - 6;
+      [1, 0, 1, 1, 0, 1].forEach((on, i) => {
+        if (!on) return;
+        px(x0 + i, a.mid - 1, '#050508');
+        px(x0 + i, a.mid, '#050508');
+      });
+    },
+  },
+  {
+    id: 'chromejaw',
+    name: 'Chrome jaw',
+    rarity: 'rare',
+    regions: ['corp'],
+    hint: 'rarely sold in the Corp Grid.',
+    draw: (px, a) => {
+      for (let x = a.mouthLeft - 1; x <= a.mouthRight + 1; x++) {
+        px(x, a.mouthRow, '#c8d0dc');
+        px(x, a.mouthRow + 1, (x - a.mouthLeft) % 2 ? '#8a93a3' : '#c8d0dc');
+      }
+    },
+  },
+  {
+    id: 'cybereye',
+    name: 'Cyber eye',
+    rarity: 'rare',
+    regions: ['corp'],
+    hint: 'rarely sold in the Corp Grid.',
+    draw: (px, a, frame) => {
+      const right = a.eyeCols.filter((x) => x > a.cx);
+      const cols = right.length ? right : [a.eyeRight];
+      for (const x of cols) {
+        px(x, a.eyeRow, '#ff1a1a');
+        px(x, a.eyeRow + 1, '#ff1a1a');
+      }
+      px(cols[cols.length - 1] + 1, a.eyeRow, '#5a5a6a');
+      px(cols[0], a.eyeRow, frame % 2 ? '#ffffff' : '#ff1a1a'); // it blinks on its own
+    },
+  },
+  {
+    id: 'mohawk',
+    name: 'Neon mohawk',
+    rarity: 'common',
+    regions: ['bazaar'],
+    hint: 'sold in the Darknet Bazaar.',
+    draw: (px, a) => {
+      for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [0, -2], [1, -2], [0, -3]]) px(a.cx + dx, a.headTop + dy, '#ff2a6d');
+    },
+  },
+  {
+    id: 'neuraljack',
+    name: 'Neural jack',
+    rarity: 'common',
+    regions: ['bazaar'],
+    hint: 'sold in the Darknet Bazaar.',
+    draw: (px, a) => {
+      px(a.headLeft, a.eyeRow, '#f9f002'); // the plug
+      for (const [dx, dy] of [[-1, 0], [-2, 1], [-2, 2], [-3, 3], [-3, 4]]) px(a.headLeft + dx, a.eyeRow + dy, '#9a9ab8');
+    },
+  },
+  {
+    id: 'tattoo',
+    name: 'Circuit tattoo',
+    rarity: 'common',
+    regions: ['bazaar'],
+    hint: 'inked in the Darknet Bazaar.',
+    draw: (px, a) => {
+      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [1, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, '#39ff14');
+    },
+  },
+  {
+    id: 'rebreather',
+    name: 'Rebreather',
+    rarity: 'common',
+    regions: ['bazaar'],
+    hint: 'sold in the Darknet Bazaar.',
+    draw: (px, a) => {
+      for (let x = a.mouthLeft - 1; x <= a.mouthRight + 1; x++) px(x, a.mouthRow, '#6a6a7a');
+      for (let x = a.mouthLeft; x <= a.mouthRight; x++) px(x, a.mouthRow + 1, '#4a4a5a');
+      px(Math.floor((a.mouthLeft + a.mouthRight) / 2), a.mouthRow + 1, '#050508'); // vent
+    },
+  },
+  {
+    id: 'satdish',
+    name: 'Sat-dish antenna',
+    rarity: 'rare',
+    regions: ['ruins'],
+    hint: 'left behind in the Old Web Ruins.',
+    draw: (px, a, frame) => {
+      const x = a.headRight - 2;
+      for (const [dx, dy] of [[0, -1], [0, -2], [-1, -3], [0, -3], [1, -3], [-2, -4], [2, -4]]) px(x + dx, a.headTop + dy, '#c8c8d8');
+      if (frame % 2) px(x, a.headTop - 5, '#ff2a6d');
+    },
+  },
+  {
+    id: 'kernelpin',
+    name: 'KERNEL pin',
+    rarity: 'veryrare',
+    regions: ['ruins'],
+    hint: 'a relic of the old project. the ruins might still have one.',
+    draw: (px, a) => {
+      const x = a.bodyLeft + 1;
+      const y = a.mid - 1;
+      for (let dx = 0; dx < 3; dx++) for (let dy = 0; dy < 3; dy++) px(x + dx, y + dy, '#d8b04a');
+      px(x + 1, y + 1, '#050508');
+    },
+  },
+  {
+    id: 'drone',
+    name: 'Drone buddy',
+    rarity: 'veryrare',
+    regions: ['deep'],
+    hint: 'something small follows runners up from the deep.',
+    draw: (px, a, frame, time = 0) => {
+      const rx = Math.floor((a.headRight - a.headLeft) / 2) + 2;
+      const t = time / 700;
+      const x = a.cx + Math.round(Math.cos(t) * rx);
+      const y = a.headTop - 2 + Math.round(Math.sin(t) * 2);
+      px(x - 1, y, '#8a93a3');
+      px(x, y, '#c8d0dc');
+      px(x + 1, y, '#8a93a3');
+      if (frame % 2) px(x, y - 1, '#39ff14');
+    },
+  },
 ];
+
+export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
+export const accessoryRegions = (x) => x.regions ?? null;
 
 export const accessoryById = (id) => ACCESSORIES.find((x) => x.id === id);
 
 // Pick an accessory the player doesn't own yet, weighted by rarity, or null.
-export function rollAccessory(exclude, rng) {
-  const pool = ACCESSORIES.filter((x) => !exclude.includes(x.id));
+// With a region, only accessories found there (or anywhere) are in the pool.
+export function rollAccessory(exclude, rng, region = null) {
+  const pool = ACCESSORIES.filter((x) => !exclude.includes(x.id) && (!region || !x.regions || x.regions.includes(region)));
   if (!pool.length) return null;
   const total = pool.reduce((n, x) => n + RARITY[x.rarity].weight, 0);
   let r = rng() * total;
@@ -178,7 +322,7 @@ export function rollAccessory(exclude, rng) {
 }
 
 // Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark.
-export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false) {
+export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0) {
   const acc = accessoryById(id);
   if (!acc) return;
   const a = anchorsFor(sprite);
@@ -186,5 +330,5 @@ export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false) {
     ctx.fillStyle = dim ? '#1c3a3f' : color;
     ctx.fillRect(ox + x, oy + y, 1, 1);
   };
-  acc.draw(px, a, frame);
+  acc.draw(px, a, frame, time);
 }

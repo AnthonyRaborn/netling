@@ -47,3 +47,33 @@ test('rolls skip owned accessories and favor common ones', () => {
   assert.equal(rollAccessory(ACCESSORIES.map((x) => x.id), rng), null);
   assert.ok(Object.keys(RARITY).every((k) => RARITY[k].hint));
 });
+
+test('regional accessories only roll in their region; the originals roll anywhere', () => {
+  const rng = mulberry32(9);
+  const seen = {};
+  for (const region of ['public', 'corp', 'bazaar', 'ruins', 'deep']) {
+    seen[region] = new Set();
+    for (let i = 0; i < 2000; i++) seen[region].add(rollAccessory([], rng, region));
+  }
+  for (const x of ACCESSORIES) {
+    for (const [region, ids] of Object.entries(seen)) {
+      const allowed = !x.regions || x.regions.includes(region);
+      if (!allowed) assert.ok(!ids.has(x.id), `${x.id} leaked into ${region}`);
+    }
+  }
+  assert.ok(seen.deep.has('drone'));
+  assert.ok(seen.corp.has('barcode'));
+  assert.ok(!seen.public.has('drone'));
+  assert.equal(ACCESSORIES.length, 20);
+});
+
+test('the drone orbits: its position changes over time', () => {
+  const drone = ACCESSORIES.find((x) => x.id === 'drone');
+  const a = anchorsFor(SPRITES.chromeA);
+  const at = (time) => {
+    const pts = [];
+    drone.draw((x, y) => pts.push(`${x},${y}`), a, 0, time);
+    return pts.join(' ');
+  };
+  assert.notEqual(at(0), at(1100));
+});
