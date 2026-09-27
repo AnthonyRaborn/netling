@@ -37,7 +37,7 @@ import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
 import { drawSprite, formSprite, ITEM_SPRITES, ITEM_COLORS } from './sprites.js';
-import { sfx, unlockAudio, setMuted, setSoundPack } from './audio.js';
+import { sfx, unlockAudio, setMuted, setSoundPack, setVolume } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 
 const SAVE_KEY = 'netling.save';
@@ -92,7 +92,8 @@ let lastSurgeAt = state.lastSurgeAt;
 let surgeUntil = 0;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-const prefs = { sound: true, alerts: false, ...store.get(PREFS_KEY) };
+const prefs = { sound: true, alerts: false, volume: 0.8, ...store.get(PREFS_KEY) };
+setVolume(prefs.volume);
 
 const dex = store.get(DEX_KEY) ?? [];
 for (const form of formsSeenIn(state, store.get(LINEAGE_KEY) ?? [])) discover(dex, form);
@@ -189,15 +190,16 @@ setMuted(!prefs.sound);
 
 let importing = false; // stops autosave from overwriting an import before the reload
 const LOCK_KEY = 'netling.lock';
+let inactive = false; // another tab is looking after the netling
 let lock = store.get(LOCK_KEY); // { code, at, generation } while the netling is on another device
 
 function save() {
-  if (importing || lock) return;
+  if (importing || lock || inactive) return;
   store.set(SAVE_KEY, state);
 }
 
 function advance() {
-  if (lock) return; // the netling is on another device
+  if (lock || inactive) return; // on another device, or in another tab
   tick(state, now());
   if (state.stage !== lastStage) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
@@ -379,6 +381,10 @@ function openRun() {
       session = null;
       if (run?.region === 'tutorial') finishOnboarding();
       if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
+      if (run?.result) {
+        progress.runs = { ...progress.runs, [run.result]: (progress.runs?.[run.result] ?? 0) + 1 };
+        store.set(PROGRESS_KEY, progress);
+      }
       if (run?.result === 'jacked') {
         if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
         const at = run.map.nodes.find((n) => n.id === run.pos);
@@ -559,6 +565,26 @@ $('inv-use').addEventListener('click', () => {
   const res = act(state, 'use', now(), Math.random, { slot: selectedSlot });
   sfx(res.sfx, state.quirk.pitch);
   if (!res.ok) flashStatus(res.msg);
+  selectedSlot = null;
+  save();
+  updateHUD();
+});
+$('inv-discard').addEventListener('click', () => {
+  if (selectedSlot === null) return;
+  const btn = $('inv-discard');
+  if (btn.dataset.armed !== '1') {
+    btn.dataset.armed = '1';
+    btn.textContent = 'SURE?';
+    setTimeout(() => {
+      btn.dataset.armed = '';
+      btn.textContent = 'DISCARD';
+    }, 3000);
+    return;
+  }
+  btn.dataset.armed = '';
+  btn.textContent = 'DISCARD';
+  const res = act(state, 'discard', now(), Math.random, { slot: selectedSlot });
+  sfx(res.sfx, state.quirk.pitch);
   selectedSlot = null;
   save();
   updateHUD();
@@ -1009,12 +1035,26 @@ const importUrl = (code) => `${location.origin}${location.pathname}#import=${cod
 
 function openSystem() {
   archive.close();
+  renderStorageNote();
+  $('volume').value = Math.round(prefs.volume * 100);
+  $('volume-value').textContent = `${Math.round(prefs.volume * 100)}%`;
   $('import-preview').hidden = true;
   renderHibernateNote();
   transfer.showModal();
 }
 $('open-transfer').addEventListener('click', openSystem);
 $('close-transfer').addEventListener('click', () => transfer.close());
+
+$('volume').addEventListener('input', () => {
+  prefs.volume = Number($('volume').value) / 100;
+  setVolume(prefs.volume);
+  $('volume-value').textContent = `${$('volume').value}%`;
+  store.set(PREFS_KEY, prefs);
+});
+$('volume').addEventListener('change', () => {
+  unlockAudio();
+  sfx('select', state.quirk.pitch); // preview at the new level
+});
 
 // --- transfer out: export and lock ---
 $('transfer-out').addEventListener('click', async () => {
@@ -1230,6 +1270,88 @@ function renderHibernation() {
   $('wake-btn').disabled = waitMin > 0;
 }
 
+// --- one active tab ------------------------------------------------------------------
+// Two tabs simulating the same save would overwrite each other. A Web Lock makes one tab
+// the caretaker; others wait (and take over when it closes) or can steal the role.
+
+const TAB_LOCK = 'netling-active-tab';
+
+function becomeInactive(message) {
+  inactive = true;
+  $('tab-guard').hidden = false;
+  $('tab-guard-note').textContent = message;
+}
+
+// Queue behind whoever holds the role; reload (as the caretaker) once they let go.
+function waitForTurn() {
+  navigator.locks.request(TAB_LOCK, () => {
+    location.reload();
+    return new Promise(() => {});
+  });
+}
+
+function claimTab() {
+  return new Promise((resolve) => {
+    if (!navigator.locks) return resolve(true); // no Web Locks: assume a single tab
+    navigator.locks
+      .request(TAB_LOCK, { ifAvailable: true }, (held) => {
+        if (!held) {
+          resolve(false);
+          waitForTurn();
+          return undefined;
+        }
+        resolve(true);
+        return new Promise(() => {}); // held for this tab's lifetime
+      })
+      .catch((err) => {
+        if (err?.name !== 'AbortError') return;
+        becomeInactive('Your netling moved to another tab.');
+        waitForTurn();
+      });
+  });
+}
+
+$('tab-guard-use').addEventListener('click', () => {
+  importing = true; // this tab's stale state must never be saved
+  navigator.locks.request(TAB_LOCK, { steal: true }, () => {
+    location.reload();
+    return new Promise(() => {});
+  });
+});
+
+// --- storage safety ---------------------------------------------------------------------
+
+let storageState = 'checking';
+async function protectStorage() {
+  try {
+    if (!navigator.storage?.persist) storageState = 'unknown';
+    else if (await navigator.storage.persisted()) storageState = 'protected';
+    else storageState = (await navigator.storage.persist()) ? 'protected' : 'at-risk';
+  } catch {
+    storageState = 'unknown';
+  }
+  renderStorageNote();
+}
+
+function renderStorageNote() {
+  const notes = {
+    checking: 'Checking...',
+    protected: 'Protected: this browser has agreed to keep your netling\'s data.',
+    'at-risk': 'Not protected yet: the browser may clear it to save space. Installing the app (or adding it to your Home Screen) usually fixes this.',
+    unknown: 'This browser does not report whether it will keep your data. Installing the app is the safest option.',
+  };
+  $('storage-note').textContent = notes[storageState];
+}
+
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const IOS_HINT_KEY = 'netling.iosHintSeen';
+if (isIOS && !isStandalone && !store.get(IOS_HINT_KEY)) $('ios-hint').hidden = false;
+$('ios-hint-ok').addEventListener('click', () => {
+  store.set(IOS_HINT_KEY, true);
+  $('ios-hint').hidden = true;
+});
+
 // --- NL-0 ------------------------------------------------------------------------
 
 function showTransmission() {
@@ -1287,7 +1409,56 @@ function bold(text) {
   return b;
 }
 
+// Lifetime record across every generation on this device.
+function renderRecord() {
+  const lineage = store.get(LINEAGE_KEY) ?? [];
+  const full = lineage.filter((e) => e.cause === 'end of life cycle').length;
+  let streak = 0;
+  let bestStreak = 0;
+  for (const e of lineage) {
+    streak = e.cause === 'end of life cycle' ? streak + 1 : 0;
+    bestStreak = Math.max(bestStreak, streak);
+  }
+  const acts = progress.acts ?? {};
+  const runs = progress.runs ?? {};
+  const best = (g) => progress.streaks?.[g]?.best ?? 0;
+  const rows = [
+    ['LIFE'],
+    ['generations', lineage.length + (state.stage === 'dead' ? 0 : 1)],
+    ['full 7-day lives', full],
+    ['longest full-life streak', bestStreak],
+    ['CARE'],
+    ['meals served', (acts.corp ?? 0) + (acts.scav ?? 0)],
+    ['viruses patched', acts.patch ?? 0],
+    ['caches purged', acts.purge ?? 0],
+    ['traces: hid / complied', `${acts.hide ?? 0} / ${acts.comply ?? 0}`],
+    ['GAMES'],
+    ['games played', progress.gamesPlayed ?? 0],
+    ['best streak: breach / dodge / tune', `${best('breach')} / ${best('dodge')} / ${best('tune')}`],
+    ['NETRUN'],
+    ['runs: jacked out / disconnected', `${runs.jacked ?? 0} / ${runs.disconnected ?? 0}`],
+    ['clean jack-outs', progress.cleanJackouts ?? 0],
+    ['exits from the deep', progress.deepExits ?? 0],
+  ];
+  $('record').replaceChildren(
+    ...rows.flatMap(([k, v]) => {
+      if (v === undefined) {
+        const h = document.createElement('div');
+        h.className = 'rh';
+        h.textContent = k;
+        return [h];
+      }
+      const dt = document.createElement('dt');
+      dt.textContent = k;
+      const dd = document.createElement('dd');
+      dd.textContent = v;
+      return [dt, dd];
+    }),
+  );
+}
+
 function renderArchive() {
+  renderRecord();
   const rows = lineageRows(store.get(LINEAGE_KEY) ?? [], state);
   $('lineage-list').replaceChildren(
     ...rows.map((r) =>
@@ -1466,6 +1637,11 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) advance();
 });
 
+// Decide which tab is the caretaker before anything simulates or saves.
+if (!(await claimTab())) becomeInactive('Your netling is open in another tab.');
+protectStorage();
+document.addEventListener('pointerdown', () => storageState !== 'protected' && protectStorage(), { once: true });
+
 checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
 if (lock) showLock();
@@ -1482,10 +1658,19 @@ if (state.stage === 'dead') showFlatline();
 else if (state.run) openRun(); // resume a run after a reload
 setInterval(advance, 1000);
 
+// The home LCD animates in half-second steps, so ~10 fps is plenty and saves battery.
+// Mini-games and netruns get every frame.
+const IDLE_FRAME_MS = 100;
 let lastFrame = performance.now();
+let lastIdleDraw = 0;
 (function loop(time) {
   const dt = Math.min(0.1, (time - lastFrame) / 1000);
   lastFrame = time;
+  if (!session && time - lastIdleDraw < IDLE_FRAME_MS && !(time < flashUntil) && !(time < surgeUntil)) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  if (!session) lastIdleDraw = time;
   if (session) {
     session.update(dt);
     session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);

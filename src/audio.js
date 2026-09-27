@@ -2,6 +2,10 @@
 
 let ctx = null;
 let muted = false;
+let volume = 1; // 0..1, scales every blip
+export function setVolume(v) {
+  volume = Math.min(1, Math.max(0, Number(v) || 0));
+}
 // The wardrobe's sound pack; calls that name their own wave (netrun regions, NL-0) ignore it.
 let pack = { wave: 'square', mult: 1 };
 export function setSoundPack(wave, mult) {
@@ -24,7 +28,7 @@ function blip(freq, start, dur, type = 'square', vol = 0.06) {
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, t);
-  gain.gain.setValueAtTime(vol, t);
+  gain.gain.setValueAtTime(Math.max(0.0001, vol * volume), t);
   gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   osc.connect(gain).connect(ctx.destination);
   osc.start(t);

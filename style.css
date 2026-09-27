@@ -880,6 +880,7 @@ body.intro-active .brand .prefs {
   overflow-y: auto;
   min-height: 0;
   margin-top: 8px;
+  padding-right: 8px; /* keep text clear of the scrollbar */
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -909,6 +910,8 @@ body.intro-active .brand .prefs {
 }
 
 .transfer textarea {
+  flex-shrink: 0; /* the scrolling column must not squash the paste box */
+  min-height: 64px;
   font: inherit;
   font-size: 13px;
   line-height: 1.2;
@@ -1050,11 +1053,68 @@ body.frozen .event-bar {
   pointer-events: none;
 }
 
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #5d7a80;
+}
+
+.volume-row input {
+  flex: 1;
+  accent-color: var(--cyan);
+}
+
+.record {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--shell-edge);
+  font-size: 16px;
+}
+
+.record dt {
+  color: #5d7a80;
+}
+
+.record dd {
+  margin: 0;
+  text-align: right;
+  color: var(--text);
+}
+
+.record .rh {
+  grid-column: 1 / -1;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  margin-top: 6px;
+}
+
+.record .rh:first-child {
+  margin-top: 0;
+}
+
+.ios-hint {
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--yellow);
+  background: rgba(249, 240, 2, 0.06);
+  font-size: 16px;
+  color: var(--text);
+}
+
+.ios-hint p {
+  margin: 0 0 6px;
+}
+
 /* --- field manual ------------------------------------------------------------ */
 
 .help-body {
   overflow-y: auto;
   min-height: 0;
+  padding-right: 8px;
   margin-top: 8px;
   font-size: 17px;
   line-height: 1.25;

@@ -94,3 +94,11 @@ test('an adult leaves a keepsake that the next script starts with', () => {
   const next = createScript({ now: T0, generation: 2, fragment: s.fragment });
   assert.deepEqual(next.inventory, ['antivirus']);
 });
+
+test('discard frees a slot, works asleep, and ignores empty slots', () => {
+  const s = booted(['coolant', 'booster']);
+  s.asleep = true;
+  assert.ok(act(s, 'discard', s.lastTick, noRng, { slot: 1 }).ok);
+  assert.deepEqual(s.inventory, ['coolant']);
+  assert.equal(act(s, 'discard', s.lastTick, noRng, { slot: 3 }).ok, false);
+});

@@ -74,6 +74,7 @@
         <div id="inv-detail" class="inv-detail" hidden>
           <div class="inv-text"><b id="inv-name"></b> <span id="inv-desc"></span></div>
           <button type="button" id="inv-use">USE</button>
+          <button type="button" id="inv-discard" class="pref">DISCARD</button>
           <button type="button" id="inv-cancel" class="pref">KEEP</button>
         </div>
       </div>
@@ -114,7 +115,19 @@
         <button type="button" id="pad-quit" class="wide">QUIT (ESC)</button>
       </nav>
 
+      <div id="ios-hint" class="ios-hint" hidden>
+        <p>On iPhone and iPad, Safari erases a site's saved data after about a week without a visit. Add Netling to your Home Screen (Share, then Add to Home Screen) to keep it safe.</p>
+        <button type="button" id="ios-hint-ok" class="pref">GOT IT</button>
+      </div>
+
       <ul id="log" class="log" aria-live="polite"></ul>
+
+      <section id="tab-guard" class="lock" hidden aria-labelledby="tab-guard-title">
+        <h2 id="tab-guard-title">ANOTHER TAB</h2>
+        <p id="tab-guard-note" class="tx-note"></p>
+        <p class="tx-note">Only one tab can look after your netling at a time, so the two never overwrite each other. This tab takes over by itself if the other one closes.</p>
+        <button type="button" id="tab-guard-use">USE IT HERE</button>
+      </section>
 
       <section id="lock" class="lock" hidden aria-labelledby="lock-title">
         <h2 id="lock-title">IN TRANSIT</h2>
@@ -160,6 +173,7 @@
         <button type="button" role="tab" id="tab-btn-wardrobe" aria-selected="false" aria-controls="tab-wardrobe">STYLE <span id="wardrobe-count"></span></button>
       </div>
       <section id="tab-lineage" role="tabpanel" aria-labelledby="tab-btn-lineage">
+        <dl id="record" class="record"></dl>
         <ol id="lineage-list" class="lineage"></ol>
       </section>
       <section id="tab-dex" role="tabpanel" aria-labelledby="tab-btn-dex" hidden>
@@ -194,6 +208,12 @@
           <label class="file-btn">LOAD FILE<input type="file" id="import-file" accept=".txt,text/plain" hidden /></label>
         </div>
         <div id="import-preview" class="tx-preview" hidden></div>
+
+        <h3>STORAGE</h3>
+        <p class="tx-note" id="storage-note"></p>
+
+        <h3>SOUND</h3>
+        <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
 
         <h3>HIBERNATE</h3>
         <p class="tx-note" id="hibernate-note"></p>

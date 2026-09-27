@@ -597,6 +597,13 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       res = ok(`handshake accepted. corp scan complete.${maybeDrop(s, 'comply', ITEM_CFG.complyDropChance, rng)}`, 'feed');
       break;
     }
+    case 'discard': {
+      const id = s.inventory?.[opts.slot];
+      if (!id) return fail('empty slot.');
+      s.inventory.splice(opts.slot, 1);
+      res = ok(`${ITEMS[id].name.toLowerCase()} discarded.`, 'purge');
+      break;
+    }
     case 'use': {
       const slot = opts.slot;
       const blockedItem = itemBlockReason(s, slot);

@@ -22,6 +22,10 @@ ARCHIVE → **SYSTEM**:
 - **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected. Loading previews what's inside first.
 - **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day.
 - **Restart** erases everything and replays the onboarding.
+- **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage). iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
+- **Volume** slider (the header's SND toggle still mutes).
+
+Only one tab looks after the netling at a time (Web Locks): other tabs show a guard screen, take over automatically when the caretaker tab closes, or can take over on request. The home screen redraws at ~10 fps to save battery; mini-games and netruns run at full rate. The Archive's LINEAGE tab opens with a lifetime RECORD (lives, care, games, netruns), and inventory items can be discarded.
 
 ## Install / offline
 
