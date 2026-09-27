@@ -1,0 +1,10 @@
+{
+  "name": "netling",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "TZ=UTC node --test tests/",
+    "serve": "python3 -m http.server 5174"
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Netling</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="device">
+      <header class="brand">
+        <span class="logo">NETLING</span>
+        <span class="model">vPET // MK-1</span>
+      </header>
+
+      <div class="screen">
+        <canvas id="lcd" width="400" height="280" aria-label="Netling display"></canvas>
+        <div class="scanlines"></div>
+        <div id="status" class="status" role="status"></div>
+        <section id="flatline" class="flatline" hidden>
+          <h2>FLATLINED</h2>
+          <p id="fl-title"></p>
+          <dl>
+            <dt>cause</dt><dd id="fl-cause"></dd>
+            <dt>uptime</dt><dd id="fl-age"></dd>
+            <dt>faults</dt><dd id="fl-faults"></dd>
+            <dt>echo</dt><dd id="fl-echo"></dd>
+            <dt>fragment</dt><dd id="fl-trait"></dd>
+          </dl>
+          <button id="fl-next" type="button">COMPILE</button>
+        </section>
+      </div>
+
+      <section class="hud" aria-label="Vitals">
+        <div class="stat"><label>CHG</label><div id="bar-charge" class="bar"></div></div>
+        <div class="stat"><label>SYN</label><div id="bar-sync" class="bar"></div></div>
+        <div class="stat"><label>INT</label><div id="bar-integrity" class="bar"></div></div>
+        <div class="stat"><label>HEAT</label><div id="bar-heat" class="bar heat"></div></div>
+        <div class="stat">
+          <label>CACHE</label>
+          <div id="cache-pips" class="pips"><i></i><i></i><i></i><i></i></div>
+        </div>
+      </section>
+
+      <p id="readout" class="readout"></p>
+
+      <nav class="controls" aria-label="Actions">
+        <button type="button" data-act="corp">CORP PKT</button>
+        <button type="button" data-act="scav">SCAV DATA</button>
+        <button type="button" data-act="play">PLAY</button>
+        <button type="button" data-act="patch">PATCH</button>
+        <button type="button" data-act="cool">COOL</button>
+        <button type="button" data-act="purge">PURGE</button>
+        <button type="button" data-act="lights" id="btn-lights" class="wide">LIGHTS OFF</button>
+      </nav>
+
+      <ul id="log" class="log" aria-live="polite"></ul>
+
+      <div id="dev" class="dev" hidden>
+        <span>DEV</span>
+        <button type="button" data-skip="15">+15m</button>
+        <button type="button" data-skip="60">+1h</button>
+        <button type="button" data-skip="480">+8h</button>
+        <button type="button" id="dev-reset">RESET</button>
+      </div>
+    </main>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
