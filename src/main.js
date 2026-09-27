@@ -1,4 +1,4 @@
-import { act, createScript, tick, CFG, TRAITS, FORMS, SAVE_VERSION, MIN } from './sim.js';
+import { act, createScript, tick, migrate, isAlive, CFG, TRAITS, FORMS, SPECIES, FORM_MODS, SAVE_VERSION, MIN } from './sim.js';
 import { renderLCD } from './render.js';
 import { sfx, unlockAudio } from './audio.js';
 
@@ -27,6 +27,7 @@ const now = () => Date.now() + skew;
 
 let state = store.get(SAVE_KEY);
 if (!state || state.saveVersion !== SAVE_VERSION) state = createScript({ now: now() });
+migrate(state);
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('lcd');
@@ -36,6 +37,7 @@ const overlay = $('flatline');
 let lastLogLen = 0;
 let lastStage = state.stage;
 let lastAttention = false;
+let flashUntil = 0;
 
 function save() {
   store.set(SAVE_KEY, state);
@@ -45,6 +47,10 @@ function advance() {
   tick(state, now());
   if (state.stage !== lastStage) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
+    if (state.stage === 'teen' || state.stage === 'adult') {
+      flashUntil = performance.now() + 2400;
+      sfx('evolve', state.quirk.pitch);
+    }
     if (state.stage === 'dead') onFlatline();
     lastStage = state.stage;
   }
@@ -74,8 +80,11 @@ function updateHUD() {
   document.querySelectorAll('#cache-pips i').forEach((pip, i) => pip.classList.toggle('on', i < state.cache));
 
   const trait = state.trait ? TRAITS[state.trait].name : '—';
+  const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
-    `v${state.generation}.0 · age ${fmtAge(state.ageMin)} · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
+    `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
+  const perk = FORM_MODS[state.form];
+  $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   document.body.classList.toggle('asleep', state.asleep);
 
@@ -92,7 +101,7 @@ function updateHUD() {
     );
   }
 
-  const attention = state.stage === 'baby' && document.hidden === false && needsAlert();
+  const attention = isAlive(state) && document.hidden === false && needsAlert();
   if (attention && !lastAttention) sfx('alert', state.quirk.pitch);
   lastAttention = attention;
 }
@@ -124,7 +133,7 @@ function showFlatline() {
   $('fl-age').textContent = fmtAge(state.ageMin);
   $('fl-faults').textContent = `${state.careMistakes}/${CFG.maxMistakes}`;
   $('fl-trait').textContent = `${TRAITS[f.trait].name} — ${TRAITS[f.trait].desc}`;
-  $('fl-echo').textContent = `${FORMS[f.form].name} signature`;
+  $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[state.form] ? '' : ' (unrealized)'}`;
   $('fl-next').textContent = `COMPILE v${state.generation + 1}.0`;
   overlay.hidden = false;
 }
@@ -170,6 +179,17 @@ if (DEV) {
       advance();
     }),
   );
+  $('dev-evolve').addEventListener('click', () => {
+    const target = state.stage === 'baby' ? CFG.teenAtMin : state.stage === 'teen' ? CFG.adultAtMin : null;
+    if (target === null) return;
+    const skip = target - state.ageMin;
+    skew += skip * MIN;
+    store.set(SKEW_KEY, skew);
+    // Jump the clock without simulating the gap, so the pet survives the test.
+    state.ageMin += skip - 1;
+    state.lastTick += (skip - 1) * MIN;
+    advance();
+  });
   $('dev-reset').addEventListener('click', () => {
     skew = 0;
     store.set(SKEW_KEY, 0);
@@ -190,6 +210,6 @@ if (state.stage === 'dead') showFlatline();
 setInterval(advance, 1000);
 
 (function loop(time) {
-  renderLCD(canvas, state, time);
+  renderLCD(canvas, state, time, { flash: time < flashUntil });
   requestAnimationFrame(loop);
 })(performance.now());

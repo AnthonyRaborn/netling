@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, tick, leaningForm, isSleepHour, mulberry32, CFG, MIN } from '../src/sim.js';
+import { act, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, MIN } from '../src/sim.js';
 
 // Noon UTC so the pet starts awake (tests run with TZ=UTC).
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -108,4 +108,74 @@ test('sleep window wraps midnight and honors offset', () => {
   assert.equal(isSleepHour(12), false);
   assert.equal(isSleepHour(22, 2), false);
   assert.equal(isSleepHour(0, 2), true);
+});
+
+test('good care evolves into Kernel at the teen threshold', () => {
+  const s = booted();
+  s.ageMin = CFG.teenAtMin - 1;
+  tick(s, s.lastTick + MIN, noRng);
+  assert.equal(s.stage, 'teen');
+  assert.equal(s.form, 'kernel');
+});
+
+test('poor care evolves into Stub', () => {
+  const s = booted();
+  s.careMistakes = CFG.teenGoodCareMaxMistakes + 1;
+  s.ageMin = CFG.teenAtMin - 1;
+  tick(s, s.lastTick + MIN, noRng);
+  assert.equal(s.form, 'stub');
+});
+
+test('adult form comes from the hidden axes', () => {
+  const s = booted();
+  s.stage = 'teen';
+  s.form = 'kernel';
+  s.careMistakes = 2;
+  s.axes = { allegiance: -12, stability: 4 };
+  s.ageMin = CFG.adultAtMin - 1;
+  tick(s, s.lastTick + MIN, noRng);
+  assert.equal(s.stage, 'adult');
+  assert.equal(s.form, 'firewall');
+});
+
+test('an adult leaves its own form as the fragment, not its current lean', () => {
+  const s = booted();
+  s.stage = 'adult';
+  s.form = 'daemon';
+  s.axes = { allegiance: 50, stability: 0 };
+  s.careMistakes = CFG.maxMistakes;
+  tick(s, s.lastTick + MIN, noRng);
+  assert.equal(s.stage, 'dead');
+  assert.equal(s.fragment.form, 'daemon');
+  assert.equal(s.fragment.trait, 'persistent');
+});
+
+test('daemon drains charge slower', () => {
+  const a = booted();
+  const b = booted();
+  b.stage = 'adult';
+  b.form = 'daemon';
+  tick(a, a.lastTick + 60 * MIN, noRng);
+  tick(b, b.lastTick + 60 * MIN, noRng);
+  assert.ok(b.stats.charge > a.stats.charge);
+});
+
+test('chrome sulks at scavenged data', () => {
+  const s = booted();
+  s.stage = 'adult';
+  s.form = 'chrome';
+  s.quirk.favPacket = 'corp';
+  s.stats.charge = 20;
+  const sync = s.stats.sync;
+  act(s, 'scav', s.lastTick, noRng);
+  assert.equal(s.stats.sync, sync - 5);
+});
+
+test('migrate backfills evolution fields on old saves', () => {
+  const s = booted();
+  delete s.form;
+  delete s.evolvedAt;
+  migrate(s);
+  assert.equal(s.form, 'bitling');
+  assert.equal(s.evolvedAt, null);
 });

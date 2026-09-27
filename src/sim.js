@@ -19,6 +19,9 @@ export const CFG = {
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
   lifespanMin: 7 * 24 * 60,
+  teenAtMin: 24 * 60,
+  adultAtMin: 72 * 60,
+  teenGoodCareMaxMistakes: 2,
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 3,
@@ -31,6 +34,31 @@ export const FORMS = {
   glitch: { name: 'Glitch', trait: 'volatile' },
   ghost: { name: 'Ghost', trait: 'untraceable' },
 };
+
+// Every body a netling can have. Adult forms also appear in FORMS.
+export const SPECIES = {
+  bitling: { name: 'Bitling', stage: 'baby' },
+  kernel: { name: 'Kernel', stage: 'teen' },
+  stub: { name: 'Stub', stage: 'teen' },
+  chrome: { name: 'Chrome', stage: 'adult' },
+  firewall: { name: 'Firewall', stage: 'adult' },
+  daemon: { name: 'Daemon', stage: 'adult' },
+  glitch: { name: 'Glitch', stage: 'adult' },
+  ghost: { name: 'Ghost', stage: 'adult' },
+};
+
+// In-life perks of each adult form (separate from inherited traits).
+export const FORM_MODS = {
+  chrome: { desc: 'Loves corp packets, sulks at scavenged data' },
+  firewall: { desc: '-30% virus chance', virusMult: 0.7 },
+  daemon: { desc: 'Charge drains 20% slower', chargeDrainMult: 0.8 },
+  glitch: { desc: 'Play is a gamble: +10 to +40 Sync' },
+  ghost: { desc: 'All drains 15% slower', chargeDrainMult: 0.85, syncDrainMult: 0.85 },
+};
+
+const mod = (s, key, fallback = 1) => FORM_MODS[s.form]?.[key] ?? fallback;
+
+export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
 
 export const TRAITS = {
   licensed: { name: 'Licensed', desc: 'Corp packets restore +25% Charge' },
@@ -88,6 +116,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     saveVersion: SAVE_VERSION,
     generation,
     stage: 'script',
+    form: 'bitling',
+    evolvedAt: null,
     bornAt: now,
     lastTick: now,
     ageMin: 0,
@@ -144,6 +174,12 @@ function step(s, t, rng) {
     return;
   }
 
+  if (s.stage === 'baby' && s.ageMin >= CFG.teenAtMin) {
+    evolve(s, t, 'teen', s.careMistakes <= CFG.teenGoodCareMaxMistakes ? 'kernel' : 'stub');
+  } else if (s.stage === 'teen' && s.ageMin >= CFG.adultAtMin) {
+    evolve(s, t, 'adult', leaningForm(s));
+  }
+
   const shouldSleep = isSleepHour(new Date(t).getHours(), s.quirk.sleepOffset);
   if (shouldSleep && !s.asleep) {
     s.asleep = true;
@@ -157,8 +193,8 @@ function step(s, t, rng) {
   const st = s.stats;
   let rate = s.asleep ? CFG.sleepDrainMult : 1;
   if (s.asleep && s.trait === 'persistent') rate *= 0.7;
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate);
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate);
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * mod(s, 'syncDrainMult'));
   st.heat = clamp(
     st.heat + (s.asleep ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );
@@ -172,6 +208,7 @@ function step(s, t, rng) {
   if (!s.virus) {
     let perHour = CFG.virusBasePerHour + CFG.virusPerCachePerHour * s.cache;
     if (s.trait === 'hardened') perHour *= 0.5;
+    perHour *= mod(s, 'virusMult');
     if (rng() < perHour / 60) {
       s.virus = true;
       s.virusMin = 0;
@@ -227,11 +264,25 @@ export function leaningForm(s) {
   return b >= 0 ? 'daemon' : 'glitch';
 }
 
+function evolve(s, t, stage, form) {
+  s.stage = stage;
+  s.form = form;
+  s.evolvedAt = t;
+  log(s, t, `> recompiling... netling is now ${SPECIES[form].name.toUpperCase()}.`);
+}
+
+// Older saves predate evolution fields.
+export function migrate(s) {
+  s.form ??= 'bitling';
+  s.evolvedAt ??= null;
+  return s;
+}
+
 function flatline(s, t, cause) {
   s.stage = 'dead';
   s.deathCause = cause;
   s.diedAt = t;
-  const form = leaningForm(s);
+  const form = FORMS[s.form] ? s.form : leaningForm(s);
   s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk } };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
@@ -260,8 +311,12 @@ export function act(s, action, now, rng = Math.random) {
         st.sync = clamp(st.sync + 8);
         msg += ' it loves these.';
       }
+      if (s.form === 'chrome') {
+        st.sync = clamp(st.sync + (action === 'corp' ? 5 : -5));
+        if (action === 'scav') msg += ' it looks disgusted.';
+      }
       if (action === 'scav' && !s.virus) {
-        const chance = s.trait === 'hardened' ? 0.06 : 0.12;
+        const chance = (s.trait === 'hardened' ? 0.06 : 0.12) * mod(s, 'virusMult');
         if (rng() < chance) {
           s.virus = true;
           s.virusMin = 0;
@@ -273,7 +328,9 @@ export function act(s, action, now, rng = Math.random) {
     }
     case 'play': {
       if (st.charge < 10) return fail('not enough charge to play.');
-      st.sync = clamp(st.sync + (s.trait === 'volatile' ? 30 : 20));
+      let gain = s.form === 'glitch' ? 10 + Math.floor(rng() * 31) : 20;
+      if (s.trait === 'volatile') gain *= 1.5;
+      st.sync = clamp(st.sync + gain);
       st.charge = clamp(st.charge - 6);
       st.heat = clamp(st.heat + 12);
       if (st.heat > 70) s.axes.stability -= 0.5;
@@ -318,7 +375,7 @@ const fail = (msg) => ({ ok: false, msg, sfx: 'error' });
 
 // Needs that warrant the blinking attention icon.
 export function needsAttention(s) {
-  if (s.stage !== 'baby') return false;
+  if (!isAlive(s)) return false;
   const st = s.stats;
   return (
     st.charge < 20 || st.sync < 20 || st.heat > 80 || s.cache >= 2 || s.virus || (s.asleep && s.lightsOn)

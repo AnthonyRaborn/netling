@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Netling Sprites</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" />
+    <style>
+      body { background: #07070c; color: #c7f9ff; font-family: 'VT323', monospace; font-size: 18px; padding: 16px; margin: 0; }
+      h1 { color: #ff2a6d; font-weight: normal; letter-spacing: 4px; margin: 0 0 12px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+      figure { margin: 0; }
+      canvas { width: 100%; image-rendering: pixelated; border: 2px solid #2a2240; border-radius: 6px; display: block; }
+      figcaption { color: #5d7a80; margin-top: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>SPRITE GALLERY</h1>
+    <div class="grid" id="grid"></div>
+    <script type="module">
+      import { renderLCD } from './src/render.js';
+      import { createScript, SPECIES, FORM_MODS } from './src/sim.js';
+
+      const poses = Object.keys(SPECIES).flatMap((form) => [
+        { form, stage: SPECIES[form].stage, asleep: false },
+        { form, stage: SPECIES[form].stage, asleep: true },
+        { form, stage: 'dead', asleep: false },
+      ]);
+      const cells = poses.map((p) => {
+        const s = createScript({ now: Date.now() });
+        Object.assign(s, p, { lightsOn: true });
+        const fig = document.createElement('figure');
+        const canvas = Object.assign(document.createElement('canvas'), { width: 400, height: 280 });
+        const cap = document.createElement('figcaption');
+        const pose = p.stage === 'dead' ? 'dead' : p.asleep ? 'asleep' : 'awake';
+        cap.textContent = `${SPECIES[p.form].name} · ${pose}${FORM_MODS[p.form] && pose === 'awake' ? ` — ${FORM_MODS[p.form].desc}` : ''}`;
+        fig.append(canvas, cap);
+        document.getElementById('grid').append(fig);
+        return { s, canvas };
+      });
+      (function loop(t) {
+        for (const { s, canvas } of cells) renderLCD(canvas, s, t);
+        requestAnimationFrame(loop);
+      })(0);
+    </script>
+  </body>
+</html>
