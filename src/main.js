@@ -6,6 +6,7 @@ import {
   migrate,
   isAlive,
   traceMinutesLeft,
+  alertReason,
   CFG,
   TRAITS,
   FORMS,
@@ -17,11 +18,13 @@ import {
 } from './sim.js';
 import { renderLCD } from './render.js';
 import { GameSession } from './games/session.js';
-import { sfx, unlockAudio } from './audio.js';
+import { sfx, unlockAudio, setMuted } from './audio.js';
+import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 
 const SAVE_KEY = 'netling.save';
 const LINEAGE_KEY = 'netling.lineage';
 const SKEW_KEY = 'netling.devSkew';
+const PREFS_KEY = 'netling.prefs';
 const DEV = new URLSearchParams(location.search).has('dev');
 
 const store = {
@@ -56,6 +59,12 @@ let lastStage = state.stage;
 let lastAttention = false;
 let flashUntil = 0;
 let session = null;
+let lastSurgeAt = state.lastSurgeAt;
+let surgeUntil = 0;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+const prefs = { sound: true, alerts: false, ...store.get(PREFS_KEY) };
+setMuted(!prefs.sound);
 
 function save() {
   store.set(SAVE_KEY, state);
@@ -68,9 +77,14 @@ function advance() {
     if (state.stage === 'teen' || state.stage === 'adult') {
       flashUntil = performance.now() + 2400;
       sfx('evolve', state.quirk.pitch);
+      pushAlert('Netling is evolving', `It recompiled into ${SPECIES[state.form].name.toUpperCase()}.`);
     }
     if (state.stage === 'dead') onFlatline();
     lastStage = state.stage;
+  }
+  if (state.lastSurgeAt !== lastSurgeAt) {
+    lastSurgeAt = state.lastSurgeAt;
+    surgeUntil = performance.now() + 900;
   }
   save();
   updateHUD();
@@ -122,20 +136,22 @@ function updateHUD() {
     );
   }
 
-  const attention = isAlive(state) && document.hidden === false && needsAlert();
-  if (attention && !lastAttention) sfx('alert', state.quirk.pitch);
-  lastAttention = attention;
+  // Chirp (or notify, when backgrounded) each time a new need appears.
+  const reason = alertReason(state);
+  if (reason && reason.key !== lastAttention) {
+    if (document.hidden) pushAlert('Netling needs you', reason.msg);
+    else sfx('alert', state.quirk.pitch);
+  }
+  lastAttention = reason?.key ?? false;
 }
 
-function needsAlert() {
-  const s = state;
-  return (
-    s.stats.charge < 20 || s.stats.sync < 20 || s.virus || s.event?.type === 'trace' || (s.asleep && s.lightsOn)
-  );
+function pushAlert(title, body) {
+  if (prefs.alerts && document.hidden) notify(title, body);
 }
 
 function onFlatline() {
   sfx('flatline', state.quirk.pitch);
+  pushAlert('FLATLINE', `netling.v${state.generation}.0 is gone: ${state.deathCause}.`);
   const f = state.fragment;
   const lineage = store.get(LINEAGE_KEY) ?? [];
   lineage.push({
@@ -243,6 +259,39 @@ document.addEventListener('keydown', (e) => {
   session.input(key);
 });
 
+// --- settings -------------------------------------------------------------------
+
+function renderPrefs() {
+  $('pref-sound').textContent = prefs.sound ? 'SND ON' : 'SND OFF';
+  $('pref-sound').setAttribute('aria-pressed', prefs.sound);
+  $('pref-alerts').textContent = prefs.alerts && notifyGranted() ? 'ALERTS ON' : 'ALERTS OFF';
+  $('pref-alerts').setAttribute('aria-pressed', prefs.alerts && notifyGranted());
+  $('pref-alerts').hidden = !notifySupported();
+}
+
+$('pref-sound').addEventListener('click', () => {
+  prefs.sound = !prefs.sound;
+  setMuted(!prefs.sound);
+  store.set(PREFS_KEY, prefs);
+  unlockAudio();
+  sfx('select', state.quirk.pitch);
+  renderPrefs();
+});
+
+$('pref-alerts').addEventListener('click', async () => {
+  if (prefs.alerts && notifyGranted()) {
+    prefs.alerts = false;
+  } else {
+    prefs.alerts = await requestNotify();
+    if (!prefs.alerts) flashStatus('notifications blocked by the browser.');
+  }
+  store.set(PREFS_KEY, prefs);
+  renderPrefs();
+});
+
+renderPrefs();
+registerServiceWorker();
+
 let statusTimer;
 function flashStatus(msg) {
   const el = $('status');
@@ -306,7 +355,11 @@ let lastFrame = performance.now();
     session.update(dt);
     session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);
   } else {
-    renderLCD(canvas, state, time, { flash: time < flashUntil });
+    renderLCD(canvas, state, time, {
+      flash: time < flashUntil,
+      surge: time < surgeUntil,
+      calm: reducedMotion.matches,
+    });
   }
   requestAnimationFrame(loop);
 })(performance.now());

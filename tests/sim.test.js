@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, MIN } from '../src/sim.js';
+import { act, alertReason, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, MIN } from '../src/sim.js';
 
 // Noon UTC so the pet starts awake (tests run with TZ=UTC).
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -229,4 +229,17 @@ test('untraceable netlings never get traced', () => {
   const alwaysRoll = () => 0; // every random check fires
   tick(s, s.lastTick + 60 * MIN, alwaysRoll);
   assert.notEqual(s.event?.type, 'trace');
+});
+
+test('alertReason picks the most urgent need', () => {
+  const s = booted();
+  assert.equal(alertReason(s), null);
+  s.stats.charge = 10;
+  assert.equal(alertReason(s).key, 'charge');
+  s.virus = true;
+  assert.equal(alertReason(s).key, 'virus');
+  s.event = { type: 'trace', startedAge: s.ageMin };
+  assert.equal(alertReason(s).key, 'trace');
+  s.stage = 'dead';
+  assert.equal(alertReason(s), null);
 });

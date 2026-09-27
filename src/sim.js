@@ -143,6 +143,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     axes: { allegiance: 0, stability: 0 },
     games: freshGames(),
     event: null,
+    lastSurgeAt: null,
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
@@ -273,6 +274,7 @@ function stepEvents(s, t, rng) {
   } else if (rng() < CFG.surgeChancePerHour / 60) {
     st.heat = clamp(st.heat + 25);
     st.charge = clamp(st.charge + 10);
+    s.lastSurgeAt = t;
     log(s, t, '> !! power surge. running hot.');
   }
 }
@@ -324,6 +326,7 @@ export function migrate(s) {
   s.evolvedAt ??= null;
   s.games ??= freshGames();
   s.event ??= null;
+  s.lastSurgeAt ??= null;
   return s;
 }
 
@@ -449,6 +452,20 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
 
 const ok = (msg, sfx) => ({ ok: true, msg, sfx });
 const fail = (msg) => ({ ok: false, msg, sfx: 'error' });
+
+// The most urgent reason to call the player back, or null. Drives sounds and notifications.
+export function alertReason(s) {
+  if (!isAlive(s)) return null;
+  const st = s.stats;
+  if (s.event?.type === 'trace') return { key: 'trace', msg: `Corp trace incoming. ${traceMinutesLeft(s)}m to respond.` };
+  if (s.virus) return { key: 'virus', msg: 'Virus detected. Patch it before Integrity collapses.' };
+  if (st.charge < 20) return { key: 'charge', msg: 'Charge is running low.' };
+  if (st.sync < 20) return { key: 'sync', msg: 'Sync is fading. It wants to play.' };
+  if (st.heat > 80) return { key: 'heat', msg: 'Running hot. Flush the coolant.' };
+  if (s.asleep && s.lightsOn) return { key: 'lights', msg: "It's trying to sleep. Kill the lights." };
+  if (s.cache >= 3) return { key: 'cache', msg: 'Corrupted cache is piling up.' };
+  return null;
+}
 
 // Needs that warrant the blinking attention icon.
 export function needsAttention(s) {

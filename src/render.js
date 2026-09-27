@@ -92,7 +92,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
   const sy = canvas.height / LCD_H;
 
   // Glitch intensity grows as Integrity falls or when infected; the Glitch form always flickers a little.
-  const g = isAlive(s)
+  const g = isAlive(s) && !opts.calm
     ? Math.max(0, (60 - s.stats.integrity) / 60) + (s.virus ? 0.35 : 0) + (s.form === 'glitch' ? 0.2 : 0)
     : 0;
   if (g > 0 && Math.random() < g * 0.5) {
@@ -106,5 +106,17 @@ export function renderLCD(canvas, s, time, opts = {}) {
     const h = 1 + Math.floor(Math.random() * 3);
     const shift = Math.round((Math.random() - 0.5) * 6 * g) * sx;
     ctx.drawImage(buf, 0, row, LCD_W, h, shift, row * sy, canvas.width, h * sy);
+  }
+
+  // Overheating: a pulsing red wash.
+  if (isAlive(s) && s.stats.heat > 80) {
+    const pulse = opts.calm ? 0.5 : 0.5 + 0.5 * Math.sin(time / 300);
+    ctx.fillStyle = `rgba(255, 42, 109, ${(0.06 + 0.1 * pulse) * ((s.stats.heat - 80) / 20)})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  // Power surge: a hard white flicker.
+  if (opts.surge && (opts.calm || Math.floor(time / 70) % 2)) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }

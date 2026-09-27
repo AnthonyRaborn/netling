@@ -68,9 +68,22 @@ body {
     0 0 12px rgba(255, 42, 109, 0.6);
 }
 
-.model {
+.prefs {
+  display: flex;
+  gap: 6px;
+}
+
+.pref {
+  font-size: 14px;
+  padding: 2px 8px;
   color: var(--dim);
-  font-size: 16px;
+  border-color: var(--shell-edge);
+  text-shadow: none;
+}
+
+.pref[aria-pressed='true'] {
+  color: var(--cyan);
+  border-color: var(--cyan);
 }
 
 .screen {
@@ -89,6 +102,50 @@ body {
   width: 100%;
   height: auto;
   image-rendering: pixelated;
+  animation: crt-on 0.6s ease-out;
+}
+
+/* Curved-glass highlight and a slow rolling scan band. */
+.crt-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 90% at 30% 10%, rgba(255, 255, 255, 0.07), transparent 45%),
+    linear-gradient(to bottom, transparent 0%, rgba(5, 217, 232, 0.05) 50%, transparent 100%) 0 0 / 100% 60px no-repeat;
+  animation: scan-roll 7s linear infinite;
+}
+
+@keyframes scan-roll {
+  from {
+    background-position:
+      0 0,
+      0 -60px;
+  }
+  to {
+    background-position:
+      0 0,
+      0 calc(100% + 60px);
+  }
+}
+
+@keyframes crt-on {
+  0% {
+    transform: scale(1, 0.005);
+    filter: brightness(4);
+  }
+  40% {
+    transform: scale(1, 0.005);
+    filter: brightness(4);
+  }
+  70% {
+    transform: scale(1, 1.05);
+    filter: brightness(1.6);
+  }
+  100% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+  }
 }
 
 .scanlines {
@@ -373,5 +430,14 @@ button:active {
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

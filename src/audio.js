@@ -1,6 +1,11 @@
 // Tiny Web Audio chiptune blips. The context starts on the first user gesture.
 
 let ctx = null;
+let muted = false;
+
+export function setMuted(value) {
+  muted = value;
+}
 
 export function unlockAudio() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -41,7 +46,7 @@ const PATTERNS = {
 
 export function sfx(name, pitch = 660) {
   const pat = PATTERNS[name];
-  if (!pat) return;
+  if (!pat || muted) return;
   if (name === 'flatline') return blip(pitch, 0, 2.5, 'sine', 0.08);
   for (const [mult, start] of pat) blip(pitch * mult, start, 0.09);
 }

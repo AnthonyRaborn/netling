@@ -4,6 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Netling</title>
+    <meta name="description" content="A cyberpunk virtual pet living in a corrupted memory sector." />
+    <meta name="theme-color" content="#14121f" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap" />
     <link rel="stylesheet" href="style.css" />
@@ -12,12 +19,16 @@
     <main class="device">
       <header class="brand">
         <span class="logo">NETLING</span>
-        <span class="model">vPET // MK-1</span>
+        <span class="prefs">
+          <button type="button" id="pref-sound" class="pref" aria-pressed="true">SND ON</button>
+          <button type="button" id="pref-alerts" class="pref" aria-pressed="false">ALERTS OFF</button>
+        </span>
       </header>
 
       <div class="screen">
         <canvas id="lcd" width="400" height="280" aria-label="Netling display"></canvas>
         <div class="scanlines"></div>
+        <div class="crt-glare"></div>
         <div id="status" class="status" role="status"></div>
         <section id="flatline" class="flatline" hidden>
           <h2>FLATLINED</h2>
