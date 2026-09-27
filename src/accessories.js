@@ -73,10 +73,12 @@ export const ACCESSORIES = [
     id: 'scarf',
     name: 'Scarf',
     rarity: 'common',
-    draw: (px, a) => {
-      for (let x = a.bodyLeft; x <= a.bodyRight; x++) px(x, a.mid, '#ff2a6d');
-      px(a.bodyRight - 1, a.mid + 1, '#ff2a6d');
-      px(a.bodyRight - 1, a.mid + 2, '#ff2a6d');
+    colors: [['scarf', '#ff2a6d']],
+    draw: (px, a, frame, time, colors) => {
+      const [c] = colors ?? ['#ff2a6d'];
+      for (let x = a.bodyLeft; x <= a.bodyRight; x++) px(x, a.mid, c);
+      px(a.bodyRight - 1, a.mid + 1, c);
+      px(a.bodyRight - 1, a.mid + 2, c);
     },
   },
   {
@@ -134,9 +136,14 @@ export const ACCESSORIES = [
     id: 'visor',
     name: 'Visor',
     rarity: 'rare',
-    draw: (px, a, frame) => {
-      for (let x = a.headLeft; x <= a.headRight; x++) px(x, a.eyeRow, '#ff2a6d');
-      px(a.headLeft + 1 + (frame % 2) * 2, a.eyeRow, '#ffffff'); // scanning light
+    colors: [
+      ['band', '#ff2a6d'],
+      ['light', '#ffffff'],
+    ],
+    draw: (px, a, frame, time, colors) => {
+      const [band, light] = colors ?? ['#ff2a6d', '#ffffff'];
+      for (let x = a.headLeft; x <= a.headRight; x++) px(x, a.eyeRow, band);
+      px(a.headLeft + 1 + (frame % 2) * 2, a.eyeRow, light); // scanning light
     },
   },
   {
@@ -226,8 +233,10 @@ export const ACCESSORIES = [
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
-    draw: (px, a) => {
-      for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [0, -2], [1, -2], [0, -3]]) px(a.cx + dx, a.headTop + dy, '#ff2a6d');
+    colors: [['mohawk', '#ff2a6d']],
+    draw: (px, a, frame, time, colors) => {
+      const [c] = colors ?? ['#ff2a6d'];
+      for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [0, -2], [1, -2], [0, -3]]) px(a.cx + dx, a.headTop + dy, c);
     },
   },
   {

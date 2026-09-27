@@ -121,3 +121,14 @@ test('party hat colors: defaults, custom picks, and junk rejected', () => {
   hat.draw((x, y, c) => seen.add(c), anchorsFor(SPRITES.bitlingA), 0, 0, ['#00ff00', '#123abc']);
   assert.ok(seen.has('#00ff00') && seen.has('#123abc'));
 });
+
+test('scarf, mohawk and visor are recolorable too', () => {
+  assert.deepEqual(accessoryColors('scarf', ['#123456']), ['#123456']);
+  assert.deepEqual(accessoryColors('mohawk'), ['#ff2a6d']);
+  assert.deepEqual(accessoryColors('visor', ['#00ff00']), ['#00ff00', '#ffffff'], 'unset picks keep their default');
+  for (const id of ['scarf', 'mohawk', 'visor']) {
+    const seen = new Set();
+    ACCESSORIES.find((x) => x.id === id).draw((x, y, c) => seen.add(c), anchorsFor(SPRITES.chromeA), 0, 0, ['#0000ff', '#0000fe']);
+    assert.ok(seen.has('#0000ff'), id);
+  }
+});
