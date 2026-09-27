@@ -320,6 +320,27 @@ button:hover {
   background: rgba(5, 217, 232, 0.12);
 }
 
+/* Test mode: a loud badge so a sped-up sandbox is never mistaken for the real netling. */
+.test-badge {
+  font-size: 14px;
+  padding: 1px 6px;
+  color: #000;
+  background: var(--yellow);
+  border-radius: 3px;
+  letter-spacing: 1px;
+  align-self: center;
+}
+
+#test-speed {
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: #0c0b16;
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 6px;
+}
+
 /* Keyboard and controller focus. */
 :focus-visible {
   outline: 2px solid var(--yellow);

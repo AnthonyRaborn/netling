@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createStore, KEYS } from '../src/storage.js';
+import { createStore, KEYS, TEST_PREFIX } from '../src/storage.js';
 
 // A Storage-like backend. failOn(key) makes setItem throw for matching keys, like a full disk.
 function memory(initial = {}, failOn = () => false) {
@@ -98,4 +98,24 @@ test('clearAll removes only netling keys', () => {
   const store = createStore(() => b);
   assert.equal(store.clearAll(), true);
   assert.deepEqual([...b.map.keys()], ['other.app']);
+});
+
+test('a test-mode store keeps its own copy and never touches the real data', () => {
+  const b = memory({ 'netling.save': '{"real":true}', 'netling.dex': '["bitling"]' });
+  const real = createStore(() => b);
+  const test = createStore(() => b, { namespace: TEST_PREFIX });
+  assert.equal(test.get(KEYS.save), null);
+  assert.equal(test.set(KEYS.save, { test: true }), true);
+  assert.equal(test.setAll({ [KEYS.dex]: ['kernel'], [KEYS.lineage]: [] }), true);
+  assert.deepEqual(real.get(KEYS.save), { real: true });
+  assert.deepEqual(real.get(KEYS.dex), ['bitling']);
+  assert.deepEqual(test.get(KEYS.dex), ['kernel']);
+  assert.ok(b.map.has('netling-test.save'));
+
+  // Each RESTART clears only its own namespace.
+  assert.equal(test.clearAll(), true);
+  assert.deepEqual(real.get(KEYS.save), { real: true });
+  test.set(KEYS.save, { test: true });
+  assert.equal(real.clearAll(), true);
+  assert.deepEqual(test.get(KEYS.save), { test: true });
 });

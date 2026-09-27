@@ -17,7 +17,9 @@ npm run balance      # simulate hundreds of lifetimes per player archetype (DETA
 
 `npm run smoke` needs Playwright, which the app itself doesn't depend on: `npm install --no-save playwright && npx playwright install chromium`. CI (`.github/workflows/test.yml`) runs both test suites on every pull request and push to `main`.
 
-New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. RESET replays the onboarding. `gallery.html` shows every sprite.
+New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons.
+
+**Test mode** (for playtesting, including in the installed app): tap the NETLING logo 7 times, then ARCHIVE > SYSTEM > TEST MODE. It switches to a separate netling (with its own lineage, codex and style, stored under `netling-test.*`) on a clock running at 1x, 24x (a day per hour) or 168x (a full 7-day life per hour), with the dev buttons shown. The real netling keeps living in real time and is never touched; the test clock pauses while you're back on it. A yellow TEST badge shows the speed. At 168x the 15-minute grace before a care mistake is about 5 real seconds, so it's for watching a life play out; 24x is playable. Transfer out is off in test mode, and RESTART there erases only the test data. RESET replays the onboarding. `gallery.html` shows every sprite.
 
 ## System: transfer, hibernate, restart
 

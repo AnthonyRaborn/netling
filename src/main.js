@@ -6,13 +6,13 @@ import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
-import { $, app, DEV, codexComplete, flashStatus, loadAll, now, save, store } from './ui/app.js';
+import { $, app, DEV, TEST, codexComplete, flashStatus, loadAll, now, save, store } from './ui/app.js';
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
-import { importFromUrl, initSystem, protectStorage, showLock, storageProtected } from './ui/system.js';
+import { importFromUrl, initSystem, protectStorage, renderTestBadge, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
 import { advance, initLife, showFlatline } from './ui/life.js';
@@ -115,6 +115,8 @@ document.addEventListener('visibilitychange', () => {
 // Decide which tab is the caretaker before anything simulates or saves: until then, storage is read-only.
 app.claimed = await claimTab();
 if (!app.claimed) becomeInactive('Your netling is open in another tab.');
+if (TEST) store.set(KEYS.testClock, app.testClock); // keep the anchor across reloads
+renderTestBadge();
 
 if (app.corruptSave && store.set(KEYS.corruptSave, { at: Date.now(), raw: app.corruptSave })) {
   setTimeout(() => flashStatus('the saved netling could not be read, so a new one was compiled. the old save is in ARCHIVE > SYSTEM.', 6000), 1000);

@@ -6,6 +6,9 @@
 // setAll() is all-or-nothing, so a full disk can't leave half of an import behind.
 
 export const PREFIX = 'netling.';
+// Test mode's own copy of everything (see ui/app.js). Not under PREFIX, so a real RESTART
+// can't see it and a test RESTART can't reach the real data.
+export const TEST_PREFIX = 'netling-test.';
 
 export const KEYS = {
   save: 'netling.save',
@@ -24,13 +27,17 @@ export const KEYS = {
   iosHint: 'netling.iosHintSeen',
   corruptSave: 'netling.corruptSave',
   tabLease: 'netling.tabLease', // written by lease.js directly: it decides who may write
+  testMode: 'netling.testMode', // { on, revealed }: always read from the real namespace
+  testClock: 'netling.testClock', // test mode's clock: { simAt, realAt, speed }
 };
 
 // getBackend: returns a Storage-like object (getItem/setItem/removeItem/key/length). It may throw,
 // as reading window.localStorage does when the browser blocks storage.
 // canWrite(key): false refuses a write; key is null for setAll() and clearAll().
 // onError(err, key): called when the backend refuses a write.
-export function createStore(getBackend, { canWrite = () => true, onError = () => {} } = {}) {
+// namespace: where keys live. Callers always use KEYS; another namespace swaps the PREFIX part.
+export function createStore(getBackend, { canWrite = () => true, onError = () => {}, namespace = PREFIX } = {}) {
+  const at = (key) => (namespace !== PREFIX && key.startsWith(PREFIX) ? namespace + key.slice(PREFIX.length) : key);
   const backend = () => {
     try {
       return getBackend() ?? null;
@@ -43,7 +50,7 @@ export function createStore(getBackend, { canWrite = () => true, onError = () =>
   // Raw string (or null) without JSON parsing.
   function getRaw(key) {
     try {
-      return backend()?.getItem(key) ?? null;
+      return backend()?.getItem(at(key)) ?? null;
     } catch {
       return null;
     }
@@ -61,8 +68,8 @@ export function createStore(getBackend, { canWrite = () => true, onError = () =>
   }
 
   function write(b, key, raw) {
-    if (raw === null) b.removeItem(key);
-    else b.setItem(key, raw);
+    if (raw === null) b.removeItem(at(key));
+    else b.setItem(at(key), raw);
   }
 
   // true when the value was stored.
@@ -100,7 +107,7 @@ export function createStore(getBackend, { canWrite = () => true, onError = () =>
     const keys = Object.keys(entries);
     const before = new Map();
     try {
-      for (const key of keys) before.set(key, b.getItem(key));
+      for (const key of keys) before.set(key, b.getItem(at(key)));
       for (const key of keys) write(b, key, entries[key] === undefined ? null : JSON.stringify(entries[key]));
       return true;
     } catch (err) {
@@ -114,7 +121,7 @@ export function createStore(getBackend, { canWrite = () => true, onError = () =>
     }
   }
 
-  // Removes every key under PREFIX. true when they're all gone.
+  // Removes every key in this store's namespace. true when they're all gone.
   function clearAll() {
     if (!canWrite(null)) return false;
     const b = backend();
@@ -126,7 +133,7 @@ export function createStore(getBackend, { canWrite = () => true, onError = () =>
       const keys = [];
       for (let i = 0; i < b.length; i++) {
         const k = b.key(i);
-        if (k?.startsWith(PREFIX)) keys.push(k);
+        if (k?.startsWith(namespace)) keys.push(k);
       }
       for (const k of keys) b.removeItem(k);
       return true;

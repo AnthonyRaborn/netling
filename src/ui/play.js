@@ -30,7 +30,7 @@ export function dropSession(err) {
   if (run) {
     try {
       if (run.phase !== 'done') abortRun(app.state);
-      closeRun(app.state, Date.now());
+      closeRun(app.state, now());
       bumpProgress(run);
     } catch {
       app.state.run = null;
@@ -70,6 +70,7 @@ function bumpProgress(run) {
 
 export function openRun() {
   app.session = new RunView(app.state, {
+    now,
     sound: (name) => {
       const tone = REGIONS[app.state.run?.region]?.sound ?? { mult: 1, wave: 'square' };
       sfx(name, app.state.quirk.pitch * tone.mult, tone.wave);

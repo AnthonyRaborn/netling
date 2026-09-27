@@ -356,6 +356,18 @@ export function cleanLock(raw) {
   return { code: raw.code, at: num(raw.at, 0, 0), generation: int(raw.generation, 1, 1, 1e6) };
 }
 
+// Test mode (see ui/app.js). speed is a clock multiplier: 1x, a day per hour, or a life per hour.
+export const TEST_SPEEDS = [1, 24, 168];
+export function cleanTestMode(raw) {
+  const t = isObj(raw) ? raw : {};
+  return { on: bool(t.on), revealed: bool(t.revealed), speed: oneOf(t.speed, TEST_SPEEDS, TEST_SPEEDS.at(-1)) };
+}
+// realAt null: paused (test mode is off).
+export function cleanTestClock(raw) {
+  if (!isObj(raw) || !Number.isFinite(raw.simAt) || !(raw.realAt === null || Number.isFinite(raw.realAt))) return null;
+  return { simAt: raw.simAt, realAt: raw.realAt, speed: oneOf(raw.speed, TEST_SPEEDS, TEST_SPEEDS.at(-1)) };
+}
+
 // Every transferable key, by its short name (see TRANSFER_KEYS in transfer.js).
 // The save is left out: it needs cleanSave() and a clock.
 export const CLEANERS = {

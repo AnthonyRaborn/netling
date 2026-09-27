@@ -626,6 +626,65 @@ await scenario('field manual shows root once the codex is complete', async ({ op
   assert(terms.includes('root'), `root still hidden: ${terms}`);
 });
 
+await scenario('test mode: hidden until 7 logo taps, separate fast netling, real one untouched', async ({ open }) => {
+  const real = awakeNetling();
+  const test = awakeNetling({ generation: 5 });
+  const page = await open(BASE, seed({ 'netling.save': real, 'netling-test.save': test, 'netling-test.onboarding': 'done', 'netling-test.helpSeen': true }));
+  const realBefore = await page.evaluate(() => localStorage.getItem('netling.save'));
+
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(!(await visible(page, '#test-mode')), 'test mode visible before the gesture');
+  await page.click('#close-transfer');
+  for (let i = 0; i < 7; i++) await page.click('.logo');
+  assert(/test mode unlocked/.test(await page.textContent('#status')), 'gesture did nothing');
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(await visible(page, '#test-mode'), 'test mode still hidden after the gesture');
+  await page.selectOption('#test-speed', '168');
+  await page.click('#test-toggle');
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1500);
+
+  assert((await page.textContent('#test-badge')) === 'TEST 168x', 'no test badge');
+  assert(await visible(page, '#dev'), 'time-skip buttons missing in test mode');
+  const age0 = (await saved(page, 'netling-test.save')).ageMin;
+  await page.waitForTimeout(4000); // ~11 game minutes at 168x
+  const age1 = (await saved(page, 'netling-test.save')).ageMin;
+  assert(age1 - age0 >= 8, `test clock not fast: ${age0} -> ${age1}`);
+  assert((await saved(page, 'netling-test.save')).generation === 5, 'not the test netling');
+  // Nothing the test netling does reaches the real save.
+  await page.click('[data-act="lights"]');
+  await page.waitForTimeout(1200);
+  assert((await page.evaluate(() => localStorage.getItem('netling.save'))) === realBefore, 'test mode wrote the real save');
+
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.click('#transfer-out');
+  assert(/not in test mode/.test(await page.textContent('#status')), 'transfer out allowed in test mode');
+  await page.click('#test-toggle'); // leave
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1500);
+  assert(!(await visible(page, '#test-badge')), 'still badged after leaving');
+  assert((await saved(page)).generation === real.generation, 'real netling not back');
+  const clock = await saved(page, 'netling-test.testClock');
+  assert(clock?.realAt === null && clock.speed === 168, `test clock not paused: ${JSON.stringify(clock)}`);
+
+  // Away for a while, then back: it resumes where it paused (at 168x, 4s away would be ~11 minutes).
+  const ageAtLeave = (await saved(page, 'netling-test.save')).ageMin;
+  await page.waitForTimeout(4000);
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.selectOption('#test-speed', '24');
+  await page.click('#test-toggle');
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(1200);
+  assert((await page.textContent('#test-badge')) === 'TEST 24x', 'speed choice not applied');
+  const ageBack = (await saved(page, 'netling-test.save')).ageMin;
+  // Up to one save interval (~3 game minutes at 168x) passes between the last save and the pause.
+  assert(ageBack - ageAtLeave <= 4, `test clock ran while paused: ${ageAtLeave} -> ${ageBack}`);
+});
+
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {
   const page = await open(
     BASE,
