@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ACCESSORIES, anchorsFor, rollAccessory, RARITY } from '../src/accessories.js';
+import { ACCESSORIES, STYLE_ITEMS, anchorsFor, rollAccessory, accessoryById, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
 import { SPECIES, mulberry32 } from '../src/sim.js';
 
@@ -40,11 +40,11 @@ test('rolls skip owned accessories and favor common ones', () => {
   for (let i = 0; i < 3000; i++) {
     const id = rollAccessory(['cap'], rng);
     assert.notEqual(id, 'cap');
-    const r = ACCESSORIES.find((x) => x.id === id).rarity;
+    const r = accessoryById(id).rarity;
     counts[r] = (counts[r] ?? 0) + 1;
   }
   assert.ok(counts.common > counts.rare && counts.rare > counts.veryrare);
-  assert.equal(rollAccessory(ACCESSORIES.map((x) => x.id), rng), null);
+  assert.equal(rollAccessory(STYLE_ITEMS.map((x) => x.id), rng), null);
   assert.ok(Object.keys(RARITY).every((k) => RARITY[k].hint));
 });
 
@@ -64,7 +64,7 @@ test('regional accessories only roll in their region; the originals roll anywher
   assert.ok(seen.deep.has('drone'));
   assert.ok(seen.corp.has('barcode'));
   assert.ok(!seen.public.has('drone'));
-  assert.equal(ACCESSORIES.length, 20);
+  assert.equal(ACCESSORIES.length, 24);
 });
 
 test('the drone orbits: its position changes over time', () => {
@@ -76,4 +76,35 @@ test('the drone orbits: its position changes over time', () => {
     return pts.join(' ');
   };
   assert.notEqual(at(0), at(1100));
+});
+
+import { PROPS, drawProp } from '../src/accessories.js';
+
+test('earned items never appear in shops or drops', () => {
+  const rng = mulberry32(11);
+  const earned = STYLE_ITEMS.filter((x) => x.source === 'earned').map((x) => x.id);
+  assert.deepEqual(earned.sort(), ['bandage', 'minidevice', 'partyhat', 'plush']);
+  for (const region of [null, 'public', 'corp', 'bazaar', 'ruins', 'deep']) {
+    for (let i = 0; i < 1500; i++) assert.ok(!earned.includes(rollAccessory([], rng, region)));
+  }
+});
+
+test('props can drop in their region and stay inside their declared size', () => {
+  const rng = mulberry32(12);
+  const bazaar = new Set(Array.from({ length: 3000 }, () => rollAccessory([], rng, 'bazaar')));
+  assert.ok(bazaar.has('boombox') && bazaar.has('deck'));
+  const plushExtra = { sprite: SPRITES.daemonA, colors: { '#': '#ff2a6d', o: '#05d9e8', '+': '#fff' } };
+  for (const p of PROPS) {
+    const pts = [];
+    p.draw((x, y) => pts.push([x, y]), 1, 0, plushExtra);
+    assert.ok(pts.length > 0, `${p.id} drew nothing`);
+    for (const [x, y] of pts) assert.ok(x >= 0 && x < p.size[0] && y >= 0 && y < p.size[1], `${p.id} at ${x},${y}`);
+  }
+});
+
+test('drawProp places props on the LCD floor at the right edge', () => {
+  const calls = [];
+  const ctx = { set fillStyle(v) {}, fillRect: (x, y) => calls.push([x, y]) };
+  drawProp(ctx, 'boombox', 40, 0);
+  assert.ok(calls.every(([x, y]) => x >= 30 && x < 40 && y >= 16 && y <= 20));
 });

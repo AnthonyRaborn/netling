@@ -1,3 +1,5 @@
+// Accessories: cosmetic pixel add-ons. slot 'wear' items are drawn over the pet; slot 'prop' items sit on the
+// ground beside it. source 'earned' items are granted by events, never sold or dropped.
 // Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory:
 // placement comes from anchors computed from the sprite's own pixels, not per-form tables.
 
@@ -305,15 +307,160 @@ export const ACCESSORIES = [
   },
 ];
 
+// --- earned (never sold) ------------------------------------------------------------------
+ACCESSORIES.push(
+  {
+    id: 'partyhat',
+    name: 'Party hat',
+    rarity: 'common',
+    source: 'earned',
+    hint: 'a gift for a first birthday.',
+    draw: (px, a, frame) => {
+      // a cheap hologram: the stripes swap every frame
+      const [c1, c2] = frame % 2 ? ['#ff2a6d', '#f9f002'] : ['#f9f002', '#ff2a6d'];
+      for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 1, x % 2 ? c1 : c2);
+      for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, a.headTop - 2, x % 2 ? c2 : c1);
+      px(a.cx, a.headTop - 3, c1);
+      px(a.cx, a.headTop - 4, '#ffffff');
+    },
+  },
+  {
+    id: 'bandage',
+    name: 'Bandage',
+    rarity: 'rare',
+    source: 'earned',
+    hint: 'you have to survive something first.',
+    draw: (px, a) => {
+      const x = a.headRight - 2;
+      const y = a.headTop + 1;
+      for (const [dx, dy] of [[-1, -1], [0, 0], [1, 1], [1, -1], [-1, 1]]) px(x + dx, y + dy, '#f0e6d8');
+      px(x, y, '#ff8fa8');
+    },
+  },
+  // --- more wearables -----------------------------------------------------------------------
+  {
+    id: 'earpiece',
+    name: 'Earpiece',
+    rarity: 'common',
+    regions: ['corp'],
+    hint: 'standard issue in the Corp Grid.',
+    draw: (px, a) => {
+      px(a.headRight + 1, a.eyeRow, '#3a3f49');
+      px(a.headRight + 1, a.eyeRow + 1, '#8a93a3');
+      px(a.headRight, a.mouthRow, '#8a93a3');
+      px(a.headRight - 1, a.mouthRow, '#ff2a6d'); // mic
+    },
+  },
+  {
+    id: 'dataaura',
+    name: 'Data aura',
+    rarity: 'rare',
+    regions: ['ruins'],
+    hint: 'echoes cling to runners in the Old Web Ruins.',
+    draw: (px, a, frame, time = 0) => {
+      const rx = Math.floor((a.headRight - a.headLeft) / 2) + 3;
+      const cy = a.eyeRow + 2;
+      for (let i = 0; i < 5; i++) {
+        const t = time / 1600 + (i * Math.PI * 2) / 5;
+        px(a.cx + Math.round(Math.cos(t) * rx), cy + Math.round(Math.sin(t * 1.3) * 5), i % 2 ? '#39ff14' : '#05d9e8');
+      }
+    },
+  },
+);
+for (const x of ACCESSORIES) x.slot ??= 'wear';
+
+// --- props: drawn on the ground at the right of the screen, behind the pet --------------------
+// draw(px, frame, time, extra) paints in prop-local coordinates; the prop's feet sit on its bottom row.
+export const PROPS = [
+  {
+    id: 'deck',
+    name: 'Cyberdeck',
+    rarity: 'rare',
+    regions: ['bazaar'],
+    hint: 'every runner in the Bazaar wants one.',
+    size: [7, 5],
+    draw: (px, frame) => {
+      const rows = ['.#####.', '.#ooo#.', '.#ooo#.', '#######', '#+#+#+#'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#3a3f49');
+          if (ch === 'o') px(x, y, frame % 2 && x === 3 && y === 2 ? '#ffffff' : '#05d9e8');
+          if (ch === '+') px(x, y, '#8a93a3');
+        }),
+      );
+    },
+  },
+  {
+    id: 'boombox',
+    name: 'Boom box',
+    rarity: 'common',
+    regions: ['bazaar'],
+    hint: 'turned up loud in the Darknet Bazaar.',
+    size: [7, 5],
+    draw: (px, frame) => {
+      const rows = ['.#...#.', '..###..', '#######', '#o#+#o#', '#######'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#b967ff');
+          if (ch === '+') px(x, y, '#f9f002');
+          if (ch === 'o') px(x, y, frame % 2 ? '#ff2a6d' : '#1a0d26'); // speakers pulse
+        }),
+      );
+    },
+  },
+  {
+    id: 'minidevice',
+    name: 'Mini device',
+    rarity: 'veryrare',
+    source: 'earned',
+    hint: 'collect every shell. then look closer.',
+    size: [4, 6],
+    draw: (px, frame) => {
+      const rows = ['.##.', '#oo#', '#oo#', '#..#', '#++#', '.##.'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#ff2a6d');
+          if (ch === 'o') px(x, y, frame % 2 && x === 1 && y === 1 ? '#39ff14' : '#0b2226'); // its pet blinks
+          if (ch === '+') px(x, y, '#05d9e8');
+        }),
+      );
+    },
+  },
+  {
+    id: 'plush',
+    name: 'Plush',
+    rarity: 'rare',
+    source: 'earned',
+    hint: 'a keepsake, after the first goodbye.',
+    size: [8, 8],
+    // extra: { sprite, colors } of the previous netling; drawn at half scale.
+    draw: (px, frame, time, extra) => {
+      if (!extra?.sprite) return;
+      const s = extra.sprite;
+      for (let y = 0; y < s.length; y += 2) {
+        for (let x = 0; x < s[0].length; x += 2) {
+          const c = extra.colors[s[y][x]];
+          if (c) px(Math.floor(x / 2), Math.floor(y / 2), c);
+        }
+      }
+    },
+  },
+];
+for (const x of PROPS) x.slot = 'prop';
+
+export const STYLE_ITEMS = [...ACCESSORIES, ...PROPS];
+
 export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
 export const accessoryRegions = (x) => x.regions ?? null;
 
-export const accessoryById = (id) => ACCESSORIES.find((x) => x.id === id);
+export const accessoryById = (id) => STYLE_ITEMS.find((x) => x.id === id);
 
 // Pick an accessory the player doesn't own yet, weighted by rarity, or null.
 // With a region, only accessories found there (or anywhere) are in the pool.
 export function rollAccessory(exclude, rng, region = null) {
-  const pool = ACCESSORIES.filter((x) => !exclude.includes(x.id) && (!region || !x.regions || x.regions.includes(region)));
+  const pool = STYLE_ITEMS.filter(
+    (x) => x.source !== 'earned' && !exclude.includes(x.id) && (!region || !x.regions || x.regions.includes(region)),
+  );
   if (!pool.length) return null;
   const total = pool.reduce((n, x) => n + RARITY[x.rarity].weight, 0);
   let r = rng() * total;
@@ -331,4 +478,18 @@ export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, t
     ctx.fillRect(ox + x, oy + y, 1, 1);
   };
   acc.draw(px, a, frame, time);
+}
+
+// Props stand on the LCD floor at the right edge. Returns nothing if the prop has nothing to draw.
+export const PROP_FLOOR = 21;
+export function drawProp(ctx, id, lcdW, frame = 0, time = 0, extra = null, dim = false) {
+  const p = PROPS.find((x) => x.id === id);
+  if (!p) return;
+  const [w, h] = p.size;
+  const ox = lcdW - w - 2;
+  const oy = PROP_FLOOR - h;
+  p.draw((x, y, color) => {
+    ctx.fillStyle = dim ? '#1c3a3f' : color;
+    ctx.fillRect(ox + x, oy + y, 1, 1);
+  }, frame, time, extra);
 }

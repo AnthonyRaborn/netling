@@ -26,7 +26,7 @@ import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, re
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
 import { RunView } from './netrun/view.js';
-import { ACCESSORIES, accessoryById, accessoryHint } from './accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint } from './accessories.js';
 import { runBlockReason, startRun } from './netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from './netrun/regions.js';
 import { codexByRegion, fragmentById, FRAGMENTS } from './netrun/codex.js';
@@ -106,6 +106,53 @@ function drainAccessoryInbox() {
   }
 }
 
+// Earned style items: granted by moments, never sold. Announced once.
+function grantStyle(id, message) {
+  if (ownedAccessories.includes(id)) return;
+  ownedAccessories.push(id);
+  store.set(ACCESSORY_KEY, ownedAccessories);
+  if (message) queueNotice(message);
+}
+
+// Grant messages play one after another instead of overwriting each other.
+const notices = [];
+let noticeBusy = false;
+function queueNotice(message) {
+  notices.push(message);
+  if (!noticeBusy) nextNotice();
+}
+function nextNotice() {
+  const msg = notices.shift();
+  if (!msg) {
+    noticeBusy = false;
+    return;
+  }
+  noticeBusy = true;
+  setTimeout(() => {
+    flashStatus(msg);
+    sfx('win', state.quirk.pitch);
+    setTimeout(nextNotice, 2000);
+  }, 400);
+}
+
+// Saves from before these items existed get what they've already earned.
+function backfillEarned() {
+  const lineage = store.get(LINEAGE_KEY) ?? [];
+  if (state.stage !== 'script' || lineage.length) grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
+  if (lineage.length) grantStyle('plush', 'a keepsake: a plush of your last netling.');
+  if (state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
+}
+
+// The plush looks like the previous netling, in its colors.
+function plushExtra() {
+  const lineage = store.get(LINEAGE_KEY) ?? [];
+  const e = lineage[lineage.length - 1];
+  if (!e) return null;
+  const form = e.realized ? e.form : e.teenForm ?? 'bitling';
+  const pal = PALETTES[e.palette ?? 0] ?? PALETTES[0];
+  return { sprite: formSprite(form, 'a'), colors: { '#': pal.main, o: pal.accent, '+': '#f5f5f5' } };
+}
+
 // Bank fragments a finished run left on the pet into the shared codex.
 function drainCodexInbox() {
   const inbox = state.codexInbox ?? [];
@@ -140,7 +187,10 @@ function save() {
 function advance() {
   tick(state, now());
   if (state.stage !== lastStage) {
-    if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
+    if (state.stage === 'baby') {
+      sfx('boot', state.quirk.pitch);
+      grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
+    }
     if (state.stage === 'teen' || state.stage === 'adult') {
       flashUntil = performance.now() + 2400;
       sfx('evolve', state.quirk.pitch);
@@ -151,6 +201,7 @@ function advance() {
     checkUnlocks();
     lastStage = state.stage;
   }
+  if (state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
   if (state.lastSurgeAt !== lastSurgeAt) {
     lastSurgeAt = state.lastSurgeAt;
     surgeUntil = performance.now() + 900;
@@ -229,6 +280,8 @@ function onFlatline() {
   lineage.push(deathRecord(state));
   store.set(LINEAGE_KEY, lineage);
   showFlatline();
+  grantStyle('plush', 'a keepsake: a plush of your last netling.');
+  plushCache = plushExtra();
   checkUnlocks();
 }
 
@@ -312,6 +365,7 @@ function openRun() {
     onGame: () => countGame(),
     onClose: (run) => {
       session = null;
+      if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
       if (run?.result === 'jacked') {
         if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
         const at = run.map.nodes.find((n) => n.id === run.pos);
@@ -528,6 +582,9 @@ function checkUnlocks({ silent = false } = {}) {
   if (!fresh.length) return;
   unlocked = [...new Set([...unlocked, ...now])];
   store.set(UNLOCKED_KEY, unlocked);
+  if (COSMETICS.shell.every((c) => unlocked.includes(`shell:${c.id}`))) {
+    grantStyle('minidevice', 'secret: a mini device. it has a pet of its own.');
+  }
   // Free items (e.g. defaults added in an update) join quietly.
   const earned = fresh.filter((id) => {
     if (id === 'label') return true;
@@ -561,7 +618,7 @@ function applyWardrobe() {
 
 function renderWardrobe() {
   const w = resolveWardrobe(wardrobe, unlocked);
-  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + ACCESSORIES.length; // + label + accessories
+  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + STYLE_ITEMS.length; // + label + accessories/props
   $('wardrobe-count').textContent = `${unlocked.length + ownedAccessories.length}/${total}`;
   const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK' };
   $('wardrobe-list').replaceChildren(
@@ -610,13 +667,20 @@ function renderWardrobe() {
 }
 
 function accessorySection() {
+  return [
+    ...styleItemSection('accessory', 'ACCESSORY', ACCESSORIES),
+    ...styleItemSection('prop', 'PROP', PROPS),
+  ];
+}
+
+// One wardrobe section for owned style items (worn accessories or ground props).
+function styleItemSection(key, title, items) {
   const h = document.createElement('h3');
-  h.textContent = 'ACCESSORY';
+  h.textContent = title;
   const grid = document.createElement('div');
   grid.className = 'wardrobe-grid';
-  const current = ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : 'none';
-  const entries = [{ id: 'none', name: 'None' }, ...ACCESSORIES];
-  for (const x of entries) {
+  const current = ownedAccessories.includes(wardrobe[key]) ? wardrobe[key] : 'none';
+  for (const x of [{ id: 'none', name: 'None' }, ...items]) {
     const owned = x.id === 'none' || ownedAccessories.includes(x.id);
     const b = document.createElement('button');
     b.type = 'button';
@@ -624,7 +688,7 @@ function accessorySection() {
     b.setAttribute('aria-pressed', owned && current === x.id);
     const sw = document.createElement('span');
     sw.className = 'sw';
-    sw.textContent = owned && x.id !== 'none' ? '✦' : '';
+    sw.textContent = owned && x.id !== 'none' ? (key === 'prop' ? '▣' : '✦') : '';
     const name = document.createElement('span');
     name.textContent = owned ? x.name : '???';
     const hint = document.createElement('span');
@@ -633,7 +697,7 @@ function accessorySection() {
     b.append(sw, name, hint);
     if (owned) {
       b.addEventListener('click', () => {
-        wardrobe = { ...wardrobe, accessory: x.id };
+        wardrobe = { ...wardrobe, [key]: x.id };
         store.set(WARDROBE_KEY, wardrobe);
         sfx('select', state.quirk.pitch);
         renderWardrobe();
@@ -919,9 +983,11 @@ document.addEventListener('visibilitychange', () => {
 
 checkUnlocks({ silent: !store.get(UNLOCKED_KEY) });
 applyWardrobe();
+let plushCache = plushExtra();
 advance();
 drainCodexInbox();
 drainAccessoryInbox();
+backfillEarned();
 if (state.stage === 'dead') showFlatline();
 else if (state.run) openRun(); // resume a run after a reload
 setInterval(advance, 1000);
@@ -936,6 +1002,8 @@ let lastFrame = performance.now();
   } else {
     renderLCD(canvas, state, time, {
       accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
+      prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
+      propExtra: wardrobe.prop === 'plush' ? plushCache : null,
       flash: time < flashUntil,
       surge: time < surgeUntil,
       calm: reducedMotion.matches,
