@@ -616,6 +616,8 @@ await scenario('field manual hides root until the codex is complete', async ({ o
   };
   const before = await terms(await open(BASE, seed()));
   assert(!before.includes('root') && before.some((t) => /^r.+t$/.test(t)), `root not hidden: ${before}`);
+  assert(before.includes('file icons'), `cache files not explained: ${before}`);
+  assert(before.includes('quirks'), `quirks not explained: ${before}`);
 });
 
 await scenario('field manual shows root once the codex is complete', async ({ open }) => {

@@ -35,6 +35,12 @@ function renderHelp() {
       ],
     ],
     [
+      'QUIRKS',
+      [
+        ['quirks', 'Every netling compiles with its own quirks: its colors, the pitch of its voice, the way it moves when idle, a favorite kind of packet, and how early or late it goes to bed. Feed it the one it loves and it perks up a little. Watch it to find out the rest.', 'Each generation inherits one quirk from the netling before it. A Memory shard rewrites one at random.'],
+      ],
+    ],
+    [
       'THE READOUT',
       [
         ['v1.0 Kernel', 'Generation number and its current form.'],
@@ -53,6 +59,7 @@ function renderHelp() {
         ['!', 'It needs something. Check the bars.'],
         ['virus icon', 'Infected. PATCH it before Integrity collapses.'],
         ['eye', 'A corp trace. HIDE or COMPLY before the timer runs out.'],
+        ['file icons', `Corrupted cache files, bottom left: one per file, up to ${CFG.maxCache}. It writes them now and then while digesting a meal. PURGE clears them.`, '3+ files damage Integrity; every file makes a virus more likely.'],
         ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
       ],
     ],
