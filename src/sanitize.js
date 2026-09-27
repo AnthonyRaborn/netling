@@ -16,6 +16,7 @@ import {
   PACKETS,
   QUIRK_KEYS,
   CFG,
+  EVENTS,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
@@ -211,7 +212,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
   const buffs = isObj(raw.buffs) ? raw.buffs : {};
   const games = isObj(raw.games) ? raw.games : {};
   const runStats = isObj(raw.runStats) ? raw.runStats : {};
-  const event = isObj(raw.event) && raw.event.type === 'trace' ? { type: 'trace', startedAge: num(raw.event.startedAge, 0, 0) } : null;
+  const event = isObj(raw.event) && has(EVENTS, raw.event.type) ? { type: raw.event.type, startedAge: num(raw.event.startedAge, 0, 0) } : null;
   const hibernation = isObj(raw.hibernation) && Number.isFinite(raw.hibernation.since) ? { ...(strict ? {} : raw.hibernation), since: raw.hibernation.since } : null;
 
   const s = {
@@ -233,6 +234,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     asleep: bool(raw.asleep),
     nap: isObj(raw.nap) && Number.isFinite(raw.nap.startedAge) ? { startedAge: Math.max(0, raw.nap.startedAge) } : null,
     lastNapEndAge: numOrNull(raw.lastNapEndAge),
+    rebootUntilAge: numOrNull(raw.rebootUntilAge),
     lightsOn: bool(raw.lightsOn, true),
     careMistakes: int(raw.careMistakes, 0, 0, 1000),
     zeroMin: { charge: num(zero.charge, 0, 0), sync: num(zero.sync, 0, 0), heat: num(zero.heat, 0, 0), lights: num(zero.lights, 0, 0) },

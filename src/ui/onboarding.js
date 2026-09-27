@@ -59,6 +59,8 @@ function renderHelp() {
         ['!', 'It needs something. Check the bars.'],
         ['virus icon', 'Infected. PATCH it before Integrity collapses.'],
         ['eye', 'A corp trace. HIDE or COMPLY before the timer runs out.'],
+        ['crosshair', `An intrusion attempt. DEFEND (a mini-game) within ${CFG.attackWindowMin} minutes, or it installs a virus.`, 'An active antivirus shield bounces them.'],
+        ['overflowing chip', `A memory overflow. PURGE within ${CFG.overflowWindowMin} minutes, or it crashes and reboots for ${CFG.rebootMin} minutes with its cache full.`, 'Cache files make overflows likelier.'],
         ['file icons', `Corrupted cache files, bottom left: one per file, up to ${CFG.maxCache}. It writes them now and then while digesting a meal. PURGE clears them.`, '3+ files damage Integrity; every file makes a virus more likely.'],
         ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
       ],

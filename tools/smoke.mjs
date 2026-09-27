@@ -165,7 +165,7 @@ await scenario('fresh launch: intro -> manual -> nudge -> tutorial run', async (
 await scenario('home: care actions, games, archive, system dialog', async ({ open }) => {
   const page = await open(BASE, seed());
   assert(!(await visible(page, '#intro')), 'intro shown for settled save');
-  for (const a of ['corp', 'cool', 'purge']) await page.click(`[data-act="${a}"]`);
+  for (const a of ['corp', 'cool', 'purge']) await page.click(`#controls [data-act="${a}"]`);
   await page.click('#btn-play');
   assert(await visible(page, '#picker'), 'game picker not shown');
   await page.click('[data-game="breach"]');
@@ -692,7 +692,7 @@ await scenario('actions play a reaction on the screen; refusals shake it off', a
   const played = () => page.evaluate(() => document.getElementById('lcd').dataset.anim);
   await page.click('[data-act="corp"]');
   assert((await played()) === 'eat', `feeding played ${await played()}`);
-  await page.click('[data-act="purge"]');
+  await page.click('#controls [data-act="purge"]');
   assert((await played()) === 'purge', `purge played ${await played()}`);
   await page.click('[data-act="cool"]'); // heat 20: already cool
   assert((await played()) === 'refuse', `a refused cool played ${await played()}`);
@@ -714,6 +714,45 @@ await scenario('Packet Feast is in the PLAY menu and pays Charge', async ({ open
   assert(s.games.feast.played === 1, 'feast not recorded');
   assert(Math.round(s.stats.charge) === 50 - 6 + 3, `charge after a lost feast: ${s.stats.charge}`);
   assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'play', 'no reaction after the game');
+});
+
+await scenario('intrusion: DEFEND launches a mini-game; losing it installs a virus', async ({ open }) => {
+  const s = awakeNetling();
+  s.event = { type: 'attack', startedAge: s.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#event-bar'), 'no alert bar');
+  assert((await page.textContent('#event-name')) === 'INTRUSION', `label: ${await page.textContent('#event-name')}`);
+  assert(await visible(page, '#event-defend'), 'no DEFEND button');
+  assert(!(await visible(page, '#event-bar [data-act="hide"]')), 'trace buttons shown for an intrusion');
+  await page.click('#event-defend');
+  assert(await visible(page, '#pad'), 'DEFEND did not start a game');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Escape'); // quit: the defense fails
+  await page.waitForTimeout(2500);
+  const after = await saved(page);
+  assert(after.event === null && after.virus === true, `defense loss not applied: ${JSON.stringify({ event: after.event, virus: after.virus })}`);
+  assert(!(await visible(page, '#event-bar')), 'alert bar still up');
+});
+
+await scenario('overflow: PURGE from the alert bar contains it', async ({ open }) => {
+  const s = awakeNetling({ cache: 0 });
+  s.event = { type: 'overflow', startedAge: s.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert((await page.textContent('#event-name')) === 'MEMORY OVERFLOW', 'wrong label');
+  await page.click('#event-bar [data-act="purge"]');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).event === null, 'overflow not contained');
+  assert(/overflow contained/.test(await page.textContent('#log')), 'not logged');
+});
+
+await scenario('after a crash it reboots: care is blocked and the readout says so', async ({ open }) => {
+  const s = awakeNetling();
+  s.rebootUntilAge = s.ageMin + 15;
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(/rebooting/.test(await page.textContent('#readout')), 'readout does not show the reboot');
+  await page.click('[data-act="corp"]');
+  assert(/rebooting/.test(await page.textContent('#status')), 'feeding allowed while rebooting');
+  assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'refuse', 'no refusal reaction');
 });
 
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {

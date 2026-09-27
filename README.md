@@ -78,6 +78,7 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
   - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
   - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each of the four games).
 - **Mini-games:** PLAY picks one of four: Breach Protocol, Firewall Dodge, Signal Tune, and **Packet Feast** (move under clean packets to eat 15 of them in 20 seconds; two corrupted bites lose). A win gives more Sync than a loss; Packet Feast also gives Charge (+10 for a win, +3 for a loss, before the usual play cost of 6), without starting digestion. Netrun ICE picks from all four.
+- **Events:** at random while it's awake, besides power surges (instant: +Heat, +Charge), a timed alert bar may open. A **corp trace**: HIDE or COMPLY within 2 hours, or lose Integrity and lean corp. An **intrusion** (crosshair icon): DEFEND within 1 hour by winning a random mini-game, or it installs a virus (-10 Integrity); an antivirus shield bounces them. A **memory overflow** (overflowing chip icon, likelier with cache files): PURGE within 45 minutes, or it crashes (-15 Integrity, cache full) and reboots, unable to act for 20 minutes. One event at a time; hibernation waits for it.
 - **Reactions:** care actions and items play a short animation on the screen (eating, patch, purge, cool, item sparkle, a hop after a game), and a refused action shakes its head under a red X.
 - **Items:** 6-slot inventory. Mini-game wins (25%), hiding (30%) and complying (30%) can drop items; each adult form leaves a keepsake item for the next generation. Coolant cell, Antivirus patch (6h shield), Corp voucher (full Charge + waves off a trace), Black ICE shard (big Sync, risky), Signal booster (next win x2), Memory shard (rewrites a quirk). Tap a slot, then USE.
 - **Netrun:** jack in (awake, 30+ Charge, 4h cooldown) and pick a path across a fogged node map. Moves cost Charge and add Heat (90+ Heat also burns Integrity). Caches may hold items, ICE is a mini-game that bites on a loss, Relays recharge and let you bank loot, the Exit banks everything plus a bonus. Hitting 0 Integrity or Charge disconnects: loot lost, a care mistake (never the fatal one), emergency reboot. Choice nodes: Checkpoints (hide/comply/voucher, lean the allegiance axis), Markets (spend Charge on items), Anomalies (risky events that lean the axes). Adult forms get run abilities, listed in the Dex. Regions: Public Net (any stage), Corp Grid and Darknet Bazaar (teen+), Old Web Ruins (adult), and a hidden fifth region. Runs also recover **codex fragments** (22, 4–5 per region) in story order, shared across generations and readable in the Archive's CODEX tab; like loot, they're lost on a disconnect. A clean jack-out re-syncs half the Integrity the run cost; each region has its own sound. `npm run balance` includes netruns in the lifetime simulation (`NO_RUNS=1` to compare). Completing the codex earns **Root Access** from NL-0: a netling's first premature flatline is reversed (old age is not); after a rescue NL-0 rests for one generation, and new scripts can roll NL-0's origin palette. `ROOT=1 npm run balance` measures it. `node tools/netrun-balance.mjs` checks risk/reward.
@@ -90,9 +91,9 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 
 | Player | Check-ins | Reaches adult | Full 7-day life |
 |---|---|---|---|
-| attentive | hourly, 7:00–23:00 | 98% | 96% |
-| casual | 6 a day | 86% | 65% |
-| worker | before work, lunch, evenings | 74% | 39% |
-| neglectful | twice a day | 4% | 0% (dies ~day 1) |
+| attentive | hourly, 7:00–23:00 | 97% | 93% |
+| casual | 6 a day | 77% | 50% |
+| worker | before work, lunch, evenings | 59% | 19% |
+| neglectful | twice a day | 2% | 0% (dies ~day 1) |
 
-Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 98%, running hot and sloppy → Glitch 68%, tidy and neutral → Daemon 71%, balanced + 22 wins → Ghost 98%. Ghost by accident: up to 4% (the most attentive players).
+Deliberate strategies each reach their form: all-corp + comply → Chrome 99%, all-scavenged + hide → Firewall 95%, running hot and sloppy → Glitch 62%, tidy and neutral → Daemon 76%, balanced + 22 wins → Ghost 97%. Ghost by accident: up to 6% (the most attentive players).

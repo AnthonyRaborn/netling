@@ -71,6 +71,8 @@ function checkIn(s, p, now, rng, ctx) {
     if (choice === 'balance') choice = s.axes.allegiance > 0 ? 'hide' : 'comply';
     doAct(choice);
   }
+  if (s.event?.type === 'attack') doAct('defend', { won: rng() < p.winRate });
+  if (s.event?.type === 'overflow') doAct('purge');
   if (s.virus) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3)) doAct('purge');
   const coolAt = p.hot ? 80 : 50;

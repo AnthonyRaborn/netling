@@ -1,6 +1,6 @@
 import { SPRITES, drawSprite, formSprite } from './sprites.js';
 import { drawAccessory, drawProp } from './accessories.js';
-import { PALETTES, CFG, needsAttention, isAlive, resting } from './sim.js';
+import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting } from './sim.js';
 
 export const LCD_W = 40;
 export const LCD_H = 28;
@@ -16,6 +16,13 @@ const buf = document.createElement('canvas');
 buf.width = LCD_W;
 buf.height = LCD_H;
 const bctx = buf.getContext('2d');
+
+// Timed-event icons, top left beside the virus icon: an intrusion's crosshair and an
+// overflowing memory chip. '#' = accent, 'o' = highlight.
+const EVENT_ICONS = {
+  attack: { rows: ['.#.#.', '#...#', '..o..', '#...#', '.#.#.'], color: '#ff2a6d' },
+  overflow: { rows: ['..o..', '.ooo.', '#####', '#.#.#', '#####'], color: '#ff9f1c' },
+};
 
 // Action feedback: how long a reaction plays, and the kinds (see drawAnimation).
 export const ANIM_MS = 1100;
@@ -67,10 +74,11 @@ export function renderLCD(canvas, s, time, opts = {}) {
     bctx.fillRect(0, 23, LCD_W, 1);
   } else {
     const hasSleepPose = Boolean(SPRITES[`${s.form}Sleep`]);
-    const sprite = formSprite(s.form, rest ? 'sleep' : frame ? 'b' : 'a');
+    const rebooting = rebootMinutesLeft(s) > 0; // crashed: still, eyes shut, powered down
+    const sprite = formSprite(s.form, rest || rebooting ? 'sleep' : frame ? 'b' : 'a');
     let x = Math.floor((LCD_W - sprite[0].length) / 2);
     let y = 20 - sprite.length;
-    if (rest) {
+    if (rest || rebooting) {
       y = 21 - sprite.length;
     } else {
       // Every idle wanders the screen: side to side, and up and down as far as a hat still fits
@@ -102,6 +110,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
     }
 
     let spriteColors = colors;
+    if (rebooting) spriteColors = { '#': '#1c3a3f', o: '#2f6b73', '+': '#2f6b73' }; // powered down
     if (rest) {
       // Forms without a dedicated sleep pose close their eyes by painting them body-colored.
       spriteColors = dimPet
@@ -134,6 +143,16 @@ export function renderLCD(canvas, s, time, opts = {}) {
       if (s.virus) drawSprite(bctx, SPRITES.virus, 2, 2, { '#': pal.accent, o: bg });
       if (s.event?.type === 'trace' && frame) {
         drawSprite(bctx, SPRITES.eye, s.virus ? 9 : 2, 2, { '#': '#f9f002', o: bg });
+      }
+      const icon = EVENT_ICONS[s.event?.type];
+      if (icon && frame) drawSprite(bctx, icon.rows, s.virus ? 9 : 2, 2, { '#': icon.color, o: '#f5f5f5' });
+      if (rebooting) {
+        // Reboot progress, like the compile bar, bottom right (a crash leaves the cache icons full on the left).
+        const pct = 1 - rebootMinutesLeft(s) / CFG.rebootMin;
+        bctx.fillStyle = pal.main;
+        bctx.fillRect(23, 24, 15, 1);
+        bctx.fillStyle = pal.accent;
+        bctx.fillRect(23, 25, Math.max(1, Math.round(15 * pct)), 1);
       }
     }
     if (needsAttention(s) && frame) {

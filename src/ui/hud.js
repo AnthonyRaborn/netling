@@ -1,5 +1,5 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, resting, tick, traceMinutesLeft, CFG, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
@@ -39,15 +39,22 @@ export function updateHUD() {
   const perk = FORM_MODS[state.form];
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
+  if (rebootMinutesLeft(state) > 0) $('readout').textContent += ` · rebooting, ${rebootMinutesLeft(state)}m left`;
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
   $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;
   renderInventory();
   renderNudge();
   renderHibernation();
-  const traceLeft = traceMinutesLeft(state);
-  $('event-bar').hidden = !(traceLeft > 0 && isAlive(state));
-  $('event-timer').textContent = `${traceLeft}m`;
+  // The timed event, if any, with the buttons that answer it.
+  const eventLeft = eventMinutesLeft(state);
+  const type = state.event?.type;
+  $('event-bar').hidden = !(eventLeft > 0 && isAlive(state));
+  if (type) {
+    $('event-name').textContent = EVENTS[type].label;
+    $('event-timer').textContent = `${eventLeft}m`;
+    document.querySelectorAll('#event-bar [data-event]').forEach((b) => (b.hidden = b.dataset.event !== type));
+  }
   document.body.classList.toggle('asleep', resting(state));
 
   // Redrawn when a line is added (the log is capped, so its length alone stops changing).

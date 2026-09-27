@@ -94,6 +94,14 @@ if (DEV) {
     save();
     updateHUD();
   });
+  for (const type of ['attack', 'overflow']) {
+    $(`dev-${type}`).addEventListener('click', () => {
+      if (!isAlive(app.state)) return;
+      app.state.event = { type, startedAge: app.state.ageMin };
+      save();
+      updateHUD();
+    });
+  }
   $('dev-reset').addEventListener('click', () => {
     setSkew(0);
     app.state = createScript({ now: now(), rootAccess: codexComplete() });

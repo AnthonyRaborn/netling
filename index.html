@@ -81,9 +81,11 @@
       </div>
 
       <div id="event-bar" class="event-bar" role="alert" hidden>
-        <span class="event-label">CORP TRACE <b id="event-timer"></b></span>
-        <button type="button" data-act="hide">HIDE</button>
-        <button type="button" data-act="comply">COMPLY</button>
+        <span class="event-label"><span id="event-name">CORP TRACE</span> <b id="event-timer"></b></span>
+        <button type="button" data-act="hide" data-event="trace">HIDE</button>
+        <button type="button" data-act="comply" data-event="trace">COMPLY</button>
+        <button type="button" id="event-defend" data-event="attack">DEFEND</button>
+        <button type="button" data-act="purge" data-event="overflow">PURGE</button>
       </div>
 
       <nav id="controls" class="controls" aria-label="Actions">
@@ -157,6 +159,8 @@
         <button type="button" data-skip="480">+8h</button>
         <button type="button" id="dev-evolve">EVO</button>
         <button type="button" id="dev-trace">TRACE</button>
+        <button type="button" id="dev-attack">ATTACK</button>
+        <button type="button" id="dev-overflow">OVERFLOW</button>
         <button type="button" id="dev-reset">RESET</button>
       </div>
     </main>

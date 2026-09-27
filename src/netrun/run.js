@@ -71,6 +71,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   if (pet.hibernation) return 'hibernating.';
   if (REGIONS[region].tutorial) return null; // the first run is always allowed
   if (resting(pet)) return pet.nap ? 'napping. wake it first.' : 'in low-power mode.';
+  if ((pet.rebootUntilAge ?? 0) > pet.ageMin) return 'still rebooting.';
   const lock = regionLock(region, pet.stage, codex);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);

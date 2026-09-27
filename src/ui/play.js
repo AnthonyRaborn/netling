@@ -1,5 +1,5 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, tick } from '../sim.js';
+import { act, blockReason, tick, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
@@ -165,6 +165,36 @@ function startGame(id) {
   showPanel('pad');
 }
 
+// DEFEND: an intrusion is fought off with a random mini-game, like netrun ICE. It counts toward
+// game unlocks but not win streaks or the netling's own game record.
+function startDefense() {
+  unlockAudio();
+  if (app.session) return;
+  tick(app.state, now());
+  const blocked = blockReason(app.state, 'defend');
+  if (blocked) {
+    sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
+    return flashStatus(blocked);
+  }
+  const game = GAME_IDS[Math.floor(Math.random() * GAME_IDS.length)];
+  app.session = new GameSession(game, {
+    sound: (name) => sfx(name, app.state.quirk.pitch),
+    onFinish: (won) => {
+      app.session = null;
+      countGame();
+      showPanel('controls');
+      tick(app.state, now());
+      const res = act(app.state, 'defend', now(), Math.random, { won });
+      playAnim(res.ok && won ? 'patch' : 'refuse');
+      flashStatus(res.msg, 3000);
+      save();
+      updateHUD();
+    },
+  });
+  showPanel('pad');
+}
+
 const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ' ': 'a', Enter: 'a', z: 'a', x: 'a' };
 
 export function initPlay() {
@@ -199,6 +229,7 @@ export function initPlay() {
     showPanel('regions');
   });
   $('regions-back').addEventListener('click', () => showPanel('controls'));
+  $('event-defend').addEventListener('click', startDefense);
 
   document.querySelectorAll('[data-key]').forEach((btn) =>
     btn.addEventListener('pointerdown', (e) => {
