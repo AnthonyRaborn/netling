@@ -32,6 +32,7 @@ export const app = {
   codex: [],
   dex: [],
   ownedAccessories: [],
+  lineage: [], // every generation that died on this device; only onFlatline (life.js) adds to it
   onboarding: 'done',
   firstLaunch: false,
   corruptSave: null, // the raw text of a save that couldn't be used
@@ -56,7 +57,7 @@ export const app = {
 };
 
 // While the netling is on another device, only settings may change.
-const WRITABLE_WHILE_LOCKED = new Set([KEYS.lock, KEYS.prefs, KEYS.iosHint]);
+const WRITABLE_WHILE_LOCKED = new Set([KEYS.lock, KEYS.prefs, KEYS.iosHint, KEYS.corruptSave]);
 
 function canWrite(key) {
   if (!app.claimed || app.inactive || app.leaving) return false;
@@ -76,7 +77,6 @@ export const store = createStore(() => localStorage, { canWrite, onError: onWrit
 
 export const now = () => Date.now() + app.skew;
 export const codexComplete = () => FRAGMENTS.every((f) => app.codex.includes(f.id));
-export const loadLineage = () => cleanLineage(store.get(KEYS.lineage));
 
 export function save() {
   if (store.set(KEYS.save, app.state)) app.writeFailed = false;
@@ -86,6 +86,7 @@ export function save() {
 export function loadAll() {
   app.skew = DEV ? num(store.get(KEYS.skew), 0) : 0;
   app.codex = cleanCodex(store.get(KEYS.codex));
+  app.lineage = cleanLineage(store.get(KEYS.lineage));
   app.dex = cleanDex(store.get(KEYS.dex));
   app.ownedAccessories = cleanAccessories(store.get(KEYS.accessories));
   app.unlocked = cleanUnlocked(store.get(KEYS.unlocked));
@@ -117,17 +118,20 @@ export function flashStatus(msg, ms = 1800) {
 }
 
 // A button that needs a second press within a few seconds. Returns true on the second press.
+// Each button keeps one timer, so a stale one can't disarm a newer first press early.
+const armTimers = new WeakMap();
 export function armed(btn, confirmLabel, idleLabel, ms = 4000) {
-  if (btn.dataset.armed === '1') {
+  clearTimeout(armTimers.get(btn));
+  const disarm = () => {
     btn.dataset.armed = '';
     btn.textContent = idleLabel;
+  };
+  if (btn.dataset.armed === '1') {
+    disarm();
     return true;
   }
   btn.dataset.armed = '1';
   btn.textContent = confirmLabel;
-  setTimeout(() => {
-    btn.dataset.armed = '';
-    btn.textContent = idleLabel;
-  }, ms);
+  armTimers.set(btn, setTimeout(disarm, ms));
   return false;
 }

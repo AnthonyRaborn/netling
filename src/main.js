@@ -6,12 +6,12 @@ import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
-import { $, app, DEV, codexComplete, flashStatus, loadAll, loadLineage, now, save, store } from './ui/app.js';
+import { $, app, DEV, codexComplete, flashStatus, loadAll, now, save, store } from './ui/app.js';
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
-import { initPlay, openRun } from './ui/play.js';
+import { dropSession, initPlay, openRun } from './ui/play.js';
 import { importFromUrl, initSystem, protectStorage, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { advance, initLife, showFlatline } from './ui/life.js';
@@ -114,12 +114,12 @@ document.addEventListener('visibilitychange', () => {
 app.claimed = await claimTab();
 if (!app.claimed) becomeInactive('Your netling is open in another tab.');
 
-if (app.corruptSave && store.setRaw(KEYS.corruptSave, app.corruptSave)) {
-  setTimeout(() => flashStatus('the saved netling could not be read, so a new one was compiled. the old save was kept aside.', 6000), 1000);
+if (app.corruptSave && store.set(KEYS.corruptSave, { at: Date.now(), raw: app.corruptSave })) {
+  setTimeout(() => flashStatus('the saved netling could not be read, so a new one was compiled. the old save is in ARCHIVE > SYSTEM.', 6000), 1000);
 }
 
 // Older saves: backfill the dex with forms this save proves were seen.
-if (formsSeenIn(app.state, loadLineage()).map((form) => discover(app.dex, form)).some(Boolean)) store.set(KEYS.dex, app.dex);
+if (formsSeenIn(app.state, app.lineage).map((form) => discover(app.dex, form)).some(Boolean)) store.set(KEYS.dex, app.dex);
 
 protectStorage();
 document.addEventListener('pointerdown', () => !storageProtected() && protectStorage(), { once: true });
@@ -147,14 +147,28 @@ const canvas = $('lcd');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let lastFrame = performance.now();
 let lastIdleDraw = 0;
+const loggedErrors = new Set();
+
+// The next frame is booked before drawing, so one bad frame can't freeze the screen.
 (function loop(time) {
+  requestAnimationFrame(loop);
+  try {
+    drawFrame(time);
+  } catch (err) {
+    if (app.session) return dropSession(err);
+    // The home screen retries every frame; log each distinct error once.
+    if (!loggedErrors.has(String(err))) {
+      loggedErrors.add(String(err));
+      console.error('netling: frame failed', err);
+    }
+  }
+})(performance.now());
+
+function drawFrame(time) {
   const dt = Math.min(0.1, (time - lastFrame) / 1000);
   lastFrame = time;
   const { session, state, wardrobe, ownedAccessories } = app;
-  if (!session && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) {
-    requestAnimationFrame(loop);
-    return;
-  }
+  if (!session && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) return;
   if (!session) lastIdleDraw = time;
   if (session) {
     session.update(dt);
@@ -170,5 +184,4 @@ let lastIdleDraw = 0;
       calm: reducedMotion.matches,
     });
   }
-  requestAnimationFrame(loop);
-})(performance.now());
+}

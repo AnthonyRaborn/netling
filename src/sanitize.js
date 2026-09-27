@@ -21,6 +21,7 @@ import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS } from './netrun/regions.js';
+import { ANOMALIES } from './netrun/anomalies.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
 export const ONBOARDING_STEPS = ['intro', 'readme', 'nudge', 'tutorial', 'done'];
@@ -90,14 +91,38 @@ function cleanQuirk(raw) {
 }
 
 // What the run view needs to draw and resolve an open ICE fight or choice node.
-function cleanPending(phase, p) {
-  if (phase === 'ice') return isObj(p) && GAME_IDS.includes(p.game) ? p : null;
-  if (phase !== 'choice' || !isObj(p) || typeof p.kind !== 'string' || typeof p.title !== 'string' || typeof p.text !== 'string') return null;
-  const optionOk = (o) => isObj(o) && typeof o.id === 'string' && typeof o.label === 'string' && (o.hint === undefined || typeof o.hint === 'string');
-  return Array.isArray(p.options) && p.options.length && p.options.every(optionOk) ? p : null;
+// Option ids each kind of choice can offer; run.js resolves nothing else.
+function choiceIds(p) {
+  if (p.kind === 'relay') return ['continue', 'out'];
+  if (p.kind === 'checkpoint') return ['hide', 'comply', 'voucher'];
+  if (p.kind === 'anomaly') return ANOMALIES.find((e) => e.id === p.event)?.options.map((o) => o.id) ?? [];
+  if (p.kind === 'market') return [...p.offers.map((_, i) => `buy${i}`), ...(p.accOffer ? ['buyacc'] : []), 'leave'];
+  return [];
 }
 
-function cleanRun(raw, s) {
+function cleanPending(phase, p, strict) {
+  if (!isObj(p)) return null;
+  if (phase === 'ice') return GAME_IDS.includes(p.game) ? (strict ? { game: p.game } : p) : null;
+  if (phase !== 'choice' || typeof p.title !== 'string' || typeof p.text !== 'string' || !Array.isArray(p.options)) return null;
+  const extra = {};
+  if (p.kind === 'market') {
+    // Market prices and wares come from the stored choice, so they're checked like any other input.
+    if (!Array.isArray(p.offers) || !p.offers.length || p.offers.length > 2 || !p.offers.every((id) => has(ITEMS, id))) return null;
+    const accOffer = p.accOffer == null ? null : STYLE_IDS.has(p.accOffer) ? p.accOffer : undefined;
+    if (accOffer === undefined) return null;
+    if (!(Number.isFinite(p.price) && p.price >= 0 && p.price <= 100)) return null; // rejected, not clamped: 0 would mean free
+    Object.assign(extra, { offers: [...p.offers], price: p.price, accOffer });
+  }
+  if (p.kind === 'anomaly') extra.event = p.event;
+  const allowed = choiceIds({ ...p, ...extra });
+  const optionOk = (o) =>
+    isObj(o) && allowed.includes(o.id) && typeof o.label === 'string' && (o.hint === undefined || typeof o.hint === 'string') && (o.disabled === undefined || typeof o.disabled === 'boolean');
+  if (!p.options.length || !p.options.every(optionOk)) return null;
+  const options = strict ? p.options.map(({ id, label, hint, disabled }) => ({ id, label, ...(hint === undefined ? {} : { hint }), ...(disabled === undefined ? {} : { disabled }) })) : p.options;
+  return { ...(strict ? {} : p), kind: p.kind, title: p.title.slice(0, 200), text: p.text.slice(0, 500), ...extra, options };
+}
+
+function cleanRun(raw, s, strict) {
   if (!isObj(raw) || !has(REGIONS, raw.region) || !isObj(raw.map) || !Array.isArray(raw.map.nodes)) return null;
   if (!Number.isInteger(raw.map.layerCount) || raw.map.layerCount < 2) return null;
   const nodes = raw.map.nodes;
@@ -108,14 +133,21 @@ function cleanRun(raw, s) {
   }
   if (!nodes.length || !ids.has(raw.pos)) return null;
   if (nodes.some((n) => n.edges.some((e) => !ids.has(e)))) return null;
+  const at = nodes.find((n) => n.id === raw.pos);
   const nodeIds = (v) => (Array.isArray(v) ? v.filter((id) => ids.has(id)) : []);
   const tally = isObj(raw.tally) ? raw.tally : {};
   // A broken ICE fight or choice is dropped; the runner is back on the map.
   let phase = oneOf(raw.phase, RUN_PHASES, 'map');
-  const pending = cleanPending(phase, raw.pending);
+  const pending = cleanPending(phase, raw.pending, strict);
   if ((phase === 'ice' || phase === 'choice') && !pending) phase = 'map';
+  if (phase === 'map' && !at.edges.length) return null; // a dead end the runner could never leave
+  const map = strict
+    ? { region: str(raw.map.region, raw.region), nodes: nodes.map(({ id, layer, type, edges }) => ({ id, layer, type, edges: [...edges] })), layerCount: raw.map.layerCount }
+    : raw.map;
   return {
-    ...raw,
+    ...(strict ? {} : raw),
+    region: raw.region,
+    map,
     pos: raw.pos,
     visited: nodeIds(raw.visited),
     revealed: nodeIds(raw.revealed),
@@ -129,7 +161,7 @@ function cleanRun(raw, s) {
     accessories: cleanAccessories(raw.accessories),
     startStats: cleanStats(raw.startStats),
     tally: { nodes: int(tally.nodes, 0, 0), iceWon: int(tally.iceWon, 0, 0), iceLost: int(tally.iceLost, 0, 0) },
-    result: oneOf(raw.result, RUN_RESULTS, null),
+    result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
     messages: Array.isArray(raw.messages) ? raw.messages.filter((m) => typeof m === 'string').slice(-20) : [],
     startedAge: num(raw.startedAge, s.ageMin, 0),
   };
@@ -163,8 +195,9 @@ function cleanFragment(raw, s) {
 
 // Returns a repaired copy of a stored netling, or null if it can't be used at all
 // (not an object, another save version, or an unknown stage or form).
-// Fields this file doesn't know about are kept as they are.
-export function cleanSave(raw, now = Date.now()) {
+// Fields this file doesn't know about are kept, so a newer version's data survives a downgrade,
+// unless strict is set: codes from outside keep only known fields.
+export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
   if (!isObj(raw) || raw.saveVersion !== SAVE_VERSION) return null;
   const stage = raw.stage;
   const form = raw.form ?? 'bitling';
@@ -178,10 +211,10 @@ export function cleanSave(raw, now = Date.now()) {
   const games = isObj(raw.games) ? raw.games : {};
   const runStats = isObj(raw.runStats) ? raw.runStats : {};
   const event = isObj(raw.event) && raw.event.type === 'trace' ? { type: 'trace', startedAge: num(raw.event.startedAge, 0, 0) } : null;
-  const hibernation = isObj(raw.hibernation) && Number.isFinite(raw.hibernation.since) ? { ...raw.hibernation, since: raw.hibernation.since } : null;
+  const hibernation = isObj(raw.hibernation) && Number.isFinite(raw.hibernation.since) ? { ...(strict ? {} : raw.hibernation), since: raw.hibernation.since } : null;
 
   const s = {
-    ...raw,
+    ...(strict ? {} : raw),
     saveVersion: SAVE_VERSION,
     generation: int(raw.generation, 1, 1, 1e6),
     stage,
@@ -239,7 +272,7 @@ export function cleanSave(raw, now = Date.now()) {
     codexInbox: cleanCodex(raw.codexInbox),
     accessoryInbox: cleanAccessories(raw.accessoryInbox),
   };
-  s.run = stage === 'dead' ? null : cleanRun(raw.run, s);
+  s.run = stage === 'dead' ? null : cleanRun(raw.run, s, strict);
   s.fragment = cleanFragment(raw.fragment, s);
   return s;
 }

@@ -296,6 +296,11 @@ export function choose(pet, optionId, rng) {
   const p = run.pending;
   const opt = p.options.find((o) => o.id === optionId);
   if (!opt || opt.disabled) return { ok: false, msg: 'not available.' };
+  // The inventory stays usable mid-choice, so the voucher offered on arrival may be gone.
+  if (p.kind === 'checkpoint' && optionId === 'voucher' && !pet.inventory.includes('voucher')) {
+    Object.assign(opt, { disabled: true, hint: 'none in inventory' });
+    return { ok: false, msg: 'no voucher left.' };
+  }
   const st = pet.stats;
   run.phase = 'map';
   run.pending = null;

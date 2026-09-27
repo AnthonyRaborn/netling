@@ -7,7 +7,7 @@ import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, flashStatus, loadLineage, store } from './app.js';
+import { $, app, flashStatus, store } from './app.js';
 
 // Bank accessories a finished run left on the pet into the shared collection.
 export function drainAccessoryInbox() {
@@ -53,7 +53,7 @@ function nextNotice() {
 
 // Saves from before these items existed get what they've already earned.
 export function backfillEarned() {
-  const lineage = loadLineage();
+  const { lineage } = app;
   if (app.onboarding === 'done' && (app.state.stage !== 'script' || lineage.length)) grantStyle('partyhat', 'a gift: party hat. happy first birthday.');
   if (lineage.length) grantStyle('plush', 'a keepsake: a plush of your last netling.');
   if (app.state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
@@ -61,7 +61,7 @@ export function backfillEarned() {
 
 // The plush looks like the previous netling, in its colors.
 export function plushExtra() {
-  const lineage = loadLineage();
+  const { lineage } = app;
   const e = lineage[lineage.length - 1];
   if (!e) return null;
   const form = e.realized ? e.form : e.teenForm ?? 'bitling';
@@ -83,7 +83,7 @@ export function countAct(action) {
 }
 
 function unlockContext() {
-  return { dex: app.dex, codex: app.codex, lineage: loadLineage(), generation: app.state.generation, progress: app.progress };
+  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress };
 }
 
 // Announce anything newly earned. First run of a save just records what's already earned.

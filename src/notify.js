@@ -15,7 +15,7 @@ export async function notify(title, body) {
   const opts = { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'netling', renotify: true };
   try {
     const reg = await navigator.serviceWorker?.getRegistration();
-    if (reg) return reg.showNotification(title, opts);
+    if (reg) return await reg.showNotification(title, opts); // awaited so a refusal lands in the catch
     new Notification(title, opts);
   } catch {
     // Some browsers only allow notifications from a service worker; nothing else to try.

@@ -16,9 +16,14 @@ export function setMuted(value) {
   muted = value;
 }
 
+// Safe to call from any click handler: without Web Audio the game just stays silent.
 export function unlockAudio() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (ctx.state === 'suspended') ctx.resume();
+  try {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+  } catch {
+    ctx = null;
+  }
 }
 
 function blip(freq, start, dur, type = 'square', vol = 0.06) {

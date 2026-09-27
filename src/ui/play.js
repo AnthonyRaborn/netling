@@ -3,7 +3,7 @@ import { act, blockReason, tick } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
-import { runBlockReason, startRun } from '../netrun/run.js';
+import { abortRun, closeRun, runBlockReason, startRun } from '../netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
 import { FRAGMENTS } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -19,6 +19,38 @@ function showPanel(name) {
   $('picker').hidden = name !== 'picker';
   $('pad').hidden = name !== 'pad';
   $('regions').hidden = name !== 'regions';
+}
+
+// A mini-game or netrun that throws is closed rather than left frozen on screen. A broken run is
+// aborted (its loot is lost, as with ABORT) so it can't crash again on the next resume.
+export function dropSession(err) {
+  console.error('netling: closing a session after an error', err);
+  app.session = null;
+  const run = app.state.run;
+  if (run) {
+    try {
+      if (run.phase !== 'done') abortRun(app.state);
+      closeRun(app.state, Date.now());
+      bumpProgress(run);
+    } catch {
+      app.state.run = null;
+    }
+    if (run.region === 'tutorial') finishOnboarding(); // never leave onboarding stuck on a broken tutorial
+  }
+  $('pad-quit').textContent = 'QUIT (ESC)';
+  showPanel('controls');
+  save();
+  updateHUD();
+  flashStatus(run ? 'the run crashed and was aborted. your netling is fine.' : 'the game crashed and was closed.', 4000);
+}
+
+// Pad and keyboard input for the running session, with the same safety net as the render loop.
+function sendInput(fn) {
+  try {
+    fn(app.session);
+  } catch (err) {
+    dropSession(err);
+  }
 }
 
 function bumpProgress(run) {
@@ -158,10 +190,10 @@ export function initPlay() {
   document.querySelectorAll('[data-key]').forEach((btn) =>
     btn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      app.session?.input(btn.dataset.key);
+      if (app.session) sendInput((s) => s.input(btn.dataset.key));
     }),
   );
-  $('pad-quit').addEventListener('click', () => app.session?.forfeit());
+  $('pad-quit').addEventListener('click', () => app.session && sendInput((s) => s.forfeit()));
 
   document.addEventListener('keydown', (e) => {
     if (introWaiting() && [' ', 'Enter', 'z', 'x'].includes(e.key)) {
@@ -169,10 +201,10 @@ export function initPlay() {
       return advanceIntro();
     }
     if (!app.session) return;
-    if (e.key === 'Escape') return app.session.forfeit();
+    if (e.key === 'Escape') return sendInput((s) => s.forfeit());
     const key = KEYMAP[e.key];
     if (!key || e.repeat) return;
     e.preventDefault();
-    app.session.input(key);
+    sendInput((s) => s.input(key));
   });
 }

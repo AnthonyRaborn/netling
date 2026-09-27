@@ -184,6 +184,7 @@ test('every state a real netrun passes through survives cleaning unchanged', () 
       for (let steps = 0; pet.run.phase !== 'done' && steps < 40; steps++) {
         const stored = roundTrip(pet);
         assert.deepEqual(cleanSave(stored, T0).run, stored.run, `${region} seed ${seed} step ${steps}`);
+        assert.deepEqual(cleanSave(stored, T0, { strict: true }).run, stored.run, `strict: ${region} seed ${seed} step ${steps}`);
         checked++;
         const run = pet.run;
         if (run.phase === 'ice') resolveIce(pet, rng() < 0.6, rng);
@@ -198,4 +199,69 @@ test('every state a real netrun passes through survives cleaning unchanged', () 
     }
   }
   assert.ok(checked > 1000);
+});
+
+// A run parked at a node of the given kind, with its choice open.
+function openChoice(type) {
+  const s = booted();
+  Object.assign(s, { stage: 'adult', form: 'daemon' });
+  s.stats.charge = 100;
+  startRun(s, 'public', mulberry32(9), [], []);
+  const next = runOptions(s.run)[0];
+  next.type = type;
+  moveTo(s, next.id, mulberry32(5));
+  assert.equal(s.run.phase, 'choice');
+  return roundTrip(s);
+}
+
+test('a stored choice is only kept if run.js could resolve it', () => {
+  const market = openChoice('market');
+  assert.deepEqual(cleanSave(market, T0).run.pending, market.run.pending);
+  for (const tamper of [
+    (p) => (p.offers = ['bogus']),
+    (p) => (p.price = -50),
+    (p) => (p.accOffer = 'crown-of-lies'),
+    (p) => p.options.push({ id: 'buy7', label: 'FREE' }),
+  ]) {
+    const bad = roundTrip(market);
+    tamper(bad.run.pending);
+    const clean = cleanSave(bad, T0).run;
+    assert.equal(clean.phase, 'map', `${tamper}: ${JSON.stringify(bad.run.pending)}`);
+    assert.equal(clean.pending, null);
+  }
+  const anomaly = openChoice('anomaly');
+  assert.deepEqual(cleanSave(anomaly, T0).run.pending, anomaly.run.pending);
+  anomaly.run.pending.event = 'nope';
+  assert.equal(cleanSave(anomaly, T0).run.pending, null);
+  const checkpoint = openChoice('checkpoint');
+  checkpoint.run.pending.options[0].id = 'bribe';
+  assert.equal(cleanSave(checkpoint, T0).run.pending, null);
+});
+
+test('a run stuck at a dead end is dropped; a finished run always has a result', () => {
+  const s = booted();
+  startRun(s, 'public', mulberry32(9), [], []);
+  const dead = roundTrip(s);
+  dead.run.map.nodes.find((n) => n.id === dead.run.pos).edges = [];
+  assert.equal(cleanSave(dead, T0).run, null);
+  const done = roundTrip(s);
+  Object.assign(done.run, { phase: 'done', result: 'won-somehow' });
+  assert.equal(cleanSave(done, T0).run.result, 'aborted');
+});
+
+test('strict cleaning (imported codes) keeps only fields the game knows', () => {
+  const s = openChoice('market');
+  Object.assign(s, { junk: 'x'.repeat(100) });
+  s.run.junk = { deep: [1, 2, 3] };
+  s.run.map.junk = 1;
+  s.run.map.nodes[0].junk = 1;
+  s.run.pending.junk = 1;
+  s.run.pending.options[0].junk = 1;
+  const loose = cleanSave(roundTrip(s), T0);
+  assert.equal(loose.junk.length, 100, 'local saves keep unknown fields');
+  assert.deepEqual(loose.run.junk, { deep: [1, 2, 3] });
+  const strict = cleanSave(roundTrip(s), T0, { strict: true });
+  const json = JSON.stringify(strict);
+  assert.ok(!json.includes('junk'), json.slice(0, 200));
+  assert.equal(strict.run.pending.offers.length, s.run.pending.offers.length);
 });

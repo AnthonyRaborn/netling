@@ -9,8 +9,11 @@ No build step, no dependencies: vanilla JS modules + canvas.
 ```bash
 npm run serve        # http://localhost:5174
 npm test             # simulation + mini-game logic
+npm run smoke        # drives the real app in headless Chromium (needs Playwright, see below)
 npm run balance      # simulate hundreds of lifetimes per player archetype (DETAIL=1 for more)
 ```
+
+`npm run smoke` needs Playwright, which the app itself doesn't depend on: `npm install --no-save playwright && npx playwright install chromium`. CI (`.github/workflows/test.yml`) runs both test suites on every pull request and push to `main`.
 
 New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons. RESET replays the onboarding. `gallery.html` shows every sprite.
 
@@ -22,10 +25,10 @@ ARCHIVE → **SYSTEM**:
 - **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected, and everything inside is checked and repaired before it's stored. Loading previews what's inside first, and either all of it is written or none of it is (a full disk changes nothing).
 - **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day.
 - **Restart** erases everything and replays the onboarding.
-- **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage). iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
+- **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage), and warns if a save has failed (a full or blocked disk). If a saved netling ever can't be read, it's set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download. iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
 - **Volume** slider (the header's SND toggle still mutes).
 
-Only one tab looks after the netling at a time (Web Locks): other tabs show a guard screen, take over automatically when the caretaker tab closes, or can take over on request. The home screen redraws at ~10 fps to save battery; mini-games and netruns run at full rate. The Archive's LINEAGE tab opens with a lifetime RECORD (lives, care, games, netruns), and inventory items can be discarded.
+Only one tab looks after the netling at a time (Web Locks, or a lease in `localStorage` on browsers without them): other tabs show a guard screen, take over automatically when the caretaker tab closes, or can take over on request. The home screen redraws at ~10 fps to save battery; mini-games and netruns run at full rate. The Archive's LINEAGE tab opens with a lifetime RECORD (lives, care, games, netruns), and inventory items can be discarded.
 
 ## Install / offline
 
@@ -43,7 +46,9 @@ Notifications (toggle **ALERTS** in the header) fire while the app is open or ba
 | `src/main.js` | Boot: load saved data, claim the caretaker tab, wire the UI, run the clock and render loop |
 | `src/ui/` | The UI, one module per area: `hud` (vitals, log, inventory), `life` (tick, evolution, flatline, care buttons), `play` (mini-games, netruns), `style` (unlocks, wardrobe), `archive`, `onboarding` (intro, field manual), `system` (transfer, import, hibernate, restart), `tabs` (one active tab). `ui/app.js` holds the shared state |
 | `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
-| `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading |
+| `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading. Imported codes keep only fields the game knows |
+| `src/lease.js` | The one-active-tab rule for browsers without Web Locks |
+| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery |
 | `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
 | `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
 | `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |
