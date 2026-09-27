@@ -56,6 +56,7 @@ export const app = {
   lastAttention: false,
   flashUntil: 0,
   surgeUntil: 0,
+  anim: null, // { kind, start }: see playAnim
   lastSurgeAt: null,
   plushCache: null,
 };
@@ -150,6 +151,12 @@ export function loadAll() {
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;
   app.lastSurgeAt = state.lastSurgeAt;
+}
+
+// A short reaction on the LCD to the last action (drawn by render.js).
+export function playAnim(kind) {
+  app.anim = { kind, start: performance.now() };
+  document.getElementById('lcd').dataset.anim = kind; // lets tests see what played
 }
 
 let statusTimer;

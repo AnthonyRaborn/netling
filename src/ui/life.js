@@ -3,7 +3,7 @@ import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../
 import { deathRecord } from '../archive.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, flashStatus, now, save, store } from './app.js';
+import { $, app, codexComplete, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
 import { checkUnlocks, countAct, grantStyle, plushExtra } from './style.js';
@@ -58,6 +58,9 @@ export function showFlatline() {
   $('flatline').hidden = false;
 }
 
+// What plays on the LCD when a care action works (a refusal always shakes its head).
+const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', cool: 'cool' };
+
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
@@ -78,6 +81,8 @@ export function initLife() {
       const res = act(state, btn.dataset.act, now());
       sfx(res.sfx, state.quirk.pitch);
       if (res.ok) countAct(btn.dataset.act);
+      if (!res.ok) playAnim('refuse');
+      else if (ACT_ANIMS[btn.dataset.act]) playAnim(ACT_ANIMS[btn.dataset.act]);
       if (!res.ok) flashStatus(res.msg);
       else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
       save();

@@ -47,6 +47,7 @@ export const COSMETICS = {
     { id: 'rain', name: 'Code rain', hint: 'an unbroken chain of breaches.', check: (c) => streak(c, 'breach') >= 10 },
     { id: 'bloom', name: 'Bloom', hint: 'slip every wall, ten times over.', check: (c) => streak(c, 'dodge') >= 10 },
     { id: 'curved', name: 'Deep curve', hint: 'hold the signal and never lose it.', check: (c) => streak(c, 'tune') >= 10 },
+    { id: 'packets', name: 'Packet rain', hint: 'ten clean feasts without a bad bite.', check: (c) => streak(c, 'feast') >= 10 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
   ],
   // Home sounds only; netruns keep each region's own voice.

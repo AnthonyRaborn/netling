@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Breach } from '../src/games/breach.js';
 import { Dodge } from '../src/games/dodge.js';
 import { Tune } from '../src/games/tune.js';
+import { Feast, LANES, MAX_BAD, NEEDED, PLAYER_Y } from '../src/games/feast.js';
 import { GameSession } from '../src/games/session.js';
 import { mulberry32 } from '../src/sim.js';
 
@@ -95,4 +96,47 @@ test('session reports the result once, and forfeiting is a loss', () => {
   s.forfeit();
   for (let i = 0; i < 50; i++) s.update(0.1);
   assert.deepEqual(results, [false]);
+});
+
+// Heads for the lowest clean packet it can still reach, and sidesteps corrupted ones.
+function feastBot(g) {
+  const danger = (lane) => g.packets.some((k) => !k.clean && k.lane === lane && k.y > PLAYER_Y - 60 && k.y < PLAYER_Y + 18);
+  const target = g.packets.filter((k) => k.clean && k.y < PLAYER_Y).sort((a, b) => b.y - a.y)[0];
+  const step = Math.sign((target?.lane ?? g.lane) - g.lane);
+  if (step && !danger(g.lane + step)) g.input(step < 0 ? 'left' : 'right');
+  else if (danger(g.lane)) {
+    const alt = [g.lane - 1, g.lane + 1].find((l) => l >= 0 && l < LANES && !danger(l));
+    if (alt !== undefined) g.input(alt < g.lane ? 'left' : 'right');
+  }
+}
+
+test('feast: a player who chases clean packets usually wins; standing still loses', () => {
+  let wins = 0;
+  for (let seed = 1; seed <= 100; seed++) {
+    const g = new Feast(mulberry32(seed), mute);
+    for (let f = 0; !g.done; f++) {
+      g.update(1 / 60);
+      if (f % 12 === 0) feastBot(g); // reacts five times a second
+    }
+    if (g.won) {
+      wins++;
+      assert.equal(g.eaten, NEEDED);
+    }
+  }
+  assert.ok(wins >= 80, `bot won ${wins}/100`);
+  let idleWins = 0;
+  for (let seed = 1; seed <= 100; seed++) {
+    const g = new Feast(mulberry32(seed), mute);
+    while (!g.done) g.update(1 / 60);
+    idleWins += g.won;
+  }
+  assert.equal(idleWins, 0);
+});
+
+test('feast: two corrupted bites lose at once', () => {
+  const g = new Feast(mulberry32(1), mute);
+  g.packets = [0, 1].map((i) => ({ lane: g.lane, y: PLAYER_Y - 2 - i * 30, clean: false, speed: 100 }));
+  for (let i = 0; i < 60 && !g.done; i++) g.update(1 / 60);
+  assert.equal(g.bad, MAX_BAD);
+  assert.equal(g.done && !g.won, true);
 });

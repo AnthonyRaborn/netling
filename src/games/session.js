@@ -2,9 +2,10 @@
 import { Breach } from './breach.js';
 import { Dodge } from './dodge.js';
 import { Tune } from './tune.js';
+import { Feast } from './feast.js';
 import { clear, text, DIM, W, H } from './common.js';
 
-export const GAMES = { breach: Breach, dodge: Dodge, tune: Tune };
+export const GAMES = { breach: Breach, dodge: Dodge, tune: Tune, feast: Feast };
 
 const RESULT_SECONDS = 1.8;
 

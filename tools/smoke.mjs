@@ -685,6 +685,35 @@ await scenario('test mode: hidden until 7 logo taps, separate fast netling, real
   assert(ageBack - ageAtLeave <= 4, `test clock ran while paused: ${ageAtLeave} -> ${ageBack}`);
 });
 
+await scenario('actions play a reaction on the screen; refusals shake it off', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ cache: 2, stats: { charge: 40, sync: 70, integrity: 90, heat: 20 }, inventory: ['booster'] }) }));
+  const played = () => page.evaluate(() => document.getElementById('lcd').dataset.anim);
+  await page.click('[data-act="corp"]');
+  assert((await played()) === 'eat', `feeding played ${await played()}`);
+  await page.click('[data-act="purge"]');
+  assert((await played()) === 'purge', `purge played ${await played()}`);
+  await page.click('[data-act="cool"]'); // heat 20: already cool
+  assert((await played()) === 'refuse', `a refused cool played ${await played()}`);
+  assert(/already running cool/.test(await page.textContent('#status')), 'refusal text gone');
+  await page.click('#inv-slots .inv-slot.filled');
+  await page.click('#inv-use');
+  assert((await played()) === 'item', `item use played ${await played()}`);
+});
+
+await scenario('Packet Feast is in the PLAY menu and pays Charge', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stats: { charge: 50, sync: 70, integrity: 90, heat: 20 } }) }));
+  await page.click('#btn-play');
+  await page.click('[data-game="feast"]');
+  assert(await visible(page, '#pad'), 'FEAST did not start');
+  await page.keyboard.press('Enter'); // past the intro card
+  await page.keyboard.press('Escape'); // quit: a loss
+  await page.waitForTimeout(2500);
+  const s = await saved(page);
+  assert(s.games.feast.played === 1, 'feast not recorded');
+  assert(Math.round(s.stats.charge) === 50 - 6 + 3, `charge after a lost feast: ${s.stats.charge}`);
+  assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'play', 'no reaction after the game');
+});
+
 await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {
   const page = await open(
     BASE,

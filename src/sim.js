@@ -42,6 +42,9 @@ export const CFG = {
   ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
+  // Packet Feast: it ate, so it gets some Charge too (digestion isn't reset: no cache files).
+  feastWinCharge: 10,
+  feastLoseCharge: 3,
   traceChancePerHour: 0.08,
   traceWindowMin: 120,
   traceIgnoredIntegrity: 15,
@@ -49,7 +52,7 @@ export const CFG = {
   surgeChancePerHour: 0.03,
 };
 
-export const GAME_IDS = ['breach', 'dodge', 'tune'];
+export const GAME_IDS = ['breach', 'dodge', 'tune', 'feast'];
 
 export const INVENTORY_SLOTS = 6;
 export const ITEM_CFG = {
@@ -441,6 +444,7 @@ export function migrate(s) {
   s.form ??= 'bitling';
   s.evolvedAt ??= null;
   s.games ??= freshGames();
+  for (const id of GAME_IDS) s.games[id] ??= { played: 0, won: 0 }; // games added since it was saved
   s.event ??= null;
   s.lastSurgeAt ??= null;
   s.teenForm ??= s.stage === 'teen' ? s.form : null;
@@ -615,7 +619,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         s.buffs.boost = false;
       }
       st.sync = clamp(st.sync + gain);
-      st.charge = clamp(st.charge - 6);
+      st.charge = clamp(st.charge - 6 + (game === 'feast' ? (won ? CFG.feastWinCharge : CFG.feastLoseCharge) : 0));
       st.heat = clamp(st.heat + 12);
       if (st.heat > 70) s.axes.stability -= 0.5;
       s.games[game].played++;

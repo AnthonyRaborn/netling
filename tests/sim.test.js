@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, alertReason, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, MIN } from '../src/sim.js';
+import { act, alertReason, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, GAME_IDS, MIN } from '../src/sim.js';
 
 // Noon UTC so the pet starts awake (tests run with TZ=UTC).
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -92,8 +92,8 @@ test('leaning form follows the dominant axis', () => {
   assert.equal(leaningForm(s), 'glitch');
   s.axes = { allegiance: 1, stability: 0.5 };
   s.careMistakes = 0;
-  const n = Math.ceil(CFG.ghostMinGameWins / 3) + CFG.ghostMinWinsEach;
-  s.games = { breach: { played: n, won: n }, dodge: { played: n, won: n }, tune: { played: n, won: n } };
+  const n = Math.ceil(CFG.ghostMinGameWins / GAME_IDS.length) + CFG.ghostMinWinsEach;
+  s.games = Object.fromEntries(GAME_IDS.map((id) => [id, { played: n, won: n }]));
   assert.equal(leaningForm(s), 'ghost');
   s.axes.stability = -3;
   assert.equal(leaningForm(s), 'glitch', 'an unstable netling never ghosts');
@@ -189,10 +189,12 @@ test('ghost needs enough mini-game wins across every game', () => {
   s.axes = { allegiance: 0, stability: 0 };
   assert.notEqual(leaningForm(s), 'ghost', 'no wins yet');
   const many = CFG.ghostMinGameWins;
-  s.games = { breach: { played: many, won: many }, dodge: { played: 1, won: 0 }, tune: { played: 0, won: 0 } };
+  s.games = { breach: { played: many, won: many }, dodge: { played: 1, won: 0 }, tune: { played: 0, won: 0 }, feast: { played: 0, won: 0 } };
   assert.notEqual(leaningForm(s), 'ghost', 'wins not spread across games');
   s.games.dodge.won = CFG.ghostMinWinsEach;
   s.games.tune.won = CFG.ghostMinWinsEach;
+  assert.notEqual(leaningForm(s), 'ghost', 'Packet Feast wins count too');
+  s.games.feast.won = CFG.ghostMinWinsEach;
   assert.equal(leaningForm(s), 'ghost');
 });
 
@@ -256,4 +258,27 @@ test('a clock set backwards resumes from the new time instead of pausing', () =>
   const age = s.ageMin;
   tick(s, s.lastTick + 10 * MIN, noRng);
   assert.equal(s.ageMin, age + 10); // time counts again right away
+});
+
+test('Packet Feast gives some Charge, more for a win, without resetting digestion', () => {
+  const won = booted();
+  const lost = booted();
+  const other = booted();
+  for (const s of [won, lost, other]) s.stats.charge = 50;
+  const fed = won.sinceFed;
+  act(won, 'play', won.lastTick, noRng, { game: 'feast', won: true });
+  act(lost, 'play', lost.lastTick, noRng, { game: 'feast', won: false });
+  act(other, 'play', other.lastTick, noRng, { game: 'breach', won: true });
+  assert.equal(won.stats.charge, 50 - 6 + CFG.feastWinCharge);
+  assert.equal(lost.stats.charge, 50 - 6 + CFG.feastLoseCharge);
+  assert.equal(other.stats.charge, 50 - 6);
+  assert.equal(won.sinceFed, fed);
+  assert.deepEqual(won.games.feast, { played: 1, won: 1 });
+});
+
+test('saves from before Packet Feast gain its record on load', () => {
+  const s = booted();
+  delete s.games.feast;
+  migrate(s);
+  assert.deepEqual(s.games.feast, { played: 0, won: 0 });
 });

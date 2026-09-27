@@ -3,7 +3,7 @@ import { act, alertReason, bedtimeHour, isAlive, itemBlockReason, napBlockReason
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
-import { $, app, armed, disarm, flashStatus, now, save } from './app.js';
+import { $, app, armed, disarm, flashStatus, now, playAnim, save } from './app.js';
 import { renderNudge } from './onboarding.js';
 import { renderHibernation } from './system.js';
 
@@ -85,6 +85,9 @@ export function pushAlert(title, body) {
 
 // --- inventory ---
 
+// Items that do what a care action does look the same on screen.
+const ITEM_ANIMS = { coolant: 'cool', antivirus: 'patch', voucher: 'eat' };
+
 let selectedSlot = null;
 let lastInvKey = '';
 
@@ -147,8 +150,10 @@ export function initInventory() {
     if (selectedSlot === null) return;
     unlockAudio();
     tick(app.state, now());
+    const id = app.state.inventory[selectedSlot];
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
+    playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');
     if (!res.ok) flashStatus(res.msg);
     selectedSlot = null;
     save();

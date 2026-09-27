@@ -1,7 +1,7 @@
 // Boot: load and check saved data, claim the caretaker tab, wire the UI, then run the clock
 // and the render loop. The UI itself lives in src/ui/.
 import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
-import { renderLCD } from './render.js';
+import { renderLCD, ANIM_MS } from './render.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -172,7 +172,8 @@ function drawFrame(time) {
   const dt = Math.min(0.1, (time - lastFrame) / 1000);
   lastFrame = time;
   const { session, state, wardrobe, ownedAccessories } = app;
-  if (!session && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) return;
+  const anim = app.anim && time - app.anim.start < ANIM_MS ? { kind: app.anim.kind, t: Math.max(0, time - app.anim.start) / ANIM_MS } : null;
+  if (!session && !anim && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) return;
   if (!session) lastIdleDraw = time;
   if (session) {
     session.update(dt);
@@ -186,6 +187,7 @@ function drawFrame(time) {
       flash: time < app.flashUntil,
       surge: time < app.surgeUntil,
       calm: reducedMotion.matches,
+      anim,
     });
   }
 }

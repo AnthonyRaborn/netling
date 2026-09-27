@@ -8,7 +8,7 @@ import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
 import { FRAGMENTS } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, flashStatus, now, save, store } from './app.js';
+import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
 import { checkUnlocks, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
@@ -103,6 +103,7 @@ function jackIn(region) {
   const blocked = runBlockReason(app.state, region, app.codex);
   if (blocked) {
     sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
     return flashStatus(blocked);
   }
   startRun(app.state, region, Math.random, app.codex, app.ownedAccessories);
@@ -154,6 +155,7 @@ function startGame(id) {
         app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
         countGame();
       }
+      playAnim(res.ok ? 'play' : 'refuse');
       if (!res.ok) flashStatus(res.msg);
       else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
       save();
@@ -172,6 +174,7 @@ export function initPlay() {
     const blocked = blockReason(app.state, 'play');
     if (blocked) {
       sfx('error', app.state.quirk.pitch);
+      playAnim('refuse');
       return flashStatus(blocked);
     }
     sfx('select', app.state.quirk.pitch);
@@ -188,6 +191,7 @@ export function initPlay() {
     const blocked = runBlockReason(app.state, 'public', app.codex);
     if (blocked) {
       sfx('error', app.state.quirk.pitch);
+      playAnim('refuse');
       return flashStatus(blocked);
     }
     sfx('select', app.state.quirk.pitch);

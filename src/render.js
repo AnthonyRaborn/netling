@@ -17,6 +17,9 @@ buf.width = LCD_W;
 buf.height = LCD_H;
 const bctx = buf.getContext('2d');
 
+// Action feedback: how long a reaction plays, and the kinds (see drawAnimation).
+export const ANIM_MS = 1100;
+
 // Walking idle: every few seconds it picks a new spot and walks there, then waits.
 // A pure function of time, so it needs no state and survives reloads.
 const WALK_SEGMENT_MS = 5000;
@@ -90,6 +93,14 @@ export function renderLCD(canvas, s, time, opts = {}) {
       }
     }
 
+    // A reaction to the last action moves the body (a hop, a chomp, a head shake).
+    const anim = opts.anim;
+    if (anim && !opts.calm) {
+      if (anim.kind === 'refuse' && anim.t < 0.7) x += Math.floor(anim.t * 16) % 2 ? 1 : -1;
+      if (anim.kind === 'play') y -= Math.round(Math.abs(Math.sin(anim.t * Math.PI * 2)) * 3);
+      if (anim.kind === 'eat' && anim.t >= 0.45) y += Math.floor(anim.t * 14) % 2;
+    }
+
     let spriteColors = colors;
     if (rest) {
       // Forms without a dedicated sleep pose close their eyes by painting them body-colored.
@@ -109,6 +120,8 @@ export function renderLCD(canvas, s, time, opts = {}) {
       drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors);
     }
     bctx.globalAlpha = 1;
+
+    if (anim) drawAnimation(bctx, anim, { x, y, w: sprite[0].length, h: sprite.length }, pal);
 
     if (rest) {
       const zc = { '#': dimPet ? '#2f6b73' : pal.main };
@@ -161,5 +174,86 @@ export function renderLCD(canvas, s, time, opts = {}) {
   if (opts.surge && (opts.calm || Math.floor(time / 70) % 2)) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// Pixel overlays for an action's reaction, over the pet at box { x, y, w, h }. t runs 0..1.
+const px = (ctx, color, x, y) => {
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+};
+const plus = (ctx, color, x, y) => {
+  px(ctx, color, x, y - 1);
+  px(ctx, color, x - 1, y);
+  px(ctx, color, x, y);
+  px(ctx, color, x + 1, y);
+  px(ctx, color, x, y + 1);
+};
+
+function drawAnimation(ctx, { kind, t }, box, pal) {
+  const cx = box.x + box.w / 2;
+  const mouthY = box.y + box.h * 0.6;
+  switch (kind) {
+    case 'eat': {
+      // A data packet flies in from the far side and gets eaten; crumbs after.
+      const from = cx > 20 ? 2 : 37;
+      if (t < 0.45) {
+        const k = t / 0.45;
+        const x = from + (cx - from) * k;
+        const y = 6 + (mouthY - 6) * k;
+        ctx.fillStyle = '#f9f002';
+        ctx.fillRect(Math.round(x) - 1, Math.round(y) - 1, 3, 3);
+      } else {
+        for (let i = 0; i < 3; i++) px(ctx, '#f9f002', cx + (i - 1) * 3, mouthY + 2 + (t - 0.45) * 8 + i);
+      }
+      break;
+    }
+    case 'patch': {
+      // Green crosses rise around it.
+      for (let i = 0; i < 3; i++) {
+        const x = box.x - 2 + i * (box.w / 2 + 2);
+        const y = box.y + box.h - t * (box.h + 2) - (i % 2) * 3;
+        if (y > 1) plus(ctx, '#39ff14', x, y);
+      }
+      break;
+    }
+    case 'purge': {
+      // Corrupted files break up and float away from the corner where they sat.
+      for (let i = 0; i < 8; i++) {
+        const x = 3 + ((i * 7) % 18) + Math.sin(t * 6 + i) * 1.5;
+        const y = 24 - t * 16 - (i % 3) * 2;
+        if (y > 0 && (i + Math.floor(t * 10)) % 3) px(ctx, pal.accent, x, y);
+      }
+      break;
+    }
+    case 'cool': {
+      // Frost falls over it.
+      for (let i = 0; i < 7; i++) {
+        const x = box.x - 3 + ((i * 5) % (box.w + 6));
+        const y = -2 + ((t * 26 + i * 4) % 24);
+        px(ctx, '#bfefff', x, y);
+      }
+      break;
+    }
+    case 'item':
+    case 'play': {
+      // Sparkles blink out around it.
+      const r = 2 + t * 5;
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + 0.6;
+        if ((i + Math.floor(t * 8)) % 2) plus(ctx, i % 2 ? '#f9f002' : '#f5f5f5', cx + Math.cos(a) * (box.w / 2 + r), box.y + box.h / 2 + Math.sin(a) * (box.h / 2 + r * 0.6));
+      }
+      break;
+    }
+    case 'refuse': {
+      // A red X over its head.
+      const x = Math.round(cx);
+      const y = Math.max(2, box.y - 4);
+      for (let i = -1; i <= 1; i++) {
+        px(ctx, '#ff2a6d', x + i, y + i);
+        px(ctx, '#ff2a6d', x + i, y - i);
+      }
+      break;
+    }
   }
 }
