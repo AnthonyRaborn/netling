@@ -257,18 +257,33 @@ export class RunView {
 
   drawSummary(ctx, pal) {
     const run = this.run;
+    const region = REGIONS[run.region];
     const good = run.result === 'jacked';
     const title = { jacked: 'JACKED OUT', disconnected: 'DISCONNECTED', aborted: 'RUN ABORTED' }[run.result];
-    text(ctx, title, W / 2, 60, { size: 40, align: 'center', color: good ? pal.main : pal.accent, glow: good ? pal.main : pal.accent });
-    const last = run.messages[run.messages.length - 1] ?? '';
-    text(ctx, last.length > 50 ? `${last.slice(0, 49)}…` : last, W / 2, 110, { size: 20, align: 'center', color: DIM });
-    if (good) {
-      const lines = [
-        ...run.loot.map((id) => [`+ ${ITEMS[id].name}`, '#c7f9ff']),
-        ...run.fragments.map((id) => [`+ codex: ${fragmentById(id).title}`, '#f9f002']),
-      ];
-      lines.slice(0, 6).forEach(([t, c], i) => text(ctx, t, W / 2, 142 + i * 20, { size: 19, align: 'center', color: c }));
-    }
+    const tone = good ? region.palette.main : '#ff2a6d'; // failure always reads red
+    text(ctx, region.name.toUpperCase(), W / 2, 22, { size: 18, align: 'center', color: DIM });
+    text(ctx, title, W / 2, 52, { size: 40, align: 'center', color: tone, glow: tone });
+
+    // Run record: how far, how the ICE went, what it cost.
+    const t = run.tally ?? { nodes: 0, iceWon: 0, iceLost: 0 };
+    const total = run.map.layerCount - 1;
+    const d = (k) => Math.round(this.pet.stats[k] - (run.startStats?.[k] ?? this.pet.stats[k]));
+    const sign = (v) => (v > 0 ? `+${v}` : `${v}`);
+    text(ctx, `nodes ${t.nodes}/${total}   ICE ${t.iceWon}W ${t.iceLost}L`, W / 2, 86, { size: 20, align: 'center', color: '#c7f9ff' });
+    text(ctx, `CHG ${sign(d('charge'))}   INT ${sign(d('integrity'))}   HEAT ${sign(d('heat'))}`, W / 2, 108, {
+      size: 20,
+      align: 'center',
+      color: DIM,
+    });
+
+    const lines = good
+      ? [
+          ...run.loot.map((id) => [`+ ${ITEMS[id].name}`, '#c7f9ff']),
+          ...run.fragments.map((id) => [`+ codex: ${fragmentById(id).title}`, '#f9f002']),
+        ]
+      : [[run.result === 'disconnected' ? 'loot and fragments lost.' : 'loot abandoned.', '#ff2a6d']];
+    if (good && !lines.length) lines.push(['came back empty-handed.', DIM]);
+    lines.slice(0, 5).forEach(([s, c], i) => text(ctx, s, W / 2, 140 + i * 20, { size: 19, align: 'center', color: c }));
     text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
   }
 }

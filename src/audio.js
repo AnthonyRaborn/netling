@@ -44,9 +44,11 @@ const PATTERNS = {
   flatline: [[1, 0]],
 };
 
-export function sfx(name, pitch = 660) {
+export function sfx(name, pitch = 660, wave = 'square') {
   const pat = PATTERNS[name];
   if (!pat || muted) return;
   if (name === 'flatline') return blip(pitch, 0, 2.5, 'sine', 0.08);
-  for (const [mult, start] of pat) blip(pitch * mult, start, 0.09);
+  // softer waves need a little more volume to sit at the same loudness
+  const vol = wave === 'sine' ? 0.1 : wave === 'triangle' ? 0.09 : 0.06;
+  for (const [mult, start] of pat) blip(pitch * mult, start, 0.09, wave, vol);
 }

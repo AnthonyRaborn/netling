@@ -2,6 +2,9 @@
 // Usage: node tools/balance.mjs [runsPerArchetype=300] [archetype filter]
 process.env.TZ = 'UTC';
 const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, MIN, GAME_IDS } = await import('../src/sim.js');
+const { runBlockReason } = await import('../src/netrun/run.js');
+const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
+const { playRun, finishRun, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
 const at = (h, m = 0) => h * 60 + m;
@@ -12,10 +15,10 @@ const at = (h, m = 0) => h * 60 + m;
 export const ARCHETYPES = {
   attentive: {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
-    jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7,
+    jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful',
   },
-  casual: { checks: [at(7, 30), at(10), at(13), at(16), at(19), at(22, 30)], jitter: 30, diet: 0.5, trace: 'mix', winRate: 0.6 },
-  worker: { checks: [at(7), at(12, 30), at(18, 30), at(21), at(23)], jitter: 20, diet: 0.5, trace: 'mix', winRate: 0.6 },
+  casual: { checks: [at(7, 30), at(10), at(13), at(16), at(19), at(22, 30)], jitter: 30, diet: 0.5, trace: 'mix', winRate: 0.6, runs: 'greedy' },
+  worker: { checks: [at(7), at(12, 30), at(18, 30), at(21), at(23)], jitter: 20, diet: 0.5, trace: 'mix', winRate: 0.6, runs: 'careful' },
   neglectful: { checks: [at(8), at(20)], jitter: 60, diet: 0.5, trace: 'mix', winRate: 0.5 },
   // Deliberate strategies: each should be able to reach its target form.
   corpo: { checks: [7, 9, 11, 13, 15, 17, 19, 21, 23].map((h) => at(h)), jitter: 20, diet: 1, trace: 'comply', winRate: 0.6 },
@@ -43,6 +46,25 @@ function checkIn(s, p, now, rng, ctx) {
   if ((p.hot || s.stats.sync < 30) && !s.asleep) useItem('blackice');
   if (p.gamer && !s.buffs?.boost) useItem('booster');
   ctx.itemsHeld = Math.max(ctx.itemsHeld ?? 0, s.inventory.length);
+
+  // Netrun when healthy, in any open region.
+  // Careful runners only jack in healthy, and only when they'll be back soon to patch things up.
+  const careful = p.runs === 'careful';
+  const healthy = s.stats.integrity > (careful ? 80 : 60) && s.stats.charge > 60;
+  const aroundAfter = !careful || ctx.gapToNext <= 120;
+  if (p.runs && !p.noRuns && healthy && aroundAfter) {
+    const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex));
+    const region = open[Math.floor(rng() * open.length)];
+    if (region && !runBlockReason(s, region, ctx.codex)) {
+      const lean = { hide: 'indie', comply: 'corp' }[p.trace] ?? 'mix';
+      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean }, region, rng, ctx.codex);
+      ctx.runs = (ctx.runs ?? 0) + 1;
+      if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
+      finishRun(s, now);
+      ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
+      s.codexInbox = [];
+    }
+  }
   if (s.event?.type === 'trace') {
     let choice = p.trace;
     if (choice === 'mix') choice = rng() < 0.5 ? 'hide' : 'comply';
@@ -81,7 +103,7 @@ export function simulate(p, seed) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng });
-  const ctx = { games: 0, lastOfDay: false };
+  const ctx = { games: 0, lastOfDay: false, codex: [] };
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
   let schedule = [];
@@ -139,6 +161,9 @@ export function simulate(p, seed) {
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
     itemsHeld: ctx.itemsHeld ?? 0,
+    runs: ctx.runs ?? 0,
+    runDisconnects: ctx.runDisconnects ?? 0,
+    fragments: ctx.codex.length,
     mistakeKinds,
     traces,
     tracesIgnored,
@@ -186,11 +211,13 @@ export function summarize(results) {
     })(),
     traces: `${mean(results.map((r) => r.traces))} (${mean(results.map((r) => r.tracesIgnored))} ignored)`,
     itemsHeld: mean(results.map((r) => r.itemsHeld)),
+    runs: `${mean(results.map((r) => r.runs))} runs (${mean(results.map((r) => r.runDisconnects))} disconnects), ${mean(results.map((r) => r.fragments))} fragments`,
   };
 }
 
 const runs = Number(process.argv[2] ?? 300);
 if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems = true;
+if (process.env.NO_RUNS) for (const p of Object.values(ARCHETYPES)) p.noRuns = true;
 const filter = process.argv[3];
 if (import.meta.url === `file://${process.argv[1]}`) {
   for (const [name, p] of Object.entries(ARCHETYPES)) {
@@ -205,6 +232,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (process.env.DETAIL) {
       console.log(`  mistakes/run: ${sum.mistakeKinds}`);
       console.log(`  at adult: ${sum.atAdult} · traces ${sum.traces} · peak items held ${sum.itemsHeld}`);
+      console.log(`  netrun: ${sum.runs}`);
     }
   }
 }

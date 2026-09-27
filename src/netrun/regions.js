@@ -13,6 +13,7 @@ export const REGIONS = {
     iceDamage: 35,
     exitBonus: 1,
     palette: { main: '#05d9e8', accent: '#ff2a6d', bg: '#0b2226' },
+    sound: { mult: 1, wave: 'square' },
   },
   corp: {
     name: 'Corp Grid',
@@ -25,6 +26,7 @@ export const REGIONS = {
     iceDamage: 40,
     exitBonus: 1,
     palette: { main: '#f9f002', accent: '#ff2a6d', bg: '#1a1a0b' },
+    sound: { mult: 1.25, wave: 'triangle' }, // clean, corporate chimes
   },
   bazaar: {
     name: 'Darknet Bazaar',
@@ -39,6 +41,7 @@ export const REGIONS = {
     iceDamage: 38,
     exitBonus: 1,
     palette: { main: '#b967ff', accent: '#ff2a6d', bg: '#160b22' },
+    sound: { mult: 0.9, wave: 'sawtooth' }, // buzzy, cheap speakers
   },
   ruins: {
     name: 'Old Web Ruins',
@@ -51,6 +54,7 @@ export const REGIONS = {
     iceDamage: 45,
     exitBonus: 2,
     palette: { main: '#39ff14', accent: '#ff2a6d', bg: '#0b1a0b' },
+    sound: { mult: 0.75, wave: 'sine' }, // old, soft
   },
   deep: {
     name: 'The Deep',
@@ -64,6 +68,7 @@ export const REGIONS = {
     iceDamage: 50,
     exitBonus: 2,
     palette: { main: '#e8e8ff', accent: '#ff2a6d', bg: '#08081a' },
+    sound: { mult: 0.5, wave: 'sine' }, // low and far away
   },
 };
 

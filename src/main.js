@@ -263,7 +263,10 @@ document.querySelectorAll('[data-game]').forEach((btn) =>
 
 function openRun() {
   session = new RunView(state, {
-    sound: (name) => sfx(name, state.quirk.pitch),
+    sound: (name) => {
+      const tone = REGIONS[state.run?.region]?.sound ?? { mult: 1, wave: 'square' };
+      sfx(name, state.quirk.pitch * tone.mult, tone.wave);
+    },
     onChange: () => {
       drainCodexInbox();
       save();
@@ -289,7 +292,7 @@ function jackIn(region) {
     return flashStatus(blocked);
   }
   startRun(state, region, Math.random, codex);
-  sfx('boot', state.quirk.pitch);
+  sfx('boot', state.quirk.pitch * REGIONS[region].sound.mult, REGIONS[region].sound.wave);
   save();
   openRun();
 }

@@ -18,7 +18,8 @@ export const RUN_CFG = {
   relayCharge: 15,
   relayCool: 20,
   // Disconnection hurts but can't kill: it reboots to this Integrity and never deals the final care mistake.
-  rebootIntegrity: 15,
+  rebootIntegrity: 30,
+  jackOutRestore: 0.5, // a clean jack-out re-syncs half the Integrity the run cost
   disconnectSync: 20,
   hideCharge: 8,
   hideHeat: 8,
@@ -82,6 +83,8 @@ export function startRun(pet, region, rng, codex = []) {
     revealed: [],
     phased: false,
     known: [...codex], // codex at jack-in, so fragments never repeat
+    startStats: { ...pet.stats },
+    tally: { nodes: 0, iceWon: 0, iceLost: 0 },
     fragments: [], // found this run; banked on jack-out like loot
     result: null, // jacked | disconnected | aborted
     messages: [],
@@ -114,6 +117,7 @@ export function moveTo(pet, nodeId, rng) {
   st.heat = clamp(st.heat + RUN_CFG.moveHeat);
   run.pos = nodeId;
   run.visited.push(nodeId);
+  if (run.tally) run.tally.nodes++;
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   if (st.heat >= RUN_CFG.throttleHeat) {
     st.integrity = clamp(st.integrity - RUN_CFG.throttleDamage);
@@ -230,6 +234,7 @@ export function resolveIce(pet, won, rng) {
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
+  if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
   if (won) {
     if (rng() < RUN_CFG.iceWinLootChance) {
       const item = weighted(REGIONS[run.region].loot, rng);
@@ -364,6 +369,9 @@ function endRun(pet, result) {
 
 export function jackOut(pet) {
   const run = pet.run;
+  const lostInt = (run.startStats?.integrity ?? pet.stats.integrity) - pet.stats.integrity;
+  const restored = lostInt > 0 ? Math.round(lostInt * RUN_CFG.jackOutRestore) : 0;
+  pet.stats.integrity = clamp(pet.stats.integrity + restored);
   const kept = [];
   const lost = [];
   for (const item of run.loot) {
@@ -375,6 +383,7 @@ export function jackOut(pet) {
     run,
     `jacked out with ${kept.length} item${kept.length === 1 ? '' : 's'}` +
       `${frags ? ` and ${frags} fragment${frags === 1 ? '' : 's'}` : ''}.` +
+      `${restored ? ` re-synced +${restored} integrity.` : ''}` +
       `${lost.length ? ` ${lost.length} lost: inventory full.` : ''}`,
   );
   // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
