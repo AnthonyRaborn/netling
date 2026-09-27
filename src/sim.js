@@ -188,6 +188,9 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     lastSurgeAt: null,
     inventory: fragment?.keepsake ? [fragment.keepsake] : [],
     buffs: { shieldUntilAge: 0, traceSkip: false, boost: false },
+    run: null,
+    lastRunEndAge: null,
+    runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
@@ -408,6 +411,9 @@ export function migrate(s) {
   s.teenForm ??= s.stage === 'teen' ? s.form : null;
   s.inventory ??= [];
   s.buffs ??= { shieldUntilAge: 0, traceSkip: false, boost: false };
+  s.run ??= null;
+  s.lastRunEndAge ??= null;
+  s.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   return s;
 }
 

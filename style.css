@@ -325,6 +325,19 @@ button:active {
   color: #000;
 }
 
+.controls .lights {
+  grid-column: span 2;
+  color: var(--magenta);
+  border-color: var(--magenta);
+  text-shadow: 0 0 6px rgba(255, 42, 109, 0.6);
+}
+
+.controls .netrun {
+  color: var(--yellow);
+  border-color: var(--yellow);
+  text-shadow: 0 0 6px rgba(249, 240, 2, 0.5);
+}
+
 .controls .wide {
   grid-column: 1 / -1;
   color: var(--magenta);

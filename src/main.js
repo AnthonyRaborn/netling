@@ -23,6 +23,8 @@ import {
 import { renderLCD } from './render.js';
 import { GameSession } from './games/session.js';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows } from './archive.js';
+import { RunView } from './netrun/view.js';
+import { runBlockReason, startRun } from './netrun/run.js';
 import { drawSprite, formSprite, ITEM_SPRITES, ITEM_COLORS } from './sprites.js';
 import { sfx, unlockAudio, setMuted } from './audio.js';
 import { notify, notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -239,6 +241,41 @@ $('picker-back').addEventListener('click', () => showPanel('controls'));
 document.querySelectorAll('[data-game]').forEach((btn) =>
   btn.addEventListener('click', () => startGame(btn.dataset.game)),
 );
+
+// --- netrun ---------------------------------------------------------------------
+
+function openRun() {
+  session = new RunView(state, {
+    sound: (name) => sfx(name, state.quirk.pitch),
+    onChange: () => {
+      save();
+      updateHUD();
+    },
+    onClose: () => {
+      session = null;
+      $('pad-quit').textContent = 'QUIT (ESC)';
+      showPanel('controls');
+      save();
+      updateHUD();
+    },
+  });
+  $('pad-quit').textContent = 'ABORT RUN';
+  showPanel('pad');
+}
+
+$('btn-netrun').addEventListener('click', () => {
+  unlockAudio();
+  tick(state, now());
+  const blocked = runBlockReason(state, 'public');
+  if (blocked) {
+    sfx('error', state.quirk.pitch);
+    return flashStatus(blocked);
+  }
+  if (!state.run) startRun(state, 'public', Math.random);
+  sfx('boot', state.quirk.pitch);
+  save();
+  openRun();
+});
 
 function startGame(id) {
   session = new GameSession(id, {
@@ -539,6 +576,7 @@ document.addEventListener('visibilitychange', () => {
 
 advance();
 if (state.stage === 'dead') showFlatline();
+else if (state.run) openRun(); // resume a run after a reload
 setInterval(advance, 1000);
 
 let lastFrame = performance.now();
