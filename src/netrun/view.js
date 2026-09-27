@@ -31,12 +31,13 @@ const TYPE_HINT = {
 };
 
 export class RunView {
-  constructor(pet, { rng = Math.random, sound = () => {}, onChange = () => {}, onClose = () => {} }) {
+  constructor(pet, { rng = Math.random, sound = () => {}, onChange = () => {}, onClose = () => {}, onGame = () => {} }) {
     this.pet = pet;
     this.rng = rng;
     this.sound = sound;
     this.onChange = onChange;
     this.onClose = onClose;
+    this.onGame = onGame; // every ICE fight is a mini-game play
     this.cursor = 0;
     this.choiceCursor = 0;
     this.toast = null;
@@ -70,6 +71,7 @@ export class RunView {
       sound: this.sound,
       onFinish: (won) => {
         this.game = null;
+        this.onGame(game, won);
         const res = resolveIce(this.pet, won, this.rng);
         if (res.result === 'disconnected') this.sound('lose');
         this.afterAction();

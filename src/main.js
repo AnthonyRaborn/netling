@@ -291,6 +291,7 @@ function openRun() {
       save();
       updateHUD();
     },
+    onGame: () => countGame(),
     onClose: (run) => {
       session = null;
       if (run?.result === 'jacked') {
@@ -373,10 +374,8 @@ function startGame(id) {
     sound: (name) => sfx(name, state.quirk.pitch),
     onFinish: (won) => {
       session = null;
-      progress.streaks = recordGame(progress.streaks, id, won);
-      progress.gamesPlayed = (progress.gamesPlayed ?? 0) + 1;
-      store.set(PROGRESS_KEY, progress);
-      checkUnlocks();
+      progress.streaks = recordGame(progress.streaks, id, won); // streak unlocks: PLAY games only
+      countGame();
       showPanel('controls');
       tick(state, now());
       const res = act(state, 'play', now(), Math.random, { game: id, won });
@@ -482,6 +481,13 @@ $('inv-cancel').addEventListener('click', () => {
 // --- wardrobe ------------------------------------------------------------------
 
 const progress = { streaks: {}, acts: {}, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, ...store.get(PROGRESS_KEY) };
+
+// Counts toward every non-streak game unlock, from PLAY and from netrun ICE alike.
+function countGame() {
+  progress.gamesPlayed = (progress.gamesPlayed ?? 0) + 1;
+  store.set(PROGRESS_KEY, progress);
+  checkUnlocks();
+}
 
 function countAct(action) {
   progress.acts = { ...progress.acts, [action]: (progress.acts?.[action] ?? 0) + 1 };

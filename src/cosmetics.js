@@ -57,6 +57,7 @@ export const COSMETICS = {
     { id: 'glass', name: 'Glass', wave: 'sine', mult: 2, hint: 'catch it before it spreads, twenty times.', check: (c) => acts(c, 'patch') >= 20 },
     { id: 'chime', name: 'Chime', wave: 'triangle', mult: 1.25, hint: 'answer when they call, ten times.', check: (c) => acts(c, 'comply') >= 10 },
     { id: 'buzz', name: 'Buzz', wave: 'sawtooth', mult: 0.9, hint: 'vanish when they call, ten times.', check: (c) => acts(c, 'hide') >= 10 },
+    // gamesPlayed counts PLAY games and netrun ICE fights; streaks (above) count PLAY games only.
     { id: 'arcade', name: 'Arcade', wave: 'triangle', mult: 0.75, hint: 'fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 50 },
   ],
 };
