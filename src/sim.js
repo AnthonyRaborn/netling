@@ -6,9 +6,9 @@ export const SAVE_VERSION = 1;
 
 export const CFG = {
   bootMinutes: 3,
-  drainPerHour: { charge: 12, sync: 10 },
+  drainPerHour: { charge: 14, sync: 12 },
   sleepDrainMult: 0.5, // asleep with the lights on: restless
-  sleepDarkDrainMult: 0.25, // asleep in the dark: real rest
+  sleepDarkDrainMult: 0.33, // asleep in the dark: real rest
   // Naps: a short rest on demand. Drains slow down but time still passes; a cooldown stops
   // back-to-back naps from covering the whole day.
   napDrainMult: 0.35,

@@ -216,6 +216,11 @@ export function summarize(results) {
   };
 }
 
+// Try settings without editing sim.js: CFG='{"drainPerHour":{"charge":14},"teenAtMin":1200}' npm run balance
+if (process.env.CFG) {
+  const over = JSON.parse(process.env.CFG);
+  Object.assign(CFG, over, { drainPerHour: { ...CFG.drainPerHour, ...over.drainPerHour } });
+}
 const runs = Number(process.argv[2] ?? 300);
 if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems = true;
 if (process.env.NO_RUNS) for (const p of Object.values(ARCHETYPES)) p.noRuns = true;
