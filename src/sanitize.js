@@ -208,6 +208,22 @@ function cleanFragment(raw, s) {
   return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed };
 }
 
+// Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
+// a form that fits the stage, and timers that start in the netling's own past. A start in the future
+// would stretch a window or a cooldown for as long as the number says.
+function settle(s, now) {
+  const bodyStage = SPECIES[s.form].stage;
+  if (s.stage === 'script' || s.stage === 'baby') s.form = 'bitling';
+  else if (s.stage === 'teen' && bodyStage !== 'teen') s.form = SPECIES[s.teenForm]?.stage === 'teen' ? s.teenForm : 'kernel';
+  else if (s.stage === 'adult' && bodyStage !== 'adult') s.form = leaningForm(s);
+  const past = (v) => (v === null ? null : Math.min(v, s.ageMin));
+  s.lastNapEndAge = past(s.lastNapEndAge);
+  s.lastRunEndAge = past(s.lastRunEndAge);
+  if (s.nap) s.nap.startedAge = past(s.nap.startedAge);
+  if (s.event) s.event.startedAge = past(s.event.startedAge);
+  if (s.hibernation) s.hibernation.since = Math.min(s.hibernation.since, now);
+}
+
 // Returns a repaired copy of a stored netling, or null if it can't be used at all
 // (not an object, another save version, or an unknown stage or form).
 // Fields this file doesn't know about are kept, so a newer version's data survives a downgrade,
@@ -293,6 +309,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     codexInbox: cleanCodex(raw.codexInbox),
     accessoryInbox: cleanAccessories(raw.accessoryInbox),
   };
+  settle(s, now);
   s.run = stage === 'dead' ? null : cleanRun(raw.run, s, strict);
   s.fragment = cleanFragment(raw.fragment, s);
   return s;

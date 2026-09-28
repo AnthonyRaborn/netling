@@ -21,7 +21,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
-| [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Open |
+| [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
 | [KI-10](#ki-10) | Low | Read | Duplicated helpers | Open |
 | [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Open |
@@ -99,6 +99,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-08
 
 **The sanitizer accepts inconsistent stage and form pairs.** Severity Low.
+
+**Status: Fixed.** New `settle()` in `sanitize.js` makes the form fit the stage (a dead netling keeps its body) and clamps timers that start in the netling's future (run and nap cooldowns, open event, hibernation start). Without the clamp a hostile or damaged value such as `lastRunEndAge: 1e9` would lock netruns for good.
 
 - `cleanSave` checks that stage and form are each valid, not that they agree (for example stage `adult` with form `bitling`). A hand-edited or hostile save can therefore hold an impossible netling. The game tolerates it (lookups fall back), but it is not validated. Also, `hibernation`, `nap` and `rebootUntilAge` are not cross-checked against `ageMin`.
 
