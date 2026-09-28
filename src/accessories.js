@@ -497,6 +497,16 @@ export function rollAccessory(exclude, rng, region = null) {
   const pool = STYLE_ITEMS.filter(
     (x) => x.source !== 'earned' && !exclude.includes(x.id) && (!region || !x.regions || x.regions.includes(region)),
   );
+  return pickByRarity(pool, rng);
+}
+
+// What a visiting netling wears: any accessory that can be found (not props, not earned ones),
+// from any region, weighted by rarity. A glimpse of what's out there.
+export function rollWornAccessory(rng) {
+  return pickByRarity(ACCESSORIES.filter((x) => x.source !== 'earned'), rng);
+}
+
+function pickByRarity(pool, rng) {
   if (!pool.length) return null;
   const total = pool.reduce((n, x) => n + RARITY[x.rarity].weight, 0);
   let r = rng() * total;

@@ -123,7 +123,7 @@ test('a visitor can leave an item, or rarely an accessory for the UI to pick', (
 
 test('a visitor leaves early when it naps, and survives a save round trip', () => {
   const s = booted();
-  s.visit = { startedAge: s.ageMin, len: 10, form: 'glitch', palette: 2 };
+  s.visit = { startedAge: s.ageMin, len: 10, form: 'glitch', palette: 2, accessory: null };
   const back = cleanSave(JSON.parse(JSON.stringify(s)), s.lastTick);
   assert.deepEqual(back.visit, s.visit);
   assert.equal(cleanSave({ ...JSON.parse(JSON.stringify(s)), visit: { form: 'nope', startedAge: 1 } }, s.lastTick).visit, null);
@@ -187,4 +187,45 @@ test('a repair kit restores 40 integrity and refuses at full', () => {
   s.stats.integrity = 30;
   assert.equal(act(s, 'use', s.lastTick, noRng, { slot: 0 }).ok, true);
   assert.equal(s.stats.integrity, 70);
+});
+
+test('most visitors wear a random accessory; props and earned items never show up on one', async () => {
+  const { ACCESSORIES } = await import('../src/accessories.js');
+  const worn = new Map(ACCESSORIES.map((x) => [x.id, x]));
+  const rng = mulberry32(7);
+  let dressed = 0;
+  const seen = new Set();
+  for (let i = 0; i < 400; i++) {
+    const s = booted();
+    // Force the visit roll; everything else comes from the seeded rng.
+    tick(s, s.lastTick + MIN, rolls(0.999, 0.999, 0.999, 0.999, 0.999, 0, rng(), rng(), rng(), rng(), rng()));
+    const acc = s.visit.accessory;
+    if (!acc) continue;
+    dressed++;
+    seen.add(acc);
+    assert.ok(worn.has(acc), `${acc} is not a worn accessory`);
+    assert.notEqual(worn.get(acc).source, 'earned');
+    assert.match(s.log.at(-1).msg, new RegExp(`in a ${worn.get(acc).name.toLowerCase()}`));
+  }
+  assert.ok(dressed > 250 && dressed < 350, `dressed ${dressed}/400`);
+  assert.ok(seen.size > 5, 'a variety of accessories');
+});
+
+test("a visitor's accessory survives a save round trip; junk is dropped", () => {
+  const s = booted();
+  s.visit = { startedAge: s.ageMin, len: 10, form: 'glitch', palette: 2, accessory: 'cap' };
+  assert.equal(cleanSave(JSON.parse(JSON.stringify(s)), s.lastTick).visit.accessory, 'cap');
+  s.visit.accessory = 'deck'; // a prop, not worn
+  assert.equal(cleanSave(JSON.parse(JSON.stringify(s)), s.lastTick).visit.accessory, null);
+});
+
+test("a visitor never shares the host's palette", () => {
+  const rng = mulberry32(3);
+  for (let i = 0; i < 200; i++) {
+    const s = booted();
+    s.quirk.palette = i % 5;
+    tick(s, s.lastTick + MIN, rolls(0.999, 0.999, 0.999, 0.999, 0.999, 0, rng(), rng(), rng(), rng(), rng()));
+    assert.notEqual(s.visit.palette, s.quirk.palette);
+    assert.ok(s.visit.palette >= 0 && s.visit.palette < 5);
+  }
 });

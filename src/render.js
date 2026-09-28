@@ -143,7 +143,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
       const vs = formSprite(visit.form, frame ? 'a' : 'b');
       const vp = PALETTES[visit.palette] ?? PALETTES[0];
       const vx = 3 + swing(0);
-      drawSprite(bctx, vs, vx, 20 - vs.length - hop(frame), { '#': vp.main, o: vp.accent, '+': '#f5f5f5' });
+      const vy = 20 - vs.length - hop(frame);
+      drawSprite(bctx, vs, vx, vy, { '#': vp.main, o: vp.accent, '+': '#f5f5f5' });
+      if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time);
       // A spark passes between them.
       if (frame) plus(bctx, '#f9f002', Math.round((vx + vs[0].length + x) / 2), 6);
     }

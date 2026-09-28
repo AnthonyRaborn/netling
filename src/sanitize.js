@@ -20,7 +20,7 @@ import {
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
-import { STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
+import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
@@ -72,6 +72,7 @@ function counts(raw, keys = null) {
 
 const FRAGMENT_IDS = new Set(FRAGMENTS.map((f) => f.id));
 const STYLE_IDS = new Set(STYLE_ITEMS.map((x) => x.id));
+const WORN_IDS = new Set(ACCESSORIES.map((x) => x.id)); // accessories, not props
 const UNLOCK_IDS = new Set(['label', ...SLOTS.flatMap((slot) => COSMETICS[slot].map((c) => `${slot}:${c.id}`))]);
 
 export const cleanDex = (raw) => idList(raw, (id) => has(SPECIES, id));
@@ -187,6 +188,7 @@ function cleanVisit(raw) {
     len: int(raw.len, CFG.visitMinMin, 1, 60),
     form: raw.form,
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
+    accessory: WORN_IDS.has(raw.accessory) ? raw.accessory : null,
   };
 }
 

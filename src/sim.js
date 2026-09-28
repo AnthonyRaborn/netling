@@ -1,5 +1,6 @@
 // Netling simulation core. Pure-ish: every function takes the state, a time
 // (ms epoch) and an rng, so tests can drive it deterministically.
+import { accessoryById, rollWornAccessory } from './accessories.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 1;
@@ -74,6 +75,7 @@ export const CFG = {
   visitHeat: 10,
   visitItemChance: 0.1,
   visitAccessoryChance: 0.01,
+  visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
   // Netrun uplink cooldown by stage, cut by clean jack-outs and overclock chips, never below the floor:
   // any sooner and corp sweeps pick up the trail.
   runCooldownMin: { baby: 240, teen: 210, adult: 180 },
@@ -453,8 +455,14 @@ function stepEvents(s, t, rng) {
 function startVisit(s, t, rng) {
   const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
   const form = pick(Object.keys(SPECIES), rng);
-  s.visit = { startedAge: s.ageMin, len, form, palette: Math.floor(rng() * BASE_PALETTES) };
-  log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()} pinged in. they're playing.`);
+  // Never the host's own colors, so the two stay easy to tell apart.
+  const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
+  let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));
+  if (own >= 0 && palette >= own) palette++;
+  const accessory = rng() < CFG.visitWearsAccessoryChance ? rollWornAccessory(rng) : null;
+  s.visit = { startedAge: s.ageMin, len, form, palette, accessory };
+  const wearing = accessory ? ` in a ${accessoryById(accessory).name.toLowerCase()}` : '';
+  log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
 }
 
 // While a visitor is here, Sync and Heat rise a little each minute. It leaves when time's up,
