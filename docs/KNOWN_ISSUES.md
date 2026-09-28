@@ -1,6 +1,6 @@
 # Known issues and risks
 
-Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01, 03 to 11 are fixed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
+Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11 are fixed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
 
 - **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
 - **Read**: derived by reading the code; not run.
@@ -15,7 +15,7 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 | Id | Severity | Confidence | Title | Status |
 |---|---|---|---|---|
 | [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one | Fixed |
-| [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Open |
+| [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Fixed |
 | [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
 | [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Fixed |
@@ -51,6 +51,8 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 ### KI-02
 
 **`SAVE_VERSION` has no migration path.** Severity Medium (latent).
+
+**Status: Fixed.** Added `src/migrations.js` (`STEPS` and `upgradeSave`); `cleanSave` now upgrades any older version step by step before cleaning, sets aside saves it cannot upgrade (with a specific notice for saves and codes from a newer build), and a pre-upgrade backup is kept. There are no steps yet because version 1 is still current. A frozen version 1 fixture and 7 tests guard the path, and the rules for adding a step are in DATA_AND_SAVES.md. The description below is the original finding.
 
 - `SAVE_VERSION` is 1 and `cleanSave` returns `null` for any other value, which sends the save down the "set aside, compile a new netling" path (`corruptSave`).
 - `migrate()` only fills missing fields with `??=` defaults. Every mechanic added so far (nap, visitors, hibernation, Packet Feast, run cooldown cuts) was handled that way, so no bump was ever needed.

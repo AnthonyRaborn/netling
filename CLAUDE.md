@@ -5,7 +5,7 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 183 unit tests, TZ=UTC, Node 22
+npm test          # 190 unit tests, TZ=UTC, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype
 npm run serve     # http://localhost:5174
@@ -22,7 +22,7 @@ npm run serve     # http://localhost:5174
 ## Rules that are easy to break
 
 1. **Ids are permanent** (fragments, items, forms, accessories, cosmetics, regions, event types, storage keys). Saves store them and the sanitizer drops unknown ones.
-2. **Adding a save field**: default it in `createScript`, `migrate` and `cleanSave`. Do not bump `SAVE_VERSION` (there is no upgrade path; see `docs/KNOWN_ISSUES.md` KI-02).
+2. **Save format**: an added field only needs a default in `createScript`, `migrate` and `cleanSave`. A rename or restructure must bump `SAVE_VERSION` and add a step in `src/migrations.js` (rules in `docs/DATA_AND_SAVES.md`). Never edit an old step or `tests/fixtures/save-v1.json`.
 3. **New source files go in `sw.js` `SHELL`**; `npm test` checks the modules (assets like fonts you must remember yourself).
 4. **Never call `localStorage` directly** (except the lease); use `store` so the write gate applies. Use `now()` from `ui/app.js`, not `Date.now()`.
 5. **Treat stored and imported data as hostile**: new values need a `clean*` function in `sanitize.js`.
@@ -38,4 +38,4 @@ npm run serve     # http://localhost:5174
 
 ## Known traps
 
-See `docs/KNOWN_ISSUES.md` (each entry has a Status). Still open and easy to trip over: `SAVE_VERSION` has no upgrade path (KI-02); adding a codex fragment revokes Root Access for players who had finished the codex (KI-18); a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour).
+See `docs/KNOWN_ISSUES.md` (each entry has a Status). Still open and easy to trip over: adding a codex fragment revokes Root Access for players who had finished the codex (KI-18); a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour).

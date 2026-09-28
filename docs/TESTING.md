@@ -13,7 +13,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 183 tests in 19 files and all pass. The smoke test has 37 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 190 tests in 20 files and all pass. The smoke test has 38 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -49,6 +49,7 @@ They use `node:test` and `node:assert/strict`, import the modules under test dir
 | `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
+| `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `shell.test.js` | 1 | Every module reachable from `main.js` is in the service worker's `SHELL` |
@@ -114,7 +115,7 @@ Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
 
 - `render.js`, `audio.js`, `notify.js`, `ui/*` and `netrun/view.js` have no unit tests; the smoke test covers their main paths.
 - A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
-- No test loads a save with a different `saveVersion` and expects an upgrade, because there is no upgrade path (KI-02).
+- Upgrade steps are tested through an injected step table and the frozen version 1 fixture. `cleanSave` cannot be pointed at a fake table, so its wiring to real steps only gets exercised once a first real step exists.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
 
 ## Adding tests

@@ -116,7 +116,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Relay** | A netrun node: recharge, vent, and an optional safe jack-out | `netrun/run.js` |
 | **Rescue** | Root Access reversing a flatline. Sets `rootUsed` | `sim.js` |
 | **Root Access** | NL-0's rescue from the first premature death. Earned by completing the codex | `sim.js` |
-| **SAVE_VERSION** | The save format version. Currently 1 | `sim.js` |
+| **SAVE_VERSION** | The save format version. Currently 1. A bump needs a step in `STEPS` | `sim.js`, `migrations.js` |
 | **Scavenged data (SCAV DATA)** | Food: +25 Charge, leans indie, 12% infection | `sim.js` |
 | **Script** | The compiling stage before baby. Also the name of a fresh netling object | `sim.js` |
 | **Session** | The currently running mini-game or netrun view, `app.session` | `ui/app.js` |

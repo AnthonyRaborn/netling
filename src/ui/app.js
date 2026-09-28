@@ -21,6 +21,7 @@ import {
   TEST_SPEEDS,
 } from '../sanitize.js';
 import { FRAGMENTS } from '../netrun/codex.js';
+import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
 export const DEV_URL = new URLSearchParams(location.search).has('dev');
@@ -39,6 +40,8 @@ export const app = {
   onboarding: 'done',
   firstLaunch: false,
   corruptSave: null, // the raw text of a save that couldn't be used
+  newerSave: false, // that save was written by a newer build of the game
+  preUpgrade: null, // { from, raw }: the stored save before an upgrade step changed it (boot stores a backup)
   skew: 0,
   testClock: null, // test mode: { simAt, realAt, speed }
   session: null, // the running mini-game or netrun view
@@ -146,6 +149,10 @@ export function loadAll() {
   app.firstLaunch = rawSave === null;
   // An unusable save is set aside (boot stores it under KEYS.corruptSave) rather than lost.
   app.corruptSave = rawSave !== null && !state ? rawSave : null;
+  const stored = store.get(KEYS.save);
+  app.newerSave = app.corruptSave !== null && isNewerSave(stored);
+  const up = state ? upgradeSave(stored) : null;
+  app.preUpgrade = up?.upgraded ? { from: up.from, raw: rawSave } : null;
   if (!state) state = createScript({ now: now(), rootAccess: codexComplete() });
   migrate(state);
   app.state = state;

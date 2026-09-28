@@ -42,6 +42,7 @@ These explain most decisions in the code.
 | `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
 | `src/random.js` | The shared weighted-pick helper |
+| `src/migrations.js` | Save upgrade steps (`STEPS`) and `upgradeSave` |
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
 | `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
@@ -55,7 +56,7 @@ These explain most decisions in the code.
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 19 unit test files, run with `node --test` |
+| `tests/` | 20 unit test files (plus `tests/fixtures/`), run with `node --test` |
 | `tools/` | Browser smoke test, balance simulators, icon generator |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
@@ -196,7 +197,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (37 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (38 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

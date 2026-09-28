@@ -24,6 +24,7 @@ import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
+import { upgradeSave } from './migrations.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
 export const ONBOARDING_STEPS = ['intro', 'readme', 'nudge', 'tutorial', 'done'];
@@ -225,11 +226,13 @@ function settle(s, now) {
 }
 
 // Returns a repaired copy of a stored netling, or null if it can't be used at all
-// (not an object, another save version, or an unknown stage or form).
+// (not an object, a version it can't upgrade, or an unknown stage or form).
 // Fields this file doesn't know about are kept, so a newer version's data survives a downgrade,
 // unless strict is set: codes from outside keep only known fields.
 export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
-  if (!isObj(raw) || raw.saveVersion !== SAVE_VERSION) return null;
+  const upgraded = upgradeSave(raw); // older versions are brought up to date first (see migrations.js)
+  if (!upgraded.save) return null;
+  raw = upgraded.save;
   const stage = raw.stage;
   const form = raw.form ?? 'bitling';
   if (!STAGES.includes(stage) || !has(SPECIES, form)) return null;

@@ -129,8 +129,11 @@ if (TEST) store.set(KEYS.testClock, app.testClock); // keep the anchor across re
 renderTestBadge();
 
 if (app.corruptSave && store.set(KEYS.corruptSave, { at: Date.now(), raw: app.corruptSave })) {
-  setTimeout(() => flashStatus('the saved netling could not be read, so a new one was compiled. the old save is in ARCHIVE > SYSTEM.', 6000), 1000);
+  const why = app.newerSave ? 'was saved by a newer version of the game (reload to update)' : 'could not be read';
+  setTimeout(() => flashStatus(`the saved netling ${why}, so a new one was compiled. the old save is in ARCHIVE > SYSTEM.`, 6000), 1000);
 }
+// A save that was just upgraded keeps a copy of how it looked before, in case a step went wrong.
+if (app.preUpgrade) store.set(KEYS.preUpgrade, { at: Date.now(), from: app.preUpgrade.from, raw: app.preUpgrade.raw });
 
 // Older saves: backfill the dex with forms this save proves were seen.
 if (formsSeenIn(app.state, app.lineage).map((form) => discover(app.dex, form)).some(Boolean)) store.set(KEYS.dex, app.dex);

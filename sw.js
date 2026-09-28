@@ -13,6 +13,7 @@ const SHELL = [
   'src/main.js',
   'src/sim.js',
   'src/random.js',
+  'src/migrations.js',
   'src/render.js',
   'src/sprites.js',
   'src/audio.js',

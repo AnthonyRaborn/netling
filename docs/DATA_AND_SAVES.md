@@ -40,6 +40,7 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 | `netling.devSkew` | Number of ms | no | Only read in dev or test mode |
 | `netling.iosHintSeen` | `true` | no | The one-time Add to Home Screen prompt |
 | `netling.corruptSave` | `{ at, raw }` | no | An unreadable save set aside, never overwritten |
+| `netling.preUpgrade` | `{ at, from, raw }` | no | The save as it was before an upgrade step changed it (last upgrade only) |
 | `netling.tabLease` | `{ id, at }` | no | Written by `lease.js` directly, bypassing the gate |
 | `netling.testMode` | `{ on, revealed, speed }` | no | Always in the real namespace |
 | `netling.testClock` | `{ simAt, realAt, speed }` | no | In the test namespace while test mode is on |
@@ -122,7 +123,7 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 `sanitize.js` treats all stored and imported data as hostile. Principles:
 
 - Every value is rebuilt from known fields. Numbers are clamped (`num`, `int`), strings truncated, ids checked against the real tables (`has(table, id)` uses `Object.hasOwn`, so `__proto__` is not a valid id).
-- `cleanSave` refuses a save only when it is not an object, has a different `saveVersion`, or has an unknown stage or form. Anything else is repaired to a safe default.
+- `cleanSave` first upgrades the save to the current version (see below), then refuses it only when it cannot be upgraded or has an unknown stage or form. Anything else is repaired to a safe default.
 - `lastTick` is clamped to `[0, now]`; a future value (clock set back) would otherwise freeze the netling.
 - **Non-strict** (local storage): unknown fields are kept (`...raw`), so a newer build's data survives a downgrade.
 - **Strict** (imported codes): only known fields survive.
@@ -132,10 +133,43 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 
 ## Versioning and migration
 
-- `SAVE_VERSION` is `1` and has never been bumped.
-- `cleanSave` rejects any other version as unusable (the save is set aside, a new netling compiles).
-- `migrate()` is not versioned. It only fills in missing fields with defaults (`??=`), which is how new mechanics (nap, visitors, hibernation, Packet Feast) were added without a version bump.
-- Consequence: adding a field is safe (add a default to `migrate` and to `cleanSave`). Renaming or restructuring a field needs a real migration step and a version bump, and the bump must add a path in `cleanSave` for the old version, or every existing player's save will be set aside. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+The netling save carries `saveVersion` (`SAVE_VERSION` in `sim.js`, currently 1). Two mechanisms keep old saves working, for two kinds of change:
+
+| Kind of change | Mechanism | Version bump |
+|---|---|---|
+| **Additive**: a new field with a default (nap, visitors, hibernation, Packet Feast were all like this) | `migrate()` in `sim.js` fills it with `??=`, and `cleanSave` defaults it | No |
+| **Structural**: rename, retype, split, merge or reinterpret a field | A step in `STEPS` in `src/migrations.js` | Yes: bump `SAVE_VERSION` |
+
+### How upgrading works
+
+`cleanSave` starts by calling `upgradeSave(raw)` (`migrations.js`). It works on a private copy and runs `STEPS[v]` for each version from the save's own up to `SAVE_VERSION`, setting `saveVersion` after each step. The result then goes through the normal field-by-field cleaning. So a save from any earlier version loads, as long as no step was ever removed.
+
+`upgradeSave` returns an error instead of guessing:
+
+| Error | When | What the game does |
+|---|---|---|
+| `invalid` | Not an object, or `saveVersion` is not an integer of at least 1 | Set aside as unreadable |
+| `newer` | Saved by a newer build than this one | Set aside, with the notice "was saved by a newer version of the game (reload to update)". An import code says "made by a newer version of Netling" |
+| `failed` | A step is missing or throws or returns junk | Set aside as unreadable |
+
+"Set aside" means the raw text is kept under `netling.corruptSave` (SYSTEM offers it as a download) and a new netling compiles. The newer-version case is unlikely to happen to a real player because the service worker is network-first, but a transfer code carried from a newer install can trigger it.
+
+### Safety net
+
+When a local save was upgraded on load, `main.js` stores its pre-upgrade text as `netling.preUpgrade` (`{ at, from, raw }`), so a bad step can be recovered by hand. There is no UI for it yet. It holds the last upgrade only, and is removed by RESTART.
+
+### Rules for a structural change
+
+1. Bump `SAVE_VERSION` in `sim.js`.
+2. Add `STEPS[<old version>]` in `migrations.js`. It receives the old shape and returns the new one. It must tolerate missing or wrong-typed fields (`cleanSave` repairs the result, but a step that throws sends the save to the set-aside path).
+3. Update `createScript`, `migrate` and `cleanSave` for the new shape.
+4. **Never edit or delete an old step**, and never regenerate `tests/fixtures/save-v1.json`. `tests/migrations.test.js` loads that frozen version 1 save through the whole chain; add a frozen fixture for each new version too, so every historical shape keeps being tested.
+5. Add a test for the new step with a before and after example.
+6. Transfer codes carry the save, so old codes upgrade through the same path. The code wrapper (`payload.v`, currently 1) is a separate format number: change it only if the wrapper itself changes.
+
+### Other stored values
+
+Only the netling save is versioned. Lineage, dex, codex, wardrobe, progress, unlocked, accessories and prefs are lists of ids and small records that the cleaners rebuild leniently, so additive changes need no migration. If one of them ever changes shape in a way a cleaner cannot absorb, add the upgrade inside that value's `clean*` function and note it here (or introduce a data version key then).
 
 ## Transfer codes
 

@@ -382,6 +382,15 @@ await scenario('unreadable save is set aside, then downloadable and deletable', 
   assert((await page.evaluate(() => localStorage.getItem('netling.corruptSave'))) === null, 'not deleted');
 });
 
+await scenario('a save from a newer version is set aside with its own notice', async ({ open }) => {
+  const newer = '{"saveVersion":99,"stage":"adult","form":"chrome"}';
+  const page = await open(BASE, seedRaw({ 'netling.save': newer, 'netling.onboarding': '"done"' }));
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(() => ({ kept: localStorage.getItem('netling.corruptSave'), status: document.getElementById('status').textContent }));
+  assert(r.kept?.includes('"saveVersion":99'), 'the newer save was not kept');
+  assert(/newer version/.test(r.status), `no newer-version notice: ${r.status}`);
+});
+
 await scenario('storage blocked entirely: game still runs and warns', async ({ open }) => {
   const page = await open(BASE, `Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('blocked', 'SecurityError'); } });`);
   await page.waitForTimeout(1500);
