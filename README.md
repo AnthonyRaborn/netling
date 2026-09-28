@@ -25,7 +25,9 @@ No build step, no dependencies: vanilla JavaScript modules and canvas.
 
 ## Play
 
-Open the game in a modern browser. On your own machine: `npm run serve`, then http://localhost:5174. Your netling is saved in the browser, so use the same browser (or the transfer feature below) to come back to it.
+Open the game in a modern browser: anthonyraborn.github.io/netling. You can use this link as a PWA to install it as an app on your device (see below).
+
+To host it on your own machine: after cloning and moving to the directory, `npm run serve`, then http://localhost:5174. Your netling is saved in the browser, so use the same browser (or the transfer feature below) to come back to it.
 
 The **?** button in the header opens the in-game **field manual**, which always matches the current rules. This README is the longer, friendlier version.
 
