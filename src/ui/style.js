@@ -1,7 +1,7 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
 import { PALETTES } from '../sim.js';
 import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
-import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors } from '../accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite } from '../sprites.js';
 import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
@@ -10,7 +10,12 @@ import { KEYS } from '../storage.js';
 import { $, app, flashStatus, store } from './app.js';
 
 // Bank accessories a finished run left on the pet into the shared collection.
+// A visitor's gift is picked here, where the collection is known, so it's always something new.
 export function drainAccessoryInbox() {
+  for (; app.state.visitAccGifts > 0; app.state.visitAccGifts--) {
+    const id = rollAccessory([...app.ownedAccessories, ...(app.state.accessoryInbox ?? [])], Math.random);
+    if (id) app.state.accessoryInbox = [...(app.state.accessoryInbox ?? []), id];
+  }
   const inbox = app.state.accessoryInbox ?? [];
   if (!inbox.length) return;
   const fresh = inbox.filter((id) => !app.ownedAccessories.includes(id));

@@ -297,6 +297,8 @@ export const ITEM_SPRITES = {
   blackice: ['...#...', '..#o#..', '.#oo+#.', '#ooo+o#', '.#ooo#.', '..#o#..', '...#...'],
   booster: ['...#...', '.#.#.#.', '#..#..#', '.#.#.#.', '...#...', '..###..', '.#####.'],
   memory: ['#.#.#.#', '.#####.', '##o+o##', '.#ooo#.', '##o+o##', '.#####.', '#.#.#.#'],
+  repair: ['.#...#.', '.##.##.', '..#+#..', '...#...', '..#+#..', '.##.##.', '.#...#.'],
+  overclock: ['.#.#.#.', '#######', '.#o+o#.', '##+++##', '.#o+o#.', '#######', '.#.#.#.'],
 };
 
 export const ITEM_COLORS = {
@@ -306,6 +308,8 @@ export const ITEM_COLORS = {
   blackice: '#ff2a6d',
   booster: '#b967ff',
   memory: '#c7f9ff',
+  repair: '#ff9f1c',
+  overclock: '#f9f002',
 };
 
 // Frame lookup per form; falls back to frame A for missing sleep/dead poses.

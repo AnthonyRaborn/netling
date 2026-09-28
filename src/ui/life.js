@@ -6,7 +6,7 @@ import { KEYS } from '../storage.js';
 import { $, app, codexComplete, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
-import { checkUnlocks, countAct, grantStyle, plushExtra } from './style.js';
+import { checkUnlocks, countAct, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
 
 export function advance() {
   if (app.lock || app.inactive) return; // on another device, or in another tab
@@ -28,7 +28,13 @@ export function advance() {
   if (state.lastSurgeAt !== app.lastSurgeAt) {
     app.lastSurgeAt = state.lastSurgeAt;
     app.surgeUntil = performance.now() + 900;
+    if (now() - state.lastSurgeAt < 2 * 60_000) sfx('surge', state.quirk.pitch); // not for one caught up on load
   }
+  // A visitor pinging in gets a greeting; one leaving may have left an accessory behind.
+  const visiting = Boolean(state.visit);
+  if (visiting && !app.lastVisit) sfx('visit', state.quirk.pitch);
+  app.lastVisit = visiting;
+  if (state.visitAccGifts > 0) drainAccessoryInbox();
   save();
   updateHUD();
 }

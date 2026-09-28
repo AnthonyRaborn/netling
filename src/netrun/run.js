@@ -1,13 +1,15 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { grantItem, isAlive, log, resting, GAME_IDS, ITEMS, CFG } from '../sim.js';
+import { grantItem, isAlive, log, resting, runCooldownAtFloor, runCooldownLeft, GAME_IDS, ITEMS, CFG } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
 import { REGIONS, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES } from './anomalies.js';
 
+// The uplink cooldown lives in sim.js (CFG.runCooldownMin and friends), where items can shorten it.
+export { runCooldownLeft };
+
 export const RUN_CFG = {
-  cooldownMin: 240,
   minCharge: 30,
   moveCharge: 4,
   moveHeat: 5,
@@ -59,11 +61,6 @@ function weighted(table, rng) {
   return entries[entries.length - 1][0];
 }
 
-export function runCooldownLeft(pet) {
-  if (pet.lastRunEndAge == null) return 0;
-  return Math.max(0, pet.lastRunEndAge + RUN_CFG.cooldownMin - pet.ageMin);
-}
-
 // Why a run can't start, or null.
 export function runBlockReason(pet, region = 'public', codex = []) {
   if (!isAlive(pet)) return pet.stage === 'script' ? 'still compiling...' : 'no signal.';
@@ -75,7 +72,10 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   const lock = regionLock(region, pet.stage, codex);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);
-  if (cd > 0) return `uplink cooling down. ${Math.ceil(cd / 60)}h left.`;
+  if (cd > 0) {
+    const left = cd >= 60 ? `${Math.floor(cd / 60)}h${cd % 60 ? ` ${cd % 60}m` : ''}` : `${cd}m`;
+    return `uplink cooling down${runCooldownAtFloor(pet) ? ', laying low from corp sweeps' : ''}. ${left} left.`;
+  }
   if (pet.stats.charge < RUN_CFG.minCharge) return `needs ${RUN_CFG.minCharge}+ charge to jack in.`;
   return null;
 }
@@ -402,7 +402,12 @@ function endRun(pet, result) {
   const run = pet.run;
   run.phase = 'done';
   run.result = result;
-  if (!REGIONS[run.region].noCooldown) pet.lastRunEndAge = pet.ageMin;
+  if (!REGIONS[run.region].noCooldown) {
+    pet.lastRunEndAge = pet.ageMin;
+    // A clean clear (out through the front door, no ICE lost) shortens the next cooldown.
+    const clean = result === 'jacked' && (run.tally?.iceLost ?? 0) === 0;
+    pet.runCooldownCut = clean ? CFG.runCleanCutMin : 0;
+  }
   pet.runStats ??= { runs: 0, jacked: 0, disconnected: 0, aborted: 0 };
   pet.runStats.runs++;
   pet.runStats[result]++;
@@ -420,12 +425,14 @@ export function jackOut(pet) {
     else kept.push(item);
   }
   const frags = run.fragments.length;
+  const clean = !REGIONS[run.region].noCooldown && (run.tally?.iceLost ?? 0) === 0;
   note(
     run,
     `jacked out with ${kept.length} item${kept.length === 1 ? '' : 's'}` +
       `${frags ? ` and ${frags} fragment${frags === 1 ? '' : 's'}` : ''}.` +
       `${restored ? ` re-synced +${restored} integrity.` : ''}` +
-      `${lost.length ? ` ${lost.length} lost: inventory full.` : ''}`,
+      `${lost.length ? ` ${lost.length} lost: inventory full.` : ''}` +
+      `${clean ? ` clean clear: uplink cools ${CFG.runCleanCutMin / 60}h faster.` : ''}`,
   );
   // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
   pet.codexInbox = [...(pet.codexInbox ?? []), ...run.fragments];
