@@ -212,11 +212,13 @@ async function checkImport() {
   warn.className = 'tx-note';
   warn.textContent = app.lock
     ? 'Loading unlocks this device with the netling in this code.'
-    : 'Loading replaces everything on this device. Transfer this one out first if you want to keep it.';
+    : TEST
+      ? 'Loading replaces the test data. Your real netling is untouched.'
+      : 'Loading replaces everything on this device. Transfer this one out first if you want to keep it.';
   const go = document.createElement('button');
   go.type = 'button';
   go.className = 'danger-btn';
-  go.textContent = app.lock ? 'LOAD AND UNLOCK' : 'REPLACE THIS DEVICE';
+  go.textContent = app.lock ? 'LOAD AND UNLOCK' : TEST ? 'REPLACE TEST DATA' : 'REPLACE THIS DEVICE';
   go.addEventListener('click', applyImport);
   box.replaceChildren(dl, warn, go);
 }

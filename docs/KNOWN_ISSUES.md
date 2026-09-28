@@ -20,7 +20,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
-| [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Open |
+| [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Open |
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
 | [KI-10](#ki-10) | Low | Read | Duplicated helpers | Open |
@@ -91,6 +91,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-07
 
 **Import in test mode says it replaces "this device".** Severity Low.
+
+**Status: Fixed.** In test mode the import preview now says it replaces the test data.
 
 - Transfer out is disabled in test mode, but importing is not. `applyImport` writes through `store`, which is the test store, so it replaces the **test** data only. The preview button still says "REPLACE THIS DEVICE". Real data is not touched (the test namespace is separate), but the wording is wrong.
 
