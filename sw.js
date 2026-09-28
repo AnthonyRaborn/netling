@@ -10,6 +10,7 @@ const SHELL = [
   'fonts/VT323-latin.woff2',
   'src/main.js',
   'src/sim.js',
+  'src/random.js',
   'src/render.js',
   'src/sprites.js',
   'src/audio.js',

@@ -23,7 +23,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
-| [KI-10](#ki-10) | Low | Read | Duplicated helpers | Open |
+| [KI-10](#ki-10) | Low | Read | Duplicated helpers | Fixed |
 | [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Open |
 | [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
 | [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
@@ -120,6 +120,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-10
 
 **Duplicated helpers.** Severity Low.
+
+**Status: Fixed.** The three copies now share `weighted()` in `src/random.js` (added to `SHELL`, with tests). `pickByRarity` in `accessories.js` was left alone: it weights an array by a rarity table, not an object of weights.
 
 - The weighted random pick exists three times: `weighted` in `netrun/map.js`, `weighted` in `netrun/run.js`, `rollTable` in `sim.js` (and a fourth variant, `pickByRarity`, in `accessories.js`). Behaviour is the same; consolidating would remove a place for drift.
 

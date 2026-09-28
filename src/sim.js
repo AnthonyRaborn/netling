@@ -1,6 +1,7 @@
 // Netling simulation core. Pure-ish: every function takes the state, a time
 // (ms epoch) and an rng, so tests can drive it deterministically.
 import { accessoryById, rollWornAccessory } from './accessories.js';
+import { weighted } from './random.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 1;
@@ -487,7 +488,7 @@ function stepVisit(s, t, rng) {
     s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
     gift = ' it left something stylish behind.';
   } else if (rng() < CFG.visitItemChance) {
-    const id = rollTable(DROPS.visit, rng);
+    const id = weighted(DROPS.visit, rng);
     const name = ITEMS[id].name;
     gift = grantItem(s, id).includes('full') ? ` it left a ${name}, but inventory is full.` : ` it left a gift: ${name}.`;
   }
@@ -526,15 +527,6 @@ export const runCooldownAtFloor = (s) => runCooldownTotal(s) <= CFG.runCooldownF
 
 export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
 
-function rollTable(table, rng) {
-  const entries = Object.entries(table);
-  let r = rng() * entries.reduce((a, [, w]) => a + w, 0);
-  for (const [id, w] of entries) {
-    if ((r -= w) < 0) return id;
-  }
-  return entries[entries.length - 1][0];
-}
-
 // Adds an item if there's room. Returns a log suffix.
 export function grantItem(s, id) {
   if (s.inventory.length >= INVENTORY_SLOTS) return ` found ${ITEMS[id].name}, but inventory is full.`;
@@ -543,7 +535,7 @@ export function grantItem(s, id) {
 }
 
 function maybeDrop(s, source, chance, rng) {
-  return rng() < chance ? grantItem(s, rollTable(DROPS[source], rng)) : '';
+  return rng() < chance ? grantItem(s, weighted(DROPS[source], rng)) : '';
 }
 
 // Minutes left to respond to the current timed event (0 when there is none).

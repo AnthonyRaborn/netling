@@ -1,12 +1,6 @@
 // Layered node-map generation: entry -> N middle layers -> exit, every node reachable and every node with a way forward.
 import { REGIONS } from './regions.js';
-
-function weighted(table, rng) {
-  const entries = Object.entries(table);
-  let r = rng() * entries.reduce((a, [, w]) => a + w, 0);
-  for (const [k, w] of entries) if ((r -= w) < 0) return k;
-  return entries[entries.length - 1][0];
-}
+import { weighted } from '../random.js';
 
 // Fixed tutorial path: entry -> cache -> ICE -> relay -> exit.
 function tutorialMap() {
