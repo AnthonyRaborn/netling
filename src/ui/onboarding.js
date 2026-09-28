@@ -30,7 +30,7 @@ function renderHelp() {
       'REST',
       [
         ['Sleep', `It sleeps at night on its own. With the LIGHTS OFF its stats drain at ${pct(CFG.sleepDarkDrainMult)} of the awake rate; with them on, ${pct(CFG.sleepDrainMult)}, and it can't settle. Nothing new finds it while it sleeps, and an open event's timer holds until morning.`, `Lights left on for ${CFG.lightsGraceMin} minutes is a fault.`],
-        ['NAP', `A rest on demand, up to ${CFG.napMaxMin / 60} hours: stats drain at ${pct(CFG.napDrainMult)} while time keeps passing. It can't eat, play or jack in while napping; WAKE UP ends it early.`, `After a nap it needs ${CFG.napCooldownMin / 60} hours awake before the next one.`],
+        ['NAP', `A rest on demand, up to ${CFG.napMaxMin / 60} hours: stats drain at ${pct(CFG.napDrainMult)} while time keeps passing. It can't eat, play or jack in while napping; WAKE UP ends it early. Unlike sleep, a nap does not pause an open alert's timer, so answer traces, intrusions and overflows first.`, `After a nap it needs ${CFG.napCooldownMin / 60} hours awake before the next one.`],
         ['Lights off, awake', 'The screen goes dark and it gets bored: Sync drains faster.'],
       ],
     ],

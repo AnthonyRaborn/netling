@@ -24,7 +24,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Fixed |
 | [KI-10](#ki-10) | Low | Read | Duplicated helpers | Fixed |
-| [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Open |
+| [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Fixed |
 | [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
 | [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
 | [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
@@ -130,6 +130,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-11
 
 **A nap does not hold an open event's timer.** Severity Note. Reproduced.
+
+**Status: Fixed.** Kept as designed (a nap does not pause event timers) but the field manual's NAP entry now says so; the README already did. The rule itself is unchanged.
 
 - Real sleep holds an open event's timer (the field manual says so). A nap does not: with a trace open, a 60 minute nap takes the remaining time from 120 to 60. A player can nap through a trace, intrusion or overflow and wake to the consequence. HIDE, COMPLY, DEFEND and PURGE stay available during a nap, so it is avoidable, but the manual's NAP entry does not mention it.
 
