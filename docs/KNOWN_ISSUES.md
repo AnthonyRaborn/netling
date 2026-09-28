@@ -17,7 +17,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one | Fixed |
 | [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Open |
 | [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
-| [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Open |
+| [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Open |
@@ -70,6 +70,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-04
 
 **The RECORD tab omits the Packet Feast streak.** Severity Low.
+
+**Status: Fixed.** The RECORD row now lists all four streaks.
 
 - `renderRecord` in `ui/archive.js` lists "best streak: breach / dodge / tune". Packet Feast was added later and has its own unlock (the Packet rain effect needs a Feast streak of 10), but its streak is not shown.
 

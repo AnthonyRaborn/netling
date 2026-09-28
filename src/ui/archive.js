@@ -111,7 +111,7 @@ function renderRecord(lineage) {
     ['traces: hid / complied', `${acts.hide ?? 0} / ${acts.comply ?? 0}`],
     ['GAMES'],
     ['games played', progress.gamesPlayed ?? 0],
-    ['best streak: breach / dodge / tune', `${best('breach')} / ${best('dodge')} / ${best('tune')}`],
+    ['best streak: breach / dodge / tune / feast', `${best('breach')} / ${best('dodge')} / ${best('tune')} / ${best('feast')}`],
     ['NETRUN'],
     ['runs: jacked out / disconnected', `${runs.jacked ?? 0} / ${runs.disconnected ?? 0}`],
     ['clean jack-outs', progress.cleanJackouts ?? 0],
