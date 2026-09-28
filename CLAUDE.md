@@ -38,4 +38,4 @@ npm run serve     # http://localhost:5174
 
 ## Known traps
 
-See `docs/KNOWN_ISSUES.md` (each entry has a Status). Still open and easy to trip over: adding a codex fragment revokes Root Access for players who had finished the codex (KI-18); a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour).
+See `docs/KNOWN_ISSUES.md` (each entry has a Status). Still open and easy to trip over: a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour).

@@ -6,7 +6,7 @@ import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
-import { $, app, DEV, TEST, codexComplete, flashStatus, loadAll, now, save, store } from './ui/app.js';
+import { $, app, DEV, TEST, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
@@ -104,7 +104,7 @@ if (DEV) {
   }
   $('dev-reset').addEventListener('click', () => {
     setSkew(0);
-    app.state = createScript({ now: now(), rootAccess: codexComplete() });
+    app.state = createScript({ now: now(), rootAccess: rootUnlocked() });
     app.lastStage = app.state.stage;
     $('flatline').hidden = true;
     save();
@@ -134,6 +134,9 @@ if (app.corruptSave && store.set(KEYS.corruptSave, { at: Date.now(), raw: app.co
 }
 // A save that was just upgraded keeps a copy of how it looked before, in case a step went wrong.
 if (app.preUpgrade) store.set(KEYS.preUpgrade, { at: Date.now(), from: app.preUpgrade.from, raw: app.preUpgrade.raw });
+
+// Root Access remembered from the codex or the save (see loadAll): write it back if storage doesn't have it yet.
+if (app.progress.rootEarned && store.get(KEYS.progress)?.rootEarned !== true) store.set(KEYS.progress, app.progress);
 
 // Older saves: backfill the dex with forms this save proves were seen.
 if (formsSeenIn(app.state, app.lineage).map((form) => discover(app.dex, form)).some(Boolean)) store.set(KEYS.dex, app.dex);

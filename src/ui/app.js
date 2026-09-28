@@ -20,7 +20,7 @@ import {
   num,
   TEST_SPEEDS,
 } from '../sanitize.js';
-import { FRAGMENTS } from '../netrun/codex.js';
+import { allFragmentsFound, rootUnlocked as rootUnlockedFor } from '../netrun/codex.js';
 import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
@@ -118,7 +118,8 @@ export function setTestMode(next) {
   location.replace(location.pathname + location.search);
   return true;
 }
-export const codexComplete = () => FRAGMENTS.every((f) => app.codex.includes(f.id));
+// Whether new netlings compile with Root Access: the codex was completed at some point (kept even if fragments are added later).
+export const rootUnlocked = () => rootUnlockedFor(app.progress, app.codex);
 
 export function save() {
   if (store.set(KEYS.save, app.state)) app.writeFailed = false;
@@ -153,8 +154,11 @@ export function loadAll() {
   app.newerSave = app.corruptSave !== null && isNewerSave(stored);
   const up = state ? upgradeSave(stored) : null;
   app.preUpgrade = up?.upgraded ? { from: up.from, raw: rawSave } : null;
-  if (!state) state = createScript({ now: now(), rootAccess: codexComplete() });
+  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked() });
   migrate(state);
+  // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
+  // already covered, before it was recorded (boot writes it back to storage).
+  if (allFragmentsFound(app.codex) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
   app.state = state;
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;

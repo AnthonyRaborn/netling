@@ -85,7 +85,7 @@ The netling belongs to one generation. Everything shared across generations (lin
 
 **Wardrobe**: `shell`, `tint`, `effect`, `sound` (ids from `COSMETICS`), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
 
-**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`.
+**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, and `rootEarned` (true once Root Access has been earned; absent otherwise).
 
 ## The write gate
 

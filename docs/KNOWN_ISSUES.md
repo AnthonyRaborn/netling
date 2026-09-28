@@ -29,7 +29,7 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 | [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
 | [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
 | [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Open |
-| [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Open |
+| [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
 | [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Open |
 | [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Open |
 
@@ -164,6 +164,8 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 ### KI-18
 
 **Adding a codex fragment makes finished codexes incomplete.** Severity Note.
+
+**Status: Fixed.** Root Access is now recorded when earned (`progress.rootEarned`, transferable) and `rootUnlocked()` in `netrun/codex.js` checks that or the full codex, so adding a fragment can't revoke it or replay the transmission. Older saves are backfilled at load from a complete codex or a netling that already has Root Access. Unit tests plus three smoke scenarios. The description below is the original finding.
 
 - `codexComplete()` (`ui/app.js`) is `FRAGMENTS.every(...)`. It decides Root Access for each new script, and `drainCodexInbox` plays the NL-0 transmission when it flips from false to true. Shipping fragment 23 would leave every player who had completed the codex without Root Access for new netlings until they find it, and would replay the transmission. Unlocked shells and tints stay unlocked (unlocks are stored, never revoked), but the "gold" shell check reads the same list.
 

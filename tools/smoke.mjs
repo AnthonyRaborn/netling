@@ -652,6 +652,34 @@ await scenario('field manual shows root once the codex is complete', async ({ op
   assert(terms.includes('root'), `root still hidden: ${terms}`);
 });
 
+// As if a fragment had been added to the game since the codex was finished.
+const codexMissingOne = FRAGMENTS.slice(0, -1).map((f) => f.id);
+const helpTerms = async (page) => {
+  await page.click('#open-help');
+  return page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+};
+
+await scenario('Root Access is kept when the codex grows: the earned flag', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne, 'netling.progress': { streaks: {}, acts: {}, rootEarned: true } }));
+  const terms = await helpTerms(page);
+  assert(terms.includes('root'), `root hidden despite rootEarned: ${terms}`);
+});
+
+await scenario('Root Access is kept when the codex grows: a netling NL-0 already covers', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne, 'netling.save': awakeNetling({ rootAccess: true }) }));
+  const terms = await helpTerms(page);
+  assert(terms.includes('root'), `root hidden for a covered netling: ${terms}`);
+  await page.waitForTimeout(300);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(stored?.rootEarned === true, `rootEarned not written back: ${JSON.stringify(stored)}`);
+});
+
+await scenario('Root Access stays hidden until it is earned', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne }));
+  const terms = await helpTerms(page);
+  assert(!terms.includes('root'), 'root shown without being earned');
+});
+
 await scenario('test mode: hidden until 7 logo taps, separate fast netling, real one untouched', async ({ open }) => {
   const real = awakeNetling();
   const test = awakeNetling({ generation: 5 });

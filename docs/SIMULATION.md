@@ -283,9 +283,9 @@ On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed }`.
 
 ## Root Access (NL-0)
 
-Unlocked by finding all 22 codex fragments (`codexComplete()` in `ui/app.js`).
+Unlocked by finding all 22 codex fragments, and then kept for good: the moment the codex completes, `progress.rootEarned` is recorded (`drainCodexInbox`), and `rootUnlocked()` in `netrun/codex.js` is true if that flag is set or every fragment is found. A fragment added to the game later therefore cannot take Root Access back. Saves from before the flag existed get it backfilled at load if the codex is complete or the current netling already has Root Access, is cooling, or a lineage record shows a rescue.
 
-- New scripts compile with `rootAccess = true` while the codex is complete. The current netling also gets it the moment the codex completes (`drainCodexInbox`).
+- New scripts compile with `rootAccess = true` once it is unlocked. The current netling also gets it the moment the codex completes (`drainCodexInbox`).
 - `rootRescue()`: the first time a netling would die of integrity collapse or neglect, it does not. Integrity, Charge and Sync are raised to at least 25, the virus is cleared, the zero-integrity counter resets, and care mistakes are capped at 9. Sets `rootUsed`. Old age is never rescued.
 - The next generation after a rescue has `rootCooling = true`: no protection, and NL-0's origin palette can still roll.
 - Dying without spending it carries straight into the next generation.

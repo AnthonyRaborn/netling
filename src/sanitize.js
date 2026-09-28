@@ -356,6 +356,7 @@ export function cleanProgress(raw) {
     gamesPlayed: int(p.gamesPlayed, 0, 0),
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
+    ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
   };
 }
 

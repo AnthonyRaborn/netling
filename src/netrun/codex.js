@@ -33,6 +33,13 @@ export const FRAGMENTS = [
   { id: 'deep-4', region: 'deep', title: 'NL-0', text: 'you took care of one of mine. that is all any of us were ever made for. thank you, runner.' },
 ];
 
+// Every fragment found. `fragments` is a parameter so tests can pretend the list grew.
+export const allFragmentsFound = (codex, fragments = FRAGMENTS) => fragments.every((f) => codex.includes(f.id));
+
+// Root Access (NL-0's rescue) is earned once and then kept: `progress.rootEarned` remembers it, so a
+// fragment added to the game later can't take it back from a player who had finished the codex.
+export const rootUnlocked = (progress, codex, fragments = FRAGMENTS) => progress?.rootEarned === true || allFragmentsFound(codex, fragments);
+
 export const fragmentById = (id) => FRAGMENTS.find((f) => f.id === id);
 
 // The next undiscovered fragment in a region, or null when it's exhausted.

@@ -4,7 +4,7 @@ import { createScript, isAlive, CFG, MIN } from '../sim.js';
 import { startRun } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, now, save, store } from './app.js';
+import { $, app, rootUnlocked, now, save, store } from './app.js';
 import { grantStyle } from './style.js';
 import { openRun } from './play.js';
 import { advance } from './life.js';
@@ -48,7 +48,7 @@ function renderHelp() {
         ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
         ['trait', 'What it inherited from the netling before it.'],
         // Hidden until earned: the codex holds the secret.
-        codexComplete()
+        rootUnlocked()
           ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]
           : ['r\u2593\u2592t', '\u2591\u2592\u2593 [sector corrupted] \u2593\u2592\u2591', 'unrecoverable. for now.'],
       ],
@@ -163,7 +163,7 @@ export function advanceIntro() {
   $('intro').hidden = true;
   document.body.classList.remove('intro-active');
   // The script compiles for real: a fresh netling that boots on the next tick.
-  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: codexComplete() });
+  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked() });
   app.lastStage = app.state.stage;
   app.lastLogKey = '';
   save();

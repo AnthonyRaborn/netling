@@ -76,7 +76,7 @@ Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, `r
 
 ### Add a codex fragment
 
-Append to `FRAGMENTS` in `netrun/codex.js` with a unique id of the form `<region>-<n>`. Position in the array is drop order. **Warning:** `codexComplete()` requires every fragment, so adding one makes players who already completed the codex incomplete again. New netlings will compile without Root Access until they find it, and the NL-0 transmission will play again when they do (KI-18). Decide whether that is intended before shipping.
+Append to `FRAGMENTS` in `netrun/codex.js` with a unique id of the form `<region>-<n>`. Position in the array is drop order. Players who already finished the codex keep Root Access (it is recorded as `progress.rootEarned`), and the NL-0 transmission does not replay. The codex count in the Archive and any "read every fragment" unlock hints will simply show the new total, and the Archive's per-region tint unlocks are stored, so they stay unlocked.
 
 ### Add an anomaly
 
