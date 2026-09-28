@@ -58,6 +58,7 @@ export const app = {
   surgeUntil: 0,
   anim: null, // { kind, start }: see playAnim
   lastSurgeAt: null,
+  lastVisit: false,
   plushCache: null,
 };
 

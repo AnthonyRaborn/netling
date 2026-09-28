@@ -11,6 +11,7 @@ const SIZE = 16;
 export const PLAYER_Y = H - 50;
 const CLEAN_CHANCE = 0.7;
 const HOLE = '#05050a'; // the dark center of a clean packet
+const HURT_TIME = 0.5;
 
 export class Feast {
   static id = 'feast';
@@ -29,6 +30,7 @@ export class Feast {
     this.eaten = 0;
     this.bad = 0;
     this.chomp = 0;
+    this.hurt = 0; // counts down after a bad bite: screen flash, shaking jaw, blinking strike
     this.done = false;
     this.won = false;
   }
@@ -45,6 +47,7 @@ export class Feast {
     if (this.done) return;
     this.elapsed += dt;
     this.chomp = Math.max(0, this.chomp - dt);
+    this.hurt = Math.max(0, this.hurt - dt);
     const p = Math.min(1, this.elapsed / TIME);
 
     this.spawnIn -= dt;
@@ -65,7 +68,8 @@ export class Feast {
         this.sound('select');
       } else {
         this.bad++;
-        this.sound('error');
+        this.hurt = HURT_TIME;
+        this.sound('hit');
       }
     }
     this.packets = this.packets.filter((k) => !k.gone && k.y < H);
@@ -117,7 +121,8 @@ export class Feast {
     }
 
     // The eater: a blocky head whose jaw drops for a moment on each bite.
-    const px = this.lane * LANE_W + LANE_W / 2;
+    const shake = this.hurt > 0 ? (Math.floor(this.hurt * 40) % 2 ? 4 : -4) : 0;
+    const px = this.lane * LANE_W + LANE_W / 2 + shake;
     const open = this.chomp > 0 ? 8 : 3;
     ctx.fillStyle = pal.main;
     ctx.fillRect(px - 18, PLAYER_Y, 36, 10);
@@ -128,8 +133,18 @@ export class Feast {
 
     text(ctx, `${this.eaten}/${NEEDED}`, 16, 24, { size: 24, color: pal.main });
     for (let i = 0; i < MAX_BAD; i++) {
-      ctx.fillStyle = i < this.bad ? pal.accent : DIM;
-      ctx.fillRect(W - 28 - i * 18, 18, 12, 12);
+      const fresh = i === this.bad - 1 && this.hurt > 0;
+      ctx.fillStyle = i < this.bad ? (fresh && Math.floor(this.hurt * 12) % 2 ? '#ffffff' : pal.accent) : DIM;
+      const grow = fresh ? 3 : 0;
+      ctx.fillRect(W - 28 - i * 18 - grow, 18 - grow, 12 + grow * 2, 12 + grow * 2);
+    }
+
+    // A bad bite washes the screen in the accent color for a moment.
+    if (this.hurt > 0) {
+      ctx.globalAlpha = 0.35 * (this.hurt / HURT_TIME);
+      ctx.fillStyle = pal.accent;
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
     }
   }
 }

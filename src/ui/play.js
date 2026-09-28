@@ -156,7 +156,10 @@ function startGame(id) {
         countGame();
       }
       playAnim(res.ok ? 'play' : 'refuse');
-      if (!res.ok) flashStatus(res.msg);
+      if (!res.ok) {
+        sfx('error', app.state.quirk.pitch);
+        flashStatus(res.msg);
+      }
       else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
       save();
       updateHUD();

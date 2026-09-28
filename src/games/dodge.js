@@ -6,6 +6,7 @@ const LANE_W = W / LANES;
 const TIME = 15;
 const BLOCK_H = 22;
 const PLAYER_Y = H - 44;
+const HIT_FLASH_MS = 450;
 
 export class Dodge {
   static id = 'dodge';
@@ -21,6 +22,7 @@ export class Dodge {
     this.blocks = [];
     this.spawnIn = 0.6;
     this.elapsed = 0;
+    this.hit = false;
     this.done = false;
     this.won = false;
   }
@@ -55,6 +57,8 @@ export class Dodge {
     if (hit) {
       this.done = true;
       this.won = false;
+      this.hit = true;
+      this.sound('hit');
     } else if (this.elapsed >= TIME) {
       this.done = true;
       this.won = true;
@@ -97,5 +101,17 @@ export class Dodge {
     ctx.fill();
     ctx.fillRect(cx - 2, cy + 14, 4, 4);
     ctx.fillRect(cx - 2, cy + 22, 4, 3);
+
+    // The moment of impact: an accent flash over the whole screen that fades out.
+    if (this.hit) {
+      this.hitDrawnAt ??= time;
+      const fade = 1 - (time - this.hitDrawnAt) / HIT_FLASH_MS;
+      if (fade > 0) {
+        ctx.globalAlpha = 0.4 * fade;
+        ctx.fillStyle = pal.accent;
+        ctx.fillRect(0, 0, W, H);
+        ctx.globalAlpha = 1;
+      }
+    }
   }
 }

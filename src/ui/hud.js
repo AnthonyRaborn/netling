@@ -93,7 +93,7 @@ export function pushAlert(title, body) {
 // --- inventory ---
 
 // Items that do what a care action does look the same on screen.
-const ITEM_ANIMS = { coolant: 'cool', antivirus: 'patch', voucher: 'eat' };
+const ITEM_ANIMS = { coolant: 'cool', antivirus: 'patch', voucher: 'eat', repair: 'patch' };
 
 let selectedSlot = null;
 let lastInvKey = '';

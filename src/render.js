@@ -101,6 +101,15 @@ export function renderLCD(canvas, s, time, opts = {}) {
       }
     }
 
+    // A visiting netling: the two bounce around each other, one on each side of the screen.
+    const visit = s.visit && !rest && !rebooting ? s.visit : null;
+    const swing = (phase) => (opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
+    const hop = (up) => (opts.calm ? 0 : up ? 1 : 0);
+    if (visit) {
+      x = LCD_W - 3 - sprite[0].length - swing(Math.PI);
+      y = 20 - sprite.length - hop(!frame);
+    }
+
     // A reaction to the last action moves the body (a hop, a chomp, a head shake).
     const anim = opts.anim;
     if (anim && !opts.calm) {
@@ -129,6 +138,17 @@ export function renderLCD(canvas, s, time, opts = {}) {
       drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors);
     }
     bctx.globalAlpha = 1;
+
+    if (visit) {
+      const vs = formSprite(visit.form, frame ? 'a' : 'b');
+      const vp = PALETTES[visit.palette] ?? PALETTES[0];
+      const vx = 3 + swing(0);
+      const vy = 20 - vs.length - hop(frame);
+      drawSprite(bctx, vs, vx, vy, { '#': vp.main, o: vp.accent, '+': '#f5f5f5' });
+      if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time);
+      // A spark passes between them.
+      if (frame) plus(bctx, '#f9f002', Math.round((vx + vs[0].length + x) / 2), 6);
+    }
 
     if (anim) drawAnimation(bctx, anim, { x, y, w: sprite[0].length, h: sprite.length }, pal);
 

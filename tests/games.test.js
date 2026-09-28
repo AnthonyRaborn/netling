@@ -140,3 +140,27 @@ test('feast: two corrupted bites lose at once', () => {
   assert.equal(g.bad, MAX_BAD);
   assert.equal(g.done && !g.won, true);
 });
+
+test('feast: a bad bite plays the hit sound and flashes; a clean one does not', () => {
+  const sounds = [];
+  const g = new Feast(mulberry32(1), (name) => sounds.push(name));
+  g.packets = [{ lane: g.lane, y: PLAYER_Y - 2, clean: true, speed: 100 }];
+  g.update(1 / 60);
+  assert.deepEqual(sounds, ['select']);
+  assert.equal(g.hurt, 0);
+  g.packets = [{ lane: g.lane, y: PLAYER_Y - 2, clean: false, speed: 100 }];
+  g.update(1 / 60);
+  assert.deepEqual(sounds, ['select', 'hit']);
+  assert.ok(g.hurt > 0);
+  for (let i = 0; i < 60; i++) g.update(1 / 60);
+  assert.equal(g.hurt, 0, 'the flash wears off');
+});
+
+test('dodge: the impact plays the hit sound', () => {
+  const sounds = [];
+  const g = new Dodge(laneZeroRng(), (name) => sounds.push(name));
+  g.lane = 0;
+  for (let t = 0; t < 16 && !g.done; t += 0.05) g.update(0.05);
+  assert.equal(g.hit, true);
+  assert.deepEqual(sounds, ['hit']);
+});

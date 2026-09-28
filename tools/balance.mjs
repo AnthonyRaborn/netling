@@ -31,7 +31,7 @@ export const ARCHETYPES = {
   },
 };
 
-function checkIn(s, p, now, rng, ctx) {
+export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
   const useItem = (id) => {
     const slot = s.inventory.indexOf(id);

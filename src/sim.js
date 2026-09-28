@@ -1,5 +1,6 @@
 // Netling simulation core. Pure-ish: every function takes the state, a time
 // (ms epoch) and an rng, so tests can drive it deterministically.
+import { accessoryById, rollWornAccessory } from './accessories.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 1;
@@ -61,6 +62,26 @@ export const CFG = {
   overflowWindowMin: 45,
   overflowCrashIntegrity: 15,
   rebootMin: 20,
+  // Integrity recovers whenever nothing is wrong, faster while it rests in the dark or naps.
+  // Tuned so an attentive player can bring it from 0 to 100 in about 16 hours with care actions.
+  integrityRegenPerHour: 5,
+  integrityRestRegenPerHour: 8,
+  careIntegrity: 4, // COOL, and PURGE with something to purge (PATCH already restores 10)
+  // A stray netling drops by to play: awake only, no response needed.
+  visitChancePerHour: 0.03,
+  visitMinMin: 5,
+  visitMaxMin: 10,
+  visitSync: 15,
+  visitHeat: 10,
+  visitItemChance: 0.1,
+  visitAccessoryChance: 0.01,
+  visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
+  // Netrun uplink cooldown by stage, cut by clean jack-outs and overclock chips, never below the floor:
+  // any sooner and corp sweeps pick up the trail.
+  runCooldownMin: { baby: 240, teen: 210, adult: 180 },
+  runCooldownFloorMin: 120,
+  runCleanCutMin: 60,
+  overclockCutMin: 60,
 };
 
 // Timed events: what the alert bar calls them and how long there is to respond.
@@ -89,13 +110,16 @@ export const ITEMS = {
   blackice: { name: 'Black ICE shard', desc: '+40 Sync, +20 Heat, may carry a virus. Leans indie and unstable.', awake: true },
   booster: { name: 'Signal booster', desc: 'Your next mini-game win counts double.', awake: true },
   memory: { name: 'Memory shard', desc: 'Rewrites one of its quirks at random.' },
+  repair: { name: 'Repair kit', desc: 'Restores 40 Integrity. Works while asleep.' },
+  overclock: { name: 'Overclock chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
 };
 
 // Weighted drop tables per source.
 const DROPS = {
-  win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, memory: 1 },
-  hide: { blackice: 2, memory: 1, coolant: 1 },
-  comply: { voucher: 3, antivirus: 1 },
+  win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, repair: 2, memory: 1, overclock: 1 },
+  hide: { blackice: 2, memory: 1, coolant: 1, overclock: 1 },
+  comply: { voucher: 3, antivirus: 1, repair: 1 },
+  visit: { coolant: 2, booster: 2, repair: 2, memory: 1, overclock: 1 },
 };
 
 // What each adult form leaves behind for the next generation.
@@ -236,6 +260,9 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     rootUsed: false,
     rootCooling,
     lastRunEndAge: null,
+    runCooldownCut: 0,
+    visit: null,
+    visitAccGifts: 0,
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
     trait: fragment?.trait ?? null,
     inheritedQuirk,
@@ -327,7 +354,8 @@ function step(s, t, rng) {
   }
   s.sinceFed++;
 
-  if (!s.virus && !shielded(s)) {
+  // No fresh infections while it rests: it's offline, not browsing.
+  if (!s.virus && !shielded(s) && !rest) {
     let perHour = CFG.virusBasePerHour + CFG.virusPerCachePerHour * s.cache;
     if (s.trait === 'hardened') perHour *= 0.5;
     perHour *= mod(s, 'virusMult');
@@ -345,13 +373,16 @@ function step(s, t, rng) {
   if (s.cache >= 3) dInt -= 5;
   if (st.heat >= 85) dInt -= 8;
   if (st.charge <= 0) dInt -= 6;
-  if (dInt === 0) dInt = 3;
+  // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
+  const deepRest = s.nap || (s.asleep && !s.lightsOn);
+  if (dInt === 0) dInt = deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour;
   if (s.trait === 'volatile') dInt -= 1;
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
   else if (!rest && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
 
+  stepVisit(s, t, rng);
   stepEvents(s, t, rng);
 
   checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
@@ -369,6 +400,11 @@ function step(s, t, rng) {
 function stepEvents(s, t, rng) {
   const st = s.stats;
   if (s.event) {
+    // Its timer holds overnight: nothing lands while it sleeps. It picks up again at wake-up.
+    if (s.asleep) {
+      s.event.startedAge++;
+      return;
+    }
     if (eventMinutesLeft(s) > 0) return;
     const type = s.event.type;
     s.event = null;
@@ -409,7 +445,51 @@ function stepEvents(s, t, rng) {
     st.charge = clamp(st.charge + 10);
     s.lastSurgeAt = t;
     log(s, t, '> !! power surge. running hot.');
+  } else if (!s.visit && !s.run && rebootMinutesLeft(s) === 0 && rng() < CFG.visitChancePerHour / 60) {
+    startVisit(s, t, rng);
   }
+}
+
+// --- visitors ------------------------------------------------------------------------------
+
+function startVisit(s, t, rng) {
+  const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
+  const form = pick(Object.keys(SPECIES), rng);
+  // Never the host's own colors, so the two stay easy to tell apart.
+  const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
+  let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));
+  if (own >= 0 && palette >= own) palette++;
+  const accessory = rng() < CFG.visitWearsAccessoryChance ? rollWornAccessory(rng) : null;
+  s.visit = { startedAge: s.ageMin, len, form, palette, accessory };
+  const wearing = accessory ? ` in a ${accessoryById(accessory).name.toLowerCase()}` : '';
+  log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
+}
+
+// While a visitor is here, Sync and Heat rise a little each minute. It leaves when time's up,
+// or early if the netling rests, crashes or jacks in. Now and then it leaves a gift.
+function stepVisit(s, t, rng) {
+  const v = s.visit;
+  if (!v) return;
+  if (resting(s) || s.run || rebootMinutesLeft(s) > 0) {
+    s.visit = null;
+    log(s, t, '> the visitor logged off.');
+    return;
+  }
+  s.stats.sync = clamp(s.stats.sync + CFG.visitSync / v.len);
+  s.stats.heat = clamp(s.stats.heat + CFG.visitHeat / v.len);
+  if (s.ageMin - v.startedAge < v.len) return;
+  s.visit = null;
+  let gift = '';
+  if (rng() < CFG.visitAccessoryChance) {
+    // The UI picks which accessory (it knows what's already owned): see drainAccessoryInbox.
+    s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
+    gift = ' it left something stylish behind.';
+  } else if (rng() < CFG.visitItemChance) {
+    const id = rollTable(DROPS.visit, rng);
+    const name = ITEMS[id].name;
+    gift = grantItem(s, id).includes('full') ? ` it left a ${name}, but inventory is full.` : ` it left a gift: ${name}.`;
+  }
+  log(s, t, `> the visitor logged off.${gift}`);
 }
 
 function infect(s, damage) {
@@ -425,6 +505,22 @@ function crash(s) {
 }
 
 export const rebootMinutesLeft = (s) => Math.max(0, (s.rebootUntilAge ?? 0) - s.ageMin);
+
+// --- netrun uplink cooldown ----------------------------------------------------------------
+// run.js starts and ends runs; the clock lives here so items can shorten it.
+
+export function runCooldownTotal(s) {
+  const base = CFG.runCooldownMin[s.stage] ?? CFG.runCooldownMin.baby;
+  return Math.max(CFG.runCooldownFloorMin, base - (s.runCooldownCut ?? 0));
+}
+
+export function runCooldownLeft(s) {
+  if (s.lastRunEndAge == null) return 0;
+  return Math.max(0, s.lastRunEndAge + runCooldownTotal(s) - s.ageMin);
+}
+
+// At the floor, nothing makes it shorter: any sooner and corp sweeps pick up the trail.
+export const runCooldownAtFloor = (s) => runCooldownTotal(s) <= CFG.runCooldownFloorMin;
 
 export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
 
@@ -518,6 +614,9 @@ export function migrate(s) {
   s.nap ??= null;
   s.lastNapEndAge ??= null;
   s.rebootUntilAge ??= null;
+  s.runCooldownCut ??= 0;
+  s.visit ??= null;
+  s.visitAccGifts ??= 0;
   return s;
 }
 
@@ -628,6 +727,11 @@ export function itemBlockReason(s, slot) {
   const id = s.inventory?.[slot];
   if (!id) return 'empty slot.';
   if (ITEMS[id].awake && resting(s)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
+  if (id === 'repair' && s.stats.integrity >= 100) return 'integrity already at 100.';
+  if (id === 'overclock') {
+    if (runCooldownLeft(s) === 0) return 'the uplink is already open.';
+    if (runCooldownAtFloor(s)) return 'laying low from corp sweeps. it can\'t go any faster.';
+  }
   return null;
 }
 
@@ -734,6 +838,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'cool': {
       if (st.heat < 30) return fail('already running cool.');
       st.heat = clamp(st.heat - 35);
+      st.integrity = clamp(st.integrity + CFG.careIntegrity);
       res = ok('coolant flushed.', 'cool');
       break;
     }
@@ -742,12 +847,14 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         s.event = null;
         s.cache = 0;
         s.axes.stability += 0.5;
+        st.integrity = clamp(st.integrity + CFG.careIntegrity);
         res = ok('buffers flushed. overflow contained.', 'purge');
         break;
       }
       if (s.cache === 0) return fail('cache is clean.');
       s.cache = 0;
       s.axes.stability += 0.5;
+      st.integrity = clamp(st.integrity + CFG.careIntegrity);
       res = ok('cache purged.', 'purge');
       break;
     }
@@ -825,6 +932,14 @@ function useItem(s, id, rng) {
     case 'booster':
       s.buffs.boost = true;
       return `${name} armed. next win counts double.`;
+    case 'repair':
+      st.integrity = clamp(st.integrity + 40);
+      return `${name} applied. integrity restored.`;
+    case 'overclock': {
+      const before = runCooldownLeft(s);
+      s.runCooldownCut = (s.runCooldownCut ?? 0) + CFG.overclockCutMin;
+      return `${name} slotted. uplink cooldown cut by ${before - runCooldownLeft(s)}m.`;
+    }
     case 'memory': {
       const keys = ['palette', 'pitch', 'idle', 'favPacket'];
       const key = keys[Math.floor(rng() * keys.length)];
