@@ -19,7 +19,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
 | [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Fixed |
-| [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
+| [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Fixed |
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
@@ -87,6 +87,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-06
 
 **"No dependencies" ignores the font.** Severity Low.
+
+**Status: Fixed.** VT323 is now served from `fonts/` (with its OFL license) through an `@font-face` rule; the Google Fonts links and the service worker's font hosts are gone, the font is in `SHELL`, and Pages copies `fonts/`. A smoke scenario asserts no third-party requests.
 
 - `index.html` loads VT323 from Google Fonts, and the service worker caches those hosts. First launch with no network shows the fallback monospace font (canvas text included) until a cached copy exists. It also sends a request to a third party. Self-hosting the font file would remove both.
 

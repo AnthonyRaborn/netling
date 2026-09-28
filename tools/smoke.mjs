@@ -49,8 +49,7 @@ const browser = await chromium.launch();
 const results = [];
 async function scenario(name, fn, { allow = [], contextInit } = {}) {
   const ctx = await browser.newContext({ acceptDownloads: true });
-  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-  if (contextInit) await ctx.addInitScript(contextInit);
+    if (contextInit) await ctx.addInitScript(contextInit);
   const errors = [];
   const expected = (text) => allow.some((re) => re.test(text));
   const open = async (url = BASE, init) => {
@@ -59,7 +58,7 @@ async function scenario(name, fn, { allow = [], contextInit } = {}) {
     page.on('pageerror', (e) => expected(e.message) || errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => {
       const text = m.text();
-      if (m.type() === 'error' && !/favicon|net::ERR_FAILED|fonts|ERR_INTERNET_DISCONNECTED/.test(text) && !expected(text)) errors.push(`console: ${text}`);
+      if (m.type() === 'error' && !/favicon|net::ERR_FAILED|ERR_INTERNET_DISCONNECTED/.test(text) && !expected(text)) errors.push(`console: ${text}`);
     });
     await page.goto(url);
     await page.waitForTimeout(600);
@@ -346,6 +345,21 @@ await scenario('offline: service worker serves every module', async ({ open }) =
     await serverUp();
   }
 }, { allow: [/Failed to load resource/] });
+
+await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
+  const foreign = [];
+  ctx.on('request', (r) => {
+    if (!r.url().startsWith(`http://localhost:${PORT}/`) && !r.url().startsWith('data:')) foreign.push(r.url());
+  });
+  const page = await open();
+  await page.waitForTimeout(500);
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.load("16px 'VT323'");
+    return document.fonts.check("16px 'VT323'") && [...document.fonts].some((f) => f.family.includes('VT323') && f.status === 'loaded');
+  });
+  assert(loaded, 'VT323 did not load from the local file');
+  assert(foreign.length === 0, `third-party requests: ${foreign.join(', ')}`);
+});
 
 await scenario('unreadable save is set aside, then downloadable and deletable', async ({ open }) => {
   const page = await open(BASE, seedRaw({ 'netling.save': '{"saveVersion":1,"stage":"zombie"}', 'netling.onboarding': '"done"' }));
