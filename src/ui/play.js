@@ -44,6 +44,18 @@ export function dropSession(err) {
   flashStatus(run ? 'the run crashed and was aborted. your netling is fine.' : 'the game crashed and was closed.', 4000);
 }
 
+// A mini-game or netrun that belongs to a netling that has flatlined (or been replaced) is closed
+// without counting anything: no result, no progress, no loot.
+export function closeStaleSession() {
+  const s = app.session;
+  if (!s) return;
+  const stale = app.state.stage === 'dead' || (s.pet && s.pet !== app.state);
+  if (!stale) return;
+  app.session = null;
+  $('pad-quit').textContent = 'QUIT (ESC)';
+  showPanel('controls');
+}
+
 // Pad and keyboard input for the running session, with the same safety net as the render loop.
 function sendInput(fn) {
   try {

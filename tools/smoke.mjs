@@ -9,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
+import { startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -781,6 +782,21 @@ await scenario('flatline screen and next generation', async ({ open }) => {
   await page.waitForTimeout(300);
   const s = await saved(page);
   assert(s.generation === 2 && s.stage === 'script', `next gen not compiled: ${s.generation} ${s.stage}`);
+});
+
+await scenario('a netling that dies during a netrun closes the run screen', async ({ open }) => {
+  const s = awakeNetling({ stage: 'adult', form: 'daemon', teenForm: 'kernel' });
+  startRun(s, 'public', Math.random);
+  s.ageMin = 7 * 24 * 60 - 1; // its last minute
+  s.lastTick = Date.now() - 58_000; // the minute completes a couple of seconds after load
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.waitForSelector('#flatline:not([hidden])', { timeout: 8000 });
+  assert(!(await visible(page, '#pad')), 'the run pad stayed open after death');
+  assert(await visible(page, '#controls'), 'home controls not restored');
+  await page.click('#fl-next');
+  await page.waitForTimeout(300);
+  assert(!(await visible(page, '#pad')), 'the old run came back after compiling');
 });
 
 await scenario('hibernate from the system dialog', async ({ open }) => {

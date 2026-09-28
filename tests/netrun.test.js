@@ -373,3 +373,24 @@ test('closing a run keeps the log at its usual length', () => {
   assert.equal(s.log.length, 50);
   assert.match(s.log.at(-1).msg, /^> netrun/);
 });
+
+test('a netling that flatlines mid-run takes the run with it', () => {
+  const s = pet('adult');
+  startRun(s, 'public', mulberry32(4));
+  s.ageMin = CFG.lifespanMin - 1;
+  tick(s, s.lastTick + 5 * MIN, noRng);
+  assert.equal(s.stage, 'dead');
+  assert.equal(s.run, null);
+  assert.match(s.log.at(-1).msg, /FLATLINE/);
+  assert.ok(s.log.some((e) => /loot lost/.test(e.msg)));
+});
+
+test('a rescued flatline keeps the open run', () => {
+  const s = pet('adult');
+  s.rootAccess = true;
+  startRun(s, 'public', mulberry32(4));
+  s.careMistakes = CFG.maxMistakes;
+  tick(s, s.lastTick + MIN, noRng);
+  assert.notEqual(s.stage, 'dead');
+  assert.ok(s.run);
+});

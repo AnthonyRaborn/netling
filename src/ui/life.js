@@ -6,12 +6,14 @@ import { KEYS } from '../storage.js';
 import { $, app, codexComplete, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
+import { closeStaleSession } from './play.js';
 import { checkUnlocks, countAct, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
 
 export function advance() {
   if (app.lock || app.inactive) return; // on another device, or in another tab
   const state = app.state;
   tick(state, now());
+  closeStaleSession();
   if (state.stage !== app.lastStage) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
     if (state.stage === 'teen' || state.stage === 'adult') {

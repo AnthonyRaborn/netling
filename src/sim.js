@@ -640,6 +640,9 @@ function flatline(s, t, cause) {
   s.stage = 'dead';
   s.deathCause = cause;
   s.diedAt = t;
+  // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
+  if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
+  s.run = null;
   const form = FORMS[s.form] ? s.form : leaningForm(s);
   s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
