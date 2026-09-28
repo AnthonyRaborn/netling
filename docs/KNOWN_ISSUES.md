@@ -18,7 +18,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Open |
 | [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
 | [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
-| [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
+| [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Fixed |
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
@@ -78,6 +78,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-05
 
 **Storage is rewritten every second.** Severity Low.
+
+**Status: Fixed.** The clock tick now saves at most every 5 seconds (and on stage changes), actions still save at once, and `flushSave` writes when the page is hidden or closing. Verified by the smoke run only after this commit; see the commit that follows if it needed a fix.
 
 - `advance()` ends with `save()` and runs each second (and on every action), so the whole netling, including its log and any open netrun map, is serialized and written continuously while the tab is open.
 - It is cheap for a save this small, but it costs battery on phones and makes storage-full failures appear as soon as space runs out rather than at a meaningful moment. Saving on change or every N seconds would do.

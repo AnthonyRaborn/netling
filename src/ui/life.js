@@ -9,12 +9,29 @@ import { recordForm } from './archive.js';
 import { closeStaleSession } from './play.js';
 import { checkUnlocks, countAct, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
 
+// The clock tick runs every second, but the netling only needs writing now and then: actions save
+// themselves, and a hidden or closing page flushes (see flushSave).
+const SAVE_EVERY_MS = 5000;
+let lastClockSave = -Infinity;
+
+function saveClock() {
+  lastClockSave = performance.now();
+  save();
+}
+
+// For when the page is hidden or about to close: write what the clock has done since the last save.
+export function flushSave() {
+  if (app.lock || app.inactive) return;
+  saveClock();
+}
+
 export function advance() {
   if (app.lock || app.inactive) return; // on another device, or in another tab
   const state = app.state;
   tick(state, now());
   closeStaleSession();
-  if (state.stage !== app.lastStage) {
+  const stageChanged = state.stage !== app.lastStage;
+  if (stageChanged) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
     if (state.stage === 'teen' || state.stage === 'adult') {
       app.flashUntil = performance.now() + 2400;
@@ -37,7 +54,7 @@ export function advance() {
   if (visiting && !app.lastVisit) sfx('visit', state.quirk.pitch);
   app.lastVisit = visiting;
   if (state.visitAccGifts > 0) drainAccessoryInbox();
-  save();
+  if (stageChanged || performance.now() - lastClockSave >= SAVE_EVERY_MS) saveClock();
   updateHUD();
 }
 

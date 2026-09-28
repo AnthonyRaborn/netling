@@ -15,7 +15,7 @@ import { dropSession, initPlay, openRun } from './ui/play.js';
 import { importFromUrl, initSystem, protectStorage, renderTestBadge, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
-import { advance, initLife, showFlatline } from './ui/life.js';
+import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -115,8 +115,10 @@ if (DEV) {
 }
 
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) advance();
+  if (document.hidden) flushSave();
+  else advance();
 });
+addEventListener('pagehide', flushSave);
 
 // --- boot ---
 

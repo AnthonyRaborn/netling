@@ -81,7 +81,7 @@ const assert = (cond, msg) => {
 };
 const visible = (page, sel) => page.locator(sel).isVisible();
 const saved = (page, key = 'netling.save') => page.evaluate((k) => JSON.parse(localStorage.getItem(k)), key);
-// The clock loop saves every second; count this tab's saves for a moment.
+// The clock loop saves every few seconds (SAVE_EVERY_MS in ui/life.js); wait for one of this tab's saves.
 async function loopRunning(page) {
   return page.evaluate(async () => {
     let saves = 0;
@@ -90,7 +90,7 @@ async function loopRunning(page) {
       if (k === 'netling.save') saves++;
       return set.call(this, k, v);
     };
-    await new Promise((r) => setTimeout(r, 2200));
+    for (let i = 0; i < 70 && !saves; i++) await new Promise((r) => setTimeout(r, 100));
     Storage.prototype.setItem = set;
     return saves > 0;
   });
