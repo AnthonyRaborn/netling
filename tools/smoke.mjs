@@ -387,7 +387,7 @@ await scenario('a save from a newer version is set aside with its own notice', a
   const page = await open(BASE, seedRaw({ 'netling.save': newer, 'netling.onboarding': '"done"' }));
   await page.waitForTimeout(1500);
   const r = await page.evaluate(() => ({ kept: localStorage.getItem('netling.corruptSave'), status: document.getElementById('status').textContent }));
-  assert(r.kept?.includes('"saveVersion":99'), 'the newer save was not kept');
+  assert(JSON.parse(r.kept ?? 'null')?.raw === newer, 'the newer save was not kept');
   assert(/newer version/.test(r.status), `no newer-version notice: ${r.status}`);
 });
 
