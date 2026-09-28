@@ -1,3 +1,4 @@
+import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { act, alertReason, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, GAME_IDS, MIN } from '../src/sim.js';

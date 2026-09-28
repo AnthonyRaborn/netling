@@ -13,17 +13,17 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 190 tests in 20 files and all pass. The smoke test has 38 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 227 tests in 24 files and all pass. The smoke test has 41 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
 ## Unit tests
 
-They use `node:test` and `node:assert/strict`, import the modules under test directly, and never touch a DOM. Time and randomness are injected.
+They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls), and per-file fakes for `AudioContext`, `Notification` and the service worker API. `tests/helpers/` is not matched by the test glob.
 
 ### Conventions used by the tests
 
-- `TZ=UTC` is set by the npm script. Tests start at noon UTC (`Date.UTC(2026, 8, 26, 12, 0)`) so a new netling is awake, and set `quirk.sleepOffset = 0`.
+- Tests start at noon UTC (`Date.UTC(2026, 8, 26, 12, 0)`) so a new netling is awake, and set `quirk.sleepOffset = 0`. The simulation reads the local hour, so the files that depend on that import `tests/helpers/utc.js` first (it sets `TZ=UTC`); the npm script also sets it. Run in Tokyo, Los Angeles and Kiritimati time, the whole suite passes.
 - `const noRng = () => 0.999` means "no random event ever fires". Tests that want a specific random outcome pass `() => 0` or a seeded `mulberry32(seed)`.
 - A helper such as `booted()` compiles a script with `createScript` and ticks it past `CFG.bootMinutes`.
 - Advance time with `tick(s, T0 + minutes * MIN, rng)`; call `act(s, action, now, rng, opts)` for care.
@@ -49,6 +49,10 @@ They use `node:test` and `node:assert/strict`, import the modules under test dir
 | `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
+| `content.test.js` | 13 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game loads |
+| `draw.test.js` | 7 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument |
+| `audio.test.js` | 7 | Sound playback against a fake `AudioContext`: notes and pitch, sound packs, the low-frequency floor, mute and volume, and a scan that every sound name used in the source really exists |
+| `notify.test.js` | 6 | Notification support, permission, service-worker delivery and fallback, and quiet failure |
 | `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
@@ -113,7 +117,8 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 
 Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
 
-- `render.js`, `audio.js`, `notify.js`, `ui/*` and `netrun/view.js` have no unit tests; the smoke test covers their main paths.
+- `ui/*` (including `advance`, the flatline handling and `dropSession`) and `ui/gamepad.js` still have no unit tests: they need a real DOM, so only the smoke test covers them. Rendering, the run view, mini-game drawing, audio, notifications and the content tables are unit tested (KI-16).
+- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html` and playtesting cover that.
 - A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
 - Upgrade steps are tested through an injected step table and the frozen version 1 fixture. `cleanSave` cannot be pointed at a fake table, so its wiring to real steps only gets exercised once a first real step exists.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.

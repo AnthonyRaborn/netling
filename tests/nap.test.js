@@ -1,3 +1,4 @@
+import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { act, blockReason, createScript, tick, mulberry32, napBlockReason, napMinutesLeft, CFG, MIN } from '../src/sim.js';

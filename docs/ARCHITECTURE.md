@@ -56,7 +56,7 @@ These explain most decisions in the code.
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 20 unit test files (plus `tests/fixtures/`), run with `node --test` |
+| `tests/` | 24 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
 | `tools/` | Browser smoke test, balance simulators, icon generator |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
@@ -197,7 +197,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (38 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (41 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

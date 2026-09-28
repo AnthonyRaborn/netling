@@ -1,6 +1,6 @@
 # Known issues and risks
 
-Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11 are fixed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
+Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11, KI-16 and KI-18 are addressed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
 
 - **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
 - **Read**: derived by reading the code; not run.
@@ -30,7 +30,7 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 | [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
 | [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Open |
 | [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
-| [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Open |
+| [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Mostly fixed |
 | [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Open |
 
 ## Findings
@@ -173,6 +173,8 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 
 **Test coverage gaps.** Severity Gap.
 
+**Status: Mostly fixed.** New unit tests cover rendering, mini-game drawing, the run view (a whole run in every region), audio, notifications and the content tables (`draw`, `audio`, `notify`, `content` tests), plus fixtures for saves. The suite also passes in any time zone now (`tests/helpers/utc.js`): before, five files failed outside UTC. Still smoke-only: `ui/*` and `ui/gamepad.js`, which need a real DOM. The description below is the original finding.
+
 - Covered well: `sim`, netrun rules, sanitizing, transfer, storage, lease, events, items, root access, mini-game logic (headless).
 - Only covered by the browser smoke test (or not at all): `render.js`, `sprites.js` (only anchors are unit tested), `audio.js`, `notify.js`, `ui/*` (including `advance`, the flatline handling and `dropSession`), `netrun/view.js`, `ui/gamepad.js`.
 - Since the fixes, a flatline with an open netrun (KI-01) and the DEFEND timing (KI-03) are covered; a save with a different `saveVersion` is still only tested as "rejected".
@@ -188,7 +190,7 @@ From [PLATFORMS.md](PLATFORMS.md), at the time of writing: enable Pages in the r
 
 Useful when deciding what to trust:
 
-- `npm test`: 176 tests passing at the commit these findings were made against (183 after the fixes below).
+- `npm test`: 176 tests passing at the commit these findings were made against (227 after the fixes and new coverage below).
 - `npm run balance` (300 runs per archetype) matches the README's old balance table within sampling noise: attentive 100% adult and 99% full life; casual 93% and 83%; worker 87% and 49% (README said 85% and 51%); neglectful 4% adult, dying around day 1; deliberate strategies reach their forms (Chrome 100%, Firewall 100%, Glitch 65%, Daemon 83%, Ghost 100%).
 - Every module reachable from `main.js` is in the service worker's `SHELL`.
 - The codex has 22 fragments (4, 5, 5, 4, 4 by region), as documented.

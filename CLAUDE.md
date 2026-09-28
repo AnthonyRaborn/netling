@@ -5,7 +5,7 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 190 unit tests, TZ=UTC, Node 22
+npm test          # 227 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype
 npm run serve     # http://localhost:5174
@@ -34,7 +34,7 @@ npm run serve     # http://localhost:5174
 - Develop on the branch you are given; do not open a pull request unless asked.
 - Say plainly what you did not run (the smoke test in particular, which needs Playwright and a browser).
 - Avoid emojis and em dashes in written text.
-- Add tests for rule changes (`tests/*.test.js`, deterministic: inject `now` and `rng`; use `TZ=UTC`).
+- Add tests for rule changes (`tests/*.test.js`, deterministic: inject `now` and `rng`; import `./helpers/utc.js` first if the test depends on the time of day).
 
 ## Known traps
 
