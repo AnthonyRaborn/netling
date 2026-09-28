@@ -1,6 +1,6 @@
 # Known issues and risks
 
-Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11, KI-16 and KI-18 are addressed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
+Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11 and KI-18 are fixed, KI-16 is mostly fixed (only `ui/*` and the gamepad remain smoke-only), and KI-17's Tier 1 is done (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
 
 - **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
 - **Read**: derived by reading the code; not run.
@@ -8,7 +8,7 @@ Found by reading the code at commit `ea87757` (2026-09-28). The **Status** colum
 
 Severity: **Medium** (wrong behaviour a player could hit, or a latent trap), **Low** (cosmetic, rare, or cleanup), **Note** (works as coded, but easy to misunderstand).
 
-Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLATFORMS.md)). The original findings were made without a browser; the fixes were checked with the unit tests and the full Playwright smoke suite in headless Chromium.
+Not checked by me: real-device behaviour beyond what the maintainer confirmed (Pages live, PWA updates, install on macOS; see [PLATFORMS.md](PLATFORMS.md)). The original findings were made without a browser; the fixes were checked with the unit tests and the full Playwright smoke suite in headless Chromium.
 
 ## Summary
 
@@ -31,7 +31,7 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 | [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Open |
 | [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
 | [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Mostly fixed |
-| [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Open |
+| [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Tier 1 done |
 
 ## Findings
 
@@ -183,6 +183,8 @@ Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLAT
 ### KI-17
 
 **Unfinished platform steps.** Open work, not a defect.
+
+**Status: Tier 1 done.** The maintainer confirmed that GitHub Pages is live, pushes to `main` update https://anthonyraborn.github.io/netling, the installed PWA receives the updates, and a manual install on macOS worked. Testing on Android, Windows and the Steam Deck, and all native wrappers, are untested stretch goals (see PLATFORMS.md). The description below is the original finding.
 
 From [PLATFORMS.md](PLATFORMS.md), at the time of writing: enable Pages in the repository settings, confirm the Pages workflow runs (it had not run when the doc was written), and manually install and play on Android, Windows, macOS and Steam Deck. Tier 2 native wrappers are unstarted and untested.
 
