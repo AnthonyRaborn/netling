@@ -1,4 +1,6 @@
 // Network-first service worker: always fresh when online, fully playable offline.
+// Bump the name when you want players' old caches dropped. Add every new module or asset to SHELL
+// (tests/shell.test.js checks the modules), or the app won't install for offline use.
 const CACHE = 'netling-v34';
 const SHELL = [
   './',

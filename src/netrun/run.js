@@ -105,7 +105,7 @@ function note(run, msg) {
   run.messages.push(msg);
 }
 
-// Picks up the region's next unread fragment, if any. Returns a log suffix.
+// Rolls an accessory this run doesn't have yet, if any (never in the tutorial). Returns a log suffix.
 function takeAccessory(run, rng) {
   if (REGIONS[run.region].noStyleDrops) return '';
   const id = rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region);
@@ -114,6 +114,7 @@ function takeAccessory(run, rng) {
   return ` accessory: ${accessoryById(id).name}!`;
 }
 
+// Picks up the region's next unread fragment, if any. Returns a log suffix.
 function takeFragment(run) {
   const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
   if (!id) return '';

@@ -1,7 +1,7 @@
-// Accessories: cosmetic pixel add-ons. slot 'wear' items are drawn over the pet; slot 'prop' items sit on the
-// ground beside it. source 'earned' items are granted by events, never sold or dropped.
 // Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory:
 // placement comes from anchors computed from the sprite's own pixels, not per-form tables.
+// Props (PROPS below) are style items too, but sit on the ground beside the pet in their own slot.
+// source 'earned' items are granted by events, never sold or dropped.
 
 export const RARITY = {
   common: { weight: 6, hint: 'sold in markets.' },

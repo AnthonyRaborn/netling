@@ -22,7 +22,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Fixed |
 | [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
 | [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
-| [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
+| [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Fixed |
 | [KI-10](#ki-10) | Low | Read | Duplicated helpers | Fixed |
 | [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Open |
 | [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
@@ -111,6 +111,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-09
 
 **Docs and comments that disagreed with the code.** Severity Low.
+
+**Status: Fixed.** README rewritten earlier; the three misplaced or duplicated comments are fixed, `sw.js` now has a reminder about `CACHE` and `SHELL`, and `gallery.html` sizes its accessory grid from the list instead of a fixed 20 columns. The 14 versus 16 hour Integrity recovery figure was never measured; the README no longer quotes it, and the `sim.js` comment is unchanged.
 
 - The old README said accessories number 20; the code has 24 wearable accessories plus 4 props (22 wearables are findable, 2 are earned). `gallery.html` also lays out a fixed 20-column grid. (README trimmed in this pass.)
 - The old README said a full Integrity recovery takes "about 14 hours"; the comment on `integrityRegenPerHour` in `sim.js` says "about 16 hours". Neither was measured here. (README trimmed in this pass.)
