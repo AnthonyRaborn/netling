@@ -48,7 +48,11 @@ export function dropSession(err) {
 // without counting anything: no result, no progress, no loot.
 export function closeStaleSession() {
   const s = app.session;
-  if (!s) return;
+  // A DEFEND that ended without reporting (a crash, a reload) must not hold the intrusion forever.
+  if (!s) {
+    if (app.state.event?.defending) delete app.state.event.defending;
+    return;
+  }
   const stale = app.state.stage === 'dead' || (s.pet && s.pet !== app.state);
   if (!stale) return;
   app.session = null;
@@ -193,10 +197,12 @@ function startDefense() {
     return flashStatus(blocked);
   }
   const game = GAME_IDS[Math.floor(Math.random() * GAME_IDS.length)];
+  app.state.event.defending = true; // the intrusion's timer holds while the defense runs
   app.session = new GameSession(game, {
     sound: (name) => sfx(name, app.state.quirk.pitch),
     onFinish: (won) => {
       app.session = null;
+      if (app.state.event) delete app.state.event.defending;
       countGame();
       showPanel('controls');
       tick(app.state, now());

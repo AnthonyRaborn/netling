@@ -16,7 +16,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 |---|---|---|---|---|
 | [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one | Fixed |
 | [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Open |
-| [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Open |
+| [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
 | [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Open |
 | [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
 | [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
@@ -60,6 +60,8 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 ### KI-03
 
 **A DEFEND result is discarded if the intrusion lands during the mini-game.** Severity Low.
+
+**Status: Fixed.** While a DEFEND mini-game runs, the UI sets `event.defending` and `stepEvents` holds the intrusion timer (like sleep does). The flag is cleared on finish, or by `closeStaleSession` if the session ends without reporting, and `cleanSave` never keeps it. Unit tests added. The description below is the original finding.
 
 - `ui/play.js` `startDefense` starts a random mini-game with up to 60 minutes on the intrusion timer. The simulation keeps ticking. If the timer runs out while the game is open, `stepEvents` clears the event and installs the virus.
 - On finish, `act('defend')` is refused with "no intrusion to defend against" and the flash message shows that, even if the player just won. The virus and the -10 Integrity have already landed.

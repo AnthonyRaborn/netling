@@ -401,7 +401,9 @@ function stepEvents(s, t, rng) {
   const st = s.stats;
   if (s.event) {
     // Its timer holds overnight: nothing lands while it sleeps. It picks up again at wake-up.
-    if (s.asleep) {
+    // It also holds while the player is fighting an intrusion off (`defending`, set by the UI and
+    // never trusted from storage), so a win can't arrive after the virus already landed.
+    if (s.asleep || s.event.defending) {
       s.event.startedAge++;
       return;
     }
