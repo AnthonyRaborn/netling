@@ -12,32 +12,34 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 
 ## Summary
 
-| Id | Severity | Confidence | Title |
-|---|---|---|---|
-| [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one |
-| [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save |
-| [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running |
-| [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak |
-| [KI-05](#ki-05) | Low | Read | Storage is rewritten every second |
-| [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request |
-| [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" |
-| [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs |
-| [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code |
-| [KI-10](#ki-10) | Low | Read | Duplicated helpers |
-| [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer |
-| [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone |
-| [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred |
-| [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost |
-| [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome |
-| [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete |
-| [KI-16](#ki-16) | Gap | Read | Test coverage gaps |
-| [KI-17](#ki-17) | Open work | Read | Unfinished platform steps |
+| Id | Severity | Confidence | Title | Status |
+|---|---|---|---|---|
+| [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one | Fixed |
+| [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Open |
+| [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Open |
+| [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Open |
+| [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Open |
+| [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Open |
+| [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Open |
+| [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Open |
+| [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Open |
+| [KI-10](#ki-10) | Low | Read | Duplicated helpers | Open |
+| [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Open |
+| [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
+| [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
+| [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
+| [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Open |
+| [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Open |
+| [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Open |
+| [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Open |
 
 ## Findings
 
 ### KI-01
 
 **A netling can die mid-netrun and leave the run screen bound to the dead one.** Severity Medium.
+
+**Status: Fixed.** `flatline()` now drops the open run, and `advance()` closes any session belonging to a dead or replaced netling (`closeStaleSession` in `ui/play.js`). Covered by two unit tests and a smoke scenario. The description below is the original finding.
 
 - `sim.js` `flatline()` sets the stage to `dead` but never touches `state.run`. Reproduced: a netling with an open run, aged to the last minutes of its life, ticks to `dead` with `run` still set (phase `map`).
 - In the UI, `ui/life.js` `advance()` calls `onFlatline()` and shows the flatline overlay, but nothing closes `app.session`. Neither `ui/play.js` nor `netrun/view.js` checks for a dead netling.
