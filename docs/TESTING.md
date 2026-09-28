@@ -13,7 +13,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-At commit `ea87757`, `npm test` runs 176 tests in 18 files and all pass. The smoke test has 33 scenarios; it was not run for this documentation pass.
+On this branch, `npm test` runs 183 tests in 19 files and all pass. The smoke test has 37 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -34,13 +34,13 @@ They use `node:test` and `node:assert/strict`, import the modules under test dir
 | File | Tests | Covers |
 |---|---|---|
 | `sim.test.js` | 27 | Compile and boot, drain, care mistakes, lights, neglect death, feeding, patch, leaning, inheritance, sleep window, evolution, form perks, migrate, Ghost rule, play, traces, alerts, clock rollback, Packet Feast |
-| `netrun.test.js` | 26 | Map connectivity for all regions, run gating, movement, jack out, disconnect, relay, abort, checkpoints, markets, anomalies, form abilities, fog, region locks, fragment order, codex grouping, accessories, the tutorial run |
+| `netrun.test.js` | 28 | Map connectivity for all regions, run gating, movement, jack out, disconnect, relay, abort, checkpoints, markets, anomalies, form abilities, fog, region locks, fragment order, codex grouping, accessories, the tutorial run, a flatline mid-run |
 | `recovery.test.js` | 14 | Integrity regeneration, care restores, quiet nights, event timers overnight, visitors, uplink cooldown, overclock, repair kit |
-| `sanitize.test.js` | 13 | Repairing every kind of stored data, hostile input, run validation, strict cleaning |
+| `sanitize.test.js` | 14 | Repairing every kind of stored data, hostile input, run validation, strict cleaning, stage and form agreement, future timers |
 | `items.test.js` | 10 | Inventory limits, each item, drops, keepsakes, discard |
 | `games.test.js` | 10 | Breach solvability, Dodge, Tune, Feast, session result and forfeit |
 | `accessories.test.js` | 10 | Sprite anchors, every accessory on every form, rarity rolls, regions, earned exclusion, props, colors |
-| `events.test.js` | 9 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
+| `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
 | `cosmetics.test.js` | 8 | Unlock conditions, hints, streaks, defaults, label |
 | `archive.test.js` | 7 | Dex, death records, lineage rows, back-compat |
@@ -48,6 +48,7 @@ They use `node:test` and `node:assert/strict`, import the modules under test dir
 | `transfer.test.js` | 7 | Round trip, whitespace tolerance, rejection messages, summary, rounding, per-key repair, size caps |
 | `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
+| `random.test.js` | 2 | The weighted pick |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `shell.test.js` | 1 | Every module reachable from `main.js` is in the service worker's `SHELL` |
@@ -112,7 +113,7 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
 
 - `render.js`, `audio.js`, `notify.js`, `ui/*` and `netrun/view.js` have no unit tests; the smoke test covers their main paths.
-- No test opens a netrun and lets the netling die (KI-01).
+- A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
 - No test loads a save with a different `saveVersion` and expects an upgrade, because there is no upgrade path (KI-02).
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
 

@@ -50,7 +50,7 @@ Recommendation: Electron, for consistency on a Linux target that can only be tes
 
 ### Code changes either wrapper needs
 
-- Bundle the VT323 font locally (it loads from Google Fonts today; wrappers have no service worker to cache it).
+- ~~Bundle the VT323 font locally.~~ Done: it is served from `fonts/` (KI-06), so wrappers need nothing extra.
 - Notifications through the wrapper's API. `registerServiceWorker()` already fails quietly where service workers don't run.
 - Save data is per app; transfer codes and the QR already move a netling between devices.
 

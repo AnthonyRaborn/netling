@@ -1,6 +1,6 @@
 # Known issues and risks
 
-Found by reading the code at commit `ea87757` (2026-09-28). Nothing here has been fixed. Each entry says how sure the finding is:
+Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01, 03 to 11 are fixed (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
 
 - **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
 - **Read**: derived by reading the code; not run.
@@ -8,7 +8,7 @@ Found by reading the code at commit `ea87757` (2026-09-28). Nothing here has bee
 
 Severity: **Medium** (wrong behaviour a player could hit, or a latent trap), **Low** (cosmetic, rare, or cleanup), **Note** (works as coded, but easy to misunderstand).
 
-Not checked: any behaviour in a real browser (the smoke test needs Playwright, which was not installed for this pass), the Pages deploy, and real-device behaviour (see [PLATFORMS.md](PLATFORMS.md)).
+Not checked: the Pages deploy and real-device behaviour (see [PLATFORMS.md](PLATFORMS.md)). The original findings were made without a browser; the fixes were checked with the unit tests and the full Playwright smoke suite in headless Chromium.
 
 ## Summary
 
@@ -79,7 +79,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 
 **Storage is rewritten every second.** Severity Low.
 
-**Status: Fixed.** The clock tick now saves at most every 5 seconds (and on stage changes), actions still save at once, and `flushSave` writes when the page is hidden or closing. Verified by the smoke run only after this commit; see the commit that follows if it needed a fix.
+**Status: Fixed.** The clock tick now saves at most every 5 seconds (and on stage changes), actions still save at once, and `flushSave` writes when the page is hidden or closing.
 
 - `advance()` ends with `save()` and runs each second (and on every action), so the whole netling, including its log and any open netrun map, is serialized and written continuously while the tab is open.
 - It is cheap for a save this small, but it costs battery on phones and makes storage-full failures appear as soon as space runs out rather than at a meaningful moment. Saving on change or every N seconds would do.
@@ -171,7 +171,7 @@ Not checked: any behaviour in a real browser (the smoke test needs Playwright, w
 
 - Covered well: `sim`, netrun rules, sanitizing, transfer, storage, lease, events, items, root access, mini-game logic (headless).
 - Only covered by the browser smoke test (or not at all): `render.js`, `sprites.js` (only anchors are unit tested), `audio.js`, `notify.js`, `ui/*` (including `advance`, the flatline handling and `dropSession`), `netrun/view.js`, `ui/gamepad.js`.
-- No test covers a flatline with an open netrun (KI-01), the DEFEND timing case (KI-03), or a save with a different `saveVersion` beyond "rejected".
+- Since the fixes, a flatline with an open netrun (KI-01) and the DEFEND timing (KI-03) are covered; a save with a different `saveVersion` is still only tested as "rejected".
 - `npm test` sets `TZ=UTC`. Running `node --test` directly in another time zone was not tried, and the sim tests assume the noon-UTC start is awake.
 
 ### KI-17
@@ -184,7 +184,7 @@ From [PLATFORMS.md](PLATFORMS.md), at the time of writing: enable Pages in the r
 
 Useful when deciding what to trust:
 
-- `npm test`: 176 tests, all passing on this commit.
+- `npm test`: 176 tests passing at the commit these findings were made against (183 after the fixes below).
 - `npm run balance` (300 runs per archetype) matches the README's old balance table within sampling noise: attentive 100% adult and 99% full life; casual 93% and 83%; worker 87% and 49% (README said 85% and 51%); neglectful 4% adult, dying around day 1; deliberate strategies reach their forms (Chrome 100%, Firewall 100%, Glitch 65%, Daemon 83%, Ghost 100%).
 - Every module reachable from `main.js` is in the service worker's `SHELL`.
 - The codex has 22 fragments (4, 5, 5, 4, 4 by region), as documented.

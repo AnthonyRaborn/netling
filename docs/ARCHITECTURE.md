@@ -2,7 +2,7 @@
 
 How Netling is put together: what each file owns, how data flows, how the page boots, and the rules that keep it safe. Written against commit `ea87757`.
 
-Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering. There is no build step, no bundler and no runtime dependency (the VT323 font is the one external resource, loaded from Google Fonts). It is served as plain files and installs as a PWA.
+Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering. There is no build step, no bundler and no runtime dependency (the VT323 font is served from `fonts/`). It is served as plain files and installs as a PWA.
 
 ## Contents
 
@@ -41,6 +41,7 @@ These explain most decisions in the code.
 | `sw.js`, `manifest.webmanifest`, `icons/` | PWA shell |
 | `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
+| `src/random.js` | The shared weighted-pick helper |
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
 | `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
@@ -54,7 +55,7 @@ These explain most decisions in the code.
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 18 unit test files, run with `node --test` |
+| `tests/` | 19 unit test files, run with `node --test` |
 | `tools/` | Browser smoke test, balance simulators, icon generator |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
@@ -122,7 +123,7 @@ Rules of thumb:
 
 Two independent loops:
 
-- **Simulation**: `advance()` every 1000 ms, on `visibilitychange`, and before every player action. It calls `tick`, reacts to stage changes (boot chime, evolution flash, flatline handling), fires the surge and visitor effects, saves, and refreshes the HUD.
+- **Simulation**: `advance()` every 1000 ms, on `visibilitychange`, and before every player action. It calls `tick`, reacts to stage changes (boot chime, evolution flash, flatline handling), fires the surge and visitor effects, refreshes the HUD, and saves at most every 5 seconds (`SAVE_EVERY_MS` in `ui/life.js`; actions save immediately and `flushSave` runs when the page is hidden or closing). It also closes any session that belongs to a dead or replaced netling (`closeStaleSession`).
 - **Drawing**: `requestAnimationFrame`. The next frame is booked before drawing so one failed frame cannot stop the loop. The home screen redraws at about 10 fps (`IDLE_FRAME_MS = 100`) unless an animation, flash or surge is running; sessions run at full rate. `prefers-reduced-motion` switches the LCD to a calm mode.
 
 `now()` in `ui/app.js` is the game clock: real time plus dev skew, or the scaled test clock. Always use `now()`, never `Date.now()`, for anything the simulation sees.
@@ -166,7 +167,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 
 ## Offline, the service worker, and deploys
 
-- `sw.js` is **network-first**: it fetches every same-origin GET (and the two Google Fonts hosts) and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline.
+- `sw.js` is **network-first**: it fetches every same-origin GET and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline.
 - Install pre-caches the `SHELL` list. `addAll` fails as a whole if any listed file 404s, so a missing or misspelled entry breaks installation. `tests/shell.test.js` follows the static `import`/`export ... from` graph from `src/main.js` and checks that every module it reaches is listed (icons and other non-module assets are not checked). **When you add a file, add it to `SHELL`.**
 - `CACHE` (`netling-v34`) is a manual version name. Bumping it on release drops old caches on activate.
 - Notification clicks focus an open window or open the app.
@@ -195,7 +196,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (33 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (37 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

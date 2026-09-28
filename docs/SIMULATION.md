@@ -193,7 +193,7 @@ Details:
 - A **Corp voucher** used with no trace open sets `traceSkip`; the next trace roll is cancelled with a log line instead of opening.
 - An active **Antivirus shield** turns an intrusion roll into a log line ("bounced off").
 - **Reboot** (`rebootUntilAge`) refuses every action except `lights` for 20 minutes.
-- **Sleep holds timers**: while asleep, an open event's `startedAge` is bumped every minute so nothing lands overnight. Napping does not hold them.
+- **Sleep holds timers**: while asleep, an open event's `startedAge` is bumped every minute so nothing lands overnight. Napping does not hold them. An intrusion's timer also holds while its DEFEND mini-game is running (`event.defending`, set by the UI, cleared when the game ends and never accepted from storage), so a win cannot arrive after the virus has already landed.
 - **Hibernation** is blocked while any event is open.
 
 ## Visitors

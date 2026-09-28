@@ -51,7 +51,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 3. Add its id to `GAME_IDS` in `sim.js`. This automatically extends save cleaning, `migrate`, the netrun ICE pool, and the Ghost requirement (4 wins in every game).
 4. Add a button to the `#picker` nav in `index.html` (`data-game="<id>"`).
 5. Add the file to `SHELL` in `sw.js`.
-6. Consider a streak cosmetic in `cosmetics.js` and a row in `renderRecord` (`ui/archive.js`, which currently omits Feast, see KI-04).
+6. Consider a streak cosmetic in `cosmetics.js` and a row in `renderRecord` (`ui/archive.js`, which lists every game's best streak).
 7. Tests in `tests/games.test.js`.
 
 ### Add a form

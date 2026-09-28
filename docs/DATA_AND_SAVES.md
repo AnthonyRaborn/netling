@@ -25,7 +25,7 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 
 | Key | Value | Transfers | Notes |
 |---|---|---|---|
-| `netling.save` | The live netling | yes | Written about once a second while the tab is the caretaker |
+| `netling.save` | The live netling | yes | Written by the caretaker tab: on every action, at most every 5 seconds by the clock, and when the page is hidden or closing |
 | `netling.lineage` | Array of death records | yes | Appended on flatline by `ui/life.js` only |
 | `netling.dex` | Array of species ids seen | yes | Ids in `SPECIES` |
 | `netling.codex` | Array of fragment ids found | yes | Ids in `FRAGMENTS` |
@@ -128,7 +128,7 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 - **Strict** (imported codes): only known fields survive.
 - `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free").
 - Fragments are rebuilt from the dead netling if the stored one is unusable.
-- The sanitizer does not check consistency between fields (for example `stage: adult` with `form: bitling`). The game tolerates it but it is not a valid netling.
+- `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel or Stub, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
 
 ## Versioning and migration
 
