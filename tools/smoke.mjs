@@ -9,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
+import { startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -48,8 +49,7 @@ const browser = await chromium.launch();
 const results = [];
 async function scenario(name, fn, { allow = [], contextInit } = {}) {
   const ctx = await browser.newContext({ acceptDownloads: true });
-  await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-  if (contextInit) await ctx.addInitScript(contextInit);
+    if (contextInit) await ctx.addInitScript(contextInit);
   const errors = [];
   const expected = (text) => allow.some((re) => re.test(text));
   const open = async (url = BASE, init) => {
@@ -58,7 +58,7 @@ async function scenario(name, fn, { allow = [], contextInit } = {}) {
     page.on('pageerror', (e) => expected(e.message) || errors.push(`pageerror: ${e.message}`));
     page.on('console', (m) => {
       const text = m.text();
-      if (m.type() === 'error' && !/favicon|net::ERR_FAILED|fonts|ERR_INTERNET_DISCONNECTED/.test(text) && !expected(text)) errors.push(`console: ${text}`);
+      if (m.type() === 'error' && !/favicon|net::ERR_FAILED|ERR_INTERNET_DISCONNECTED/.test(text) && !expected(text)) errors.push(`console: ${text}`);
     });
     await page.goto(url);
     await page.waitForTimeout(600);
@@ -80,7 +80,7 @@ const assert = (cond, msg) => {
 };
 const visible = (page, sel) => page.locator(sel).isVisible();
 const saved = (page, key = 'netling.save') => page.evaluate((k) => JSON.parse(localStorage.getItem(k)), key);
-// The clock loop saves every second; count this tab's saves for a moment.
+// The clock loop saves every few seconds (SAVE_EVERY_MS in ui/life.js); wait for one of this tab's saves.
 async function loopRunning(page) {
   return page.evaluate(async () => {
     let saves = 0;
@@ -89,7 +89,7 @@ async function loopRunning(page) {
       if (k === 'netling.save') saves++;
       return set.call(this, k, v);
     };
-    await new Promise((r) => setTimeout(r, 2200));
+    for (let i = 0; i < 70 && !saves; i++) await new Promise((r) => setTimeout(r, 100));
     Storage.prototype.setItem = set;
     return saves > 0;
   });
@@ -346,6 +346,21 @@ await scenario('offline: service worker serves every module', async ({ open }) =
   }
 }, { allow: [/Failed to load resource/] });
 
+await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
+  const foreign = [];
+  ctx.on('request', (r) => {
+    if (!r.url().startsWith(`http://localhost:${PORT}/`) && !r.url().startsWith('data:')) foreign.push(r.url());
+  });
+  const page = await open();
+  await page.waitForTimeout(500);
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.load("16px 'VT323'");
+    return document.fonts.check("16px 'VT323'") && [...document.fonts].some((f) => f.family.includes('VT323') && f.status === 'loaded');
+  });
+  assert(loaded, 'VT323 did not load from the local file');
+  assert(foreign.length === 0, `third-party requests: ${foreign.join(', ')}`);
+});
+
 await scenario('unreadable save is set aside, then downloadable and deletable', async ({ open }) => {
   const page = await open(BASE, seedRaw({ 'netling.save': '{"saveVersion":1,"stage":"zombie"}', 'netling.onboarding': '"done"' }));
   await page.waitForTimeout(1500);
@@ -365,6 +380,15 @@ await scenario('unreadable save is set aside, then downloadable and deletable', 
   await page.click('#old-save-delete');
   assert(!(await visible(page, '#old-save')), 'still shown after delete');
   assert((await page.evaluate(() => localStorage.getItem('netling.corruptSave'))) === null, 'not deleted');
+});
+
+await scenario('a save from a newer version is set aside with its own notice', async ({ open }) => {
+  const newer = '{"saveVersion":99,"stage":"adult","form":"chrome"}';
+  const page = await open(BASE, seedRaw({ 'netling.save': newer, 'netling.onboarding': '"done"' }));
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(() => ({ kept: localStorage.getItem('netling.corruptSave'), status: document.getElementById('status').textContent }));
+  assert(JSON.parse(r.kept ?? 'null')?.raw === newer, 'the newer save was not kept');
+  assert(/newer version/.test(r.status), `no newer-version notice: ${r.status}`);
 });
 
 await scenario('storage blocked entirely: game still runs and warns', async ({ open }) => {
@@ -628,6 +652,34 @@ await scenario('field manual shows root once the codex is complete', async ({ op
   assert(terms.includes('root'), `root still hidden: ${terms}`);
 });
 
+// As if a fragment had been added to the game since the codex was finished.
+const codexMissingOne = FRAGMENTS.slice(0, -1).map((f) => f.id);
+const helpTerms = async (page) => {
+  await page.click('#open-help');
+  return page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));
+};
+
+await scenario('Root Access is kept when the codex grows: the earned flag', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne, 'netling.progress': { streaks: {}, acts: {}, rootEarned: true } }));
+  const terms = await helpTerms(page);
+  assert(terms.includes('root'), `root hidden despite rootEarned: ${terms}`);
+});
+
+await scenario('Root Access is kept when the codex grows: a netling NL-0 already covers', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne, 'netling.save': awakeNetling({ rootAccess: true }) }));
+  const terms = await helpTerms(page);
+  assert(terms.includes('root'), `root hidden for a covered netling: ${terms}`);
+  await page.waitForTimeout(300);
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(stored?.rootEarned === true, `rootEarned not written back: ${JSON.stringify(stored)}`);
+});
+
+await scenario('Root Access stays hidden until it is earned', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': codexMissingOne }));
+  const terms = await helpTerms(page);
+  assert(!terms.includes('root'), 'root shown without being earned');
+});
+
 await scenario('test mode: hidden until 7 logo taps, separate fast netling, real one untouched', async ({ open }) => {
   const real = awakeNetling();
   const test = awakeNetling({ generation: 5 });
@@ -781,6 +833,21 @@ await scenario('flatline screen and next generation', async ({ open }) => {
   await page.waitForTimeout(300);
   const s = await saved(page);
   assert(s.generation === 2 && s.stage === 'script', `next gen not compiled: ${s.generation} ${s.stage}`);
+});
+
+await scenario('a netling that dies during a netrun closes the run screen', async ({ open }) => {
+  const s = awakeNetling({ stage: 'adult', form: 'daemon', teenForm: 'kernel' });
+  startRun(s, 'public', Math.random);
+  s.ageMin = 7 * 24 * 60 - 1; // its last minute
+  s.lastTick = Date.now() - 58_000; // the minute completes a couple of seconds after load
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.waitForSelector('#flatline:not([hidden])', { timeout: 8000 });
+  assert(!(await visible(page, '#pad')), 'the run pad stayed open after death');
+  assert(await visible(page, '#controls'), 'home controls not restored');
+  await page.click('#fl-next');
+  await page.waitForTimeout(300);
+  assert(!(await visible(page, '#pad')), 'the old run came back after compiling');
 });
 
 await scenario('hibernate from the system dialog', async ({ open }) => {

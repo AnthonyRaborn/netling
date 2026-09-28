@@ -2,6 +2,7 @@
 // Format: NL1.<base64url(deflate(json))>.<crc32 hex>
 import { SPECIES } from './sim.js';
 import { CLEANERS, cleanSave } from './sanitize.js';
+import { isNewerSave } from './migrations.js';
 
 const PREFIX = 'NL1';
 // Real codes are a few KB. The caps stop a hostile code from hanging the tab.
@@ -104,7 +105,13 @@ export async function decodeSave(code, now = Date.now()) {
     throw new TransferError('this code is from a different version.');
   }
   const save = cleanSave(payload.data.save, now, { strict: true }); // outside data keeps only known fields
-  if (!save) throw new TransferError('this code has no netling in it.');
+  if (!save) {
+    throw new TransferError(
+      isNewerSave(payload.data.save)
+        ? 'this code was made by a newer version of Netling. reload the game to update it, then try again.'
+        : 'this code has no netling in it.',
+    );
+  }
   const data = { save };
   for (const k of TRANSFER_KEYS) {
     if (k === 'save' || !Object.hasOwn(payload.data, k)) continue;

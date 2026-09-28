@@ -24,6 +24,7 @@ import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
+import { upgradeSave } from './migrations.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
 export const ONBOARDING_STEPS = ['intro', 'readme', 'nudge', 'tutorial', 'done'];
@@ -208,12 +209,30 @@ function cleanFragment(raw, s) {
   return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed };
 }
 
+// Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
+// a form that fits the stage, and timers that start in the netling's own past. A start in the future
+// would stretch a window or a cooldown for as long as the number says.
+function settle(s, now) {
+  const bodyStage = SPECIES[s.form].stage;
+  if (s.stage === 'script' || s.stage === 'baby') s.form = 'bitling';
+  else if (s.stage === 'teen' && bodyStage !== 'teen') s.form = SPECIES[s.teenForm]?.stage === 'teen' ? s.teenForm : 'kernel';
+  else if (s.stage === 'adult' && bodyStage !== 'adult') s.form = leaningForm(s);
+  const past = (v) => (v === null ? null : Math.min(v, s.ageMin));
+  s.lastNapEndAge = past(s.lastNapEndAge);
+  s.lastRunEndAge = past(s.lastRunEndAge);
+  if (s.nap) s.nap.startedAge = past(s.nap.startedAge);
+  if (s.event) s.event.startedAge = past(s.event.startedAge);
+  if (s.hibernation) s.hibernation.since = Math.min(s.hibernation.since, now);
+}
+
 // Returns a repaired copy of a stored netling, or null if it can't be used at all
-// (not an object, another save version, or an unknown stage or form).
+// (not an object, a version it can't upgrade, or an unknown stage or form).
 // Fields this file doesn't know about are kept, so a newer version's data survives a downgrade,
 // unless strict is set: codes from outside keep only known fields.
 export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
-  if (!isObj(raw) || raw.saveVersion !== SAVE_VERSION) return null;
+  const upgraded = upgradeSave(raw); // older versions are brought up to date first (see migrations.js)
+  if (!upgraded.save) return null;
+  raw = upgraded.save;
   const stage = raw.stage;
   const form = raw.form ?? 'bitling';
   if (!STAGES.includes(stage) || !has(SPECIES, form)) return null;
@@ -293,6 +312,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     codexInbox: cleanCodex(raw.codexInbox),
     accessoryInbox: cleanAccessories(raw.accessoryInbox),
   };
+  settle(s, now);
   s.run = stage === 'dead' ? null : cleanRun(raw.run, s, strict);
   s.fragment = cleanFragment(raw.fragment, s);
   return s;
@@ -336,6 +356,7 @@ export function cleanProgress(raw) {
     gamesPlayed: int(p.gamesPlayed, 0, 0),
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
+    ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
   };
 }
 

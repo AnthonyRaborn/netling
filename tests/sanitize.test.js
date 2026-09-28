@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, migrate, tick, mulberry32, CFG, MIN, PALETTES } from '../src/sim.js';
+import { act, createScript, migrate, tick, mulberry32, CFG, MIN, PALETTES, SPECIES } from '../src/sim.js';
 import { startRun, moveTo, resolveIce, choose, runOptions } from '../src/netrun/run.js';
 import { REGION_ORDER } from '../src/netrun/regions.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
@@ -270,4 +270,26 @@ test('repaired defaults match a fresh netling', () => {
   const s = cleanSave({ saveVersion: 1, stage: 'baby', form: 'bitling', cache: 99 }, T0);
   assert.equal(s.sinceFed, CFG.digestMinutes); // not "just fed", so no phantom cache files
   assert.equal(s.cache, CFG.maxCache);
+});
+
+test('stage and form are made to agree, and timers cannot start in the future', () => {
+  const s = createScript({ now: T0, rng: mulberry32(1) });
+  tick(s, T0 + 3 * MIN, () => 0.999);
+  const stored = (over) => JSON.parse(JSON.stringify({ ...s, ...over }));
+  assert.equal(cleanSave(stored({ stage: 'baby', form: 'daemon' }), T0 + 5 * MIN).form, 'bitling');
+  assert.equal(cleanSave(stored({ stage: 'teen', form: 'chrome', teenForm: 'stub' }), T0 + 5 * MIN).form, 'stub');
+  assert.equal(cleanSave(stored({ stage: 'teen', form: 'bitling', teenForm: null }), T0 + 5 * MIN).form, 'kernel');
+  assert.equal(SPECIES[cleanSave(stored({ stage: 'adult', form: 'bitling' }), T0 + 5 * MIN).form].stage, 'adult');
+  const dead = cleanSave(stored({ stage: 'dead', form: 'kernel', deathCause: 'neglect' }), T0 + 5 * MIN);
+  assert.equal(dead.form, 'kernel', 'a dead netling keeps whatever body it had');
+
+  const future = cleanSave(
+    stored({ ageMin: 100, lastRunEndAge: 1e9, lastNapEndAge: 1e9, nap: { startedAge: 1e9 }, event: { type: 'trace', startedAge: 1e9 }, hibernation: { since: T0 + 1e12 } }),
+    T0 + 5 * MIN,
+  );
+  assert.equal(future.lastRunEndAge, 100);
+  assert.equal(future.lastNapEndAge, 100);
+  assert.equal(future.nap.startedAge, 100);
+  assert.equal(future.event.startedAge, 100);
+  assert.equal(future.hibernation.since, T0 + 5 * MIN);
 });

@@ -20,7 +20,8 @@ import {
   num,
   TEST_SPEEDS,
 } from '../sanitize.js';
-import { FRAGMENTS } from '../netrun/codex.js';
+import { allFragmentsFound, rootUnlocked as rootUnlockedFor } from '../netrun/codex.js';
+import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
 export const DEV_URL = new URLSearchParams(location.search).has('dev');
@@ -39,6 +40,8 @@ export const app = {
   onboarding: 'done',
   firstLaunch: false,
   corruptSave: null, // the raw text of a save that couldn't be used
+  newerSave: false, // that save was written by a newer build of the game
+  preUpgrade: null, // { from, raw }: the stored save before an upgrade step changed it (boot stores a backup)
   skew: 0,
   testClock: null, // test mode: { simAt, realAt, speed }
   session: null, // the running mini-game or netrun view
@@ -115,7 +118,8 @@ export function setTestMode(next) {
   location.replace(location.pathname + location.search);
   return true;
 }
-export const codexComplete = () => FRAGMENTS.every((f) => app.codex.includes(f.id));
+// Whether new netlings compile with Root Access: the codex was completed at some point (kept even if fragments are added later).
+export const rootUnlocked = () => rootUnlockedFor(app.progress, app.codex);
 
 export function save() {
   if (store.set(KEYS.save, app.state)) app.writeFailed = false;
@@ -146,8 +150,15 @@ export function loadAll() {
   app.firstLaunch = rawSave === null;
   // An unusable save is set aside (boot stores it under KEYS.corruptSave) rather than lost.
   app.corruptSave = rawSave !== null && !state ? rawSave : null;
-  if (!state) state = createScript({ now: now(), rootAccess: codexComplete() });
+  const stored = store.get(KEYS.save);
+  app.newerSave = app.corruptSave !== null && isNewerSave(stored);
+  const up = state ? upgradeSave(stored) : null;
+  app.preUpgrade = up?.upgraded ? { from: up.from, raw: rawSave } : null;
+  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked() });
   migrate(state);
+  // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
+  // already covered, before it was recorded (boot writes it back to storage).
+  if (allFragmentsFound(app.codex) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
   app.state = state;
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;

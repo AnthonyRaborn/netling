@@ -1,4 +1,6 @@
 // Network-first service worker: always fresh when online, fully playable offline.
+// Bump the name when you want players' old caches dropped. Add every new module or asset to SHELL
+// (tests/shell.test.js checks the modules), or the app won't install for offline use.
 const CACHE = 'netling-v34';
 const SHELL = [
   './',
@@ -7,8 +9,11 @@ const SHELL = [
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'fonts/VT323-latin.woff2',
   'src/main.js',
   'src/sim.js',
+  'src/random.js',
+  'src/migrations.js',
   'src/render.js',
   'src/sprites.js',
   'src/audio.js',
@@ -44,8 +49,6 @@ const SHELL = [
   'src/games/tune.js',
   'src/games/feast.js',
 ];
-const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
-
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
@@ -62,7 +65,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (url.origin !== location.origin && !FONT_HOSTS.includes(url.hostname)) return;
+  if (url.origin !== location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then((res) => {

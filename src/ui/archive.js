@@ -3,11 +3,11 @@
 import { PALETTES, SPECIES } from '../sim.js';
 import { dexEntries, discover, lineageRows } from '../archive.js';
 import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
-import { codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
+import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
 import { drawSprite, formSprite } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, flashStatus, save, store } from './app.js';
+import { $, app, rootUnlocked, flashStatus, save, store } from './app.js';
 import { checkUnlocks, renderWardrobe } from './style.js';
 import { fmtAge } from './hud.js';
 
@@ -15,14 +15,16 @@ import { fmtAge } from './hud.js';
 export function drainCodexInbox() {
   const inbox = app.state.codexInbox ?? [];
   if (!inbox.length) return;
-  const wasComplete = codexComplete();
+  const wasEarned = rootUnlocked();
   const fresh = inbox.filter((id) => !app.codex.includes(id));
   app.codex.push(...fresh);
   app.state.codexInbox = [];
   store.set(KEYS.codex, app.codex);
   if (fresh.length) flashStatus(`codex updated: ${fresh.map((id) => `"${fragmentById(id).title}"`).join(', ')}.`);
   checkUnlocks();
-  if (!wasComplete && codexComplete()) {
+  if (!wasEarned && allFragmentsFound(app.codex)) {
+    app.progress.rootEarned = true; // earned for good: later fragments can't take it back
+    store.set(KEYS.progress, app.progress);
     app.state.rootAccess = true; // the current netling is covered from this moment
     save();
     showTransmission();
@@ -111,7 +113,7 @@ function renderRecord(lineage) {
     ['traces: hid / complied', `${acts.hide ?? 0} / ${acts.comply ?? 0}`],
     ['GAMES'],
     ['games played', progress.gamesPlayed ?? 0],
-    ['best streak: breach / dodge / tune', `${best('breach')} / ${best('dodge')} / ${best('tune')}`],
+    ['best streak: breach / dodge / tune / feast', `${best('breach')} / ${best('dodge')} / ${best('tune')} / ${best('feast')}`],
     ['NETRUN'],
     ['runs: jacked out / disconnected', `${runs.jacked ?? 0} / ${runs.disconnected ?? 0}`],
     ['clean jack-outs', progress.cleanJackouts ?? 0],
@@ -161,7 +163,7 @@ function renderArchive() {
   }
 
   renderWardrobe();
-  $('codex-gift').hidden = !codexComplete();
+  $('codex-gift').hidden = !rootUnlocked();
   const groups = codexByRegion(app.codex, REGION_ORDER);
   $('codex-count').textContent = `${app.codex.length}/${FRAGMENTS.length}`;
   $('codex-list').replaceChildren(

@@ -5,6 +5,7 @@ import { REGIONS, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES } from './anomalies.js';
+import { weighted } from '../random.js';
 
 // The uplink cooldown lives in sim.js (CFG.runCooldownMin and friends), where items can shorten it.
 export { runCooldownLeft };
@@ -53,13 +54,6 @@ export const FORM_ABILITIES = {
 const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
-
-function weighted(table, rng) {
-  const entries = Object.entries(table);
-  let r = rng() * entries.reduce((a, [, w]) => a + w, 0);
-  for (const [k, w] of entries) if ((r -= w) < 0) return k;
-  return entries[entries.length - 1][0];
-}
 
 // Why a run can't start, or null.
 export function runBlockReason(pet, region = 'public', codex = []) {
@@ -111,7 +105,7 @@ function note(run, msg) {
   run.messages.push(msg);
 }
 
-// Picks up the region's next unread fragment, if any. Returns a log suffix.
+// Rolls an accessory this run doesn't have yet, if any (never in the tutorial). Returns a log suffix.
 function takeAccessory(run, rng) {
   if (REGIONS[run.region].noStyleDrops) return '';
   const id = rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region);
@@ -120,6 +114,7 @@ function takeAccessory(run, rng) {
   return ` accessory: ${accessoryById(id).name}!`;
 }
 
+// Picks up the region's next unread fragment, if any. Returns a log suffix.
 function takeFragment(run) {
   const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
   if (!id) return '';

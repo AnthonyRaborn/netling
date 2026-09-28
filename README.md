@@ -1,100 +1,201 @@
 # Netling
 
-A cyberpunk, Tamagotchi-style virtual pet. It lives in real time (even while closed), evolves based on how you raise it, and flatlines if neglected. Each death leaves a fragment that shapes the next generation.
+A cyberpunk, Tamagotchi-style virtual pet. It lives in real time (even while the page is closed), grows up according to how you raise it, and flatlines if neglected. Each death leaves a fragment that shapes the next generation.
 
-No build step, no dependencies: vanilla JS modules + canvas.
+No build step, no dependencies: vanilla JavaScript modules and canvas.
 
 > **AI disclosure:** this game was made with AI. Most of its code, tests, pixel art and text were written by an AI model (Anthropic's Claude, through Claude Code) under human direction and review. It's a hobby project: review anything you reuse from it.
 
-## Run
+## Contents
+
+- [Play](#play)
+- [Your first few minutes](#your-first-few-minutes)
+- [What your netling needs](#what-your-netling-needs)
+- [Caring for it](#caring-for-it)
+- [Rest: sleep, lights and naps](#rest-sleep-lights-and-naps)
+- [When things go wrong](#when-things-go-wrong)
+- [Items](#items)
+- [Mini-games](#mini-games)
+- [Netruns](#netruns)
+- [Growing up, and what comes after](#growing-up-and-what-comes-after)
+- [Style](#style)
+- [Saving, moving and pausing](#saving-moving-and-pausing)
+- [Install, offline and controllers](#install-offline-and-controllers)
+- [For developers](#for-developers)
+
+## Play
+
+Open the game in a modern browser: anthonyraborn.github.io/netling. You can use this link as a PWA to install it as an app on your device (see below).
+
+To host it on your own machine: after cloning and moving to the directory, `npm run serve`, then http://localhost:5174. Your netling is saved in the browser, so use the same browser (or the transfer feature below) to come back to it.
+
+The **?** button in the header opens the in-game **field manual**, which always matches the current rules. This README is the longer, friendlier version.
+
+## Your first few minutes
+
+A new game opens with a short intro: you run a script by accident, and it turns out to be a living thing. A field manual opens, then your netling asks to go exploring and you take it on a short, gentle **netrun** (a guided first run). It ends with a party hat, and you're on your own.
+
+The first three minutes it is still compiling. After that it is a **Bitling**, and the clock is running.
+
+## What your netling needs
+
+Four bars and a small icon row sit under the screen. Everything the game asks of you comes down to keeping these healthy.
+
+| Stat | What it is | Goes down when | Looks like trouble at |
+|---|---|---|---|
+| **CHG** (Charge) | Its power | Time passes (about 14 an hour awake) | 0: it becomes a fault, and Integrity starts slipping |
+| **SYN** (Sync) | Its bond with you, and how happy it is | Time passes (about 12 an hour awake) | 0: it becomes a fault |
+| **INT** (Integrity) | Its health | A virus, a full cache, overheating or empty Charge wear it down | 0 for two hours in a row: it flatlines |
+| **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 85 and up hurts Integrity; 100 is a fault |
+| **Cache** (the little file icons) | Corrupted files it writes while digesting a meal, up to four | Each file makes viruses likelier; 3 or more damage Integrity | Clear it with PURGE |
+
+Integrity heals on its own (5 an hour) whenever nothing is wrong, and faster (8 an hour) while it sleeps in the dark or naps.
+
+The line under the bars, the **readout**, shows the generation, its form, its age, its bedtime, its **faults** and its inherited **trait**.
+
+### Faults
+
+A **fault** (care mistake) is a need left unmet for 15 minutes: Charge at 0, Sync at 0, or Heat at 100. Sleeping with the lights on counts after 60 minutes. Ten faults, two hours at zero Integrity, or seven days of age ends its life. Faults also nudge how it grows up, so a tidy life matters for more than survival.
+
+## Caring for it
+
+| Button | What it does | Notes |
+|---|---|---|
+| **CORP PKT** | Feeds it a licensed packet: +30 Charge | Refused when it is nearly full. Feeding it starts digestion, which is when cache files appear |
+| **SCAV DATA** | Feeds it scavenged data: +25 Charge | A small chance the payload is infected. Your choices between corp and scavenged food shape what it becomes |
+| **PLAY** | Pick a mini-game. Wins give more Sync than losses | Costs Charge and warms it up. It needs at least 10 Charge to play |
+| **PATCH** | Cures a virus and restores a little Integrity | Only when it is infected |
+| **COOL** | Vents Heat | Only when it's warm |
+| **PURGE** | Clears every cache file, or stops a memory overflow | |
+| **LIGHTS** | Toggles the lights | See rest, below |
+| **NAP** | A short rest on demand | See rest, below |
+| **NETRUN** | Jack into the net | See netruns, below |
+
+Anything refused costs nothing: the netling shakes its head under a red X and the reason appears on screen. Successful actions play a short reaction (eating, patching, a hop after a game).
+
+Each netling also has **quirks** you can discover by watching it: its colors, the pitch of its voice, how it moves when idle, a favorite kind of packet (feed it that one and it perks up), and how early or late it goes to bed.
+
+## Rest: sleep, lights and naps
+
+- **Sleep**: it goes to bed at night by itself. Its bedtime is on the readout and differs a little from netling to netling. Turn the **lights off** when it sleeps: stats drain at about a third of the awake rate, against half with the lights on, and Integrity heals faster. Leaving the lights on all night is a fault.
+- **Nothing new happens while it rests**: no new viruses, cache files or alerts start. Anything already wrong keeps hurting, though, so patch a virus before bed. An open alert's timer holds until morning.
+- **Nap**: up to two hours of rest on demand, at about a third of the awake drain. It can't eat, play or jack in while napping, and needs four hours awake before it can nap again. WAKE UP ends a nap early. Unlike sleep, a nap does not pause an alert's timer.
+- **Lights off while awake** darkens the screen and bores it: Sync drains faster. Use it sparingly.
+
+## When things go wrong
+
+Trouble shows up as an icon on the screen, a bar at the top, and a chirp (or a notification if you turn ALERTS on).
+
+| Sign | What it is | What to do |
+|---|---|---|
+| **!** | It needs something | Check the bars |
+| Virus icon | It's infected and losing Integrity | PATCH it |
+| Eye | A **corp trace**: someone is scanning it | **HIDE** (costs Charge and Heat) or **COMPLY** (costs Integrity and Sync) within 2 hours, or lose Integrity. Your choice leans it toward one side or the other |
+| Crosshair | An **intrusion** attempt | **DEFEND** within an hour by winning a random mini-game, or it installs a virus |
+| Overflowing chip | A **memory overflow** | **PURGE** within 45 minutes, or it crashes: Integrity loss, a full cache, and 20 minutes rebooting where you can only turn the lights on and off. More cache files make overflows likelier |
+| Screen flicker | A **power surge**: instant Heat and a little Charge | Nothing to do, but watch the Heat |
+| A second netling | A **visitor** playing with it for a few minutes: +Sync, +Heat | Enjoy. It sometimes leaves a gift |
+
+Only one alert is open at a time. If you leave a game or a netrun open, the clock keeps running behind it.
+
+## Items
+
+The inventory holds six items. Tap an item to see what it does, then **USE** it (or DISCARD it, with a confirm). Some only work while it is awake.
+
+| Item | Effect |
+|---|---|
+| Coolant cell | Vents 50 Heat |
+| Antivirus patch | Cures a virus and shields it against new ones for 6 hours |
+| Corp voucher | Full Charge, and waves off a corp trace |
+| Black ICE shard | Big Sync boost, but heat and a risk of infection |
+| Signal booster | Your next mini-game win counts double |
+| Memory shard | Rewrites one of its quirks at random |
+| Repair kit | Restores 40 Integrity |
+| Overclock chip | Shortens the wait before the next netrun by an hour |
+
+Items drop from mini-game wins, from handling traces, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation.
+
+## Mini-games
+
+PLAY offers four. Controls are left, right and A (keyboard arrows plus Space or Enter, the on-screen pad, or a controller).
+
+| Game | Goal |
+|---|---|
+| **Breach Protocol** | Pick codes from a grid, alternating between rows and columns, until the target sequence lands in your buffer |
+| **Firewall Dodge** | Slide between lanes to avoid the falling firewalls for 15 seconds |
+| **Signal Tune** | Press A when your wave matches the ghost signal. Two of three rounds win |
+| **Packet Feast** | Move under clean packets to eat 15 in 20 seconds. Two corrupted bites lose. Gives some Charge too |
+
+Quitting mid-game counts as a loss. Intrusions and netrun ICE use the same four games.
+
+## Netruns
+
+A netrun is an expedition. **Jack in** with at least 30 Charge while it is awake and not resting, and pick a path across a fogged map, one node at a time. Every move costs Charge and adds Heat, and a very hot netling starts losing Integrity. Between runs the uplink needs a few hours to cool down, and a clean run shortens the wait.
+
+| Node | What happens |
+|---|---|
+| **Data cache** | May hold an item |
+| **ICE** | A mini-game. Win to pass; lose and it bites into Integrity |
+| **Relay** | Recharges and cools it, and lets you bank your loot and jack out safely |
+| **Checkpoint** | A corp scan: hide, comply or pay with a voucher |
+| **Market** | Spend Charge on items, and sometimes something stylish |
+| **Anomaly** | A strange event with a risky choice |
+| **Exit** | Banks everything you carry, plus a bonus |
+
+Loot is only safe once you **jack out**, at a relay or the exit. If Integrity or Charge hits zero you are **disconnected**: the loot is lost, it costs a care mistake (but never the last one), and the netling reboots. You can also **abort** (press twice) to bail out with no penalty beyond losing the loot.
+
+The Public Net is open to every age. More regions open as the netling grows up. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
+
+## Growing up, and what comes after
+
+- **Baby**: the first day. Good care through it (two faults or fewer) grows a healthier teen.
+- **Teen**: from 24 hours. The teen years shape what comes next.
+- **Adult**: from 72 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
+- **Old age**: a netling lives for at most seven days.
+
+When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, and a keepsake item. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
+
+## Style
+
+The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits and netrun feats. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
+
+## Saving, moving and pausing
+
+Everything is stored in your browser. On a phone or tablet, install the app (below) so the browser keeps the data. Safari on iPhone and iPad clears site data after about a week without a visit, so the game asks you to Add to Home Screen.
+
+ARCHIVE > **SYSTEM** has:
+
+- **Transfer out**: makes a code (`NL1...`) and a QR code holding everything, then locks this device. Load the code on another device with **Bring one here** (paste it, load a file, or scan the QR). Loading shows a preview first, and it is all or nothing. The lock stops *this* device from playing, but a code is not copy-protected: it can be loaded more than once, and time keeps passing on a netling while it is in a code.
+- **Hibernate**: freezes the clock for a long break. It lasts at least 24 hours and needs three days to recover after waking, so it's for vacations, not for skipping a work day.
+- **Restart**: erases everything and replays the intro.
+- **Storage**: shows whether the browser has agreed to keep your data, and warns if a save has failed.
+- **Volume**: a slider (the header's SND toggle still mutes).
+
+If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
+
+Only one browser tab looks after the netling at a time. Other tabs show a guard screen, take over when the first closes, or take over on request.
+
+## Install, offline and controllers
+
+Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari on macOS 14+), or "Add to Home Screen" (iOS and Android). It caches itself, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
+
+**Controllers** work with no setup. In mini-games and netruns the d-pad or left stick moves, A confirms and B quits. Elsewhere the d-pad moves between buttons, A presses, and B backs out or closes a dialog. Browsers only notice a controller after you press one of its buttons on the page.
+
+Wide, short screens (Steam Deck, laptops) put the screen beside the controls so everything fits without scrolling; phones and tall windows use one column.
+
+**Notifications**: turn on **ALERTS** in the header and the game notifies you while it is open or in the background. A fully closed app can't be woken without a push server, which this static game doesn't have.
+
+## For developers
 
 ```bash
-npm run serve        # http://localhost:5174
-npm test             # simulation + mini-game logic
-npm run smoke        # drives the real app in headless Chromium (needs Playwright, see below)
-npm run balance      # simulate hundreds of lifetimes per player archetype (DETAIL=1 for more)
+npm run serve      # http://localhost:5174
+npm test           # unit tests (Node 22)
+npm run smoke      # drives the real app in headless Chromium (needs Playwright)
+npm run balance    # simulates full lifetimes per player archetype
 ```
 
-`npm run smoke` needs Playwright, which the app itself doesn't depend on: `npm install --no-save playwright && npx playwright install chromium`. CI (`.github/workflows/test.yml`) runs both test suites on every pull request and push to `main`.
+`npm run smoke` needs Playwright, which the game itself doesn't depend on: `npm install --no-save playwright && npx playwright install chromium`. CI runs both test suites on every pull request and push to `main`, and GitHub Pages deploys from `main` after the tests pass.
 
-New saves open with a short onboarding: an accidental script run, the field manual as its README, a nudge to explore, and a scripted tutorial netrun that ends with a party hat. Add `?dev` to the URL for time-skip, forced-evolution, and forced-trace buttons.
+Add `?dev` to the URL for time-skip and forced-event buttons. There is also a separate fast-clock test mode for playtesting; see the docs.
 
-**Test mode** (for playtesting, including in the installed app): tap the NETLING logo 7 times, then ARCHIVE > SYSTEM > TEST MODE. It switches to a separate netling (with its own lineage, codex and style, stored under `netling-test.*`) on a clock running at 1x, 24x (a day per hour) or 168x (a full 7-day life per hour), with the dev buttons shown. The real netling keeps living in real time and is never touched; the test clock pauses while you're back on it. A yellow TEST badge shows the speed. At 168x the 15-minute grace before a care mistake is about 5 real seconds, so it's for watching a life play out; 24x is playable. Transfer out is off in test mode, and RESTART there erases only the test data. RESET replays the onboarding. `gallery.html` shows every sprite.
-
-## System: transfer, hibernate, restart
-
-ARCHIVE → **SYSTEM**:
-
-- **Transfer out** makes a code (`NL1.…`) and a **QR code** holding everything (netling, lineage, dex, codex, style, progress), then **locks this device**. The lock screen only offers re-export (show the code/QR again), reload (load a code, e.g. to bring it back) or restart. The lock is for moving a netling, not copy protection: it only stops *this* device from playing. Codes work offline, so nothing marks one as used: the same code can be loaded on more than one device, and reloading it here brings the netling back even if the other device already loaded it. Scanning the QR opens the game with `#import=<code>`, straight to the import preview. The code rides in the URL fragment, so it's never sent to a server.
-- **Bring one here** loads a code, a QR link or a file. Codes are compressed and checksummed; a damaged paste is rejected, and everything inside is checked and repaired before it's stored. Loading previews what's inside first, and either all of it is written or none of it is (a full disk changes nothing).
-- **Hibernate** freezes the clock for a long break: nothing drains or ages. It lasts at least 24 hours and needs 3 days to recover after waking, so it's for vacations, not skipping a work day. Hibernating and transferring out both wait until a running mini-game or netrun is finished.
-- **Restart** erases everything and replays the onboarding.
-- **Storage** shows whether the browser has agreed to keep the data (the game asks for persistent storage), and warns if a save has failed (a full or blocked disk). If a saved netling ever can't be read, it's set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download. iPhone/iPad Safari players get a one-time prompt to Add to Home Screen, since Safari clears site data after about a week without a visit.
-- **Volume** slider (the header's SND toggle still mutes).
-
-Only one tab looks after the netling at a time (Web Locks, or a lease in `localStorage` on browsers without them): other tabs show a guard screen, take over automatically when the caretaker tab closes, or can take over on request. The home screen redraws at ~10 fps to save battery; mini-games and netruns run at full rate. The Archive's LINEAGE tab opens with a lifetime RECORD (lives, care, games, netruns), and inventory items can be discarded.
-
-## Install / offline
-
-It's a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari, macOS 14+) or "Add to Home Screen" (iOS/Android). A network-first service worker caches the app shell, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
-
-On wide, short screens (Steam Deck, laptops) the screen sits beside the controls so everything fits without scrolling; phones and tall windows keep the one-column layout.
-
-**Controllers** work with no setup: in mini-games and netruns the d-pad or left stick moves, A confirms and B quits; elsewhere the d-pad moves between buttons, A presses and B backs out or closes a dialog. Browsers only see a controller after one of its buttons is pressed on the page.
-
-**Deploying:** `.github/workflows/pages.yml` publishes the game to GitHub Pages whenever the test workflow passes on `main` (Settings > Pages > Source: GitHub Actions, once). Only the files the game loads are published. [`docs/PLATFORMS.md`](docs/PLATFORMS.md) covers native apps.
-
-Notifications (toggle **ALERTS** in the header) fire while the app is open or backgrounded. A fully closed app can't be woken without a push server; that's out of scope for this static build.
-
-## Layout
-
-| Path | What |
-|---|---|
-| `src/sim.js` | All game rules. Pure functions of `(state, time, rng)`; minute-by-minute `tick()` |
-| `src/render.js`, `src/sprites.js` | 40×28 LCD renderer and code-drawn pixel sprites |
-| `src/games/` | Breach Protocol, Firewall Dodge, Signal Tune, Packet Feast + intro/result session wrapper |
-| `src/main.js` | Boot: load saved data, claim the caretaker tab, wire the UI, run the clock and render loop |
-| `src/ui/` | The UI, one module per area: `hud` (vitals, log, inventory), `life` (tick, evolution, flatline, care buttons), `play` (mini-games, netruns), `style` (unlocks, wardrobe), `archive`, `onboarding` (intro, field manual), `system` (transfer, import, hibernate, restart), `tabs` (one active tab). `ui/app.js` holds the shared state |
-| `src/storage.js` | Every `localStorage` read and write. One gate refuses writes from a tab that isn't the caretaker or a page about to reload; failed writes are reported; imports are written all-or-nothing |
-| `src/sanitize.js` | Checks and repairs stored data and imported codes before the game uses them, so a damaged save or hostile code can't break loading. Imported codes keep only fields the game knows |
-| `src/lease.js` | The one-active-tab rule for browsers without Web Locks |
-| `src/ui/gamepad.js` | Controller input (Gamepad API): game controls in sessions, focus navigation in menus |
-| `tools/smoke.mjs` | Browser smoke test (`npm run smoke`): onboarding, care, games, netruns, transfer, hostile imports, two tabs, full or blocked storage, offline, crash recovery, controllers, screen sizes |
-| `src/netrun/` | Netrun regions, map generation, rules, anomalies, codex lore, and the run view |
-| `src/accessories.js` | Accessory art, sprite anchor detection, rarity rolls |
-| `src/transfer.js` | Transfer codes: compress, checksum, validate, summarize |
-| `src/qr.js` | Dependency-free QR encoder (byte mode, level L, versions 1–40) |
-| `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
-| `src/archive.js` | Lineage records and the form dex (ARCHIVE button) |
-| `src/notify.js`, `sw.js`, `manifest.webmanifest` | PWA + notifications |
-| `tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite |
-
-## Rules at a glance
-
-- **Stats:** Charge, Sync, Integrity, Heat, Cache. A need left unmet for 15 minutes (60 for sleeping with the lights on) is a care mistake; 10 mistakes, 2 hours at zero Integrity, or 7 days of age ends the run.
-- **Integrity** recovers 5/hr whenever nothing is wrong, 8/hr while it sleeps in the dark or naps. COOL and a PURGE that clears something each restore 4 more (PATCH restores 10). An attentive player can take it from 0 to 100 in about 14 hours.
-- **Rest:** it sleeps at night on its own; stats drain at 33% of the awake rate with the lights off, 50% with them on. No new viruses or events start while it rests, and an event already open holds its timer overnight. **NAP** rests it on demand for up to 2 hours at 35% drain (time still passes; it can't eat, play or jack in), with 4 hours awake before the next nap. Lights off while it's awake darkens the screen and makes it bored (Sync drains faster).
-- **Evolution:** Bitling → teen at 24h (Kernel for good care, Stub otherwise) → adult at 72h, chosen by two hidden axes:
-  - *Allegiance* (corp packets, complying with traces ↔ scavenged data, hiding) → **Chrome** / **Firewall**
-  - *Stability* (prompt patches, purges ↔ overheating, mistakes) → **Daemon** / **Glitch**
-  - **Ghost** is secret: neutral allegiance, non-negative stability, ≤1 mistake, and 22+ mini-game wins (4+ in each of the four games).
-- **Mini-games:** PLAY picks one of four: Breach Protocol, Firewall Dodge, Signal Tune, and **Packet Feast** (move under clean packets to eat 15 of them in 20 seconds; two corrupted bites lose). A win gives more Sync than a loss; Packet Feast also gives Charge (+10 for a win, +3 for a loss, before the usual play cost of 6), without starting digestion. Netrun ICE picks from all four.
-- **Events:** at random while it's awake, besides power surges (instant: +Heat, +Charge), a timed alert bar may open. A **corp trace**: HIDE or COMPLY within 2 hours, or lose Integrity and lean corp. An **intrusion** (crosshair icon): DEFEND within 1 hour by winning a random mini-game, or it installs a virus (-10 Integrity); an antivirus shield bounces them. A **memory overflow** (overflowing chip icon, likelier with cache files): PURGE within 45 minutes, or it crashes (-15 Integrity, cache full) and reboots, unable to act for 20 minutes. One event at a time; hibernation waits for it. Now and then a **stray netling visits** (awake only), in a random form and colors, usually wearing a random accessory from anywhere on the net: the two play for 5–10 minutes (+15 Sync, +10 Heat), and it may leave an item or, rarely, an accessory.
-- **Reactions:** care actions and items play a short animation and sound on the screen (eating, patch, purge, cool, item sparkle, a hop after a game), and a refused action shakes its head under a red X.
-- **Items:** 6-slot inventory. Mini-game wins (25%), hiding (30%) and complying (30%) can drop items; each adult form leaves a keepsake item for the next generation. Coolant cell, Antivirus patch (6h shield), Corp voucher (full Charge + waves off a trace), Black ICE shard (big Sync, risky), Signal booster (next win x2), Memory shard (rewrites a quirk), Repair kit (+40 Integrity), Overclock chip (1h off the netrun cooldown). Tap a slot, then USE.
-- **Netrun:** jack in (awake, 30+ Charge; cooldown 4h as a baby, 3.5h as a teen, 3h as an adult, 1h shorter after a clean clear with no ICE lost or with an Overclock chip, never under 2h) and pick a path across a fogged node map. Moves cost Charge and add Heat (90+ Heat also burns Integrity). Caches may hold items, ICE is a mini-game that bites on a loss, Relays recharge and let you bank loot, the Exit banks everything plus a bonus. Hitting 0 Integrity or Charge disconnects: loot lost, a care mistake (never the fatal one), emergency reboot. Choice nodes: Checkpoints (hide/comply/voucher, lean the allegiance axis), Markets (spend Charge on items), Anomalies (risky events that lean the axes). Adult forms get run abilities, listed in the Dex. Regions: Public Net (any stage), Corp Grid and Darknet Bazaar (teen+), Old Web Ruins (adult), and a hidden fifth region. Runs also recover **codex fragments** (22, 4–5 per region) in story order, shared across generations and readable in the Archive's CODEX tab; like loot, they're lost on a disconnect. A clean jack-out re-syncs half the Integrity the run cost; each region has its own sound. `npm run balance` includes netruns in the lifetime simulation (`NO_RUNS=1` to compare). Completing the codex earns **Root Access** from NL-0: a netling's first premature flatline is reversed (old age is not); after a rescue NL-0 rests for one generation, and new scripts can roll NL-0's origin palette. `ROOT=1 npm run balance` measures it. `node tools/netrun-balance.mjs` checks risk/reward.
-- **Style:** the Archive's STYLE tab holds cosmetic shells, screen tints, screen effects, sound packs (home sounds; netruns keep region voices) and a device label (earned when the first netling dies), unlocked by raising forms, finishing codex regions, full-life streaks, mini-game win streaks, care habits and netrun feats. Locked items show only a hint. **Accessories** (20, common to very rare) fit every form via anchors computed from each sprite; they're mostly bought at netrun markets for Charge, and rarely found in caches, exits and ICE wins (lost on disconnect like loot). Half are regional: corp mods in the Corp Grid, street mods in the Darknet Bazaar, relics in the Old Web Ruins, and one companion only in The Deep. **Props** (cyberdeck, boom box, mini device, plush) sit on the ground beside the pet in their own slot. Some items are **earned**, never sold: a party hat when your first netling hatches, a bandage for surviving a disconnect or an NL-0 rescue, a plush of your previous netling after the first goodbye, and a secret for collecting every shell. Purely visual; shared across generations.
-- **Lineage:** each generation inherits its predecessor's form trait and one of its quirks. The **ARCHIVE** lists every generation and a dex of the 8 forms; undiscovered forms show only a silhouette and a hint.
-
-## Balance targets
-
-`tools/balance.mjs` plays full lifetimes with scripted players (they never nap). Try settings without editing the game with `CFG='{"drainPerHour":{"charge":15},"teenAtMin":1200}' npm run balance`. Current results (300 runs each):
-
-| Player | Check-ins | Reaches adult | Full 7-day life |
-|---|---|---|---|
-| attentive | hourly, 7:00–23:00 | 100% | 99% |
-| casual | 6 a day | 93% | 82% |
-| worker | before work, lunch, evenings | 85% | 51% |
-| neglectful | twice a day | 3% | 0% (dies ~day 1) |
-
-Deliberate strategies each reach their form: all-corp + comply → Chrome 100%, all-scavenged + hide → Firewall 99%, running hot and sloppy → Glitch 67%, tidy and neutral → Daemon 85%, balanced + 22 wins → Ghost 100%. Ghost by accident: up to 4% (the most attentive players).
+Deeper documentation is in [`docs/`](docs/README.md): architecture, the full rules, netrun mechanics, the save format, a glossary, known issues, testing, the content catalog (which contains spoilers) and a contributing guide. [`docs/PLATFORMS.md`](docs/PLATFORMS.md) covers native apps.

@@ -3,16 +3,35 @@ import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../
 import { deathRecord } from '../archive.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, codexComplete, flashStatus, now, playAnim, save, store } from './app.js';
+import { $, app, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
+import { closeStaleSession } from './play.js';
 import { checkUnlocks, countAct, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
+
+// The clock tick runs every second, but the netling only needs writing now and then: actions save
+// themselves, and a hidden or closing page flushes (see flushSave).
+const SAVE_EVERY_MS = 5000;
+let lastClockSave = -Infinity;
+
+function saveClock() {
+  lastClockSave = performance.now();
+  save();
+}
+
+// For when the page is hidden or about to close: write what the clock has done since the last save.
+export function flushSave() {
+  if (app.lock || app.inactive) return;
+  saveClock();
+}
 
 export function advance() {
   if (app.lock || app.inactive) return; // on another device, or in another tab
   const state = app.state;
   tick(state, now());
-  if (state.stage !== app.lastStage) {
+  closeStaleSession();
+  const stageChanged = state.stage !== app.lastStage;
+  if (stageChanged) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
     if (state.stage === 'teen' || state.stage === 'adult') {
       app.flashUntil = performance.now() + 2400;
@@ -35,7 +54,7 @@ export function advance() {
   if (visiting && !app.lastVisit) sfx('visit', state.quirk.pitch);
   app.lastVisit = visiting;
   if (state.visitAccGifts > 0) drainAccessoryInbox();
-  save();
+  if (stageChanged || performance.now() - lastClockSave >= SAVE_EVERY_MS) saveClock();
   updateHUD();
 }
 
@@ -70,7 +89,7 @@ const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', co
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: codexComplete() });
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked() });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;

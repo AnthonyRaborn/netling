@@ -1,3 +1,4 @@
+import './helpers/utc.js';
 // Day-1 playtest balance: Integrity recovery, quiet nights, visitors and the netrun cooldown.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

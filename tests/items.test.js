@@ -1,3 +1,4 @@
+import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { act, createScript, tick, grantItem, itemBlockReason, mulberry32, CFG, MIN, INVENTORY_SLOTS, ITEM_CFG } from '../src/sim.js';

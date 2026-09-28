@@ -26,6 +26,7 @@ export const KEYS = {
   skew: 'netling.devSkew',
   iosHint: 'netling.iosHintSeen',
   corruptSave: 'netling.corruptSave',
+  preUpgrade: 'netling.preUpgrade', // { at, from, raw }: the save as it was before an upgrade step ran on it
   tabLease: 'netling.tabLease', // written by lease.js directly: it decides who may write
   testMode: 'netling.testMode', // { on, revealed }: always read from the real namespace
   testClock: 'netling.testClock', // test mode's clock: { simAt, realAt, speed }

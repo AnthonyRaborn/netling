@@ -1,3 +1,4 @@
+import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { act, alertReason, blockReason, createScript, eventMinutesLeft, hibernateBlockReason, tick, mulberry32, CFG, MIN } from '../src/sim.js';
@@ -117,4 +118,24 @@ test('stored intrusions, overflows and reboots survive loading; unknown events d
   assert.deepEqual(loaded.event, s.event);
   assert.equal(loaded.rebootUntilAge, s.rebootUntilAge);
   assert.equal(cleanSave({ ...JSON.parse(JSON.stringify(s)), event: { type: 'meteor', startedAge: 1 } }, s.lastTick).event, null);
+});
+
+test('an intrusion holds its timer while it is being defended, then lands or clears normally', () => {
+  const s = booted();
+  s.event = { type: 'attack', startedAge: s.ageMin };
+  s.event.defending = true;
+  tick(s, s.lastTick + (CFG.attackWindowMin + 30) * MIN, noRng);
+  assert.equal(s.event.type, 'attack', 'still open after the window: the defense is running');
+  assert.equal(eventMinutesLeft(s), CFG.attackWindowMin);
+  assert.equal(s.virus, false);
+  const res = act(s, 'defend', s.lastTick, noRng, { won: true });
+  assert.ok(res.ok);
+  assert.equal(s.event, null);
+});
+
+test('the defending flag is never trusted from storage', () => {
+  const s = booted();
+  s.event = { type: 'attack', startedAge: s.ageMin, defending: true };
+  const clean = cleanSave(JSON.parse(JSON.stringify(s)), s.lastTick);
+  assert.equal(clean.event.defending, undefined);
 });
