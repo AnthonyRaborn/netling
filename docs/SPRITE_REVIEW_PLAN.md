@@ -1,6 +1,8 @@
 # Sprite review plan
 
-Plan for a full art review of every code-drawn sprite, and of the ways they are layered. **Contains spoilers** (secret forms, earned items). Written against branch `claude/vibrant-cerf-kthozk`, which forks from `41b4ae9`. Nothing in this plan has been run as a review yet: the "seeded suspicions" below come from a script and one look at the current gallery, and each needs confirming by eye.
+Plan for a full art review of every code-drawn sprite, and of the ways they are layered. **Contains spoilers** (secret forms, earned items). Written against branch `claude/vibrant-cerf-kthozk`, now merged with `main` at `c121f59` (which includes the crest slot).
+
+**Status (2026-09-29):** steps 1 to 3 are done. The gallery is rewritten (section 3), `tools/sprite-audit.mjs` and its tests exist (section 4), and the screenshot pass has been run, with the results in [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md). Step 4 (the human pass in a browser) is the maintainer's. The sections below are kept as the plan; where reality differed, a note says so. Section 8's suspicions are now resolved in the findings (most confirmed; the silhouette one was not).
 
 Decisions recorded from the maintainer: the review covers all art; it is done by both an automated pass and a human pass; and the output is **findings only** (severity and a suggested fix, no art or code changes as part of the review).
 
@@ -37,7 +39,7 @@ A finding is any place where a goal below fails. Each goal has a concrete test s
 
 - Wearable on a form: 24 x 9 forms x 4 states (awake A, awake B, asleep lit, asleep in the dark) = 864, times 6 palettes = 5,184 renders. Too many to read one by one, so the automated pass covers all of them and the eyes cover a structured subset (section 5).
 - Wearable plus prop (both slots equipped): 24 x 4 x 9 = 864. The pet wanders up to 8 columns either side of centre, and props sit in columns 30 to 37, so adults overlap them.
-- Visitor scenes: 9 x 9 form pairs, with the visitor wearing any findable wearable.
+- Visitor scenes: 9 x 9 form pairs, with the visitor wearing any findable wearable. With a visitor present the host moves to the right side and the visitor stands on the left.
 - Custom colors on the 8 recolorable wearables: unbounded, so test against a fixed worst-case set (section 4).
 - Background: 7 tints, each with a darker lights-off variant.
 
@@ -137,6 +139,8 @@ The output of the review is this list, sorted by severity, with counts per surfa
 
 ## 8. Seeded suspicions (to confirm, not yet findings)
 
+**Resolved by the first pass:** 1 is SR-04 (worse than first computed: the hover idle is not clamped) and SR-11; 2 is SR-01; 3 is SR-02; 4 is SR-03; 5 is SR-16; 6 is SR-09 and SR-10 (with the correction that the host, not the visitor, moves onto the prop); 7 was **not confirmed** (all three teens are distinct in silhouette); 8 is SR-17; 9 was fixed by the gallery rewrite.
+
 From a quick script over the current code (2026-09-29), and a look at the current gallery. Each is a hypothesis.
 
 1. **Halo, Spark and Sat-dish antenna clip off the top** on the tall forms (Chrome, Firewall, Daemon, Ghost, plus Halo on Bitling, Stub, Shell and Glitch) at the highest wander position. Halo goes to LCD row -1 on the tall adults; Spark and Sat-dish reach row 0. Likely Major.
@@ -144,18 +148,18 @@ From a quick script over the current code (2026-09-29), and a look at the curren
 3. **Dark sleep flattens every wearable** to the body color (`#1c3a3f`), so hats merge with the head. Likely Major, and it is the state a player looks at most (overnight).
 4. **Sleep and Dead reuse the awake sprite** for 8 of 9 forms (Sleep is a recolor; Dead is a grey copy). Dead Ghost and Dead Firewall look like awake versions in grey. Likely Major for "differentiated".
 5. **Ghost's alpha applies to its wearable**, so a worn item on a Ghost fades and pulses with the body. May be intended; needs a decision.
-6. **Wearable plus prop overlap for adults**: props occupy columns 30 to 37; an adult at maximum wander covers up to about column 35. The visitor also stands in that area. Needs the sheet to confirm.
+6. **Wearable plus prop overlap for adults**: props occupy columns 30 to 37; an adult at maximum wander covers up to about column 35. With a visitor the host itself is moved to the right edge, over the prop. Confirmed in the props and visitors sheets (SR-09, SR-10).
 7. **Teens are a tight set** (Kernel, Stub, Shell all round with side details, 12 to 14 pixels); check the silhouette test.
 8. **The Shell sprite is a draft.** `BALANCE_PLAN.md` (item 27) said it should be reviewed before any rules depended on it, and the Shell has since shipped. Give it a specific pass.
 9. **Gallery layout**: column widths in the wearable matrix are uneven because header labels stretch some columns, and accessory cells are too small to judge.
 
 ## 9. The fifth wardrobe option (crests), from `ccr-14d93101-qcalx0`
 
-That branch is 2 commits ahead of this one (`7fccbd6` "Lineage Step 3: family tree and legacy crests" and `309ff54`), and is not merged. It adds a `crest` wardrobe slot (`SLOTS` becomes `['shell', 'tint', 'effect', 'sound', 'crest']`) with four 9x9 emblems (`helix`, `triad`, `loop`, `star`), drawn by `drawCrest` in `ui/style.js` into a canvas beside the device label in the logo's color, at 27px in the header and 18px in the picker. The same commit reworks the family tree in `ui/archive.js`, which redraws form thumbnails.
+That work (`7fccbd6` "Lineage Step 3: family tree and legacy crests" and `309ff54`, from `ccr-14d93101-qcalx0`) has since been merged to `main` (PR 9) and into this branch. It adds a `crest` wardrobe slot (`SLOTS` becomes `['shell', 'tint', 'effect', 'sound', 'crest']`) with four 9x9 emblems (`helix`, `triad`, `loop`, `star`), drawn by `drawCrest` in `ui/style.js` into a canvas beside the device label in the logo's color, at 27px in the header and 18px in the picker. The same commit reworks the family tree in `ui/archive.js`, which redraws form thumbnails.
 
 How the plan handles it:
 
-1. **Sequence**: do sections 3 to 6 on the current branch; do not wait for the merge. The gallery reads `COSMETICS.crest` if present, so it lights up on merge with no further edit. Once `ccr-14d93101-qcalx0` is merged, rerun the gallery and the audit tool and add the crest checks below; do not review crests from the unmerged branch, since they may change before merging.
+1. **Sequence**: done. The merge landed before the gallery was built, so the gallery has a crests section (guarded, so it still works if the slot is removed) and the audit has a `crests` check. Findings are SR-14 (and SR-15 for custom colors).
 2. **Crest checks** (goal wording as above):
    - Clear: each emblem reads at 9x9 native and at 27px. The `drop-shadow(1px 0 0 var(--cyan))` on `.crest` adds a colored fringe; judge legibility with it on.
    - Differentiated: the four shapes differ from each other in silhouette, and none looks like one of the 9 form sprites or a HUD icon. Compare pairs: Triad and Helix are both diagonal-heavy.
@@ -163,21 +167,23 @@ How the plan handles it:
    - Stable: the crest in each shell's logo color (default plus chrome and gold, which recolor the logo) against each shell body, and the swatch color `#ff2a6d` in the picker on the locked and unlocked states.
    - Layering: crest plus the label at the 10 character maximum on a narrow phone; crest beside the device shell.
 3. **Family tree thumbnails**: the tree at 16px reuses `formSprite`, so add its form list (each form, each palette, the plush's half-scale copy) to the icon section.
-4. **Merge hygiene for this plan**: this plan only adds two new files, `docs/SPRITE_REVIEW_PLAN.md` and, after the audit tool exists, `tools/sprite-audit.mjs`. It deliberately does not edit `docs/README.md`, `CLAUDE.md` or `docs/CONTENT_CATALOG.md`, which the other branch also changes. After the merge, add one row to the "Start here" table in `docs/README.md`, and update the counts in `CONTENT_CATALOG.md` if wardrobe totals change (5 slots, 4 crests).
-5. **New forms and slots later**: `docs/CONTRIBUTING.md` step 6 says to update `gallery.html` if it lists forms by hand. After the gallery rewrite it should not: everything is generated from the source arrays. Add that note when the gallery lands.
+4. **Merge hygiene**: done. With the crest branch merged, the docs edits this plan had held back were made: an index row in `docs/README.md`, test and tool entries in `docs/TESTING.md`, and the gallery notes in `ARCHITECTURE.md` and `CONTRIBUTING.md`.
+5. **New forms and slots later**: the gallery and the audit read forms, wearables, props and crests from the source arrays, so a new one appears with no edit; `docs/CONTRIBUTING.md` step 6 now says so. Two things are copied by hand and can drift: the thumbnail colors from `src/ui/archive.js` (gallery thumbs section) and the HUD icon boxes in `tools/lib/sprite-checks.mjs` (from `render.js`).
 
 ## 10. Order of work and what this plan has not done
 
-| # | Step | Output | Who |
-|---|---|---|---|
-| 1 | Gallery update (section 3) | `gallery.html`, verified in Chromium | Claude |
-| 2 | Audit tool and unit tests (section 4) | `tools/sprite-audit.mjs`, tests, candidate list | Claude |
-| 3 | Screenshot pass (section 5) | Findings in the log | Claude |
-| 4 | Human pass (section 6) | Confirmed and closed findings, taste calls | Maintainer |
-| 5 | After the crest branch merges | Rerun 1 to 3 with crests, add row to `docs/README.md` | Claude |
-| 6 | Decide fixes | A separate change set, with a balance and baseline check only if a rule changes (CLAUDE.md workflow) | Maintainer |
+| # | Step | Output | Who | Status |
+|---|---|---|---|---|
+| 1 | Gallery update (section 3) | `gallery.html`, verified in Chromium: 14 sections, no console errors | Claude | Done |
+| 2 | Audit tool and unit tests (section 4) | `tools/sprite-audit.mjs`, `tools/lib/sprite-checks.mjs`, `tests/sprite-checks.test.js` | Claude | Done |
+| 3 | Screenshot pass (section 5) | [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md), 18 findings | Claude | Done, except the palette-`all` matrices and the wearable-plus-prop matrix, which were not looked at closely |
+| 4 | Human pass (section 6) | Confirmed and closed findings, taste calls, motion and flicker | Maintainer | Open |
+| 5 | Crests after the merge | Crest section and check | Claude | Done (SR-14) |
+| 6 | Decide fixes | A separate change set, with a balance and baseline check only if a rule changes (CLAUDE.md workflow) | Maintainer | Open |
 
-Not done or not run so far: no findings have been confirmed by eye; the smoke test (needs Playwright and a browser), `npm test` and the balance tools were not run for this plan because no code changed; the crest branch was read from its diff, not run.
+Not done or not run: the human pass; the smoke test (needs Playwright, `npm run smoke`), which was not run against these changes (the only game-code change is `export` added to `drawNode` in `src/netrun/view.js`, so the netrun view is untouched but has not been re-driven in a browser); the balance tools (no rule or number changed); `sw.js` and `version.js` (no shipped asset changed, so no version bump). The palette-`all` matrices were checked through the audit's numbers only. The gallery's pink outline is computed from the sprite's own colors, so it can differ slightly from the audit, which reads the real render.
+
+Changes made to game code for this: only `export` on `drawNode`. Everything else is `gallery.html`, `tools/`, `tests/sprite-checks.test.js` and docs.
 
 Open questions for the maintainer:
 

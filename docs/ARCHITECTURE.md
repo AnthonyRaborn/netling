@@ -40,7 +40,7 @@ These explain most decisions in the code.
 | `index.html` | All markup: the device, dialogs (archive, system, field manual, NL-0 transmission), lock screens |
 | `style.css` | All styling (about 1550 lines), theme variables in `:root`, one landscape media query, calm mode (`body.calm` and the reduced-motion query) |
 | `sw.js`, `manifest.webmanifest`, `icons/`, `screenshots/` | PWA shell (the screenshots are for the install dialog) |
-| `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
+| `gallery.html` | Development gallery of every sprite, wearable, prop, icon, node marker, mini-game frame and crest, in every valid combination, built from the source arrays (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
 | `src/random.js` | The shared weighted-pick helper |
 | `src/migrations.js` | Save upgrade steps (`STEPS`) and `upgradeSave` |
@@ -60,7 +60,7 @@ These explain most decisions in the code.
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
 | `tests/` | 28 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators |
+| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators, the sprite audit (`sprite-audit.mjs`, with `lib/sprite-checks.mjs`) |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
