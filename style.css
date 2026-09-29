@@ -102,6 +102,18 @@ body {
   border-color: var(--cyan);
 }
 
+.screen-confirm {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 8px 16px;
+  border-color: var(--magenta);
+  color: var(--magenta);
+  background: rgba(3, 9, 10, 0.92);
+}
+
 .screen {
   position: relative;
   border-radius: 10px;
@@ -425,6 +437,17 @@ button:active {
 
 .inventory {
   margin-top: 12px;
+}
+
+.inv-scrip {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--dim);
+  text-align: right;
+}
+
+.inv-scrip.full {
+  color: var(--yellow);
 }
 
 .inv-slots {

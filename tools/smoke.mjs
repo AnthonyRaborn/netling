@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
-import { startRun } from '../src/netrun/run.js';
+import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -174,6 +174,7 @@ await scenario('home: care actions, games, archive, system dialog', async ({ ope
   await page.click('[data-game="breach"]');
   await page.waitForTimeout(300);
   await page.click('#pad-quit');
+  await page.click('#pad-confirm');
   await page.waitForTimeout(2500);
   const progress = await saved(page, 'netling.progress');
   assert(progress?.acts?.corp === 1, `care action not counted: ${JSON.stringify(progress)}`);
@@ -631,6 +632,129 @@ await scenario('a DISCARD confirm does not carry over to another item', async ({
   assert(JSON.stringify(inv) === '["coolant"]', `wrong item discarded: ${JSON.stringify(inv)}`);
 });
 
+await scenario('a Segfault takes a second press, then adds two faults', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['segfault'] }) }));
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  assert(/FAULTS/.test(await page.textContent('#inv-use')), 'no confirm on the button');
+  assert((await saved(page)).careMistakes === 0, 'used on the first press');
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
+});
+
+await scenario('quitting on touch needs a confirm somewhere else; Esc still quits at once', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const played = async () => (await saved(page, 'netling.progress'))?.gamesPlayed ?? 0;
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await page.click('#pad-quit');
+  await page.click('#pad-quit'); // the same spot again only cancels
+  await page.waitForTimeout(300);
+  assert(await visible(page, '#pad'), 'a second tap in the same place quit the game');
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm stayed up after KEEP PLAYING');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-quit')) === 'KEEP PLAYING', 'the quit button did not change');
+  const confirm = await page.locator('#pad-confirm').boundingBox();
+  const quit = await page.locator('#pad-quit').boundingBox();
+  assert(confirm.y + confirm.height < quit.y, 'the confirm is not away from the pad');
+  await page.waitForTimeout(3300);
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm never timed out');
+  await page.click('#pad-quit');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'CONFIRM QUIT did not end the game');
+  assert((await played()) === 1, 'the forfeited game was not counted');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="tune"]');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'Esc no longer quits in one press');
+  assert(!(await visible(page, '#pad-confirm')), 'Esc left a confirm on screen');
+});
+
+await scenario('ABORT RUN on touch confirms at the top of the screen', async ({ open }) => {
+  const s = awakeNetling();
+  startRun(s, 'public', Math.random);
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-confirm')) === 'CONFIRM ABORT', 'wrong confirm label');
+  assert((await page.textContent('#pad-quit')) === 'KEEP RUNNING', 'wrong cancel label');
+  assert((await saved(page)).run.phase !== 'done', 'aborted on the first tap');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).run?.result === 'aborted', `not aborted: ${JSON.stringify((await saved(page)).run?.result)}`);
+  assert((await page.textContent('#pad-quit')) === 'ABORT RUN', 'the pad label was not restored');
+  await page.click('#pad-quit'); // the summary card closes on one tap
+  await page.waitForTimeout(300);
+  assert(!(await visible(page, '#pad')), 'the summary card did not close');
+});
+
+await scenario('the readout shows the trait level and its history', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 3, trait: 'persistent', traitLevel: 2, history: 'hardened' }) }));
+  const text = await page.textContent('#readout');
+  assert(/trait Persistent II · history Hardened/.test(text), `readout: ${text}`);
+});
+
+await scenario('SCRAP sells for a quarter, and the scrip line shows it', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['overclock'], scrip: 30 }) }));
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 30/100', `scrip line: ${await page.textContent('#inv-scrip')}`);
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SCRAP +12', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.scrip === 42 && s.inventory.length === 0, `after scrapping: ${s.scrip} scrip, ${JSON.stringify(s.inventory)}`);
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 42/100', 'scrip line not updated');
+});
+
+await scenario('regions open in order: only the Public Net until its exit is reached', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: [] }) }));
+  await page.click('#btn-netrun');
+  const buttons = page.locator('#region-list button');
+  assert(!(await buttons.nth(0).isDisabled()), 'the Public Net is closed');
+  assert(await buttons.nth(1).isDisabled(), 'the Bazaar is open without a clear');
+  assert(/exit of the Public Net/.test(await buttons.nth(1).textContent()), `no reason shown: ${await buttons.nth(1).textContent()}`);
+  assert(/CODEX MEMORY 0\/8/.test(await page.textContent('#region-memory')), 'no codex memory line');
+  await page.close();
+
+  const page2 = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: ['public'], codexFound: 8 }) }));
+  await page2.click('#btn-netrun');
+  const b2 = page2.locator('#region-list button');
+  assert(!(await b2.nth(1).isDisabled()), 'the Bazaar stayed closed after a Public Net clear');
+  assert(/DARKNET BAZAAR/.test(await b2.nth(1).textContent()), 'the Bazaar is not second');
+  assert(await b2.nth(2).isDisabled(), 'the Corp Grid opened early');
+  assert(/FULL/.test(await page2.textContent('#region-memory')), 'a full memory is not shown');
+});
+
+await scenario('at a netrun market the inventory sells for half, and a purchase opens up', async ({ open }) => {
+  const s = awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', inventory: ['overclock'], scrip: 0 });
+  s.stats.charge = 90;
+  let seedN = 1;
+  const rng = () => ((seedN = (seedN * 16807) % 2147483647) / 2147483647);
+  startRun(s, 'public', rng);
+  const next = runOptions(s.run)[0];
+  next.type = 'market';
+  moveTo(s, next.id, rng);
+  const cheapest = Math.min(...s.run.pending.offers.map((id) => ({ coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15 })[id] ?? 25));
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SELL +25', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(300);
+  const after = await saved(page);
+  assert(after.scrip === 25 && after.inventory.length === 0, `after selling: ${after.scrip} scrip`);
+  const buys = after.run.pending.options.filter((o) => o.id.startsWith('buy') && o.id !== 'buyacc');
+  assert(buys.some((o) => !o.disabled) === cheapest <= 25, `purchases: ${JSON.stringify(buys)}`);
+});
+
 await scenario('system actions wait for a running mini-game; a refused result explains why', async ({ open }) => {
   const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stats: { charge: 25, sync: 70, integrity: 100, heat: 20 } }) }));
   await page.click('#btn-play');
@@ -657,12 +781,14 @@ await scenario('system actions wait for a running mini-game; a refused result ex
   await dev.click('[data-game="tune"]');
   await dev.click('[data-skip="60"]');
   await dev.keyboard.press('Escape');
+  // Usually it ran out of charge. A random memory overflow in the skipped hour can crash it instead,
+  // and then the refusal names the reboot: either way the player is told why.
   let status = '';
-  for (let i = 0; i < 30 && !/charge/.test(status); i++) {
+  for (let i = 0; i < 30 && !/charge|rebooting/.test(status); i++) {
     await dev.waitForTimeout(100);
     status = await dev.textContent('#status');
   }
-  assert(/not enough charge/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
+  assert(/not enough charge|rebooting/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
 });
 
 // Plugs in a fake controller: window.__pad is what navigator.getGamepads() reports.

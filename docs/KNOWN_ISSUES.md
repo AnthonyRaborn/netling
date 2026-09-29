@@ -28,7 +28,7 @@ Not checked by me: real-device behaviour beyond what the maintainer confirmed (P
 | [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
 | [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
 | [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
-| [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Open |
+| [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Fixed |
 | [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
 | [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Mostly fixed |
 | [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Tier 1 done |
@@ -153,9 +153,11 @@ Not checked by me: real-device behaviour beyond what the maintainer confirmed (P
 
 **Boosted wins count double toward Ghost.** Severity Note.
 
-- A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned.
+- A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned. (The requirement is now 18 wins with 3 in each game; the maintainer chose to keep boosted wins counting double, and SIMULATION.md says so.)
 
 ### KI-15
+
+**Status: Fixed.** Ties (the axes within 0.5 of each other, or an axis within 0.5 of zero) are now broken at random, with forms the player has never raised weighted 1.2 (`leaningCandidates` in `sim.js`). A neutral netling that misses Ghost can become any of the four. The description below is the original finding.
 
 **Neutral netlings that miss Ghost become Chrome.** Severity Note.
 

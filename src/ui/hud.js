@@ -1,5 +1,6 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
+import { atMarket, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
@@ -74,7 +75,7 @@ export function updateHUD() {
   const summary = screenSummary(state);
   if ($('lcd').getAttribute('aria-label') !== summary) $('lcd').setAttribute('aria-label', summary);
 
-  const trait = state.trait ? TRAITS[state.trait].name : '—';
+  const trait = `${traitLabel(state.trait, state.traitLevel) ?? '—'}${state.history ? ` · history ${TRAITS[state.history].name}` : ''}`;
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
     `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
@@ -149,14 +150,21 @@ function itemIcon(id) {
   return c;
 }
 
+// At an open netrun market an item sells for half its price; anywhere else it scraps for a quarter.
+const sellLabel = (id) => (atMarket(app.state) ? `SELL +${sellValue(id, true)}` : `SCRAP +${sellValue(id)}`);
+
 function renderInventory() {
   const inv = app.state.inventory ?? [];
   if (selectedSlot !== null && !inv[selectedSlot]) selectedSlot = null;
-  const key = `${inv.join(',')}|${selectedSlot}`;
+  const scrip = app.state.scrip ?? 0;
+  $('inv-scrip').textContent = `SCRIP ${scrip}/${SCRIP.max}${scrip >= SCRIP.max ? ' FULL' : ''}`;
+  $('inv-scrip').classList.toggle('full', scrip >= SCRIP.max);
+  const key = `${inv.join(',')}|${selectedSlot}|${atMarket(app.state)}`;
   if (key !== lastInvKey) {
     lastInvKey = key;
-    // A DISCARD confirm belongs to the item it was pressed for: a new selection starts over.
-    disarm($('inv-discard'), 'DISCARD');
+    // A SCRAP confirm belongs to the item it was pressed for: a new selection starts over.
+    disarm($('inv-discard'), selectedSlot === null ? 'SCRAP' : sellLabel(inv[selectedSlot]));
+    disarm($('inv-use'), 'USE');
     const slots = [];
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
       const id = inv[i];
@@ -197,6 +205,8 @@ export function initInventory() {
     unlockAudio();
     tick(app.state, now());
     const id = app.state.inventory[selectedSlot];
+    // A Segfault adds faults, and faults can end a life: it takes a second press.
+    if (id === 'segfault' && !armed($('inv-use'), '+2 FAULTS?', 'USE', 3000)) return;
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
     playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');
@@ -207,9 +217,14 @@ export function initInventory() {
   });
   $('inv-discard').addEventListener('click', () => {
     if (selectedSlot === null) return;
-    if (!armed($('inv-discard'), 'SURE?', 'DISCARD', 3000)) return;
-    const res = act(app.state, 'discard', now(), Math.random, { slot: selectedSlot });
-    sfx(res.sfx, app.state.quirk.pitch);
+    if (!armed($('inv-discard'), 'SURE?', sellLabel(app.state.inventory[selectedSlot]), 3000)) return;
+    if (atMarket(app.state)) {
+      sellItem(app.state, selectedSlot);
+      sfx('feed', app.state.quirk.pitch);
+    } else {
+      const res = act(app.state, 'discard', now(), Math.random, { slot: selectedSlot });
+      sfx(res.sfx, app.state.quirk.pitch);
+    }
     selectedSlot = null;
     save();
     updateHUD();

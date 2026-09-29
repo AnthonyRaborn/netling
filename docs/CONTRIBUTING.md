@@ -69,7 +69,7 @@ Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, `r
 
 ### Add a netrun region
 
-1. `REGIONS` and `REGION_ORDER` in `netrun/regions.js`: name, blurb, `minStage`, optional `requires` (a codex fragment id), `layers`, `width`, `nodes` weights, `loot`, optional `market` and `marketPrice`, `iceDamage`, `exitBonus`, `palette`, `sound`.
+1. `REGIONS` and `REGION_ORDER` in `netrun/regions.js` (the order is the way down: each region opens once a netling has cleared the one before it, so a new region's place in the list decides what unlocks it, and `clearedForStage` what older saves get): name, blurb, `minStage`, optional `requires` (a codex fragment id), `layers`, `width`, `nodes` weights, `loot`, optional `market` and `marketPrice`, `iceDamage`, `exitBonus`, `palette`, `sound`.
 2. Codex fragments for it (below), a tint cosmetic that unlocks on finishing them, and possibly regional accessories.
 3. `tests/netrun.test.js` already checks every region generates valid maps; add access-rule tests.
 4. Regions are stored by id inside a saved run, so the id must never change.

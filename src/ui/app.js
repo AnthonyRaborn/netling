@@ -1,7 +1,7 @@
 // Shared state for the UI modules: the live netling, player data loaded from storage,
 // the storage gate, and small DOM helpers. Everything here is plain data or a function;
 // nothing touches the page until main.js boots.
-import { createScript, migrate } from '../sim.js';
+import { createScript, migrate, FORMS } from '../sim.js';
 import { createStore, KEYS, TEST_PREFIX } from '../storage.js';
 import {
   cleanSave,
@@ -121,6 +121,8 @@ export function setTestMode(next) {
 }
 // Whether new netlings compile with Root Access: the codex was completed at some point (kept even if fragments are added later).
 export const rootUnlocked = () => rootUnlockedFor(app.progress, app.codex);
+// Adult forms this player has never raised: a new netling carries the list (it tips tied evolutions).
+export const newForms = () => Object.keys(FORMS).filter((f) => !app.dex.includes(f));
 
 export function save() {
   if (store.set(KEYS.save, app.state)) app.writeFailed = false;
@@ -155,7 +157,7 @@ export function loadAll() {
   app.newerSave = app.corruptSave !== null && isNewerSave(stored);
   const up = state ? upgradeSave(stored) : null;
   app.preUpgrade = up?.upgraded ? { from: up.from, raw: rawSave } : null;
-  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked() });
+  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms() });
   migrate(state);
   // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
   // already covered, before it was recorded (boot writes it back to storage).

@@ -147,18 +147,25 @@ export class RunView {
     }
   }
 
-  // The pad's quit button: press twice to abort (loot is forfeited).
+  // Esc or the controller's B: press twice to abort (loot is forfeited).
   forfeit() {
     if (this.game) return this.game.forfeit();
     if (!this.run || this.run.phase === 'done') return this.close();
     if (performance.now() < this.abortArmed) {
-      abortRun(this.pet);
-      this.sound('lose');
-      this.afterAction();
+      this.abortNow();
     } else {
       this.abortArmed = performance.now() + 2500;
       this.toast = { msg: 'press ABORT again to bail out. loot will be lost.', until: this.abortArmed };
     }
+  }
+
+  // A confirmed abort (the touch confirm already asked): an ICE fight is lost, a run ends now.
+  abortNow() {
+    if (this.game) return this.game.forfeit();
+    if (!this.run || this.run.phase === 'done') return this.close();
+    abortRun(this.pet);
+    this.sound('lose');
+    this.afterAction();
   }
 
   close() {

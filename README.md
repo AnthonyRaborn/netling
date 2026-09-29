@@ -55,7 +55,7 @@ The line under the bars, the **readout**, shows the generation, its form, its ag
 
 ### Faults
 
-A **fault** (care mistake) is a need left unmet for 15 minutes: Charge at 0, Sync at 0, or Heat at 100. Sleeping with the lights on counts after 60 minutes. Ten faults, two hours at zero Integrity, or seven days of age ends its life. Faults also nudge how it grows up, so a tidy life matters for more than survival.
+A **fault** (care mistake) is a need left unmet for 15 minutes: Charge at 0, Sync at 0, or Heat at 100. Sleeping with the lights on counts after 60 minutes. Ten faults, two hours at zero Integrity, or five days of age ends its life. Faults also nudge how it grows up, so a tidy life matters for more than survival.
 
 ## Caring for it
 
@@ -100,7 +100,7 @@ Only one alert is open at a time. If you leave a game or a netrun open, the cloc
 
 ## Items
 
-The inventory holds six items. Tap an item to see what it does, then **USE** it (or DISCARD it, with a confirm). Some only work while it is awake.
+The inventory holds six items. Tap an item to see what it does, then **USE** it, or **SCRAP** it for a little scrip (with a confirm). Some only work while it is awake.
 
 | Item | Effect |
 |---|---|
@@ -112,8 +112,11 @@ The inventory holds six items. Tap an item to see what it does, then **USE** it 
 | Memory shard | Rewrites one of its quirks at random |
 | Repair kit | Restores 40 Integrity |
 | Overclock chip | Shortens the wait before the next netrun by an hour |
+| Segfault | Adds two faults on purpose (it asks you to press twice). Faults shape how it grows up, and ten end its life |
 
-Items drop from mini-game wins, from handling traces, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation.
+Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation. Anything found while the inventory is full is scrapped for you rather than lost.
+
+**Corpo scrip** (shown above the inventory) is your netling's money, up to 100; anything past that is lost. Rarer items are worth more. Scrapping at home pays a quarter of an item's price; selling at a netrun market pays half. Half of what a netling holds passes to the next generation.
 
 ## Mini-games
 
@@ -126,7 +129,7 @@ PLAY offers four. Controls are left, right and A (keyboard arrows plus Space or 
 | **Signal Tune** | Press A when your wave matches the ghost signal. Two of three rounds win |
 | **Packet Feast** | Move under clean packets to eat 15 in 20 seconds. Two corrupted bites lose. Gives some Charge too |
 
-Quitting mid-game counts as a loss. Intrusions and netrun ICE use the same four games.
+Quitting mid-game counts as a loss. On a touch screen, QUIT asks you to confirm with a button at the top of the screen (tap KEEP PLAYING to carry on); Esc or a controller's B quits at once. Intrusions and netrun ICE use the same four games.
 
 ## Netruns
 
@@ -138,22 +141,22 @@ A netrun is an expedition. **Jack in** with at least 30 Charge while it is awake
 | **ICE** | A mini-game. Win to pass; lose and it bites into Integrity |
 | **Relay** | Recharges and cools it, and lets you bank your loot and jack out safely |
 | **Checkpoint** | A corp scan: hide, comply or pay with a voucher |
-| **Market** | Spend Charge on items, and sometimes something stylish |
+| **Market** | Buy items with scrip plus some Charge, and sometimes something stylish. While a market is open, the inventory's button sells for half price |
 | **Anomaly** | A strange event with a risky choice |
-| **Exit** | Banks everything you carry, plus a bonus |
+| **Exit** | Banks everything you carry, plus a bonus, and clears the region |
 
 Loot is only safe once you **jack out**, at a relay or the exit. If Integrity or Charge hits zero you are **disconnected**: the loot is lost, it costs a care mistake (but never the last one), and the netling reboots. You can also **abort** (press twice) to bail out with no penalty beyond losing the loot.
 
-The Public Net is open to every age. More regions open as the netling grows up. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
+Every netling starts with only the Public Net. Reaching a region's exit **clears** it and opens the next one down, and some regions also wait for the netling to grow up. Each new netling finds its own way down. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. A netling's memory only holds eight new fragments in its life (the region list shows how many it has); the rest wait for the next generation. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
 
 ## Growing up, and what comes after
 
-- **Baby**: the first day. Good care through it (two faults or fewer) grows a healthier teen.
-- **Teen**: from 24 hours. The teen years shape what comes next.
-- **Adult**: from 72 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
-- **Old age**: a netling lives for at most seven days.
+- **Baby**: the first 17 hours. How it is raised through them decides which teen it becomes; good care (two faults or fewer) grows a healthier one.
+- **Teen**: from 17 hours. The teen years shape what comes next.
+- **Adult**: from 51 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
+- **Old age**: a netling lives for at most five days. (One that was already alive when lives were shortened keeps its seven days, and its old 24 and 72 hour milestones.)
 
-When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, and a keepsake item. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
+When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, a keepsake item and half its scrip. A family that keeps ending as the same form makes its trait stronger (shown as II or III), and the trait from two generations back lingers as a weaker **history**. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
 
 ## Style
 

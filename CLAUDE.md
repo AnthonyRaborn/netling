@@ -5,9 +5,9 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 244 unit tests, Node 22
+npm test          # 303 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
-npm run balance   # lifetime simulations per player archetype
+npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174
 ```
 
@@ -36,6 +36,7 @@ npm run serve     # http://localhost:5174
 - Say plainly what you did not run (the smoke test in particular, which needs Playwright and a browser).
 - Avoid emojis and em dashes in written text.
 - Add tests for rule changes (`tests/*.test.js`, deterministic: inject `now` and `rng`; import `./helpers/utc.js` first if the test depends on the time of day).
+- When a rule or number changes, regenerate `tools/baseline/` and report what moved with `tools/balance-diff.mjs` (commands in `docs/TESTING.md`).
 
 ## Known traps
 

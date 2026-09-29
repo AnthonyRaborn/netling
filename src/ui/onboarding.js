@@ -4,7 +4,7 @@ import { createScript, isAlive, CFG, MIN } from '../sim.js';
 import { startRun } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, now, save, store } from './app.js';
+import { $, app, newForms, rootUnlocked, now, save, store } from './app.js';
 import { grantStyle } from './style.js';
 import { openRun } from './play.js';
 import { advance } from './life.js';
@@ -46,7 +46,7 @@ function renderHelp() {
         ['v1.0 Kernel', 'Generation number and its current form.'],
         ['age · bed', 'How long it has been running, and the hour it goes to sleep.'],
         ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
-        ['trait', 'What it inherited from the netling before it.'],
+        ['trait', 'What it inherited from the netling before it. A numeral (II, III) means that form ran in the family for generations in a row, and the trait is stronger. Its history is a weaker trait from the generation before that.'],
         // Hidden until earned: the codex holds the secret.
         rootUnlocked()
           ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]
@@ -163,7 +163,7 @@ export function advanceIntro() {
   $('intro').hidden = true;
   document.body.classList.remove('intro-active');
   // The script compiles for real: a fresh netling that boots on the next tick.
-  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked() });
+  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked(), newForms: newForms() });
   app.lastStage = app.state.stage;
   app.lastLogKey = '';
   save();

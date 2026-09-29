@@ -8,7 +8,6 @@ import {
   FORMS,
   TRAITS,
   ITEMS,
-  KEEPSAKES,
   PALETTES,
   INVENTORY_SLOTS,
   GAME_IDS,
@@ -17,12 +16,16 @@ import {
   QUIRK_KEYS,
   CFG,
   EVENTS,
+  LEGACY_LIFE,
+  SCRIP,
+  TRAIT_CFG,
+  fragmentOf,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
-import { REGIONS } from './netrun/regions.js';
+import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
 import { upgradeSave } from './migrations.js';
 
@@ -159,10 +162,12 @@ function cleanRun(raw, s, strict) {
     phase,
     pending,
     phased: bool(raw.phased),
+    insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     known: cleanCodex(raw.known),
     fragments: cleanCodex(raw.fragments),
     knownAcc: cleanAccessories(raw.knownAcc),
     accessories: cleanAccessories(raw.accessories),
+    scrip: int(raw.scrip, 0, 0, 1000),
     startStats: cleanStats(raw.startStats),
     tally: { nodes: int(tally.nodes, 0, 0), iceWon: int(tally.iceWon, 0, 0), iceLost: int(tally.iceLost, 0, 0) },
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
@@ -193,6 +198,15 @@ function cleanVisit(raw) {
   };
 }
 
+// The life lengths a netling compiled with. Anything missing or out of order means a save from
+// before lives were shortened (or a damaged one): it gets the old seven days, and never longer.
+function cleanLife(raw) {
+  if (!isObj(raw)) return { ...LEGACY_LIFE };
+  const { teenAt, adultAt, lifespan } = raw;
+  const ok = [teenAt, adultAt, lifespan].every(Number.isInteger) && teenAt >= 60 && teenAt < adultAt && adultAt < lifespan && lifespan <= LEGACY_LIFE.lifespan;
+  return ok ? { teenAt, adultAt, lifespan } : { ...LEGACY_LIFE };
+}
+
 // A flatlined netling's fragment, rebuilt the way sim.js makes it if the stored one is unusable.
 function cleanFragment(raw, s) {
   if (isObj(raw) && has(FORMS, raw.form)) {
@@ -202,11 +216,13 @@ function cleanFragment(raw, s) {
       quirk: cleanQuirk(raw.quirk),
       keepsake: keyOf(raw.keepsake, ITEMS),
       rootUsed: bool(raw.rootUsed),
+      scrip: int(raw.scrip, 0, 0, Math.floor(SCRIP.max * SCRIP.inherit)),
+      level: int(raw.level, 1, 1, TRAIT_CFG.maxLevel),
+      history: keyOf(raw.history, TRAITS),
     };
   }
   if (s.stage !== 'dead') return null;
-  const form = FORMS[s.form] ? s.form : leaningForm(s);
-  return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed };
+  return fragmentOf(s, FORMS[s.form] ? s.form : leaningForm(s));
 }
 
 // Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
@@ -251,6 +267,12 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     ...(strict ? {} : raw),
     saveVersion: SAVE_VERSION,
     generation: int(raw.generation, 1, 1, 1e6),
+    life: cleanLife(raw.life),
+    newForms: Array.isArray(raw.newForms) ? [...new Set(raw.newForms.filter((f) => has(FORMS, f)))] : [],
+    // Regions whose exit it reached. Saves from before the unlock order open what the stage allows.
+    cleared: Array.isArray(raw.cleared) ? REGION_ORDER.filter((r) => raw.cleared.includes(r)) : clearedForStage(stage),
+    codexFound: int(raw.codexFound, 0, 0, FRAGMENTS.length),
+    scrip: int(raw.scrip, 0, 0, SCRIP.max),
     stage,
     form,
     teenForm: keyOf(raw.teenForm, SPECIES),
@@ -299,6 +321,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
       aborted: int(runStats.aborted, 0, 0),
     },
     trait: keyOf(raw.trait, TRAITS),
+    traitLevel: int(raw.traitLevel, 1, 1, TRAIT_CFG.maxLevel),
+    history: keyOf(raw.history, TRAITS),
     inheritedQuirk: oneOf(raw.inheritedQuirk, QUIRK_KEYS, null),
     quirk: cleanQuirk(raw.quirk),
     log: Array.isArray(raw.log)
@@ -331,7 +355,10 @@ export function cleanLineage(raw) {
     ageMin: int(e.ageMin, 0, 0),
     mistakes: int(e.mistakes, undefined, 0),
     trait: keyOf(e.trait, TRAITS),
+    traitLevel: int(e.traitLevel, 1, 1, TRAIT_CFG.maxLevel), // older records: 1
+    history: keyOf(e.history, TRAITS),
     fragmentTrait: keyOf(e.fragmentTrait, TRAITS),
+    fragmentLevel: int(e.fragmentLevel, 1, 1, TRAIT_CFG.maxLevel),
     keepsake: keyOf(e.keepsake, ITEMS),
     rescued: bool(e.rescued),
     palette: int(e.palette, 0, 0, PALETTES.length - 1),

@@ -59,8 +59,8 @@ These explain most decisions in the code.
 | `src/version.js`, `src/update.js` | The page's release name, and noticing a newer release while the page is open |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 26 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators, icon and screenshot generators |
+| `tests/` | 28 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
+| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
@@ -191,6 +191,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Input
 
 - **Keyboard**: arrows move, Space, Enter, Z, X are A, Escape quits the session.
+- **Touch and mouse**: the pad's QUIT / ABORT RUN button only arms a confirm (`armQuit` in `ui/play.js`): a CONFIRM button (`#pad-confirm`) appears over the top of the screen, away from where thumbs rest, and the pad button becomes KEEP PLAYING (or KEEP RUNNING) to cancel. It disarms after 3 s or when the pad closes. Confirming forfeits a mini-game or calls `RunView.abortNow()`. A click with `detail === 0` (Enter or Space on the focused button) counts as a key press and skips the confirm.
 - **On-screen pad**: `data-key` buttons on `pointerdown`.
 - **Controller** (`ui/gamepad.js`): standard mapping (buttons 0 A, 1 B, 12 to 15 d-pad, left stick with a 0.5 threshold). In a session: left/right and A go to the game, B quits. In menus: the d-pad moves focus between usable buttons in the topmost dialog or overlay, A presses, B closes or backs out, left/right adjust the volume slider. Polling starts on `gamepadconnected`; browsers only report a pad after a button press.
 - **Layout**: the one-column phone layout is the default; landscape screens at least 860 px wide and at most 1000 px tall put the screen beside the controls (Steam Deck, laptops).

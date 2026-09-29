@@ -1,10 +1,10 @@
 // The netling's life: the clock tick, evolution, flatline and the next generation, and the care buttons.
-import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS, traitLabel } from '../sim.js';
 import { deathRecord } from '../archive.js';
 import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
+import { $, app, newForms, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
 import { closeStaleSession } from './play.js';
@@ -78,7 +78,9 @@ export function showFlatline() {
   $('fl-cause').textContent = state.deathCause;
   $('fl-age').textContent = fmtAge(state.ageMin);
   $('fl-faults').textContent = `${state.careMistakes}/${CFG.maxMistakes}`;
-  $('fl-trait').textContent = `${TRAITS[f.trait].name} — ${TRAITS[f.trait].desc}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
+  // What the next generation gets: this trait (levelled up by a streak of one form), and this netling's own trait as its history.
+  const history = f.history && f.history !== f.trait ? ` · history: ${TRAITS[f.history].name}` : f.history ? ' · and its history' : '';
+  $('fl-trait').textContent = `${traitLabel(f.trait, f.level)} — ${TRAITS[f.trait].desc}${history}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
   $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[state.form] ? '' : ' (unrealized)'}`;
   $('fl-next').textContent = `COMPILE v${state.generation + 1}.0`;
   $('flatline').hidden = false;
@@ -90,7 +92,7 @@ const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', co
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked() });
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms() });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;

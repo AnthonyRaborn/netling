@@ -6,7 +6,7 @@ import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
-import { $, app, DEV, TEST, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
+import { $, app, DEV, TEST, newForms, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
@@ -103,7 +103,7 @@ if (DEV) {
   );
   $('dev-evolve').addEventListener('click', () => {
     const state = app.state;
-    const target = state.stage === 'baby' ? CFG.teenAtMin : state.stage === 'teen' ? CFG.adultAtMin : null;
+    const target = state.stage === 'baby' ? state.life.teenAt : state.stage === 'teen' ? state.life.adultAt : null;
     if (target === null) return;
     const skip = target - state.ageMin;
     setSkew(app.skew + skip * MIN);
@@ -128,7 +128,7 @@ if (DEV) {
   }
   $('dev-reset').addEventListener('click', () => {
     setSkew(0);
-    app.state = createScript({ now: now(), rootAccess: rootUnlocked() });
+    app.state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms() });
     app.lastStage = app.state.stage;
     $('flatline').hidden = true;
     save();
