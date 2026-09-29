@@ -46,14 +46,30 @@
       addEventListener('error', (e) => problems.push(`${e.message || 'script error'} (${(e.filename || '').split('/').slice(-2).join('/')}:${e.lineno || '?'})`));
       addEventListener('unhandledrejection', (e) => problems.push(`unhandled: ${e.reason && (e.reason.message || e.reason)}`));
       const MODULES = ['src/render.js', 'src/sim.js', 'src/sprites.js', 'src/accessories.js', 'src/cosmetics.js', 'src/random.js', 'src/games/common.js', 'src/games/session.js', 'src/games/breach.js', 'src/games/dodge.js', 'src/games/tune.js', 'src/games/feast.js', 'src/netrun/regions.js', 'src/netrun/view.js', 'src/netrun/map.js', 'src/netrun/run.js', 'src/netrun/codex.js', 'src/netrun/anomalies.js', 'tools/lib/sprite-checks.mjs'];
+      // Drops what this browser stored for this site: service workers, their caches, and the HTTP cache entries of the modules.
+      window.__resetCopies = async () => {
+        try {
+          for (const r of (await navigator.serviceWorker?.getRegistrations()) ?? []) await r.unregister();
+          for (const k of (await globalThis.caches?.keys()) ?? []) await caches.delete(k);
+          await Promise.all(MODULES.concat(['gallery.html']).map((m) => fetch(m, { cache: 'reload' }).catch(() => {})));
+        } finally {
+          location.reload();
+        }
+      };
       setTimeout(async () => {
         if (window.__galleryReady) return;
         const box = document.getElementById('fail');
         box.style.display = 'block';
         const hint = location.protocol === 'file:'
           ? 'Browsers block ES modules on <code>file://</code> pages. From the repo folder run <code>npm run serve</code> (or <code>python3 -m http.server 5174</code>) and open <code>http://localhost:5174/gallery.html</code>.'
-          : 'Serve the whole repo folder (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
+          : 'A stored older copy of a file (service worker or browser cache) is the usual cause on a server that is running: try the button below, or a hard reload (Ctrl+Shift+R). Also check that the whole repo folder is served (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
         box.innerHTML = `<b>The gallery did not load.</b> ${hint}<br><small></small>`;
+        if (location.protocol !== 'file:') {
+          const fix = document.createElement('button');
+          fix.textContent = 'clear stored copies (service worker, caches) and reload';
+          fix.onclick = () => window.__resetCopies();
+          box.append(document.createElement('br'), fix);
+        }
         const detail = box.querySelector('small');
         const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
         const lines = [`browser: ${navigator.userAgent}`, `page: ${location.href}`, problems.length ? `script errors:\n  ${problems.join('\n  ')}` : 'script errors: none reported (a module failed to load, see below)'];
@@ -72,11 +88,12 @@
       import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, drawSprite } from './src/sprites.js';
       import { COSMETICS } from './src/cosmetics.js';
       import { REGIONS, REGION_ORDER } from './src/netrun/regions.js';
-      import { drawNode } from './src/netrun/view.js';
       import { GameSession, GAMES } from './src/games/session.js';
       import { FLASH_TOGGLE_MS } from './src/games/common.js';
       import { collectAccessory, lostPixels, spriteCells, spriteColor } from './tools/lib/sprite-checks.mjs';
 
+      // drawNode was exported for this page. A browser holding an older cached view.js lacks it: keep the rest of the gallery working.
+      const drawNode = await import('./src/netrun/view.js').then((m) => m.drawNode ?? null, () => null);
       const FORMS = Object.keys(SPECIES);
       const TINTS = COSMETICS.tint;
       const DIM = '#1c3a3f'; // a resting pet in the dark, and every accessory it wears (render.js)
@@ -401,6 +418,10 @@
 
         nodes() {
           const s = section('nodes', 'NETRUN NODE MARKERS', 'The eight map markers, in each region\'s colors, fresh and spent (spent draws at 45% alpha). Drawn by the game\'s own drawNode.');
+          if (!drawNode) {
+            s.append(el('p', { className: 'note warn', textContent: 'Not shown: this browser is using an older copy of src/netrun/view.js that does not export drawNode. ' }), el('button', { textContent: 'clear stored copies and reload', onclick: () => window.__resetCopies() }));
+            return s;
+          }
           const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'anomaly', 'exit'];
           const g = grid(types.length, types);
           for (const region of REGION_ORDER) {

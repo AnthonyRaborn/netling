@@ -11,6 +11,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md) | Node only |
+| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
