@@ -1,8 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ACCESSORIES, STYLE_ITEMS, anchorsFor, anchorRowsFor, rollAccessory, accessoryById, RARITY } from '../src/accessories.js';
+import { ACCESSORIES, STYLE_ITEMS, anchorsFor, anchorRowsFor, rollAccessory, accessoryById, drawAccessory, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
-import { SPECIES, mulberry32 } from '../src/sim.js';
+import { SPECIES, PALETTES, mulberry32 } from '../src/sim.js';
+import { readFileSync } from 'node:fs';
+import { computeAutoColors, renderModule, slotClearance, CLEAR } from '../tools/wearable-colors.mjs';
+import { deltaE } from '../src/colors.js';
 
 const FORM_SPRITES = Object.keys(SPECIES).flatMap((form) =>
   ['A', 'B', 'Sleep'].map((k) => [`${form}${k}`, SPRITES[`${form}${k}`]]).filter(([, s]) => s),
@@ -179,4 +182,43 @@ test('the scarf sits on the neck row, below the mouth', () => {
     assert.equal(Math.min(...ys), a.neckRow, form);
     assert.ok(a.neckRow > a.mouthRow, form);
   }
+});
+
+test('recolorable wearables default to a color that stands clear of the palette, and a pick or null overrides it', () => {
+  const ice = PALETTES.find((p) => p.name === 'ice');
+  // The cap's signature cyan is the ice body color: on ice it must not be cyan, on a palette where cyan stands clear it stays.
+  assert.notEqual(accessoryColors('cap', null, ice)[0], '#05d9e8');
+  assert.equal(accessoryColors('cap', null, PALETTES.find((p) => p.name === 'acid'))[0], '#05d9e8');
+  assert.equal(accessoryColors('cap', ['#123456'], ice)[0], '#123456', 'a player pick wins');
+  assert.equal(accessoryColors('cap', [null], ice)[0], accessoryColors('cap', null, ice)[0], 'null is automatic');
+  assert.equal(accessoryColors('cap', ['red'], ice)[0], accessoryColors('cap', null, ice)[0], 'junk is automatic');
+  assert.equal(accessoryColors('cap', null)[0], '#05d9e8', 'with no palette, the signature color');
+  assert.equal(accessoryColors('crown', null, ice), null, 'a wearable with fixed colors has no color list');
+});
+
+test('src/wearable-colors.js is up to date, and every default stands clear of every palette on every form', () => {
+  const { out } = computeAutoColors();
+  assert.equal(readFileSync(new URL('../src/wearable-colors.js', import.meta.url), 'utf8'), renderModule(out), 'run: node tools/wearable-colors.mjs --write');
+  for (const acc of ACCESSORIES.filter((a) => a.colors)) {
+    for (const pal of PALETTES) {
+      const picks = accessoryColors(acc.id, null, pal);
+      picks.forEach((c, slot) => {
+        const others = picks.slice(0, slot).map((oc, i) => [i, oc]);
+        const score = slotClearance(acc, slot, c, pal, others);
+        assert.ok(score >= CLEAR, `${acc.id} ${acc.colors[slot][0]} on ${pal.name}: ${c} only stands ${score.toFixed(1)} clear`);
+      });
+    }
+  }
+});
+
+test('a wearable with fixed colors is painted in a color that stands clear of the body it is worn on', () => {
+  const acid = PALETTES.find((p) => p.name === 'acid');
+  const drawn = [];
+  const ctx = { set fillStyle(v) { this._c = v; }, fillRect() { drawn.push(this._c); } };
+  drawAccessory(ctx, 'crown', SPRITES.chromeA, 0, 0, 0, false, 0, null, acid); // a yellow crown on a yellow body
+  assert.ok(drawn.length > 0);
+  for (const c of drawn) assert.ok(deltaE(c, acid.main) >= 30, `${c} blends into ${acid.main}`);
+  drawn.length = 0;
+  drawAccessory(ctx, 'crown', SPRITES.chromeA, 0, 0, 0, false, 0, null, PALETTES.find((p) => p.name === 'ice'));
+  assert.ok(drawn.includes('#f9f002'), 'where yellow stands clear, the crown stays yellow');
 });

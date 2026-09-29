@@ -213,7 +213,9 @@ function colorSection() {
   const id = app.wardrobe.accessory;
   const acc = app.ownedAccessories.includes(id) ? accessoryById(id) : null;
   if (!acc?.colors) return [];
-  const current = accessoryColors(id, app.wardrobe.colors?.[id]);
+  const pal = PALETTES[app.state.quirk.palette] ?? PALETTES[0];
+  const picked = [...(app.wardrobe.colors?.[id] ?? [])]; // null = automatic
+  const current = accessoryColors(id, picked, pal);
   const row = document.createElement('div');
   row.className = 'color-row';
   const label = document.createElement('span');
@@ -225,8 +227,8 @@ function colorSection() {
     input.value = current[i];
     input.setAttribute('aria-label', `${acc.name} ${name} ${i + 1}`);
     input.addEventListener('input', () => {
-      current[i] = input.value;
-      setWardrobe({ ...app.wardrobe, colors: { ...app.wardrobe.colors, [id]: [...current] } });
+      picked[i] = input.value;
+      setWardrobe({ ...app.wardrobe, colors: { ...app.wardrobe.colors, [id]: acc.colors.map((_, j) => picked[j] ?? null) } });
     });
     row.append(input);
   });

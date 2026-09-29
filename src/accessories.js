@@ -5,6 +5,8 @@
 // Props (PROPS below) are style items too, but sit on the ground beside the pet in their own slot.
 // source 'earned' items are granted by events, never sold or dropped.
 import { SPRITES } from './sprites.js';
+import { contrastColor } from './colors.js';
+import { AUTO_COLORS } from './wearable-colors.js';
 
 export const RARITY = {
   common: { weight: 6, hint: 'sold in markets.' },
@@ -520,12 +522,14 @@ export const STYLE_ITEMS = [...ACCESSORIES, ...PROPS];
 
 export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
 
-// Recolorable accessories declare colors: [[label, default], ...]. Custom picks must be #rrggbb.
+// Recolorable accessories declare colors: [[label, signature color], ...]. Custom picks must be #rrggbb.
 export const HEX = /^#[0-9a-f]{6}$/i;
-export function accessoryColors(id, custom) {
+// A slot the player has not picked (null, or anything that is not a #rrggbb) is automatic: the wearable's color for the
+// palette `pal` ({ name }) from AUTO_COLORS, which stands clear of that palette, else its signature color.
+export function accessoryColors(id, custom, pal = null) {
   const x = accessoryById(id);
   if (!x?.colors) return null;
-  return x.colors.map(([, def], i) => (HEX.test(custom?.[i] ?? '') ? custom[i] : def));
+  return x.colors.map(([, def], i) => (HEX.test(custom?.[i] ?? '') ? custom[i] : (AUTO_COLORS[id]?.[i]?.[pal?.name] ?? def)));
 }
 export const accessoryRegions = (x) => x.regions ?? null;
 
@@ -554,16 +558,23 @@ function pickByRarity(pool, rng) {
   return pool[pool.length - 1].id;
 }
 
-// Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark.
-export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null) {
+// What a wearable is painted in when its wearer rests in the dark: a step lighter than the dimmed body (#1c3a3f), so it
+// still shows as a shape against it.
+export const DIM_WEARABLE = '#2f6b73';
+
+// Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark. pal ({ name, main, accent }) is the
+// wearer's palette: recolorable wearables take their automatic colors for it, and any other wearable pixel that would
+// blend into the body is swapped for a color that does not.
+export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null, pal = null) {
   const acc = accessoryById(id);
   if (!acc) return;
   const a = anchorsFor(sprite);
+  const fixed = !acc.colors;
   const px = (x, y, color) => {
-    ctx.fillStyle = dim ? '#1c3a3f' : color;
+    ctx.fillStyle = dim ? DIM_WEARABLE : fixed && pal ? contrastColor(color, pal.main) : color;
     ctx.fillRect(ox + x, oy + y, 1, 1);
   };
-  acc.draw(px, a, frame, time, accessoryColors(id, custom));
+  acc.draw(px, a, frame, time, accessoryColors(id, custom, pal));
 }
 
 // Props stand on the LCD floor at the right edge. Returns nothing if the prop has nothing to draw.

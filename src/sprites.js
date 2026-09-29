@@ -1,4 +1,9 @@
-// Pixel sprites as string rows. '#' = main color, 'o' = accent, '+' = highlight, '.' = empty.
+// Pixel sprites as string rows. '#' = main color, 'o' = accent, '+' = highlight, 'x' = dim fill (a darkened main color,
+// used for the inside of the Shell's casing), '.' = empty.
+import { blend } from './colors.js';
+
+// The colors of a living netling's sprite marks in palette `pal` ({ main, accent }).
+export const paletteColors = (pal) => ({ '#': pal.main, o: pal.accent, '+': '#f5f5f5', x: blend(pal.main, 0.3, '#000000') });
 
 export const SPRITES = {
   script: [

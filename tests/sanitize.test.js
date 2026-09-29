@@ -160,7 +160,8 @@ test('progress, wardrobe, prefs, onboarding and lock fall back to safe shapes', 
   assert.equal(w.prop, undefined);
   assert.equal(w.label, undefined);
   assert.equal(w.colors.partyhat[0], '#00ff00');
-  assert.match(w.colors.partyhat[1], /^#[0-9a-f]{6}$/i);
+  assert.equal(w.colors.partyhat[1], null, 'a bad color drops the slot back to automatic');
+  assert.deepEqual(cleanWardrobe({ colors: { partyhat: [null, '#112233'] } }).colors.partyhat, [null, '#112233'], 'null stays automatic');
   assert.equal(w.colors.nope, undefined);
   assert.deepEqual(resolveWardrobe(cleanWardrobe([1, 2]), []), resolveWardrobe({}, []));
 

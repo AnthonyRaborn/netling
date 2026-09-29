@@ -18,41 +18,8 @@ export const HUD_BOXES = {
 // room #03090a is 23 (just visible). The cutoff is a judgement call: tune it if the tool flags too much or too little.
 export const SAME_COLOR = 18;
 
-export function hexToRgb(hex) {
-  const h = String(hex).replace('#', '');
-  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
-}
-
-export const rgbToHex = (rgb) => `#${rgb.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('')}`;
-
-// Alpha blend `hex` over `bg`.
-export function blend(hex, alpha, bg) {
-  if (alpha >= 1) return hex;
-  const a = hexToRgb(hex);
-  const b = hexToRgb(bg);
-  return rgbToHex(a.map((v, i) => v * alpha + b[i] * (1 - alpha)));
-}
-
-function rgbToLab([r, g, b]) {
-  const lin = (v) => {
-    v /= 255;
-    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  };
-  const [R, G, B] = [lin(r), lin(g), lin(b)];
-  const X = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047;
-  const Y = R * 0.2126 + G * 0.7152 + B * 0.0722;
-  const Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
-  const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
-  const [fx, fy, fz] = [f(X), f(Y), f(Z)];
-  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
-}
-
-// CIE76 color difference between two #rrggbb colors.
-export function deltaE(a, b) {
-  const [l1, a1, b1] = rgbToLab(hexToRgb(a));
-  const [l2, a2, b2] = rgbToLab(hexToRgb(b));
-  return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
-}
+import { hexToRgb, rgbToHex, blend, deltaE } from '../../src/colors.js';
+export { hexToRgb, rgbToHex, blend, deltaE };
 
 export const sameColor = (a, b) => deltaE(a, b) < SAME_COLOR;
 
