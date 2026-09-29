@@ -18,7 +18,7 @@ const offscreen = [];
 globalThis.document = { createElement: () => offscreen[offscreen.push(fakeCanvas(LCD.w, LCD.h)) - 1] };
 const { renderLCD } = await import('../src/render.js');
 const { createScript, SPECIES, PALETTES, IDLES } = await import('../src/sim.js');
-const { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite } = await import('../src/sprites.js');
+const { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, paletteColors } = await import('../src/sprites.js');
 const { ACCESSORIES, PROPS, anchorsFor, accessoryColors } = await import('../src/accessories.js');
 const { COSMETICS } = await import('../src/cosmetics.js');
 
@@ -236,7 +236,7 @@ if (wants('forms') || wants('poses')) {
 if (wants('props')) {
   // How much of each prop stays visible with the pet standing at the far right, and with a visitor beside it.
   const rows = [];
-  const plush = { sprite: formSprite('bitling', 'a'), colors: { '#': '#05d9e8', o: '#ff2a6d', '+': '#f5f5f5' } };
+  const plush = { sprite: formSprite('bitling', 'a'), colors: paletteColors(PALETTES[0]) };
   for (const prop of PROPS) {
     for (const form of FORMS) {
       const idles = report.ranges;

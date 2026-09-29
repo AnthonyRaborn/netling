@@ -4,7 +4,7 @@ import { PALETTES, SPECIES } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
-import { drawSprite, formSprite } from '../sprites.js';
+import { drawSprite, formSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, rootUnlocked, flashStatus, save, store } from './app.js';
@@ -55,10 +55,10 @@ function thumb(form, paletteIdx, { dead = false, locked = false } = {}) {
   c.height = 16;
   const pal = PALETTES[paletteIdx] ?? PALETTES[0];
   const colors = locked
-    ? { '#': '#1c3a3f', o: '#1c3a3f', '+': '#1c3a3f' }
+    ? LOCKED_COLORS
     : dead
-      ? { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' }
-      : { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
+      ? DEAD_COLORS
+      : paletteColors(pal);
   drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);
   wrap.append(c);
   return wrap;

@@ -86,7 +86,7 @@
       import { createScript, SPECIES, FORM_MODS, PALETTES, IDLES } from './src/sim.js';
       import { ACCESSORIES, PROPS, anchorsFor, accessoryColors, drawAccessory, DIM_WEARABLE } from './src/accessories.js';
       import { contrastColor } from './src/colors.js';
-      import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, drawSprite } from './src/sprites.js';
+      import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, drawSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS, WHITE_COLORS } from './src/sprites.js';
       import { COSMETICS } from './src/cosmetics.js';
       import { REGIONS, REGION_ORDER } from './src/netrun/regions.js';
       import { GameSession, GAMES } from './src/games/session.js';
@@ -169,8 +169,8 @@
         c.style.height = `${h * sc}px`;
         return c;
       }
-      const flat = { '#': '#f5f5f5', o: '#f5f5f5', '+': '#f5f5f5' };
-      const palColors = (i) => ({ '#': PALETTES[i].main, o: PALETTES[i].accent, '+': '#f5f5f5' });
+      const flat = WHITE_COLORS;
+      const palColors = (i) => paletteColors(PALETTES[i]);
       const fig = (canvas, caption) => el('figure', {}, canvas, el('figcaption', { textContent: caption }));
       const section = (id, title, note) => el('section', { id }, el('h2', { textContent: title }), el('p', { className: 'note', textContent: note }));
       const grid = (cols, headers) => {
@@ -211,7 +211,7 @@
             g.append(el('span', { textContent: `${SPECIES[form].name} (${SPECIES[form].stage})${FORM_MODS[form] ? '' : ''}` }));
             const colors = palColors(pal);
             for (const [k, pose] of [['A', 'a'], ['B', 'b'], ['Sleep', 'sleep'], ['Dead', 'dead']]) {
-              const c = raw(formSprite(form, pose), k === 'Dead' && has('Dead') ? { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' } : colors, 10);
+              const c = raw(formSprite(form, pose), k === 'Dead' && has('Dead') ? DEAD_COLORS : colors, 10);
               if (k !== 'A' && k !== 'B' && !has(k)) c.style.opacity = '0.35';
               c.title = k !== 'A' && k !== 'B' && !has(k) ? `${SPECIES[form].name} has no ${k} sprite: the game reuses A (=A)` : '';
               g.append(c);
@@ -404,7 +404,7 @@
           const pal = PALETTES[palettes()[0]];
           for (const form of FORMS) {
             g.append(el('span', { textContent: SPECIES[form].name }));
-            for (const colors of [palColors(palettes()[0]), { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' }, { '#': DIM, o: DIM, '+': DIM }]) {
+            for (const colors of [palColors(palettes()[0]), DEAD_COLORS, LOCKED_COLORS]) {
               const sprite = formSprite(form, 'a');
               const c = el('canvas', { width: 16, height: 16 });
               drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);

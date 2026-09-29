@@ -2,7 +2,7 @@
 import { PALETTES } from '../sim.js';
 import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
-import { formSprite } from '../sprites.js';
+import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
@@ -71,7 +71,7 @@ export function plushExtra() {
   if (!e) return null;
   const form = e.realized ? e.form : e.teenForm ?? 'bitling';
   const pal = PALETTES[e.palette ?? 0] ?? PALETTES[0];
-  return { sprite: formSprite(form, 'a'), colors: { '#': pal.main, o: pal.accent, '+': '#f5f5f5' } };
+  return { sprite: formSprite(form, 'a'), colors: paletteColors(pal) };
 }
 
 // Counts toward every non-streak game unlock, from PLAY and from netrun ICE alike.

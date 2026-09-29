@@ -1,10 +1,11 @@
 // Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory. Placement comes from
-// anchors: four rows per sprite that are authored in ANCHOR_ROWS below (so a wearable sits on the same part of the body
+// anchors: four rows per sprite that are authored in ANCHOR_ROWS (sprites.js, so a wearable sits on the same part of the body
 // in every frame), with everything else read from the sprite's own pixels. A sprite that is not in the table falls back
 // to guessing all four rows from its pixels, and tests/accessories.test.js checks that every form has its rows.
 // Props (PROPS below) are style items too, but sit on the ground beside the pet in their own slot.
 // source 'earned' items are granted by events, never sold or dropped.
-import { SPRITES } from './sprites.js';
+import { SPRITES, ANCHOR_ROWS, anchorRowsFor } from './sprites.js';
+export { anchorRowsFor };
 import { contrastColor } from './colors.js';
 import { AUTO_COLORS } from './wearable-colors.js';
 
@@ -13,27 +14,6 @@ export const RARITY = {
   rare: { weight: 2, hint: 'rarely sold. sometimes turns up on a run.' },
   veryrare: { weight: 1, hint: 'almost never for sale.' },
 };
-
-// Authored anchor rows, in sprite rows, per form and pose (a, b, sleep). headTop: the first row of the head proper
-// (not antennae or horns). eyeRow: the row the eyes are on. mouthRow: the row a mouthpiece sits on. neckRow: where a
-// scarf goes. A pose that is missing uses the form's A frame (a form with no dedicated sleep sprite draws its A frame).
-// Guessing eyeRow from "the first row with an accent pixel" failed on the small forms, whose B frames put an accent
-// pixel in the top of the head, so eye wearables jumped up to four rows between frames.
-const ANCHOR_ROWS = {
-  bitling: {
-    a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 },
-    sleep: { headTop: 3, eyeRow: 6, mouthRow: 8, neckRow: 9 },
-  },
-  kernel: { a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  stub: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  shell: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 } },
-  chrome: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 } },
-  firewall: { a: { headTop: 1, eyeRow: 6, mouthRow: 8, neckRow: 10 }, b: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 10 } },
-  daemon: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  glitch: { a: { headTop: 1, eyeRow: 4, mouthRow: 8, neckRow: 9 } },
-  ghost: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-};
-export const anchorRowsFor = (form, pose) => ANCHOR_ROWS[form]?.[pose] ?? ANCHOR_ROWS[form]?.a ?? null;
 
 // sprite array -> its authored rows. The same array can be several poses (a missing pose falls back to A).
 const authored = new Map();

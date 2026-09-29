@@ -22,8 +22,8 @@ export const AUTO_COLORS = {
     { ice: '#39ff14', neon: '#39ff14', acid: '#39ff14', toxic: '#f9f002', ultra: '#39ff14', origin: '#39ff14' },
   ],
   rebreather: [
-    { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', origin: '#ff2a6d' },
-    { ice: '#7843a6', neon: '#7843a6', acid: '#7843a6', toxic: '#7843a6', ultra: '#a61b47', origin: '#a61b47' },
+    { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', origin: '#b967ff' },
+    { ice: '#7843a6', neon: '#7843a6', acid: '#7843a6', toxic: '#7843a6', ultra: '#a61b47', origin: '#7843a6' },
   ],
   partyhat: [
     { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
