@@ -19,7 +19,7 @@ import { GAMES } from '../src/games/session.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const unique = (list) => new Set(list).size === list.length;
-const PIXELS = /^[#o+.]+$/;
+const PIXELS = /^[#o+x.]+$/;
 
 test('every body has a sprite, and every sprite is a clean rectangle of known pixels', () => {
   for (const form of Object.keys(SPECIES)) {

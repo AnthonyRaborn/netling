@@ -61,7 +61,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 3. The rule that selects it in `leaningForm`, and its netrun ability in `FORM_ABILITIES` and `visibleNodeIds` or the relevant case in `netrun/run.js`.
 4. Dex entries in `archive.js`: `DEX_ORDER`, `DEX_HINTS`, `DEX_LORE`.
 5. A shell cosmetic unlocked by discovering it (`cosmetics.js`) if wanted.
-6. Update `gallery.html` if it lists forms by hand, the balance tool's adult tallies, and tests (`sim.test.js`, `archive.test.js`, `accessories.test.js` already loops over all forms).
+6. `gallery.html` and `tools/sprite-audit.mjs` read forms, wearables, props and crests from the source arrays, so a new one appears with no edit (check it in the gallery and run the audit); update the balance tool's adult tallies, and tests (`sim.test.js`, `archive.test.js`, `accessories.test.js` already loops over all forms).
 
 ### Add an accessory or prop
 

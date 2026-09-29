@@ -91,7 +91,7 @@ export const COSMETICS = {
       name: 'Helix',
       hint: 'inherit every trait there is, once.',
       check: (c) => LEGACY.traitsHeld(c) >= Object.keys(TRAITS).length,
-      pixels: ['#.......#', '.#.....#.', '..#####..', '...#.#...', '....#....', '...#.#...', '..#####..', '.#.....#.', '#.......#'],
+      pixels: ['.#.....#.', '..#.#.#..', '...#.#...', '....#....', '...#.#...', '..#.#.#..', '.#.....#.', '..#.#.#..', '...#.#...'],
     },
     {
       id: 'triad',

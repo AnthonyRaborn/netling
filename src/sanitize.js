@@ -404,7 +404,8 @@ export function cleanWardrobe(raw) {
     for (const [id, list] of Object.entries(w.colors)) {
       const acc = STYLE_IDS.has(id) ? accessoryById(id) : null;
       if (!acc?.colors || !Array.isArray(list)) continue;
-      colors[id] = acc.colors.map(([, def], i) => (typeof list[i] === 'string' && HEX.test(list[i]) ? list[i] : def));
+      // null keeps a slot automatic (see accessoryColors); anything that is not a #rrggbb is dropped to it.
+      colors[id] = acc.colors.map((_, i) => (typeof list[i] === 'string' && HEX.test(list[i]) ? list[i] : null));
     }
     out.colors = colors;
   }

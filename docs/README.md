@@ -18,6 +18,7 @@ Written against commit `ea87757` (2026-09-28). Every file names the commit it wa
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
 | Plan the next balance passes (forms, netruns, lineage) | [BALANCE_PLAN.md](BALANCE_PLAN.md) |
+| Review the art (forms, wearables, props, icons, crests) and see what the first pass found | [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md), [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
 ## The project in one paragraph
@@ -26,7 +27,7 @@ Netling is a Tamagotchi-style pet that runs in real time in the browser. A pure 
 
 ## Numbers at a glance
 
-- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 31 unit test files (315 tests) and a 54-scenario browser smoke test.
+- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 34 unit test files (337 tests) and a 54-scenario browser smoke test.
 - 9 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost), 9 items, 4 mini-games, 5 netrun regions plus a tutorial, 22 codex fragments, 28 style items (24 accessories, 4 props), 36 cosmetics (9 shells, 7 tints, 8 effects, 7 sounds, 5 crests) plus a device label.
 - Life: up to 5 days; teen at 17 hours; adult at 51 hours (netlings compiled before this keep 7 days, 24 and 72); 10 care mistakes end it.
 

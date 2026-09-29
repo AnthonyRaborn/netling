@@ -1,7 +1,13 @@
-// Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory:
-// placement comes from anchors computed from the sprite's own pixels, not per-form tables.
+// Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory. Placement comes from
+// anchors: four rows per sprite that are authored in ANCHOR_ROWS (sprites.js, so a wearable sits on the same part of the body
+// in every frame), with everything else read from the sprite's own pixels. A sprite that is not in the table falls back
+// to guessing all four rows from its pixels, and tests/accessories.test.js checks that every form has its rows.
 // Props (PROPS below) are style items too, but sit on the ground beside the pet in their own slot.
 // source 'earned' items are granted by events, never sold or dropped.
+import { SPRITES, ANCHOR_ROWS, anchorRowsFor } from './sprites.js';
+export { anchorRowsFor };
+import { contrastColor } from './colors.js';
+import { AUTO_COLORS } from './wearable-colors.js';
 
 export const RARITY = {
   common: { weight: 6, hint: 'sold in markets.' },
@@ -9,10 +15,26 @@ export const RARITY = {
   veryrare: { weight: 1, hint: 'almost never for sale.' },
 };
 
+// sprite array -> its authored rows. The same array can be several poses (a missing pose falls back to A).
+const authored = new Map();
+for (const form of Object.keys(ANCHOR_ROWS)) {
+  for (const [key, pose] of [['A', 'a'], ['B', 'b'], ['Sleep', 'sleep']]) {
+    const sprite = SPRITES[`${form}${key}`];
+    if (sprite) authored.set(sprite, anchorRowsFor(form, pose));
+  }
+}
+
+const spriteCellsOf = (sprite, ch, fromRow, toRow) => {
+  const out = [];
+  for (let y = fromRow; y <= toRow; y++) [...(sprite[y] ?? '')].forEach((c, x) => c === ch && out.push([x, y]));
+  return out;
+};
+
 // Anchors for a sprite (array of strings). Cached per sprite array.
 const cache = new WeakMap();
 export function anchorsFor(sprite) {
   if (cache.has(sprite)) return cache.get(sprite);
+  const rows = authored.get(sprite);
   const w = sprite[0].length;
   const span = (row) => {
     const cols = [...row].map((ch, i) => (ch !== '.' ? i : -1)).filter((i) => i >= 0);
@@ -20,22 +42,41 @@ export function anchorsFor(sprite) {
   };
   const spans = sprite.map(span);
   const top = spans.findIndex(Boolean); // first painted row (antenna tips included)
-  // Head top: first row that's clearly body, not antennae or horns.
-  let headTop = spans.findIndex((s) => s && s.count >= w * 0.4);
+  // Head top: the authored row, else the first row that's clearly body, not antennae or horns.
+  let headTop = rows?.headTop ?? spans.findIndex((s) => s && s.count >= w * 0.4);
   if (headTop < 0) headTop = top;
-  // Eye row: first row at/below the head top holding accent pixels.
-  let eyeRow = sprite.findIndex((row, i) => i >= headTop && row.includes('o'));
+  // Eye row: the authored row, else the first row at/below the head top holding accent pixels.
+  let eyeRow = rows?.eyeRow ?? sprite.findIndex((row, i) => i >= headTop && row.includes('o'));
   if (eyeRow < 0) eyeRow = Math.min(sprite.length - 1, headTop + 2);
   const eyeCols = [...sprite[eyeRow]].map((ch, i) => (ch === 'o' ? i : -1)).filter((i) => i >= 0);
   let bottom = sprite.length - 1;
   while (bottom > eyeRow && !(spans[bottom] && spans[bottom].count >= w * 0.4)) bottom--;
   const mid = Math.min(bottom, eyeRow + Math.max(2, Math.round((bottom - eyeRow) / 2)));
   const head = spans[headTop];
-  const body = spans[mid] ?? head;
-  // Mouth: first row below the eyes with highlight pixels ('+'); otherwise a guess.
-  let mouthRow = sprite.findIndex((row, i) => i > eyeRow && row.includes('+'));
+  // The body and neck are the solid run of pixels through the middle of the row: side arms (Kernel's, on some frames)
+  // are attached to a row but are not the body, so a scarf must not stretch out to them.
+  const centre = Math.floor((head.left + head.right) / 2);
+  const runAt = (rowIndex) => {
+    const row = sprite[rowIndex];
+    if (!row || !spans[rowIndex]) return null;
+    let start = centre;
+    for (let d = 0; d < w && row[start] === '.'; d++) start = centre + (d % 2 ? -1 : 1) * Math.ceil((d + 1) / 2);
+    if (row[start] === undefined || row[start] === '.') return spans[rowIndex];
+    let left = start;
+    let right = start;
+    while (row[left - 1] && row[left - 1] !== '.') left--;
+    while (row[right + 1] && row[right + 1] !== '.') right++;
+    return { left, right, count: right - left + 1 };
+  };
+  const spanOf = (authored, rowIndex) => (authored ? { left: authored[0], right: authored[1], count: authored[1] - authored[0] + 1 } : runAt(rowIndex));
+  const body = spanOf(rows?.bodySpan, mid) ?? head;
+  // Mouth: the authored row, else the first row below the eyes with highlight pixels ('+'), else a guess.
+  let mouthRow = rows?.mouthRow ?? sprite.findIndex((row, i) => i > eyeRow && row.includes('+'));
   if (mouthRow < 0) mouthRow = Math.min(bottom, eyeRow + 2);
   const mouthCols = [...sprite[mouthRow]].map((ch, i) => (ch === '+' ? i : -1)).filter((i) => i >= 0);
+  // Neck: the authored row, else the row under the mouth.
+  const neckRow = Math.min(sprite.length - 1, rows?.neckRow ?? mouthRow + 1);
+  const neck = spanOf(rows?.neckSpan, neckRow) ?? body;
   const a = {
     top,
     headTop,
@@ -52,6 +93,11 @@ export function anchorsFor(sprite) {
     mouthRow,
     mouthLeft: mouthCols.length ? mouthCols[0] : Math.floor((head.left + head.right) / 2) - 1,
     mouthRight: mouthCols.length ? mouthCols[mouthCols.length - 1] : Math.floor((head.left + head.right) / 2) + 1,
+    neckRow,
+    neckLeft: neck.left,
+    neckRight: neck.right,
+    // Cells of the sprite that shine through eyewear: a form whose eyes are bright highlights ('+') on a visor (Chrome).
+    shine: rows?.shine ? spriteCellsOf(sprite, '+', eyeRow, eyeRow + 1) : [],
   };
   cache.set(sprite, a);
   return a;
@@ -67,6 +113,8 @@ export const ACCESSORIES = [
     colors: [['cap', '#05d9e8']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#05d9e8'];
+      // A dome with a brim that juts out to the right, so it is not the Crown's flat band.
+      for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, a.headTop - 3, c);
       for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 2, c);
       for (let x = a.cx - 3; x <= a.cx + 5; x++) px(x, a.headTop - 1, c);
     },
@@ -78,9 +126,9 @@ export const ACCESSORIES = [
     colors: [['scarf', '#ff2a6d']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#ff2a6d'];
-      for (let x = a.bodyLeft; x <= a.bodyRight; x++) px(x, a.mid, c);
-      px(a.bodyRight - 1, a.mid + 1, c);
-      px(a.bodyRight - 1, a.mid + 2, c);
+      for (let x = a.neckLeft; x <= a.neckRight; x++) px(x, a.neckRow, c);
+      px(a.neckRight - 1, a.neckRow + 1, c);
+      px(a.neckRight - 1, a.neckRow + 2, c);
     },
   },
   {
@@ -137,6 +185,8 @@ export const ACCESSORIES = [
       }
       for (let x = a.eyeLeft; x <= a.eyeRight; x++) px(x, a.eyeRow, lens);
       px(a.eyeLeft, a.eyeRow, glint);
+      // Eyes that are too bright to hide (Chrome's) shine through the lenses.
+      for (const [x, y] of a.shine) px(x, y, '#ffffff');
     },
   },
   {
@@ -149,8 +199,25 @@ export const ACCESSORIES = [
     ],
     draw: (px, a, frame, time, colors) => {
       const [band, light] = colors ?? ['#ff2a6d', '#ffffff'];
-      for (let x = a.headLeft; x <= a.headRight; x++) px(x, a.eyeRow, band);
-      px(a.headLeft + 1 + (frame % 2) * 2, a.eyeRow, light); // scanning light
+      // An augmented-vision visor: two tinted lenses with a bridge between them, rounded corners, a scan light sweeping
+      // each lens and a blip of readout above the right one. Not a single bar across the face.
+      const left = Math.min(a.headLeft, a.eyeLeft);
+      const right = Math.max(a.headRight, a.eyeRight);
+      const lenses = [[left, a.cx - 1], [a.cx + 1, right]];
+      for (const [from, to] of lenses) {
+        for (let x = from; x <= to; x++) {
+          px(x, a.eyeRow, band);
+          if (x > from && x < to) {
+            px(x, a.eyeRow - 1, '#050508');
+            px(x, a.eyeRow + 1, '#050508');
+          }
+        }
+      }
+      px(a.cx, a.eyeRow, '#050508'); // the bridge
+      const sweep = frame % 2 ? 2 : 0;
+      px(left + 1 + sweep, a.eyeRow, light); // scan lights, one per lens, moving together
+      px(right - 1 - sweep, a.eyeRow, light);
+      px(right - 1, a.eyeRow - 2, frame % 2 ? light : band); // readout blip
     },
   },
   {
@@ -182,9 +249,10 @@ export const ACCESSORIES = [
     name: 'Spark',
     rarity: 'veryrare',
     draw: (px, a, frame) => {
+      // A twinkle: a plus on one frame, an X on the other, always with the bright centre.
       const y = a.top - 3;
       px(a.cx, y, '#ffffff');
-      if (frame % 2) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(a.cx + dx, y + dy, '#05d9e8');
+      for (const [dx, dy] of frame % 2 ? [[-1, -1], [1, -1], [-1, 1], [1, 1]] : [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(a.cx + dx, y + dy, frame % 2 ? '#ffffff' : '#05d9e8');
     },
   },
 
@@ -215,6 +283,7 @@ export const ACCESSORIES = [
         px(x, a.mouthRow, '#c8d0dc');
         px(x, a.mouthRow + 1, (x - a.mouthLeft) % 2 ? '#8a93a3' : '#c8d0dc');
       }
+      for (let x = a.mouthLeft; x <= a.mouthRight; x++) px(x, a.mouthRow + 2, '#8a93a3'); // a heavy chin, so the jaw hangs lower than a mask
     },
   },
   {
@@ -243,7 +312,8 @@ export const ACCESSORIES = [
     colors: [['mohawk', '#ff2a6d']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#ff2a6d'];
-      for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [0, -2], [1, -2], [0, -3]]) px(a.cx + dx, a.headTop + dy, c);
+      // A crest swept back and up, a staircase rather than the Party hat's cone.
+      for (const [dx, dy] of [[-2, -1], [-1, -1], [-1, -2], [0, -2], [0, -3], [1, -3], [1, -4], [2, -4]]) px(a.cx + dx, a.headTop + dy, c);
     },
   },
   {
@@ -254,6 +324,7 @@ export const ACCESSORIES = [
     hint: 'sold in the Darknet Bazaar.',
     draw: (px, a) => {
       px(a.headLeft, a.eyeRow, '#f9f002'); // the plug
+      px(a.headLeft, a.eyeRow + 1, '#f9f002');
       for (const [dx, dy] of [[-1, 0], [-2, 1], [-2, 2], [-3, 3], [-3, 4]]) px(a.headLeft + dx, a.eyeRow + dy, '#9a9ab8');
     },
   },
@@ -266,7 +337,7 @@ export const ACCESSORIES = [
     colors: [['glow', '#39ff14']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#39ff14'];
-      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [1, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, c);
+      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [2, 3], [2, 4], [3, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, c);
     },
   },
   {
@@ -284,6 +355,8 @@ export const ACCESSORIES = [
       for (let x = a.mouthLeft - 1; x <= a.mouthRight + 1; x++) px(x, a.mouthRow, plate);
       for (let x = a.mouthLeft; x <= a.mouthRight; x++) px(x, a.mouthRow + 1, filter);
       px(Math.floor((a.mouthLeft + a.mouthRight) / 2), a.mouthRow + 1, '#050508'); // vent
+      // A filter can on each side, sticking out past the face: a mask, not a jaw.
+      for (const x of [a.mouthLeft - 2, a.mouthRight + 2]) for (const dy of [0, 1]) px(x, a.mouthRow + dy, filter);
     },
   },
   {
@@ -325,7 +398,9 @@ export const ACCESSORIES = [
       px(x - 1, y, '#8a93a3');
       px(x, y, '#c8d0dc');
       px(x + 1, y, '#8a93a3');
-      if (frame % 2) px(x, y - 1, '#39ff14');
+      px(x - 2, y - 1, '#c8d0dc'); // rotors
+      px(x + 2, y - 1, '#c8d0dc');
+      px(x, y + 1, frame % 2 ? '#39ff14' : '#5a5a6a'); // its light blinks
     },
   },
 ];
@@ -348,8 +423,9 @@ ACCESSORIES.push(
       const [c1, c2] = frame % 2 ? [s1, s2] : [s2, s1];
       for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 1, x % 2 ? c1 : c2);
       for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, a.headTop - 2, x % 2 ? c2 : c1);
-      px(a.cx, a.headTop - 3, c1);
-      px(a.cx, a.headTop - 4, '#ffffff');
+      for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, a.headTop - 3, x % 2 ? c1 : c2); // a tall cone
+      px(a.cx, a.headTop - 4, c1);
+      px(a.cx, a.headTop - 5, '#ffffff'); // the pom-pom
     },
   },
   {
@@ -359,10 +435,12 @@ ACCESSORIES.push(
     source: 'earned',
     hint: 'you have to survive something first.',
     draw: (px, a) => {
-      const x = a.headRight - 2;
+      // A plaster across the cheek: a strip with a pad in the middle.
+      const x = a.headRight - 3;
       const y = a.headTop + 1;
-      for (const [dx, dy] of [[-1, -1], [0, 0], [1, 1], [1, -1], [-1, 1]]) px(x + dx, y + dy, '#f0e6d8');
+      for (let dx = -2; dx <= 2; dx++) for (const dy of [0, 1]) px(x + dx, y + dy, '#f0e6d8');
       px(x, y, '#ff8fa8');
+      px(x, y + 1, '#ff8fa8');
     },
   },
   // --- more wearables -----------------------------------------------------------------------
@@ -373,8 +451,11 @@ ACCESSORIES.push(
     regions: ['corp'],
     hint: 'standard issue in the Corp Grid.',
     draw: (px, a) => {
-      px(a.headRight + 1, a.eyeRow, '#3a3f49');
-      px(a.headRight + 1, a.eyeRow + 1, '#8a93a3');
+      for (const dy of [0, 1]) {
+        px(a.headRight + 1, a.eyeRow + dy, '#3a3f49'); // the bud, two by two
+        px(a.headRight + 2, a.eyeRow + dy, '#8a93a3');
+      }
+      px(a.headRight + 1, a.eyeRow + 2, '#8a93a3'); // the boom, curving to the mouth
       px(a.headRight, a.mouthRow, '#8a93a3');
       px(a.headRight - 1, a.mouthRow, '#ff2a6d'); // mic
     },
@@ -390,7 +471,11 @@ ACCESSORIES.push(
       const cy = a.eyeRow + 2;
       for (let i = 0; i < 5; i++) {
         const t = time / 1600 + (i * Math.PI * 2) / 5;
-        px(a.cx + Math.round(Math.cos(t) * rx), cy + Math.round(Math.sin(t * 1.3) * 5), i % 2 ? '#39ff14' : '#05d9e8');
+        const x = a.cx + Math.round(Math.cos(t) * rx);
+        const y = cy + Math.round(Math.sin(t * 1.3) * 5);
+        const c = i % 2 ? '#39ff14' : '#05d9e8';
+        px(x, y, c);
+        px(x + 1, y, c); // each echo is two wide, so it reads as a mark rather than a speck
       }
     },
   },
@@ -460,16 +545,25 @@ export const PROPS = [
     rarity: 'rare',
     source: 'earned',
     hint: 'a keepsake, after the first goodbye.',
-    size: [8, 8],
+    size: [10, 10], // the half-scale body is 8 by 8, inside a one pixel outline
     // extra: { sprite, colors } of the previous netling; drawn at half scale.
     draw: (px, frame, time, extra) => {
       if (!extra?.sprite) return;
       const s = extra.sprite;
+      const lit = new Set();
       for (let y = 0; y < s.length; y += 2) {
         for (let x = 0; x < s[0].length; x += 2) {
           const c = extra.colors[s[y][x]];
-          if (c) px(Math.floor(x / 2), Math.floor(y / 2), c);
+          if (c) {
+            px(1 + Math.floor(x / 2), 1 + Math.floor(y / 2), c);
+            lit.add(`${1 + Math.floor(x / 2)},${1 + Math.floor(y / 2)}`);
+          }
         }
+      }
+      // A one pixel dark outline, so the plush stays a shape when it overlaps the pet.
+      for (const key of [...lit]) {
+        const [x, y] = key.split(',').map(Number);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (!lit.has(`${x + dx},${y + dy}`)) px(x + dx, y + dy, '#050508');
       }
     },
   },
@@ -480,12 +574,14 @@ export const STYLE_ITEMS = [...ACCESSORIES, ...PROPS];
 
 export const accessoryHint = (x) => x.hint ?? RARITY[x.rarity].hint;
 
-// Recolorable accessories declare colors: [[label, default], ...]. Custom picks must be #rrggbb.
+// Recolorable accessories declare colors: [[label, signature color], ...]. Custom picks must be #rrggbb.
 export const HEX = /^#[0-9a-f]{6}$/i;
-export function accessoryColors(id, custom) {
+// A slot the player has not picked (null, or anything that is not a #rrggbb) is automatic: the wearable's color for the
+// palette `pal` ({ name }) from AUTO_COLORS, which stands clear of that palette, else its signature color.
+export function accessoryColors(id, custom, pal = null) {
   const x = accessoryById(id);
   if (!x?.colors) return null;
-  return x.colors.map(([, def], i) => (HEX.test(custom?.[i] ?? '') ? custom[i] : def));
+  return x.colors.map(([, def], i) => (HEX.test(custom?.[i] ?? '') ? custom[i] : (AUTO_COLORS[id]?.[i]?.[pal?.name] ?? def)));
 }
 export const accessoryRegions = (x) => x.regions ?? null;
 
@@ -514,16 +610,26 @@ function pickByRarity(pool, rng) {
   return pool[pool.length - 1].id;
 }
 
-// Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark.
-export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null) {
+// What a wearable is painted in when its wearer rests in the dark: a step lighter than the dimmed body (#1c3a3f), so it
+// still shows as a shape against it.
+export const DIM_WEARABLE = '#2f6b73';
+
+// Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark. pal ({ name, main, accent }) is the
+// wearer's palette: recolorable wearables take their automatic colors for it, and any other wearable pixel that sits on
+// the body and would blend into it is swapped for a color that does not.
+export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null, pal = null) {
   const acc = accessoryById(id);
   if (!acc) return;
   const a = anchorsFor(sprite);
+  const fixed = !acc.colors;
+  // A fixed color is only swapped where it sits on the pet or right beside it; floating clear of the body (an orbiting
+  // echo, a halo) it is seen against the room, where the wearable's own color is fine.
+  const touchesBody = (x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (sprite[y + dy]?.[x + dx] ?? '.') !== '.');
   const px = (x, y, color) => {
-    ctx.fillStyle = dim ? '#1c3a3f' : color;
+    ctx.fillStyle = dim ? DIM_WEARABLE : fixed && pal && touchesBody(x, y) ? contrastColor(color, pal.main) : color;
     ctx.fillRect(ox + x, oy + y, 1, 1);
   };
-  acc.draw(px, a, frame, time, accessoryColors(id, custom));
+  acc.draw(px, a, frame, time, accessoryColors(id, custom, pal));
 }
 
 // Props stand on the LCD floor at the right edge. Returns nothing if the prop has nothing to draw.

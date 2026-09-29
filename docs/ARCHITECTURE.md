@@ -40,7 +40,7 @@ These explain most decisions in the code.
 | `index.html` | All markup: the device, dialogs (archive, system, field manual, NL-0 transmission), lock screens |
 | `style.css` | All styling (about 1550 lines), theme variables in `:root`, one landscape media query, calm mode (`body.calm` and the reduced-motion query) |
 | `sw.js`, `manifest.webmanifest`, `icons/`, `screenshots/` | PWA shell (the screenshots are for the install dialog) |
-| `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
+| `gallery.html` | Development gallery of every sprite, wearable, prop, icon, node marker, mini-game frame and crest, in every valid combination, built from the source arrays (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
 | `src/random.js` | The shared weighted-pick helper |
 | `src/migrations.js` | Save upgrade steps (`STEPS`) and `upgradeSave` |
@@ -60,7 +60,7 @@ These explain most decisions in the code.
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
 | `tests/` | 28 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators |
+| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators, the sprite audit (`sprite-audit.mjs`, with `lib/sprite-checks.mjs`) |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
@@ -149,8 +149,8 @@ Data that outlives a generation is kept outside the netling and updated by the U
 ## Rendering
 
 - **Home LCD**: `renderLCD()` draws a 40x28 buffer (`LCD_W`, `LCD_H`) from code-drawn sprites, then the visible canvas scales it up with nearest-neighbour. Layers: background (tint, darker with lights off), the pet or compile bar, accessory and prop, cache icons, event icons, reboot bar, visitors, action reaction animations, evolution strobe, then screen effects (scanlines, glitch when Integrity is low or infected, overheat wash, surge flash).
-- **Sprites** (`sprites.js`) are arrays of strings using `#` main color, `o` accent, `+` highlight, `.` empty. Poses are looked up by `formSprite(form, pose)`: `A`, `B`, `Sleep`, `Dead`, with fallback to `A`. Colors come from the netling's palette quirk.
-- **Accessories** are drawn by `accessories.js` through anchors computed from each sprite's own pixels (`anchorsFor`: head top, eye row, mouth, body span), so every accessory fits every form. Props draw on the ground at the right edge.
+- **Sprites** (`sprites.js`) are arrays of strings using `#` main color, `o` accent, `+` highlight, `x` dim fill (the inside of the Shell's casing), `.` empty. Poses are looked up by `formSprite(form, pose)`: `A`, `B`, `Sleep`, `Dead`. Bitling's Sleep and Dead are drawn by hand; every other form's are generated from its A frame at load (each eye becomes an X when dead and a slit when asleep). Colors come from the netling's palette quirk (`paletteColors`); the states have their own maps (`DEAD_COLORS`, `DIM_COLORS`, ...), each with a color for every mark.
+- **Accessories** are drawn by `accessories.js` through anchors (`anchorsFor`): four rows per form and frame are authored in `ANCHOR_ROWS` (`sprites.js`: head top, eye row, mouth row, neck row) so a wearable stays on the same part of the body between frames, and the rest (spans, eye columns) is read from the sprite's pixels, so every accessory fits every form. Props draw on the ground at the right edge, in front of the pet.
 - **Mini-games and netruns** draw straight onto the 400x280 canvas via `common.js` helpers (`clear`, `text`, `timerBar`). The wardrobe tint feeds `setGameBg`.
 - **Idle motion** is a pure function of time (`wanderPos`), so it needs no stored state.
 

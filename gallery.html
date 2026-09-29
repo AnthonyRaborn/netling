@@ -6,60 +6,556 @@
     <title>Netling Sprites</title>
     <style>
       @font-face { font-family: 'VT323'; font-weight: 400; font-display: swap; src: url(fonts/VT323-latin.woff2) format('woff2'); }
+      :root { --dim: #809fa6; --line: #2a2240; --pink: #ff2a6d; --cyan: #05d9e8; }
       body { background: #07070c; color: #c7f9ff; font-family: 'VT323', monospace; font-size: 18px; padding: 16px; margin: 0; }
-      h1 { color: #ff2a6d; font-weight: normal; letter-spacing: 4px; margin: 0 0 12px; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+      h1 { color: var(--pink); font-weight: normal; letter-spacing: 4px; margin: 0 0 4px; }
+      h2 { color: var(--pink); font-weight: normal; letter-spacing: 3px; margin: 32px 0 4px; }
+      h3 { color: var(--cyan); font-weight: normal; margin: 16px 0 4px; }
+      p.note { color: var(--dim); margin: 0 0 10px; max-width: 110ch; }
+      .warn { color: #f9f002; }
+      #bar { position: sticky; top: 0; z-index: 5; background: #07070cee; padding: 8px 0; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; border-bottom: 1px solid var(--line); }
+      #bar label { color: var(--dim); display: inline-flex; gap: 4px; align-items: center; }
+      select, input, button { font: inherit; background: #14121f; color: #c7f9ff; border: 1px solid var(--line); padding: 1px 4px; }
+      button.on { border-color: var(--pink); color: var(--pink); }
+      #nav { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+      canvas { image-rendering: pixelated; display: block; border: 1px solid var(--line); }
+      canvas.flag { outline: 2px solid var(--pink); outline-offset: -1px; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
       figure { margin: 0; }
-      canvas { width: 100%; image-rendering: pixelated; border: 2px solid #2a2240; border-radius: 6px; display: block; }
-      .acc { display: grid; gap: 4px; align-items: center; }
-      .acc span { color: #5d7a80; font-size: 15px; }
-      .acc canvas { border-width: 1px; border-radius: 2px; }
-      figcaption { color: #5d7a80; margin-top: 4px; }
+      figcaption { color: var(--dim); font-size: 15px; max-width: 24ch; }
+      .grid { display: grid; gap: 3px; align-items: center; }
+      .grid > span { color: var(--dim); font-size: 15px; }
+      .grid > span.h { text-align: center; }
+      #fail { display: none; border: 2px solid var(--pink); padding: 10px 14px; margin: 12px 0; max-width: 90ch; color: #f5f5f5; }
+      #fail code { color: #f9f002; }
+      .swatch { display: inline-flex; padding: 8px; gap: 8px; align-items: center; }
     </style>
   </head>
   <body>
     <h1>SPRITE GALLERY</h1>
-    <div class="grid" id="grid"></div>
-    <h1 style="margin-top: 24px">ACCESSORIES</h1>
-    <div id="acc" class="acc"></div>
-    <script type="module">
-      import { renderLCD } from './src/render.js';
-      import { createScript, SPECIES, FORM_MODS } from './src/sim.js';
-      import { ACCESSORIES } from './src/accessories.js';
-
-      const poses = Object.keys(SPECIES).flatMap((form) => [
-        { form, stage: SPECIES[form].stage, asleep: false },
-        { form, stage: SPECIES[form].stage, asleep: true },
-        { form, stage: 'dead', asleep: false },
-      ]);
-      const cells = poses.map((p) => {
-        const s = createScript({ now: Date.now() });
-        Object.assign(s, p, { lightsOn: true });
-        const fig = document.createElement('figure');
-        const canvas = Object.assign(document.createElement('canvas'), { width: 400, height: 280 });
-        const cap = document.createElement('figcaption');
-        const pose = p.stage === 'dead' ? 'dead' : p.asleep ? 'asleep' : 'awake';
-        cap.textContent = `${SPECIES[p.form].name} · ${pose}${FORM_MODS[p.form] && pose === 'awake' ? ` — ${FORM_MODS[p.form].desc}` : ''}`;
-        fig.append(canvas, cap);
-        document.getElementById('grid').append(fig);
-        return { s, canvas };
-      });
-      const acc = document.getElementById('acc');
-      acc.style.gridTemplateColumns = `80px repeat(${ACCESSORIES.length}, 1fr)`;
-      acc.append(document.createElement('span'), ...ACCESSORIES.map((x) => Object.assign(document.createElement('span'), { textContent: x.name })));
-      for (const form of Object.keys(SPECIES)) {
-        acc.append(Object.assign(document.createElement('span'), { textContent: SPECIES[form].name }));
-        for (const x of ACCESSORIES) {
-          const s = createScript({ now: Date.now() });
-          Object.assign(s, { form, stage: SPECIES[form].stage, lightsOn: true });
-          s.quirk.idle = 'bounce';
-          const canvas = Object.assign(document.createElement('canvas'), { width: 160, height: 112 });
-          acc.append(canvas);
-          cells.push({ s, canvas, accessory: x.id });
+    <div id="fail" role="alert"></div>
+    <p class="note"><span class="warn">Spoilers:</span> shows every form, secret and earned item. Development only; not deployed. Open it through <code>npm run serve</code> (http://localhost:5174/gallery.html): opening the file directly does not work. Everything is drawn by the game's own code (<code>renderLCD</code> and friends), so what you see is what ships. Review plan: <code>docs/SPRITE_REVIEW_PLAN.md</code>. Pink outlines mark a wearable that a check (<code>tools/lib/sprite-checks.mjs</code>) thinks blends into the pet: half or more of its pixels look like what is under or beside them. Hover a cell for the reason. Candidates only; <code>node tools/sprite-audit.mjs</code> lists them all.</p>
+    <div id="bar"></div>
+    <div id="nav"></div>
+    <div id="out"></div>
+    <script>
+      // Nothing in the module runs if it fails to load or throws, so say why instead of showing a blank page: any script
+      // error with its file and line, and the HTTP status and content type of every module the page imports (a wrong
+      // type, a 404 or a service worker answering with something else all show up here).
+      const problems = [];
+      addEventListener('error', (e) => problems.push(`${e.message || 'script error'} (${(e.filename || '').split('/').slice(-2).join('/')}:${e.lineno || '?'})`));
+      addEventListener('unhandledrejection', (e) => problems.push(`unhandled: ${e.reason && (e.reason.message || e.reason)}`));
+      const MODULES = ['src/render.js', 'src/sim.js', 'src/sprites.js', 'src/accessories.js', 'src/cosmetics.js', 'src/random.js', 'src/games/common.js', 'src/games/session.js', 'src/games/breach.js', 'src/games/dodge.js', 'src/games/tune.js', 'src/games/feast.js', 'src/netrun/regions.js', 'src/netrun/view.js', 'src/netrun/map.js', 'src/netrun/run.js', 'src/netrun/codex.js', 'src/netrun/anomalies.js', 'tools/lib/sprite-checks.mjs'];
+      // Drops what this browser stored for this site: service workers, their caches, and the HTTP cache entries of the modules.
+      window.__resetCopies = async () => {
+        try {
+          for (const r of (await navigator.serviceWorker?.getRegistrations()) ?? []) await r.unregister();
+          for (const k of (await globalThis.caches?.keys()) ?? []) await caches.delete(k);
+          await Promise.all(MODULES.concat(['gallery.html']).map((m) => fetch(m, { cache: 'reload' }).catch(() => {})));
+        } finally {
+          location.reload();
         }
+      };
+      setTimeout(async () => {
+        if (window.__galleryReady) return;
+        const box = document.getElementById('fail');
+        box.style.display = 'block';
+        const hint = location.protocol === 'file:'
+          ? 'Browsers block ES modules on <code>file://</code> pages. From the repo folder run <code>npm run serve</code> (or <code>python3 -m http.server 5174</code>) and open <code>http://localhost:5174/gallery.html</code>.'
+          : 'A stored older copy of a file (service worker or browser cache) is the usual cause on a server that is running: try the button below, or a hard reload (Ctrl+Shift+R). Also check that the whole repo folder is served (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
+        box.innerHTML = `<b>The gallery did not load.</b> ${hint}<br><small></small>`;
+        if (location.protocol !== 'file:') {
+          const fix = document.createElement('button');
+          fix.textContent = 'clear stored copies (service worker, caches) and reload';
+          fix.onclick = () => window.__resetCopies();
+          box.append(document.createElement('br'), fix);
+        }
+        const detail = box.querySelector('small');
+        const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+        const lines = [`browser: ${navigator.userAgent}`, `page: ${location.href}`, problems.length ? `script errors:\n  ${problems.join('\n  ')}` : 'script errors: none reported (a module failed to load, see below)'];
+        if (location.protocol !== 'file:') {
+          const rows = await Promise.all(MODULES.map((m) => fetch(m).then((r) => `${r.status} ${r.headers.get('content-type')} ${m}`, (err) => `failed ${m}: ${err.message}`)));
+          lines.push('modules (status, content type):', ...rows.map((r) => `  ${r}`));
+          lines.push(`service worker: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'controlling this page' : 'not controlling this page'}`);
+        }
+        detail.innerHTML = `<pre style="white-space:pre-wrap;color:#c7f9ff;font-size:14px">${esc(lines.join('\n'))}</pre>`;
+      }, 2500);
+    </script>
+    <script type="module">
+      import { renderLCD, LCD_W, LCD_H, setLcdTint } from './src/render.js';
+      import { createScript, SPECIES, FORM_MODS, PALETTES, IDLES } from './src/sim.js';
+      import { ACCESSORIES, PROPS, anchorsFor, accessoryColors, drawAccessory, DIM_WEARABLE } from './src/accessories.js';
+      import { contrastColor } from './src/colors.js';
+      import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, drawSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS, WHITE_COLORS } from './src/sprites.js';
+      import { COSMETICS } from './src/cosmetics.js';
+      import { REGIONS, REGION_ORDER } from './src/netrun/regions.js';
+      import { GameSession, GAMES } from './src/games/session.js';
+      import { FLASH_TOGGLE_MS } from './src/games/common.js';
+      import { collectAccessory, lostPixels, spriteCells, spriteColor } from './tools/lib/sprite-checks.mjs';
+
+      // drawNode was exported for this page. A browser holding an older cached view.js lacks it: keep the rest of the gallery working.
+      const drawNode = await import('./src/netrun/view.js').then((m) => m.drawNode ?? null, () => null);
+      const FORMS = Object.keys(SPECIES);
+      const TINTS = COSMETICS.tint;
+      const DIM = '#1c3a3f'; // a resting pet in the dark, and every accessory it wears (render.js)
+      const STATES = { 'awake A': { time: 0 }, 'awake B': { time: 500 }, asleep: { rest: true }, 'asleep dark': { rest: true, lights: false } };
+      const SECTIONS = ['forms', 'silhouettes', 'scenes', 'wearables', 'matrix', 'props', 'propmatrix', 'visitors', 'icons', 'thumbs', 'nodes', 'games', 'crests', 'colors'];
+
+      // --- settings, kept in the URL hash so any view can be linked ---------------------------------------------------
+      const DEFAULTS = { pal: '0', tint: TINTS[0].id, idle: 'bounce', t: '0', scale: '5', calm: '1', live: '0', wear: '', prop: 'none', form: 'chrome', state: 'awake A', anchors: '1', sec: '' };
+      const P = { ...DEFAULTS };
+      const read = () => {
+        const q = new URLSearchParams(location.hash.slice(1));
+        for (const k of Object.keys(DEFAULTS)) P[k] = q.get(k) ?? DEFAULTS[k];
+      };
+      const write = (k, v) => {
+        const q = new URLSearchParams(location.hash.slice(1));
+        q.set(k, v);
+        location.hash = q.toString();
+      };
+      const tint = () => TINTS.find((t) => t.id === P.tint) ?? TINTS[0];
+      const palettes = () => (P.pal === 'all' ? PALETTES.map((_, i) => i) : [Number(P.pal) || 0]);
+      const scale = () => Math.max(1, Number(P.scale) || 5);
+      const at = () => Number(P.t) || 0;
+
+      // --- drawing helpers ---------------------------------------------------------------------------------------------
+      let cells = []; // {draw(now)} redrawn each frame in live mode
+      const el = (tag, props = {}, ...kids) => {
+        const e = Object.assign(document.createElement(tag), props);
+        e.append(...kids);
+        return e;
+      };
+      const T0 = Date.UTC(2026, 8, 26, 12, 0);
+
+      function mk(form, { rest = false, lights = true, idle = P.idle, palette = 0, stage, extra = {} } = {}) {
+        const s = createScript({ now: T0, rng: () => 0.5 });
+        Object.assign(s, { stage: stage ?? SPECIES[form].stage, form, lightsOn: lights, asleep: rest }, extra);
+        s.quirk.idle = idle;
+        s.quirk.palette = palette;
+        return s;
       }
-      (function loop(t) {
-        for (const { s, canvas, accessory } of cells) renderLCD(canvas, s, t, { accessory });
+
+      // Where to crop the 40x28 LCD when only the pet matters.
+      const CROP = { x: 5, y: 0, w: 30, h: 24 };
+      const WIDE = { x: 3, y: 0, w: 37, h: 24 };
+      const FULL = { x: 0, y: 0, w: LCD_W, h: LCD_H };
+
+      let work = null;
+      function lcd(s, time, opts = {}, crop = CROP, sc = scale(), tag = {}) {
+        const canvas = el('canvas', { width: crop.w * sc, height: crop.h * sc });
+        if (tag.title) canvas.title = tag.title;
+        if (tag.flag) canvas.classList.add('flag');
+        const draw = (now) => {
+          const cw = LCD_W * sc;
+          if (!work || work.width !== cw) work = el('canvas', { width: cw, height: LCD_H * sc });
+          setLcdTint(tag.tint?.lcd ?? tint().lcd, tag.tint?.dark ?? tint().dark);
+          renderLCD(work, s, P.live === '1' ? now : time, { calm: P.calm === '1' && P.live !== '1', ...opts });
+          const g = canvas.getContext('2d');
+          g.imageSmoothingEnabled = false;
+          g.clearRect(0, 0, canvas.width, canvas.height);
+          g.drawImage(work, crop.x * sc, crop.y * sc, crop.w * sc, crop.h * sc, 0, 0, canvas.width, canvas.height);
+        };
+        draw(0);
+        cells.push({ draw });
+        return canvas;
+      }
+
+      function raw(rows, colors, sc = 10, pad = 0) {
+        const w = rows[0].length + pad * 2;
+        const h = rows.length + pad * 2;
+        const c = el('canvas', { width: w, height: h });
+        drawSprite(c.getContext('2d'), rows, pad, pad, colors);
+        c.style.width = `${w * sc}px`;
+        c.style.height = `${h * sc}px`;
+        return c;
+      }
+      const flat = WHITE_COLORS;
+      const palColors = (i) => paletteColors(PALETTES[i]);
+      const fig = (canvas, caption) => el('figure', {}, canvas, el('figcaption', { textContent: caption }));
+      const section = (id, title, note) => el('section', { id }, el('h2', { textContent: title }), el('p', { className: 'note', textContent: note }));
+      const grid = (cols, headers) => {
+        const g = el('div', { className: 'grid' });
+        g.style.gridTemplateColumns = `110px repeat(${cols}, max-content)`;
+        g.append(el('span'), ...headers.map((h) => el('span', { className: 'h', textContent: h })));
+        return g;
+      };
+
+      // The check behind the pink outline: how much of a worn accessory blends into the body, from the sprite's own colors.
+      function wornFlag(accId, form, state, palette) {
+        const acc = ACCESSORIES.find((a) => a.id === accId);
+        const sprite = formSprite(form, state.rest ? 'sleep' : state.time === 500 ? 'b' : 'a');
+        const pal = PALETTES[palette];
+        const dim = state.rest && state.lights === false;
+        const bg = dim ? tint().dark : tint().lcd;
+        const hasSleep = Boolean(SPRITES[`${form}Sleep`]);
+        const body = spriteCells(sprite).map((c) => ({
+          x: c.x, y: c.y,
+          color: dim ? (c.ch === 'o' && hasSleep ? '#0f2528' : DIM) : state.rest && c.ch === 'o' ? (hasSleep ? pal.accent : pal.main) : spriteColor(c.ch, pal),
+        }));
+        const pts = collectAccessory(acc, anchorsFor(sprite), { frame: state.time === 500 ? 1 : 0, time: state.time ?? 0, colors: accessoryColors(accId, null, pal) }).map((p) => ({ ...p, color: dim ? DIM_WEARABLE : acc.colors ? p.color : contrastColor(p.color, pal.main) }));
+        const { ratio, lost } = lostPixels(pts, body, bg);
+        return { flag: ratio >= 0.5, title: `${acc.name} on ${SPECIES[form].name}: ${lost.length} of ${pts.length} pixels blend in${lost[0] ? ` (${lost[0].reason})` : ''}` };
+      }
+      const stateOpts = (st) => ({ rest: st.rest, lights: st.lights });
+
+      // --- sections ----------------------------------------------------------------------------------------------------
+      const build = {
+        forms() {
+          const s = section('forms', 'FORMS AND POSES', 'Raw sprites at 10x (A, B, sleep, dead; "=A" means the form has no such sprite and the game reuses A recolored), a flat silhouette, then the real LCD in each state. Palette follows the palette control.');
+          const g = el('div', { className: 'grid' });
+          g.style.gridTemplateColumns = '110px repeat(10, max-content)';
+          g.append(el('span'), ...['raw A', 'raw B', 'raw sleep', 'raw dead', 'silhouette', 'LCD A', 'LCD B', 'asleep', 'asleep dark', 'dead'].map((h) => el('span', { className: 'h', textContent: h })));
+          const pal = palettes()[0];
+          for (const form of FORMS) {
+            const has = (k) => Boolean(SPRITES[`${form}${k}`]);
+            g.append(el('span', { textContent: `${SPECIES[form].name} (${SPECIES[form].stage})${FORM_MODS[form] ? '' : ''}` }));
+            const colors = palColors(pal);
+            for (const [k, pose] of [['A', 'a'], ['B', 'b'], ['Sleep', 'sleep'], ['Dead', 'dead']]) {
+              const c = raw(formSprite(form, pose), k === 'Dead' && has('Dead') ? DEAD_COLORS : colors, 10);
+              if (k !== 'A' && k !== 'B' && !has(k)) c.style.opacity = '0.35';
+              c.title = k !== 'A' && k !== 'B' && !has(k) ? `${SPECIES[form].name} has no ${k} sprite: the game reuses A (=A)` : '';
+              g.append(c);
+            }
+            g.append(raw(formSprite(form, 'a'), flat, 10));
+            g.append(lcd(mk(form, { palette: pal }), 0, {}, CROP));
+            g.append(lcd(mk(form, { palette: pal }), 500, {}, CROP));
+            g.append(lcd(mk(form, { palette: pal, rest: true }), 0, {}, CROP));
+            g.append(lcd(mk(form, { palette: pal, rest: true, lights: false }), 0, {}, CROP));
+            g.append(lcd(mk(form, { palette: pal, stage: 'dead' }), 0, {}, CROP));
+          }
+          s.append(g, el('h3', { textContent: 'Every palette, awake A' }));
+          const pg = grid(PALETTES.length, PALETTES.map((p) => p.name));
+          for (const form of FORMS) {
+            pg.append(el('span', { textContent: SPECIES[form].name }));
+            PALETTES.forEach((_, i) => pg.append(lcd(mk(form, { palette: i }), 0, {}, CROP, Math.max(3, scale() - 2))));
+          }
+          s.append(pg);
+          return s;
+        },
+
+        silhouettes() {
+          const s = section('silhouettes', 'SILHOUETTES', 'One flat color, no eyes: the differentiation test. Each stage on its own row, drawn to the same scale on a shared baseline.');
+          for (const stage of ['baby', 'teen', 'adult']) {
+            s.append(el('h3', { textContent: stage }));
+            const row = el('div', { className: 'row' });
+            for (const form of FORMS.filter((f) => SPECIES[f].stage === stage)) row.append(fig(raw(formSprite(form, 'a'), flat, 12), SPECIES[form].name));
+            s.append(row);
+          }
+          return s;
+        },
+
+        scenes() {
+          const form = P.form;
+          const s = section('scenes', 'SCENES', `The whole 40x28 screen: compile, states, alerts, effects and dead. Form ${SPECIES[form].name} (form control), wearing ${P.wear || 'nothing'} (wearable control), palette ${PALETTES[palettes()[0]].name}. Icons share the top rows with tall wearables.`);
+          const pal = palettes()[0];
+          const opts = { accessory: P.wear || null, accessoryColors: null, prop: P.prop && P.prop !== 'none' ? P.prop : null };
+          const plush = { sprite: formSprite('bitling', 'a'), colors: palColors(pal) };
+          const defs = [
+            ['compiling', mk(form, { palette: pal, stage: 'script', extra: { ageMin: 10 } }), {}],
+            ['awake', mk(form, { palette: pal }), {}],
+            ['asleep', mk(form, { palette: pal, rest: true }), {}],
+            ['asleep, lights off', mk(form, { palette: pal, rest: true, lights: false }), {}],
+            ['lights off, awake', mk(form, { palette: pal, lights: false }), {}],
+            ['rebooting', mk(form, { palette: pal, extra: { rebootUntilAge: 15 } }), {}],
+            ['virus', mk(form, { palette: pal, extra: { virus: true } }), {}],
+            ['trace', mk(form, { palette: pal, extra: { event: { type: 'trace', startedAge: 0 } } }), {}],
+            ['attack', mk(form, { palette: pal, extra: { event: { type: 'attack', startedAge: 0 } } }), {}],
+            ['overflow', mk(form, { palette: pal, extra: { event: { type: 'overflow', startedAge: 0 } } }), {}],
+            ['virus + trace', mk(form, { palette: pal, extra: { virus: true, event: { type: 'trace', startedAge: 0 } } }), {}],
+            ['cache full', mk(form, { palette: pal, extra: { cache: 5 } }), {}],
+            ['integrity low', mk(form, { palette: pal, extra: { stats: { ...createScript({ now: T0 }).stats, integrity: 3 } } }), {}],
+            ['overheating', mk(form, { palette: pal, extra: { stats: { ...createScript({ now: T0 }).stats, heat: 95 } } }), {}],
+            ['evolving (white strobe)', mk(form, { palette: pal }), { flash: true }],
+            ['power surge', mk(form, { palette: pal }), { surge: 1 }],
+            ['visitor', mk(form, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: 'ghost', palette: (pal + 2) % 5, accessory: P.wear || null } } }), {}],
+            ['dead', mk(form, { palette: pal, stage: 'dead' }), {}],
+            ['reaction: eat', mk(form, { palette: pal }), { anim: { kind: 'eat', t: 0.3 } }],
+            ['reaction: cool', mk(form, { palette: pal }), { anim: { kind: 'cool', t: 0.5 } }],
+          ];
+          // Blinking icons only show on odd half-seconds, and the strobe only on its odd steps.
+          const odd = Math.floor(at() / 1000) * 1000 + 500;
+          const strobeOn = Math.floor(at() / (FLASH_TOGGLE_MS * 2)) * FLASH_TOGGLE_MS * 2 + FLASH_TOGGLE_MS;
+          const times = { trace: odd, attack: odd, overflow: odd, 'virus + trace': odd, 'evolving (white strobe)': strobeOn };
+          const row = el('div', { className: 'row' });
+          for (const [name, st, extra] of defs) {
+            const wearable = name === 'dead' || name === 'compiling' ? {} : opts;
+            row.append(fig(lcd(st, times[name] ?? at(), { ...wearable, ...extra, propExtra: opts.prop === 'plush' ? plush : null }, FULL, Math.max(3, scale() - 1)), name));
+          }
+          s.append(row);
+          return s;
+        },
+
+        wearables() {
+          const s = section('wearables', 'WEARABLES ALONE', 'Each wearable on a reference body at 10x, with its anchor rows marked in the margin (yellow head top, green eye row, magenta mouth, blue mid). Left: Chrome, an adult with a wide head. Right: Bitling, the smallest body. Earned items are marked (e), regional ones name their region.');
+          const pal = palettes()[0];
+          for (const form of ['chrome', 'bitling']) {
+            s.append(el('h3', { textContent: SPECIES[form].name }));
+            const row = el('div', { className: 'row' });
+            const sprite = formSprite(form, 'a');
+            const a = anchorsFor(sprite);
+            for (const acc of ACCESSORIES) {
+              const pad = 4;
+              const c = el('canvas', { width: sprite[0].length + pad * 2, height: sprite.length + pad * 2 + 3 });
+              const g = c.getContext('2d');
+              drawSprite(g, sprite, pad, pad + 3, palColors(pal));
+              drawAccessory(g, acc.id, sprite, pad, pad + 3, 0, false, 1200, null, PALETTES[pal]);
+              if (P.anchors === '1') {
+                for (const [y, color] of [[a.headTop, '#f9f002'], [a.eyeRow, '#39ff14'], [a.mouthRow, '#ff2a6d'], [a.mid, '#4a7aff']]) {
+                  g.fillStyle = color;
+                  g.fillRect(0, y + pad + 3, 1, 1);
+                }
+              }
+              c.style.width = `${c.width * 10}px`;
+              c.style.height = `${c.height * 10}px`;
+              const tag = acc.source === 'earned' ? ' (e)' : acc.regions ? ` [${acc.regions.join(',')}]` : '';
+              row.append(fig(c, `${acc.name}${tag}`));
+            }
+            s.append(row);
+          }
+          return s;
+        },
+
+        matrix() {
+          const st = STATES[P.state] ?? STATES['awake A'];
+          const s = section('matrix', 'WEARABLES ON EVERY FORM', `Rows are wearables, columns are forms, state "${P.state}" (state control), tint ${tint().id}. Pink outline: half or more of its pixels blend into the pet. Use the palette control "all" for one table per palette (about 1,300 cells each state).`);
+          for (const palette of palettes()) {
+            s.append(el('h3', { textContent: `palette ${PALETTES[palette].name}, ${P.state}` }));
+            const g = grid(FORMS.length, FORMS.map((f) => SPECIES[f].name));
+            for (const acc of ACCESSORIES) {
+              g.append(el('span', { textContent: acc.name }));
+              for (const form of FORMS) {
+                const { flag, title } = wornFlag(acc.id, form, st, palette);
+                g.append(lcd(mk(form, { ...stateOpts(st), palette }), st.time ?? 0, { accessory: acc.id }, CROP, scale(), { flag, title }));
+              }
+            }
+            s.append(g);
+          }
+          return s;
+        },
+
+        props() {
+          const s = section('props', 'PROPS', 'Each prop stands on the floor at the right edge, behind the pet. Top table: the pet at its far right (the sway idle at 2356 ms), where it covers the prop most. Bottom: the pet in the middle. Plush shows a half-scale Bitling in the palette colors.');
+          const pal = palettes()[0];
+          const plush = { sprite: formSprite('bitling', 'a'), colors: palColors(pal) };
+          for (const [title, idle, time] of [['pet at far right (sway, 2356 ms)', 'sway', 2356], ['pet in the middle (0 ms)', 'bounce', 0]]) {
+            s.append(el('h3', { textContent: title }));
+            const g = grid(FORMS.length, FORMS.map((f) => SPECIES[f].name));
+            for (const prop of PROPS) {
+              g.append(el('span', { textContent: prop.name ?? prop.id }));
+              for (const form of FORMS) g.append(lcd(mk(form, { palette: pal, idle }), time, { prop: prop.id, propExtra: prop.id === 'plush' ? plush : null }, WIDE, Math.max(3, scale() - 1)));
+            }
+            s.append(g);
+          }
+          return s;
+        },
+
+        propmatrix() {
+          const prop = PROPS.find((p) => p.id === P.prop) ?? PROPS[0]; // no prop chosen: show the first
+          const s = section('propmatrix', 'WEARABLE AND PROP TOGETHER', `Both slots filled: prop ${prop.id} (prop control), the pet at its far right (sway, 2356 ms). Rows are wearables, columns are forms.`);
+          const pal = palettes()[0];
+          const plush = { sprite: formSprite('bitling', 'a'), colors: palColors(pal) };
+          const g = grid(FORMS.length, FORMS.map((f) => SPECIES[f].name));
+          for (const acc of ACCESSORIES) {
+            g.append(el('span', { textContent: acc.name }));
+            for (const form of FORMS) g.append(lcd(mk(form, { palette: pal, idle: 'sway' }), 2356, { accessory: acc.id, prop: prop.id, propExtra: prop.id === 'plush' ? plush : null }, WIDE, Math.max(3, scale() - 1)));
+          }
+          s.append(g);
+          return s;
+        },
+
+        visitors() {
+          const s = section('visitors', 'VISITORS', `With a visitor the host moves to the right side and the visitor stands on the left (both wearing ${P.wear || 'nothing'}). Rows are hosts, columns are visitors, so every pair of forms appears. The host is on the right, where the prop is.`);
+          const g = grid(FORMS.length, FORMS.map((f) => SPECIES[f].name));
+          const pal = palettes()[0];
+          for (const host of FORMS) {
+            g.append(el('span', { textContent: SPECIES[host].name }));
+            for (const vis of FORMS) g.append(lcd(mk(host, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: vis, palette: (pal + 2) % 5, accessory: P.wear || null } } }), 700, { accessory: P.wear || null }, FULL, 3));
+          }
+          s.append(g);
+          return s;
+        },
+
+        icons() {
+          const s = section('icons', 'ITEM AND HUD ICONS', 'Item icons at 10x and at their real 7px size (as the inventory scales them), then the small screen icons.');
+          const row = el('div', { className: 'row' });
+          for (const id of Object.keys(ITEM_SPRITES)) {
+            const colors = { '#': ITEM_COLORS[id], o: DIM, '+': '#f5f5f5' };
+            const small = raw(ITEM_SPRITES[id], colors, 3);
+            row.append(fig(raw(ITEM_SPRITES[id], colors, 10), id), small);
+          }
+          s.append(row, el('h3', { textContent: 'Screen icons (cache, virus, trace eye, sleep Z, alert bang, compile sprite)' }));
+          const pal = PALETTES[palettes()[0]];
+          const r2 = el('div', { className: 'row' });
+          r2.append(
+            fig(raw(SPRITES.cache, { '#': pal.main, o: pal.accent }, 10), 'cache'),
+            fig(raw(SPRITES.virus, { '#': pal.accent, o: tint().lcd }, 10), 'virus'),
+            fig(raw(SPRITES.eye, { '#': '#f9f002', o: tint().lcd }, 10), 'trace eye'),
+            fig(raw(SPRITES.z, { '#': pal.main }, 10), 'sleep Z'),
+            fig(raw(SPRITES.bang, { '#': '#f9f002' }, 10), 'bang'),
+            fig(raw(SPRITES.script, palColors(palettes()[0]), 10), 'compile'),
+          );
+          s.append(r2);
+          return s;
+        },
+
+        thumbs() {
+          const s = section('thumbs', 'DEX AND FAMILY TREE THUMBNAILS', 'The 16px thumbnails in the dex and family tree, at 4x: alive, dead and locked. The colors are copied from src/ui/archive.js; if they change there, update here.');
+          const g = grid(3, ['alive', 'dead', 'locked']);
+          const pal = PALETTES[palettes()[0]];
+          for (const form of FORMS) {
+            g.append(el('span', { textContent: SPECIES[form].name }));
+            for (const colors of [palColors(palettes()[0]), DEAD_COLORS, LOCKED_COLORS]) {
+              const sprite = formSprite(form, 'a');
+              const c = el('canvas', { width: 16, height: 16 });
+              drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);
+              c.style.width = c.style.height = '64px';
+              c.style.background = tint().lcd;
+              g.append(c);
+            }
+          }
+          s.append(g);
+          return s;
+        },
+
+        nodes() {
+          const s = section('nodes', 'NETRUN NODE MARKERS', 'The eight map markers, in each region\'s colors, fresh and spent (spent draws at 45% alpha). Drawn by the game\'s own drawNode.');
+          if (!drawNode) {
+            s.append(el('p', { className: 'note warn', textContent: 'Not shown: this browser is using an older copy of src/netrun/view.js that does not export drawNode. ' }), el('button', { textContent: 'clear stored copies and reload', onclick: () => window.__resetCopies() }));
+            return s;
+          }
+          const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'anomaly', 'exit'];
+          const g = grid(types.length, types);
+          for (const region of REGION_ORDER) {
+            for (const spent of [false, true]) {
+              g.append(el('span', { textContent: `${region}${spent ? ' spent' : ''}` }));
+              for (const type of types) {
+                const c = el('canvas', { width: 40, height: 40 });
+                const ctx = c.getContext('2d');
+                ctx.fillStyle = REGIONS[region].palette.bg;
+                ctx.fillRect(0, 0, 40, 40);
+                drawNode(ctx, type, 20, 20, REGIONS[region].palette, spent);
+                c.style.width = c.style.height = '80px';
+                g.append(c);
+              }
+            }
+          }
+          s.append(g);
+          return s;
+        },
+
+        games() {
+          const s = section('games', 'MINI-GAMES', 'Intro card and a frame of play for each game, drawn by the game code (fixed random seed).');
+          const row = el('div', { className: 'row' });
+          const pal = PALETTES[palettes()[0]];
+          let seed = 7;
+          const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+          for (const id of Object.keys(GAMES)) {
+            for (const phase of ['intro', 'play']) {
+              const session = new GameSession(id, { rng, sound: () => {}, onFinish: () => {} });
+              if (phase === 'play') {
+                session.input('a');
+                for (let i = 0; i < 20; i++) session.update(0.1);
+              }
+              const c = el('canvas', { width: 400, height: 280 });
+              const ctx = c.getContext('2d');
+              session.draw(ctx, pal, 250);
+              c.style.width = '320px';
+              c.style.imageRendering = 'auto';
+              row.append(fig(c, `${id} ${phase}`));
+            }
+          }
+          s.append(row);
+          return s;
+        },
+
+        crests() {
+          const crests = (COSMETICS.crest ?? []).filter((c) => c.pixels);
+          const s = section('crests', 'CREST WARDROBE SLOT', 'The 9x9 crests at native size, at the device header size (27px) with its cyan edge, and at the picker swatch size (18px), on each shell. Shell colors here are the picker swatches, not the real CSS shell art; the logo color is the default pink, dark on chrome and gold (style.css).');
+          if (!crests.length) return s;
+          const logo = (shellId) => ({ chrome: '#1a1d24', gold: '#2a1e04' })[shellId] ?? '#ff2a6d';
+          for (const crest of crests) {
+            s.append(el('h3', { textContent: `${crest.name} (${crest.id}): ${crest.hint}` }));
+            const row = el('div', { className: 'row' });
+            for (const shell of COSMETICS.shell) {
+              const wrap = el('div', { className: 'swatch' });
+              wrap.style.background = shell.swatch;
+              for (const px of [27, 18]) {
+                const c = el('canvas', { width: 9, height: 9 });
+                const g = c.getContext('2d');
+                g.fillStyle = logo(shell.id);
+                crest.pixels.forEach((r, y) => [...r].forEach((ch, x) => ch === '#' && g.fillRect(x, y, 1, 1)));
+                c.style.width = c.style.height = `${px}px`;
+                c.style.border = '0';
+                if (px === 27) c.style.filter = 'drop-shadow(1px 0 0 #05d9e8)';
+                wrap.append(c);
+              }
+              row.append(fig(wrap, shell.name));
+            }
+            s.append(row);
+          }
+          return s;
+        },
+
+        colors() {
+          const s = section('colors', 'CUSTOM COLOR WORST CASES', 'Wearables that can be recolored (any #rrggbb) drawn in the pet\'s own colors, the room color, black and white: what a player can end up with. Rows are wearables, columns are the color used for every slot.');
+          const pal = PALETTES[palettes()[0]];
+          const picks = [['default', null], ['body main', pal.main], ['body accent', pal.accent], ['room', tint().lcd], ['black', '#000000'], ['white', '#ffffff']];
+          for (const form of ['chrome', 'bitling']) {
+            s.append(el('h3', { textContent: SPECIES[form].name }));
+            const g = grid(picks.length, picks.map(([n]) => n));
+            for (const acc of ACCESSORIES.filter((a) => a.colors)) {
+              g.append(el('span', { textContent: acc.name }));
+              for (const [, hex] of picks) g.append(lcd(mk(form, { palette: palettes()[0] }), 0, { accessory: acc.id, accessoryColors: hex ? acc.colors.map(() => hex) : null }, CROP, scale()));
+            }
+            s.append(g);
+          }
+          return s;
+        },
+      };
+
+      // --- page ---------------------------------------------------------------------------------------------------------
+      const select = (key, options, label) => {
+        const sel = el('select');
+        for (const [v, t] of options) sel.append(el('option', { value: v, textContent: t, selected: P[key] === v }));
+        sel.onchange = () => write(key, sel.value);
+        return el('label', { textContent: `${label} ` }, sel);
+      };
+      const bar = () => {
+        const b = document.getElementById('bar');
+        b.replaceChildren(
+          select('pal', [...PALETTES.map((p, i) => [String(i), `${i} ${p.name}`]), ['all', 'all (matrix tables)']], 'palette'),
+          select('tint', TINTS.map((t) => [t.id, t.id]), 'tint'),
+          select('state', Object.keys(STATES).map((k) => [k, k]), 'state'),
+          select('idle', IDLES.map((i) => [i, i]), 'idle'),
+          select('form', FORMS.map((f) => [f, SPECIES[f].name]), 'form'),
+          select('wear', [['', 'none'], ...ACCESSORIES.map((a) => [a.id, a.name])], 'wear'),
+          select('prop', [['none', 'none'], ...PROPS.map((p) => [p.id, p.id])], 'prop'),
+          select('scale', ['3', '4', '5', '6', '8'].map((v) => [v, `${v}x`]), 'scale'),
+          el('label', { textContent: 'time ms ' }, Object.assign(el('input', { type: 'number', value: P.t, step: 250, style: 'width:7ch' }), { onchange: (e) => write('t', e.target.value) })),
+          Object.assign(el('button', { textContent: P.live === '1' ? 'live: on' : 'live: off', className: P.live === '1' ? 'on' : '' }), { onclick: () => write('live', P.live === '1' ? '0' : '1') }),
+          Object.assign(el('button', { textContent: P.calm === '1' ? 'calm: on' : 'calm: off', className: P.calm === '1' ? 'on' : '' }), { onclick: () => write('calm', P.calm === '1' ? '0' : '1') }),
+          Object.assign(el('button', { textContent: P.anchors === '1' ? 'anchors: on' : 'anchors: off', className: P.anchors === '1' ? 'on' : '' }), { onclick: () => write('anchors', P.anchors === '1' ? '0' : '1') }),
+        );
+        const nav = document.getElementById('nav');
+        nav.replaceChildren(
+          ...['', ...SECTIONS].map((id) => Object.assign(el('button', { textContent: id || 'all', className: P.sec === id ? 'on' : '' }), { onclick: () => write('sec', id) })),
+        );
+      };
+
+      function render() {
+        read();
+        cells = [];
+        work = null;
+        bar();
+        const out = document.getElementById('out');
+        out.replaceChildren(...SECTIONS.filter((id) => !P.sec || P.sec === id).map((id) => build[id]()));
+        document.title = `Netling Sprites (${cells.length} screens)`;
+        window.__galleryReady = true;
+      }
+      addEventListener('hashchange', render);
+      render();
+      (function loop(now) {
+        if (P.live === '1') for (const c of cells) c.draw(now);
         requestAnimationFrame(loop);
       })(0);
     </script>

@@ -10,11 +10,14 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run smoke` | Drives the real app in headless Chromium | Playwright (`npm install --no-save playwright && npx playwright install chromium`) |
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
+| `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md) | Node only |
+| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 315 tests in 31 files and all pass. The smoke test has 54 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 337 tests in 34 files and all pass. The smoke test has 54 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -40,7 +43,10 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `sanitize.test.js` | 14 | Repairing every kind of stored data, hostile input, run validation, strict cleaning, stage and form agreement, future timers |
 | `items.test.js` | 10 | Inventory limits, each item, drops, keepsakes, discard |
 | `games.test.js` | 10 | Breach solvability, Dodge, Tune, Feast, session result and forfeit |
-| `accessories.test.js` | 10 | Sprite anchors, every accessory on every form, rarity rolls, regions, earned exclusion, props, colors |
+| `sprites.test.js` | 5 | Every form has its own dead and sleep sprite, dead eyes are X's, asleep eyes are slits, the Shell is solid with a void, every color map covers every mark |
+| `colors.test.js` | 2 | Color distance and the contrast swap |
+| `sprite-checks.test.js` | 7 | The sprite review arithmetic: color distance, blending, clipping, lost pixels, overlap, silhouettes |
+| `accessories.test.js` | 18 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
 | `cosmetics.test.js` | 13 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot |
@@ -200,7 +206,7 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
 
 - `ui/*` (including `advance`, the flatline handling and `dropSession`) and `ui/gamepad.js` still have no unit tests: they need a real DOM, so only the smoke test covers them. Rendering, the run view, mini-game drawing, audio, notifications and the content tables are unit tested (KI-16).
-- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html` and playtesting cover that.
+- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html`, `tools/sprite-audit.mjs` and playtesting cover that (the audit flags candidates; a person judges them).
 - A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
 - Upgrade steps are tested through an injected step table and the frozen version 1 fixture. `cleanSave` cannot be pointed at a fake table, so its wiring to real steps only gets exercised once a first real step exists.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
