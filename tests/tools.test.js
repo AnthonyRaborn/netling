@@ -62,6 +62,7 @@ test('stats turn results into rates and averages', () => {
   const bands = Object.values(st.atTeen.balancedWithin);
   assert.ok(bands.every((x, i) => i === 0 || x >= bands[i - 1]), 'a wider band never holds fewer');
   assert.ok(st.atTeen.ghostPathPlay <= st.atTeen.ghostPath);
+  assert.ok(st.atTeen.ghostPathPlay <= st.atTeen.ghostPathPlayOnce, 'twice is narrower than once');
 });
 
 test('the report diff finds what moved, by path', () => {

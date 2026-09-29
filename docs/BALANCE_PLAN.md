@@ -42,6 +42,15 @@ Third round, 2026-09-29:
 16. **Scrip numbers**: a cap of 100; item prices scale with rarity, the rarest costing 50; the next generation inherits 50%, rounded down.
 17. **Tie-breaks (KI-15)**: pick randomly among the tied forms, with a 20% weight boost for each form the player has not yet raised.
 
+Fourth round, 2026-09-29:
+
+18. **The third teen is the Shell** (so the Ghost is in the Shell), chosen by the narrower rule: Ghost's axis rule, at most 1 fault, and every game won at least twice.
+19. **A tie is a band of 0.5.**
+20. **Life length: 5 days, stages scaled** (teen at 17 hours, adult at 51 hours). This leaves room for an extra stage later.
+21. **Selling pays half the price at a market and a quarter anywhere else. A purchase costs the same Charge as today** (12, or 10 in the Bazaar) on top of its scrip price.
+22. **Segfault**: the deliberate-fault item, uncommon tier. Using it adds **2 faults**, so a Stub takes one Segfault and one other deliberate mistake.
+23. **Casual codex pacing is acceptable** as it is: casual lines may take many lives.
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -98,10 +107,10 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
 1. **Numbers only**: lower `uptimeStabilityPerHour` (for example 0.1 to 0.05), then measure. If Daemon still dominates, compare the axes after scaling each by its typical spread instead of raw.
 2. **Full steering for attentive players (decided)**:
    - **Adults**: every form must be reachable by a careful player who chooses for it. Glitch needs its own route: deliberate risk (Overclock rig, SALVAGE, RAID, playing hot) should move stability down without faults. Measured with the `steer-*` and `daredevil` archetypes.
-   - **Teens (decided)**: an item that adds 1 fault when used. It counts like any fault, so it can end a life at the limit. Sources: markets, intrusions, overflows, power surges and visitors. A Stub needs 3 faults in the first 24 hours, so a baby has to be able to find about 3 in its first day (the Public Net is the only region open to it); drop chances are tuned for that. Today `steer-stub` gets there by starving the netling, at 3.6 faults of 10; with the item it should cost exactly 3 and no Integrity. It needs a new permanent item id, art, a field-manual entry, and a `steer-stub` update to use it.
+   - **Teens (decided): Segfault**, an uncommon item that adds **2 faults** when used. They count like any fault, so it can end a life at the limit. Sources: markets, intrusions, overflows, power surges and visitors. A Stub needs 3 faults before the teen stage (17 hours with the scaled stages), so one Segfault plus one other deliberate mistake does it; a baby must be able to find one Segfault in its first 17 hours (the Public Net is the only region open to it). Today `steer-stub` gets there by starving the netling, at 3.6 faults of 10; with Segfault it should cost exactly 3 and less Integrity. It needs a permanent item id (`segfault`), art, a field-manual entry, and a `steer-stub` update to use it.
 3. **Ghost (decided: stays a deliberate chase)**: keep its conditions. Every other change in this pass is checked against the `ghosthunter` archetype (100% Ghost today) and attentive players (1 to 2%), so neither moves. KI-14 (a boosted win counts twice) can stay as it is: boosters are part of the chase. Document it where the rule is described.
 4. **Tie-break (KI-15, decided)**: when the axes tie, pick at random among the tied forms, each weighted 1, or 1.2 if the player has never raised it (not in the dex).
-   - **What counts as a tie** needs a definition. The axes are decimals, so exact ties are rare, apart from allegiance exactly 0 (today always Chrome) and a stability-versus-allegiance tie. Options: exact ties only (the rule then almost never fires), or a band, for example the two axes within 0.5 of each other, or an axis within 0.5 of zero.
+   - **What counts as a tie (decided: a band of 0.5)**: the two axes within 0.5 of each other in size (allegiance against stability) is a tie between the forms they point to; an axis within 0.5 of zero is a tie between its two forms (Chrome and Firewall, or Daemon and Glitch). Both can apply at once, giving up to four candidates.
    - **Purity**: `sim.js` doesn't know the dex. The simplest route is a list of forms not yet raised, stored on the netling when it compiles (`newForms`, an added field with a default of none) and passed on by the UI; the balance tools can then simulate a first-time player or a veteran.
 5. **A third teen form that hints at Ghost (decided)**: at 24 hours, a netling on Ghost's path becomes the new teen instead of Kernel. Measured at 24 hours over 500 lives per archetype:
 
@@ -111,7 +120,9 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
    | Ghost's axis rule (allegiance within ±2, stability 0 or more), at most 1 fault | 99% | up to 98% (steer-daemon), attentive 29% |
    | **Ghost's axis rule, at most 1 fault, and every game won at least twice** | **74%** | **at most 5%** (steer-daemon), attentive 2% |
 
-   "Both axes balanced" is a poor hint: tidy play raises stability by about 0.1 an hour, so Ghost chasers are at about +3.5 by 24 hours, and the rule mostly picks casual players who won't reach Ghost. **Recommended: the third row**, which mirrors Ghost's real conditions (balanced allegiance, no chaos, few faults, all four games played). It stays a hint, not a promise: the teen still needs Ghost's adult conditions at 72 hours. A new form needs:
+   "Both axes balanced" is a poor hint: tidy play raises stability by about 0.1 an hour, so Ghost chasers are at about +3.5 by 24 hours, and the rule mostly picks casual players who won't reach Ghost. **Decided: the third row, and the teen is called the Shell.** It stays a hint, not a promise: the Shell still needs Ghost's adult conditions.
+
+   With the scaled stages (item 6) the check happens at 17 hours instead of 24. Measured there: every game won twice catches 63% of Ghost chasers and at most 1% of anyone else; every game won once catches 96% of chasers but also 59% of Daemon-steering players and about 20% of attentive ones. **Keep "twice"**: the Shell is a sign for players already on the chase, and chasers reach Ghost 98% of the time either way. A new form needs:
    - a permanent id and sprites;
    - a DEX entry with hints, and `DEX_ORDER`;
    - a check of every "all forms" condition in cosmetics and archive, the sanitizer whitelist, CONTENT_CATALOG and `gallery.html`.
@@ -130,7 +141,18 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
    - **Same stages** changes no evolution odds (they are decided by 72 hours) and raises survival, but leaves only two adult days. Adult-only content suffers most: the Ruins and the Deep hold the last fragments, so the codex slows sharply (half of attentive lines unfinished after 5 lives, casual never).
    - **An earlier adulthood** breaks the Ghost chase: 22 wins by adulthood is out of reach for a third of chasers at 48 hours. Ghost's win count would have to scale with the stage (about 15 at 48 hours), which touches the decided Ghost conditions.
    - **Seven days with a fourth stage** can't be measured until the stage has rules. The candidate: an elder stage from day 5 or 6 with its own perk or pose, keeping four adult days split into adult and elder.
-   - **Leaning**: if shorter, "5 days, same stages" is the safe choice for evolution, but it needs the codex cap (Pass 2) and Deep access rethought together, because adult time is where the late codex is found.
+   - **Decided: 5 days, stages scaled** (`lifespanMin` 7200, `teenAtMin` 1020, `adultAtMin` 3060). It keeps the option of a fourth stage later.
+   - **Ghost's win requirement has to scale with it**, or the chase breaks (89% for the chaser at 22 wins and 4 each). Measured with the scaled stages, 500 lives per archetype:
+
+     | Ghost needs | Ghost chaser | Highest other archetype |
+     |---|---|---|
+     | 22 wins, 4 in each game (now) | 89% | 0% |
+     | **18 wins, 3 in each game** | **98%** | **0.8%** (sysadmin, steer-daemon) |
+     | 16 wins, 4 in each game | 92% | 3% |
+     | 16 wins, 3 in each game | 98% | 10% (steer-daemon) |
+
+     **Recommended: 18 and 3**, which keeps Ghost as secret as it is today. Other results with that setting: survival rises (casual full life 87%, worker 78%), steer-glitch reaches Glitch 89%, and every other steering player 99% or more.
+   - **Codex** with scaled stages (200 lineages): attentive lines finish in a median of 4 lives, 9% within 2 and 36% within 3; about 14 fragments a life. The per-life cap is still needed for the at-least-3-lives rule. Casual lines rarely finish, which is accepted (decision 23).
 
 ### Candidate targets (to confirm)
 
@@ -185,12 +207,11 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
   | Tier | Items (average loot share) | Price |
   |---|---|---|
   | Common | Memory shard 17%, Coolant cell 17%, Antivirus patch 15%, Repair kit 15%, Signal booster 14% | 15 |
-  | Uncommon | Black ICE shard 12%, Corp voucher 10% | 25 |
+  | Uncommon | Black ICE shard 12%, Corp voucher 10%, Segfault (decided) | 25 |
   | Rarest | Overclock chip 1% | 50 |
-  | To set | Deliberate-fault item: its tier follows the drop chances chosen for it (it must be findable by a baby) | |
 
-  Selling pays a fraction of the price (for example a third), so buying back what you sold always costs more.
-- **At home**: DISCARD becomes SCRAP, for a token amount, so a home sale is never better than a market sale.
+  **Selling (decided)** pays half the price at a netrun market, and a quarter anywhere else (SCRAP at home). **Buying (decided)** costs the scrip price plus the same Charge as today (12, or 10 in the Bazaar).
+- **At home**: DISCARD becomes SCRAP, for a quarter of the price (decided), so a home sale is never better than a market sale.
 - **Scarcity still matters**: lower the loot tables a little too, so a full inventory is the exception. Targets are below.
 - **Where it lives (decided)**: on the netling (`state.scrip`); the next generation inherits `Math.floor(scrip / 2)`. It needs a default in `createScript`, `migrate` and `cleanSave`, a cleaner, a place in the HUD or Archive, and a transfer round-trip test. No version bump.
 - **Allegiance**: buying at a market leans indie today (-0.5 per item). Keep that on purchases; selling can stay neutral.
@@ -246,10 +267,8 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 ## Still to decide
 
-1. **Third teen rule**: the recommended Ghost-path rule (Pass 1, item 5), or the literal "both axes balanced"? And its look and name.
-2. **What counts as a tie** for KI-15: exact ties only, or a band (Pass 1, item 4)?
-3. **Life length**: five days with the same stages (and the codex and Deep reworked around two adult days), or seven days with a fourth stage? See the measurements in Pass 1, item 6.
-4. **Scrip**: the price table, the sell fraction and the Charge part of a purchase.
-5. **Deliberate-fault item**: its name, and drop chances high enough for three in a baby's first day.
-6. **Trait numbers**: strengths, level steps and caps, after measuring.
-7. **Casual codex pacing**: casual lineages rarely finish the codex within 4 lives, and a per-life cap does nothing for them. Is that acceptable, or should casual players have an upper bound too (for example 6 lives)?
+1. **Ghost's scaled win requirement**: 18 wins and 3 in each game (recommended, Pass 1, item 6)?
+2. **The Shell's look**: sprite, palette and its DEX hint.
+3. **Segfault drop chances**: enough for one in a baby's first 17 hours in the Public Net.
+4. **Trait numbers**: strengths, level steps and caps, after measuring.
+5. **The fourth stage** (later): whether a stage after adult earns a place in the five days.

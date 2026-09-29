@@ -276,8 +276,9 @@ export function stats(results) {
           // On Ghost's own path at 24 hours: its allegiance and stability rules, and at most 1 fault.
           wins: round(avg(teens.map((x) => x.wins)), 2),
           minWins: round(avg(teens.map((x) => x.minWins)), 2),
-          // Ghost's path plus every game won at least twice: a narrower hint.
+          // Ghost's path plus every game won at least twice (or once): narrower hints.
           ghostPathPlay: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1 && x.minWins >= 2).length / n),
+          ghostPathPlayOnce: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1 && x.minWins >= 1).length / n),
           ghostPath: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1).length / n),
         }
       : null,
@@ -345,7 +346,7 @@ function printLife(st, detail) {
   console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
   console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}`);
   const t = st.atTeen;
-  if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
+  if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
   console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments`);
 }

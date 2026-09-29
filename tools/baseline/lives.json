@@ -61,6 +61,7 @@
         "wins": 6.11,
         "minWins": 0.79,
         "ghostPathPlay": 0.02,
+        "ghostPathPlayOnce": 0.227,
         "ghostPath": 0.301
       },
       "wins": 43.81,
@@ -133,6 +134,7 @@
         "wins": 6.01,
         "minWins": 0.68,
         "ghostPathPlay": 0.004,
+        "ghostPathPlayOnce": 0.125,
         "ghostPath": 0.216
       },
       "wins": 39.08,
@@ -204,6 +206,7 @@
         "wins": 5.55,
         "minWins": 0.6,
         "ghostPathPlay": 0.002,
+        "ghostPathPlayOnce": 0.131,
         "ghostPath": 0.225
       },
       "wins": 30.47,
@@ -272,6 +275,7 @@
         "wins": 2.82,
         "minWins": 0.12,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 2.77,
@@ -338,6 +342,7 @@
         "wins": 6.36,
         "minWins": 0.74,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 42.6,
@@ -404,6 +409,7 @@
         "wins": 6,
         "minWins": 0.7,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 42.74,
@@ -475,6 +481,7 @@
         "wins": 5.95,
         "minWins": 0.67,
         "ghostPathPlay": 0.004,
+        "ghostPathPlayOnce": 0.031,
         "ghostPath": 0.04
       },
       "wins": 40.14,
@@ -544,6 +551,7 @@
         "wins": 6.61,
         "minWins": 0.87,
         "ghostPathPlay": 0.036,
+        "ghostPathPlayOnce": 0.276,
         "ghostPath": 0.331
       },
       "wins": 47.53,
@@ -610,6 +618,7 @@
         "wins": 11.79,
         "minWins": 1.95,
         "ghostPathPlay": 0.743,
+        "ghostPathPlayOnce": 0.968,
         "ghostPath": 0.985
       },
       "wins": 72.33,
@@ -680,6 +689,7 @@
         "wins": 5.75,
         "minWins": 0.7,
         "ghostPathPlay": 0.002,
+        "ghostPathPlayOnce": 0.072,
         "ghostPath": 0.117
       },
       "wins": 41.96,
@@ -746,6 +756,7 @@
         "wins": 6.3,
         "minWins": 0.82,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 38.82,
@@ -812,6 +823,7 @@
         "wins": 5.74,
         "minWins": 0.72,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 39.54,
@@ -879,6 +891,7 @@
         "wins": 5.94,
         "minWins": 0.75,
         "ghostPathPlay": 0.045,
+        "ghostPathPlayOnce": 0.697,
         "ghostPath": 0.984
       },
       "wins": 42.29,
@@ -949,6 +962,7 @@
         "wins": 6.16,
         "minWins": 0.79,
         "ghostPathPlay": 0.009,
+        "ghostPathPlayOnce": 0.189,
         "ghostPath": 0.253
       },
       "wins": 39.88,
@@ -1018,6 +1032,7 @@
         "wins": 4.88,
         "minWins": 0.53,
         "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
       "wins": 42.3,
