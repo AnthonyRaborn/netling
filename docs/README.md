@@ -18,6 +18,7 @@ Written against commit `ea87757` (2026-09-28). Every file names the commit it wa
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
 | Plan the next balance passes (forms, netruns, lineage) | [BALANCE_PLAN.md](BALANCE_PLAN.md) |
+| Plan the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION_PLAN.md](ATTENTION_PLAN.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what the first pass found | [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md), [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
