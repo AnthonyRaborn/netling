@@ -407,4 +407,4 @@ Side effects, all within the targets in [TESTING.md](TESTING.md#balance-targets)
 
 ## Still to decide
 
-Opt-in rewards for attention (decision 50): designed in [ATTENTION_PLAN.md](ATTENTION_PLAN.md), with its open questions there.
+Opt-in rewards for attention (decision 50) are implemented; see [ATTENTION_PLAN.md](ATTENTION_PLAN.md) for what remains open there.

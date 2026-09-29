@@ -17,7 +17,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 338 tests in 34 files and all pass. The smoke test has 54 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 354 tests in 35 files and all pass. The smoke test has 58 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -49,7 +49,8 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `accessories.test.js` | 18 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
-| `cosmetics.test.js` | 13 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot |
+| `cosmetics.test.js` | 17 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, and the four attention cosmetics |
+| `attention.test.js` | 12 | Attention rewards: requests (game and COOL, expiry without a fault, when none are asked), GREET and the gift chance, flow and that it changes nothing, chatter (pool, fading, content rules), saves |
 | `archive.test.js` | 9 | Dex, death records, lineage rows, the family tree chain (links, gaps, the running netling's stats), back-compat |
 | `nap.test.js` | 7 | Naps: drain, duration, cooldown, blocking, bedtime override, persistence |
 | `transfer.test.js` | 7 | Round trip, whitespace tolerance, rejection messages, summary, rounding, per-key repair, size caps |
@@ -132,7 +133,7 @@ Settings (environment variables and arguments):
 | Setting | Effect |
 |---|---|
 | `node tools/balance.mjs 500 casual` | 500 runs, only archetypes whose name contains `casual` (the second argument is a substring filter) |
-| `DETAIL=1` | Adds faults by kind, days spent in each stage; at the teen evolution, the axes, faults and wins, how often both axes were within 1, 1.5, 2 or 3 of zero, and how often it was on Ghost's path (alone, with every game won once, and with every game won twice); the axes and wins at adulthood, timed events and corp traces, peak items held, and netrun totals |
+| `DETAIL=1` | Adds faults by kind, days spent in each stage; at the teen evolution, the axes, faults and wins, how often both axes were within 1, 1.5, 2 or 3 of zero, and how often it was on Ghost's path (alone, with every game won once, and with every game won twice); the axes and wins at adulthood, timed events and corp traces, peak items held, netrun totals, and attention rewards a life (requests answered, visitors greeted, hours in flow, chatter lines seen at check-ins) |
 | `JSON=1` | Prints the whole report as JSON (rates as fractions) instead of text, for `tools/balance-diff.mjs` |
 | `CFG='{"drainPerHour":{"charge":15},"lifespanMin":7200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
 | `TRAIT=ghost` | Every netling starts as the child of that adult form: its trait and keepsake, generation 2. Add `TRAIT_LEVEL=2` for a streak, `HISTORY=daemon` for a grandparent whose trait carries on as history |

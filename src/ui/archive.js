@@ -4,6 +4,7 @@ import { PALETTES, SPECIES } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
+import { CHATTER, CHATTER_GROUPS, chatterProgress } from '../chatter.js';
 import { drawSprite, formSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
@@ -199,6 +200,8 @@ function renderArchive() {
     }),
   );
 
+  renderChatter();
+
   const entries = dexEntries(app.dex);
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
   $('dex-grid').replaceChildren(
@@ -218,8 +221,38 @@ function renderArchive() {
   );
 }
 
+// Lines heard, by group; a group with nothing heard yet shows only its hint.
+function renderChatter() {
+  const heard = new Set(app.progress.chatter ?? []);
+  const prog = chatterProgress([...heard]);
+  $('chatter-count').textContent = `${heard.size}/${CHATTER.length}`;
+  $('chatter-list').replaceChildren(
+    ...CHATTER_GROUPS.flatMap((g) => {
+      const { heard: got, total } = prog[g.id];
+      const h = document.createElement('h3');
+      h.textContent = got ? `${g.name.toUpperCase()} ` : '??? ';
+      const count = document.createElement('span');
+      count.textContent = `${got}/${total}`;
+      h.append(count);
+      if (!got) {
+        const d = document.createElement('div');
+        d.className = 'frag missing';
+        d.textContent = g.hint;
+        return [h, d];
+      }
+      const lines = CHATTER.filter((c) => c.group === g.id).map((c) => {
+        const d = document.createElement('div');
+        d.className = heard.has(c.id) ? 'frag' : 'frag missing';
+        d.textContent = heard.has(c.id) ? `"${c.text}"` : '[ not heard yet ]';
+        return d;
+      });
+      return [h, ...lines];
+    }),
+  );
+}
+
 function selectTab(name) {
-  for (const t of ['lineage', 'dex', 'codex', 'wardrobe']) {
+  for (const t of ['lineage', 'dex', 'codex', 'chatter', 'wardrobe']) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
@@ -244,7 +277,7 @@ export function initArchive() {
   archive.addEventListener('click', (e) => {
     if (e.target === archive) archive.close(); // backdrop click
   });
-  for (const t of ['lineage', 'dex', 'codex', 'wardrobe']) $(`tab-btn-${t}`).addEventListener('click', () => selectTab(t));
+  for (const t of ['lineage', 'dex', 'codex', 'chatter', 'wardrobe']) $(`tab-btn-${t}`).addEventListener('click', () => selectTab(t));
 
   $('close-transmission').addEventListener('click', () => $('transmission').close());
   $('replay-transmission').addEventListener('click', showTransmission);

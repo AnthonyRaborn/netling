@@ -1196,6 +1196,60 @@ await scenario('hibernate from the system dialog', async ({ open }) => {
   assert(await visible(page, '#hibernating'), 'hibernation panel not shown');
 });
 
+await scenario('attention: a request bar with a direct PLAY into the game it asked for', async ({ open }) => {
+  const game = awakeNetling();
+  game.request = { kind: 'game', game: 'tune', startedAge: game.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': game }));
+  assert(await visible(page, '#wish-bar'), 'request bar not shown');
+  assert((await page.textContent('#wish-text')).includes('TUNE'), 'request does not name the game');
+  assert((await page.textContent('#wish-play')) === 'PLAY TUNE', 'no direct PLAY button');
+  assert(!(await visible(page, '#event-bar')), 'a request must not look like an alert');
+  await page.click('#wish-play');
+  await page.waitForTimeout(300);
+  assert(await visible(page, '#pad'), 'PLAY TUNE did not start the game');
+  assert(!(await visible(page, '#wish-bar')), 'the request bar stays up during the game');
+});
+
+await scenario('attention: COOL answers a COOL request, and it counts', async ({ open }) => {
+  const warm = awakeNetling();
+  warm.stats.heat = 50;
+  warm.request = { kind: 'cool', startedAge: warm.ageMin };
+  const page2 = await open(BASE, seed({ 'netling.save': warm }));
+  assert(await visible(page2, '#wish-cool'), 'no COOL button for a COOL request');
+  await page2.click('#wish-cool');
+  await page2.waitForTimeout(300);
+  assert(!(await visible(page2, '#wish-bar')), 'request bar still up after COOL');
+  const progress = await page2.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(progress.requestsMet === 1, `requests met: ${progress.requestsMet}`);
+});
+
+await scenario('attention: GREET a visitor, hear its line, find it in the CHATTER tab', async ({ open }) => {
+  const save = awakeNetling();
+  save.visit = { startedAge: save.ageMin, len: 20, form: 'daemon', palette: 1, accessory: null };
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert(await visible(page, '#wish-greet'), 'no GREET while a visitor is here');
+  await page.click('#wish-greet');
+  await page.waitForTimeout(1300);
+  assert(!(await visible(page, '#wish-greet')), 'GREET still offered after saying hello');
+  assert(await visible(page, '#speech'), 'the visitor said nothing');
+  assert((await page.textContent('#speech')).startsWith('visitor:'), 'not a visitor line');
+  const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(progress.visitorsGreeted === 1, `greeted: ${progress.visitorsGreeted}`);
+  assert(progress.chatter.length === 1, `heard: ${progress.chatter}`);
+  await page.click('#open-archive');
+  await page.click('#tab-btn-chatter');
+  assert((await page.textContent('#chatter-count')).startsWith('1/'), 'chatter count');
+  assert((await page.textContent('#chatter-list')).includes('VISITORS'), 'visitor group not shown');
+});
+
+await scenario('attention: flow shows in the readout and glows on screen', async ({ open }) => {
+  const save = awakeNetling({ flowMin: 400 });
+  Object.assign(save.stats, { charge: 90, sync: 90, integrity: 100, heat: 20 });
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert((await page.textContent('#readout')).includes('in flow'), 'flow not in the readout');
+  assert(await animating(page), 'screen not drawing');
+});
+
 await scenario('dev mode: time skip and evolve', async ({ open }) => {
   const page = await open(`${BASE}?dev`, seed());
   await page.waitForTimeout(500);

@@ -17,6 +17,8 @@ export function setLcdTint(bg, dark) {
 // FLASH_TOGGLE_MS). The glitch and the surge follow the same limit.
 export const GLITCH_STEP_MS = 350; // the glitch picks a new look at most this often
 export const SURGE_MS = 900;
+// The flow glow's slow breath (radians per ms divisor): about a ten-second cycle, far from a flash.
+export const FLOW_BREATH_MS = 1600;
 
 // A repeatable 0..1 sequence for one glitch step, so the look holds for the whole step.
 function stepRandom(step) {
@@ -152,6 +154,17 @@ export function renderLCD(canvas, s, time, opts = {}) {
     const strobe = opts.flash && Math.floor(time / FLASH_TOGGLE_MS) % 2;
     if (strobe) {
       spriteColors = WHITE_COLORS;
+    }
+
+    // Flow: kept in good shape for hours, it glows. A soft outline that breathes slowly (a still
+    // glow in calm mode); it never flashes.
+    if (opts.flow && !rest && !rebooting && !strobe) {
+      const glow = Object.fromEntries([...new Set(sprite.join(''))].filter((c) => spriteColors[c]).map((c) => [c, pal.accent]));
+      bctx.globalAlpha = opts.calm ? 0.5 : 0.45 + 0.15 * Math.sin(time / FLOW_BREATH_MS);
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) drawSprite(bctx, sprite, x + dx, y + dy, glow);
+      bctx.globalAlpha *= 0.5; // a fainter second ring
+      for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawSprite(bctx, sprite, x + dx, y + dy, glow);
+      bctx.globalAlpha = 1;
     }
 
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;

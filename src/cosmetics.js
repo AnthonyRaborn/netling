@@ -3,6 +3,7 @@
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits } }
 import { FRAGMENTS } from './netrun/codex.js';
 import { FORMS, TRAITS, TRAIT_CFG } from './sim.js';
+import { CHATTER_GROUPS, chatterProgress } from './chatter.js';
 
 const regionDone = (ctx, region) => FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
 const fullLives = (ctx) => ctx.lineage.filter((e) => e.cause === 'end of life cycle').length;
@@ -17,6 +18,17 @@ function fullLifeStreak(ctx) {
 }
 const streak = (ctx, game) => ctx.progress.streaks?.[game]?.best ?? 0;
 const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[a] ?? 0), 0);
+
+// Attention rewards (docs/ATTENTION_PLAN.md). ctx.flowMin is every life's time in flow, the living one's included.
+export const ATTENTION = {
+  requests: 25,
+  greetings: 10,
+  flowHours: 24,
+  groupHeard: (ctx) => {
+    const prog = chatterProgress(ctx.progress.chatter ?? []);
+    return CHATTER_GROUPS.some((g) => prog[g.id].total > 0 && prog[g.id].heard === prog[g.id].total);
+  },
+};
 
 // Legacy goals: read from the lineage records, in the order the generations ended.
 // A full life NL-0 never had to pull back.
@@ -60,6 +72,7 @@ export const COSMETICS = {
     { id: 'violet', name: 'Bazaar violet', swatch: '#1a0d26', lcd: '#1a0d26', dark: '#08040c', hint: 'hear every rumor in the market.', check: (c) => regionDone(c, 'bazaar') },
     { id: 'phosphor', name: 'Green phosphor', swatch: '#0a1f0d', lcd: '#0a1f0d', dark: '#030a04', hint: 'learn what the ruins remember.', check: (c) => regionDone(c, 'ruins') },
     { id: 'abyss', name: 'Abyss', swatch: '#08081a', lcd: '#08081a', dark: '#020206', hint: 'listen to the bottom of the net.', check: (c) => regionDone(c, 'deep') },
+    { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, ten times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
     { id: 'amber', name: 'Amber', swatch: '#261a08', lcd: '#261a08', dark: '#0c0803', hint: 'three in a row, start to finish.', check: (c) => fullLifeStreak(c) >= 3 },
   ],
   effect: [
@@ -70,6 +83,7 @@ export const COSMETICS = {
     { id: 'bloom', name: 'Bloom', hint: 'slip every wall, ten times over.', check: (c) => streak(c, 'dodge') >= 10 },
     { id: 'curved', name: 'Deep curve', hint: 'hold the signal and never lose it.', check: (c) => streak(c, 'tune') >= 10 },
     { id: 'packets', name: 'Packet rain', hint: 'ten clean feasts without a bad bite.', check: (c) => streak(c, 'feast') >= 10 },
+    { id: 'aurora', name: 'Aurora', hint: 'keep it well for a whole day, a few hours at a time.', check: (c) => (c.flowMin ?? 0) >= ATTENTION.flowHours * 60 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
   ],
   // Home sounds only; netruns keep each region's own voice.
@@ -81,6 +95,7 @@ export const COSMETICS = {
     { id: 'chime', name: 'Chime', wave: 'triangle', mult: 1.25, hint: 'answer when they call, ten times.', check: (c) => acts(c, 'comply') >= 10 },
     { id: 'buzz', name: 'Buzz', wave: 'sawtooth', mult: 0.9, hint: 'vanish when they call, ten times.', check: (c) => acts(c, 'hide') >= 10 },
     // gamesPlayed counts PLAY games and netrun ICE fights; streaks (above) count PLAY games only.
+    { id: 'purr', name: 'Purr', wave: 'sine', mult: 0.6, hint: 'give it what it asks for, twenty-five times.', check: (c) => (c.progress.requestsMet ?? 0) >= ATTENTION.requests },
     { id: 'arcade', name: 'Arcade', wave: 'triangle', mult: 0.75, hint: 'fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 50 },
   ],
   // A pixel emblem beside the device label, earned by the line itself. `pixels`: '#' lit, '.' dark.
@@ -113,6 +128,13 @@ export const COSMETICS = {
       hint: 'raise every grown shape in one line.',
       check: (c) => LEGACY.adultsRaised(c) >= Object.keys(FORMS).length,
       pixels: ['....#....', '....#....', '...###...', '#########', '.#######.', '..#####..', '..##.##..', '.##...##.', '.#.....#.'],
+    },
+    {
+      id: 'speech',
+      name: 'Speech mark',
+      hint: 'hear everything one kind of netling has to say.',
+      check: (c) => ATTENTION.groupHeard(c),
+      pixels: ['.........', '.#######.', '#.......#', '#.#.#.#.#', '#.......#', '.#######.', '..#......', '.#.......', '.........'],
     },
   ],
 };

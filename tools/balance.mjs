@@ -139,6 +139,16 @@ export function checkIn(s, p, now, rng, ctx) {
   const coolAt = p.coolAt ?? (p.hot ? 80 : 50);
   if (s.stats.heat > coolAt) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
+  // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
+  if (s.chatter) ctx.chatterSeen.add(s.chatter.id);
+  if (s.visit && !s.visit.greeted && doAct('greet').ok) {
+    ctx.greeted = (ctx.greeted ?? 0) + 1;
+    ctx.chatterSeen.add(s.chatter.id);
+  }
+  if (s.request?.kind === 'cool' && doAct('cool').requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
+  if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play')) {
+    if (doAct('play', { game: s.request.game, won: rng() < p.winRate }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
+  }
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     const game = GAME_IDS[ctx.games++ % GAME_IDS.length];
@@ -162,7 +172,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
-  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {} };
+  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set() };
   const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -255,6 +265,10 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     events,
     traces,
     tracesIgnored,
+    requestsMet: ctx.requestsMet ?? 0,
+    greeted: ctx.greeted ?? 0,
+    flowHours: (s.flowTotalMin ?? 0) / 60,
+    chatterSeen: ctx.chatterSeen.size,
   };
 }
 
@@ -328,6 +342,13 @@ export function stats(results) {
     events: round(avg(results.map((r) => r.events)), 2),
     traces: round(avg(results.map((r) => r.traces)), 2),
     tracesIgnored: round(avg(results.map((r) => r.tracesIgnored)), 2),
+    // Attention rewards, a life: requests answered, visitors greeted, hours in flow, chatter lines seen.
+    attention: {
+      requestsMet: round(avg(results.map((r) => r.requestsMet)), 2),
+      greeted: round(avg(results.map((r) => r.greeted)), 2),
+      flowHours: round(avg(results.map((r) => r.flowHours)), 2),
+      chatterSeen: round(avg(results.map((r) => r.chatterSeen)), 2),
+    },
     itemsHeld: round(avg(results.map((r) => r.itemsHeld)), 2),
     // How often a check-in found the inventory full (the target is under half).
     fullAtCheckIn: round(avg(results.map((r) => r.fullShare))),
@@ -409,6 +430,8 @@ function printLife(st, detail) {
   const t = st.atTeen;
   if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
+  const at = st.attention;
+  console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
   console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments, codex cap reached ${pct(st.netruns.codexCapped)}`);
   console.log(`  cleared: ${list(st.netruns.cleared)} · runs by region: ${Object.entries(st.netruns.byRegion).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);

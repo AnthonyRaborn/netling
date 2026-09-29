@@ -1,10 +1,12 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
+import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
 import { atMarket, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
 import { $, app, armed, disarm, flashStatus, now, playAnim, save } from './app.js';
+import { chatterById } from '../chatter.js';
+import { hearChatter } from './style.js';
 import { renderNudge } from './onboarding.js';
 import { renderHibernation } from './system.js';
 
@@ -88,11 +90,13 @@ export function updateHUD() {
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
   if (rebootMinutesLeft(state) > 0) $('readout').textContent += ` · rebooting, ${rebootMinutesLeft(state)}m left`;
+  if (inFlow(state)) $('readout').textContent += ' · in flow';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
   $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;
   renderInventory();
-  renderNudge();
+  renderSpeech(renderNudge());
+  renderWish(state);
   renderHibernation();
   // The timed event, if any, with the buttons that answer it.
   const eventLeft = eventMinutesLeft(state);
@@ -126,6 +130,42 @@ export function updateHUD() {
     if (!EVENTS[reason.key]) $('sr-announce').textContent = reason.msg;
   }
   app.lastAttention = reason?.key ?? false;
+}
+
+// What an open request asks for, in words.
+export function requestText(r) {
+  return r.kind === 'cool' ? 'It is running warm and wants a COOL.' : `It wants to play ${r.game.toUpperCase()}.`;
+}
+
+// The request bar: what it wants and how long it will wait, and GREET while a visitor is here.
+// Calm on purpose (not an alert): missing any of it costs nothing.
+function renderWish(state) {
+  const on = isAlive(state) && !resting(state) && !app.session && !state.run;
+  const r = on ? state.request : null;
+  const v = on && state.visit && !state.visit.greeted ? state.visit : null;
+  $('wish-bar').hidden = !r && !v;
+  if (!r && !v) return;
+  const parts = [];
+  if (r) parts.push(`${r.kind === 'cool' ? 'it is fanning itself' : `it wants ${r.game.toUpperCase()}`} · ${requestMinutesLeft(state)}m`);
+  if (v) parts.push(`a ${SPECIES[v.form].name.toLowerCase()} dropped by`);
+  $('wish-text').textContent = parts.join(' · ');
+  $('wish-play').hidden = r?.kind !== 'game';
+  if (r?.kind === 'game') $('wish-play').textContent = `PLAY ${r.game.toUpperCase()}`;
+  $('wish-cool').hidden = r?.kind !== 'cool';
+  $('wish-greet').hidden = !v;
+}
+
+// Chatter in the speech bubble (the onboarding nudge has it first). A line counts as heard once it
+// has been on screen with the page visible.
+function renderSpeech(nudging) {
+  if (nudging) return;
+  const state = app.state;
+  const line = isAlive(state) && !resting(state) && !app.session && !state.run && state.chatter ? chatterById(state.chatter.id) : null;
+  $('speech').hidden = !line;
+  if (!line) return;
+  if ($('speech').textContent !== line.text) $('speech').textContent = line.text;
+  $('speech').classList.toggle('visitor', line.group === 'visitor');
+  if (!document.hidden && $('flatline').hidden && hearChatter(line.id)) $('sr-announce').textContent = line.text;
 }
 
 export function pushAlert(title, body) {

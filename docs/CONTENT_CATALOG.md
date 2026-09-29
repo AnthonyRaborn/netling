@@ -9,10 +9,11 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 3. [Items](#items)
 4. [Mini-games](#mini-games)
 5. [Style: cosmetics](#style-cosmetics)
-6. [Accessories and props](#accessories-and-props)
-7. [Codex fragments](#codex-fragments)
-8. [Onboarding and NL-0 text](#onboarding-and-nl-0-text)
-9. [Dex lore and hints](#dex-lore-and-hints)
+6. [Chatter](#chatter)
+7. [Accessories and props](#accessories-and-props)
+8. [Codex fragments](#codex-fragments)
+9. [Onboarding and NL-0 text](#onboarding-and-nl-0-text)
+10. [Dex lore and hints](#dex-lore-and-hints)
 
 ## Forms
 
@@ -89,7 +90,7 @@ Slots: shell, tint, effect, sound. `free: true` items are available from the sta
 
 Owning all nine shells grants the secret **Mini device** prop.
 
-### Tints (7)
+### Tints (8)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -99,9 +100,10 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `violet` | Bazaar violet | All Bazaar fragments | "hear every rumor in the market." |
 | `phosphor` | Green phosphor | All Old Web Ruins fragments | "learn what the ruins remember." |
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
+| `guest` | Guest pink | 10 visitors greeted | "say hello to whoever drops by, ten times." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (8)
+### Effects (9)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -112,11 +114,12 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `bloom` | Bloom | Best Dodge streak 10 | "slip every wall, ten times over." |
 | `curved` | Deep curve | Best Tune streak 10 | "hold the signal and never lose it." |
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
+| `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
-### Sounds (7)
+### Sounds (8)
 
 | Id | Name | Wave, multiplier | Unlock | Hint |
 |---|---|---|---|---|
@@ -126,11 +129,12 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 | `glass` | Glass | sine, 2 | 20 patches | "catch it before it spreads, twenty times." |
 | `chime` | Chime | triangle, 1.25 | 10 complies | "answer when they call, ten times." |
 | `buzz` | Buzz | sawtooth, 0.9 | 10 hides | "vanish when they call, ten times." |
+| `purr` | Purr | sine, 0.6 | 25 requests answered | "give it what it asks for, twenty-five times." |
 | `arcade` | Arcade | triangle, 0.75 | 50 games played (PLAY plus netrun ICE) | "fifty games, win or lose." |
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (5)
+### Crests (6)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -141,12 +145,27 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `triad` | Triad | A level III trait held or passed on (the same form three generations running) | "the same shape, three times running." |
 | `loop` | Closed loop | 5 full lives in a row with no NL-0 rescue | "five whole lives in a row, nobody pulled back." |
 | `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
+| `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 
-Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house.
+Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark is the one crest not read from the lineage: it comes from the chatter heard (see [Chatter](#chatter)).
 
 ### Device label
 
 Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlocked when the first netling has died: "lose one before you name the line."
+
+## Chatter
+
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 50 lines in 11 groups; a group with nothing heard shows only its hint.
+
+| Group | Lines | When | Hint |
+|---|---|---|---|
+| Bitling | 5 | A baby | "listen to it while it is new." |
+| Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
+| Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
+| Lineage | 7 | One per inherited trait, one with a history, one while NL-0 watches | "listen to one that remembers who came before." |
+| Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
+
+The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).
 
 ## Accessories and props
 

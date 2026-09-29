@@ -10,7 +10,7 @@ import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
-import { checkUnlocks, countGame, drainAccessoryInbox, grantStyle } from './style.js';
+import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
@@ -225,6 +225,7 @@ function startGame(id) {
       if (res.ok) {
         app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
         countGame();
+        countAttention(res);
       }
       playAnim(res.ok ? 'play' : 'refuse');
       if (!res.ok) {
@@ -237,6 +238,7 @@ function startGame(id) {
     },
   });
   showPanel('pad');
+  updateHUD(); // hides the request bar and the chatter bubble while the game runs
 }
 
 // DEFEND: an intrusion is fought off with a random mini-game, like netrun ICE. It counts toward
@@ -269,6 +271,20 @@ function startDefense() {
     },
   });
   showPanel('pad');
+}
+
+// PLAY straight into the game it asked for (the request bar's button).
+export function playRequested(game) {
+  unlockAudio();
+  tick(app.state, now());
+  const blocked = blockReason(app.state, 'play');
+  if (blocked) {
+    sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
+    return flashStatus(blocked);
+  }
+  sfx('select', app.state.quirk.pitch);
+  startGame(game);
 }
 
 const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ' ': 'a', Enter: 'a', z: 'a', x: 'a' };

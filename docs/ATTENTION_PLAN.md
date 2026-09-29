@@ -1,6 +1,6 @@
 # Attention rewards plan
 
-Opt-in rewards for players who check in often. Nothing here is implemented yet. Spoiler-heavy, like the rest of `docs/`.
+Opt-in rewards for players who check in often. Requests, visitor greetings, flow and chatter are implemented (release `netling-v42`); the daily check-in and netrun contracts are parked. Spoiler-heavy, like the rest of `docs/`. The rules as built are in [SIMULATION.md](SIMULATION.md#attention-rewards).
 
 ## Principles (from the maintainer, 2026-09-29)
 
@@ -8,16 +8,37 @@ Opt-in rewards for players who check in often. Nothing here is implemented yet. 
 2. **Rewards favour cosmetics and lore.** Gameplay benefits are allowed where they fit (for example netrun contracts), but are never the main purpose.
 3. **Notifications: yes**, for the short windows below.
 
+Decided 2026-09-29, after the draft below:
+
+4. **Requests are games and COOL only**, no food requests (answering must not steer allegiance).
+5. **Visits change** as proposed: 6% an awake hour, 10 to 20 minutes.
+6. **Chatter gets its own Archive tab.**
+7. **Notifications share the ALERTS switch.**
+8. **The four cosmetics are approved** as listed.
+
+## Measured
+
+Balance bots, 1000 lives each (they answer a request or greet a visitor only if it is there at a check-in, and "see" a chatter line only then, so real players who keep the app open will see more):
+
+| Archetype | Requests answered | Visitors greeted | Hours in flow | Chatter lines seen |
+|---|---|---|---|---|
+| attentive | 9.5 | 1.0 | 19.5 | 3.6 |
+| casual | 2.1 | 0.3 | 0.1 | 1.2 |
+| worker | 0.6 | 0.2 | 0.0 | 0.8 |
+| neglectful | 0.0 | 0.0 | 0.0 | 0.1 |
+
+So an attentive player earns Purr in about three lives and Aurora in about two, while casual players rarely reach flow. **Guest pink is slow**: at 10 greetings it takes a bot-like attentive player about ten lives (a visit lasts 10 to 20 minutes, so hourly check-ins catch about one a life). Survival and form odds barely moved (casual full lives 92.5% to 91.2%, within noise), and every balance target still holds.
+
 ## Scope
 
 | Idea | Status |
 |---|---|
-| 1. Requests | Proposed below |
-| 2. Greet a visitor | Proposed below |
-| 3. Flow state, visual only | Proposed below |
+| 1. Requests | Implemented |
+| 2. Greet a visitor | Implemented |
+| 3. Flow state, visual only | Implemented |
 | 4. Daily check-in reward | Parked: the maintainer is thinking about rewards and balance |
 | 5. Netrun contracts | Parked: its time window can clash with the uplink cooldown (see [Later](#later)) |
-| 6. Chatter logs | Proposed below |
+| 6. Chatter logs | Implemented (50 lines, drafted by Claude; the maintainer reviews the text before release) |
 
 ## 1. Requests
 
@@ -31,7 +52,6 @@ The netling sometimes asks for one specific thing. Answer it in time and it is h
   |---|---|---|
   | `game` | One named mini-game (win or lose) | Charge is at least 20 |
   | `cool` | COOL | Heat is 30 or more |
-  | `packet` | Its favourite packet (`quirk.favPacket`) | Charge is below 95 (see question Q1) |
 
 - **Reward**: a happy animation and log line, and the count `progress.requestsMet`, which carries across lives and unlocks cosmetics (see [Cosmetic rewards](#cosmetic-rewards)). No stat bonus beyond what the action itself gives.
 - **Screen**: a small speech bubble or icon beside the netling naming what it wants, and a line in the log. It is not an alert: no alert sound and no app badge, so it never reads as a need.
@@ -63,7 +83,7 @@ The netling mutters to itself. Lines you catch are kept in the Archive.
 - **When**: awake and idle, about 0.15 an hour (`chatterChancePerHour`). A line stays on screen for 20 minutes, then fades.
 - **Caught**: a line counts as heard only if the page is visible while it is showing. That is recorded by the UI in the cross-life progress store (`progress.chatter`, a list of line ids, cleaned in `sanitize.js` like the codex). Missing one costs nothing; it comes round again later.
 - **Content**: pools by stage and form (for example a Chrome muttering about compliance scores, a Glitch talking over itself), a few that mention its parent's form or trait, and visitor lines about other netlings. About 50 lines to start, drafted by Claude for the maintainer's approval. Line ids are permanent once shipped.
-- **Archive**: a new CHATTER tab, or a section of the Codex (see question Q3), showing lines heard and a count of lines left per group, with hints for the empty ones in the style of the DEX.
+- **Archive**: a CHATTER tab (decision 6), showing lines heard and a count of lines left per group, with hints for the empty ones in the style of the DEX.
 
 ## Notifications
 
@@ -71,7 +91,7 @@ The app already sends a notification when a need appears while it is in the back
 
 - A request or a visitor arriving while the app is in the background sends a notification: "It wants to play TUNE." or "A visitor pinged in." (at most one per request or visit).
 - Chatter and flow never notify.
-- A separate setting, "Requests and visitors", so a player can keep need alerts and turn these off (see question Q4).
+- They share the existing ALERTS switch (decision 7).
 
 **Limit**: these are local notifications. They fire while the app is open or in a background tab; a closed app, or a phone that has suspended it, gets nothing, because a static site has no push server. Reliable notifications with the app closed would need a push service, which is a larger change (see [PLATFORMS.md](PLATFORMS.md)).
 
@@ -95,11 +115,7 @@ Placeholder names and thresholds, to be confirmed with the art:
 
 ## Questions for the maintainer
 
-- **Q1**: should food requests exist? Asking for its favourite packet nudges allegiance toward corp or scav every time it is answered, which could quietly steer the adult form. The alternative is games and COOL only.
-- **Q2**: are more frequent and longer visits acceptable (a little free Sync for everyone), with GREET raising only the accessory chance?
-- **Q3**: chatter in its own Archive tab, or a section of the Codex?
-- **Q4**: a separate notification setting for requests and visitors, or share the existing ALERTS switch?
-- **Q5**: the cosmetic list above: right slots and thresholds, or different rewards (for example lore only for requests)?
+Answered (decisions 4 to 8 above). Still open: whether Guest pink should need fewer greetings (5 instead of 10), given the measurement above.
 
 ## Later
 

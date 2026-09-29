@@ -75,6 +75,17 @@ Anything refused costs nothing: the netling shakes its head under a red X and th
 
 Each netling also has **quirks** you can discover by watching it: its colors, the pitch of its voice, how it moves when idle, a favorite kind of packet (feed it that one and it perks up), and how early or late it goes to bed.
 
+### Little extras for being around
+
+None of these ever costs a fault; they are small rewards for checking in often.
+
+- **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
+- **Visitors**: say hello with **GREET** while one is here.
+- **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
+- **A glow**: keep it in good shape for a few hours and it shows.
+
+With ALERTS on, requests and visitors also send a notification while the app is open in the background.
+
 ## Rest: sleep, lights and naps
 
 - **Sleep**: it goes to bed at night by itself. Its bedtime is on the readout and differs a little from netling to netling. If you change time zones, it keeps the old one until it wakes up the next morning, then settles into the new one. Turn the **lights off** when it sleeps: stats drain at about a third of the awake rate, against half with the lights on, and Integrity heals faster. Leaving the lights on all night is a fault.
@@ -94,7 +105,7 @@ Trouble shows up as an icon on the screen, a bar at the top, and a chirp (or a n
 | Crosshair | An **intrusion** attempt | **DEFEND** within an hour by winning a random mini-game, or it installs a virus |
 | Overflowing chip | A **memory overflow** | **PURGE** within 45 minutes, or it crashes: Integrity loss, a full cache, and 20 minutes rebooting where you can only turn the lights on and off. More cache files make overflows likelier |
 | Screen flicker | A **power surge**: instant Heat and a little Charge | Nothing to do, but watch the Heat |
-| A second netling | A **visitor** playing with it for a few minutes: +Sync, +Heat | Enjoy. It sometimes leaves a gift |
+| A second netling | A **visitor** playing with it for a while: +Sync, +Heat | Enjoy. **GREET** it if you like; it sometimes leaves a gift |
 
 Only one alert is open at a time. If you leave a game or a netrun open, the clock keeps running behind it.
 
@@ -160,7 +171,7 @@ When it flatlines it leaves a **fragment**. The next generation inherits that ne
 
 ## Style
 
-The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
+The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, the little extras above, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
 
 ## Saving, moving and pausing
 

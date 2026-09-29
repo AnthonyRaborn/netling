@@ -65,7 +65,10 @@ function renderHelp() {
         ['overflowing chip', `A memory overflow. PURGE within ${CFG.overflowWindowMin} minutes, or it crashes and reboots for ${CFG.rebootMin} minutes with its cache full.`, 'Cache files make overflows likelier.'],
         ['file icons', `Corrupted cache files, bottom left: one per file, up to ${CFG.maxCache}. It writes them now and then while digesting a meal. PURGE clears them.`, '3+ files damage Integrity; every file makes a virus more likely.'],
         ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
-        ['a second netling', `A stray visitor, playing with it for a few minutes: +${CFG.visitSync} Sync, +${CFG.visitHeat} Heat.`, 'Sometimes it leaves a gift.'],
+        ['a second netling', `A stray visitor, playing with it for ${CFG.visitMinMin} to ${CFG.visitMaxMin} minutes: +${CFG.visitSync} Sync, +${CFG.visitHeat} Heat. GREET it while it is here and it may pass on a line from the wider net.`, 'Sometimes it leaves a gift; more often if you said hello.'],
+        ['a request', `Now and then it asks for one game, or for a COOL when it is warm, and waits ${CFG.requestWindowMin} minutes. Answer it from the bar below the inventory.`, 'Nothing bad happens if you miss one.'],
+        ['a speech bubble', `It mutters to itself while it is awake and idle. Lines you see are kept in the Archive under CHATTER.`, 'Lines only count while the app is open.'],
+        ['a glow', `Kept in good shape for ${CFG.flowAfterMin / 60} hours in a row while awake (Charge and Sync ${CFG.flowMinStat}+, Integrity ${CFG.flowMinIntegrity}+, Heat under ${CFG.flowMaxHeat}, nothing wrong), it glows. It is only a look.`],
       ],
     ],
   ];
@@ -177,9 +180,12 @@ export function advanceIntro() {
 // The netling asks to go exploring; NETRUN glows until the first run.
 export function renderNudge() {
   const nudging = app.onboarding === 'nudge' && isAlive(app.state) && !app.session;
-  $('speech').hidden = !nudging;
-  if (nudging) $('speech').textContent = 'the net is out there... take me?';
+  if (nudging) {
+    $('speech').hidden = false;
+    $('speech').textContent = 'the net is out there... take me?';
+  }
   $('btn-netrun').classList.toggle('nudge', nudging);
+  return nudging; // the speech bubble is the nudge's; chatter waits (see renderSpeech)
 }
 
 export function startTutorial() {

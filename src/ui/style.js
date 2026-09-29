@@ -81,6 +81,31 @@ export function countGame() {
   checkUnlocks();
 }
 
+// Answered requests and greeted visitors count toward their cosmetics.
+export function countAttention(res) {
+  if (!res?.ok || !(res.requestMet || res.greeted)) return;
+  if (res.requestMet) app.progress.requestsMet = (app.progress.requestsMet ?? 0) + 1;
+  if (res.greeted) app.progress.visitorsGreeted = (app.progress.visitorsGreeted ?? 0) + 1;
+  store.set(KEYS.progress, app.progress);
+  checkUnlocks();
+}
+
+// A flatlined netling's time in flow joins the running total (the living one adds its own; see unlockContext).
+export function bankFlow(state) {
+  app.progress.flowMin = (app.progress.flowMin ?? 0) + (state.flowTotalMin ?? 0);
+  store.set(KEYS.progress, app.progress);
+}
+
+// A chatter line seen on screen: kept for the Archive, once.
+export function hearChatter(id) {
+  const heard = app.progress.chatter ?? [];
+  if (heard.includes(id)) return false;
+  app.progress.chatter = [...heard, id];
+  store.set(KEYS.progress, app.progress);
+  checkUnlocks();
+  return true;
+}
+
 export function countAct(action) {
   app.progress.acts = { ...app.progress.acts, [action]: (app.progress.acts?.[action] ?? 0) + 1 };
   store.set(KEYS.progress, app.progress);
@@ -88,7 +113,8 @@ export function countAct(action) {
 }
 
 function unlockContext() {
-  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress };
+  const living = app.state.stage === 'dead' ? 0 : app.state.flowTotalMin ?? 0; // a dead one's is banked already
+  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress, flowMin: (app.progress.flowMin ?? 0) + living };
 }
 
 // Announce anything newly earned. First run of a save just records what's already earned.

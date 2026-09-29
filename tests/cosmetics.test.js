@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { COSMETICS, SLOTS, unlockedIds, resolveWardrobe, recordGame, DEFAULT_WARDROBE } from '../src/cosmetics.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
+import { CHATTER } from '../src/chatter.js';
 
 const empty = { dex: [], codex: [], lineage: [], generation: 1, progress: {} };
 
@@ -129,4 +130,29 @@ test('the crest slot defaults to none, has pixels for every crest, and survives 
   }
   assert.equal(cleanWardrobe({ crest: 'triad' }).crest, 'triad');
   assert.equal(cleanWardrobe({ crest: 'bogus' }).crest, undefined);
+});
+
+// --- attention rewards ---
+
+const earns = (ctx, id) => unlockedIds({ ...empty, ...ctx }).includes(id);
+
+test('Purr: twenty-five requests answered', () => {
+  assert.equal(earns({ progress: { requestsMet: 24 } }, 'sound:purr'), false);
+  assert.equal(earns({ progress: { requestsMet: 25 } }, 'sound:purr'), true);
+});
+
+test('Guest pink: ten visitors greeted', () => {
+  assert.equal(earns({ progress: { visitorsGreeted: 9 } }, 'tint:guest'), false);
+  assert.equal(earns({ progress: { visitorsGreeted: 10 } }, 'tint:guest'), true);
+});
+
+test('Aurora: a day in flow, counted across lives', () => {
+  assert.equal(earns({ progress: {}, flowMin: 24 * 60 - 1 }, 'effect:aurora'), false);
+  assert.equal(earns({ progress: {}, flowMin: 24 * 60 }, 'effect:aurora'), true);
+});
+
+test('Speech mark: every line of one group heard', () => {
+  const bitling = CHATTER.filter((c) => c.group === 'bitling').map((c) => c.id);
+  assert.equal(earns({ progress: { chatter: bitling.slice(1) } }, 'crest:speech'), false);
+  assert.equal(earns({ progress: { chatter: bitling } }, 'crest:speech'), true);
 });

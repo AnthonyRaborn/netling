@@ -93,6 +93,13 @@
         <button type="button" data-act="purge" data-event="overflow">PURGE</button>
       </div>
 
+      <div id="wish-bar" class="wish-bar" hidden>
+        <span id="wish-text" class="wish-text"></span>
+        <button type="button" id="wish-play" hidden>PLAY</button>
+        <button type="button" id="wish-cool" hidden>COOL</button>
+        <button type="button" id="wish-greet" hidden>GREET</button>
+      </div>
+
       <nav id="controls" class="controls" aria-label="Actions">
         <button type="button" data-act="corp">CORP PKT</button>
         <button type="button" data-act="scav">SCAV DATA</button>
@@ -189,6 +196,7 @@
         <button type="button" role="tab" id="tab-btn-lineage" aria-selected="true" aria-controls="tab-lineage">LINEAGE</button>
         <button type="button" role="tab" id="tab-btn-dex" aria-selected="false" aria-controls="tab-dex">DEX <span id="dex-count"></span></button>
         <button type="button" role="tab" id="tab-btn-codex" aria-selected="false" aria-controls="tab-codex">CODEX <span id="codex-count"></span></button>
+        <button type="button" role="tab" id="tab-btn-chatter" aria-selected="false" aria-controls="tab-chatter">CHATTER <span id="chatter-count"></span></button>
         <button type="button" role="tab" id="tab-btn-wardrobe" aria-selected="false" aria-controls="tab-wardrobe">STYLE <span id="wardrobe-count"></span></button>
       </div>
       <section id="tab-lineage" role="tabpanel" aria-labelledby="tab-btn-lineage">
@@ -200,6 +208,10 @@
       </section>
       <section id="tab-wardrobe" role="tabpanel" aria-labelledby="tab-btn-wardrobe" hidden>
         <div id="wardrobe-list" class="wardrobe"></div>
+      </section>
+      <section id="tab-chatter" role="tabpanel" aria-labelledby="tab-btn-chatter" hidden>
+        <p class="tx-note">Things it said while you were watching. Each netling mutters now and then while it is awake and idle.</p>
+        <div id="chatter-list" class="codex chatter"></div>
       </section>
       <section id="tab-codex" role="tabpanel" aria-labelledby="tab-btn-codex" hidden>
         <div id="codex-gift" class="gift" hidden>

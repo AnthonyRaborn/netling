@@ -13,6 +13,7 @@ import { DEX_ORDER, DEX_HINTS, DEX_LORE } from '../src/archive.js';
 import { COSMETICS, SLOTS, DEFAULT_WARDROBE, LABEL } from '../src/cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, RARITY } from '../src/accessories.js';
 import { GAMES } from '../src/games/session.js';
+import { CHATTER } from '../src/chatter.js';
 
 // Cross-checks between the game's content tables. Each of these is a typo or a forgotten entry waiting to
 // happen when someone adds a form, item, region or cosmetic (see docs/CONTRIBUTING.md).
@@ -140,7 +141,8 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
       fragmentLevel: i === all.length - 1 ? 3 : 1,
     })),
     generation: 9,
-    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 99, cleanJackouts: 20, deepExits: 2 },
+    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 99, cleanJackouts: 20, deepExits: 2, requestsMet: 30, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
+    flowMin: 25 * 60,
   };
   for (const slot of SLOTS) {
     const list = COSMETICS[slot];
