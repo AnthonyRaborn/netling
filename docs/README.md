@@ -17,6 +17,7 @@ Written against commit `ea87757` (2026-09-28). Every file names the commit it wa
 | Add a feature safely | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
+| Plan the next balance passes (forms, netruns, lineage) | [BALANCE_PLAN.md](BALANCE_PLAN.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
 ## The project in one paragraph
