@@ -447,6 +447,53 @@ await scenario('the screen stays on for games and when asked; the badge follows 
   assert((await events()).filter((e) => e === 'badge').length === 1, `badge set more than once: ${(await events()).join(',')}`);
 });
 
+await scenario('screen readers get values, a summary, new needs and only new log lines; MOTION overrides the system', async ({ open }) => {
+  const low = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': low }));
+  const attr = (sel, name) => page.getAttribute(sel, name);
+  assert((await attr('#bar-charge', 'aria-valuenow')) === '70', `charge meter says ${await attr('#bar-charge', 'aria-valuenow')}`);
+  assert(/^\d+, low$/.test(await attr('#bar-sync', 'aria-valuetext')), `sync meter says ${await attr('#bar-sync', 'aria-valuetext')}`);
+  assert(await page.locator('#bar-sync').evaluate((el) => el.closest('.stat').classList.contains('danger')), 'low sync has no danger mark');
+  assert(!(await page.locator('#bar-charge').evaluate((el) => el.closest('.stat').classList.contains('danger'))), 'charge marked in danger');
+  const mark = await page.locator('#bar-sync').evaluate((el) => getComputedStyle(el.closest('.stat').querySelector('label'), '::after').content);
+  assert(/!/.test(mark), `no ! beside the label: ${mark}`);
+  assert(/Bitling, awake.*Sync is fading/.test(await attr('#lcd', 'aria-label')), `summary: ${await attr('#lcd', 'aria-label')}`);
+  assert(/Sync is fading/.test(await page.textContent('#sr-announce')), 'the need was not announced');
+
+  // A new log line is added to the list; the lines already there stay put.
+  const count = await page.locator('#log li').count();
+  await page.evaluate(() => (window.__firstLine = document.querySelector('#log li')));
+  await page.click('[data-act="scav"]');
+  await page.waitForTimeout(300);
+  assert((await page.locator('#log li').count()) > count, 'no new log line');
+  assert(await page.evaluate(() => window.__firstLine.isConnected), 'the log was rebuilt instead of added to');
+
+  // MOTION: AUTO follows the system; REDUCED and FULL override it.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  const calm = () => page.evaluate(() => document.body.classList.contains('calm'));
+  assert(await calm(), 'AUTO ignored the system asking for reduced motion');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForTimeout(100);
+  assert(!(await calm()), 'AUTO stayed calm');
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not start on AUTO');
+  await page.click('#pref-motion');
+  assert(/REDUCED/.test(await page.textContent('#pref-motion')) && (await calm()), 'REDUCED did not calm the screen');
+  assert((await saved(page, 'netling.prefs')).motion === 'reduce', 'motion setting not saved');
+  const still = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(still === 'none', `animations still run: ${still}`);
+  await page.click('#pref-motion');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  assert(/FULL/.test(await page.textContent('#pref-motion')) && !(await calm()), 'FULL did not override the system');
+  const moving = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(moving !== 'none', 'FULL still stops animations when the system asks for less');
+  await page.click('#pref-motion');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not cycle back to AUTO');
+});
+
 await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
   const foreign = [];
   ctx.on('request', (r) => {

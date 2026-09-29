@@ -382,9 +382,11 @@ export function cleanWardrobe(raw) {
   return out;
 }
 
+// MOTION: 'auto' follows the system's reduced-motion setting; 'reduce' and 'full' override it.
+export const MOTION_MODES = ['auto', 'reduce', 'full'];
 export function cleanPrefs(raw) {
   const p = isObj(raw) ? raw : {};
-  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1), awake: bool(p.awake) };
+  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1), awake: bool(p.awake), motion: oneOf(p.motion, MOTION_MODES, 'auto') };
 }
 
 export const cleanOnboarding = (raw) => oneOf(raw, ONBOARDING_STEPS, null);

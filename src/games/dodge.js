@@ -1,5 +1,5 @@
 // Firewall Dodge: slide the packet between lanes to avoid falling firewall blocks until time runs out.
-import { clear, timerBar, DIM, W, H } from './common.js';
+import { clear, timerBar, DIM, FLASH_TOGGLE_MS, W, H } from './common.js';
 
 const LANES = 5;
 const LANE_W = W / LANES;
@@ -90,7 +90,7 @@ export class Dodge {
     // player packet: a diamond with a trailing tail
     const cx = this.lane * LANE_W + LANE_W / 2;
     const cy = PLAYER_Y + 9;
-    const blink = this.done && !this.won && Math.floor(time / 100) % 2;
+    const blink = this.done && !this.won && Math.floor(time / FLASH_TOGGLE_MS) % 2; // no faster than 3 flashes a second
     ctx.fillStyle = blink ? '#ffffff' : pal.main;
     ctx.beginPath();
     ctx.moveTo(cx, cy - 12);

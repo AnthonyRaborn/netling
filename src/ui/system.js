@@ -8,7 +8,7 @@ import { KEYS } from '../storage.js';
 import { $, app, armed, flashStatus, now, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
 import { advance } from './life.js';
-import { renderScreenPref } from './device.js';
+import { renderScreenPrefs } from './device.js';
 
 let pendingImport = null;
 
@@ -84,7 +84,7 @@ export function openSystem() {
   renderOldSave();
   $('volume').value = Math.round(app.prefs.volume * 100);
   $('volume-value').textContent = `${Math.round(app.prefs.volume * 100)}%`;
-  renderScreenPref();
+  renderScreenPrefs();
   $('import-preview').hidden = true;
   renderHibernateNote();
   renderTestMode();

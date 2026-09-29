@@ -13,13 +13,14 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 5. [The frame loop and the clock](#the-frame-loop-and-the-clock)
 6. [Shared UI state](#shared-ui-state)
 7. [Rendering](#rendering)
-8. [Mini-games and netruns as sessions](#mini-games-and-netruns-as-sessions)
-9. [One active tab](#one-active-tab)
-10. [Offline, the service worker, and deploys](#offline-the-service-worker-and-deploys)
-11. [Input](#input)
-12. [Audio and notifications](#audio-and-notifications)
-13. [Crash containment](#crash-containment)
-14. [Tools and CI](#tools-and-ci)
+8. [Accessibility](#accessibility)
+9. [Mini-games and netruns as sessions](#mini-games-and-netruns-as-sessions)
+10. [One active tab](#one-active-tab)
+11. [Offline, the service worker, and deploys](#offline-the-service-worker-and-deploys)
+12. [Input](#input)
+13. [Audio and notifications](#audio-and-notifications)
+14. [Crash containment](#crash-containment)
+15. [Tools and CI](#tools-and-ci)
 
 ## Design principles
 
@@ -37,7 +38,7 @@ These explain most decisions in the code.
 | Path | Owns |
 |---|---|
 | `index.html` | All markup: the device, dialogs (archive, system, field manual, NL-0 transmission), lock screens |
-| `style.css` | All styling (about 1500 lines), theme variables in `:root`, one landscape media query, one reduced-motion query |
+| `style.css` | All styling (about 1550 lines), theme variables in `:root`, one landscape media query, calm mode (`body.calm` and the reduced-motion query) |
 | `sw.js`, `manifest.webmanifest`, `icons/`, `screenshots/` | PWA shell (the screenshots are for the install dialog) |
 | `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
@@ -77,7 +78,7 @@ These explain most decisions in the code.
 | `system.js` | SYSTEM dialog: transfer out, lock screen, import, hibernate, restart, storage note, volume, test mode |
 | `tabs.js` | The one-active-tab rule |
 | `gamepad.js` | Controller input |
-| `device.js` | The app icon badge and the screen wake lock, synced once a second; the KEEP SCREEN ON setting |
+| `device.js` | The app icon badge and the screen wake lock, synced once a second; the SCREEN settings (MOTION, KEEP SCREEN ON) and calm mode |
 
 ## Layers and dependencies
 
@@ -128,7 +129,7 @@ Rules of thumb:
 Two independent loops:
 
 - **Simulation**: `advance()` every 1000 ms, on `visibilitychange`, and before every player action. It calls `tick`, reacts to stage changes (boot chime, evolution flash, flatline handling), fires the surge and visitor effects, refreshes the HUD, and saves at most every 5 seconds (`SAVE_EVERY_MS` in `ui/life.js`; actions save immediately and `flushSave` runs when the page is hidden or closing). It also closes any session that belongs to a dead or replaced netling (`closeStaleSession`).
-- **Drawing**: `requestAnimationFrame`. The next frame is booked before drawing so one failed frame cannot stop the loop. The home screen redraws at about 10 fps (`IDLE_FRAME_MS = 100`) unless an animation, flash or surge is running; sessions run at full rate. `prefers-reduced-motion` switches the LCD to a calm mode.
+- **Drawing**: `requestAnimationFrame`. The next frame is booked before drawing so one failed frame cannot stop the loop. The home screen redraws at about 10 fps (`IDLE_FRAME_MS = 100`) unless an animation, flash or surge is running; sessions run at full rate. Calm mode (`app.calm`) stills the LCD; see Accessibility below.
 
 `now()` in `ui/app.js` is the game clock: real time plus dev skew, or the scaled test clock. Always use `now()`, never `Date.now()`, for anything the simulation sees.
 
@@ -152,6 +153,14 @@ Data that outlives a generation is kept outside the netling and updated by the U
 - **Accessories** are drawn by `accessories.js` through anchors computed from each sprite's own pixels (`anchorsFor`: head top, eye row, mouth, body span), so every accessory fits every form. Props draw on the ground at the right edge.
 - **Mini-games and netruns** draw straight onto the 400x280 canvas via `common.js` helpers (`clear`, `text`, `timerBar`). The wardrobe tint feeds `setGameBg`.
 - **Idle motion** is a pure function of time (`wanderPos`), so it needs no stored state.
+
+## Accessibility
+
+- **Flash safety**, in every motion setting: an on/off strobe toggles no faster than `FLASH_TOGGLE_MS` (200 ms, in `games/common.js`; 2.5 flashes a second, under the usual limit of three). The evolution strobe, Firewall Dodge's loss blink and Packet Feast's strike blink use it. The glitch picks a new look every `GLITCH_STEP_MS` (350 ms) from a seeded sequence instead of every frame, and a power surge is one white flash that fades over `SURGE_MS` (`opts.surge` runs 1 to 0). `tests/draw.test.js` checks the home screen.
+- **Calm mode** (`ui/device.js` `applyMotion`): the MOTION setting in SYSTEM (`prefs.motion`: `auto`, `reduce`, `full`). AUTO follows `prefers-reduced-motion` and updates when it changes. Calm sets `app.calm` (the LCD drops the glitch, wobble, reaction bounces and heat pulse, and the surge becomes a steady faint wash) and `body.calm` (no CSS animation or transition). FULL sets `body.motion-full`, which the reduced-motion media query respects, so the page is calm before the script runs. Mini-games keep their motion.
+- **Screen readers**: the stat bars and cache are `role="meter"` with `aria-valuenow` and an `aria-valuetext` that adds "low", "too hot" or "piling up". The LCD canvas is `role="img"` with a summary label (form, awake or asleep, lights, infection, the current need; a session says what is on screen). A new need is written to a polite live region (`#sr-announce`) as the chirp plays; timed events are left to the event bar (`role="alert"`). The log is a polite live region, so new lines are appended (`renderLog`) instead of rebuilding it, and only rebuilt for a new netling.
+- **Danger is not color-only**: a stat in danger also gets diagonal stripes and a `!` beside its label (`.stat.danger`).
+- **Contrast**: `--dim` text is `#809fa6`, at least 4.5:1 on the standard shell and the dark shells' main tones (the light shells set their own dark `--dim`).
 
 ## Mini-games and netruns as sessions
 

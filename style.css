@@ -15,7 +15,7 @@
   --cyan: #05d9e8;
   --yellow: #f9f002;
   --text: #c7f9ff;
-  --dim: #5d7a80;
+  --dim: #809fa6; /* at least 4.5:1 on the dark shells */
   --lcd: #0b2226;
 }
 
@@ -87,7 +87,7 @@ body {
 .pref {
   font-size: 14px;
   padding: 2px 8px;
-  color: #5d7a80; /* fixed: buttons sit on their own dark fill, whatever the shell */
+  color: #809fa6; /* fixed: buttons sit on their own dark fill, whatever the shell */
   border-color: var(--shell-edge);
   text-shadow: none;
 }
@@ -273,9 +273,19 @@ body {
 }
 
 .bar.danger::after {
-  background: var(--magenta);
+  /* Stripes as well as the color, so danger doesn't rely on seeing magenta. */
+  background: repeating-linear-gradient(135deg, var(--magenta) 0 4px, #8a1238 4px 8px);
   box-shadow: 0 0 8px var(--magenta);
   animation: flicker 0.8s infinite;
+}
+
+/* ...and a mark beside the label. */
+.stat.danger label {
+  color: var(--magenta);
+}
+
+.stat.danger label::after {
+  content: ' !';
 }
 
 .pips {
@@ -946,7 +956,7 @@ body.intro-active .brand .prefs {
 .tx-note {
   margin: 0;
   font-size: 15px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .tx-row {
@@ -1008,7 +1018,7 @@ body.intro-active .brand .prefs {
 }
 
 .tx-preview dt {
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .tx-preview dd {
@@ -1106,7 +1116,7 @@ body.frozen .event-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .volume-row input {
@@ -1125,7 +1135,7 @@ body.frozen .event-bar {
 }
 
 .record dt {
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .record dd {
@@ -1235,7 +1245,7 @@ body:has(#pad:not([hidden])) .update-bar {
 
 .help-body dd small {
   display: block;
-  color: #5d7a80;
+  color: #809fa6;
   font-size: 15px;
 }
 
@@ -1349,7 +1359,7 @@ body:has(#pad:not([hidden])) .update-bar {
   padding: 6px 8px;
   border: 1px solid var(--shell-edge);
   font-size: 16px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .color-row span {
@@ -1497,13 +1507,34 @@ body:has(#pad:not([hidden])) .update-bar {
   }
 }
 
+/* Calm: no animation or transition. body.calm comes from the MOTION setting (ui/device.js); until
+   it is applied, and in AUTO, the system setting decides. MOTION: FULL sets .motion-full. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  body:not(.motion-full) *,
+  body:not(.motion-full) *::before,
+  body:not(.motion-full) *::after {
     animation: none !important;
     transition: none !important;
   }
+}
+body.calm *,
+body.calm *::before,
+body.calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* For screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Wide, short screens (Steam Deck, laptops, desktop windows): the screen on the left, everything

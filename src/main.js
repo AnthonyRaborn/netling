@@ -1,7 +1,7 @@
 // Boot: load and check saved data, claim the caretaker tab, wire the UI, then run the clock
 // and the render loop. The UI itself lives in src/ui/.
 import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
-import { renderLCD, ANIM_MS } from './render.js';
+import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -196,7 +196,6 @@ setInterval(() => {
 // Mini-games and netruns get every frame.
 const IDLE_FRAME_MS = 100;
 const canvas = $('lcd');
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let lastFrame = performance.now();
 let lastIdleDraw = 0;
 const loggedErrors = new Set();
@@ -233,8 +232,8 @@ function drawFrame(time) {
       prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
       propExtra: wardrobe.prop === 'plush' ? app.plushCache : null,
       flash: time < app.flashUntil,
-      surge: time < app.surgeUntil,
-      calm: reducedMotion.matches,
+      surge: time < app.surgeUntil ? (app.surgeUntil - time) / SURGE_MS : 0,
+      calm: app.calm,
       anim,
     });
   }

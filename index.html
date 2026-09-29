@@ -28,11 +28,12 @@
       </header>
 
       <div class="screen">
-        <canvas id="lcd" width="400" height="280" aria-label="Netling display"></canvas>
+        <canvas id="lcd" width="400" height="280" role="img" aria-label="Netling display"></canvas>
         <div class="scanlines"></div>
         <div class="fx-layer"></div>
         <div class="crt-glare"></div>
         <div id="status" class="status" role="status"></div>
+        <p id="sr-announce" class="sr-only" aria-live="polite"></p>
         <div id="speech" class="speech" hidden></div>
         <section id="intro" class="intro" hidden aria-live="polite">
           <pre id="intro-text"></pre>
@@ -53,13 +54,13 @@
       </div>
 
       <section class="hud" aria-label="Vitals">
-        <div class="stat" title="Charge: power. Feed it."><label>CHG</label><div id="bar-charge" class="bar" role="meter" aria-label="Charge"></div></div>
-        <div class="stat" title="Sync: its bond with you. Play with it."><label>SYN</label><div id="bar-sync" class="bar" role="meter" aria-label="Sync"></div></div>
-        <div class="stat" title="Integrity: its health. At zero too long, it flatlines."><label>INT</label><div id="bar-integrity" class="bar" role="meter" aria-label="Integrity"></div></div>
-        <div class="stat" title="Heat: running hot hurts it. Cool it down."><label>HEAT</label><div id="bar-heat" class="bar heat" role="meter" aria-label="Heat"></div></div>
-        <div class="stat" title="Cache: corrupted files. Purge them.">
+        <div class="stat" title="Charge: power. Feed it."><label>CHG</label><div id="bar-charge" class="bar" role="meter" aria-label="Charge" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Sync: its bond with you. Play with it."><label>SYN</label><div id="bar-sync" class="bar" role="meter" aria-label="Sync" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Integrity: its health. At zero too long, it flatlines."><label>INT</label><div id="bar-integrity" class="bar" role="meter" aria-label="Integrity" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Heat: running hot hurts it. Cool it down."><label>HEAT</label><div id="bar-heat" class="bar heat" role="meter" aria-label="Heat" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div id="stat-cache" class="stat" title="Cache: corrupted files. Purge them.">
           <label>CACHE</label>
-          <div id="cache-pips" class="pips"><i></i><i></i><i></i><i></i></div>
+          <div id="cache-pips" class="pips" role="meter" aria-label="Cache" aria-valuemin="0" aria-valuemax="4"><i></i><i></i><i></i><i></i></div>
         </div>
       </section>
 
@@ -236,8 +237,10 @@
         <h3>SOUND</h3>
         <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
 
+        <h3>SCREEN</h3>
+        <p class="tx-note" id="motion-note"></p>
+        <button type="button" id="pref-motion">MOTION: AUTO</button>
         <div id="screen-prefs" hidden>
-          <h3>SCREEN</h3>
           <p class="tx-note">The screen stays on during mini-games and netruns. Turn this on to keep it on whenever the game is showing (uses more battery).</p>
           <button type="button" id="pref-awake" aria-pressed="false">KEEP SCREEN ON: NO</button>
         </div>

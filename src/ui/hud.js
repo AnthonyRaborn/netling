@@ -14,20 +14,65 @@ export function fmtAge(min) {
   return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
 }
 
-function setBar(id, value, danger) {
+// A stat bar: its fill, a danger look that doesn't rely on color alone, and its value for screen
+// readers (the bar is a meter).
+function setBar(id, value, danger, dangerWord) {
   const el = $(id);
+  const v = Math.round(value);
   el.style.setProperty('--v', `${value}%`);
   el.classList.toggle('danger', danger);
+  el.closest('.stat').classList.toggle('danger', danger);
+  el.setAttribute('aria-valuenow', v);
+  el.setAttribute('aria-valuetext', danger ? `${v}, ${dangerWord}` : String(v));
+}
+
+// What the LCD shows, in words, for screen readers (the canvas is an image with this label).
+function screenSummary(state) {
+  if (app.session) return state.run ? 'Netrun map on screen.' : 'Mini-game on screen.';
+  if (state.stage === 'dead') return 'Flatlined.';
+  if (state.stage === 'script') return 'Compiling a new netling.';
+  const parts = [SPECIES[state.form].name];
+  if (state.hibernation) parts.push('hibernating');
+  else if (rebootMinutesLeft(state) > 0) parts.push('rebooting');
+  else if (state.nap) parts.push('napping');
+  else parts.push(resting(state) ? 'asleep' : 'awake');
+  parts.push(state.lightsOn ? 'lights on' : 'lights off');
+  if (state.virus) parts.push('infected');
+  const reason = alertReason(state);
+  return `${parts.join(', ')}.${reason ? ` ${reason.msg}` : ''}`;
+}
+
+// Log lines: added one by one, so a screen reader (the log is a polite live region) hears only
+// the new ones rather than the whole log again.
+const logKeyOf = (e) => `${e.t}|${e.msg}`;
+function logItem(e) {
+  const li = document.createElement('li');
+  li.dataset.key = logKeyOf(e);
+  li.textContent = `${new Date(e.t).toTimeString().slice(0, 5)} ${e.msg}`;
+  if (e.msg.includes('!!') || e.msg.includes('mistake') || e.msg.includes('FLATLINE')) li.className = 'warn';
+  return li;
+}
+function renderLog(logEl, lines) {
+  const lastShown = logEl.lastElementChild?.dataset.key;
+  const from = lastShown ? lines.findLastIndex((e) => logKeyOf(e) === lastShown) : -1;
+  if (lastShown && from === -1) return logEl.replaceChildren(...lines.map(logItem)); // a new netling
+  logEl.append(...lines.slice(from + 1).map(logItem));
+  while (logEl.childElementCount > lines.length) logEl.firstElementChild.remove(); // the log is capped
 }
 
 export function updateHUD() {
   const state = app.state;
   const st = state.stats;
-  setBar('bar-charge', st.charge, st.charge < 20);
-  setBar('bar-sync', st.sync, st.sync < 20);
-  setBar('bar-integrity', st.integrity, st.integrity < 30);
-  setBar('bar-heat', st.heat, st.heat > 80);
+  setBar('bar-charge', st.charge, st.charge < 20, 'low');
+  setBar('bar-sync', st.sync, st.sync < 20, 'low');
+  setBar('bar-integrity', st.integrity, st.integrity < 30, 'low');
+  setBar('bar-heat', st.heat, st.heat > 80, 'too hot');
   document.querySelectorAll('#cache-pips i').forEach((pip, i) => pip.classList.toggle('on', i < state.cache));
+  $('cache-pips').setAttribute('aria-valuenow', state.cache);
+  $('cache-pips').setAttribute('aria-valuetext', state.cache >= 3 ? `${state.cache} files, piling up` : `${state.cache} files`);
+  $('stat-cache').classList.toggle('danger', state.cache >= 3);
+  const summary = screenSummary(state);
+  if ($('lcd').getAttribute('aria-label') !== summary) $('lcd').setAttribute('aria-label', summary);
 
   const trait = state.trait ? TRAITS[state.trait].name : '—';
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
@@ -65,23 +110,17 @@ export function updateHUD() {
     app.lastLogKey = logKey;
     // Follow new lines unless the player has scrolled up to read older ones.
     const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 8;
-    logEl.replaceChildren(
-      ...state.log.map((e) => {
-        const li = document.createElement('li');
-        const t = new Date(e.t);
-        li.textContent = `${t.toTimeString().slice(0, 5)} ${e.msg}`;
-        if (e.msg.includes('!!') || e.msg.includes('mistake') || e.msg.includes('FLATLINE')) li.className = 'warn';
-        return li;
-      }),
-    );
+    renderLog(logEl, state.log);
     if (atBottom) logEl.scrollTop = logEl.scrollHeight;
   }
 
-  // Chirp (or notify, when backgrounded) each time a new need appears.
+  // Chirp (or notify, when backgrounded) each time a new need appears. Screen readers hear it too;
+  // timed events are already announced by the event bar (an alert).
   const reason = alertReason(state);
   if (reason && reason.key !== app.lastAttention) {
     if (document.hidden) pushAlert('Netling needs you', reason.msg);
     else sfx('alert', state.quirk.pitch);
+    if (!EVENTS[reason.key]) $('sr-announce').textContent = reason.msg;
   }
   app.lastAttention = reason?.key ?? false;
 }

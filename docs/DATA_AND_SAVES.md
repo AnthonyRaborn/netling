@@ -33,7 +33,7 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 | `netling.progress` | Counters and streaks | yes | See below |
 | `netling.unlocked` | Array of unlocked style ids | yes | `slot:id` strings, plus `label` |
 | `netling.accessories` | Array of owned accessory and prop ids | yes | Ids in `STYLE_ITEMS` |
-| `netling.prefs` | `{ sound, alerts, volume, awake }` | yes | |
+| `netling.prefs` | `{ sound, alerts, volume, awake, motion }` (`motion`: `auto`, `reduce` or `full`) | yes | |
 | `netling.onboarding` | `intro`, `readme`, `nudge`, `tutorial` or `done` | yes | |
 | `netling.helpSeen` | `true` | yes | |
 | `netling.lock` | `{ code, at, generation }` | no | Present while the netling is on another device |

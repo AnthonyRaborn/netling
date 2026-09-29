@@ -14,13 +14,13 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 241 tests in 26 files and all pass. The smoke test has 43 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 244 tests in 26 files and all pass. The smoke test has 44 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
 ## Unit tests
 
-They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls), and per-file fakes for `AudioContext`, `Notification` and the service worker API (including its `controllerchange` and `message` events, in `update.test.js`). `tests/helpers/` is not matched by the test glob.
+They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls, and its fill, stroke and alpha changes), and per-file fakes for `AudioContext`, `Notification` and the service worker API (including its `controllerchange` and `message` events, in `update.test.js`). `tests/helpers/` is not matched by the test glob.
 
 ### Conventions used by the tests
 
@@ -51,7 +51,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
 | `content.test.js` | 14 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game and the manifest load, install screenshots match their stated sizes |
-| `draw.test.js` | 7 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument |
+| `draw.test.js` | 10 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument. Flash safety: the evolution strobe and the glitch change at most three times a second, and a surge is one fading flash |
 | `audio.test.js` | 7 | Sound playback against a fake `AudioContext`: notes and pitch, sound packs, the low-frequency floor, mute and volume, and a scan that every sound name used in the source really exists |
 | `notify.test.js` | 7 | Notification support, permission, service-worker delivery and fallback, the app badge, and quiet failure |
 | `wake.test.js` | 5 | The screen wake lock against a fake API: taken once while wanted, released, re-taken after the browser drops it, a refusal waits, missing support is quiet |
@@ -74,6 +74,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Transfer out locks and reloads keep the lock; loading a code unlocks; malformed and hostile `#import=` links and codes.
 - Corrupted or unreadable saves; full storage; blocked storage.
 - Offline: the service worker serves every module.
+- Accessibility: meter values and danger text, the danger mark, the screen summary, a new need announced, a new log line added without rebuilding the log, and MOTION (AUTO follows the emulated system setting; REDUCED and FULL override it).
 - Device: the screen is kept on during a mini-game and with KEEP SCREEN ON, not otherwise; the badge follows its needs with ALERTS on (wake lock, badge and notification permission are faked, as headless Chromium lacks them).
 - A new release while the page is open: the first install stays quiet, a changed `sw.js` shows the update bar, RELOAD waits for a running game, then reloads and keeps the netling; LATER hides the bar.
 - Two tabs: guard screen, takeover (Web Locks and the lease fallback).

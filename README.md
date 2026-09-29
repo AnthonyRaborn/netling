@@ -170,6 +170,7 @@ ARCHIVE > **SYSTEM** has:
 - **Restart**: erases everything and replays the intro.
 - **Storage**: shows whether the browser has agreed to keep your data, and warns if a save has failed.
 - **Volume**: a slider (the header's SND toggle still mutes).
+- **Motion**: AUTO follows your device's reduced-motion setting; REDUCED keeps the screen still (no glitching, flicker or scrolling effects) and FULL keeps every effect. Nothing flashes more than three times a second in any setting.
 - **Keep screen on**: the screen always stays on during mini-games and netruns; turn this on to keep it on whenever the game is showing (where the browser supports it).
 
 If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
