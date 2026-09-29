@@ -7,7 +7,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | Term | Meaning | Where |
 |---|---|---|
 | **A / B (buttons)** | Normalized input names. `a` confirms, `left` and `right` move. On a controller B quits | `ui/play.js`, `ui/gamepad.js` |
-| **Abort** | Ending a netrun early by pressing ABORT RUN twice. Loot is forfeited, nothing else | `netrun/run.js` `abortRun` |
+| **Abort** | Ending a netrun early: tap ABORT RUN, then CONFIRM ABORT at the top of the screen (Esc or B: press twice). Loot is forfeited, nothing else | `netrun/run.js` `abortRun` |
 | **Accessory** | A cosmetic pixel item drawn on the netling (24 of them, some earned, some found). Fits every form by anchors | `accessories.js` |
 | **Advance** | The UI function that ticks the simulation, reacts and saves. Runs each second | `ui/life.js` |
 | **Age (`ageMin`)** | Simulated minutes the netling has lived. Not wall-clock; excludes hibernation | `sim.js` |

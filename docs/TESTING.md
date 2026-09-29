@@ -14,7 +14,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 303 tests in 30 files and all pass. The smoke test has 49 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 303 tests in 30 files and all pass. The smoke test has 51 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -84,6 +84,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Two tabs: guard screen, takeover (Web Locks and the lease fallback).
 - Stale confirm timers, the SCRAP confirm, a Segfault's second press.
 - The readout shows the trait level and its history.
+- Quitting on touch: QUIT arms a confirm at the top of the screen, a second tap on QUIT only cancels, it times out, CONFIRM forfeits, Esc still quits at once; ABORT RUN confirms the same way.
 - Scrip: SCRAP pays a quarter and the scrip line updates; at an open market the button sells for half and a purchase opens up.
 - Regions open in order: only the Public Net until its exit is reached, then the Bazaar; the codex memory line and FULL.
 - System actions waiting for a running mini-game; refused results explain why.

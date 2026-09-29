@@ -129,7 +129,7 @@ PLAY offers four. Controls are left, right and A (keyboard arrows plus Space or 
 | **Signal Tune** | Press A when your wave matches the ghost signal. Two of three rounds win |
 | **Packet Feast** | Move under clean packets to eat 15 in 20 seconds. Two corrupted bites lose. Gives some Charge too |
 
-Quitting mid-game counts as a loss. Intrusions and netrun ICE use the same four games.
+Quitting mid-game counts as a loss. On a touch screen, QUIT asks you to confirm with a button at the top of the screen (tap KEEP PLAYING to carry on); Esc or a controller's B quits at once. Intrusions and netrun ICE use the same four games.
 
 ## Netruns
 

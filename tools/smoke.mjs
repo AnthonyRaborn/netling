@@ -174,6 +174,7 @@ await scenario('home: care actions, games, archive, system dialog', async ({ ope
   await page.click('[data-game="breach"]');
   await page.waitForTimeout(300);
   await page.click('#pad-quit');
+  await page.click('#pad-confirm');
   await page.waitForTimeout(2500);
   const progress = await saved(page, 'netling.progress');
   assert(progress?.acts?.corp === 1, `care action not counted: ${JSON.stringify(progress)}`);
@@ -642,6 +643,55 @@ await scenario('a Segfault takes a second press, then adds two faults', async ({
   await page.waitForTimeout(200);
   const s = await saved(page);
   assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
+});
+
+await scenario('quitting on touch needs a confirm somewhere else; Esc still quits at once', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const played = async () => (await saved(page, 'netling.progress'))?.gamesPlayed ?? 0;
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await page.click('#pad-quit');
+  await page.click('#pad-quit'); // the same spot again only cancels
+  await page.waitForTimeout(300);
+  assert(await visible(page, '#pad'), 'a second tap in the same place quit the game');
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm stayed up after KEEP PLAYING');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-quit')) === 'KEEP PLAYING', 'the quit button did not change');
+  const confirm = await page.locator('#pad-confirm').boundingBox();
+  const quit = await page.locator('#pad-quit').boundingBox();
+  assert(confirm.y + confirm.height < quit.y, 'the confirm is not away from the pad');
+  await page.waitForTimeout(3300);
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm never timed out');
+  await page.click('#pad-quit');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'CONFIRM QUIT did not end the game');
+  assert((await played()) === 1, 'the forfeited game was not counted');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="tune"]');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'Esc no longer quits in one press');
+  assert(!(await visible(page, '#pad-confirm')), 'Esc left a confirm on screen');
+});
+
+await scenario('ABORT RUN on touch confirms at the top of the screen', async ({ open }) => {
+  const s = awakeNetling();
+  startRun(s, 'public', Math.random);
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-confirm')) === 'CONFIRM ABORT', 'wrong confirm label');
+  assert((await page.textContent('#pad-quit')) === 'KEEP RUNNING', 'wrong cancel label');
+  assert((await saved(page)).run.phase !== 'done', 'aborted on the first tap');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).run?.result === 'aborted', `not aborted: ${JSON.stringify((await saved(page)).run?.result)}`);
+  assert((await page.textContent('#pad-quit')) === 'ABORT RUN', 'the pad label was not restored');
+  await page.click('#pad-quit'); // the summary card closes on one tap
+  await page.waitForTimeout(300);
+  assert(!(await visible(page, '#pad')), 'the summary card did not close');
 });
 
 await scenario('the readout shows the trait level and its history', async ({ open }) => {

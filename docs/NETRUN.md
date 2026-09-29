@@ -167,7 +167,7 @@ Per move: Charge -4 (`moveCharge`), Heat +5 (`moveHeat`).
 - All loot, loose scrip, fragments and accessories from the run are lost.
 - The UI grants the earned "bandage" accessory on the first disconnect.
 
-**Abort** (ABORT RUN pressed twice within 2.5 s): loot, fragments and accessories are forfeited, nothing else. Counts as `aborted`; the cooldown starts and any clean-clear bonus is reset.
+**Abort** (touch: ABORT RUN, then CONFIRM ABORT at the top of the screen within 3 s; Esc or a controller's B: pressed twice within 2.5 s): loot, fragments and accessories are forfeited, nothing else. Counts as `aborted`; the cooldown starts and any clean-clear bonus is reset.
 
 All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` and increments `runStats`.
 
