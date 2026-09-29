@@ -22,7 +22,7 @@ const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[
 // Attention rewards (docs/ATTENTION_PLAN.md). ctx.flowMin is every life's time in flow, the living one's included.
 export const ATTENTION = {
   requests: 25,
-  greetings: 10,
+  greetings: 5,
   flowHours: 24,
   groupHeard: (ctx) => {
     const prog = chatterProgress(ctx.progress.chatter ?? []);
@@ -72,7 +72,7 @@ export const COSMETICS = {
     { id: 'violet', name: 'Bazaar violet', swatch: '#1a0d26', lcd: '#1a0d26', dark: '#08040c', hint: 'hear every rumor in the market.', check: (c) => regionDone(c, 'bazaar') },
     { id: 'phosphor', name: 'Green phosphor', swatch: '#0a1f0d', lcd: '#0a1f0d', dark: '#030a04', hint: 'learn what the ruins remember.', check: (c) => regionDone(c, 'ruins') },
     { id: 'abyss', name: 'Abyss', swatch: '#08081a', lcd: '#08081a', dark: '#020206', hint: 'listen to the bottom of the net.', check: (c) => regionDone(c, 'deep') },
-    { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, ten times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
+    { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, five times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
     { id: 'amber', name: 'Amber', swatch: '#261a08', lcd: '#261a08', dark: '#0c0803', hint: 'three in a row, start to finish.', check: (c) => fullLifeStreak(c) >= 3 },
   ],
   effect: [

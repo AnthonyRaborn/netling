@@ -15,6 +15,7 @@ Decided 2026-09-29, after the draft below:
 6. **Chatter gets its own Archive tab.**
 7. **Notifications share the ALERTS switch.**
 8. **The four cosmetics are approved** as listed.
+9. **Guest pink needs 5 greetings**, not 10, after measuring how rarely hourly check-ins catch a visitor.
 
 ## Measured
 
@@ -27,7 +28,7 @@ Balance bots, 1000 lives each (they answer a request or greet a visitor only if 
 | worker | 0.6 | 0.2 | 0.0 | 0.8 |
 | neglectful | 0.0 | 0.0 | 0.0 | 0.1 |
 
-So an attentive player earns Purr in about three lives and Aurora in about two, while casual players rarely reach flow. **Guest pink is slow**: at 10 greetings it takes a bot-like attentive player about ten lives (a visit lasts 10 to 20 minutes, so hourly check-ins catch about one a life). Survival and form odds barely moved (casual full lives 92.5% to 91.2%, within noise), and every balance target still holds.
+So an attentive player earns Purr in about three lives and Aurora in about two, while casual players rarely reach flow. Guest pink was lowered from 10 greetings to 5 (decision 9): hourly check-ins catch about one visit a life, so it takes a bot-like attentive player about five lives. Survival and form odds barely moved (casual full lives 92.5% to 91.2%, within noise), and every balance target still holds.
 
 ## Scope
 
@@ -103,7 +104,7 @@ Placeholder names and thresholds, to be confirmed with the art:
 |---|---|---|
 | sound | Purr | 25 requests answered |
 | effect | Aurora | 24 hours in flow, across lives |
-| tint | Guest pink | 10 visitors greeted |
+| tint | Guest pink | 5 visitors greeted (was 10; decision 9) |
 | crest | Speech mark | every chatter line of one group heard |
 
 ## Save and code notes
@@ -115,7 +116,7 @@ Placeholder names and thresholds, to be confirmed with the art:
 
 ## Questions for the maintainer
 
-Answered (decisions 4 to 8 above). Still open: whether Guest pink should need fewer greetings (5 instead of 10), given the measurement above.
+All answered (decisions 4 to 9).
 
 ## Later
 

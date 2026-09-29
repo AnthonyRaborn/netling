@@ -141,9 +141,9 @@ test('Purr: twenty-five requests answered', () => {
   assert.equal(earns({ progress: { requestsMet: 25 } }, 'sound:purr'), true);
 });
 
-test('Guest pink: ten visitors greeted', () => {
-  assert.equal(earns({ progress: { visitorsGreeted: 9 } }, 'tint:guest'), false);
-  assert.equal(earns({ progress: { visitorsGreeted: 10 } }, 'tint:guest'), true);
+test('Guest pink: five visitors greeted', () => {
+  assert.equal(earns({ progress: { visitorsGreeted: 4 } }, 'tint:guest'), false);
+  assert.equal(earns({ progress: { visitorsGreeted: 5 } }, 'tint:guest'), true);
 });
 
 test('Aurora: a day in flow, counted across lives', () => {

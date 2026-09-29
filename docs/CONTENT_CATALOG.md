@@ -100,7 +100,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `violet` | Bazaar violet | All Bazaar fragments | "hear every rumor in the market." |
 | `phosphor` | Green phosphor | All Old Web Ruins fragments | "learn what the ruins remember." |
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
-| `guest` | Guest pink | 10 visitors greeted | "say hello to whoever drops by, ten times." |
+| `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
 ### Effects (9)
