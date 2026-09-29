@@ -218,7 +218,7 @@ function cleanFragment(raw, s) {
       rootUsed: bool(raw.rootUsed),
       scrip: int(raw.scrip, 0, 0, Math.floor(SCRIP.max * SCRIP.inherit)),
       level: int(raw.level, 1, 1, TRAIT_CFG.maxLevel),
-      echo: keyOf(raw.echo, TRAITS),
+      history: keyOf(raw.history, TRAITS),
     };
   }
   if (s.stage !== 'dead') return null;
@@ -322,7 +322,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     },
     trait: keyOf(raw.trait, TRAITS),
     traitLevel: int(raw.traitLevel, 1, 1, TRAIT_CFG.maxLevel),
-    echo: keyOf(raw.echo, TRAITS),
+    history: keyOf(raw.history, TRAITS),
     inheritedQuirk: oneOf(raw.inheritedQuirk, QUIRK_KEYS, null),
     quirk: cleanQuirk(raw.quirk),
     log: Array.isArray(raw.log)
@@ -356,7 +356,7 @@ export function cleanLineage(raw) {
     mistakes: int(e.mistakes, undefined, 0),
     trait: keyOf(e.trait, TRAITS),
     traitLevel: int(e.traitLevel, 1, 1, TRAIT_CFG.maxLevel), // older records: 1
-    echo: keyOf(e.echo, TRAITS),
+    history: keyOf(e.history, TRAITS),
     fragmentTrait: keyOf(e.fragmentTrait, TRAITS),
     fragmentLevel: int(e.fragmentLevel, 1, 1, TRAIT_CFG.maxLevel),
     keepsake: keyOf(e.keepsake, ITEMS),

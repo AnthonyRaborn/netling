@@ -1,7 +1,7 @@
 // Measures each trait at several strengths against the same parent with the trait switched off.
 // Usage: node tools/trait-balance.mjs [lives=400] [archetypes=casual,attentive] [forms=all] [strengths=0,0.5,1,cap]
 // A strength scales the trait's TRAIT_CFG.full effect (and Volatile's Integrity cost) for a child of
-// that form at level 1, so 0.5 is an echo alone and "cap" is the trait's cap. Prints, per strength,
+// that form at level 1, so 0.5 is a history alone and "cap" is the trait's cap. Prints, per strength,
 // the full-life rate and its change, the largest change in any adult form's share, corp traces and
 // faults a life. Targets are in docs/TESTING.md.
 process.env.TZ = 'UTC';

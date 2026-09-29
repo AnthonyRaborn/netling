@@ -280,7 +280,7 @@ Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data
 
 ## Lineage: fragments, traits, quirks
 
-On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed, scrip, level, echo }` (`fragmentOf`).
+On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed, scrip, level, history }` (`fragmentOf`).
 
 | Adult form | Trait passed on | Effect at strength 1 | Cap |
 |---|---|---|---|
@@ -296,9 +296,9 @@ Every trait effect is its strength-1 value (`TRAIT_CFG.full`) times the netling'
 
 - **The parent's trait** (`trait`) applies at its level's strength: level 1 is 1.0, and each level adds 0.25 (`levelStep`), up to level 3 (`maxLevel`, 1.5).
 - **Levels are a streak.** A netling that ends as the same adult form as its parent passes the trait on one level higher (Daemon, Daemon, Daemon gives Persistent III). Ending as any other form starts the new trait at level 1.
-- **The grandparent's trait comes back as an echo** (`echo`) at half strength (`TRAIT_CFG.echo`): the fragment stores the dying netling's own inherited trait. When the echo is the same trait as the parent's, the two add up.
-- **Each trait is capped** (`TRAIT_CFG.cap`, table above), after measuring: Persistent's fewer faults shift adult forms, Volatile's cost hurts casual players, and a stronger Untraceable would be an immunity again. So Persistent III with a Persistent echo (1.5 + 0.5) is still 1.25.
-- A first-generation netling has neither. Saves from before levels get level 1 and no echo.
+- **The grandparent's trait comes back as its history** (`history`) at half strength (`TRAIT_CFG.history`): the fragment stores the dying netling's own inherited trait. When the history is the same trait as the parent's, the two add up.
+- **Each trait is capped** (`TRAIT_CFG.cap`, table above), after measuring: Persistent's fewer faults shift adult forms, Volatile's cost hurts casual players, and a stronger Untraceable would be an immunity again. So Persistent III with a Persistent history (1.5 + 0.5) is still 1.25.
+- A first-generation netling has neither. Saves from before levels get level 1 and no history.
 
 Measured with 400 to 800 simulated lives per case, against the same parent with the trait switched off: no trait at its cap moves the casual full-life rate by more than about 4 points, or any adult form's share by more than about 8 points. The Untraceable child of a Ghost meets about 2 corp traces a life at strength 1 (1.3 at the cap) instead of 5, so it can still steer its allegiance.
 

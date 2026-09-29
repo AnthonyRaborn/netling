@@ -32,7 +32,7 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 
 ## Traits and perks
 
-Effects at strength 1; levels, echoes and caps are in [SIMULATION.md](SIMULATION.md#trait-strength-balance-pass-3). The in-game text (`TRAITS[id].desc`) names the effect without numbers.
+Effects at strength 1; levels, history and caps are in [SIMULATION.md](SIMULATION.md#trait-strength-balance-pass-3). The in-game text (`TRAITS[id].desc`) names the effect without numbers.
 
 | Trait | Source form | Effect | Cap |
 |---|---|---|---|

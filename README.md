@@ -156,7 +156,7 @@ Every netling starts with only the Public Net. Reaching a region's exit **clears
 - **Adult**: from 51 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
 - **Old age**: a netling lives for at most five days. (One that was already alive when lives were shortened keeps its seven days, and its old 24 and 72 hour milestones.)
 
-When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, a keepsake item and half its scrip. A family that keeps ending as the same form makes its trait stronger (shown as II or III), and the trait from two generations back lingers as a weaker **echo**. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
+When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, a keepsake item and half its scrip. A family that keeps ending as the same form makes its trait stronger (shown as II or III), and the trait from two generations back lingers as a weaker **history**. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
 
 ## Style
 

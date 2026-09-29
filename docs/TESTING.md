@@ -60,7 +60,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 18 and 3, the Shell, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
 | `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
-| `traits.test.js` | 9 | Balance pass 3: level strengths, echoes and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
+| `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
 | `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
@@ -83,7 +83,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - A new release while the page is open: the first install stays quiet, a changed `sw.js` shows the update bar, RELOAD waits for a running game, then reloads and keeps the netling; LATER hides the bar.
 - Two tabs: guard screen, takeover (Web Locks and the lease fallback).
 - Stale confirm timers, the SCRAP confirm, a Segfault's second press.
-- The readout shows the trait level and its echo.
+- The readout shows the trait level and its history.
 - Scrip: SCRAP pays a quarter and the scrip line updates; at an open market the button sells for half and a purchase opens up.
 - Regions open in order: only the Public Net until its exit is reached, then the Bazaar; the codex memory line and FULL.
 - System actions waiting for a running mini-game; refused results explain why.
@@ -127,7 +127,7 @@ Settings (environment variables and arguments):
 | `DETAIL=1` | Adds faults by kind, days spent in each stage; at the teen evolution, the axes, faults and wins, how often both axes were within 1, 1.5, 2 or 3 of zero, and how often it was on Ghost's path (alone, with every game won once, and with every game won twice); the axes and wins at adulthood, timed events and corp traces, peak items held, and netrun totals |
 | `JSON=1` | Prints the whole report as JSON (rates as fractions) instead of text, for `tools/balance-diff.mjs` |
 | `CFG='{"drainPerHour":{"charge":15},"lifespanMin":7200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
-| `TRAIT=ghost` | Every netling starts as the child of that adult form: its trait and keepsake, generation 2. Add `TRAIT_LEVEL=2` for a streak, `ECHO=daemon` for a grandparent whose trait echoes |
+| `TRAIT=ghost` | Every netling starts as the child of that adult form: its trait and keepsake, generation 2. Add `TRAIT_LEVEL=2` for a streak, `HISTORY=daemon` for a grandparent whose trait carries on as history |
 | `LIVES=4` | Simulates lineages of that many lives instead of single lives. Each child inherits its parent's fragment (trait, quirk, keepsake), the codex found so far, and Root Access from the life after the codex completes. Reports the share of lineages that finished the codex by each life, the fastest and median, new fragments per life, and every life's results. `runs` is then the number of lineages |
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
@@ -187,7 +187,7 @@ Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-f
 
 ### `tools/trait-balance.mjs`
 
-`node tools/trait-balance.mjs [lives=400] [archetypes=casual,attentive] [forms=all] [strengths=0,0.5,1,cap]` measures each trait at several strengths for a child of that form, against the same parent with the trait switched off (strength 0), so the keepsake and the parent's form stay the same. A strength scales `TRAIT_CFG.full` (and Volatile's Integrity cost); 0.5 is an echo alone and `cap` the trait's cap. It prints the full-life rate and its change, the largest change in any adult form's share, corp traces and faults a life. `TRAIT=<form>`, `TRAIT_LEVEL=<1-3>` and `ECHO=<form>` on `balance.mjs` run whole reports for a given inheritance.
+`node tools/trait-balance.mjs [lives=400] [archetypes=casual,attentive] [forms=all] [strengths=0,0.5,1,cap]` measures each trait at several strengths for a child of that form, against the same parent with the trait switched off (strength 0), so the keepsake and the parent's form stay the same. A strength scales `TRAIT_CFG.full` (and Volatile's Integrity cost); 0.5 is a history alone and `cap` the trait's cap. It prints the full-life rate and its change, the largest change in any adult form's share, corp traces and faults a life. `TRAIT=<form>`, `TRAIT_LEVEL=<1-3>` and `HISTORY=<form>` on `balance.mjs` run whole reports for a given inheritance.
 
 ### `tools/make-icons.mjs`
 

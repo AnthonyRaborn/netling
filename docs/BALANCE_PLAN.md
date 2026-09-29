@@ -70,10 +70,11 @@ Sixth round, 2026-09-29 (Pass 2):
 
 Seventh round, 2026-09-29 (Pass 3):
 
-35. **Trait levels are a streak**: each generation in a row that ends as the same form adds a level (1.0, 1.25, 1.5); a different form starts over. The grandparent's echo (half strength) adds on top when it matches, under the per-trait cap.
+35. **Trait levels are a streak**: each generation in a row that ends as the same form adds a level (1.0, 1.25, 1.5); a different form starts over. The grandparent's trait (its history, half strength) adds on top when it matches, under the per-trait cap.
 36. **Pass 3 scope**: Step 1 plus levels. The family tree and legacy goals (Step 3) wait for a later pass.
-37. **Display**: the readout shows the trait with its level and the echo (for example "Persistent II · echo Hardened"); the flatline screen shows what the next generation inherits; the field manual explains levels and echoes without numbers.
+37. **Display**: the readout shows the trait with its level and its history (for example "Persistent II · history Hardened"); the flatline screen shows what the next generation inherits; the field manual explains levels and history without numbers.
 38. **Untraceable** becomes fewer traces (60% less at strength 1), not an immunity.
+39. **The grandparent's trait is called its history**, not an echo, which already names an anomaly and an unrealized form. The stored field is `history` (renamed before release, so no save ever held `echo`).
 
 ## How the passes work
 
@@ -301,13 +302,13 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 
 **Status: Step 1 and trait levels implemented** (release `netling-v38`). What shipped:
 
-- `TRAIT_CFG` in `sim.js`: each trait's effect at strength 1 (`full`), the echo (0.5), the level step (0.25, up to level 3) and a cap per trait. `traitStrength(s, id)` combines the netling's `trait` at `levelStrength(traitLevel)` with its `echo`; every trait effect scales by it, costs included.
-- Save fields (added, no version bump): `traitLevel` and `echo` on the netling, `level` and `echo` on the fragment (`fragmentOf`), and `traitLevel`, `echo`, `fragmentLevel` on lineage records. All cleaned in `sanitize.js`; older saves get level 1 and no echo.
+- `TRAIT_CFG` in `sim.js`: each trait's effect at strength 1 (`full`), the history (0.5), the level step (0.25, up to level 3) and a cap per trait. `traitStrength(s, id)` combines the netling's `trait` at `levelStrength(traitLevel)` with its `history`; every trait effect scales by it, costs included.
+- Save fields (added, no version bump): `traitLevel` and `history` on the netling, `level` and `history` on the fragment (`fragmentOf`), and `traitLevel`, `history`, `fragmentLevel` on lineage records. All cleaned in `sanitize.js`; older saves get level 1 and no history.
 - Untraceable: corp traces 60% less often at strength 1.
 - Volatile's Integrity cost is 0.75 an hour at strength 1 (from 1): at 1, casual players lost 5.7 points of full-life rate against the same parent with the trait switched off, over the target of 5.
 - Caps: Licensed and Hardened 1.5; Persistent, Volatile and Untraceable 1.25.
 - UI: readout, flatline screen, lineage rows and the field manual; `TRAITS[id].desc` no longer states numbers.
-- Tools: `TRAIT_LEVEL=<1-3>` and `ECHO=<adult form>` beside `TRAIT=<form>`.
+- Tools: `TRAIT_LEVEL=<1-3>` and `HISTORY=<adult form>` beside `TRAIT=<form>`.
 
 Measured (400 to 800 lives per case, each trait at strengths 0.5, 1 and its cap, against the same parent with the trait switched off):
 
@@ -351,7 +352,7 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 ### Step 3: lineage UI and goals
 
-1. **Family tree** in the Archive, from the lineage records the game already keeps, showing each generation's trait and echo.
+1. **Family tree** in the Archive, from the lineage records the game already keeps, showing each generation's trait and history.
 2. **Legacy goals**: streaks across generations (for example three full lives in a line, or every trait held once), rewarded with cosmetics only so power stays bounded.
 3. **Inherited scrip** (decided): half, rounded down, passes to the next generation, as a small head start and a reason to end a life well.
 

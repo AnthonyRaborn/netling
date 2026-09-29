@@ -46,7 +46,7 @@ function renderHelp() {
         ['v1.0 Kernel', 'Generation number and its current form.'],
         ['age · bed', 'How long it has been running, and the hour it goes to sleep.'],
         ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
-        ['trait', 'What it inherited from the netling before it. A numeral (II, III) means that form ran in the family for generations in a row, and the trait is stronger. An echo is a weaker trait from the generation before that.'],
+        ['trait', 'What it inherited from the netling before it. A numeral (II, III) means that form ran in the family for generations in a row, and the trait is stronger. Its history is a weaker trait from the generation before that.'],
         // Hidden until earned: the codex holds the secret.
         rootUnlocked()
           ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]

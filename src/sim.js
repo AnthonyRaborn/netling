@@ -212,10 +212,10 @@ export const TRAITS = {
 
 // Trait strength. The parent's trait applies at level strength (1, then +levelStep for each
 // generation in a row that ended as the same form, up to maxLevel); the grandparent's trait comes
-// back as an echo at half strength, and adds to the trait when they match. Each trait is capped.
+// back as its history at half strength, and adds to the trait when they match. Each trait is capped.
 // `full` is each effect at strength 1.
 export const TRAIT_CFG = {
-  echo: 0.5,
+  history: 0.5,
   levelStep: 0.25,
   maxLevel: 3,
   full: {
@@ -233,11 +233,11 @@ export const TRAIT_CFG = {
 
 export const levelStrength = (level) => 1 + TRAIT_CFG.levelStep * (Math.min(Math.max(level ?? 1, 1), TRAIT_CFG.maxLevel) - 1);
 
-// How strongly trait `id` applies to this netling: 0 if it has neither the trait nor its echo.
+// How strongly trait `id` applies to this netling: 0 if it has neither the trait nor its history.
 export function traitStrength(s, id) {
   let st = 0;
   if (s.trait === id) st += levelStrength(s.traitLevel);
-  if (s.echo === id) st += TRAIT_CFG.echo;
+  if (s.history === id) st += TRAIT_CFG.history;
   return Math.min(st, TRAIT_CFG.cap[id] ?? st);
 }
 
@@ -349,7 +349,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     scrip: Math.min(SCRIP.max, fragment?.scrip ?? 0),
     trait: fragment?.trait ?? null,
     traitLevel: fragment?.trait ? Math.min(Math.max(fragment.level ?? 1, 1), TRAIT_CFG.maxLevel) : 1, // generations in a row as that form
-    echo: fragment?.trait ? (fragment.echo ?? null) : null, // the grandparent's trait, at half strength
+    history: fragment?.trait ? (fragment.history ?? null) : null, // the grandparent's trait, at half strength
     inheritedQuirk,
     quirk,
     log: [
@@ -737,7 +737,7 @@ export function migrate(s) {
   s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
   s.codexFound ??= 0;
   s.traitLevel ??= 1; // from before trait levels: every inherited trait was level 1
-  s.echo ??= null;
+  s.history ??= null;
   s.scrip ??= 0;
   return s;
 }
@@ -745,11 +745,11 @@ export function migrate(s) {
 export const inheritedScrip = (s) => Math.floor((s.scrip ?? 0) * SCRIP.inherit);
 
 // What a netling that ends as `form` leaves the next generation. Its own inherited trait becomes the
-// child's echo; if it ended as the same form as its parent, the trait's level goes up (a streak).
+// child's history; if it ended as the same form as its parent, the trait's level goes up (a streak).
 export function fragmentOf(s, form) {
   const trait = FORMS[form].trait;
   const level = s.trait === trait ? Math.min((s.traitLevel ?? 1) + 1, TRAIT_CFG.maxLevel) : 1;
-  return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, echo: s.trait ?? null };
+  return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, history: s.trait ?? null };
 }
 
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.

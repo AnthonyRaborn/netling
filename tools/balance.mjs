@@ -2,8 +2,8 @@
 // Usage: node tools/balance.mjs [runsPerArchetype=300] [archetype filter]
 // Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
 // tools/balance-diff.mjs); CFG='{...}' override CFG; NO_ITEMS=1, NO_RUNS=1; ROOT=1 Root Access;
-// TRAIT=<adult form> start as the child of that form (TRAIT_LEVEL=<1-3> its level, ECHO=<adult form>
-// the grandparent, whose trait echoes at half strength); LIVES=<n> simulate lineages of n lives,
+// TRAIT=<adult form> start as the child of that form (TRAIT_LEVEL=<1-3> its level, HISTORY=<adult form>
+// the grandparent, whose trait is its history at half strength); LIVES=<n> simulate lineages of n lives,
 // carrying the fragment, codex and Root Access from each life to the next.
 process.env.TZ = 'UTC';
 const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
@@ -367,13 +367,13 @@ export function lineStats(lines) {
 }
 
 // A parent fragment for TRAIT=<adult form>.
-// level: the trait's level (a streak of that form); echo: the grandparent's adult form, whose trait
+// level: the trait's level (a streak of that form); history: the grandparent's adult form, whose trait
 // comes back at half strength.
-export function parentOf(form, { level = 1, echo = null } = {}) {
+export function parentOf(form, { level = 1, history = null } = {}) {
   const forms = Object.keys(FORMS).join(', ');
   if (!FORMS[form]) throw new Error(`TRAIT must be an adult form: ${forms}`);
-  if (echo && !FORMS[echo]) throw new Error(`ECHO must be an adult form: ${forms}`);
-  return { form, trait: FORMS[form].trait, quirk: null, keepsake: KEEPSAKES[form], rootUsed: false, level, echo: echo ? FORMS[echo].trait : null };
+  if (history && !FORMS[history]) throw new Error(`HISTORY must be an adult form: ${forms}`);
+  return { form, trait: FORMS[form].trait, quirk: null, keepsake: KEEPSAKES[form], rootUsed: false, level, history: history ? FORMS[history].trait : null };
 }
 
 // n lives in a row: each child inherits its parent's fragment, the codex found so far, and Root
@@ -423,7 +423,7 @@ if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems =
 if (process.env.NO_RUNS) for (const p of Object.values(ARCHETYPES)) p.noRuns = true;
 const filter = process.argv[3];
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const parent = process.env.TRAIT ? parentOf(process.env.TRAIT, { level: Number(process.env.TRAIT_LEVEL ?? 1), echo: process.env.ECHO ?? null }) : null;
+  const parent = process.env.TRAIT ? parentOf(process.env.TRAIT, { level: Number(process.env.TRAIT_LEVEL ?? 1), history: process.env.HISTORY ?? null }) : null;
   const lives = Number(process.env.LIVES ?? 0);
   const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };
   for (const [name, p] of Object.entries(ARCHETYPES)) {

@@ -644,10 +644,10 @@ await scenario('a Segfault takes a second press, then adds two faults', async ({
   assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
 });
 
-await scenario('the readout shows the trait level and its echo', async ({ open }) => {
-  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 3, trait: 'persistent', traitLevel: 2, echo: 'hardened' }) }));
+await scenario('the readout shows the trait level and its history', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 3, trait: 'persistent', traitLevel: 2, history: 'hardened' }) }));
   const text = await page.textContent('#readout');
-  assert(/trait Persistent II · echo Hardened/.test(text), `readout: ${text}`);
+  assert(/trait Persistent II · history Hardened/.test(text), `readout: ${text}`);
 });
 
 await scenario('SCRAP sells for a quarter, and the scrip line shows it', async ({ open }) => {

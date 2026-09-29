@@ -75,7 +75,7 @@ export function updateHUD() {
   const summary = screenSummary(state);
   if ($('lcd').getAttribute('aria-label') !== summary) $('lcd').setAttribute('aria-label', summary);
 
-  const trait = `${traitLabel(state.trait, state.traitLevel) ?? '—'}${state.echo ? ` · echo ${TRAITS[state.echo].name}` : ''}`;
+  const trait = `${traitLabel(state.trait, state.traitLevel) ?? '—'}${state.history ? ` · history ${TRAITS[state.history].name}` : ''}`;
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
     `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;

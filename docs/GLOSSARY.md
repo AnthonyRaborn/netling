@@ -58,7 +58,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Dex** | The list of the 9 forms seen. Undiscovered forms show a silhouette and a hint | `archive.js` |
 | **Digesting** | The 240 minutes after a meal, during which cache files can appear | `sim.js` |
 | **Disconnect** | A netrun ends in failure (Integrity or Charge hit 0). Loot lost, one care mistake, emergency reboot | `netrun/run.js` |
-| **Echo** | 1) An anomaly with a codex fragment. 2) An "unrealized" adult form: a netling that died before adulthood but whose fragment shows the form it was leaning toward. 3) **Trait echo**: the grandparent's trait, at half strength (`echo`) | `netrun/anomalies.js`, `archive.js`, `sim.js` |
+| **Echo** | 1) An anomaly with a codex fragment. 2) An "unrealized" adult form: a netling that died before adulthood but whose fragment shows the form it was leaning toward. | `netrun/anomalies.js`, `archive.js` |
 | **Effect** | A screen effect cosmetic (scanlines, clean, interlace, rain, bloom, curve, packets, static) | `cosmetics.js` |
 | **Event** | A timed thing that needs a response (trace, intrusion, overflow). One at a time | `sim.js` `EVENTS` |
 | **Evolution** | Baby to teen at 17 hours, teen to adult at 51 hours (`s.life`; 24 and 72 for older netlings) | `sim.js` |
@@ -67,7 +67,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
 | **Firewall Dodge** | Mini-game: slide between five lanes to avoid falling blocks for 15 seconds | `games/dodge.js` |
 | **Form** | A netling's body. Eight exist: Bitling, Kernel, Stub, Chrome, Firewall, Daemon, Glitch, Ghost | `sim.js` `SPECIES` |
-| **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait and its level, echo, quirk, keepsake, scrip). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
+| **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait and its level, history, quirk, keepsake, scrip). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
 | **Gate (write gate)** | `canWrite` in `ui/app.js`: decides whether storage may be written | `ui/app.js` |
 | **Generation** | The number of the current netling, shown as `v<n>.0` | `sim.js` |
 | **Ghost** | Secret adult form. Neutral allegiance, non-negative stability, 1 mistake or fewer, 18+ wins with 3+ in each game. Trait Untraceable. In runs: sees every node, checkpoints and 45% of ICE miss it | `sim.js` |
@@ -76,6 +76,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Heat** | Stat: rises when active. 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |
 | **HIDE** | Trace answer: reroute. Charge -10, Heat +10, leans indie | `sim.js` |
+| **History (trait history)** | The grandparent's trait, carried on at half strength beside the parent's (`history`). Adds to the trait when they match, under its cap | `sim.js` `traitStrength` |
 | **ICE** | A netrun node guarded by a mini-game. Losing costs Integrity | `netrun/run.js` |
 | **Idle** | A quirk: bounce, sway or hover. All idles also wander across the screen | `sim.js` |
 | **Integrity** | Stat: health. 0 for 2 hours ends the netling | `sim.js` |
@@ -138,7 +139,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Test mode** | A separate netling on a fast clock, in its own storage | `ui/app.js` |
 | **Tick** | One simulated minute, or the function that runs many | `sim.js` |
 | **Tint** | The screen color cosmetic | `cosmetics.js` |
-| **Trait** | The perk inherited from the previous netling's adult form. Its strength grows with a streak of the same form (levels, shown as II and III) and with a matching echo, up to a cap | `sim.js` `TRAITS`, `TRAIT_CFG` |
+| **Trait** | The perk inherited from the previous netling's adult form. Its strength grows with a streak of the same form (levels, shown as II and III) and with a matching history, up to a cap | `sim.js` `TRAITS`, `TRAIT_CFG` |
 | **Trait level** | How many generations in a row ended as the form behind a trait (1 to 3, `traitLevel`); each level adds 0.25 strength | `sim.js` `levelStrength` |
 | **Transfer code** | `NL1.` string holding a full save, movable between devices | `transfer.js` |
 | **Transmission** | The NL-0 message shown when the codex completes | `index.html` |

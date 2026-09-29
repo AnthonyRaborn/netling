@@ -78,16 +78,16 @@ Built by `createScript()` in `sim.js`. Fields:
 | `visit`, `visitAccGifts` | | A visitor in progress; pending accessory gifts (max 10) |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
-| `traitLevel`, `echo` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
+| `traitLevel`, `history` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |
-| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed, scrip, level, echo }`, where `level` is 1..3 (1 for older fragments), `echo` the dying netling's own trait, and `scrip` the inheritance (half, rounded down; cleaned to 0..50) |
+| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed, scrip, level, history }`, where `level` is 1..3 (1 for older fragments), `history` the dying netling's own trait, and `scrip` the inheritance (half, rounded down; cleaned to 0..50) |
 | `codexInbox`, `accessoryInbox` | arrays of ids | Finds waiting for the UI to bank them into the shared codex and wardrobe |
 
 The netling belongs to one generation. Everything shared across generations (lineage, dex, codex, wardrobe, unlocks, accessories, progress) is stored separately.
 
 ## Other stored values
 
-**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, echo, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer and `lineageRows` tolerate that.
+**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer and `lineageRows` tolerate that.
 
 **Wardrobe**: `shell`, `tint`, `effect`, `sound` (ids from `COSMETICS`), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
 
