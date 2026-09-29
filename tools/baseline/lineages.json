@@ -57,6 +57,23 @@
             "wins": 18.61,
             "mistakes": 0.18
           },
+          "atTeen": {
+            "allegiance": -0.19,
+            "absAllegiance": 3.49,
+            "stability": 2.82,
+            "absStability": 2.89,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0.045,
+              "w1.5": 0.095,
+              "w2": 0.15,
+              "w3": 0.265
+            },
+            "wins": 6.15,
+            "minWins": 0.8,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.3
+          },
           "wins": 44.28,
           "events": 13.82,
           "traces": 7.88,
@@ -106,6 +123,23 @@
             "stability": 8.88,
             "wins": 18.32,
             "mistakes": 0.24
+          },
+          "atTeen": {
+            "allegiance": -0.33,
+            "absAllegiance": 3.37,
+            "stability": 3.14,
+            "absStability": 3.2,
+            "mistakes": 0.08,
+            "balancedWithin": {
+              "w1": 0.025,
+              "w1.5": 0.06,
+              "w2": 0.12,
+              "w3": 0.275
+            },
+            "wins": 6.22,
+            "minWins": 0.8,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.31
           },
           "wins": 43.57,
           "events": 13.73,
@@ -159,6 +193,23 @@
             "wins": 18.36,
             "mistakes": 0.21
           },
+          "atTeen": {
+            "allegiance": -0.85,
+            "absAllegiance": 3.71,
+            "stability": 3.27,
+            "absStability": 3.33,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0.005,
+              "w1.5": 0.04,
+              "w2": 0.055,
+              "w3": 0.245
+            },
+            "wins": 6.06,
+            "minWins": 0.75,
+            "ghostPathPlay": 0.01,
+            "ghostPath": 0.275
+          },
           "wins": 43.61,
           "events": 14.04,
           "traces": 7.72,
@@ -208,6 +259,23 @@
             "stability": 9.1,
             "wins": 18.2,
             "mistakes": 0.19
+          },
+          "atTeen": {
+            "allegiance": -0.12,
+            "absAllegiance": 3.51,
+            "stability": 3.13,
+            "absStability": 3.17,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0.005,
+              "w1.5": 0.04,
+              "w2": 0.095,
+              "w3": 0.215
+            },
+            "wins": 6.15,
+            "minWins": 0.78,
+            "ghostPathPlay": 0.015,
+            "ghostPath": 0.295
           },
           "wins": 43.83,
           "events": 13.81,
@@ -278,6 +346,23 @@
             "wins": 17.82,
             "mistakes": 1.83
           },
+          "atTeen": {
+            "allegiance": 0,
+            "absAllegiance": 2.74,
+            "stability": 0.52,
+            "absStability": 1.79,
+            "mistakes": 0.52,
+            "balancedWithin": {
+              "w1": 0.1,
+              "w1.5": 0.17,
+              "w2": 0.335,
+              "w3": 0.565
+            },
+            "wins": 6.03,
+            "minWins": 0.72,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.205
+          },
           "wins": 38.46,
           "events": 12.61,
           "traces": 7.03,
@@ -331,6 +416,23 @@
             "stability": 1.72,
             "wins": 17.45,
             "mistakes": 1.52
+          },
+          "atTeen": {
+            "allegiance": 0.35,
+            "absAllegiance": 2.92,
+            "stability": 0.7,
+            "absStability": 1.72,
+            "mistakes": 0.45,
+            "balancedWithin": {
+              "w1": 0.07,
+              "w1.5": 0.125,
+              "w2": 0.28,
+              "w3": 0.55
+            },
+            "wins": 5.93,
+            "minWins": 0.67,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.22
           },
           "wins": 38.83,
           "events": 12.51,
@@ -386,6 +488,23 @@
             "wins": 16.98,
             "mistakes": 1.32
           },
+          "atTeen": {
+            "allegiance": 0.73,
+            "absAllegiance": 3.02,
+            "stability": 1.15,
+            "absStability": 1.82,
+            "mistakes": 0.37,
+            "balancedWithin": {
+              "w1": 0.085,
+              "w1.5": 0.155,
+              "w2": 0.27,
+              "w3": 0.545
+            },
+            "wins": 5.7,
+            "minWins": 0.63,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.275
+          },
           "wins": 38.63,
           "events": 12.65,
           "traces": 7.08,
@@ -440,6 +559,23 @@
             "stability": 2.26,
             "wins": 17.51,
             "mistakes": 1.53
+          },
+          "atTeen": {
+            "allegiance": 0.62,
+            "absAllegiance": 3.01,
+            "stability": 1.01,
+            "absStability": 1.75,
+            "mistakes": 0.42,
+            "balancedWithin": {
+              "w1": 0.125,
+              "w1.5": 0.165,
+              "w2": 0.295,
+              "w3": 0.5
+            },
+            "wins": 5.85,
+            "minWins": 0.66,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.2
           },
           "wins": 37.99,
           "events": 12.31,
@@ -510,6 +646,23 @@
             "wins": 16.55,
             "mistakes": 2.51
           },
+          "atTeen": {
+            "allegiance": 0.03,
+            "absAllegiance": 2.91,
+            "stability": 0.36,
+            "absStability": 1.42,
+            "mistakes": 0.23,
+            "balancedWithin": {
+              "w1": 0.14,
+              "w1.5": 0.185,
+              "w2": 0.31,
+              "w3": 0.59
+            },
+            "wins": 5.57,
+            "minWins": 0.6,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.185
+          },
           "wins": 30.28,
           "events": 11.16,
           "traces": 6.36,
@@ -564,6 +717,23 @@
             "wins": 14.7,
             "mistakes": 2.47
           },
+          "atTeen": {
+            "allegiance": 0.13,
+            "absAllegiance": 2.6,
+            "stability": 0.08,
+            "absStability": 1.54,
+            "mistakes": 0.3,
+            "balancedWithin": {
+              "w1": 0.145,
+              "w1.5": 0.195,
+              "w2": 0.415,
+              "w3": 0.62
+            },
+            "wins": 4.74,
+            "minWins": 0.5,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.19
+          },
           "wins": 28.15,
           "events": 11.67,
           "traces": 6.61,
@@ -617,6 +787,23 @@
             "wins": 14.4,
             "mistakes": 2.5
           },
+          "atTeen": {
+            "allegiance": -0.28,
+            "absAllegiance": 2.72,
+            "stability": 0.01,
+            "absStability": 1.66,
+            "mistakes": 0.35,
+            "balancedWithin": {
+              "w1": 0.14,
+              "w1.5": 0.18,
+              "w2": 0.335,
+              "w3": 0.58
+            },
+            "wins": 4.54,
+            "minWins": 0.43,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.17
+          },
           "wins": 27.62,
           "events": 11.08,
           "traces": 6.12,
@@ -669,6 +856,23 @@
             "stability": -2.69,
             "wins": 14.65,
             "mistakes": 2.44
+          },
+          "atTeen": {
+            "allegiance": 0.18,
+            "absAllegiance": 2.58,
+            "stability": 0.27,
+            "absStability": 1.33,
+            "mistakes": 0.18,
+            "balancedWithin": {
+              "w1": 0.18,
+              "w1.5": 0.235,
+              "w2": 0.43,
+              "w3": 0.67
+            },
+            "wins": 4.64,
+            "minWins": 0.42,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.22
           },
           "wins": 26.98,
           "events": 10.69,
@@ -735,6 +939,23 @@
             "wins": 7,
             "mistakes": 7.83
           },
+          "atTeen": {
+            "allegiance": 1.16,
+            "absAllegiance": 2.25,
+            "stability": -6.18,
+            "absStability": 6.18,
+            "mistakes": 3.06,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0.005
+            },
+            "wins": 2.63,
+            "minWins": 0.09,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 2.76,
           "events": 2.57,
           "traces": 1.53,
@@ -784,6 +1005,23 @@
             "stability": -19.15,
             "wins": 8,
             "mistakes": 8.2
+          },
+          "atTeen": {
+            "allegiance": -0.18,
+            "absAllegiance": 1.85,
+            "stability": -6.84,
+            "absStability": 6.84,
+            "mistakes": 2.76,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0.01
+            },
+            "wins": 1.71,
+            "minWins": 0.06,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 1.56,
           "events": 2.3,
@@ -835,6 +1073,23 @@
             "wins": 7,
             "mistakes": 7
           },
+          "atTeen": {
+            "allegiance": -0.03,
+            "absAllegiance": 1.57,
+            "stability": -6.83,
+            "absStability": 6.83,
+            "mistakes": 2.92,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0.005
+            },
+            "wins": 1.44,
+            "minWins": 0.01,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 1.48,
           "events": 2.33,
           "traces": 1.29,
@@ -884,6 +1139,23 @@
             "stability": -16.18,
             "wins": 7.2,
             "mistakes": 8.2
+          },
+          "atTeen": {
+            "allegiance": 0.48,
+            "absAllegiance": 1.96,
+            "stability": -6.7,
+            "absStability": 6.7,
+            "mistakes": 2.83,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0.01
+            },
+            "wins": 1.47,
+            "minWins": 0,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 1.63,
           "events": 2.19,
@@ -948,6 +1220,23 @@
             "wins": 19.52,
             "mistakes": 0.2
           },
+          "atTeen": {
+            "allegiance": 11.29,
+            "absAllegiance": 11.29,
+            "stability": 3.09,
+            "absStability": 3.13,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.37,
+            "minWins": 0.7,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 42.88,
           "events": 14.24,
           "traces": 7.84,
@@ -996,6 +1285,23 @@
             "stability": 8.93,
             "wins": 19.57,
             "mistakes": 0.21
+          },
+          "atTeen": {
+            "allegiance": 8.98,
+            "absAllegiance": 8.98,
+            "stability": 3.07,
+            "absStability": 3.09,
+            "mistakes": 0.03,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.23,
+            "minWins": 0.69,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 42.79,
           "events": 13.46,
@@ -1046,6 +1352,23 @@
             "wins": 19.65,
             "mistakes": 0.17
           },
+          "atTeen": {
+            "allegiance": 8.93,
+            "absAllegiance": 8.93,
+            "stability": 2.99,
+            "absStability": 3.04,
+            "mistakes": 0.06,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.18,
+            "minWins": 0.68,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 43.24,
           "events": 13.59,
           "traces": 7.42,
@@ -1094,6 +1417,23 @@
             "stability": 8.77,
             "wins": 19.77,
             "mistakes": 0.2
+          },
+          "atTeen": {
+            "allegiance": 8.99,
+            "absAllegiance": 8.99,
+            "stability": 2.92,
+            "absStability": 2.96,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.3,
+            "minWins": 0.7,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 43.85,
           "events": 13.85,
@@ -1159,6 +1499,23 @@
             "wins": 18.08,
             "mistakes": 0.15
           },
+          "atTeen": {
+            "allegiance": -13.27,
+            "absAllegiance": 13.28,
+            "stability": 1.76,
+            "absStability": 2.04,
+            "mistakes": 0.03,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.82,
+            "minWins": 0.69,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 42.22,
           "events": 13.24,
           "traces": 7.7,
@@ -1206,6 +1563,23 @@
             "stability": 7.28,
             "wins": 18.65,
             "mistakes": 0.19
+          },
+          "atTeen": {
+            "allegiance": -13.61,
+            "absAllegiance": 13.61,
+            "stability": 2.85,
+            "absStability": 2.89,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.95,
+            "minWins": 0.67,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 43.92,
           "events": 13.56,
@@ -1256,6 +1630,23 @@
             "wins": 18.05,
             "mistakes": 0.21
           },
+          "atTeen": {
+            "allegiance": -13.14,
+            "absAllegiance": 13.15,
+            "stability": 3.05,
+            "absStability": 3.06,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.97,
+            "minWins": 0.75,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 42.42,
           "events": 13.65,
           "traces": 7.6,
@@ -1304,6 +1695,23 @@
             "stability": 7.16,
             "wins": 18.51,
             "mistakes": 0.2
+          },
+          "atTeen": {
+            "allegiance": -13.06,
+            "absAllegiance": 13.07,
+            "stability": 3,
+            "absStability": 3.01,
+            "mistakes": 0.06,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.98,
+            "minWins": 0.69,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 43.05,
           "events": 13.75,
@@ -1371,6 +1779,23 @@
             "wins": 18.81,
             "mistakes": 0.55
           },
+          "atTeen": {
+            "allegiance": -0.1,
+            "absAllegiance": 2.74,
+            "stability": -2.04,
+            "absStability": 2.37,
+            "mistakes": 0.16,
+            "balancedWithin": {
+              "w1": 0.11,
+              "w1.5": 0.135,
+              "w2": 0.26,
+              "w3": 0.46
+            },
+            "wins": 6.04,
+            "minWins": 0.69,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.075
+          },
           "wins": 39.65,
           "events": 14.33,
           "traces": 7.35,
@@ -1422,6 +1847,23 @@
             "wins": 15.85,
             "mistakes": 0.47
           },
+          "atTeen": {
+            "allegiance": -0.63,
+            "absAllegiance": 3.02,
+            "stability": -2.1,
+            "absStability": 2.27,
+            "mistakes": 0.15,
+            "balancedWithin": {
+              "w1": 0.09,
+              "w1.5": 0.115,
+              "w2": 0.245,
+              "w3": 0.395
+            },
+            "wins": 4.91,
+            "minWins": 0.48,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.045
+          },
           "wins": 35.68,
           "events": 13.92,
           "traces": 7.09,
@@ -1472,6 +1914,23 @@
             "stability": -5.77,
             "wins": 16.34,
             "mistakes": 0.5
+          },
+          "atTeen": {
+            "allegiance": -0.35,
+            "absAllegiance": 2.54,
+            "stability": -1.72,
+            "absStability": 2.03,
+            "mistakes": 0.11,
+            "balancedWithin": {
+              "w1": 0.11,
+              "w1.5": 0.19,
+              "w2": 0.35,
+              "w3": 0.58
+            },
+            "wins": 5.03,
+            "minWins": 0.5,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.075
           },
           "wins": 36.27,
           "events": 14.44,
@@ -1525,6 +1984,23 @@
             "stability": -5.84,
             "wins": 16.31,
             "mistakes": 0.53
+          },
+          "atTeen": {
+            "allegiance": -0.36,
+            "absAllegiance": 2.78,
+            "stability": -1.68,
+            "absStability": 1.95,
+            "mistakes": 0.13,
+            "balancedWithin": {
+              "w1": 0.125,
+              "w1.5": 0.17,
+              "w2": 0.305,
+              "w3": 0.52
+            },
+            "wins": 4.96,
+            "minWins": 0.48,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.04
           },
           "wins": 35.64,
           "events": 14.07,
@@ -1591,6 +2067,23 @@
             "wins": 19.73,
             "mistakes": 0.01
           },
+          "atTeen": {
+            "allegiance": 0.08,
+            "absAllegiance": 2.92,
+            "stability": 3.49,
+            "absStability": 3.49,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.01,
+              "w1.5": 0.015,
+              "w2": 0.085,
+              "w3": 0.25
+            },
+            "wins": 6.58,
+            "minWins": 0.83,
+            "ghostPathPlay": 0.015,
+            "ghostPath": 0.29
+          },
           "wins": 47.54,
           "events": 13.99,
           "traces": 7.86,
@@ -1637,6 +2130,23 @@
             "stability": 10.7,
             "wins": 19.66,
             "mistakes": 0
+          },
+          "atTeen": {
+            "allegiance": -0.41,
+            "absAllegiance": 2.83,
+            "stability": 3.63,
+            "absStability": 3.65,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.015,
+              "w1.5": 0.035,
+              "w2": 0.085,
+              "w3": 0.22
+            },
+            "wins": 6.61,
+            "minWins": 0.9,
+            "ghostPathPlay": 0.035,
+            "ghostPath": 0.355
           },
           "wins": 46.81,
           "events": 13.72,
@@ -1688,6 +2198,23 @@
             "wins": 19.55,
             "mistakes": 0
           },
+          "atTeen": {
+            "allegiance": 0.44,
+            "absAllegiance": 2.96,
+            "stability": 3.52,
+            "absStability": 3.53,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.02,
+              "w1.5": 0.035,
+              "w2": 0.1,
+              "w3": 0.215
+            },
+            "wins": 6.44,
+            "minWins": 0.9,
+            "ghostPathPlay": 0.025,
+            "ghostPath": 0.32
+          },
           "wins": 46.3,
           "events": 13.72,
           "traces": 7.57,
@@ -1737,6 +2264,23 @@
             "stability": 10.64,
             "wins": 19.61,
             "mistakes": 0.01
+          },
+          "atTeen": {
+            "allegiance": 0.07,
+            "absAllegiance": 2.8,
+            "stability": 3.57,
+            "absStability": 3.62,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.005,
+              "w1.5": 0.02,
+              "w2": 0.055,
+              "w3": 0.235
+            },
+            "wins": 6.42,
+            "minWins": 0.81,
+            "ghostPathPlay": 0.03,
+            "ghostPath": 0.375
           },
           "wins": 46.79,
           "events": 13.77,
@@ -1800,6 +2344,23 @@
             "wins": 34.55,
             "mistakes": 0.01
           },
+          "atTeen": {
+            "allegiance": 0.52,
+            "absAllegiance": 0.52,
+            "stability": 3.48,
+            "absStability": 3.49,
+            "mistakes": 0.01,
+            "balancedWithin": {
+              "w1": 0.06,
+              "w1.5": 0.115,
+              "w2": 0.16,
+              "w3": 0.38
+            },
+            "wins": 11.61,
+            "minWins": 1.95,
+            "ghostPathPlay": 0.74,
+            "ghostPath": 0.98
+          },
           "wins": 72.13,
           "events": 14.23,
           "traces": 8.13,
@@ -1849,6 +2410,23 @@
             "wins": 33.99,
             "mistakes": 0.01
           },
+          "atTeen": {
+            "allegiance": 0.5,
+            "absAllegiance": 0.5,
+            "stability": 3.66,
+            "absStability": 3.7,
+            "mistakes": 0.01,
+            "balancedWithin": {
+              "w1": 0.03,
+              "w1.5": 0.06,
+              "w2": 0.11,
+              "w3": 0.35
+            },
+            "wins": 11.46,
+            "minWins": 1.89,
+            "ghostPathPlay": 0.685,
+            "ghostPath": 0.985
+          },
           "wins": 70.74,
           "events": 6.39,
           "traces": 0.06,
@@ -1893,6 +2471,23 @@
             "stability": 10.38,
             "wins": 34.22,
             "mistakes": 0
+          },
+          "atTeen": {
+            "allegiance": 0.52,
+            "absAllegiance": 0.52,
+            "stability": 3.32,
+            "absStability": 3.32,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.06,
+              "w1.5": 0.145,
+              "w2": 0.23,
+              "w3": 0.455
+            },
+            "wins": 11.5,
+            "minWins": 1.79,
+            "ghostPathPlay": 0.665,
+            "ghostPath": 0.99
           },
           "wins": 71.06,
           "events": 6.35,
@@ -1941,6 +2536,23 @@
             "stability": 10.68,
             "wins": 34.14,
             "mistakes": 0.01
+          },
+          "atTeen": {
+            "allegiance": 0.44,
+            "absAllegiance": 0.44,
+            "stability": 3.59,
+            "absStability": 3.6,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0.06,
+              "w1.5": 0.09,
+              "w2": 0.19,
+              "w3": 0.34
+            },
+            "wins": 11.66,
+            "minWins": 1.89,
+            "ghostPathPlay": 0.735,
+            "ghostPath": 0.995
           },
           "wins": 70.96,
           "events": 6.15,
@@ -2009,6 +2621,23 @@
             "wins": 17.93,
             "mistakes": 0.71
           },
+          "atTeen": {
+            "allegiance": -2.01,
+            "absAllegiance": 3.68,
+            "stability": -0.44,
+            "absStability": 1.75,
+            "mistakes": 0.17,
+            "balancedWithin": {
+              "w1": 0.09,
+              "w1.5": 0.145,
+              "w2": 0.25,
+              "w3": 0.45
+            },
+            "wins": 5.63,
+            "minWins": 0.68,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.12
+          },
           "wins": 41.86,
           "events": 13.67,
           "traces": 7.9,
@@ -2061,6 +2690,23 @@
             "wins": 17.29,
             "mistakes": 0.55
           },
+          "atTeen": {
+            "allegiance": -2.17,
+            "absAllegiance": 3.89,
+            "stability": -0.3,
+            "absStability": 1.51,
+            "mistakes": 0.14,
+            "balancedWithin": {
+              "w1": 0.105,
+              "w1.5": 0.165,
+              "w2": 0.305,
+              "w3": 0.495
+            },
+            "wins": 5.42,
+            "minWins": 0.63,
+            "ghostPathPlay": 0.01,
+            "ghostPath": 0.105
+          },
           "wins": 40.85,
           "events": 13.66,
           "traces": 7.68,
@@ -2111,6 +2757,23 @@
             "stability": -1.07,
             "wins": 17.33,
             "mistakes": 0.56
+          },
+          "atTeen": {
+            "allegiance": -2.39,
+            "absAllegiance": 3.8,
+            "stability": -0.22,
+            "absStability": 1.57,
+            "mistakes": 0.14,
+            "balancedWithin": {
+              "w1": 0.105,
+              "w1.5": 0.205,
+              "w2": 0.28,
+              "w3": 0.46
+            },
+            "wins": 5.45,
+            "minWins": 0.69,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.13
           },
           "wins": 41.44,
           "events": 13.87,
@@ -2163,6 +2826,23 @@
             "stability": -1.34,
             "wins": 17.74,
             "mistakes": 0.6
+          },
+          "atTeen": {
+            "allegiance": -2.05,
+            "absAllegiance": 3.75,
+            "stability": -0.41,
+            "absStability": 1.61,
+            "mistakes": 0.14,
+            "balancedWithin": {
+              "w1": 0.115,
+              "w1.5": 0.16,
+              "w2": 0.28,
+              "w3": 0.445
+            },
+            "wins": 5.59,
+            "minWins": 0.66,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.125
           },
           "wins": 41.68,
           "events": 14.08,
@@ -2226,6 +2906,23 @@
             "wins": 19.07,
             "mistakes": 0.17
           },
+          "atTeen": {
+            "allegiance": 16.52,
+            "absAllegiance": 16.52,
+            "stability": 4.72,
+            "absStability": 4.72,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.29,
+            "minWins": 0.79,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 39.2,
           "events": 14.18,
           "traces": 8.07,
@@ -2274,6 +2971,23 @@
             "stability": 14.57,
             "wins": 18.88,
             "mistakes": 0.12
+          },
+          "atTeen": {
+            "allegiance": 14.71,
+            "absAllegiance": 14.71,
+            "stability": 4.89,
+            "absStability": 4.89,
+            "mistakes": 0.02,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.22,
+            "minWins": 0.83,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 39.48,
           "events": 14.07,
@@ -2324,6 +3038,23 @@
             "wins": 19.33,
             "mistakes": 0.14
           },
+          "atTeen": {
+            "allegiance": 14.78,
+            "absAllegiance": 14.78,
+            "stability": 4.63,
+            "absStability": 4.65,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.45,
+            "minWins": 0.79,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 40.6,
           "events": 14.26,
           "traces": 7.83,
@@ -2370,6 +3101,23 @@
             "stability": 14.63,
             "wins": 19.18,
             "mistakes": 0.09
+          },
+          "atTeen": {
+            "allegiance": 14.72,
+            "absAllegiance": 14.72,
+            "stability": 4.95,
+            "absStability": 4.95,
+            "mistakes": 0.02,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.32,
+            "minWins": 0.83,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 40.63,
           "events": 13.86,
@@ -2435,6 +3183,23 @@
             "wins": 16.83,
             "mistakes": 0.19
           },
+          "atTeen": {
+            "allegiance": -20.59,
+            "absAllegiance": 20.59,
+            "stability": 3.62,
+            "absStability": 3.67,
+            "mistakes": 0.06,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.66,
+            "minWins": 0.73,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 38.9,
           "events": 13.69,
           "traces": 7.95,
@@ -2481,6 +3246,23 @@
             "stability": 11.6,
             "wins": 17.98,
             "mistakes": 0.22
+          },
+          "atTeen": {
+            "allegiance": -20.68,
+            "absAllegiance": 20.68,
+            "stability": 4.47,
+            "absStability": 4.47,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 6.04,
+            "minWins": 0.78,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 41.44,
           "events": 13.83,
@@ -2530,6 +3312,23 @@
             "wins": 17.25,
             "mistakes": 0.19
           },
+          "atTeen": {
+            "allegiance": -20.32,
+            "absAllegiance": 20.32,
+            "stability": 4.22,
+            "absStability": 4.22,
+            "mistakes": 0.05,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.81,
+            "minWins": 0.68,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 39.6,
           "events": 14.15,
           "traces": 7.97,
@@ -2576,6 +3375,23 @@
             "stability": 12.07,
             "wins": 17.41,
             "mistakes": 0.17
+          },
+          "atTeen": {
+            "allegiance": -20.52,
+            "absAllegiance": 20.52,
+            "stability": 4.44,
+            "absStability": 4.44,
+            "mistakes": 0,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 5.86,
+            "minWins": 0.75,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 39.69,
           "events": 13.67,
@@ -2640,6 +3456,23 @@
             "wins": 17.92,
             "mistakes": 0.19
           },
+          "atTeen": {
+            "allegiance": 0.33,
+            "absAllegiance": 0.57,
+            "stability": 4.16,
+            "absStability": 4.17,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0.045,
+              "w1.5": 0.065,
+              "w2": 0.085,
+              "w3": 0.255
+            },
+            "wins": 6.02,
+            "minWins": 0.77,
+            "ghostPathPlay": 0.055,
+            "ghostPath": 0.99
+          },
           "wins": 42.88,
           "events": 13.71,
           "traces": 7.85,
@@ -2686,6 +3519,23 @@
             "wins": 17.55,
             "mistakes": 0.18
           },
+          "atTeen": {
+            "allegiance": 0.27,
+            "absAllegiance": 0.47,
+            "stability": 4.17,
+            "absStability": 4.17,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0.045,
+              "w1.5": 0.06,
+              "w2": 0.085,
+              "w3": 0.22
+            },
+            "wins": 5.86,
+            "minWins": 0.69,
+            "ghostPathPlay": 0.035,
+            "ghostPath": 0.985
+          },
           "wins": 40.9,
           "events": 13.17,
           "traces": 7.48,
@@ -2730,6 +3580,23 @@
             "stability": 12.05,
             "wins": 17.5,
             "mistakes": 0.16
+          },
+          "atTeen": {
+            "allegiance": 0.28,
+            "absAllegiance": 0.52,
+            "stability": 4.16,
+            "absStability": 4.16,
+            "mistakes": 0.02,
+            "balancedWithin": {
+              "w1": 0.045,
+              "w1.5": 0.06,
+              "w2": 0.105,
+              "w3": 0.265
+            },
+            "wins": 5.84,
+            "minWins": 0.68,
+            "ghostPathPlay": 0.025,
+            "ghostPath": 0.985
           },
           "wins": 41.64,
           "events": 14.13,
@@ -2778,6 +3645,23 @@
             "stability": 12.14,
             "wins": 17.53,
             "mistakes": 0.19
+          },
+          "atTeen": {
+            "allegiance": 0.23,
+            "absAllegiance": 0.48,
+            "stability": 4.27,
+            "absStability": 4.32,
+            "mistakes": 0.04,
+            "balancedWithin": {
+              "w1": 0.025,
+              "w1.5": 0.05,
+              "w2": 0.105,
+              "w3": 0.255
+            },
+            "wins": 5.86,
+            "minWins": 0.75,
+            "ghostPathPlay": 0.03,
+            "ghostPath": 0.985
           },
           "wins": 41.29,
           "events": 13.48,
@@ -2846,6 +3730,23 @@
             "wins": 18.43,
             "mistakes": 0.73
           },
+          "atTeen": {
+            "allegiance": 0.37,
+            "absAllegiance": 0.54,
+            "stability": -1.79,
+            "absStability": 2.66,
+            "mistakes": 0.14,
+            "balancedWithin": {
+              "w1": 0.23,
+              "w1.5": 0.36,
+              "w2": 0.435,
+              "w3": 0.635
+            },
+            "wins": 6.07,
+            "minWins": 0.79,
+            "ghostPathPlay": 0.01,
+            "ghostPath": 0.235
+          },
           "wins": 39.34,
           "events": 13.77,
           "traces": 8.1,
@@ -2898,6 +3799,23 @@
             "wins": 15.54,
             "mistakes": 0.82
           },
+          "atTeen": {
+            "allegiance": 0.32,
+            "absAllegiance": 0.53,
+            "stability": -1.65,
+            "absStability": 2.25,
+            "mistakes": 0.16,
+            "balancedWithin": {
+              "w1": 0.295,
+              "w1.5": 0.42,
+              "w2": 0.525,
+              "w3": 0.72
+            },
+            "wins": 5.09,
+            "minWins": 0.56,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.235
+          },
           "wins": 33.76,
           "events": 13.43,
           "traces": 7.78,
@@ -2948,6 +3866,23 @@
             "wins": 15.67,
             "mistakes": 0.78
           },
+          "atTeen": {
+            "allegiance": 0.36,
+            "absAllegiance": 0.55,
+            "stability": -1.54,
+            "absStability": 2.43,
+            "mistakes": 0.14,
+            "balancedWithin": {
+              "w1": 0.24,
+              "w1.5": 0.39,
+              "w2": 0.505,
+              "w3": 0.71
+            },
+            "wins": 5.21,
+            "minWins": 0.66,
+            "ghostPathPlay": 0,
+            "ghostPath": 0.28
+          },
           "wins": 34.51,
           "events": 13.8,
           "traces": 8.01,
@@ -2997,6 +3932,23 @@
             "stability": -8.37,
             "wins": 15.8,
             "mistakes": 0.66
+          },
+          "atTeen": {
+            "allegiance": 0.27,
+            "absAllegiance": 0.54,
+            "stability": -1.79,
+            "absStability": 2.58,
+            "mistakes": 0.17,
+            "balancedWithin": {
+              "w1": 0.255,
+              "w1.5": 0.345,
+              "w2": 0.47,
+              "w3": 0.665
+            },
+            "wins": 5.29,
+            "minWins": 0.64,
+            "ghostPathPlay": 0.005,
+            "ghostPath": 0.3
           },
           "wins": 34.9,
           "events": 13.8,
@@ -3064,6 +4016,23 @@
             "wins": 17.24,
             "mistakes": 3.32
           },
+          "atTeen": {
+            "allegiance": -1,
+            "absAllegiance": 3.24,
+            "stability": -4.83,
+            "absStability": 4.83,
+            "mistakes": 3.16,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 4.79,
+            "minWins": 0.52,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 42.32,
           "events": 13.77,
           "traces": 7.97,
@@ -3116,6 +4085,23 @@
             "wins": 17.14,
             "mistakes": 3.29
           },
+          "atTeen": {
+            "allegiance": -0.46,
+            "absAllegiance": 3.06,
+            "stability": -4.83,
+            "absStability": 4.83,
+            "mistakes": 3.17,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 4.66,
+            "minWins": 0.48,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 41.68,
           "events": 13.76,
           "traces": 7.64,
@@ -3167,6 +4153,23 @@
             "wins": 17.02,
             "mistakes": 3.33
           },
+          "atTeen": {
+            "allegiance": -1.03,
+            "absAllegiance": 3.03,
+            "stability": -4.68,
+            "absStability": 4.68,
+            "mistakes": 3.17,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 4.66,
+            "minWins": 0.56,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
+          },
           "wins": 41.71,
           "events": 13.77,
           "traces": 7.69,
@@ -3216,6 +4219,23 @@
             "stability": 1.36,
             "wins": 17.27,
             "mistakes": 3.34
+          },
+          "atTeen": {
+            "allegiance": -0.41,
+            "absAllegiance": 2.96,
+            "stability": -4.73,
+            "absStability": 4.73,
+            "mistakes": 3.18,
+            "balancedWithin": {
+              "w1": 0,
+              "w1.5": 0,
+              "w2": 0,
+              "w3": 0
+            },
+            "wins": 4.88,
+            "minWins": 0.56,
+            "ghostPathPlay": 0,
+            "ghostPath": 0
           },
           "wins": 42.14,
           "events": 14,

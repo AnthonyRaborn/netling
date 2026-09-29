@@ -58,6 +58,10 @@ test('stats turn results into rates and averages', () => {
   assert.equal(st.teen, 1);
   assert.ok(Object.values(st.adults).every((x) => x > 0 && x <= 1));
   assert.ok(st.stageDays.adult > 3);
+  assert.deepEqual(Object.keys(st.atTeen.balancedWithin), ['w1', 'w1.5', 'w2', 'w3'], 'bands keep their order');
+  const bands = Object.values(st.atTeen.balancedWithin);
+  assert.ok(bands.every((x, i) => i === 0 || x >= bands[i - 1]), 'a wider band never holds fewer');
+  assert.ok(st.atTeen.ghostPathPlay <= st.atTeen.ghostPath);
 });
 
 test('the report diff finds what moved, by path', () => {

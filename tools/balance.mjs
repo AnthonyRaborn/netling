@@ -169,6 +169,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     if (s.stage === 'teen' && teenAt === null) {
       teenAt = minute;
       teenForm = s.form;
+      ctx.atTeen = { axes: { ...s.axes }, mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
     }
     if (s.stage === 'adult' && adultAt === null) {
       adultAt = minute;
@@ -194,6 +195,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     axes: { ...s.axes },
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
+    atTeen: ctx.atTeen ?? null,
     rootUsed: s.rootUsed,
     trait: s.trait ?? null,
     fragment: s.fragment ?? null,
@@ -226,12 +228,15 @@ function shares(results, key) {
   return Object.fromEntries(Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, round(v / results.length)]));
 }
 
+const BALANCE_BANDS = [1, 1.5, 2, 3];
+
 // Everything the report says, as numbers (rates are fractions). JSON=1 prints this.
 export function stats(results) {
   const n = results.length;
   const rate = (f) => round(results.filter(f).length / n);
   const ages = results.map((r) => r.ageMin).sort((a, b) => a - b);
   const adults = results.filter((r) => r.atAdult).map((r) => r.atAdult);
+  const teens = results.filter((r) => r.atTeen).map((r) => r.atTeen);
   const kinds = {};
   for (const r of results) for (const [k, v] of Object.entries(r.mistakeKinds)) kinds[k] = (kinds[k] ?? 0) + v;
   return {
@@ -254,6 +259,26 @@ export function stats(results) {
           stability: round(avg(adults.map((x) => x.axes.stability)), 2),
           wins: round(avg(adults.map((x) => x.wins)), 2),
           mistakes: round(avg(adults.map((x) => x.mistakes)), 2),
+        }
+      : null,
+    // The axes when it became a teen, and how often both were within k of zero (a balanced netling).
+    atTeen: teens.length
+      ? {
+          allegiance: round(avg(teens.map((x) => x.axes.allegiance)), 2),
+          absAllegiance: round(avg(teens.map((x) => Math.abs(x.axes.allegiance))), 2),
+          stability: round(avg(teens.map((x) => x.axes.stability)), 2),
+          absStability: round(avg(teens.map((x) => Math.abs(x.axes.stability))), 2),
+          mistakes: round(avg(teens.map((x) => x.mistakes)), 2),
+          // Keys are strings so they keep this order (1.5 would otherwise sort after 3).
+          balancedWithin: Object.fromEntries(
+            BALANCE_BANDS.map((k) => [`w${k}`, round(teens.filter((x) => Math.abs(x.axes.allegiance) <= k && Math.abs(x.axes.stability) <= k && x.mistakes <= 2).length / n)]),
+          ),
+          // On Ghost's own path at 24 hours: its allegiance and stability rules, and at most 1 fault.
+          wins: round(avg(teens.map((x) => x.wins)), 2),
+          minWins: round(avg(teens.map((x) => x.minWins)), 2),
+          // Ghost's path plus every game won at least twice: a narrower hint.
+          ghostPathPlay: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1 && x.minWins >= 2).length / n),
+          ghostPath: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1).length / n),
         }
       : null,
     wins: round(avg(results.map((r) => r.wins)), 2),
@@ -319,6 +344,8 @@ function printLife(st, detail) {
   const a = st.atAdult;
   console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
   console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}`);
+  const t = st.atTeen;
+  if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
   console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments`);
 }

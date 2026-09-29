@@ -33,7 +33,14 @@ Second round, 2026-09-29:
 10. **Lineage forms**: trait levels (option D), if the numbers work. New forms must be thematic, visually distinct and interesting to play, so none are planned yet.
 11. **Echoes at half strength**; a trait shared by parent and grandparent stacks up to a cap chosen by measurement.
 12. **Life length is an open question**: seven days is long for three stages. Either shorten it (for example to five days) or add a stage. Measure both.
-13. **Tooling pass first.**
+13. **Tooling pass first.** (Done.)
+
+Third round, 2026-09-29:
+
+14. **The third teen hints at Ghost**, by the hidden axes being closely balanced. The measurements below suggest a narrower rule (see Pass 1, item 5).
+15. **A deliberate-fault item**: using it adds 1 to the netling's faults, which counts like any fault and can end its life at the limit. Found at markets, from intrusions, overflows and power surges, and from visitors.
+16. **Scrip numbers**: a cap of 100; item prices scale with rarity, the rarest costing 50; the next generation inherits 50%, rounded down.
+17. **Tie-breaks (KI-15)**: pick randomly among the tied forms, with a 20% weight boost for each form the player has not yet raised.
 
 ## How the passes work
 
@@ -91,17 +98,39 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
 1. **Numbers only**: lower `uptimeStabilityPerHour` (for example 0.1 to 0.05), then measure. If Daemon still dominates, compare the axes after scaling each by its typical spread instead of raw.
 2. **Full steering for attentive players (decided)**:
    - **Adults**: every form must be reachable by a careful player who chooses for it. Glitch needs its own route: deliberate risk (Overclock rig, SALVAGE, RAID, playing hot) should move stability down without faults. Measured with the `steer-*` and `daredevil` archetypes.
-   - **Teens**: a way to take faults on purpose, by an item that adds a fault directly, or one that pushes a stat into fault territory (for example a "drain spike" that empties Sync). Stub is reachable today only through neglect; the `steer-stub` archetype measures what that costs now.
+   - **Teens (decided)**: an item that adds 1 fault when used. It counts like any fault, so it can end a life at the limit. Sources: markets, intrusions, overflows, power surges and visitors. A Stub needs 3 faults in the first 24 hours, so a baby has to be able to find about 3 in its first day (the Public Net is the only region open to it); drop chances are tuned for that. Today `steer-stub` gets there by starving the netling, at 3.6 faults of 10; with the item it should cost exactly 3 and no Integrity. It needs a new permanent item id, art, a field-manual entry, and a `steer-stub` update to use it.
 3. **Ghost (decided: stays a deliberate chase)**: keep its conditions. Every other change in this pass is checked against the `ghosthunter` archetype (100% Ghost today) and attentive players (1 to 2%), so neither moves. KI-14 (a boosted win counts twice) can stay as it is: boosters are part of the chase. Document it where the rule is described.
-4. **Tie-break (KI-15)**: decide whether a neutral netling that misses Ghost should become Chrome, or whichever form its larger scaled axis points to.
-5. **A third teen form, chosen from the hidden axes (decided)**: at 24 hours, a netling with few faults and a strong lean becomes the new teen instead of Kernel, as a preview of where it is heading. Which lean (corp, indie, orderly or chaotic, or any strong one) is still open. A new form needs:
+4. **Tie-break (KI-15, decided)**: when the axes tie, pick at random among the tied forms, each weighted 1, or 1.2 if the player has never raised it (not in the dex).
+   - **What counts as a tie** needs a definition. The axes are decimals, so exact ties are rare, apart from allegiance exactly 0 (today always Chrome) and a stability-versus-allegiance tie. Options: exact ties only (the rule then almost never fires), or a band, for example the two axes within 0.5 of each other, or an axis within 0.5 of zero.
+   - **Purity**: `sim.js` doesn't know the dex. The simplest route is a list of forms not yet raised, stored on the netling when it compiles (`newForms`, an added field with a default of none) and passed on by the UI; the balance tools can then simulate a first-time player or a veteran.
+5. **A third teen form that hints at Ghost (decided)**: at 24 hours, a netling on Ghost's path becomes the new teen instead of Kernel. Measured at 24 hours over 500 lives per archetype:
+
+   | Rule at 24 hours | Ghost chaser | Every other archetype |
+   |---|---|---|
+   | Both axes within ±2, at most 2 faults (the literal "closely balanced") | 16% | up to 49% (steer-glitch), casual 32%, worker 37% |
+   | Ghost's axis rule (allegiance within ±2, stability 0 or more), at most 1 fault | 99% | up to 98% (steer-daemon), attentive 29% |
+   | **Ghost's axis rule, at most 1 fault, and every game won at least twice** | **74%** | **at most 5%** (steer-daemon), attentive 2% |
+
+   "Both axes balanced" is a poor hint: tidy play raises stability by about 0.1 an hour, so Ghost chasers are at about +3.5 by 24 hours, and the rule mostly picks casual players who won't reach Ghost. **Recommended: the third row**, which mirrors Ghost's real conditions (balanced allegiance, no chaos, few faults, all four games played). It stays a hint, not a promise: the teen still needs Ghost's adult conditions at 72 hours. A new form needs:
    - a permanent id and sprites;
    - a DEX entry with hints, and `DEX_ORDER`;
    - a check of every "all forms" condition in cosmetics and archive, the sanitizer whitelist, CONTENT_CATALOG and `gallery.html`.
 
    It is additive, so no save version bump.
 
-6. **Life length (open)**: seven days for three stages leaves four days as an adult. Measure two variants with `CFG` overrides before choosing: a five-day life (`lifespanMin` 7200), and the current seven days with a fourth stage (for example an elder stage from day 5 with its own perk or pose). The tools report days spent in each stage.
+6. **Life length (open, measured)**: seven days for three stages leaves four days as an adult. Three five-day variants, 500 lives per archetype (`CFG` overrides):
+
+   | Variant | Adult days | Full life: casual, worker | Ghost chaser reaches Ghost | Fragments a life (attentive) | Codex by life 5 (attentive, 200 lines) |
+   |---|---|---|---|---|---|
+   | 7 days (now) | 4.0 | 80%, 51% | 100% | 16.9 | 94% (median 3) |
+   | 5 days, same stages (teen 24h, adult 72h) | 2.0 | 88%, 79% | 100% | 13.5 | 50% |
+   | 5 days, adult at 48h | 3.0 | 88%, 77% | 67% | 14.1 | not run |
+   | 5 days, scaled (teen 17h, adult 51h) | 2.9 | 87%, 78% | 89% | 14.2 | not run |
+
+   - **Same stages** changes no evolution odds (they are decided by 72 hours) and raises survival, but leaves only two adult days. Adult-only content suffers most: the Ruins and the Deep hold the last fragments, so the codex slows sharply (half of attentive lines unfinished after 5 lives, casual never).
+   - **An earlier adulthood** breaks the Ghost chase: 22 wins by adulthood is out of reach for a third of chasers at 48 hours. Ghost's win count would have to scale with the stage (about 15 at 48 hours), which touches the decided Ghost conditions.
+   - **Seven days with a fourth stage** can't be measured until the stage has rules. The candidate: an elder stage from day 5 or 6 with its own perk or pose, keeping four adult days split into adult and elder.
+   - **Leaning**: if shorter, "5 days, same stages" is the safe choice for evolution, but it needs the codex cap (Pass 2) and Deep access rethought together, because adult time is where the late codex is found.
 
 ### Candidate targets (to confirm)
 
@@ -150,10 +179,20 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 
 - **Earning**: sell an item at a netrun market for scrip. When a pickup meets a full inventory, offer to take it as scrip instead of losing it. Exits and caches can also drop a little loose scrip.
 - **Spending**: market items and accessory offers cost scrip **and** some Charge (decided: Charge is still needed). Tune the two together so a purchase stays a real choice mid-run.
-- **A maximum** (decided): a netling can hold only so much scrip (for example enough for two or three purchases), so hoarding is not a strategy and spending stays a decision. Scrip that would go over the cap is lost, and the HUD should show when it is full.
+- **A maximum of 100** (decided), so hoarding is not a strategy and spending stays a decision. Scrip that would go over the cap is lost, and the HUD should show when it is full.
+- **Prices by rarity** (decided: the rarest costs 50). A starting table, tiered by each item's average share of the loot tables across the five regions, to be tuned:
+
+  | Tier | Items (average loot share) | Price |
+  |---|---|---|
+  | Common | Memory shard 17%, Coolant cell 17%, Antivirus patch 15%, Repair kit 15%, Signal booster 14% | 15 |
+  | Uncommon | Black ICE shard 12%, Corp voucher 10% | 25 |
+  | Rarest | Overclock chip 1% | 50 |
+  | To set | Deliberate-fault item: its tier follows the drop chances chosen for it (it must be findable by a baby) | |
+
+  Selling pays a fraction of the price (for example a third), so buying back what you sold always costs more.
 - **At home**: DISCARD becomes SCRAP, for a token amount, so a home sale is never better than a market sale.
 - **Scarcity still matters**: lower the loot tables a little too, so a full inventory is the exception. Targets are below.
-- **Where it lives (decided)**: on the netling (`state.scrip`), with part of it inherited by the next generation (see Pass 3). It needs a default in `createScript`, `migrate` and `cleanSave`, a cleaner, a place in the HUD or Archive, and a transfer round-trip test. No version bump.
+- **Where it lives (decided)**: on the netling (`state.scrip`); the next generation inherits `Math.floor(scrip / 2)`. It needs a default in `createScript`, `migrate` and `cleanSave`, a cleaner, a place in the HUD or Archive, and a transfer round-trip test. No version bump.
 - **Allegiance**: buying at a market leans indie today (-0.5 per item). Keep that on purchases; selling can stay neutral.
 
 #### Other netrun changes
@@ -203,13 +242,14 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 1. **Family tree** in the Archive, from the lineage records the game already keeps, showing each generation's trait and echo.
 2. **Legacy goals**: streaks across generations (for example three full lives in a line, or every trait held once), rewarded with cosmetics only so power stays bounded.
-3. **Inherited scrip** (decided): part of it passes to the next generation (for example half, under the cap), as a small head start and a reason to end a life well.
+3. **Inherited scrip** (decided): half, rounded down, passes to the next generation, as a small head start and a reason to end a life well.
 
 ## Still to decide
 
-1. **Third teen**: which lean picks it (corp, indie, orderly, chaotic, or any strong one), and what it looks like.
-2. **Deliberate faults**: an item that adds a fault directly, or one that pushes a stat into fault territory? How is it obtained?
-3. **Life length**: five days, or seven with a fourth stage? To be measured first.
-4. **Scrip numbers**: the cap, prices, the Charge part of a purchase, and how much is inherited.
-5. **Trait numbers**: strengths, level steps and caps, after measuring.
-6. **Casual codex pacing**: casual lineages rarely finish the codex within 4 lives, and a per-life cap does nothing for them. Is that acceptable, or should casual players have an upper bound too (for example 6 lives)?
+1. **Third teen rule**: the recommended Ghost-path rule (Pass 1, item 5), or the literal "both axes balanced"? And its look and name.
+2. **What counts as a tie** for KI-15: exact ties only, or a band (Pass 1, item 4)?
+3. **Life length**: five days with the same stages (and the codex and Deep reworked around two adult days), or seven days with a fourth stage? See the measurements in Pass 1, item 6.
+4. **Scrip**: the price table, the sell fraction and the Charge part of a purchase.
+5. **Deliberate-fault item**: its name, and drop chances high enough for three in a baby's first day.
+6. **Trait numbers**: strengths, level steps and caps, after measuring.
+7. **Casual codex pacing**: casual lineages rarely finish the codex within 4 lives, and a per-life cap does nothing for them. Is that acceptable, or should casual players have an upper bound too (for example 6 lives)?
