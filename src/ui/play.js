@@ -71,7 +71,10 @@ function sendInput(fn) {
 }
 
 // Pad, keyboard and controller input for the running session.
-export const sendKey = (key) => app.session && sendInput((s) => s.input(key));
+export const sendKey = (key) => {
+  if (app.quitArmed) return disarmQuit(); // any game input answers the confirm with KEEP PLAYING, and is not played
+  return app.session && sendInput((s) => s.input(key));
+};
 export const quitSession = () => {
   disarmQuit();
   return app.session && sendInput((s) => s.forfeit());
@@ -79,6 +82,7 @@ export const quitSession = () => {
 
 // On touch, QUIT (or ABORT RUN) asks for a confirm somewhere else: a button over the top of the
 // screen, away from the pad where thumbs rest, so a second tap in the same place never quits.
+// While it shows, the game is paused.
 // Keyboard (Esc) and controller (B) keep their own behaviour through quitSession.
 const QUIT_CONFIRM_MS = 3000;
 let quitTimer = null;
@@ -92,6 +96,7 @@ export function resetPadQuit() {
 function disarmQuit() {
   clearTimeout(quitTimer);
   quitTimer = null;
+  app.quitArmed = false;
   $('pad-confirm').hidden = true;
   resetPadQuit();
 }
@@ -101,6 +106,7 @@ function armQuit() {
   // An ICE fight inside a run is a mini-game: losing it is the cost, not the loot.
   $('pad-confirm').textContent = run && !app.session.game ? 'CONFIRM ABORT' : 'CONFIRM QUIT';
   $('pad-confirm').hidden = false;
+  app.quitArmed = true; // the render loop holds the session still until it is answered
   $('pad-quit').textContent = run && !app.session.game ? 'KEEP RUNNING' : 'KEEP PLAYING';
   quitTimer = setTimeout(disarmQuit, QUIT_CONFIRM_MS);
 }

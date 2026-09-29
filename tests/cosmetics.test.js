@@ -78,3 +78,55 @@ test('device label is earned by the first lost netling and sanitized', () => {
   assert.equal(sanitizeLabel('!!!'), 'NETLING');
   assert.equal(sanitizeLabel('nl-0.v2'), 'NL-0.V2');
 });
+
+import { LEGACY } from '../src/cosmetics.js';
+import { cleanWardrobe } from '../src/sanitize.js';
+
+// Legacy goals (lineage Step 3): crests earned by the line, read from the lineage records.
+const has = (lineage, id) => unlockedIds({ ...empty, lineage }).includes(id);
+
+test('Helix: every trait inherited at least once, counted across the line', () => {
+  const line = ['licensed', 'hardened', 'persistent', 'volatile'].map((trait) => ({ trait }));
+  assert.ok(!has(line, 'crest:helix'));
+  assert.ok(has([...line, { trait: 'untraceable' }], 'crest:helix'));
+  assert.ok(!has([...line, { trait: 'nonsense' }, { trait: null }], 'crest:helix'), 'unknown traits do not count');
+});
+
+test('Triad: a level III trait, held or passed on', () => {
+  assert.ok(!has([{ traitLevel: 2, fragmentLevel: 2 }], 'crest:triad'));
+  assert.ok(has([{ traitLevel: 2, fragmentLevel: 3 }], 'crest:triad'), 'passing on level III counts');
+  assert.ok(has([{ traitLevel: 3, fragmentLevel: 1 }], 'crest:triad'), 'holding level III counts');
+  assert.ok(!has([{ trait: 'persistent' }], 'crest:triad'), 'records from before levels are level 1');
+});
+
+test('Closed loop: five full lives in a row with no NL-0 rescue', () => {
+  const full = { cause: 'end of life cycle' };
+  const rescued = { cause: 'end of life cycle', rescued: true };
+  const died = { cause: 'neglect' };
+  assert.equal(LEGACY.unbroken, 5);
+  assert.ok(has([died, full, full, full, full, full], 'crest:loop'));
+  assert.ok(!has([full, full, rescued, full, full, full], 'crest:loop'), 'a rescue breaks the loop');
+  assert.ok(!has([full, full, full, died, full, full], 'crest:loop'));
+  assert.ok(has([full, full, rescued, full], 'tint:amber'), 'amber still counts rescued lives');
+});
+
+test('Full house: every adult form raised to adulthood in the line', () => {
+  const adult = (form) => ({ form, realized: true });
+  const four = ['chrome', 'firewall', 'daemon', 'glitch'].map(adult);
+  assert.ok(!has(four, 'crest:star'));
+  assert.ok(!has([...four, { form: 'ghost', realized: false }], 'crest:star'), 'an unrealized echo is not raised');
+  assert.ok(!has([...four, { form: 'ghost' }], 'crest:star'), 'old records without realized do not count');
+  assert.ok(has([...four, adult('ghost')], 'crest:star'));
+  assert.ok(!unlockedIds({ ...empty, dex: ['chrome', 'firewall', 'daemon', 'glitch', 'ghost'] }).includes('crest:star'), 'the dex alone is not enough');
+});
+
+test('the crest slot defaults to none, has pixels for every crest, and survives cleaning', () => {
+  assert.equal(DEFAULT_WARDROBE.crest, 'none');
+  assert.equal(resolveWardrobe({ crest: 'helix' }, unlockedIds(empty)).crest, 'none', 'locked crest falls back');
+  for (const c of COSMETICS.crest.filter((x) => !x.free)) {
+    assert.equal(c.pixels.length, 9, c.id);
+    assert.ok(c.pixels.every((r) => /^[#.]{9}$/.test(r)), c.id);
+  }
+  assert.equal(cleanWardrobe({ crest: 'triad' }).crest, 'triad');
+  assert.equal(cleanWardrobe({ crest: 'bogus' }).crest, undefined);
+});

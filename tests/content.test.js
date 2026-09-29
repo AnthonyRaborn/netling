@@ -131,7 +131,14 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
   const full = {
     dex: Object.keys(SPECIES),
     codex: FRAGMENTS.map((f) => f.id),
-    lineage: Array.from({ length: 6 }, () => ({ cause: 'end of life cycle' })),
+    // A line that raised every adult form, each passing its trait on, with a level III streak at the end.
+    lineage: [...Object.keys(FORMS), 'daemon', 'daemon'].map((form, i, all) => ({
+      cause: 'end of life cycle',
+      form,
+      realized: true,
+      trait: i ? FORMS[all[i - 1]].trait : null,
+      fragmentLevel: i === all.length - 1 ? 3 : 1,
+    })),
     generation: 9,
     progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 99, cleanJackouts: 20, deepExits: 2 },
   };

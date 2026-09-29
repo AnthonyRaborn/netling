@@ -1,7 +1,7 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
 import { PALETTES, SPECIES } from '../sim.js';
-import { dexEntries, discover, lineageRows } from '../archive.js';
+import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
 import { drawSprite, formSprite } from '../sprites.js';
@@ -104,7 +104,7 @@ function renderRecord(lineage) {
   const rows = [
     ['LIFE'],
     ['generations', lineage.length + (state.stage === 'dead' ? 0 : 1)],
-    ['full 7-day lives', full],
+    ['full lives', full],
     ['longest full-life streak', bestStreak],
     ['CARE'],
     ['meals served', (acts.corp ?? 0) + (acts.scav ?? 0)],
@@ -139,23 +139,30 @@ function renderRecord(lineage) {
 function renderArchive() {
   const { lineage } = app;
   renderRecord(lineage);
-  const rows = lineageRows(lineage, app.state);
+  const chain = lineageChain(lineage, app.state);
   $('lineage-list').replaceChildren(
-    ...rows.map((r) =>
-      row(
+    ...chain.map((r) => {
+      if (r.kind === 'link') {
+        const li = document.createElement('li');
+        li.className = r.gap ? 'link gap' : 'link';
+        li.textContent = r.text;
+        return li;
+      }
+      return row(
         thumb(r.form, r.palette, { dead: r.dead }),
         [bold(r.version), ` ${r.formLabel}`],
         [
           `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
-          r.trait || r.fragment ? `inherited ${r.trait ?? '—'}${r.fragment ? ` · left ${r.fragment}` : ''}` : null,
-          r.keepsake ? `keepsake: ${r.keepsake}` : null,
+          r.stats ? { cls: 'stats', text: r.stats } : null,
+          r.inherited ? `inherited ${r.inherited}` : null,
+          r.left ? `left ${r.left}${r.keepsake ? ` + ${r.keepsake}` : ''}` : null,
           r.rescued ? { cls: 'perk', text: 'pulled back once by NL-0' } : null,
         ],
         r.dead ? '' : 'running',
-      ),
-    ),
+      );
+    }),
   );
-  if (!rows.length) {
+  if (!chain.length) {
     const li = document.createElement('li');
     li.className = 'empty';
     li.textContent = 'no generations yet.';
@@ -216,6 +223,14 @@ function selectTab(name) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
+  if (name === 'lineage') scrollToCurrent();
+}
+
+// The tree runs oldest first, so a long line would hide the running netling at the bottom.
+function scrollToCurrent() {
+  if ($('tab-lineage').hidden) return;
+  const list = $('lineage-list');
+  (list.querySelector('li.running') ?? list.lastElementChild)?.scrollIntoView({ block: 'end' });
 }
 
 export function initArchive() {
@@ -223,6 +238,7 @@ export function initArchive() {
   $('open-archive').addEventListener('click', () => {
     renderArchive();
     archive.showModal();
+    scrollToCurrent();
   });
   $('close-archive').addEventListener('click', () => archive.close());
   archive.addEventListener('click', (e) => {

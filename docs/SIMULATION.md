@@ -28,7 +28,7 @@ The simulation is pure in the sense that matters: every function takes the state
 - `state.ageMin` counts simulated minutes. It is the netling's own timeline: events, naps, cooldowns and shields are all stored as ages, not wall-clock times, so hibernation (which freezes the clock) cannot break them.
 - If `now < lastTick` (the device clock moved backwards), `lastTick` is reset to `now` and the netling resumes from there instead of pausing until real time catches up.
 - Hibernation makes `tick` return immediately. `wake()` sets `lastTick = now`, so the frozen stretch never happened.
-- The step uses the **local hour** (`new Date(t).getHours()`) to decide sleep. Time zone changes and daylight saving shift the bedtime window. Tests pin `TZ=UTC` for this reason.
+- The step decides sleep by the hour in the netling's own **zone** (`s.zone`, the device's UTC offset in minutes as `getTimezoneOffset` gives it). The zone is set at compile and read again from the device only when the netling wakes; if it is still night in the new zone, it keeps sleeping. So travel, daylight saving or importing onto a device elsewhere takes effect the next morning, and a day never changes zone halfway (KI-12). Tests pin `TZ=UTC` and set `s.zone` to act out a move.
 - The UI calls `advance()` (`ui/life.js`) once per second, on tab focus, and before every action, so the simulation is always caught up when the player acts.
 - Test mode replaces "now" with a scaled clock (see [DATA_AND_SAVES.md](DATA_AND_SAVES.md#test-mode)). The simulation does not know.
 
@@ -127,7 +127,7 @@ The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "abou
 
 ## Rest: sleep, lights, naps
 
-**Sleep.** A netling sleeps from `22 + sleepOffset` to `7 + sleepOffset` local time. `sleepOffset` is a quirk from -2 to +2, so bedtime is 20:00 to 00:00 and wake time 05:00 to 09:00. It falls asleep and wakes on its own. On waking, `lightsOn` is reset to true.
+**Sleep.** A netling sleeps from `22 + sleepOffset` to `7 + sleepOffset` in its own zone (see above). The readout shows its bedtime converted to the device's clock (`bedtimeOnDevice`), which differs from `bedtimeHour` only between a zone change and the next wake. `sleepOffset` is a quirk from -2 to +2, so bedtime is 20:00 to 00:00 and wake time 05:00 to 09:00. It falls asleep and wakes on its own. On waking, `lightsOn` is reset to true.
 
 **Lights.** `LIGHTS OFF` while asleep gives the dark drain multiplier and deep-rest regeneration. Sleeping with the lights on for 60 minutes (`lightsGraceMin`) is a care mistake. Lights off while awake makes it bored (Sync x2) and darkens the screen. Lights state is not touched at bedtime, so turning them off during the day carries into the night.
 

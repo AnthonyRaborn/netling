@@ -45,6 +45,7 @@ export const app = {
   skew: 0,
   testClock: null, // test mode: { simAt, realAt, speed }
   session: null, // the running mini-game or netrun view
+  quitArmed: false, // the touch quit confirm is showing: the session is paused (ui/play.js)
 
   // Storage gate: see canWrite() below.
   claimed: false, // this tab won the caretaker role (tabs.js)

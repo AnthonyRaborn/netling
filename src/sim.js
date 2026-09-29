@@ -347,6 +347,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     cleared: [], // regions whose exit it has reached, which opens the next one down
     codexFound: 0, // new codex fragments recovered this life (capped by RUN_CFG.codexPerLife)
     scrip: Math.min(SCRIP.max, fragment?.scrip ?? 0),
+    zone: deviceZone(now), // the time zone its sleep follows; refreshed each time it wakes
     trait: fragment?.trait ?? null,
     traitLevel: fragment?.trait ? Math.min(Math.max(fragment.level ?? 1, 1), TRAIT_CFG.maxLevel) : 1, // generations in a row as that form
     history: fragment?.trait ? (fragment.history ?? null) : null, // the grandparent's trait, at half strength
@@ -371,6 +372,19 @@ export function log(s, t, msg) {
 
 export function bedtimeHour(s) {
   return (CFG.sleepStart + (s.quirk?.sleepOffset ?? 0) + 24) % 24;
+}
+
+// The sleep window's time zone (KI-12): the device's offset from UTC in minutes, as
+// getTimezoneOffset gives it. Stored on the netling at compile and read again only when it wakes,
+// so a day keeps the zone it started in and travel or a clock change takes effect the next morning.
+export const deviceZone = (t) => new Date(t).getTimezoneOffset();
+export const localHour = (t, zone) => new Date(t - zone * 60_000).getUTCHours();
+
+// Bedtime as minutes past midnight on the device's clock at `t`: bedtimeHour, unless the device has
+// changed zone since the netling last woke (it keeps the old zone until the next morning).
+export function bedtimeOnDevice(s, t) {
+  const m = bedtimeHour(s) * 60 + (s.zone ?? deviceZone(t)) - deviceZone(t);
+  return ((m % 1440) + 1440) % 1440;
 }
 
 export function isSleepHour(hour, offset = 0) {
@@ -409,7 +423,12 @@ function step(s, t, rng) {
     evolve(s, t, 'adult', leaningForm(s, rng));
   }
 
-  const shouldSleep = isSleepHour(new Date(t).getHours(), s.quirk.sleepOffset);
+  let shouldSleep = isSleepHour(localHour(t, s.zone), s.quirk.sleepOffset);
+  if (s.asleep && !shouldSleep) {
+    // Waking: the new day takes the device's zone now. Still night there? Keep sleeping.
+    s.zone = deviceZone(t);
+    shouldSleep = isSleepHour(localHour(t, s.zone), s.quirk.sleepOffset);
+  }
   if (s.nap && (shouldSleep || s.ageMin - s.nap.startedAge >= CFG.napMaxMin)) {
     endNap(s, t, shouldSleep ? null : '> nap over. back online.');
   }
@@ -739,6 +758,7 @@ export function migrate(s) {
   s.traitLevel ??= 1; // from before trait levels: every inherited trait was level 1
   s.history ??= null;
   s.scrip ??= 0;
+  s.zone ??= deviceZone(s.lastTick ?? 0); // from before KI-12: the device's zone, as it always used
   return s;
 }
 

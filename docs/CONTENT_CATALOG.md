@@ -130,6 +130,20 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
+### Crests (5)
+
+A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
+
+| Id | Name | Unlock | Hint |
+|---|---|---|---|
+| `none` | No crest | free | |
+| `helix` | Helix | Every trait inherited at least once, anywhere in the line | "inherit every trait there is, once." |
+| `triad` | Triad | A level III trait held or passed on (the same form three generations running) | "the same shape, three times running." |
+| `loop` | Closed loop | 5 full lives in a row with no NL-0 rescue | "five whole lives in a row, nobody pulled back." |
+| `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
+
+Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house.
+
 ### Device label
 
 Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlocked when the first netling has died: "lose one before you name the line."
