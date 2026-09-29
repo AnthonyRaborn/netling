@@ -58,6 +58,14 @@ Fifth round, 2026-09-29:
 26. **Segfault drops**: Public Net loot weight 2 (Coolant cell drops from 3 to 2 there), weight 1 in the other regions' loot, weight 1 in the mini-game win and HIDE drop tables, weight 1 in market stock (Public Net and Bazaar), and small new chances after answering an intrusion (DEFEND), containing an overflow (PURGE) and after a power surge.
 27. **The Shell's sprite comes first**, for review before any rule changes (see Pass 1, item 5).
 
+Sixth round, 2026-09-29 (Pass 2):
+
+28. **Netruns are linear**: each region opens once the netling has cleared the one before it, in the order Public Net, Darknet Bazaar, Corp Grid, Old Web Ruins, The Deep.
+29. **Clears belong to each netling**: every new netling starts with only the Public Net.
+30. **Only reaching the exit node clears a region** (not a relay jack-out).
+31. **Stage gates stay** (Bazaar and Corp Grid need a teen, the Ruins and The Deep an adult), and **The Deep still needs `ruins-4`** as well as a Ruins clear.
+32. **Netlings alive when this ships** count as having cleared every region their stage can enter.
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -184,7 +192,29 @@ Measured against the previous baselines (details in [TESTING.md](TESTING.md#bala
 
 ## Pass 2: netruns
 
-### Findings
+**Status: implemented** (release `netling-v37`), apart from the ability changes, which wait on a decision (see [Other netrun changes](#other-netrun-changes)). What shipped:
+
+- **The way down** (decisions 28 to 32): `pet.cleared`, `regionLock(region, stage, codex, cleared)`, `REGION_ORDER` reordered to public, bazaar, corp, ruins, deep.
+- **Per-life codex cap of 8** (`RUN_CFG.codexPerLife`, `pet.codexFound`), shown in the region picker.
+- **Corpo scrip** as outlined below: cap 100, prices 15 / 25 / 50, half at a market and a quarter elsewhere, market purchases cost scrip plus the old Charge price, accessories 25 or 50 scrip plus 20 Charge, half inherited. A pickup that meets a full inventory is scrapped for a quarter automatically (no prompt). Loose scrip: 3 at every exit and 3 in 30% of empty caches.
+- **Region difficulty**: ICE damage Bazaar 38 to 40, Corp Grid 40 to 35, Ruins 45 to 48.
+- **Loot tables unchanged**: once the balance players use or sell what they carry, the inventory is full at only 16 to 26% of check-ins, under the target of half, so no cut was needed.
+- **Balance tools**: the bots follow the way down (heading for the deepest open region until it is cleared), sell surplus at markets, scrap surplus when full, use Repair kits and Overclock chips, and buy only what they use. New report fields: `netruns.cleared`, `netruns.byRegion`, `netruns.codexCapped`, `scrip.*` and `fullAtCheckIn`.
+
+Results (baselines regenerated):
+
+| Target | Result |
+|---|---|
+| Codex takes at least 3 lives | Met: no lineage finishes before life 3; attentive-style lines finish in life 3 (17 to 33%) or 4 (median 4). Casual lines: 0.5% within 4 lives |
+| Free slot at least half the time at check-ins | Met: inventory full at 16% (casual) to 26% (attentive) of check-ins |
+| A purchase affordable about every second run | Met for attentive players: 0.66 markets a run, affordable at 81% of them (0.53 a run). Casual players: 34% of markets |
+| Careful disconnects rise region by region, the Deep a wall | Met: Public 4%, Bazaar 5%, Corp 7%, Ruins 8%, Deep 26% |
+| Abilities within about 4 points of each other | **Not met** (not changed yet): in the Deep, Firewall 8%, Glitch 21%, Ghost 22%, Daemon 23%, Chrome 26% (no ability there) |
+| No regression elsewhere | Every form target from Pass 1 still holds (Ghost 99% for `ghosthunter`, `steer-*` 89 to 100%, `steer-stub` 97% Stub). Full-life rates held or rose |
+
+Side effects: attentive players end as Firewall less often (30% to 22%) and Chrome more often (11% to 16%), because they now buy fewer items at markets (buying leans indie). Heavy runners reach the scrip cap late in life (attentive peak 98, 84 at the end).
+
+### Findings (before Pass 2)
 
 | | Result |
 |---|---|
@@ -238,15 +268,23 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 
 #### Other netrun changes
 
-1. **Difficulty curve**: bring the Corp Grid's disconnect rate below the Ruins' (ICE damage 40, or its checkpoint weight). The Deep stays a deliberate wall (decided); keep its rate well above the Ruins'.
-2. **Abilities**: after Pass 0, bring Daemon and Ghost vision to within a few points of Firewall's disconnect rate, or give them a second effect.
+1. **Difficulty curve** (done): with the way down, the order is now Public < Bazaar < Corp < Ruins < Deep.
+2. **Abilities** (open): measured after the rest of Pass 2, careful play, 4000 runs each (disconnect rates):
+
+   | Region | No ability | Chrome | Firewall | Daemon | Glitch | Ghost |
+   |---|---|---|---|---|---|---|
+   | Corp Grid | 7.1% | 5.1% | 1.4% | 5.7% | 3.0% | 3.5% |
+   | Old Web Ruins | 7.9% | 7.9% | 1.1% | 6.4% | 2.5% | 5.5% |
+   | The Deep | 26.4% | 26.4% | 7.5% | 23.4% | 20.6% | 21.6% |
+
+   Firewall's half ICE damage is far ahead everywhere; Chrome's credentials do nothing outside checkpoint regions. Softening Firewall alone (ICE damage x0.7 instead of x0.5) gives 15.9% in the Deep: still the best, but closer. Options: (a) soften Firewall; (b) give Daemon, Ghost and Chrome a second effect that matters in the Deep (for example Daemon's lookahead also shows which mini-game each ICE holds, or Chrome pays less scrip at markets); (c) accept that abilities differ in kind and drop the 4-point target. Waiting on a decision.
 3. Late-game content (seeded daily runs, run modifiers) is a feature, not balance; it is out of scope here, but its rewards would be tuned with the same tools.
 
 ### Candidate targets (to confirm)
 
 - Codex: no simulated player finishes in fewer than 3 lives; attentive players take 3 to 4, casual players 4 to 6 (measured with `LIVES=n`).
 - Items: players who run have a free slot at least half the time at check-ins; a market purchase is affordable about every second run.
-- Careful-player disconnect rates rise region by region (Public < Bazaar ≈ Corp < Ruins < Deep), with the Deep kept as a wall.
+- Careful-player disconnect rates rise region by region (Public < Bazaar < Corp < Ruins < Deep, the way down), with the Deep kept as a wall.
 - No adult ability is more than about 4 points better than another at avoiding disconnects.
 
 ## Pass 3: lineage
@@ -291,3 +329,4 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 2. **Segfault's new drop chances** after DEFEND, PURGE and power surges, and its market weight; measured in Pass 1.
 3. **Trait numbers**: strengths, level steps and caps, after measuring.
 4. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
+5. **Adult abilities** (Pass 2): soften Firewall, add second effects, or drop the target (see [Other netrun changes](#other-netrun-changes)).

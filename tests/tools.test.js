@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import './helpers/utc.js';
 
 // The balance tools are how rule changes get judged, so their own logic is tested here.
-const { planMove } = await import('../tools/netrun-bot.mjs');
+const { planMove, surplusSlot } = await import('../tools/netrun-bot.mjs');
 const { simulate, simulateLine, stats, parentOf, ARCHETYPES } = await import('../tools/balance.mjs');
 const { diff, flatten } = await import('../tools/balance-diff.mjs');
 const { FORMS } = await import('../src/sim.js');
@@ -24,6 +24,23 @@ test('the netrun bot plans only with the nodes the player can see', () => {
   assert.equal(planMove(MAP, options, new Set([1, 2]), false).id, 1, 'unseen nodes must not steer it: a tie keeps the first');
   assert.equal(planMove(MAP, options, new Set([1, 2, 3, 4]), false).id, 2, 'with sight it avoids the ICE behind 1');
   assert.equal(planMove(MAP, options, new Set([1, 2, 3]), true).id, 2, 'seeing only the ICE is enough to avoid it when hurt');
+});
+
+test('the bot sells what it has no use for first, then the commonest duplicate, cheapest first', () => {
+  const keep = ['coolant', 'overclock'];
+  assert.equal(surplusSlot(['coolant', 'memory', 'overclock'], keep), 1, 'no use for memory');
+  assert.equal(surplusSlot(['overclock', 'coolant', 'overclock', 'coolant', 'coolant'], keep), 1, 'three coolants beat two chips');
+  assert.equal(surplusSlot(['overclock', 'overclock', 'coolant', 'coolant'], keep), 2, 'a tie sells the cheaper');
+  assert.equal(surplusSlot(['coolant', 'overclock'], keep), null, 'nothing spare');
+});
+
+test('a simulated life follows the way down and keeps its scrip in range', () => {
+  const r = simulate(ARCHETYPES.attentive, 11);
+  assert.ok(r.cleared.length >= 1);
+  const order = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
+  assert.deepEqual(r.cleared, order.slice(0, r.cleared.length), 'regions clear in order');
+  assert.ok(r.fragments <= 8, 'never more than the per-life cap');
+  assert.ok(r.scrip.end >= 0 && r.scrip.end <= 100);
 });
 
 test('a simulated life is repeatable and reports its stages', () => {

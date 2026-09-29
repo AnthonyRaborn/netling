@@ -1,7 +1,7 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { grantItem, isAlive, log, resting, runCooldownAtFloor, runCooldownLeft, GAME_IDS, ITEMS, CFG } from '../sim.js';
+import { addScrip, grantItem, isAlive, log, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
 import { generateMap, nodeById } from './map.js';
-import { REGIONS, regionLock } from './regions.js';
+import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES } from './anomalies.js';
@@ -30,10 +30,17 @@ export const RUN_CFG = {
   hideCaughtChance: 0.25,
   caughtDamage: 15,
   complyDamage: 5,
-  marketPrice: 12,
+  marketPrice: 12, // Charge per purchase, on top of the item's scrip price (SCRIP.price)
   cacheFragmentChance: 0.15,
+  // A netling's memory holds this many new codex fragments; the rest wait for the next generation.
+  codexPerLife: 8,
+  // Loose scrip, banked on jack-out like loot.
+  exitScrip: 3,
+  cacheScripChance: 0.3, // an empty cache
+  cacheScrip: 3,
   // Accessories: mostly bought at markets, rarely found.
   accPrice: 20,
+  accScrip: { common: 25, rare: 50 },
   marketAccChance: 0.5,
   cacheAccChance: 0.03,
   iceWinAccChance: 0.05,
@@ -63,7 +70,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   if (REGIONS[region].tutorial) return null; // the first run is always allowed
   if (resting(pet)) return pet.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if ((pet.rebootUntilAge ?? 0) > pet.ageMin) return 'still rebooting.';
-  const lock = regionLock(region, pet.stage, codex);
+  const lock = regionLock(region, pet.stage, codex, pet.cleared ?? []);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);
   if (cd > 0) {
@@ -92,6 +99,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     fragments: [], // found this run; banked on jack-out like loot
     knownAcc: [...ownedAccessories],
     accessories: [], // found or bought this run; banked on jack-out like loot
+    scrip: 0, // loose scrip found this run; banked on jack-out like loot
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
@@ -114,10 +122,14 @@ function takeAccessory(run, rng) {
   return ` accessory: ${accessoryById(id).name}!`;
 }
 
+export const codexRoom = (pet) => Math.max(0, RUN_CFG.codexPerLife - (pet.codexFound ?? 0) - (pet.run?.fragments.length ?? 0));
+
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
-function takeFragment(run) {
+function takeFragment(pet) {
+  const run = pet.run;
   const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
   if (!id) return '';
+  if (!codexRoom(pet)) return ' a codex fragment, but its memory is full: it will keep for the next generation.';
   run.fragments.push(id);
   return ` codex fragment: "${fragmentById(id).title}".`;
 }
@@ -144,12 +156,17 @@ export function moveTo(pet, nodeId, rng) {
   const region = REGIONS[run.region];
   switch (node.type) {
     case 'cache': {
-      const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(run) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
+      const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(pet) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
       if (rng() < (region.cacheFind ?? RUN_CFG.cacheFindChance)) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
         note(run, `cache cracked: ${ITEMS[item].name}.${frag}`);
         return { ok: true, kind: 'cache', item, fragment: Boolean(frag) };
+      }
+      if (rng() < RUN_CFG.cacheScripChance) {
+        run.scrip = (run.scrip ?? 0) + RUN_CFG.cacheScrip;
+        note(run, `cache held ${RUN_CFG.cacheScrip} loose scrip.${frag}`);
+        return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
       }
       note(run, frag ? `cache held no items.${frag}` : 'cache was empty.');
       return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
@@ -207,29 +224,21 @@ export function moveTo(pet, nodeId, rng) {
         if (next !== offers[0]) offers.push(next);
       }
       const price = region.marketPrice ?? RUN_CFG.marketPrice;
-      const affordable = st.charge > price + 5;
       const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region) : null;
-      const accAffordable = st.charge > RUN_CFG.accPrice + 5;
       openChoice(run, {
         kind: 'market',
         title: 'BLACK MARKET',
-        text: `a vendor process. ${price} charge per item.`,
+        text: `a vendor process. scrip, plus ${price} charge.`,
         offers,
         price,
         accOffer,
         options: [
-          ...offers.map((id, i) => ({ id: `buy${i}`, label: ITEMS[id].name.toUpperCase(), hint: `-${price} chg`, disabled: !affordable })),
-          ...(accOffer
-            ? [{
-                id: 'buyacc',
-                label: `${accessoryById(accOffer).name.toUpperCase()} (STYLE)`,
-                hint: `-${RUN_CFG.accPrice} chg · ${accessoryById(accOffer).rarity === 'common' ? 'accessory' : 'rare accessory'}`,
-                disabled: !accAffordable,
-              }]
-            : []),
-          { id: 'leave', label: 'LEAVE', hint: 'buy nothing' },
+          ...offers.map((id, i) => ({ id: `buy${i}`, label: `${ITEMS[id].name.toUpperCase()} ${SCRIP.price[id]}$` })),
+          ...(accOffer ? [{ id: 'buyacc', label: `${accessoryById(accOffer).name.toUpperCase()} ${accScrip(accOffer)}$` }] : []),
+          { id: 'leave', label: 'LEAVE', hint: 'buy nothing. sell from the inventory first.' },
         ],
       });
+      refreshMarket(pet);
       return { ok: true, kind: 'market' };
     }
     case 'anomaly': {
@@ -246,8 +255,16 @@ export function moveTo(pet, nodeId, rng) {
     case 'exit': {
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
-      const frag = (rng() < (region.exitFragment ?? RUN_CFG.exitFragmentChance) ? takeFragment(run) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
-      note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}.${frag}`);
+      run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip;
+      const frag = (rng() < (region.exitFragment ?? RUN_CFG.exitFragmentChance) ? takeFragment(pet) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
+      // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
+      const opened = !region.tutorial && !(pet.cleared ??= []).includes(run.region);
+      if (opened) pet.cleared.push(run.region);
+      const next = opened && REGION_ORDER[REGION_ORDER.indexOf(run.region) + 1];
+      const young = next && STAGE_ORDER.indexOf(pet.stage) < STAGE_ORDER.indexOf(REGIONS[next].minStage);
+      // The Deep stays unnamed: its way in is a secret.
+      const opens = next && !REGIONS[next].requires ? `: the ${REGIONS[next].name} ${young ? 'opens once it grows up' : 'is open to it'}.` : '.';
+      note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}, ${RUN_CFG.exitScrip} scrip.${frag}${opened ? ` region cleared${opens}` : ''}`);
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
   }
@@ -285,11 +302,50 @@ function openChoice(run, pending) {
   run.pending = pending;
 }
 
+const accScrip = (id) => RUN_CFG.accScrip[accessoryById(id)?.rarity === 'common' ? 'common' : 'rare'];
+
+// Market buttons follow what the netling can afford right now (it can sell mid-choice).
+export function refreshMarket(pet) {
+  const p = pet.run?.pending;
+  if (p?.kind !== 'market') return;
+  const scrip = pet.scrip ?? 0;
+  const charge = pet.stats.charge;
+  for (const o of p.options) {
+    if (o.id === 'leave') continue;
+    const acc = o.id === 'buyacc';
+    const cost = acc ? accScrip(p.accOffer) : SCRIP.price[p.offers[Number(o.id.slice(3))]];
+    const chg = acc ? RUN_CFG.accPrice : p.price;
+    const short = scrip < cost ? `needs ${cost} scrip, has ${scrip}` : charge <= chg + 5 ? `needs ${chg + 5}+ charge` : null;
+    o.disabled = Boolean(short);
+    o.hint = short ?? `-${cost} scrip, -${chg} chg${acc ? ` · ${accessoryById(p.accOffer).rarity === 'common' ? 'accessory' : 'rare accessory'}` : ''}`;
+  }
+}
+
+// Whether the open choice is a market, where the inventory sells for more.
+export const atMarket = (pet) => pet.run?.phase === 'choice' && pet.run.pending?.kind === 'market';
+
+// Sells an inventory slot: half the price at an open market, a quarter anywhere else (SCRAP).
+export function sellItem(pet, slot) {
+  const id = pet.inventory?.[slot];
+  if (!id) return { ok: false, msg: 'empty slot.' };
+  const market = atMarket(pet);
+  pet.inventory.splice(slot, 1);
+  const value = sellValue(id, market);
+  const over = addScrip(pet, value);
+  const msg = `${ITEMS[id].name.toLowerCase()} ${market ? 'sold' : 'scrapped'} for ${value} scrip.${over ? ' scrip full: the rest is lost.' : ''}`;
+  if (market) {
+    note(pet.run, msg);
+    refreshMarket(pet);
+  }
+  return { ok: true, msg, value, market };
+}
+
 // Resolve the open choice node. Returns { ok, msg, result? }.
 export function choose(pet, optionId, rng) {
   const run = pet.run;
   if (run.phase !== 'choice') return { ok: false, msg: 'nothing to choose.' };
   const p = run.pending;
+  if (p.kind === 'market') refreshMarket(pet); // selling since it opened may have changed what it can afford
   const opt = p.options.find((o) => o.id === optionId);
   if (!opt || opt.disabled) return { ok: false, msg: 'not available.' };
   // The inventory stays usable mid-choice, so the voucher offered on arrival may be gone.
@@ -344,11 +400,13 @@ export function choose(pet, optionId, rng) {
       msg = 'left the market.';
     } else if (optionId === 'buyacc') {
       st.charge = clamp(st.charge - RUN_CFG.accPrice);
+      pet.scrip -= accScrip(p.accOffer);
       run.accessories.push(p.accOffer);
       msg = `bought ${accessoryById(p.accOffer).name} for your style.`;
     } else {
       const item = p.offers[Number(optionId.slice(3))];
       st.charge = clamp(st.charge - p.price);
+      pet.scrip -= SCRIP.price[item];
       run.loot.push(item);
       lean(-0.5, 0);
       msg = `bought ${ITEMS[item].name}.`;
@@ -358,7 +416,7 @@ export function choose(pet, optionId, rng) {
     const reveal = (depth) => {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
-    const fragment = (chance) => (rng() < chance ? takeFragment(run) : '');
+    const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
     msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
@@ -414,11 +472,15 @@ export function jackOut(pet) {
   const restored = lostInt > 0 ? Math.round(lostInt * RUN_CFG.jackOutRestore) : 0;
   pet.stats.integrity = clamp(pet.stats.integrity + restored);
   const kept = [];
-  const lost = [];
+  const lost = []; // scrapped for scrip: the inventory was full
   for (const item of run.loot) {
     if (grantItem(pet, item).includes('full')) lost.push(item);
     else kept.push(item);
   }
+  const scrapped = lost.reduce((n, id) => n + sellValue(id), 0);
+  const loose = run.scrip ?? 0;
+  const over = addScrip(pet, loose);
+  pet.codexFound = (pet.codexFound ?? 0) + run.fragments.length;
   const frags = run.fragments.length;
   const clean = !REGIONS[run.region].noCooldown && (run.tally?.iceLost ?? 0) === 0;
   note(
@@ -426,7 +488,9 @@ export function jackOut(pet) {
     `jacked out with ${kept.length} item${kept.length === 1 ? '' : 's'}` +
       `${frags ? ` and ${frags} fragment${frags === 1 ? '' : 's'}` : ''}.` +
       `${restored ? ` re-synced +${restored} integrity.` : ''}` +
-      `${lost.length ? ` ${lost.length} lost: inventory full.` : ''}` +
+      `${loose ? ` +${loose} scrip.` : ''}` +
+      `${lost.length ? ` ${lost.length} scrapped for ${scrapped} scrip: inventory full.` : ''}` +
+      `${over || (lost.length && pet.scrip >= SCRIP.max) ? ' scrip full.' : ''}` +
       `${clean ? ` clean clear: uplink cools ${CFG.runCleanCutMin / 60}h faster.` : ''}`,
   );
   // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
@@ -448,6 +512,7 @@ export function disconnect(pet, why) {
   if (mistake) pet.careMistakes++;
   note(run, `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
+  run.scrip = 0;
   run.fragments = [];
   run.accessories = [];
   endRun(pet, 'disconnected');
@@ -457,6 +522,7 @@ export function disconnect(pet, why) {
 // Bail out: forfeit the loot, no other penalty.
 export function abortRun(pet) {
   pet.run.loot = [];
+  pet.run.scrip = 0;
   pet.run.fragments = [];
   pet.run.accessories = [];
   note(pet.run, 'run aborted. loot abandoned.');

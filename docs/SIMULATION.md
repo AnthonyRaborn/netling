@@ -170,7 +170,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 | `cool` | Heat 30+ | Heat -35, Integrity +4 |
 | `purge` | Cache above 0, or an overflow event | Clears cache. Stability +0.5, Integrity +4. Cancels an overflow |
 | `use` | Item in slot, item's own conditions | See [Items](#items) |
-| `discard` | Item in slot | Removes it |
+| `discard` | Item in slot | SCRAP: removes it for a quarter of its scrip price (see [NETRUN.md](NETRUN.md#corpo-scrip)) |
 | `nap` | Not asleep, no netrun, cooldown over | Starts a nap; pressing again wakes it |
 | `lights` | always allowed except dead/hibernating | Toggles `lightsOn` |
 
@@ -204,7 +204,7 @@ A stray netling appears for 5 to 10 minutes (`visitMinMin`, `visitMaxMin`). Its 
 
 ## Items
 
-Six slots (`INVENTORY_SLOTS`). Extra finds are refused with "inventory is full".
+Six slots (`INVENTORY_SLOTS`). A find that meets a full inventory is scrapped for a quarter of its scrip price (`grantItem`), up to the scrip cap of 100.
 
 | Id | Name | Effect | Needs awake |
 |---|---|---|---|

@@ -427,6 +427,17 @@ button:active {
   margin-top: 12px;
 }
 
+.inv-scrip {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--dim);
+  text-align: right;
+}
+
+.inv-scrip.full {
+  color: var(--yellow);
+}
+
 .inv-slots {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

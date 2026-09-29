@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
-import { startRun } from '../src/netrun/run.js';
+import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -642,6 +642,61 @@ await scenario('a Segfault takes a second press, then adds two faults', async ({
   await page.waitForTimeout(200);
   const s = await saved(page);
   assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
+});
+
+await scenario('SCRAP sells for a quarter, and the scrip line shows it', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['overclock'], scrip: 30 }) }));
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 30/100', `scrip line: ${await page.textContent('#inv-scrip')}`);
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SCRAP +12', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.scrip === 42 && s.inventory.length === 0, `after scrapping: ${s.scrip} scrip, ${JSON.stringify(s.inventory)}`);
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 42/100', 'scrip line not updated');
+});
+
+await scenario('regions open in order: only the Public Net until its exit is reached', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: [] }) }));
+  await page.click('#btn-netrun');
+  const buttons = page.locator('#region-list button');
+  assert(!(await buttons.nth(0).isDisabled()), 'the Public Net is closed');
+  assert(await buttons.nth(1).isDisabled(), 'the Bazaar is open without a clear');
+  assert(/exit of the Public Net/.test(await buttons.nth(1).textContent()), `no reason shown: ${await buttons.nth(1).textContent()}`);
+  assert(/CODEX MEMORY 0\/8/.test(await page.textContent('#region-memory')), 'no codex memory line');
+  await page.close();
+
+  const page2 = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: ['public'], codexFound: 8 }) }));
+  await page2.click('#btn-netrun');
+  const b2 = page2.locator('#region-list button');
+  assert(!(await b2.nth(1).isDisabled()), 'the Bazaar stayed closed after a Public Net clear');
+  assert(/DARKNET BAZAAR/.test(await b2.nth(1).textContent()), 'the Bazaar is not second');
+  assert(await b2.nth(2).isDisabled(), 'the Corp Grid opened early');
+  assert(/FULL/.test(await page2.textContent('#region-memory')), 'a full memory is not shown');
+});
+
+await scenario('at a netrun market the inventory sells for half, and a purchase opens up', async ({ open }) => {
+  const s = awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', inventory: ['overclock'], scrip: 0 });
+  s.stats.charge = 90;
+  let seedN = 1;
+  const rng = () => ((seedN = (seedN * 16807) % 2147483647) / 2147483647);
+  startRun(s, 'public', rng);
+  const next = runOptions(s.run)[0];
+  next.type = 'market';
+  moveTo(s, next.id, rng);
+  const cheapest = Math.min(...s.run.pending.offers.map((id) => ({ coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15 })[id] ?? 25));
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SELL +25', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(300);
+  const after = await saved(page);
+  assert(after.scrip === 25 && after.inventory.length === 0, `after selling: ${after.scrip} scrip`);
+  const buys = after.run.pending.options.filter((o) => o.id.startsWith('buy') && o.id !== 'buyacc');
+  assert(buys.some((o) => !o.disabled) === cheapest <= 25, `purchases: ${JSON.stringify(buys)}`);
 });
 
 await scenario('system actions wait for a running mini-game; a refused result explains why', async ({ open }) => {

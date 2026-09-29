@@ -5,11 +5,12 @@
 // TRAIT=<adult form> start as the child of that form; LIVES=<n> simulate lineages of n lives,
 // carrying the fragment, codex and Root Access from each life to the next.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS } = await import('../src/sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
+const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
 const { FRAGMENTS } = await import('../src/netrun/codex.js');
-const { playRun, finishRun, RUN_STYLES } = await import('./netrun-bot.mjs');
+const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
 const at = (h, m = 0) => h * 60 + m;
@@ -58,10 +59,23 @@ export function checkIn(s, p, now, rng, ctx) {
     if (slot < 0 || p.noItems) return false;
     return doAct('use', { slot }).ok;
   };
-  // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else throws it away.
+  ctx.checkIns = (ctx.checkIns ?? 0) + 1;
+  if (s.inventory.length >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
+  // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else scraps it.
   const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
   for (let i = s.inventory.length - 1; i >= 0 && !wantsFaults; i--) if (s.inventory[i] === 'segfault') doAct('discard', { slot: i });
   if (wantsFaults) useItem('segfault');
+  // What this player has a use for; the rest is surplus, sold at markets or scrapped when full.
+  const keep = ['coolant', 'antivirus', 'repair', 'overclock', 'blackice'];
+  if (p.trace !== 'hide') keep.push('voucher');
+  if (p.gamer) keep.push('booster');
+  if (wantsFaults) keep.push('segfault');
+  if (s.inventory.length >= INVENTORY_SLOTS && !p.noItems) {
+    const slot = surplusSlot(s.inventory, keep);
+    if (slot !== null) doAct('discard', { slot });
+  }
+  if (s.stats.integrity < 60) useItem('repair');
+  if (p.runs && runCooldownLeft(s) > 0) useItem('overclock');
   // Items first: they can resolve things more cheaply than actions.
   if (s.event?.type === 'trace' && p.trace !== 'hide') useItem('voucher');
   if (s.stats.heat > 70) useItem('coolant');
@@ -71,18 +85,27 @@ export function checkIn(s, p, now, rng, ctx) {
   if (p.gamer && !s.buffs?.boost) useItem('booster');
   ctx.itemsHeld = Math.max(ctx.itemsHeld ?? 0, s.inventory.length);
 
-  // Netrun when healthy, in any open region.
+  // Netrun when healthy. Until the deepest open region is cleared it heads there (the way down);
+  // after that, any open region.
   // Careful runners only jack in healthy, and only when they'll be back soon to patch things up.
   const careful = p.runs === 'careful';
   const healthy = s.stats.integrity > (careful ? 80 : 60) && s.stats.charge > 60;
   const aroundAfter = !careful || ctx.gapToNext <= 120;
   if (p.runs && !p.noRuns && healthy && aroundAfter) {
-    const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex));
-    const region = open[Math.floor(rng() * open.length)];
+    const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex, s.cleared));
+    const frontier = open.at(-1);
+    const region = frontier && !s.cleared.includes(frontier) ? frontier : open[Math.floor(rng() * open.length)];
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
-      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop }, region, rng, ctx.codex);
+      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep }, region, rng, ctx.codex);
       ctx.runs = (ctx.runs ?? 0) + 1;
+      ctx.regionRuns[region] = (ctx.regionRuns[region] ?? 0) + 1;
+      ctx.bought = (ctx.bought ?? 0) + run.messages.filter((m) => m.startsWith('bought')).length;
+      ctx.sold = (ctx.sold ?? 0) + (run.sold ?? 0);
+      ctx.markets = (ctx.markets ?? 0) + (run.markets ?? 0);
+      ctx.affordable = (ctx.affordable ?? 0) + (run.affordable ?? 0);
+      if (run.result === 'jacked' && run.messages.some((m) => m.startsWith('bought'))) ctx.runsWithBuy = (ctx.runsWithBuy ?? 0) + 1;
+      ctx.scripPeak = Math.max(ctx.scripPeak ?? 0, s.scrip);
       if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
       finishRun(s, now);
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
@@ -136,7 +159,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
-  const ctx = { games: 0, lastOfDay: false, codex: [...codex] };
+  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {} };
   const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -220,6 +243,11 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     runs: ctx.runs ?? 0,
     runDisconnects: ctx.runDisconnects ?? 0,
     fragments: ctx.codex.length - codexAtStart,
+    codexCapped: (s.codexFound ?? 0) >= RUN_CFG.codexPerLife,
+    cleared: [...(s.cleared ?? [])],
+    regionRuns: ctx.regionRuns,
+    fullShare: ctx.checkIns ? (ctx.fullChecks ?? 0) / ctx.checkIns : 0,
+    scrip: { end: s.scrip ?? 0, peak: ctx.scripPeak ?? 0, bought: ctx.bought ?? 0, sold: ctx.sold ?? 0, markets: ctx.markets ?? 0, affordable: ctx.affordable ?? 0 },
     mistakeKinds,
     events,
     traces,
@@ -298,10 +326,25 @@ export function stats(results) {
     traces: round(avg(results.map((r) => r.traces)), 2),
     tracesIgnored: round(avg(results.map((r) => r.tracesIgnored)), 2),
     itemsHeld: round(avg(results.map((r) => r.itemsHeld)), 2),
+    // How often a check-in found the inventory full (the target is under half).
+    fullAtCheckIn: round(avg(results.map((r) => r.fullShare))),
     netruns: {
       runs: round(avg(results.map((r) => r.runs)), 2),
       disconnects: round(avg(results.map((r) => r.runDisconnects)), 2),
       fragments: round(avg(results.map((r) => r.fragments)), 2),
+      codexCapped: rate((r) => r.codexCapped),
+      // The share of lives that reached each region's exit, and the average runs in each.
+      cleared: Object.fromEntries(REGION_ORDER.map((id) => [id, rate((r) => r.cleared.includes(id))])),
+      byRegion: Object.fromEntries(REGION_ORDER.map((id) => [id, round(avg(results.map((r) => r.regionRuns[id] ?? 0)), 2)])),
+    },
+    scrip: {
+      end: round(avg(results.map((r) => r.scrip.end)), 1),
+      peak: round(avg(results.map((r) => r.scrip.peak)), 1),
+      bought: round(avg(results.map((r) => r.scrip.bought)), 2),
+      sold: round(avg(results.map((r) => r.scrip.sold)), 2),
+      // Of the markets it met, the share where it could afford at least one item (after selling).
+      affordable: round(results.reduce((a, r) => a + r.scrip.affordable, 0) / Math.max(1, results.reduce((a, r) => a + r.scrip.markets, 0))),
+      marketsPerRun: round(results.reduce((a, r) => a + r.scrip.markets, 0) / Math.max(1, results.reduce((a, r) => a + r.runs, 0)), 2),
     },
   };
 }
@@ -360,7 +403,9 @@ function printLife(st, detail) {
   if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
-  console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments`);
+  console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments, codex cap reached ${pct(st.netruns.codexCapped)}`);
+  console.log(`  cleared: ${list(st.netruns.cleared)} · runs by region: ${Object.entries(st.netruns.byRegion).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
+  console.log(`  scrip: ${st.scrip.end.toFixed(0)} at the end (peak ${st.scrip.peak.toFixed(0)}), ${st.scrip.bought.toFixed(1)} bought, ${st.scrip.sold.toFixed(1)} sold, could afford an item at ${pct(st.scrip.affordable)} of markets (${st.scrip.marketsPerRun.toFixed(2)} a run) · inventory full at ${pct(st.fullAtCheckIn)} of check-ins`);
 }
 
 // Try settings without editing sim.js: CFG='{"drainPerHour":{"charge":14},"teenAtMin":1200}' npm run balance

@@ -18,12 +18,14 @@ import {
   CFG,
   EVENTS,
   LEGACY_LIFE,
+  SCRIP,
+  inheritedScrip,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
-import { REGIONS } from './netrun/regions.js';
+import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
 import { upgradeSave } from './migrations.js';
 
@@ -164,6 +166,7 @@ function cleanRun(raw, s, strict) {
     fragments: cleanCodex(raw.fragments),
     knownAcc: cleanAccessories(raw.knownAcc),
     accessories: cleanAccessories(raw.accessories),
+    scrip: int(raw.scrip, 0, 0, 1000),
     startStats: cleanStats(raw.startStats),
     tally: { nodes: int(tally.nodes, 0, 0), iceWon: int(tally.iceWon, 0, 0), iceLost: int(tally.iceLost, 0, 0) },
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
@@ -212,11 +215,12 @@ function cleanFragment(raw, s) {
       quirk: cleanQuirk(raw.quirk),
       keepsake: keyOf(raw.keepsake, ITEMS),
       rootUsed: bool(raw.rootUsed),
+      scrip: int(raw.scrip, 0, 0, Math.floor(SCRIP.max * SCRIP.inherit)),
     };
   }
   if (s.stage !== 'dead') return null;
   const form = FORMS[s.form] ? s.form : leaningForm(s);
-  return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed };
+  return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed, scrip: inheritedScrip(s) };
 }
 
 // Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
@@ -263,6 +267,10 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     generation: int(raw.generation, 1, 1, 1e6),
     life: cleanLife(raw.life),
     newForms: Array.isArray(raw.newForms) ? [...new Set(raw.newForms.filter((f) => has(FORMS, f)))] : [],
+    // Regions whose exit it reached. Saves from before the unlock order open what the stage allows.
+    cleared: Array.isArray(raw.cleared) ? REGION_ORDER.filter((r) => raw.cleared.includes(r)) : clearedForStage(stage),
+    codexFound: int(raw.codexFound, 0, 0, FRAGMENTS.length),
+    scrip: int(raw.scrip, 0, 0, SCRIP.max),
     stage,
     form,
     teenForm: keyOf(raw.teenForm, SPECIES),

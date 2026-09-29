@@ -42,19 +42,19 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 
 ## Items
 
-Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`).
+Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`). Prices are in corpo scrip (`SCRIP.price` in `sim.js`); markets add Charge, and selling pays half at a market or a quarter elsewhere.
 
-| Name | Effect |
-|---|---|
-| Coolant cell | Vents 50 Heat. Works while asleep |
-| Antivirus patch | Cures any virus and shields against new ones for 6 hours |
-| Corp voucher | Full Charge, waves off the current or next corp trace. Leans corp |
-| Black ICE shard | +40 Sync, +20 Heat, may carry a virus. Leans indie and unstable. Awake only |
-| Signal booster | Your next mini-game win counts double. Awake only |
-| Memory shard | Rewrites one of its quirks at random |
-| Repair kit | Restores 40 Integrity. Works while asleep |
-| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) |
-| Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press |
+| Name | Effect | Scrip price |
+|---|---|---|
+| Coolant cell | Vents 50 Heat. Works while asleep | 15 |
+| Antivirus patch | Cures any virus and shields against new ones for 6 hours | 15 |
+| Corp voucher | Full Charge, waves off the current or next corp trace. Leans corp | 25 |
+| Black ICE shard | +40 Sync, +20 Heat, may carry a virus. Leans indie and unstable. Awake only | 25 |
+| Signal booster | Your next mini-game win counts double. Awake only | 15 |
+| Memory shard | Rewrites one of its quirks at random | 15 |
+| Repair kit | Restores 40 Integrity. Works while asleep | 15 |
+| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
+| Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press | 25 |
 
 ## Mini-games
 

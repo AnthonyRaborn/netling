@@ -71,11 +71,12 @@
       </section>
 
       <div class="inventory" aria-label="Inventory">
+        <p id="inv-scrip" class="inv-scrip" title="Corpo scrip: sell items at netrun markets, spend it there with Charge. Half passes to the next generation."></p>
         <div id="inv-slots" class="inv-slots"></div>
         <div id="inv-detail" class="inv-detail" hidden>
           <div class="inv-text"><b id="inv-name"></b> <span id="inv-desc"></span></div>
           <button type="button" id="inv-use">USE</button>
-          <button type="button" id="inv-discard" class="pref">DISCARD</button>
+          <button type="button" id="inv-discard" class="pref">SCRAP</button>
           <button type="button" id="inv-cancel" class="pref">KEEP</button>
         </div>
       </div>
@@ -109,6 +110,7 @@
       </nav>
 
       <nav id="regions" class="regions" aria-label="Netrun regions" hidden>
+        <p id="region-memory" class="inv-scrip"></p>
         <div id="region-list" class="region-list"></div>
         <button type="button" id="regions-back" class="wide">BACK</button>
       </nav>

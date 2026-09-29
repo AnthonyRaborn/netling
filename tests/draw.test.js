@@ -200,6 +200,8 @@ function playThrough(region, seed, { winIce = true } = {}) {
       view.game.game.won = winIce;
       view.update(0.05);
       view.update(3); // result card, then the fight reports
+    } else if (pet.run.phase === 'choice' && pet.run.pending.options[view.choiceCursor]?.disabled) {
+      view.input('right'); // a market it can't afford: move on to what it can pick
     } else {
       view.input('a');
     }

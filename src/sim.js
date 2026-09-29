@@ -2,6 +2,7 @@
 // (ms epoch) and an rng, so tests can drive it deterministically.
 import { accessoryById, rollWornAccessory } from './accessories.js';
 import { weighted } from './random.js';
+import { clearedForStage } from './netrun/regions.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 1;
@@ -129,6 +130,24 @@ export const ITEMS = {
   overclock: { name: 'Overclock chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
   segfault: { name: 'Segfault', desc: 'Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life.', awake: true },
 };
+
+// Corpo scrip: a netling's money, spent with Charge at netrun markets. Prices follow rarity.
+export const SCRIP = {
+  max: 100, // anything over the cap is lost, so spending stays a choice
+  inherit: 0.5, // the next generation starts with half, rounded down
+  sellMarket: 0.5, // selling at a netrun market pays half the price
+  sellElsewhere: 0.25, // scrapping at home, or a pickup that meets a full inventory, a quarter
+  price: { coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15, blackice: 25, voucher: 25, segfault: 25, overclock: 50 },
+};
+
+export const sellValue = (id, atMarket = false) => Math.floor((SCRIP.price[id] ?? 0) * (atMarket ? SCRIP.sellMarket : SCRIP.sellElsewhere));
+
+// Adds scrip up to the cap. Returns how much went over it and was lost.
+export function addScrip(s, n) {
+  const before = s.scrip ?? 0;
+  s.scrip = Math.min(SCRIP.max, before + n);
+  return before + n - s.scrip;
+}
 
 // Weighted drop tables per source.
 const DROPS = {
@@ -288,6 +307,9 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     visit: null,
     visitAccGifts: 0,
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
+    cleared: [], // regions whose exit it has reached, which opens the next one down
+    codexFound: 0, // new codex fragments recovered this life (capped by RUN_CFG.codexPerLife)
+    scrip: Math.min(SCRIP.max, fragment?.scrip ?? 0),
     trait: fragment?.trait ?? null,
     inheritedQuirk,
     quirk,
@@ -552,7 +574,11 @@ export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
 
 // Adds an item if there's room. Returns a log suffix.
 export function grantItem(s, id) {
-  if (s.inventory.length >= INVENTORY_SLOTS) return ` found ${ITEMS[id].name}, but inventory is full.`;
+  if (s.inventory.length >= INVENTORY_SLOTS) {
+    const value = sellValue(id);
+    const over = addScrip(s, value);
+    return ` found ${ITEMS[id].name}, but inventory is full: scrapped for ${value} scrip${over ? ' (scrip full)' : ''}.`;
+  }
   s.inventory.push(id);
   return ` found: ${ITEMS[id].name}.`;
 }
@@ -669,8 +695,13 @@ export function migrate(s) {
   s.visitAccGifts ??= 0;
   s.life ??= { ...LEGACY_LIFE }; // compiled before lives were shortened: it keeps its seven days
   s.newForms ??= [];
+  s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
+  s.codexFound ??= 0;
+  s.scrip ??= 0;
   return s;
 }
+
+export const inheritedScrip = (s) => Math.floor((s.scrip ?? 0) * SCRIP.inherit);
 
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.
 function rootRescue(s, t, cause) {
@@ -696,7 +727,7 @@ function flatline(s, t, cause, rng = null) {
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
   const form = FORMS[s.form] ? s.form : leaningForm(s, rng);
-  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed };
+  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s) };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
@@ -866,10 +897,13 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       break;
     }
     case 'discard': {
+      // SCRAP: sold for a quarter of its price, so a market is always the better place to sell.
       const id = s.inventory?.[opts.slot];
       if (!id) return fail('empty slot.');
       s.inventory.splice(opts.slot, 1);
-      res = ok(`${ITEMS[id].name.toLowerCase()} discarded.`, 'purge');
+      const value = sellValue(id);
+      const over = addScrip(s, value);
+      res = ok(`${ITEMS[id].name.toLowerCase()} scrapped for ${value} scrip.${over ? ' scrip full: the rest is lost.' : ''}`, 'purge');
       break;
     }
     case 'use': {

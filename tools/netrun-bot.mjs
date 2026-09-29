@@ -1,5 +1,6 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
-import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds } from '../src/netrun/run.js';
+import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem } from '../src/netrun/run.js';
+import { INVENTORY_SLOTS, SCRIP } from '../src/sim.js';
 import { nodeById } from '../src/netrun/map.js';
 
 // plan: look a few steps ahead, using only the nodes the player can see (so a form's sight helps).
@@ -33,8 +34,12 @@ function decide(pet, style, rng) {
     if (style.lean === 'balance') return pet.axes.allegiance > 0 ? 'hide' : 'comply';
     return pet.stats.integrity > 40 || style.lean === 'indie' ? 'hide' : 'comply';
   }
-  // Buying leans indie, so a player steering corp may walk past.
-  if (p.kind === 'market') return style.shop !== false && has('buy0') && pet.stats.charge > 50 ? 'buy0' : 'leave';
+  // Buying leans indie, so a player steering corp may walk past. It only buys what it has room to keep.
+  if (p.kind === 'market') {
+    const room = pet.inventory.length + pet.run.loot.length < INVENTORY_SLOTS;
+    const wanted = p.options.find((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled && (!style.keep || style.keep.includes(p.offers[Number(o.id.slice(3))])));
+    return style.shop !== false && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
+  }
   const prefs = ANOMALY_PREFS[style.anomaly ?? 'random'];
   const preferred = prefs.find((id) => has(id));
   if (preferred) return preferred;
@@ -71,6 +76,31 @@ export function planMove(map, options, visible, hurt, depth = 3) {
   return best;
 }
 
+// The slot to sell or scrap first: something it has no use for (not in `keep`), else the commonest
+// duplicate, cheapest first. null if everything is worth keeping.
+export function surplusSlot(inventory, keep = null) {
+  const counts = {};
+  for (const id of inventory) counts[id] = (counts[id] ?? 0) + 1;
+  const useless = (id) => (keep && !keep.includes(id) ? 1 : 0);
+  const pick = inventory
+    .map((id, slot) => ({ id, slot }))
+    .filter(({ id }) => useless(id) || counts[id] > 1)
+    .sort((a, b) => useless(b.id) - useless(a.id) || counts[b.id] - counts[a.id] || SCRIP.price[a.id] - SCRIP.price[b.id])[0];
+  return pick ? pick.slot : null;
+}
+
+// At a market, sells surplus down to one free slot. Returns how many it sold.
+export function sellAtMarket(pet, keep = null) {
+  let sold = 0;
+  while (pet.inventory.length >= INVENTORY_SLOTS - 1) {
+    const slot = surplusSlot(pet.inventory, keep);
+    if (slot === null) break;
+    sellItem(pet, slot);
+    sold++;
+  }
+  return sold;
+}
+
 // Plays one full run on the pet. Returns the finished run (before it's cleared).
 export function playRun(pet, style, region, rng, codex = []) {
   startRun(pet, region, rng, codex);
@@ -78,7 +108,15 @@ export function playRun(pet, style, region, rng, codex = []) {
   while (pet.run.phase !== 'done' && steps++ < 40) {
     const run = pet.run;
     if (run.phase === 'ice') resolveIce(pet, rng() < style.winRate, rng);
-    else if (run.phase === 'choice') choose(pet, decide(pet, style, rng), rng);
+    else if (run.phase === 'choice') {
+      if (run.pending.kind === 'market') {
+        if (style.sell !== false) run.sold = (run.sold ?? 0) + sellAtMarket(pet, style.keep);
+        // Whether it could afford any item here, after selling (the "a purchase every second run" target).
+        run.markets = (run.markets ?? 0) + 1;
+        if (run.pending.options.some((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled)) run.affordable = (run.affordable ?? 0) + 1;
+      }
+      choose(pet, decide(pet, style, rng), rng);
+    }
     else {
       const opts = runOptions(run);
       const hurt = pet.stats.integrity < style.avoidIceBelow;

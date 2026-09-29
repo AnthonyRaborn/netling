@@ -100,7 +100,7 @@ Only one alert is open at a time. If you leave a game or a netrun open, the cloc
 
 ## Items
 
-The inventory holds six items. Tap an item to see what it does, then **USE** it (or DISCARD it, with a confirm). Some only work while it is awake.
+The inventory holds six items. Tap an item to see what it does, then **USE** it, or **SCRAP** it for a little scrip (with a confirm). Some only work while it is awake.
 
 | Item | Effect |
 |---|---|
@@ -114,7 +114,9 @@ The inventory holds six items. Tap an item to see what it does, then **USE** it 
 | Overclock chip | Shortens the wait before the next netrun by an hour |
 | Segfault | Adds two faults on purpose (it asks you to press twice). Faults shape how it grows up, and ten end its life |
 
-Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation.
+Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation. Anything found while the inventory is full is scrapped for you rather than lost.
+
+**Corpo scrip** (shown above the inventory) is your netling's money, up to 100; anything past that is lost. Rarer items are worth more. Scrapping at home pays a quarter of an item's price; selling at a netrun market pays half. Half of what a netling holds passes to the next generation.
 
 ## Mini-games
 
@@ -139,13 +141,13 @@ A netrun is an expedition. **Jack in** with at least 30 Charge while it is awake
 | **ICE** | A mini-game. Win to pass; lose and it bites into Integrity |
 | **Relay** | Recharges and cools it, and lets you bank your loot and jack out safely |
 | **Checkpoint** | A corp scan: hide, comply or pay with a voucher |
-| **Market** | Spend Charge on items, and sometimes something stylish |
+| **Market** | Buy items with scrip plus some Charge, and sometimes something stylish. While a market is open, the inventory's button sells for half price |
 | **Anomaly** | A strange event with a risky choice |
-| **Exit** | Banks everything you carry, plus a bonus |
+| **Exit** | Banks everything you carry, plus a bonus, and clears the region |
 
 Loot is only safe once you **jack out**, at a relay or the exit. If Integrity or Charge hits zero you are **disconnected**: the loot is lost, it costs a care mistake (but never the last one), and the netling reboots. You can also **abort** (press twice) to bail out with no penalty beyond losing the loot.
 
-The Public Net is open to every age. More regions open as the netling grows up. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
+Every netling starts with only the Public Net. Reaching a region's exit **clears** it and opens the next one down, and some regions also wait for the netling to grow up. Each new netling finds its own way down. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. A netling's memory only holds eight new fragments in its life (the region list shows how many it has); the rest wait for the next generation. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
 
 ## Growing up, and what comes after
 
@@ -154,7 +156,7 @@ The Public Net is open to every age. More regions open as the netling grows up. 
 - **Adult**: from 51 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
 - **Old age**: a netling lives for at most five days. (One that was already alive when lives were shortened keeps its seven days, and its old 24 and 72 hour milestones.)
 
-When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, and a keepsake item. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
+When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, a keepsake item and half its scrip. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
 
 ## Style
 

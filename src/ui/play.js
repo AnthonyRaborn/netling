@@ -3,9 +3,9 @@ import { act, blockReason, tick, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
-import { abortRun, closeRun, runBlockReason, startRun } from '../netrun/run.js';
+import { abortRun, closeRun, codexRoom, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
-import { FRAGMENTS } from '../netrun/codex.js';
+import { FRAGMENTS, allFragmentsFound } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
@@ -129,10 +129,14 @@ function jackIn(region) {
 }
 
 function renderRegions() {
+  const room = codexRoom(app.state);
+  $('region-memory').textContent = `CODEX MEMORY ${RUN_CFG.codexPerLife - room}/${RUN_CFG.codexPerLife} THIS LIFE${room ? '' : ' · FULL'}`;
+  $('region-memory').classList.toggle('full', !room);
+  $('region-memory').hidden = allFragmentsFound(app.codex); // nothing left to find
   $('region-list').replaceChildren(
     ...REGION_ORDER.map((id) => {
       const r = REGIONS[id];
-      const lock = regionLock(id, app.state.stage, app.codex);
+      const lock = regionLock(id, app.state.stage, app.codex, app.state.cleared);
       const secret = lock && r.requires;
       const regionFrags = FRAGMENTS.filter((f) => f.region === id);
       const found = regionFrags.filter((f) => app.codex.includes(f.id)).length;

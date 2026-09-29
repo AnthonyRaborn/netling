@@ -68,15 +68,18 @@ Built by `createScript()` in `sim.js`. Fields:
 | `event` | `{ type, startedAge }` or null | `trace`, `attack` or `overflow` |
 | `lastSurgeAt` | ms epoch or null | Drives the surge flash |
 | `inventory` | array of item ids | Max 6 |
+| `scrip` | int | Corpo scrip, 0..100. Missing: 0 |
 | `buffs` | `{ shieldUntilAge, traceSkip, boost }` | |
 | `run` | the netrun or null | Cleaned by `cleanRun` |
 | `rootAccess`, `rootUsed`, `rootCooling` | booleans | |
 | `lastRunEndAge`, `runCooldownCut`, `runStats` | | Uplink cooldown state and lifetime counts for this netling |
+| `cleared` | region ids | Regions whose exit this netling reached, in `REGION_ORDER` order. Unknown ids and repeats dropped. Missing (a save from before the unlock order): every region its stage can enter (`clearedForStage`) |
+| `codexFound` | int | New codex fragments banked this life (the per-life cap). Missing: 0 |
 | `visit`, `visitAccGifts` | | A visitor in progress; pending accessory gifts (max 10) |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |
-| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed }` |
+| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed, scrip }`, where `scrip` is the inheritance (half, rounded down; cleaned to 0..50) |
 | `codexInbox`, `accessoryInbox` | arrays of ids | Finds waiting for the UI to bank them into the shared codex and wardrobe |
 
 The netling belongs to one generation. Everything shared across generations (lineage, dex, codex, wardrobe, unlocks, accessories, progress) is stored separately.
@@ -129,7 +132,7 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 - `lastTick` is clamped to `[0, now]`; a future value (clock set back) would otherwise freeze the netling.
 - **Non-strict** (local storage): unknown fields are kept (`...raw`), so a newer build's data survives a downgrade.
 - **Strict** (imported codes): only known fields survive.
-- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free").
+- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free"). Loose scrip carried in a run (`run.scrip`) is cleaned to 0..1000.
 - Fragments are rebuilt from the dead netling if the stored one is unusable.
 - `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel, Stub or Shell, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
 
