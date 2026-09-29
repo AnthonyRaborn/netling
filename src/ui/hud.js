@@ -1,5 +1,5 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue } from '../sim.js';
+import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
 import { atMarket, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -75,7 +75,7 @@ export function updateHUD() {
   const summary = screenSummary(state);
   if ($('lcd').getAttribute('aria-label') !== summary) $('lcd').setAttribute('aria-label', summary);
 
-  const trait = state.trait ? TRAITS[state.trait].name : '—';
+  const trait = `${traitLabel(state.trait, state.traitLevel) ?? '—'}${state.echo ? ` · echo ${TRAITS[state.echo].name}` : ''}`;
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
   $('readout').textContent =
     `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;

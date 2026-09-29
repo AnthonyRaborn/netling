@@ -8,7 +8,6 @@ import {
   FORMS,
   TRAITS,
   ITEMS,
-  KEEPSAKES,
   PALETTES,
   INVENTORY_SLOTS,
   GAME_IDS,
@@ -19,7 +18,8 @@ import {
   EVENTS,
   LEGACY_LIFE,
   SCRIP,
-  inheritedScrip,
+  TRAIT_CFG,
+  fragmentOf,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
@@ -217,11 +217,12 @@ function cleanFragment(raw, s) {
       keepsake: keyOf(raw.keepsake, ITEMS),
       rootUsed: bool(raw.rootUsed),
       scrip: int(raw.scrip, 0, 0, Math.floor(SCRIP.max * SCRIP.inherit)),
+      level: int(raw.level, 1, 1, TRAIT_CFG.maxLevel),
+      echo: keyOf(raw.echo, TRAITS),
     };
   }
   if (s.stage !== 'dead') return null;
-  const form = FORMS[s.form] ? s.form : leaningForm(s);
-  return { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form] ?? null, rootUsed: s.rootUsed, scrip: inheritedScrip(s) };
+  return fragmentOf(s, FORMS[s.form] ? s.form : leaningForm(s));
 }
 
 // Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
@@ -320,6 +321,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
       aborted: int(runStats.aborted, 0, 0),
     },
     trait: keyOf(raw.trait, TRAITS),
+    traitLevel: int(raw.traitLevel, 1, 1, TRAIT_CFG.maxLevel),
+    echo: keyOf(raw.echo, TRAITS),
     inheritedQuirk: oneOf(raw.inheritedQuirk, QUIRK_KEYS, null),
     quirk: cleanQuirk(raw.quirk),
     log: Array.isArray(raw.log)
@@ -352,7 +355,10 @@ export function cleanLineage(raw) {
     ageMin: int(e.ageMin, 0, 0),
     mistakes: int(e.mistakes, undefined, 0),
     trait: keyOf(e.trait, TRAITS),
+    traitLevel: int(e.traitLevel, 1, 1, TRAIT_CFG.maxLevel), // older records: 1
+    echo: keyOf(e.echo, TRAITS),
     fragmentTrait: keyOf(e.fragmentTrait, TRAITS),
+    fragmentLevel: int(e.fragmentLevel, 1, 1, TRAIT_CFG.maxLevel),
     keepsake: keyOf(e.keepsake, ITEMS),
     rescued: bool(e.rescued),
     palette: int(e.palette, 0, 0, PALETTES.length - 1),

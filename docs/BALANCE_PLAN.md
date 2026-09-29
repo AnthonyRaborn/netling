@@ -68,6 +68,13 @@ Sixth round, 2026-09-29 (Pass 2):
 33. **Abilities: option B**, second effects: Chrome gets corp insurance (once a run, a blow that would disconnect it leaves it at 12 Integrity), Daemon repairs 6 Integrity per move, Glitch phases each later ICE 35% of the time, Ghost goes unnoticed by 45% of ICE. Firewall is unchanged. (Daemon taking less ICE damage was measured too, but it would copy Firewall.)
 34. **Harden The Deep** so it stays a wall with every form stronger, by something other than ICE damage: it is now 10 middle layers long (from 8).
 
+Seventh round, 2026-09-29 (Pass 3):
+
+35. **Trait levels are a streak**: each generation in a row that ends as the same form adds a level (1.0, 1.25, 1.5); a different form starts over. The grandparent's echo (half strength) adds on top when it matches, under the per-trait cap.
+36. **Pass 3 scope**: Step 1 plus levels. The family tree and legacy goals (Step 3) wait for a later pass.
+37. **Display**: the readout shows the trait with its level and the echo (for example "Persistent II · echo Hardened"); the flatline screen shows what the next generation inherits; the field manual explains levels and echoes without numbers.
+38. **Untraceable** becomes fewer traces (60% less at strength 1), not an immunity.
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -292,7 +299,29 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 
 ## Pass 3: lineage
 
-### Findings
+**Status: Step 1 and trait levels implemented** (release `netling-v38`). What shipped:
+
+- `TRAIT_CFG` in `sim.js`: each trait's effect at strength 1 (`full`), the echo (0.5), the level step (0.25, up to level 3) and a cap per trait. `traitStrength(s, id)` combines the netling's `trait` at `levelStrength(traitLevel)` with its `echo`; every trait effect scales by it, costs included.
+- Save fields (added, no version bump): `traitLevel` and `echo` on the netling, `level` and `echo` on the fragment (`fragmentOf`), and `traitLevel`, `echo`, `fragmentLevel` on lineage records. All cleaned in `sanitize.js`; older saves get level 1 and no echo.
+- Untraceable: corp traces 60% less often at strength 1.
+- Volatile's Integrity cost is 0.75 an hour at strength 1 (from 1): at 1, casual players lost 5.7 points of full-life rate against the same parent with the trait switched off, over the target of 5.
+- Caps: Licensed and Hardened 1.5; Persistent, Volatile and Untraceable 1.25.
+- UI: readout, flatline screen, lineage rows and the field manual; `TRAITS[id].desc` no longer states numbers.
+- Tools: `TRAIT_LEVEL=<1-3>` and `ECHO=<adult form>` beside `TRAIT=<form>`.
+
+Measured (400 to 800 lives per case, each trait at strengths 0.5, 1 and its cap, against the same parent with the trait switched off):
+
+| Trait | Casual full-life change at the cap | Largest adult-form shift | Notes |
+|---|---|---|---|
+| Licensed | -0.7 at 1.5 | 4 points | Within noise |
+| Hardened | +4.0 at 1.5 | 7 points (attentive) | Fewer viruses keep casual players alive |
+| Persistent | -1.3 at 1.25 | 8 points (casual) | Fewer faults (2.6 to 1.2 a life) move casual players toward Daemon; at 1.5 it was 10.5 |
+| Volatile | -4.2 at 1.25 | 3 points | At the old cost it was -9.0 at 1.5 |
+| Untraceable | -1.2 at 1.25 | 5 points | Corp traces 5.0 a life with no trait, 2.2 at 1, 1.3 at the cap (0.6 at 1.5) |
+
+Targets met: no trait moves the casual full-life rate by more than about 5 points, or the adult form odds by more than about 10. Across lineages (`lineages.json`, 4 lives), every steering player still reaches its form in every generation (`ghosthunter` 99%, `steer-*` 86 to 100%), and casual full-life rates held (93 to 95%).
+
+### Findings (before Pass 3)
 
 - A new generation inherits the parent's adult form as one trait, one quirk and one keepsake item. Nothing accumulates beyond one generation, apart from Root Access, the codex and cosmetics.
 - Trait strength is unmeasured (Pass 0 adds this). Two to check first:
@@ -330,5 +359,5 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 1. **The Shell**: approve or revise the draft sprite, DEX hint and lore (Pass 1, item 5).
 2. **Segfault's new drop chances** after DEFEND, PURGE and power surges, and its market weight; measured in Pass 1.
-3. **Trait numbers**: strengths, level steps and caps, after measuring.
-4. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
+3. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
+4. **Lineage Step 3** (a later pass): the family tree in the Archive and cosmetic legacy goals.

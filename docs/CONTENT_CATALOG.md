@@ -32,13 +32,15 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 
 ## Traits and perks
 
-| Trait | Source form | Effect |
-|---|---|---|
-| Licensed | Chrome | Corp packets restore +25% Charge |
-| Hardened | Firewall | -50% virus chance |
-| Persistent | Daemon | Drains 30% slower while resting |
-| Volatile | Glitch | Play rewards x1.5, Integrity drains an extra 1/hr |
-| Untraceable | Ghost | Immune to corp traces |
+Effects at strength 1; levels, echoes and caps are in [SIMULATION.md](SIMULATION.md#trait-strength-balance-pass-3). The in-game text (`TRAITS[id].desc`) names the effect without numbers.
+
+| Trait | Source form | Effect | Cap |
+|---|---|---|---|
+| Licensed | Chrome | Corp packets restore +25% Charge | 1.5 |
+| Hardened | Firewall | -50% virus chance | 1.5 |
+| Persistent | Daemon | Drains 30% slower while resting | 1.25 |
+| Volatile | Glitch | Play rewards x1.5, Integrity drains an extra 0.75/hr | 1.25 |
+| Untraceable | Ghost | Corp traces 60% less often | 1.25 |
 
 ## Items
 

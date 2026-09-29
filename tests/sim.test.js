@@ -230,12 +230,17 @@ test('hiding from a trace resolves it and leans indie', () => {
   assert.equal(s.axes.allegiance, -1);
 });
 
-test('untraceable netlings never get traced', () => {
+test('untraceable netlings are traced less often', () => {
+  // A roll between the reduced chance (40% of normal) and the normal one: only the plain netling is traced.
+  const roll = () => (0.7 * CFG.traceChancePerHour) / 60;
+  const plain = booted();
+  tick(plain, plain.lastTick + MIN, roll);
+  assert.equal(plain.event?.type, 'trace');
   const s = booted({ fragment: { trait: 'untraceable', quirk: null } });
-  s.quirk.sleepOffset = 0;
-  const alwaysRoll = () => 0; // every random check fires
-  tick(s, s.lastTick + 60 * MIN, alwaysRoll);
+  tick(s, s.lastTick + MIN, roll);
   assert.notEqual(s.event?.type, 'trace');
+  tick(s, s.lastTick + MIN, () => 0);
+  assert.equal(s.event?.type, 'trace', 'no longer immune');
 });
 
 test('alertReason picks the most urgent need', () => {

@@ -88,7 +88,7 @@ Drain multipliers stack multiplicatively on the base rate:
 | Asleep, lights off | 0.33 (`sleepDarkDrainMult`) |
 | Asleep, lights on | 0.5 (`sleepDrainMult`) |
 | Napping | 0.35 (`napDrainMult`) |
-| Resting with trait Persistent | x0.7 extra |
+| Resting with trait Persistent | x0.7 extra at strength 1 (see [Trait strength](#trait-strength-balance-pass-3)) |
 | Daemon form (Charge only) | x0.8 |
 | Ghost form (Charge and Sync) | x0.85 |
 | Awake with lights off (Sync only) | x2 (`darkAwakeSyncMult`) |
@@ -106,7 +106,7 @@ Damage sources add up. If there are none, Integrity regenerates.
 | Heat 85 or more | -8 |
 | Charge at 0 | -6 |
 | Nothing wrong | +5 (`integrityRegenPerHour`), or +8 when in "deep rest" (napping, or asleep with lights off) |
-| Trait Volatile | an extra -1 always applies |
+| Trait Volatile | an extra -0.75 at strength 1 always applies |
 
 Care actions add flat Integrity on top: COOL +4, PURGE that clears something +4, PATCH +10, Repair kit +40.
 
@@ -120,9 +120,9 @@ The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "abou
 
 ### Viruses
 
-- Infection chance per hour: `0.02 + 0.03 * cache`. It is multiplied by 0.5 for trait Hardened and by 0.7 for the Firewall form (they stack: x0.35).
+- Infection chance per hour: `0.02 + 0.03 * cache`. It is multiplied by 0.5 for trait Hardened at strength 1 and by 0.7 for the Firewall form (they stack: x0.35).
 - Never while resting, while shielded (Antivirus patch), or while already infected.
-- Other infection routes: a scavenged packet (12%, or 6% with Hardened, times the Firewall multiplier), Black ICE shard (25%), a landed intrusion (certain).
+- Other infection routes: a scavenged packet (12%, or 6% with Hardened at strength 1, times the Firewall multiplier), Black ICE shard (25%), a landed intrusion (certain).
 - `virusMin` counts minutes since infection. PATCHing within 30 minutes gives +1 stability, later gives -1.
 
 ## Rest: sleep, lights, naps
@@ -160,7 +160,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 
 | Action | Requires | Effect |
 |---|---|---|
-| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
+| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed at strength 1), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
 | `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -1, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
 | `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss. Charge -6, Heat +12. Records win/loss. Wins can drop items (25%) |
 | `hide` | Open trace | Ends it. Charge -10, Heat +10, allegiance -1. 30% drop from the hide table |
@@ -174,7 +174,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 | `nap` | Not asleep, no netrun, cooldown over | Starts a nap; pressing again wakes it |
 | `lights` | always allowed except dead/hibernating | Toggles `lightsOn` |
 
-Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability.
+Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5 at strength 1. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability.
 
 The UI runs the mini-game first, then calls `act('play', { game, won })`. The result can be refused if the netling fell asleep or hit 0 charge while the game ran.
 
@@ -184,7 +184,7 @@ At most one timed event is open at a time (`state.event`). While one is open, no
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
-| **Corp trace** | 8% (never for Untraceable) | 120 min | Integrity -15, allegiance +1 | HIDE or COMPLY, or a Corp voucher |
+| **Corp trace** | 8% (60% less for Untraceable at strength 1) | 120 min | Integrity -15, allegiance +1 | HIDE or COMPLY, or a Corp voucher |
 | **Intrusion** | 4% (not while infected) | 60 min | Virus, Integrity -10 | DEFEND (random mini-game) |
 | **Memory overflow** | 2% + 2% per cache file | 45 min | Integrity -15, cache set to 4, reboot for 20 min | PURGE |
 | **Power surge** | 3% | instant | Heat +25, Charge +10 | none |
@@ -280,15 +280,27 @@ Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data
 
 ## Lineage: fragments, traits, quirks
 
-On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed }`.
+On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed, scrip, level, echo }` (`fragmentOf`).
 
-| Adult form | Trait passed on | Trait effect |
-|---|---|---|
-| Chrome | Licensed | Corp packets restore +25% Charge |
-| Firewall | Hardened | -50% virus chance |
-| Daemon | Persistent | Drains 30% slower while resting |
-| Glitch | Volatile | Play rewards x1.5, Integrity drains an extra 1/hr |
-| Ghost | Untraceable | Immune to corp traces |
+| Adult form | Trait passed on | Effect at strength 1 | Cap |
+|---|---|---|---|
+| Chrome | Licensed | Corp packets restore +25% Charge | 1.5 |
+| Firewall | Hardened | -50% virus chance (per hour and from scavenged data) | 1.5 |
+| Daemon | Persistent | Drains 30% slower while resting | 1.25 |
+| Glitch | Volatile | Play rewards x1.5, Integrity drains an extra 0.75/hr | 1.25 |
+| Ghost | Untraceable | Corp traces 60% less often | 1.25 |
+
+### Trait strength (balance pass 3)
+
+Every trait effect is its strength-1 value (`TRAIT_CFG.full`) times the netling's strength in that trait (`traitStrength`), so a stronger trait does more of the same, costs included (Volatile's Integrity drain scales too).
+
+- **The parent's trait** (`trait`) applies at its level's strength: level 1 is 1.0, and each level adds 0.25 (`levelStep`), up to level 3 (`maxLevel`, 1.5).
+- **Levels are a streak.** A netling that ends as the same adult form as its parent passes the trait on one level higher (Daemon, Daemon, Daemon gives Persistent III). Ending as any other form starts the new trait at level 1.
+- **The grandparent's trait comes back as an echo** (`echo`) at half strength (`TRAIT_CFG.echo`): the fragment stores the dying netling's own inherited trait. When the echo is the same trait as the parent's, the two add up.
+- **Each trait is capped** (`TRAIT_CFG.cap`, table above), after measuring: Persistent's fewer faults shift adult forms, Volatile's cost hurts casual players, and a stronger Untraceable would be an immunity again. So Persistent III with a Persistent echo (1.5 + 0.5) is still 1.25.
+- A first-generation netling has neither. Saves from before levels get level 1 and no echo.
+
+Measured with 400 to 800 simulated lives per case, against the same parent with the trait switched off: no trait at its cap moves the casual full-life rate by more than about 4 points, or any adult form's share by more than about 8 points. The Untraceable child of a Ghost meets about 2 corp traces a life at strength 1 (1.3 at the cap) instead of 5, so it can still steer its allegiance.
 
 **Quirks** (`rollQuirk`): `palette` (0 to 4, plus 5 "origin" only with Root Access), `pitch` (440 to 880 Hz), `idle` (bounce, sway, hover), `favPacket` (corp or scav), `sleepOffset` (-2 to +2). A new generation rolls a fresh quirk and then overwrites exactly one random key (from all five) with the parent's value. `createScript` records which one in `inheritedQuirk`.
 

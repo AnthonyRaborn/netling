@@ -203,12 +203,49 @@ export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
 export const resting = (s) => s.asleep || Boolean(s.nap);
 
 export const TRAITS = {
-  licensed: { name: 'Licensed', desc: 'Corp packets restore +25% Charge' },
-  hardened: { name: 'Hardened', desc: '-50% virus chance' },
-  persistent: { name: 'Persistent', desc: 'Drains 30% slower while asleep' },
-  volatile: { name: 'Volatile', desc: 'Play rewards x1.5, Integrity drains faster' },
-  untraceable: { name: 'Untraceable', desc: 'Immune to corp traces' },
+  licensed: { name: 'Licensed', desc: 'Corp packets restore more Charge' },
+  hardened: { name: 'Hardened', desc: 'Catches viruses less often' },
+  persistent: { name: 'Persistent', desc: 'Drains slower while it rests' },
+  volatile: { name: 'Volatile', desc: 'Bigger play rewards, but Integrity drains faster' },
+  untraceable: { name: 'Untraceable', desc: 'Corp traces find it less often' },
 };
+
+// Trait strength. The parent's trait applies at level strength (1, then +levelStep for each
+// generation in a row that ended as the same form, up to maxLevel); the grandparent's trait comes
+// back as an echo at half strength, and adds to the trait when they match. Each trait is capped.
+// `full` is each effect at strength 1.
+export const TRAIT_CFG = {
+  echo: 0.5,
+  levelStep: 0.25,
+  maxLevel: 3,
+  full: {
+    licensed: 0.25, // corp packets restore +25% Charge
+    hardened: 0.5, // -50% virus chance
+    persistent: 0.3, // drains 30% slower while resting
+    volatile: 0.5, // play rewards x1.5; costs volatileIntegrity per hour
+    untraceable: 0.6, // corp traces 60% less often
+  },
+  volatileIntegrity: 0.75, // Integrity per hour at strength 1
+  // Caps, from measurement (balance pass 3): Persistent's fewer faults shift adult forms, Volatile's
+  // Integrity cost hurts casual players, and Untraceable would be an immunity again above 1.25.
+  cap: { licensed: 1.5, hardened: 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25 },
+};
+
+export const levelStrength = (level) => 1 + TRAIT_CFG.levelStep * (Math.min(Math.max(level ?? 1, 1), TRAIT_CFG.maxLevel) - 1);
+
+// How strongly trait `id` applies to this netling: 0 if it has neither the trait nor its echo.
+export function traitStrength(s, id) {
+  let st = 0;
+  if (s.trait === id) st += levelStrength(s.traitLevel);
+  if (s.echo === id) st += TRAIT_CFG.echo;
+  return Math.min(st, TRAIT_CFG.cap[id] ?? st);
+}
+
+// "Persistent", or "Persistent II" for a trait held two generations in a row.
+export const traitLabel = (id, level = 1) => (id ? `${TRAITS[id].name}${level > 1 ? ` ${['', 'I', 'II', 'III', 'IV', 'V'][level] ?? level}` : ''}` : null);
+
+// The effect size of trait `id` for this netling (TRAIT_CFG.full times its strength).
+const traitEffect = (s, id) => TRAIT_CFG.full[id] * traitStrength(s, id);
 
 export const PALETTES = [
   { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' },
@@ -311,6 +348,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     codexFound: 0, // new codex fragments recovered this life (capped by RUN_CFG.codexPerLife)
     scrip: Math.min(SCRIP.max, fragment?.scrip ?? 0),
     trait: fragment?.trait ?? null,
+    traitLevel: fragment?.trait ? Math.min(Math.max(fragment.level ?? 1, 1), TRAIT_CFG.maxLevel) : 1, // generations in a row as that form
+    echo: fragment?.trait ? (fragment.echo ?? null) : null, // the grandparent's trait, at half strength
     inheritedQuirk,
     quirk,
     log: [
@@ -386,7 +425,7 @@ function step(s, t, rng) {
   const st = s.stats;
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
-  if (rest && s.trait === 'persistent') rate *= 0.7;
+  if (rest) rate *= 1 - traitEffect(s, 'persistent');
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
@@ -403,7 +442,7 @@ function step(s, t, rng) {
   // No fresh infections while it rests: it's offline, not browsing.
   if (!s.virus && !shielded(s) && !rest) {
     let perHour = CFG.virusBasePerHour + CFG.virusPerCachePerHour * s.cache;
-    if (s.trait === 'hardened') perHour *= 0.5;
+    perHour *= 1 - traitEffect(s, 'hardened');
     perHour *= mod(s, 'virusMult');
     if (rng() < perHour / 60) {
       s.virus = true;
@@ -422,7 +461,7 @@ function step(s, t, rng) {
   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
   const deepRest = s.nap || (s.asleep && !s.lightsOn);
   if (dInt === 0) dInt = deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour;
-  if (s.trait === 'volatile') dInt -= 1;
+  dInt -= TRAIT_CFG.volatileIntegrity * traitStrength(s, 'volatile');
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
@@ -470,7 +509,7 @@ function stepEvents(s, t, rng) {
     return;
   }
   if (resting(s)) return;
-  if (s.trait !== 'untraceable' && rng() < CFG.traceChancePerHour / 60) {
+  if (rng() < (CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
       log(s, t, '> corp trace waved off by voucher.');
@@ -697,11 +736,21 @@ export function migrate(s) {
   s.newForms ??= [];
   s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
   s.codexFound ??= 0;
+  s.traitLevel ??= 1; // from before trait levels: every inherited trait was level 1
+  s.echo ??= null;
   s.scrip ??= 0;
   return s;
 }
 
 export const inheritedScrip = (s) => Math.floor((s.scrip ?? 0) * SCRIP.inherit);
+
+// What a netling that ends as `form` leaves the next generation. Its own inherited trait becomes the
+// child's echo; if it ended as the same form as its parent, the trait's level goes up (a streak).
+export function fragmentOf(s, form) {
+  const trait = FORMS[form].trait;
+  const level = s.trait === trait ? Math.min((s.traitLevel ?? 1) + 1, TRAIT_CFG.maxLevel) : 1;
+  return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, echo: s.trait ?? null };
+}
 
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.
 function rootRescue(s, t, cause) {
@@ -727,7 +776,7 @@ function flatline(s, t, cause, rng = null) {
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
   const form = FORMS[s.form] ? s.form : leaningForm(s, rng);
-  s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s) };
+  s.fragment = fragmentOf(s, form);
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
 
@@ -833,7 +882,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'scav': {
       if (st.charge >= 95) return fail('buffer full. refused.');
       let gain = action === 'corp' ? 30 : 25;
-      if (action === 'corp' && s.trait === 'licensed') gain *= 1.25;
+      if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
       s.axes.allegiance += action === 'corp' ? 1 : -1;
@@ -848,7 +897,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         if (action === 'scav') msg += ' it looks disgusted.';
       }
       if (action === 'scav' && !s.virus && !shielded(s)) {
-        const chance = (s.trait === 'hardened' ? 0.06 : 0.12) * mod(s, 'virusMult');
+        const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult');
         if (rng() < chance) {
           s.virus = true;
           s.virusMin = 0;
@@ -863,7 +912,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       if (s.form === 'glitch') gain = 10 + Math.floor(rng() * 31);
-      if (s.trait === 'volatile') gain *= 1.5;
+      gain *= 1 + traitEffect(s, 'volatile');
       const boosted = won && s.buffs.boost;
       if (boosted) {
         gain *= 2;

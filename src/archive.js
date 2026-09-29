@@ -1,5 +1,5 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
-import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES } from './sim.js';
+import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, traitLabel } from './sim.js';
 import { FORM_ABILITIES } from './netrun/run.js';
 
 export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
@@ -59,7 +59,10 @@ export function deathRecord(state) {
     ageMin: state.ageMin,
     mistakes: state.careMistakes,
     trait: state.trait,
+    traitLevel: state.traitLevel ?? 1,
+    echo: state.echo ?? null,
     fragmentTrait: f?.trait ?? null,
+    fragmentLevel: f?.level ?? 1,
     keepsake: f?.keepsake ?? null,
     rescued: Boolean(state.rootUsed),
     palette: state.quirk?.palette ?? 0,
@@ -77,8 +80,8 @@ export function lineageRows(lineage, current) {
     status: e.cause ?? 'flatlined',
     ageMin: e.ageMin ?? 0,
     mistakes: e.mistakes,
-    trait: e.trait ? TRAITS[e.trait].name : null,
-    fragment: e.fragmentTrait ? TRAITS[e.fragmentTrait].name : null,
+    trait: e.trait ? `${traitLabel(e.trait, e.traitLevel)}${e.echo ? ` (echo ${TRAITS[e.echo].name})` : ''}` : null,
+    fragment: e.fragmentTrait ? traitLabel(e.fragmentTrait, e.fragmentLevel) : null,
     keepsake: e.keepsake ? ITEMS[e.keepsake].name : null,
     rescued: Boolean(e.rescued),
     palette: e.palette ?? 0,
@@ -92,7 +95,7 @@ export function lineageRows(lineage, current) {
       status: 'running',
       ageMin: current.ageMin,
       mistakes: current.careMistakes,
-      trait: current.trait ? TRAITS[current.trait].name : null,
+      trait: current.trait ? `${traitLabel(current.trait, current.traitLevel)}${current.echo ? ` (echo ${TRAITS[current.echo].name})` : ''}` : null,
       fragment: null,
       palette: current.quirk.palette,
       dead: false,

@@ -56,7 +56,8 @@ test('a simulated life is repeatable and reports its stages', () => {
 test('a child starts from its parent: trait, keepsake and generation', () => {
   const r = simulate(ARCHETYPES.attentive, 3, { fragment: parentOf('ghost'), generation: 2 });
   assert.equal(r.trait, FORMS.ghost.trait);
-  assert.equal(r.traces, 0, 'Untraceable: no corp traces at all');
+  const traces = (fragment) => [1, 2, 3, 4, 5, 6, 7, 8].reduce((n, seed) => n + simulate(ARCHETYPES.attentive, seed, { fragment, generation: 2 }).traces, 0);
+  assert.ok(traces(parentOf('ghost')) < 0.7 * traces(parentOf('daemon')), 'Untraceable: far fewer corp traces');
   assert.throws(() => parentOf('kernel'), /adult form/);
 });
 
