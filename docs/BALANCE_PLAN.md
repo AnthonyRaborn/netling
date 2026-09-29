@@ -23,6 +23,18 @@ From the maintainer, 2026-09-29:
 3. **Items should be scarcer, or surplus needs a use** other than DISCARD: for example a thematic currency ("scrip") spent at netrun markets.
 4. **More lineage depth.** A weaker echo of an older generation's trait is welcome, partly so that an inherited Ghost trait no longer takes away the next netling's main way to steer its form. Lineage depth should be designed together with possible new evolution forms (see [Pass 3](#pass-3-lineage)).
 
+Second round, 2026-09-29:
+
+5. **Attentive players can steer every evolution**, teen and adult (Ghost stays the deliberate chase within that). For the teen stage this comes from items or similar that let a player take faults on purpose, either directly (an item adds a fault) or indirectly (an item pushes a stat into fault territory).
+6. **A third teen form, chosen by the hidden axes.**
+7. **The Deep stays a deliberate wall.**
+8. **Codex pacing uses a per-life cap.**
+9. **Corpo scrip**: the currency is called scrip in short and corpo scrip where the text has room. It belongs to each netling, part of it is inherited, it has a **maximum** so spending stays a choice, and **Charge is still needed** at markets alongside scrip.
+10. **Lineage forms**: trait levels (option D), if the numbers work. New forms must be thematic, visually distinct and interesting to play, so none are planned yet.
+11. **Echoes at half strength**; a trait shared by parent and grandparent stacks up to a cap chosen by measurement.
+12. **Life length is an open question**: seven days is long for three stages. Either shorten it (for example to five days) or add a stage. Measure both.
+13. **Tooling pass first.**
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -65,18 +77,23 @@ The current tools cannot measure some of what the later passes change.
 ### Proposed changes (in order of cost)
 
 1. **Numbers only**: lower `uptimeStabilityPerHour` (for example 0.1 to 0.05), then measure. If Daemon still dominates, compare the axes after scaling each by its typical spread instead of raw.
-2. **A caring route to Glitch**: give deliberate risk its own chaos, separate from neglect. For example, Overclock rig, SALVAGE, RAID and playing while hot move stability down even with zero faults. Measured with the `daredevil` archetype.
+2. **Full steering for attentive players (decided)**:
+   - **Adults**: every form must be reachable by a careful player who chooses for it. Glitch needs its own route: deliberate risk (Overclock rig, SALVAGE, RAID, playing hot) should move stability down without faults. Measured with the `steer-*` and `daredevil` archetypes.
+   - **Teens**: a way to take faults on purpose, by an item that adds a fault directly, or one that pushes a stat into fault territory (for example a "drain spike" that empties Sync). Stub is reachable today only through neglect; the `steer-stub` archetype measures what that costs now.
 3. **Ghost (decided: stays a deliberate chase)**: keep its conditions. Every other change in this pass is checked against the `ghosthunter` archetype (100% Ghost today) and attentive players (1 to 2%), so neither moves. KI-14 (a boosted win counts twice) can stay as it is: boosters are part of the chase. Document it where the rule is described.
 4. **Tie-break (KI-15)**: decide whether a neutral netling that misses Ghost should become Chrome, or whichever form its larger scaled axis points to.
-5. **Teen variety (content, the largest change)**: a third teen form chosen from the axes at 24 hours, as a preview of the adult direction. A new form needs:
+5. **A third teen form, chosen from the hidden axes (decided)**: at 24 hours, a netling with few faults and a strong lean becomes the new teen instead of Kernel, as a preview of where it is heading. Which lean (corp, indie, orderly or chaotic, or any strong one) is still open. A new form needs:
    - a permanent id and sprites;
    - a DEX entry with hints, and `DEX_ORDER`;
    - a check of every "all forms" condition in cosmetics and archive, the sanitizer whitelist, CONTENT_CATALOG and `gallery.html`.
 
    It is additive, so no save version bump.
 
+6. **Life length (open)**: seven days for three stages leaves four days as an adult. Measure two variants with `CFG` overrides before choosing: a five-day life (`lifespanMin` 7200), and the current seven days with a fourth stage (for example an elder stage from day 5 with its own perk or pose). The tools report days spent in each stage.
+
 ### Candidate targets (to confirm)
 
+- Every adult form, including Glitch, reached at least 80% of the time by its `steer-*` archetype, with no more faults than an attentive player makes.
 - Attentive with mixed choices: no adult form above about 45%, and each of Chrome, Firewall, Daemon and Glitch at least 10%.
 - Each deliberate archetype reaches its form at least 80% of the time, including Glitch through `daredevil` without faults.
 - Ghost: `ghosthunter` stays at or near 100%, and attentive players stay under 5%.
@@ -113,22 +130,23 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 | **B. Lower drop rates**: exit 60% to about 25%, cache 15% to 8%, Echo 50% to 25% | Fewer finds for everyone | Casual players drop to about 3 a life (7 or more lives), and a lucky, busy player can still beat 3 lives |
 | **C. Generation gates**: The Deep's fragments need generation 3 or later | A hard minimum, and a reason to keep a line going | Only works if the earlier regions take 2 lives by themselves; a gate alone doesn't pace them |
 
-**Recommended: A on its own to start.** Casual players already take about 4 lives at 6 a life, and the cap stops busy players at exactly 3. Take a small cut from B only if measurements show otherwise. Root Access then arrives in generation 3 at the earliest. The cap is a new `RUN_CFG` number and a counter on the netling (`codexFoundThisLife`, an added field with a default, so no save version bump). The cooldown (180 to 240 minutes, floor 120) is a separate lever that also cuts item income; see below.
+**Decided: A.** Start with A on its own. Casual players already take about 4 lives at 6 a life, and the cap stops busy players at exactly 3. Take a small cut from B only if measurements show otherwise. Root Access then arrives in generation 3 at the earliest. The cap is a new `RUN_CFG` number and a counter on the netling (`codexFoundThisLife`, an added field with a default, so no save version bump). The cooldown (180 to 240 minutes, floor 120) is a separate lever that also cuts item income; see below.
 
-#### Item economy (decided: scarcer, or a use for surplus)
+#### Item economy (decided: corpo scrip)
 
-A currency, working name **scrip**, gives surplus a use without making the inventory bigger:
+**Corpo scrip** (scrip for short) gives surplus a use without making the inventory bigger:
 
 - **Earning**: sell an item at a netrun market for scrip. When a pickup meets a full inventory, offer to take it as scrip instead of losing it. Exits and caches can also drop a little loose scrip.
-- **Spending**: market items and the market's accessory offers are priced in scrip instead of Charge. Charge stays the cost of moving through a run, so the run's tension stays where it is.
+- **Spending**: market items and accessory offers cost scrip **and** some Charge (decided: Charge is still needed). Tune the two together so a purchase stays a real choice mid-run.
+- **A maximum** (decided): a netling can hold only so much scrip (for example enough for two or three purchases), so hoarding is not a strategy and spending stays a decision. Scrip that would go over the cap is lost, and the HUD should show when it is full.
 - **At home**: DISCARD becomes SCRAP, for a token amount, so a home sale is never better than a market sale.
 - **Scarcity still matters**: lower the loot tables a little too, so a full inventory is the exception. Targets are below.
-- **Where it lives**: on the netling (`state.scrip`), so it can take part in lineage (for example half is inherited; see Pass 3), or shared across generations (`progress.scrip`). It needs a default in `createScript`, `migrate` and `cleanSave`, a cleaner, a place in the HUD or Archive, and a transfer round-trip test. No version bump.
+- **Where it lives (decided)**: on the netling (`state.scrip`), with part of it inherited by the next generation (see Pass 3). It needs a default in `createScript`, `migrate` and `cleanSave`, a cleaner, a place in the HUD or Archive, and a transfer round-trip test. No version bump.
 - **Allegiance**: buying at a market leans indie today (-0.5 per item). Keep that on purchases; selling can stay neutral.
 
 #### Other netrun changes
 
-1. **Difficulty curve**: bring the Corp Grid's disconnect rate below the Ruins' (ICE damage 40, or its checkpoint weight). Whether the Deep's 31% for careful players is the intended endgame wall is still open.
+1. **Difficulty curve**: bring the Corp Grid's disconnect rate below the Ruins' (ICE damage 40, or its checkpoint weight). The Deep stays a deliberate wall (decided); keep its rate well above the Ruins'.
 2. **Abilities**: after Pass 0, bring Daemon and Ghost vision to within a few points of Firewall's disconnect rate, or give them a second effect.
 3. Late-game content (seeded daily runs, run modifiers) is a feature, not balance; it is out of scope here, but its rewards would be tuned with the same tools.
 
@@ -136,7 +154,7 @@ A currency, working name **scrip**, gives surplus a use without making the inven
 
 - Codex: no simulated player finishes in fewer than 3 lives; attentive players take 3 to 4, casual players 4 to 6 (measured with `LIVES=n`).
 - Items: players who run have a free slot at least half the time at check-ins; a market purchase is affordable about every second run.
-- Careful-player disconnect rates rise region by region (Public < Bazaar ≈ Corp < Ruins < Deep), with the Deep under about 20% unless it is kept as a wall.
+- Careful-player disconnect rates rise region by region (Public < Bazaar ≈ Corp < Ruins < Deep), with the Deep kept as a wall.
 - No adult ability is more than about 4 points better than another at avoiding disconnects.
 
 ## Pass 3: lineage
@@ -151,7 +169,7 @@ A currency, working name **scrip**, gives surplus a use without making the inven
 
 ### Step 1: echoes and trait strength (decided in outline)
 
-- **Every trait gets a strength**, stored in one table (`TRAIT_CFG` beside `CFG`). The parent's trait applies at full strength, and the **grandparent's trait as an echo at half strength**. If both are the same trait, the echo adds to it, capped (a mild "bloodline" bonus with no new rule).
+- **Every trait gets a strength**, stored in one table (`TRAIT_CFG` beside `CFG`). The parent's trait applies at full strength, and the **grandparent's trait as an echo at half strength** (decided). If both are the same trait, the echo adds to it, up to a cap per trait set by measurement (decided).
 - **Untraceable becomes a strength, not an immunity**: traces arrive 60% less often at full strength and 30% less as an echo. The child of a Ghost still meets a few traces and can still steer. The numbers are placeholders, to be measured.
 - **Save work**: the stored fragment gains the parent's own trait as `echo` (an added field, default none), and the lineage record shows it. No version bump. Trait ids stay.
 - **Measure** every trait at full and echo strength, for casual and attentive players. Target: no trait moves the casual full-life rate by more than about 5 points, and no trait moves the adult form odds by more than about 10 points.
@@ -167,20 +185,18 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 | **C. Heritage teens** | The teen form follows the inherited trait (or the axes at 24 hours) instead of always being Kernel | 2 to 3 teens | Fixes the teen stage's lack of variety (Pass 1) and previews where the line is heading | Low to moderate: teens have no perks today, so balance risk is small |
 | **D. Trait levels only** | Repeating a form raises its trait's strength, capped | None | Depth without new content | Cheap, but adds nothing to discover |
 
-**Suggested direction**: Step 1 first (it is needed whatever is chosen, and fixes the Ghost steering problem), then **C** for teen variety, then **A** with two hybrids as the lineage-driven secret forms. B is the most expensive and can wait until A shows whether players chase multi-generation goals. D is mostly covered by Step 1's capped bloodline bonus.
+**Decided**: D (trait levels), if the numbers work. New forms must be thematic, visually distinct and interesting to play, so none are planned from lineage for now; A and B stay on the list for later, and teen variety comes from the axes instead (Pass 1, item 5). Trait levels extend Step 1: the same form over several generations raises its trait further, still under the per-trait cap.
 
 ### Step 3: lineage UI and goals
 
 1. **Family tree** in the Archive, from the lineage records the game already keeps, showing each generation's trait and echo.
 2. **Legacy goals**: streaks across generations (for example three full lives in a line, or every trait held once), rewarded with cosmetics only so power stays bounded.
-3. **Inherited scrip** (if scrip lives on the netling): half passes to the next generation, as a small head start and a reason to end a life well.
+3. **Inherited scrip** (decided): part of it passes to the next generation (for example half, under the cap), as a small head start and a reason to end a life well.
 
 ## Still to decide
 
-1. **Glitch**: should a caring player have a route to Glitch through deliberate risk (Pass 1, item 2), or should Glitch stay tied to neglect and faults?
-2. **Teen stage**: variety through heritage teens (Pass 3, option C), a third teen from the axes, or leave teens as they are?
-3. **The Deep**: an endgame wall (31% disconnects for careful players), or in line with the other regions?
-4. **Codex cap**: is a per-life cap (Pass 2, option A) acceptable, or should pacing come from rarer drops instead?
-5. **Scrip**: the name, whether it lives on the netling or is shared across generations, and whether markets should also take Charge.
-6. **Lineage forms**: which of options A to D, and how many new forms to plan for.
-7. **Echo strength**: half strength for a grandparent's trait, and the capped bonus when parent and grandparent share a trait?
+1. **Third teen**: which lean picks it (corp, indie, orderly, chaotic, or any strong one), and what it looks like.
+2. **Deliberate faults**: an item that adds a fault directly, or one that pushes a stat into fault territory? How is it obtained?
+3. **Life length**: five days, or seven with a fourth stage? To be measured first.
+4. **Scrip numbers**: the cap, prices, the Charge part of a purchase, and how much is inherited.
+5. **Trait numbers**: strengths, level steps and caps, after measuring.
