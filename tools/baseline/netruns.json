@@ -23,14 +23,14 @@
       "stability": -0.12
     },
     "public.chrome": {
-      "jacked": 0.965,
-      "disconnected": 0.035,
-      "items": 1.9,
-      "fragments": 0.78,
-      "intSpent": 11.07,
-      "chargeSpent": 12.84,
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 1.94,
+      "fragments": 0.8,
+      "intSpent": 10.82,
+      "chargeSpent": 12.96,
       "allegiance": 0.02,
-      "stability": -0.12
+      "stability": -0.09
     },
     "public.firewall": {
       "jacked": 0.997,
@@ -43,32 +43,32 @@
       "stability": -0.1
     },
     "public.daemon": {
-      "jacked": 0.971,
-      "disconnected": 0.029,
-      "items": 1.95,
-      "fragments": 0.82,
-      "intSpent": 11.03,
-      "chargeSpent": 14.95,
-      "allegiance": -0.2,
-      "stability": -0.11
+      "jacked": 0.997,
+      "disconnected": 0.003,
+      "items": 2.14,
+      "fragments": 0.91,
+      "intSpent": -7.61,
+      "chargeSpent": 16.29,
+      "allegiance": -0.24,
+      "stability": -0.08
     },
     "public.glitch": {
-      "jacked": 0.988,
-      "disconnected": 0.012,
-      "items": 2.09,
-      "fragments": 0.9,
-      "intSpent": 6.28,
-      "chargeSpent": 16.67,
-      "allegiance": -0.26,
-      "stability": -0.1
+      "jacked": 0.995,
+      "disconnected": 0.005,
+      "items": 2.03,
+      "fragments": 0.91,
+      "intSpent": 4.61,
+      "chargeSpent": 16.81,
+      "allegiance": -0.25,
+      "stability": -0.09
     },
     "public.ghost": {
-      "jacked": 0.979,
-      "disconnected": 0.021,
-      "items": 2.01,
-      "fragments": 0.83,
-      "intSpent": 9.69,
-      "chargeSpent": 13.06,
+      "jacked": 0.994,
+      "disconnected": 0.006,
+      "items": 2.06,
+      "fragments": 0.89,
+      "intSpent": 5.99,
+      "chargeSpent": 14.1,
       "allegiance": 0.02,
       "stability": -0.09
     },
@@ -93,14 +93,14 @@
       "stability": -0.13
     },
     "bazaar.chrome": {
-      "jacked": 0.955,
-      "disconnected": 0.045,
-      "items": 1.76,
-      "fragments": 0.77,
-      "intSpent": 11.59,
-      "chargeSpent": 15.2,
+      "jacked": 0.987,
+      "disconnected": 0.013,
+      "items": 1.8,
+      "fragments": 0.79,
+      "intSpent": 11.21,
+      "chargeSpent": 15.29,
       "allegiance": 0.01,
-      "stability": -0.16
+      "stability": -0.13
     },
     "bazaar.firewall": {
       "jacked": 0.994,
@@ -113,34 +113,34 @@
       "stability": -0.13
     },
     "bazaar.daemon": {
-      "jacked": 0.953,
-      "disconnected": 0.047,
-      "items": 1.82,
-      "fragments": 0.79,
-      "intSpent": 11,
-      "chargeSpent": 15.64,
-      "allegiance": 0.02,
-      "stability": -0.16
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 2.04,
+      "fragments": 0.89,
+      "intSpent": -9.04,
+      "chargeSpent": 17.32,
+      "allegiance": 0.01,
+      "stability": -0.13
     },
     "bazaar.glitch": {
-      "jacked": 0.986,
-      "disconnected": 0.014,
-      "items": 1.9,
-      "fragments": 0.84,
-      "intSpent": 6.11,
-      "chargeSpent": 17.28,
+      "jacked": 0.993,
+      "disconnected": 0.007,
+      "items": 1.95,
+      "fragments": 0.85,
+      "intSpent": 4.15,
+      "chargeSpent": 17.4,
       "allegiance": 0.01,
       "stability": -0.12
     },
     "bazaar.ghost": {
-      "jacked": 0.962,
-      "disconnected": 0.038,
-      "items": 1.84,
-      "fragments": 0.8,
-      "intSpent": 10.51,
-      "chargeSpent": 15.52,
-      "allegiance": 0.02,
-      "stability": -0.14
+      "jacked": 0.991,
+      "disconnected": 0.009,
+      "items": 1.96,
+      "fragments": 0.85,
+      "intSpent": 6,
+      "chargeSpent": 16.39,
+      "allegiance": 0,
+      "stability": -0.13
     },
     "corp.careful": {
       "jacked": 0.926,
@@ -163,14 +163,14 @@
       "stability": -0.07
     },
     "corp.chrome": {
-      "jacked": 0.94,
-      "disconnected": 0.06,
-      "items": 1.76,
-      "fragments": 0.72,
-      "intSpent": 14,
-      "chargeSpent": 14.16,
+      "jacked": 0.977,
+      "disconnected": 0.023,
+      "items": 1.81,
+      "fragments": 0.74,
+      "intSpent": 13.57,
+      "chargeSpent": 14.29,
       "allegiance": 0.01,
-      "stability": -0.12
+      "stability": -0.09
     },
     "corp.firewall": {
       "jacked": 0.979,
@@ -183,34 +183,34 @@
       "stability": -0.09
     },
     "corp.daemon": {
-      "jacked": 0.947,
-      "disconnected": 0.053,
-      "items": 1.71,
-      "fragments": 0.72,
-      "intSpent": 15.65,
-      "chargeSpent": 21.73,
-      "allegiance": -0.89,
-      "stability": -0.1
+      "jacked": 0.993,
+      "disconnected": 0.007,
+      "items": 2.12,
+      "fragments": 0.89,
+      "intSpent": -3.39,
+      "chargeSpent": 25.78,
+      "allegiance": -1.19,
+      "stability": -0.06
     },
     "corp.glitch": {
-      "jacked": 0.961,
-      "disconnected": 0.039,
-      "items": 1.87,
+      "jacked": 0.984,
+      "disconnected": 0.016,
+      "items": 1.91,
       "fragments": 0.85,
-      "intSpent": 11.29,
-      "chargeSpent": 25.83,
-      "allegiance": -1.18,
-      "stability": -0.09
+      "intSpent": 8.5,
+      "chargeSpent": 26.61,
+      "allegiance": -1.25,
+      "stability": -0.07
     },
     "corp.ghost": {
-      "jacked": 0.958,
-      "disconnected": 0.042,
-      "items": 1.88,
-      "fragments": 0.77,
-      "intSpent": 12.81,
-      "chargeSpent": 14.39,
-      "allegiance": 0.01,
-      "stability": -0.09
+      "jacked": 0.986,
+      "disconnected": 0.014,
+      "items": 2.05,
+      "fragments": 0.87,
+      "intSpent": 7.4,
+      "chargeSpent": 15.94,
+      "allegiance": -0.01,
+      "stability": -0.06
     },
     "ruins.careful": {
       "jacked": 0.912,
@@ -233,14 +233,14 @@
       "stability": -0.22
     },
     "ruins.chrome": {
-      "jacked": 0.912,
-      "disconnected": 0.088,
-      "items": 2.86,
-      "fragments": 0.82,
-      "intSpent": 15.76,
-      "chargeSpent": 14.22,
+      "jacked": 0.972,
+      "disconnected": 0.028,
+      "items": 3,
+      "fragments": 0.86,
+      "intSpent": 14.98,
+      "chargeSpent": 14.44,
       "allegiance": -0.03,
-      "stability": -0.27
+      "stability": -0.21
     },
     "ruins.firewall": {
       "jacked": 0.988,
@@ -253,104 +253,104 @@
       "stability": -0.21
     },
     "ruins.daemon": {
-      "jacked": 0.93,
-      "disconnected": 0.07,
-      "items": 2.94,
-      "fragments": 0.87,
-      "intSpent": 14.86,
-      "chargeSpent": 14.04,
+      "jacked": 0.98,
+      "disconnected": 0.02,
+      "items": 3.43,
+      "fragments": 1.01,
+      "intSpent": -3.71,
+      "chargeSpent": 15.9,
       "allegiance": -0.03,
-      "stability": -0.25
-    },
-    "ruins.glitch": {
-      "jacked": 0.972,
-      "disconnected": 0.028,
-      "items": 3.34,
-      "fragments": 1,
-      "intSpent": 8.63,
-      "chargeSpent": 16.09,
-      "allegiance": -0.03,
-      "stability": -0.28
-    },
-    "ruins.ghost": {
-      "jacked": 0.941,
-      "disconnected": 0.059,
-      "items": 3.04,
-      "fragments": 0.89,
-      "intSpent": 14.03,
-      "chargeSpent": 14.47,
-      "allegiance": -0.04,
-      "stability": -0.24
-    },
-    "deep.careful": {
-      "jacked": 0.745,
-      "disconnected": 0.255,
-      "items": 1.77,
-      "fragments": 0.45,
-      "intSpent": 26.57,
-      "chargeSpent": 11.49,
-      "allegiance": 0,
-      "stability": -0.35
-    },
-    "deep.skilled": {
-      "jacked": 0.874,
-      "disconnected": 0.126,
-      "items": 2.89,
-      "fragments": 0.72,
-      "intSpent": 17.43,
-      "chargeSpent": 15.55,
-      "allegiance": -0.01,
-      "stability": -0.25
-    },
-    "deep.chrome": {
-      "jacked": 0.745,
-      "disconnected": 0.255,
-      "items": 1.77,
-      "fragments": 0.45,
-      "intSpent": 26.57,
-      "chargeSpent": 11.49,
-      "allegiance": 0,
-      "stability": -0.35
-    },
-    "deep.firewall": {
-      "jacked": 0.913,
-      "disconnected": 0.087,
-      "items": 2.53,
-      "fragments": 0.65,
-      "intSpent": 17.93,
-      "chargeSpent": 14.44,
-      "allegiance": 0,
       "stability": -0.2
     },
-    "deep.daemon": {
-      "jacked": 0.786,
-      "disconnected": 0.214,
-      "items": 1.84,
-      "fragments": 0.49,
-      "intSpent": 25.15,
-      "chargeSpent": 11.18,
-      "allegiance": -0.01,
+    "ruins.glitch": {
+      "jacked": 0.982,
+      "disconnected": 0.018,
+      "items": 3.4,
+      "fragments": 1.04,
+      "intSpent": 6.35,
+      "chargeSpent": 16.12,
+      "allegiance": -0.04,
+      "stability": -0.29
+    },
+    "ruins.ghost": {
+      "jacked": 0.977,
+      "disconnected": 0.023,
+      "items": 3.35,
+      "fragments": 0.98,
+      "intSpent": 8.45,
+      "chargeSpent": 15.5,
+      "allegiance": -0.04,
+      "stability": -0.23
+    },
+    "deep.careful": {
+      "jacked": 0.653,
+      "disconnected": 0.347,
+      "items": 1.45,
+      "fragments": 0.37,
+      "intSpent": 31.33,
+      "chargeSpent": 12.38,
+      "allegiance": 0.01,
+      "stability": -0.48
+    },
+    "deep.skilled": {
+      "jacked": 0.797,
+      "disconnected": 0.203,
+      "items": 2.74,
+      "fragments": 0.69,
+      "intSpent": 23.29,
+      "chargeSpent": 18.07,
+      "allegiance": 0.02,
+      "stability": -0.37
+    },
+    "deep.chrome": {
+      "jacked": 0.815,
+      "disconnected": 0.185,
+      "items": 1.7,
+      "fragments": 0.43,
+      "intSpent": 28.92,
+      "chargeSpent": 12.8,
+      "allegiance": 0.01,
+      "stability": -0.33
+    },
+    "deep.firewall": {
+      "jacked": 0.854,
+      "disconnected": 0.146,
+      "items": 2.21,
+      "fragments": 0.57,
+      "intSpent": 22.55,
+      "chargeSpent": 15.51,
+      "allegiance": 0,
       "stability": -0.31
     },
-    "deep.glitch": {
-      "jacked": 0.807,
-      "disconnected": 0.193,
-      "items": 2.22,
-      "fragments": 0.61,
-      "intSpent": 22.5,
-      "chargeSpent": 13.93,
+    "deep.daemon": {
+      "jacked": 0.808,
+      "disconnected": 0.192,
+      "items": 2.39,
+      "fragments": 0.64,
+      "intSpent": 17.22,
+      "chargeSpent": 15.98,
       "allegiance": 0.01,
-      "stability": -0.3
+      "stability": -0.35
+    },
+    "deep.glitch": {
+      "jacked": 0.83,
+      "disconnected": 0.17,
+      "items": 2.42,
+      "fragments": 0.68,
+      "intSpent": 21.45,
+      "chargeSpent": 18.44,
+      "allegiance": 0.03,
+      "stability": -0.31
     },
     "deep.ghost": {
-      "jacked": 0.8,
-      "disconnected": 0.2,
-      "items": 1.89,
-      "fragments": 0.5,
-      "intSpent": 24.32,
-      "chargeSpent": 11.26,
+      "jacked": 0.853,
+      "disconnected": 0.147,
+      "items": 2.42,
+      "fragments": 0.68,
+      "intSpent": 20.64,
+      "chargeSpent": 16.71,
       "allegiance": -0.01,
-      "stability": -0.3
+      "stability": -0.31
     }
   }
 }

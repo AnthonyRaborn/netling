@@ -34,7 +34,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **CFG** | The exported object of every tunable rule number | `sim.js` |
 | **Charge** | Stat: power. Drains 14/hr awake. Fed by packets | `sim.js` |
 | **Checkpoint** | A corp scan node: hide, comply, or use a voucher | `netrun/run.js` |
-| **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through | `sim.js` |
+| **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; corp insurance once a run | `sim.js` |
 | **Clean clear / clean jack-out** | A netrun that ends by jacking out with no ICE lost. Shortens the next cooldown by 1 hour | `netrun/run.js` |
 | **Clear (region clear)** | Reaching a region's exit node. Opens the next region down for that netling (`pet.cleared`) | `netrun/run.js` |
 | **Codex** | The 22 lore fragments collected on netruns. Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |
@@ -48,7 +48,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Corp trace** | Timed event: HIDE or COMPLY within 2 hours or lose Integrity and lean corp | `sim.js` |
 | **Corp voucher** | Item: full Charge, waves off a trace | `sim.js` |
 | **Crash** | What an ignored memory overflow does: -15 Integrity, cache full, 20 minute reboot | `sim.js` |
-| **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead in runs | `sim.js` |
+| **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead and repairs as it moves in runs | `sim.js` |
 | **Dark** | Lights off. Deep rest when asleep, boredom when awake | `sim.js` |
 | **Dead / flatline** | The end of a netling. Leaves a fragment | `sim.js` `flatline` |
 | **Deep rest** | Napping, or asleep with the lights off: Integrity regenerates 8/hr | `sim.js` |
@@ -70,8 +70,8 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait, quirk, keepsake). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
 | **Gate (write gate)** | `canWrite` in `ui/app.js`: decides whether storage may be written | `ui/app.js` |
 | **Generation** | The number of the current netling, shown as `v<n>.0` | `sim.js` |
-| **Ghost** | Secret adult form. Neutral allegiance, non-negative stability, 1 mistake or fewer, 22+ wins with 4+ in each game. Trait Untraceable | `sim.js` |
-| **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE | `sim.js` |
+| **Ghost** | Secret adult form. Neutral allegiance, non-negative stability, 1 mistake or fewer, 18+ wins with 3+ in each game. Trait Untraceable. In runs: sees every node, checkpoints and 45% of ICE miss it | `sim.js` |
+| **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE, and often later ones | `sim.js` |
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
 | **Heat** | Stat: rises when active. 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |

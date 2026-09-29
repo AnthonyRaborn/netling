@@ -62,7 +62,7 @@ export const REGIONS = {
     blurb: 'below the logs. nothing here is recorded.',
     minStage: 'adult',
     requires: 'ruins-4',
-    layers: 8,
+    layers: 10, // the longest way: harder by distance, not by ICE damage
     width: [2, 3],
     nodes: { cache: 2, ice: 8, relay: 1, anomaly: 2 },
     loot: { memory: 3, booster: 2, antivirus: 2, coolant: 2, repair: 2, voucher: 1, blackice: 1, overclock: 1, segfault: 1 },

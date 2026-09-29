@@ -7,7 +7,7 @@ import { encodeSave, decodeSave } from '../src/transfer.js';
 import { REGIONS, REGION_ORDER, clearedForStage, regionLock } from '../src/netrun/regions.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
 import {
-  abortRun, atMarket, choose, codexRoom, disconnect, jackOut, moveTo, refreshMarket, runBlockReason, runOptions, sellItem, startRun, RUN_CFG,
+  abortRun, atMarket, choose, codexRoom, disconnect, jackOut, moveTo, refreshMarket, resolveIce, runBlockReason, runOptions, sellItem, startRun, RUN_CFG,
 } from '../src/netrun/run.js';
 
 // Balance pass 2: regions open in order, the per-life codex cap, and corpo scrip.
@@ -287,4 +287,78 @@ test('every region still names a real next region, and none opens itself', () =>
     assert.ok(REGIONS[id]);
     if (i) assert.match(regionLock(id, 'adult', ['ruins-4'], REGION_ORDER.slice(0, i - 1)) ?? '', /first/);
   }
+});
+
+// --- second abilities ---
+
+function adult(form) {
+  const s = pet('adult');
+  s.form = form;
+  s.stats.charge = 100;
+  s.stats.heat = 0;
+  return s;
+}
+
+test('Chrome: corp insurance saves it from one disconnect a run', () => {
+  const s = adult('chrome');
+  into(s, 'deep', 'cache');
+  s.run.phase = 'ice';
+  s.run.pending = { game: 'breach' };
+  s.stats.integrity = 1;
+  resolveIce(s, false, noRng);
+  assert.equal(s.run.phase, 'map', 'still running');
+  assert.equal(s.stats.integrity, RUN_CFG.chromeInsurance);
+  assert.match(s.run.messages.at(-1), /insurance/);
+  s.run.phase = 'ice';
+  s.run.pending = { game: 'breach' };
+  s.stats.integrity = 1;
+  assert.equal(resolveIce(s, false, noRng).result, 'disconnected', 'only once');
+  const k = adult('kernel');
+  into(k, 'public', 'cache');
+  k.run.phase = 'ice';
+  k.run.pending = { game: 'breach' };
+  k.stats.integrity = 1;
+  assert.equal(resolveIce(k, false, noRng).result, 'disconnected', 'nobody else is insured');
+});
+
+test('Daemon: repairs a little Integrity with every move', () => {
+  const s = adult('daemon');
+  s.stats.integrity = 50;
+  moveTo(s, into(s, 'deep', 'cache').id, noRng);
+  assert.ok(RUN_CFG.daemonMoveRepair > 0);
+  assert.equal(s.stats.integrity, 50 + RUN_CFG.daemonMoveRepair);
+  const g = adult('glitch');
+  g.stats.integrity = 50;
+  moveTo(g, into(g, 'deep', 'cache').id, noRng);
+  assert.equal(g.stats.integrity, 50);
+});
+
+test('Ghost: an ICE sometimes never notices it', () => {
+  const s = adult('ghost');
+  const res = moveTo(s, into(s, 'deep', 'ice').id, always);
+  assert.equal(res.phased, true);
+  assert.equal(s.run.phase, 'map');
+  const t = adult('ghost');
+  assert.equal(moveTo(t, into(t, 'deep', 'ice').id, noRng).game !== undefined, true, 'not every time');
+});
+
+test('Glitch: after the first ICE, the next ones are sometimes phased too', () => {
+  const s = adult('glitch');
+  into(s, 'deep', 'ice');
+  s.run.phased = true; // the free one is spent
+  const next = runOptions(s.run)[0];
+  next.type = 'ice';
+  assert.equal(moveTo(s, next.id, always).phased, true);
+  const t = adult('glitch');
+  into(t, 'deep', 'ice');
+  t.run.phased = true;
+  assert.ok(moveTo(t, runOptions(t.run)[0].id, noRng).game, 'not every time');
+});
+
+test('the insurance flag survives a reload', () => {
+  const s = adult('chrome');
+  into(s, 'deep', 'cache');
+  s.run.insured = true;
+  const back = cleanSave(JSON.parse(JSON.stringify(s)), T0 + 60 * MIN, { strict: true });
+  assert.equal(back.run.insured, true);
 });

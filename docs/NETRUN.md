@@ -80,9 +80,9 @@ Netlings from before the order existed (no `cleared` field) are given every regi
 | Darknet Bazaar | teen+, Public Net cleared | 7 | 2 / 5 / 1 / 0 / 4 / 2 | 40 | 1 | sawtooth, x0.9 |
 | Corp Grid | teen+, Bazaar cleared | 7 | 3 / 6 / 1 / 4 / 0 / 1 | 35 | 1 | triangle, x1.25 |
 | Old Web Ruins | adult, Corp Grid cleared | 7 | 3 / 5 / 1 / 0 / 0 / 4 | 48 | 2 | sine, x0.75 |
-| The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 8 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
+| The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 10 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
 
-ICE damage was tuned in balance pass 2 so careful players disconnect more often at each step down: about 4% in the Public Net, 5% in the Bazaar, 7% in the Corp Grid (whose checkpoints add their own damage), 8% in the Ruins and 26% in The Deep, which stays a wall (`tools/baseline/netruns.json`).
+ICE damage was tuned in balance pass 2 so careful players disconnect more often at each step down: about 4% in the Public Net, 5% in the Bazaar, 7% in the Corp Grid (whose checkpoints add their own damage), 8% in the Ruins and 35% in The Deep, which stays a wall (`tools/baseline/netruns.json`). The Deep is hard by distance (10 middle layers, from 8 in pass 2) rather than by ICE damage, because more ICE damage pulls the adult abilities apart again; with their abilities, careful adults disconnect 14 to 19% there against 1 to 3% in the Ruins.
 
 While locked, The Deep shows as `???` in the picker, and the exit message of the Ruins never names it. The picker also shows how many new codex fragments this netling has recovered against the per-life cap. Each region has its own palette and its own netrun sound voice. The player's chosen sound pack applies only at home.
 
@@ -141,7 +141,7 @@ Every move first costs Charge and Heat (see below), then the node triggers.
 | `anomaly` | A random anomaly from the list below |
 | `exit` | Adds the region's exit bonus item(s) and 3 loose scrip, rolls 60% for a fragment (100% in the tutorial) and 8% for an accessory, marks the region cleared for this netling (not the tutorial), then jacks out |
 
-Glitch form skips the first ICE of each run entirely (`run.phased`).
+Glitch form skips the first ICE of each run entirely (`run.phased`), and each later ICE with a 35% chance (`glitchPhaseChance`). A Ghost goes unnoticed by 45% of ICE (`ghostSlipChance`).
 
 ## Movement costs
 
@@ -177,11 +177,13 @@ All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` 
 
 | Form | Ability |
 |---|---|
-| Chrome | Corp credentials: checkpoints wave it through |
+| Chrome | Corp credentials: checkpoints wave it through. Corp insurance: once a run, a blow that would disconnect it leaves it at 12 Integrity instead (`chromeInsurance`, `run.insured`) |
 | Firewall | ICE deals half damage |
-| Daemon | Sees node types two steps ahead |
-| Glitch | Slips through the first ICE of each run |
-| Ghost | Sees every node; checkpoints never notice it |
+| Daemon | Sees node types two steps ahead. Upkeep: +6 Integrity with every move (`daemonMoveRepair`) |
+| Glitch | Slips through the first ICE of each run, and each later one 35% of the time (`glitchPhaseChance`) |
+| Ghost | Sees every node; checkpoints never notice it; 45% of ICE never notice it either (`ghostSlipChance`) |
+
+The second effects (insurance, upkeep, the later phases, slipping past ICE) were added in balance pass 2 so no form is far ahead where it matters most. Careful play, 4000 runs each, disconnect rates in The Deep: Firewall 14%, Ghost 14%, Glitch 17%, Chrome 18%, Daemon 18%, against 35% with no ability.
 
 ## Anomalies
 

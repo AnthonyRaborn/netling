@@ -48,15 +48,20 @@ export const RUN_CFG = {
   exitFragmentChance: 0.6,
   echoFragmentChance: 0.5,
   firewallIceMult: 0.5,
+  // Second abilities (balance pass 2), so no form is far ahead in The Deep. 0 turns one off.
+  chromeInsurance: 12, // once a run, a blow that would disconnect leaves it at this Integrity
+  daemonMoveRepair: 6, // Integrity restored per move
+  ghostSlipChance: 0.45, // chance an ICE never notices it
+  glitchPhaseChance: 0.35, // after the first, the chance each later ICE is phased through too
 };
 
 // Adult form abilities, applied automatically.
 export const FORM_ABILITIES = {
-  chrome: 'Corp credentials: checkpoints wave it through.',
+  chrome: 'Corp credentials: checkpoints wave it through, and corp insurance saves it from one disconnect a run.',
   firewall: 'Hardened: ICE deals half damage.',
-  daemon: 'Lookahead: sees node types two steps ahead.',
-  glitch: 'Phase: slips through the first ICE of each run.',
-  ghost: 'Unseen: sees every node; checkpoints never notice it.',
+  daemon: 'Lookahead and upkeep: sees node types two steps ahead, and repairs a little Integrity with every move.',
+  glitch: 'Phase: slips through the first ICE of each run, and often the ones after.',
+  ghost: 'Unseen: sees every node; checkpoints never notice it, and ICE often misses it.',
 };
 const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
 
@@ -93,6 +98,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     pending: null, // ice: { game } | choice: { kind, title, text, options, ... }
     revealed: [],
     phased: false,
+    insured: false, // Chrome's corp insurance used this run
     known: [...codex], // codex at jack-in, so fragments never repeat
     startStats: { ...pet.stats },
     tally: { nodes: 0, iceWon: 0, iceLost: 0 },
@@ -146,10 +152,11 @@ export function moveTo(pet, nodeId, rng) {
   run.visited.push(nodeId);
   if (run.tally) run.tally.nodes++;
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
+  if (ability(pet) === 'daemon' && RUN_CFG.daemonMoveRepair) st.integrity = clamp(st.integrity + RUN_CFG.daemonMoveRepair);
   if (st.heat >= RUN_CFG.throttleHeat) {
     st.integrity = clamp(st.integrity - RUN_CFG.throttleDamage);
     note(run, `thermal throttling. -${RUN_CFG.throttleDamage} integrity.`);
-    if (st.integrity <= 0) return disconnect(pet, 'burned out from the heat.');
+    if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'burned out from the heat.');
   }
 
   const node = nodeById(run.map, nodeId);
@@ -172,6 +179,14 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
     }
     case 'ice': {
+      if (ability(pet) === 'ghost' && rng() < RUN_CFG.ghostSlipChance) {
+        note(run, 'the ICE looked straight through it.');
+        return { ok: true, kind: 'ice', phased: true };
+      }
+      if (ability(pet) === 'glitch' && run.phased && rng() < RUN_CFG.glitchPhaseChance) {
+        note(run, 'glitched through the ICE again.');
+        return { ok: true, kind: 'ice', phased: true };
+      }
       if (ability(pet) === 'glitch' && !run.phased) {
         run.phased = true;
         note(run, 'glitched straight through the ICE.');
@@ -293,8 +308,18 @@ export function resolveIce(pet, won, rng) {
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
   note(run, `ICE bit back. -${dmg} integrity.`);
-  if (st.integrity <= 0) return disconnect(pet, 'integrity breached by ICE.');
+  if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
+}
+
+// Chrome's corp insurance: once a run, a blow that would disconnect it is paid off instead.
+function insured(pet) {
+  const run = pet.run;
+  if (ability(pet) !== 'chrome' || !RUN_CFG.chromeInsurance || run.insured) return false;
+  run.insured = true;
+  pet.stats.integrity = RUN_CFG.chromeInsurance;
+  note(run, `corp insurance paid out. integrity restored to ${RUN_CFG.chromeInsurance}.`);
+  return true;
 }
 
 function openChoice(run, pending) {
@@ -423,7 +448,7 @@ export function choose(pet, optionId, rng) {
     st.sync = clamp(st.sync);
   }
   note(run, msg);
-  if (st.integrity <= 0) return disconnect(pet, 'integrity collapsed mid-run.');
+  if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity collapsed mid-run.');
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   return { ok: true, msg };
 }

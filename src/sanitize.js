@@ -162,6 +162,7 @@ function cleanRun(raw, s, strict) {
     phase,
     pending,
     phased: bool(raw.phased),
+    insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     known: cleanCodex(raw.known),
     fragments: cleanCodex(raw.fragments),
     knownAcc: cleanAccessories(raw.knownAcc),
