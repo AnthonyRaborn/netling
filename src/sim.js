@@ -3,13 +3,18 @@
 import { accessoryById, rollWornAccessory } from './accessories.js';
 import { weighted } from './random.js';
 import { clearedForStage } from './netrun/regions.js';
+import { chatterPool, visitorLines } from './chatter.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 1;
 
 export const CFG = {
   bootMinutes: 3,
-  drainPerHour: { charge: 14, sync: 12 },
+  drainPerHour: { charge: 15.4, sync: 13.2 },
+  // Charge and Sync drain faster the fuller they are: the rate above is scaled from `empty` at 0 to
+  // `full` at 100. Topping up often means more to do; a stat left low eases off, so long gaps
+  // (a work day, the night) still cost faults without being fatal.
+  drainCurve: { empty: 0.39, full: 2 },
   sleepDrainMult: 0.5, // asleep with the lights on: restless
   sleepDarkDrainMult: 0.33, // asleep in the dark: real rest
   // Naps: a short rest on demand. Drains slow down but time still passes; a cooldown stops
@@ -39,7 +44,7 @@ export const CFG = {
   // The Shell: a teen on Ghost's path (Ghost's allegiance band, no chaos, few faults, and every
   // game won at least this often).
   shellMaxMistakes: 1,
-  shellMinWinsEach: 2,
+  shellMinWinsEach: 3,
   // Adult evolution: axes within this of each other (or of zero) are a tie, broken at random,
   // with forms the player has never raised weighted up.
   tieBand: 0.5,
@@ -51,8 +56,8 @@ export const CFG = {
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
-  ghostMinGameWins: 18,
-  ghostMinWinsEach: 3,
+  ghostMinGameWins: 29,
+  ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
   // Packet Feast: it ate, so it gets some Charge too (digestion isn't reset: no cache files).
@@ -79,15 +84,30 @@ export const CFG = {
   integrityRegenPerHour: 5,
   integrityRestRegenPerHour: 8,
   careIntegrity: 4, // COOL, and PURGE with something to purge (PATCH already restores 10)
-  // A stray netling drops by to play: awake only, no response needed.
-  visitChancePerHour: 0.03,
-  visitMinMin: 5,
-  visitMaxMin: 10,
+  // A stray netling drops by to play: awake only, no response needed. GREET is optional.
+  visitChancePerHour: 0.06,
+  visitMinMin: 10,
+  visitMaxMin: 20,
   visitSync: 15,
   visitHeat: 10,
   visitItemChance: 0.1,
   visitAccessoryChance: 0.01,
+  visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
+  // Attention rewards (see docs/ATTENTION_PLAN.md): nothing here costs a fault when missed.
+  // Requests: now and then it asks for one game, or for COOL when warm.
+  requestChancePerHour: 0.25,
+  requestWindowMin: 45,
+  requestMinCharge: 20, // it only asks for a game it has the Charge to play
+  requestCoolHeat: 30, // and for COOL only when COOL would work
+  // Flow: kept in good shape this long, awake, it glows (a look only).
+  flowAfterMin: 180,
+  flowMinStat: 50, // Charge and Sync
+  flowMinIntegrity: 80,
+  flowMaxHeat: 60,
+  // Chatter: a line it mutters, shown this long.
+  chatterChancePerHour: 0.15,
+  chatterShowMin: 20,
   // Netrun uplink cooldown by stage, cut by clean jack-outs and overclock chips, never below the floor:
   // any sooner and corp sweeps pick up the trail.
   runCooldownMin: { baby: 240, teen: 210, adult: 180 },
@@ -343,6 +363,10 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     runCooldownCut: 0,
     visit: null,
     visitAccGifts: 0,
+    request: null, // { kind: 'game' | 'cool', game?, startedAge }
+    flowMin: 0, // minutes in a row in good shape, awake
+    flowTotalMin: 0, // minutes spent in flow this life
+    chatter: null, // { id, startedAge }: the line on screen
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
     cleared: [], // regions whose exit it has reached, which opens the next one down
     codexFound: 0, // new codex fragments recovered this life (capped by RUN_CFG.codexPerLife)
@@ -368,6 +392,12 @@ const freshGames = () => Object.fromEntries(GAME_IDS.map((id) => [id, { played: 
 export function log(s, t, msg) {
   s.log.push({ t, msg });
   if (s.log.length > 50) s.log.splice(0, s.log.length - 50);
+}
+
+// How much faster (or slower) than the base rate a stat at `value` drains.
+export function drainCurve(value) {
+  const { empty, full } = CFG.drainCurve;
+  return empty + ((full - empty) * value) / 100;
 }
 
 export function bedtimeHour(s) {
@@ -445,9 +475,9 @@ function step(s, t, rng) {
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult'));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult'));
   st.heat = clamp(
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );
@@ -488,6 +518,9 @@ function step(s, t, rng) {
 
   stepVisit(s, t, rng);
   stepEvents(s, t, rng);
+  stepRequest(s, t, rng);
+  stepFlow(s);
+  stepChatter(s, rng);
 
   checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
   checkMistake(s, t, 'sync', st.sync <= 0, 'sync lost');
@@ -586,7 +619,7 @@ function stepVisit(s, t, rng) {
   if (s.ageMin - v.startedAge < v.len) return;
   s.visit = null;
   let gift = '';
-  if (rng() < CFG.visitAccessoryChance) {
+  if (rng() < (v.greeted ? CFG.visitGreetedAccessoryChance : CFG.visitAccessoryChance)) {
     // The UI picks which accessory (it knows what's already owned): see drainAccessoryInbox.
     s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
     gift = ' it left something stylish behind.';
@@ -596,6 +629,64 @@ function stepVisit(s, t, rng) {
     gift = grantItem(s, id).includes('full') ? ` it left a ${name}, but inventory is full.` : ` it left a gift: ${name}.`;
   }
   log(s, t, `> the visitor logged off.${gift}`);
+}
+
+// --- attention rewards ---------------------------------------------------------------------
+// Opt-in: each is a bonus for a player who is around, and missing one costs nothing.
+
+// Can it ask for something, or mutter to itself? Awake, idle, and nothing else going on.
+const idle = (s) => !resting(s) && !s.run && rebootMinutesLeft(s) === 0 && !s.event;
+
+export const requestMinutesLeft = (s) => (s.request ? Math.max(0, CFG.requestWindowMin - (s.ageMin - s.request.startedAge)) : 0);
+
+function stepRequest(s, t, rng) {
+  if (s.request) {
+    // Sleep, a nap, a netrun or a crash ends it quietly; so does waiting too long.
+    if (resting(s) || s.run || rebootMinutesLeft(s) > 0) s.request = null;
+    else if (requestMinutesLeft(s) === 0) {
+      s.request = null;
+      log(s, t, '> it stopped asking.');
+    }
+    return;
+  }
+  if (!idle(s) || s.stats.charge < CFG.requestMinCharge) return;
+  if (rng() >= CFG.requestChancePerHour / 60) return;
+  // COOL only when it would work; otherwise one named game.
+  const warm = s.stats.heat >= CFG.requestCoolHeat;
+  if (warm && rng() < 0.25) {
+    s.request = { kind: 'cool', startedAge: s.ageMin };
+    log(s, t, '> it is fanning itself. it wants a COOL.');
+  } else {
+    const game = pick(GAME_IDS, rng);
+    s.request = { kind: 'game', game, startedAge: s.ageMin };
+    log(s, t, `> it wants to play ${game.toUpperCase()}.`);
+  }
+}
+
+// Does this action answer the open request? Clears it if so.
+function answerRequest(s, action, game) {
+  const r = s.request;
+  if (!r) return false;
+  const met = (r.kind === 'cool' && action === 'cool') || (r.kind === 'game' && action === 'play' && game === r.game);
+  if (met) s.request = null;
+  return met;
+}
+
+export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
+
+function stepFlow(s) {
+  const st = s.stats;
+  const good = !s.asleep && !s.nap && !s.run && !s.event && !s.virus && s.cache < 3 && rebootMinutesLeft(s) === 0 &&
+    st.charge >= CFG.flowMinStat && st.sync >= CFG.flowMinStat && st.integrity >= CFG.flowMinIntegrity && st.heat < CFG.flowMaxHeat;
+  s.flowMin = good ? s.flowMin + 1 : 0;
+  if (inFlow(s)) s.flowTotalMin++;
+}
+
+function stepChatter(s, rng) {
+  if (s.chatter && (resting(s) || s.ageMin - s.chatter.startedAge >= CFG.chatterShowMin)) s.chatter = null;
+  if (s.chatter || !idle(s) || rng() >= CFG.chatterChancePerHour / 60) return;
+  const pool = chatterPool(s);
+  if (pool.length) s.chatter = { id: pick(pool, rng).id, startedAge: s.ageMin };
 }
 
 function infect(s, damage) {
@@ -759,6 +850,10 @@ export function migrate(s) {
   s.history ??= null;
   s.scrip ??= 0;
   s.zone ??= deviceZone(s.lastTick ?? 0); // from before KI-12: the device's zone, as it always used
+  s.request ??= null;
+  s.flowMin ??= 0;
+  s.flowTotalMin ??= 0;
+  s.chatter ??= null;
   return s;
 }
 
@@ -835,6 +930,8 @@ export function blockReason(s, action) {
   if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
   if (action === 'defend' && s.event?.type !== 'attack') return 'no intrusion to defend against.';
+  if (action === 'greet' && !s.visit) return 'nobody is here.';
+  if (action === 'greet' && s.visit.greeted) return 'already said hello.';
   return null;
 }
 
@@ -946,7 +1043,9 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (won) s.games[game].won += boosted ? 2 : 1;
       let msg = won ? `${game}: won${boosted ? ' (boosted x2)' : ''}. sync up.` : `${game}: lost. it had fun anyway.`;
       if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance, rng);
-      res = ok(msg, won ? 'win' : 'lose');
+      const asked = answerRequest(s, 'play', game);
+      if (asked) msg += ' just what it asked for.';
+      res = { ...ok(msg, won ? 'win' : 'lose'), requestMet: asked };
       break;
     }
     case 'hide': {
@@ -993,11 +1092,20 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       res = ok('virus quarantined.', 'patch');
       break;
     }
+    case 'greet': {
+      // Said hello to a visitor: it may pass on a line from the wider net, and leaves a gift more often.
+      s.visit.greeted = true;
+      const line = pick(visitorLines(), rng);
+      s.chatter = { id: line.id, startedAge: s.ageMin };
+      res = { ...ok(`said hello to the ${SPECIES[s.visit.form].name.toLowerCase()}.`, 'visit'), greeted: true };
+      break;
+    }
     case 'cool': {
       if (st.heat < 30) return fail('already running cool.');
       st.heat = clamp(st.heat - 35);
       st.integrity = clamp(st.integrity + CFG.careIntegrity);
-      res = ok('coolant flushed.', 'cool');
+      const asked = answerRequest(s, 'cool');
+      res = { ...ok(`coolant flushed.${asked ? ' just what it asked for.' : ''}`, 'cool'), requestMet: asked };
       break;
     }
     case 'purge': {

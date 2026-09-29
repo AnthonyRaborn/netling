@@ -24,6 +24,7 @@ import {
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
+import { CHATTER_IDS } from './chatter.js';
 import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
@@ -196,7 +197,23 @@ function cleanVisit(raw) {
     form: raw.form,
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
     accessory: WORN_IDS.has(raw.accessory) ? raw.accessory : null,
+    ...(raw.greeted === true ? { greeted: true } : {}),
   };
+}
+
+// What it's asking for: { kind: 'game', game, startedAge } or { kind: 'cool', startedAge }.
+function cleanRequest(raw) {
+  if (!isObj(raw) || !Number.isFinite(raw.startedAge)) return null;
+  const startedAge = Math.max(0, raw.startedAge);
+  if (raw.kind === 'cool') return { kind: 'cool', startedAge };
+  if (raw.kind === 'game' && GAME_IDS.includes(raw.game)) return { kind: 'game', game: raw.game, startedAge };
+  return null;
+}
+
+// The chatter line on screen: { id, startedAge }.
+function cleanChatter(raw) {
+  if (!isObj(raw) || !CHATTER_IDS.has(raw.id) || !Number.isFinite(raw.startedAge)) return null;
+  return { id: raw.id, startedAge: Math.max(0, raw.startedAge) };
 }
 
 // The life lengths a netling compiled with. Anything missing or out of order means a save from
@@ -315,6 +332,10 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     runCooldownCut: num(raw.runCooldownCut, 0, 0, 24 * 60),
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
+    request: cleanRequest(raw.request),
+    flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
+    flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
+    chatter: cleanChatter(raw.chatter),
     runStats: {
       runs: int(runStats.runs, 0, 0),
       jacked: int(runStats.jacked, 0, 0),
@@ -385,6 +406,10 @@ export function cleanProgress(raw) {
     gamesPlayed: int(p.gamesPlayed, 0, 0),
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
+    requestsMet: int(p.requestsMet, 0, 0),
+    visitorsGreeted: int(p.visitorsGreeted, 0, 0),
+    flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
+    chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
   };
 }

@@ -538,6 +538,28 @@ button:active {
   padding: 4px 12px;
 }
 
+.wish-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 6px 0;
+  padding: 6px 10px;
+  border: 1px dashed var(--cyan);
+  color: var(--cyan);
+  font-size: 16px;
+}
+.wish-bar[hidden] {
+  display: none;
+}
+.wish-text {
+  flex: 1 1 12em;
+}
+.speech.visitor {
+  border-color: var(--yellow, #f9f002);
+  color: var(--yellow, #f9f002);
+}
+
 .event-bar {
   display: flex;
   align-items: center;
@@ -667,9 +689,16 @@ button:active {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   margin: 12px 0;
+}
+
+.tabs button {
+  min-width: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  letter-spacing: 0;
 }
 
 .tabs [aria-selected='false'] {
@@ -1523,6 +1552,15 @@ body:has(#pad:not([hidden])) .update-bar {
 }
 
 /* screen effects */
+.screen.fx-aurora .fx-layer {
+  background: linear-gradient(115deg, rgba(57, 255, 20, 0.08), rgba(5, 217, 232, 0.12), rgba(185, 103, 255, 0.1), rgba(57, 255, 20, 0.08)) 0 0 / 300% 100%;
+  animation: aurora 24s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  to {
+    background-position: 100% 0;
+  }
+}
 .fx-layer {
   position: absolute;
   inset: 0;

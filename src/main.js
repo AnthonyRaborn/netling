@@ -1,6 +1,6 @@
 // Boot: load and check saved data, claim the caretaker tab, wire the UI, then run the clock
 // and the render loop. The UI itself lives in src/ui/.
-import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
+import { createScript, inFlow, isAlive, CFG, MIN, PALETTES } from './sim.js';
 import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
 import { text, W, H } from './games/common.js';
 import { discover, formsSeenIn } from './archive.js';
@@ -242,6 +242,7 @@ function drawFrame(time) {
       flash: time < app.flashUntil,
       surge: time < app.surgeUntil ? (app.surgeUntil - time) / SURGE_MS : 0,
       calm: app.calm,
+      flow: inFlow(state),
       anim,
     });
   }

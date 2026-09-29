@@ -32,7 +32,8 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Cache node** | A netrun node that may hold an item, a fragment, or an accessory | `netrun/run.js` |
 | **Caretaker tab** | The one browser tab allowed to simulate and save. Others show a guard screen | `ui/tabs.js` |
 | **CFG** | The exported object of every tunable rule number | `sim.js` |
-| **Charge** | Stat: power. Drains 14/hr awake. Fed by packets | `sim.js` |
+| **Charge** | Stat: power. Drains 15.4/hr awake, scaled by the drain curve. Fed by packets | `sim.js` |
+| **Chatter** | A line it mutters while awake and idle; lines seen are kept in the Archive's CHATTER tab | `chatter.js` |
 | **Checkpoint** | A corp scan node: hide, comply, or use a voucher | `netrun/run.js` |
 | **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; corp insurance once a run | `sim.js` |
 | **Clean clear / clean jack-out** | A netrun that ends by jacking out with no ICE lost. Shortens the next cooldown by 1 hour | `netrun/run.js` |
@@ -50,6 +51,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Crash** | What an ignored memory overflow does: -15 Integrity, cache full, 20 minute reboot | `sim.js` |
 | **Crest** | Wardrobe slot: a pixel emblem beside the device label, earned by a legacy goal | `cosmetics.js` |
 | **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead and repairs as it moves in runs | `sim.js` |
+| **Drain curve** | Charge and Sync drain faster the fuller they are: 0.39x the base rate near empty, 2x when full (`drainCurve`) | `sim.js` |
 | **Dark** | Lights off. Deep rest when asleep, boredom when awake | `sim.js` |
 | **Dead / flatline** | The end of a netling. Leaves a fragment | `sim.js` `flatline` |
 | **Deep rest** | Napping, or asleep with the lights off: Integrity regenerates 8/hr | `sim.js` |
@@ -68,13 +70,15 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Field manual** | The in-game help dialog, built from live `CFG` values | `ui/onboarding.js` |
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
 | **Firewall Dodge** | Mini-game: slide between five lanes to avoid falling blocks for 15 seconds | `games/dodge.js` |
+| **Flow** | Three good hours in a row, awake: it glows. A look only | `sim.js` `inFlow` |
 | **Form** | A netling's body. Eight exist: Bitling, Kernel, Stub, Chrome, Firewall, Daemon, Glitch, Ghost | `sim.js` `SPECIES` |
 | **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait and its level, history, quirk, keepsake, scrip). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
 | **Gate (write gate)** | `canWrite` in `ui/app.js`: decides whether storage may be written | `ui/app.js` |
 | **Generation** | The number of the current netling, shown as `v<n>.0` | `sim.js` |
-| **Ghost** | Secret adult form. Neutral allegiance, non-negative stability, 1 mistake or fewer, 18+ wins with 3+ in each game. Trait Untraceable. In runs: sees every node, checkpoints and 45% of ICE miss it | `sim.js` |
+| **Ghost** | Secret adult form. Neutral allegiance, non-negative stability, 1 mistake or fewer, 29+ wins with 4+ in each game. Trait Untraceable. In runs: sees every node, checkpoints and 45% of ICE miss it | `sim.js` |
 | **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE, and often later ones | `sim.js` |
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
+| **GREET** | Optional hello to a visitor, once per visit | `sim.js` |
 | **Heat** | Stat: rises when active. 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |
 | **HIDE** | Trace answer: reroute. Charge -10, Heat +10, leans indie | `sim.js` |
@@ -119,6 +123,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Quirk** | One of five inherited traits of appearance and habit: palette, pitch, idle, favorite packet, sleep offset | `sim.js` |
 | **Reboot** | 20 minutes unable to act after a crash | `sim.js` |
 | **Relay** | A netrun node: recharge, vent, and an optional safe jack-out | `netrun/run.js` |
+| **Request** | It asks for one game, or a COOL when warm, and waits 45 minutes. Missing one costs nothing | `sim.js` `stepRequest` |
 | **Rescue** | Root Access reversing a flatline. Sets `rootUsed` | `sim.js` |
 | **Root Access** | NL-0's rescue from the first premature death. Earned by completing the codex | `sim.js` |
 | **SAVE_VERSION** | The save format version. Currently 1. A bump needs a step in `STEPS` | `sim.js`, `migrations.js` |
@@ -138,7 +143,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Stub** | Teen form after a rough first day (3+ mistakes) | `sim.js` |
 | **Style** | The Archive tab for cosmetics: shells, tints, effects, sounds, label, accessories, props | `ui/style.js` |
 | **Surge (power surge)** | Instant event: +25 Heat, +10 Charge | `sim.js` |
-| **Sync** | Stat: bond with the player. Drains 12/hr. Raised by play | `sim.js` |
+| **Sync** | Stat: bond with the player. Drains 13.2/hr, scaled by the drain curve. Raised by play | `sim.js` |
 | **Teen** | Second stage: Kernel, Stub or Shell. 17 to 51 hours | `sim.js` |
 | **Test mode** | A separate netling on a fast clock, in its own storage | `ui/app.js` |
 | **Tick** | One simulated minute, or the function that runs many | `sim.js` |
@@ -151,7 +156,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Unrealized** | A death fragment whose form the netling never became (it died before adulthood) | `archive.js` |
 | **Uplink** | The netrun connection. "Uplink cooling down" means the cooldown | `netrun/run.js` |
 | **Virus** | Infection that costs 12 Integrity/hr. PATCH cures it | `sim.js` |
-| **Visitor** | A stray netling that plays with yours for 5 to 10 minutes | `sim.js` |
+| **Visitor** | A stray netling that plays with yours for 10 to 20 minutes. GREET it for a line and better gift odds | `sim.js` |
 | **Wake (wake it)** | Ending a nap early, or ending hibernation | `sim.js` |
 | **Wardrobe** | The stored equipped cosmetics | `cosmetics.js` |
 | **Way down** | The order regions open in, each by clearing the one before: Public Net, Bazaar, Corp Grid, Ruins, The Deep | `netrun/regions.js` `REGION_ORDER` |
