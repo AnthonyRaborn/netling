@@ -393,6 +393,60 @@ await scenario('a new release while open offers a reload, which waits for a runn
   }
 });
 
+// Records wake lock and badge calls in window.__device; headless Chromium has neither for real, and
+// refuses notifications even when granted, so permission is faked too.
+const FAKE_DEVICE = `(() => {
+  window.__device = [];
+  const log = (e) => window.__device.push(e);
+  Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: { request: async () => {
+    log('lock');
+    const s = new EventTarget();
+    s.release = async () => { log('unlock'); s.dispatchEvent(new Event('release')); };
+    return s;
+  } } });
+  navigator.setAppBadge = async () => log('badge');
+  navigator.clearAppBadge = async () => log('clear');
+  Object.defineProperty(Notification, 'permission', { configurable: true, get: () => 'granted' });
+})()`;
+
+await scenario('the screen stays on for games and when asked; the badge follows its needs with ALERTS on', async ({ open }) => {
+  const needy = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': needy, 'netling.prefs': { sound: false, alerts: true, volume: 0.8 } }) + ';' + FAKE_DEVICE);
+  const events = () => page.evaluate(() => window.__device.slice());
+  const waitFor = async (name, count = 1) => {
+    for (let i = 0; i < 30; i++) {
+      if ((await events()).filter((e) => e === name).length >= count) return;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`no ${name} (x${count}): ${(await events()).join(',')}`);
+  };
+  await waitFor('badge');
+  await page.waitForTimeout(1200);
+  assert(!(await events()).includes('lock'), 'the screen was kept on at home without being asked');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await waitFor('lock');
+  await page.keyboard.press('Escape');
+  await waitFor('unlock');
+
+  await page.waitForTimeout(2500); // the result card
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(await visible(page, '#screen-prefs'), 'no screen setting');
+  await page.click('#pref-awake');
+  await waitFor('lock', 2);
+  assert((await saved(page, 'netling.prefs')).awake === true, 'setting not saved');
+  assert(/YES/.test(await page.textContent('#pref-awake')), 'button does not show the setting');
+  await page.click('#pref-awake');
+  await waitFor('unlock', 2);
+  await page.click('#close-transfer');
+
+  await page.click('#pref-alerts'); // ALERTS off: the badge goes
+  await waitFor('clear');
+  assert((await events()).filter((e) => e === 'badge').length === 1, `badge set more than once: ${(await events()).join(',')}`);
+});
+
 await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
   const foreign = [];
   ctx.on('request', (r) => {

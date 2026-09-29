@@ -384,7 +384,7 @@ export function cleanWardrobe(raw) {
 
 export function cleanPrefs(raw) {
   const p = isObj(raw) ? raw : {};
-  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1) };
+  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1), awake: bool(p.awake) };
 }
 
 export const cleanOnboarding = (raw) => oneOf(raw, ONBOARDING_STEPS, null);

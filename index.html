@@ -236,6 +236,12 @@
         <h3>SOUND</h3>
         <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
 
+        <div id="screen-prefs" hidden>
+          <h3>SCREEN</h3>
+          <p class="tx-note">The screen stays on during mini-games and netruns. Turn this on to keep it on whenever the game is showing (uses more battery).</p>
+          <button type="button" id="pref-awake" aria-pressed="false">KEEP SCREEN ON: NO</button>
+        </div>
+
         <h3>HIBERNATE</h3>
         <p class="tx-note" id="hibernate-note"></p>
         <button type="button" id="hibernate-btn">HIBERNATE</button>

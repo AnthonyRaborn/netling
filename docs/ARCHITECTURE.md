@@ -54,10 +54,11 @@ These explain most decisions in the code.
 | `src/transfer.js`, `src/qr.js` | Transfer codes and the QR encoder |
 | `src/lease.js` | Fallback one-tab lease for browsers without Web Locks |
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
+| `src/wake.js` | Keeping the screen on (Screen Wake Lock), re-asked after the page was hidden |
 | `src/version.js`, `src/update.js` | The page's release name, and noticing a newer release while the page is open |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 25 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
+| `tests/` | 26 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
 | `tools/` | Browser smoke test, balance simulators, icon and screenshot generators |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
@@ -76,6 +77,7 @@ These explain most decisions in the code.
 | `system.js` | SYSTEM dialog: transfer out, lock screen, import, hibernate, restart, storage note, volume, test mode |
 | `tabs.js` | The one-active-tab rule |
 | `gamepad.js` | Controller input |
+| `device.js` | The app icon badge and the screen wake lock, synced once a second; the KEEP SCREEN ON setting |
 
 ## Layers and dependencies
 
@@ -187,6 +189,8 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Audio and notifications
 
 - `audio.js` synthesizes everything with WebAudio (`blip`, `noise`); sound effects are note patterns keyed by name (`PATTERNS`). The netling's `pitch` quirk transposes them and the sound pack (wave and multiplier) shapes them. Failure sounds (`error`, `hit`, `lose`) are moved up an octave if they would drop under 350 Hz, because phone speakers lose low notes. Audio is unlocked on the first user gesture.
+- **Badge** (`notify.js` `setBadge`, driven by `ui/device.js` once a second): with ALERTS on and permission granted, the installed app's icon shows a plain badge whenever `needsAttention` is true (the same test as the blinking icon), and it is cleared otherwise, when ALERTS goes off, or while the netling is on another device. It is only set on a change, and the first sync clears a badge left from the last session. It cannot change while the app is fully closed, so it shows the state at closing. A waiting tab leaves it to the caretaker.
+- **Wake lock** (`wake.js`, driven by `ui/device.js`): held while a mini-game or netrun is on screen, or always while the page is visible if the player turned on KEEP SCREEN ON in SYSTEM (`prefs.awake`). The browser drops it when the page is hidden; the next sync asks again once visible. A refusal waits 30 seconds before asking again.
 - Notifications are local only (`notify.js`): they fire while the app is open or backgrounded, through the service worker's `showNotification` when available. A fully closed app cannot be woken without a push server, which this static build does not have.
 
 ## Crash containment
@@ -199,7 +203,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (42 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (43 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

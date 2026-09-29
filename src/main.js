@@ -17,6 +17,7 @@ import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
 import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
 import { watchForUpdates } from './update.js';
+import { initDevice, syncDevice } from './ui/device.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -30,6 +31,7 @@ initOnboarding();
 initSystem();
 initTabs();
 initGamepad();
+initDevice();
 
 // --- settings ---
 
@@ -60,6 +62,7 @@ $('pref-alerts').addEventListener('click', async () => {
   }
   store.set(KEYS.prefs, app.prefs);
   renderPrefs();
+  syncDevice();
 });
 
 renderPrefs();
@@ -141,6 +144,7 @@ document.addEventListener('visibilitychange', () => {
     advance();
     checkForUpdate();
   }
+  syncDevice();
 });
 addEventListener('pagehide', flushSave);
 
@@ -182,7 +186,11 @@ drainAccessoryInbox();
 backfillEarned();
 if (app.state.stage === 'dead') showFlatline();
 else if (app.state.run) openRun(); // resume a run after a reload
-setInterval(advance, 1000);
+syncDevice();
+setInterval(() => {
+  advance();
+  syncDevice();
+}, 1000);
 
 // The home LCD animates in half-second steps, so ~10 fps is plenty and saves battery.
 // Mini-games and netruns get every frame.

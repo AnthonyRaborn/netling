@@ -170,6 +170,7 @@ ARCHIVE > **SYSTEM** has:
 - **Restart**: erases everything and replays the intro.
 - **Storage**: shows whether the browser has agreed to keep your data, and warns if a save has failed.
 - **Volume**: a slider (the header's SND toggle still mutes).
+- **Keep screen on**: the screen always stays on during mini-games and netruns; turn this on to keep it on whenever the game is showing (where the browser supports it).
 
 If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
 
@@ -183,7 +184,7 @@ Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add
 
 Wide, short screens (Steam Deck, laptops) put the screen beside the controls so everything fits without scrolling; phones and tall windows use one column.
 
-**Notifications**: turn on **ALERTS** in the header and the game notifies you while it is open or in the background. A fully closed app can't be woken without a push server, which this static game doesn't have.
+**Notifications**: turn on **ALERTS** in the header and the game notifies you while it is open or in the background. With ALERTS on, the installed app's icon also shows a badge while your netling needs something (on devices that support it). A fully closed app can't be woken without a push server, which this static game doesn't have, so the badge shows how things stood when you closed it.
 
 ## For developers
 
