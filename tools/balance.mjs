@@ -1,9 +1,14 @@
 // Headless balance harness: simulates full lifetimes under scripted player archetypes.
 // Usage: node tools/balance.mjs [runsPerArchetype=300] [archetype filter]
+// Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
+// tools/balance-diff.mjs); CFG='{...}' override CFG; NO_ITEMS=1, NO_RUNS=1; ROOT=1 Root Access;
+// TRAIT=<adult form> start as the child of that form; LIVES=<n> simulate lineages of n lives,
+// carrying the fragment, codex and Root Access from each life to the next.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, MIN, GAME_IDS } = await import('../src/sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS } = await import('../src/sim.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
+const { FRAGMENTS } = await import('../src/netrun/codex.js');
 const { playRun, finishRun, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
@@ -11,7 +16,11 @@ const at = (h, m = 0) => h * 60 + m;
 
 // Check-in times are minutes-of-day; each gets +/- jitter minutes of randomness.
 // diet: probability of choosing corp over scav. trace: 'hide' | 'comply' | 'mix'.
-// hot: keep playing even when warm (overclocker). winRate: mini-game skill.
+// hot: keep playing even when warm (overclocker); coolAt overrides the Heat it cools at.
+// winRate: mini-game skill. runs: a RUN_STYLES name. anomaly: an ANOMALY_PREFS name (netrun-bot).
+// shop: false to walk past markets. babyFaults: let this many faults happen as a baby, on purpose.
+const ATTENTIVE = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h));
+
 export const ARCHETYPES = {
   attentive: {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
@@ -29,6 +38,16 @@ export const ARCHETYPES = {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
     jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true,
   },
+  // Attentive care, but takes every risk that doesn't cost a fault: plays hot, uses Overclock rigs,
+  // SALVAGE and RAID. Shows whether a caring player can lean chaotic.
+  daredevil: { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', hot: true, anomaly: 'risky' },
+  // Attentive players steering for one form with every choice they have (Ghost's is ghosthunter).
+  'steer-chrome': { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', shop: false },
+  'steer-firewall': { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie' },
+  'steer-daemon': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', anomaly: 'orderly' },
+  'steer-glitch': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', coolAt: 88, anomaly: 'risky' },
+  // Attentive, but lets three faults happen in the first day to get a Stub teen: what that costs today.
+  'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
 };
 
 export function checkIn(s, p, now, rng, ctx) {
@@ -56,8 +75,8 @@ export function checkIn(s, p, now, rng, ctx) {
     const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex));
     const region = open[Math.floor(rng() * open.length)];
     if (region && !runBlockReason(s, region, ctx.codex)) {
-      const lean = { hide: 'indie', comply: 'corp' }[p.trace] ?? 'mix';
-      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean }, region, rng, ctx.codex);
+      const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
+      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop }, region, rng, ctx.codex);
       ctx.runs = (ctx.runs ?? 0) + 1;
       if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
       finishRun(s, now);
@@ -75,7 +94,12 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.event?.type === 'overflow') doAct('purge');
   if (s.virus) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3)) doAct('purge');
-  const coolAt = p.hot ? 80 : 50;
+  const coolAt = p.coolAt ?? (p.hot ? 80 : 50);
+  // Taking faults on purpose as a baby: let Charge and Sync run out until enough faults have
+  // landed. A fault only counts once until the stat recovers, so a flagged one is topped up again.
+  const holdBack = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
+  const mayFeed = !holdBack || s.flagged.charge;
+  const mayPlay = !holdBack || s.flagged.sync;
   if (s.stats.heat > coolAt) doAct('cool');
   const feed = () => {
     for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
@@ -83,15 +107,15 @@ export function checkIn(s, p, now, rng, ctx) {
       doAct(corp ? 'corp' : 'scav');
     }
   };
-  if (s.stats.charge < 30) feed();
+  if (mayFeed && s.stats.charge < 30) feed();
   const syncTarget = p.gamer ? 90 : 80;
-  for (let i = 0; i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
+  for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     const game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     doAct('play', { game, won: rng() < p.winRate });
     if (s.stats.heat > coolAt + 10) doAct('cool');
   }
   if (s.stats.heat > coolAt) doAct('cool');
-  feed();
+  if (mayFeed) feed();
   // The UI shows bedtime, so players kill the lights if it's due before their next check.
   const nowMin = (now / MIN) % (24 * 60);
   const untilBed = (bedtimeHour(s) * 60 - nowMin + 24 * 60) % (24 * 60);
@@ -101,11 +125,14 @@ export function checkIn(s, p, now, rng, ctx) {
   if (wantDark === s.lightsOn) doAct('lights');
 }
 
-export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT) } = {}) {
+// One life. fragment: the parent's (as flatline() leaves it), for a later generation. codex: the
+// fragments already found, carried along a lineage.
+export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [] } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
-  const s = createScript({ now: t0, rng, rootAccess });
-  const ctx = { games: 0, lastOfDay: false, codex: [] };
+  const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
+  const ctx = { games: 0, lastOfDay: false, codex: [...codex] };
+  const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
   let schedule = [];
@@ -114,6 +141,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT) } = {
   let teenForm = null;
   const mistakeKinds = {};
   let prevFlags = { ...s.flagged };
+  let events = 0; // every timed event: traces, intrusions, overflows
   let traces = 0;
   let tracesIgnored = 0;
   let prevEvent = null;
@@ -131,8 +159,12 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT) } = {
       }
     }
     prevFlags = { ...s.flagged };
-    if (s.event && !prevEvent) traces++;
-    if (prevEvent && !s.event && s.stats.integrity < integrityBefore - 10) tracesIgnored++;
+    if (s.event && !prevEvent) {
+      events++;
+      if (s.event.type === 'trace') traces++;
+    }
+    // A trace left to run out costs Integrity at once.
+    if (prevEvent?.type === 'trace' && !s.event && s.stats.integrity < integrityBefore - 10) tracesIgnored++;
     prevEvent = s.event;
     if (s.stage === 'teen' && teenAt === null) {
       teenAt = minute;
@@ -163,59 +195,132 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT) } = {
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
     rootUsed: s.rootUsed,
+    trait: s.trait ?? null,
+    fragment: s.fragment ?? null,
+    codex: ctx.codex,
+    newFragments: ctx.codex.length - codexAtStart,
+    // Days spent in each stage (a stage not reached counts as 0).
+    stageDays: {
+      baby: (teenAt ?? s.ageMin) / DAY,
+      teen: teenAt === null ? 0 : ((adultAt ?? s.ageMin) - teenAt) / DAY,
+      adult: adultAt === null ? 0 : (s.ageMin - adultAt) / DAY,
+    },
     itemsHeld: ctx.itemsHeld ?? 0,
     runs: ctx.runs ?? 0,
     runDisconnects: ctx.runDisconnects ?? 0,
-    fragments: ctx.codex.length,
+    fragments: ctx.codex.length - codexAtStart,
     mistakeKinds,
+    events,
     traces,
     tracesIgnored,
   };
 }
 
-const mean = (xs) => (xs.reduce((a, b) => a + b, 0) / xs.length).toFixed(1);
+const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const round = (x, places = 3) => Math.round(x * 10 ** places) / 10 ** places;
 
-export function summarize(results) {
+// The share of results for each value of key, as fractions, largest first.
+function shares(results, key) {
+  const m = {};
+  for (const r of results) if (r[key]) m[r[key]] = (m[r[key]] ?? 0) + 1;
+  return Object.fromEntries(Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, round(v / results.length)]));
+}
+
+// Everything the report says, as numbers (rates are fractions). JSON=1 prints this.
+export function stats(results) {
   const n = results.length;
-  const pct = (k) => `${Math.round((100 * k) / n)}%`;
-  const count = (f) => results.filter(f).length;
-  const tally = (key) => {
-    const m = {};
-    for (const r of results) if (r[key]) m[r[key]] = (m[r[key]] ?? 0) + 1;
-    return Object.entries(m)
-      .sort((a, b) => b[1] - a[1])
-      .map(([k, v]) => `${k} ${pct(v)}`)
-      .join(', ');
-  };
+  const rate = (f) => round(results.filter(f).length / n);
   const ages = results.map((r) => r.ageMin).sort((a, b) => a - b);
+  const adults = results.filter((r) => r.atAdult).map((r) => r.atAdult);
+  const kinds = {};
+  for (const r of results) for (const [k, v] of Object.entries(r.mistakeKinds)) kinds[k] = (kinds[k] ?? 0) + v;
   return {
-    teen: pct(count((r) => r.ageMin >= CFG.teenAtMin)),
-    adult: pct(count((r) => r.adultForm)),
-    fullLife: pct(count((r) => r.cause === 'end of life cycle')),
-    medianDays: (ages[Math.floor(n / 2)] / DAY).toFixed(1),
-    avgMistakes: (results.reduce((a, r) => a + r.mistakes, 0) / n).toFixed(1),
-    deaths: tally('cause'),
-    teens: tally('teenForm'),
-    adults: tally('adultForm'),
-    mistakeKinds: Object.entries(
-      results.reduce((m, r) => {
-        for (const [k, v] of Object.entries(r.mistakeKinds)) m[k] = (m[k] ?? 0) + v;
-        return m;
-      }, {}),
-    )
-      .map(([k, v]) => `${k} ${(v / n).toFixed(1)}`)
-      .join(', '),
-    axes: `allegiance ${mean(results.map((r) => r.axes.allegiance))}, stability ${mean(results.map((r) => r.axes.stability))}`,
-    wins: mean(results.map((r) => r.wins)),
-    atAdult: (() => {
-      const a = results.filter((r) => r.atAdult).map((r) => r.atAdult);
-      if (!a.length) return 'n/a';
-      return `allegiance ${mean(a.map((x) => x.axes.allegiance))} (|${mean(a.map((x) => Math.abs(x.axes.allegiance)))}|), stability ${mean(a.map((x) => x.axes.stability))}, wins ${mean(a.map((x) => x.wins))}, mistakes ${mean(a.map((x) => x.mistakes))}`;
-    })(),
-    traces: `${mean(results.map((r) => r.traces))} (${mean(results.map((r) => r.tracesIgnored))} ignored)`,
-    itemsHeld: mean(results.map((r) => r.itemsHeld)),
-    runs: `${mean(results.map((r) => r.runs))} runs (${mean(results.map((r) => r.runDisconnects))} disconnects), ${mean(results.map((r) => r.fragments))} fragments`,
+    runs: n,
+    teen: rate((r) => r.ageMin >= CFG.teenAtMin),
+    adult: rate((r) => r.adultForm),
+    fullLife: rate((r) => r.cause === 'end of life cycle'),
+    medianDays: round(ages[Math.floor(n / 2)] / DAY, 2),
+    mistakes: round(avg(results.map((r) => r.mistakes)), 2),
+    deaths: shares(results, 'cause'),
+    teens: shares(results, 'teenForm'),
+    adults: shares(results, 'adultForm'),
+    mistakeKinds: Object.fromEntries(Object.entries(kinds).map(([k, v]) => [k, round(v / n, 2)])),
+    stageDays: Object.fromEntries(['baby', 'teen', 'adult'].map((k) => [k, round(avg(results.map((r) => r.stageDays[k])), 2)])),
+    axes: { allegiance: round(avg(results.map((r) => r.axes.allegiance)), 2), stability: round(avg(results.map((r) => r.axes.stability)), 2) },
+    atAdult: adults.length
+      ? {
+          allegiance: round(avg(adults.map((x) => x.axes.allegiance)), 2),
+          absAllegiance: round(avg(adults.map((x) => Math.abs(x.axes.allegiance))), 2),
+          stability: round(avg(adults.map((x) => x.axes.stability)), 2),
+          wins: round(avg(adults.map((x) => x.wins)), 2),
+          mistakes: round(avg(adults.map((x) => x.mistakes)), 2),
+        }
+      : null,
+    wins: round(avg(results.map((r) => r.wins)), 2),
+    events: round(avg(results.map((r) => r.events)), 2),
+    traces: round(avg(results.map((r) => r.traces)), 2),
+    tracesIgnored: round(avg(results.map((r) => r.tracesIgnored)), 2),
+    itemsHeld: round(avg(results.map((r) => r.itemsHeld)), 2),
+    netruns: {
+      runs: round(avg(results.map((r) => r.runs)), 2),
+      disconnects: round(avg(results.map((r) => r.runDisconnects)), 2),
+      fragments: round(avg(results.map((r) => r.fragments)), 2),
+    },
   };
+}
+
+// Lineages: lives[i] is every line's (i + 1)th life. codexLife is the life that finished the codex.
+export function lineStats(lines) {
+  const n = lines.length;
+  const lives = lines[0].lives.length;
+  const done = lines.map((l) => l.codexLife).filter((x) => x !== null).sort((a, b) => a - b);
+  return {
+    lines: n,
+    codex: {
+      byLife: Object.fromEntries(Array.from({ length: lives }, (_, i) => [i + 1, round(done.filter((x) => x <= i + 1).length / n)])),
+      fastest: done[0] ?? null,
+      median: done.length * 2 > n ? done[Math.floor(n / 2)] : null, // null: fewer than half finished
+    },
+    lives: Array.from({ length: lives }, (_, i) => stats(lines.map((l) => l.lives[i]).filter(Boolean))),
+  };
+}
+
+// A parent fragment for TRAIT=<adult form>.
+export function parentOf(form) {
+  if (!FORMS[form]) throw new Error(`TRAIT must be an adult form: ${Object.keys(FORMS).join(', ')}`);
+  return { form, trait: FORMS[form].trait, quirk: null, keepsake: KEEPSAKES[form], rootUsed: false };
+}
+
+// n lives in a row: each child inherits its parent's fragment, the codex found so far, and Root
+// Access once the codex is complete (the game also grants it mid-life; this gives it from the next).
+export function simulateLine(p, seed, lives, { fragment = null } = {}) {
+  const out = [];
+  let codex = [];
+  let codexLife = null;
+  for (let gen = 1; gen <= lives; gen++) {
+    const r = simulate(p, seed * 1000 + gen, { fragment, generation: gen, codex, rootAccess: codexLife !== null || Boolean(process.env.ROOT) });
+    out.push(r);
+    codex = r.codex;
+    if (codexLife === null && codex.length >= FRAGMENTS.length) codexLife = gen;
+    fragment = r.fragment;
+  }
+  return { lives: out, codexLife };
+}
+
+const pct = (x) => `${Math.round(x * 100)}%`;
+const list = (m) => Object.entries(m).map(([k, v]) => `${k} ${pct(v)}`).join(', ');
+
+function printLife(st, detail) {
+  console.log(`  reach teen ${pct(st.teen)} · adult ${pct(st.adult)} · full life ${pct(st.fullLife)} · median ${st.medianDays.toFixed(1)}d · mistakes ${st.mistakes.toFixed(1)}`);
+  console.log(`  deaths: ${list(st.deaths)}`);
+  console.log(`  teens:  ${list(st.teens)}`);
+  console.log(`  adults: ${list(st.adults)}`);
+  if (!detail) return;
+  const a = st.atAdult;
+  console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
+  console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}`);
+  if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
+  console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments`);
 }
 
 // Try settings without editing sim.js: CFG='{"drainPerHour":{"charge":14},"teenAtMin":1200}' npm run balance
@@ -228,19 +333,29 @@ if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems =
 if (process.env.NO_RUNS) for (const p of Object.values(ARCHETYPES)) p.noRuns = true;
 const filter = process.argv[3];
 if (import.meta.url === `file://${process.argv[1]}`) {
+  const parent = process.env.TRAIT ? parentOf(process.env.TRAIT) : null;
+  const lives = Number(process.env.LIVES ?? 0);
+  const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };
   for (const [name, p] of Object.entries(ARCHETYPES)) {
     if (filter && !name.includes(filter)) continue;
-    const results = Array.from({ length: runs }, (_, i) => simulate(p, i + 1));
-    const sum = summarize(results);
-    console.log(`\n== ${name} (${runs} runs)`);
-    console.log(`  reach teen ${sum.teen} · adult ${sum.adult} · full life ${sum.fullLife} · median ${sum.medianDays}d · mistakes ${sum.avgMistakes}`);
-    console.log(`  deaths: ${sum.deaths}`);
-    console.log(`  teens:  ${sum.teens}`);
-    console.log(`  adults: ${sum.adults}`);
-    if (process.env.DETAIL) {
-      console.log(`  mistakes/run: ${sum.mistakeKinds}`);
-      console.log(`  at adult: ${sum.atAdult} · traces ${sum.traces} · peak items held ${sum.itemsHeld}`);
-      console.log(`  netrun: ${sum.runs}`);
+    if (lives) {
+      const st = lineStats(Array.from({ length: runs }, (_, i) => simulateLine(p, i + 1, lives, { fragment: parent })));
+      report.archetypes[name] = st;
+      if (process.env.JSON) continue;
+      console.log(`\n== ${name} (${runs} lineages of ${lives} lives${parent ? `, first parent ${process.env.TRAIT}` : ''})`);
+      console.log(`  codex complete by life: ${Object.entries(st.codex.byLife).map(([k, v]) => `${k}: ${pct(v)}`).join(', ')} · fastest ${st.codex.fastest ?? 'never'} · median ${st.codex.median ?? `over ${lives}`}`);
+      console.log(`  new fragments per life: ${st.lives.map((l) => l.netruns.fragments.toFixed(1)).join(', ')}`);
+      st.lives.forEach((l, i) => {
+        console.log(` life ${i + 1}:`);
+        printLife(l, process.env.DETAIL);
+      });
+      continue;
     }
+    const st = stats(Array.from({ length: runs }, (_, i) => simulate(p, i + 1, { fragment: parent, generation: parent ? 2 : 1 })));
+    report.archetypes[name] = st;
+    if (process.env.JSON) continue;
+    console.log(`\n== ${name} (${runs} runs${parent ? `, child of a ${process.env.TRAIT}` : ''})`);
+    printLife(st, process.env.DETAIL);
   }
+  if (process.env.JSON) console.log(JSON.stringify(report, null, 2));
 }

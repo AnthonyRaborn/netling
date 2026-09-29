@@ -1,8 +1,8 @@
 # Balance plan
 
-An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. Nothing here is implemented yet. Spoiler-heavy, like the rest of `docs/`.
+An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. Pass 0 (tooling) is done; nothing in the game has changed yet. Spoiler-heavy, like the rest of `docs/`.
 
-Measured on commit `767b7c5` (2026-09-29) with the tools in [TESTING.md](TESTING.md#balance-tools): `DETAIL=1 node tools/balance.mjs 300 <archetype>` and `node tools/netrun-balance.mjs 1000 <region|all>`. The simulators are scripted players, not people: treat the numbers as relative, and rerun them before acting on any of this.
+First measured on commit `767b7c5` (2026-09-29). After Pass 0 the numbers come from the baselines in `tools/baseline/` (see [TESTING.md](TESTING.md#baselines)), with the netrun bot planning by what the player can see; where the two differ, this document says so. The simulators are scripted players, not people: treat the numbers as relative. The agreed targets and whether they are met are in [TESTING.md](TESTING.md#balance-targets).
 
 ## Contents
 
@@ -43,18 +43,30 @@ Second round, 2026-09-29:
 - **Every pass updates** [SIMULATION.md](SIMULATION.md) or [NETRUN.md](NETRUN.md) (prose numbers are not generated), [KNOWN_ISSUES.md](KNOWN_ISSUES.md) where an entry is settled, and adds tests for changed rules. The field manual follows `CFG` by itself.
 - **Save rules** ([DATA_AND_SAVES.md](DATA_AND_SAVES.md)): ids are permanent; an added field needs defaults in `createScript`, `migrate` and `cleanSave`; a restructure needs a `SAVE_VERSION` bump and a migration step.
 
-## Pass 0: tooling
+## Pass 0: tooling (done)
 
-The current tools cannot measure some of what the later passes change.
+What was missing, and what the tools do now (details in [TESTING.md](TESTING.md#balance-tools)):
 
-| Gap | Effect today | Change |
-|---|---|---|
-| The netrun bot ignores map vision | Daemon plays exactly like `careful` and Ghost exactly like Chrome in `netrun-balance.mjs`, so their abilities measure as zero | Teach `netrun-bot.mjs` to route around revealed ICE when Integrity is low |
-| `simulate()` always starts a first-generation netling | No way to measure what a trait, keepsake or quirk is worth | Accept a parent fragment (`{ form, trait, keepsake }`) and add `TRAIT=<form>` to `balance.mjs` |
-| Codex progress resets every simulated life | Can't measure how many generations the codex takes | A `LIVES=n` mode that carries codex, lineage and Root Access across lives |
-| No archetype plays well but chaotically | Nothing shows whether a caring player can reach Glitch | Add a `daredevil` archetype: attentive care, but hot play, Overclock rigs and SALVAGE and RAID choices |
-| Results are only printed | Before and after comparisons are done by eye | A `JSON=1` output and a small `tools/balance-diff.mjs` |
-| No written targets | "Balanced" has no definition | A targets table in TESTING.md, filled in from the decisions below |
+| Gap | Change |
+|---|---|
+| The netrun bot ignored map vision, so Daemon's and Ghost's sight measured as nothing | Careful and skilled players plan three steps ahead using only the nodes the player can see (`planMove`); a unit test checks unseen nodes never steer it |
+| Every simulated netling was first-generation | `TRAIT=<form>` starts each netling as the child of that form |
+| Codex progress reset every life | `LIVES=n` simulates lineages, carrying the fragment, codex and Root Access |
+| No careful player leaned chaotic, and none steered | `daredevil`, `steer-chrome`, `steer-firewall`, `steer-daemon`, `steer-glitch` and `steer-stub` |
+| Results were only printed | `JSON=1` on both tools, `tools/balance-diff.mjs`, and committed baselines |
+| No written targets | A targets table in TESTING.md, with each target's status |
+| The "traces" count included intrusions and overflows | It now counts corp traces only (about 8 a life, not 13); all timed events are counted separately |
+
+The planning bot changes a few old numbers. Against the one-step bot at 300 runs, `attentive` finds about one more fragment a life (16.8), disconnects less (0.6 a life), and ends Firewall slightly more often (29%, from 24%). The archetypes that don't run are unchanged.
+
+### What the new tools found
+
+- **Adult forms can already be steered.** Each `steer-*` player reaches its form 96 to 100% of the time. Glitch costs about one heat fault a life, from running hot.
+- **Stub can be steered, at a price**: `steer-stub` gets a Stub teen every time, but by starving the netling for 3.6 faults of 10, and the faults push its adult toward Firewall (54%).
+- **A caring player who takes risks mostly becomes Firewall, not Glitch** (`daredevil`: Firewall 61%, Glitch 19%): RAID and market buys lean indie faster than the risks lean chaotic.
+- **Codex pacing**: attentive-style lineages finish the codex in a median of 3 lives, but 1 to 5% finish in one life and 20 to 46% within two. Casual lineages almost never finish within 4 lives (0.5%): later fragments sit in regions they rarely reach.
+- **Chrome's netrun ability only works where there are checkpoints** (Public Net and Corp Grid). Elsewhere a Chrome plays exactly like a careful player with no ability.
+- **Vision is worth something, but little**: in the Deep, Daemon and Ghost disconnect 21% and 20% of the time against 27% with no ability; Firewall 9%.
 
 ## Pass 1: forms
 
@@ -70,7 +82,7 @@ The current tools cannot measure some of what the later passes change.
 
 - **The teen stage is almost always Kernel.** Stub needs more than 2 faults in the first 24 hours, which only neglect produces (neglectful: Stub 34%).
 - **Good care funnels into Daemon.** Stability gains 0.1 an hour whenever the netling is awake with no alert, which is about +5 by 72 hours for any tidy player. Allegiance only moves through choices, so for an attentive player stability is usually the larger axis, and it is positive.
-- **Glitch is the bad-care form.** Negative stability comes from faults, heat and slow patches, so a caring player never reaches it (0%). The overclocker gets there, but only by being sloppy.
+- **Glitch is the bad-care form for a player who isn't aiming for it.** Negative stability comes from faults, heat and slow patches, so an attentive player with mixed choices almost never gets it (0.1%). A player aiming for it gets it by running hot (`steer-glitch`, 96%; see Pass 0).
 - **Ghost is rare unless chased.** An attentive player averages 18.5 wins by adulthood against the 22 required, and also needs \|allegiance\| under 2.
 - Known notes that belong here: boosted wins count double toward Ghost ([KI-14](KNOWN_ISSUES.md#ki-14)), and a neutral netling that misses Ghost becomes Chrome ([KI-15](KNOWN_ISSUES.md#ki-15)).
 
@@ -105,18 +117,18 @@ The current tools cannot measure some of what the later passes change.
 
 | | Result |
 |---|---|
-| Runs per life | attentive 29.6 (0.8 disconnects), casual 7.4 |
-| Codex fragments found in one life | attentive 15.8 of 22, casual 6.0 |
-| Items held | attentive and casual peak at 6.0 and 5.8, which is the 6-slot cap |
-| Disconnect rate, careful player | Public 5%, Corp 13%, Bazaar 8%, Ruins 12%, Deep 31% |
-| Disconnect rate, skilled player | Public 2%, Corp 6%, Bazaar 3%, Ruins 5%, Deep 16% |
-| Baby in the Public Net | 16% disconnected |
-| Adult abilities (Public Net) | Firewall 1% disconnects, Glitch 3%, Chrome and Ghost 6%, Daemon 5% (the same as no ability; see Pass 0) |
+| Runs per life | attentive 30.7 (0.6 disconnects), casual 7.4 |
+| Codex fragments found in one life | attentive 16.9 of 22, casual 5.9 |
+| Items held | attentive and casual peak at 6.0 and 5.9, which is the 6-slot cap |
+| Disconnect rate, careful player | Public 3%, Corp 11%, Bazaar 5%, Ruins 8%, Deep 27% |
+| Disconnect rate, skilled player | Public 1%, Corp 4%, Bazaar 1%, Ruins 3%, Deep 13% |
+| Baby in the Public Net | 12% disconnected |
+| Adult abilities (Deep, careful play) | Firewall 9% disconnects, Ghost 20%, Daemon 21%, Glitch 22%, Chrome 27% (the same as no ability there) |
 
-- **The codex goes fast for an attentive player**: about two lives. After that, runs have no story left to find, and Root Access comes early.
+- **The codex goes fast for an attentive player**: a median of 3 lives, but within 2 lives for a third of lineages, and occasionally in 1 (Pass 0). Casual players are the opposite: they rarely finish in 4 lives. After the codex, runs have no story left to find.
 - **Items are not scarce**: players who run sit at a full inventory, so loot often has nowhere to go and markets matter little.
-- **The difficulty curve is uneven**: the Corp Grid (teen) is harder than the Bazaar and about as hard as the Ruins (adult). The Deep is a big step up.
-- **Abilities are uneven**: halving ICE damage (Firewall) is by far the strongest; vision (Daemon, Ghost) can't be judged until the bot uses it.
+- **The difficulty curve is uneven**: the Corp Grid (teen) is harder than the Bazaar and than the Ruins (adult): 11% against 5% and 8% for careful players with the planning bot. The Deep is a big step up (27%).
+- **Abilities are uneven**: halving ICE damage (Firewall) is by far the strongest; vision (Daemon, Ghost) helps a little; Chrome's does nothing outside the Public Net and Corp Grid.
 
 ### Proposed changes
 
@@ -163,7 +175,7 @@ An attentive player finds about 16 fragments a life today, so the limit has to h
 
 - A new generation inherits the parent's adult form as one trait, one quirk and one keepsake item. Nothing accumulates beyond one generation, apart from Root Access, the codex and cosmetics.
 - Trait strength is unmeasured (Pass 0 adds this). Two to check first:
-  - **Untraceable** (from Ghost) removes corp traces entirely. Traces arrive about 0.08 times an hour, roughly 13 a life, and HIDE or COMPLY is the main way to move allegiance. So a Ghost's child loses most of its steering, which is at odds with Ghost being the reward for a deliberate chase.
+  - **Untraceable** (from Ghost) removes corp traces entirely. Traces arrive about 0.08 times an hour while awake, roughly 8 a life, and HIDE or COMPLY is the main way to move allegiance. So a Ghost's child loses most of its steering, which is at odds with Ghost being the reward for a deliberate chase.
   - **Volatile** (from Glitch) multiplies play rewards by 1.5 but costs 1 Integrity an hour.
 - Because good care funnels into Daemon (Pass 1), most lineages will pass on Persistent, and most players will see only one or two traits.
 
@@ -200,3 +212,4 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 3. **Life length**: five days, or seven with a fourth stage? To be measured first.
 4. **Scrip numbers**: the cap, prices, the Charge part of a purchase, and how much is inherited.
 5. **Trait numbers**: strengths, level steps and caps, after measuring.
+6. **Casual codex pacing**: casual lineages rarely finish the codex within 4 lives, and a per-life cap does nothing for them. Is that acceptable, or should casual players have an upper bound too (for example 6 lives)?

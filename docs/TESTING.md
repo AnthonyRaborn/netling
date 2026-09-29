@@ -14,7 +14,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 244 tests in 26 files and all pass. The smoke test has 44 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 250 tests in 27 files and all pass. The smoke test has 44 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -58,6 +58,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
+| `tools.test.js` | 6 | The balance tools: the netrun bot plans only with visible nodes, simulated lives are repeatable, a child starts from its parent, a lineage carries the codex, stats and the report diff |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
 
@@ -91,29 +92,83 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 
 ## Balance tools
 
+The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance plan ([BALANCE_PLAN.md](BALANCE_PLAN.md)) says what each pass is trying to move.
+
 ### `tools/balance.mjs`
 
-Simulates `runs` lifetimes (default 300) for each **archetype**: scripted players with check-in times, a diet (`corp` share), a trace policy (`hide`, `comply`, `mix`, `balance`), a mini-game win rate and a netrun style. Archetypes: `attentive`, `casual`, `worker`, `neglectful`, `corpo`, `runner`, `overclocker`, `sysadmin`, `ghosthunter`. It reports reach-teen, reach-adult, full-life rates, median lifespan, mistakes, causes of death, and the mix of teen and adult forms.
+Simulates `runs` lifetimes (default 300) for each **archetype**: scripted players with check-in times, a diet (`corp` share), a trace policy (`hide`, `comply`, `mix`, `balance`), a mini-game win rate and a netrun style. It reports reach-teen, reach-adult and full-life rates, median lifespan, faults, causes of death and the mix of teen and adult forms. It sets `TZ=UTC` itself, and every run is seeded, so the same settings always give the same numbers.
 
-Options (environment variables and arguments):
+| Archetype | Plays like |
+|---|---|
+| `attentive` | Checks in hourly, mixed choices, careful netruns |
+| `casual` | Six check-ins a day, greedy netruns |
+| `worker` | Five check-ins around a working day |
+| `neglectful` | Twice a day |
+| `corpo`, `runner`, `overclocker`, `sysadmin`, `ghosthunter` | Deliberate strategies for Chrome, Firewall, Glitch (hot and sloppy), Daemon and Ghost, with no netruns |
+| `daredevil` | Attentive, but takes every risk that costs no fault: plays hot, Overclock rigs, SALVAGE, RAID |
+| `steer-chrome`, `steer-firewall`, `steer-daemon`, `steer-glitch` | Attentive players choosing everything (diet, traces, checkpoints, anomalies, markets) for one adult form. Ghost's is `ghosthunter` |
+| `steer-stub` | Attentive, but lets Charge and Sync run out as a baby until 3 faults have landed, for a Stub teen |
+
+Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop` and `babyFaults`.
+
+Settings (environment variables and arguments):
 
 | Setting | Effect |
 |---|---|
 | `node tools/balance.mjs 500 casual` | 500 runs, only archetypes whose name contains `casual` (the second argument is a substring filter) |
-| `DETAIL=1` | Adds mistakes per run by kind, stats at adulthood, traces and peak items held, and netrun totals |
-| `CFG='{"drainPerHour":{"charge":15},"teenAtMin":1200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
+| `DETAIL=1` | Adds faults by kind, days spent in each stage, the axes and wins at adulthood, timed events and corp traces, peak items held, and netrun totals |
+| `JSON=1` | Prints the whole report as JSON (rates as fractions) instead of text, for `tools/balance-diff.mjs` |
+| `CFG='{"drainPerHour":{"charge":15},"lifespanMin":7200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
+| `TRAIT=ghost` | Every netling starts as the child of that adult form: its trait and keepsake, generation 2 |
+| `LIVES=4` | Simulates lineages of that many lives instead of single lives. Each child inherits its parent's fragment (trait, quirk, keepsake), the codex found so far, and Root Access from the life after the codex completes. Reports the share of lineages that finished the codex by each life, the fastest and median, new fragments per life, and every life's results. `runs` is then the number of lineages |
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
 
-It sets `TZ=UTC` itself. `simulate(profile, seed)` is exported.
-
-The README's old balance targets came from this tool; a run on this commit matched them within sampling noise (see [KNOWN_ISSUES.md](KNOWN_ISSUES.md#checked-and-found-consistent)).
+Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
 
 ### `tools/netrun-balance.mjs` and `tools/netrun-bot.mjs`
 
-`netrun-bot.mjs` is a scripted netrun player shared by both balance tools. `RUN_STYLES`: `careful` (banks at a relay when Integrity is under 55, avoids ICE under 45), `greedy` (always pushes to the exit) and `skilled` (higher win rate). The bot picks checkpoint answers by lean (`corp`, `indie`, `mix`), buys the first market offer when Charge is over 50, and picks anomaly options at random.
+`netrun-bot.mjs` is a scripted netrun player shared by both balance tools. `RUN_STYLES`: `careful` (banks at a relay when Integrity is under 55, avoids ICE under 45), `greedy` (always pushes to the exit, judging only the next step) and `skilled` (higher win rate). Careful and skilled players **plan**: `planMove` scores each way on by the best path up to three steps ahead, using only the nodes the player can see (`visibleNodeIds`: adjacent, visited, revealed, plus Daemon's and Ghost's sight). Unseen nodes count as nothing, so sight is the only thing planning gains, and a tie keeps the first option as the one-step bot did.
 
-`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. Styles include a weak baby and each adult form with its ability. `region` may be `all`, which instead prints disconnect rate, items, fragments per run and Integrity spent for careful, skilled and Firewall players in every region.
+The bot answers checkpoints by lean (`corp`, `indie`, `mix`, `balance`; an indie player won't spend a voucher), buys the first market offer when Charge is over 50 unless the style says `shop: false`, and picks anomaly options from an `ANOMALY_PREFS` list (`random`, `risky`, `orderly`, `corp`, `indie`).
+
+`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. Styles include a weak baby and each adult form with its ability. `region` may be `all`, which prints the disconnect rate, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region. `JSON=1` prints JSON.
+
+### `tools/balance-diff.mjs`
+
+Compares two JSON reports from either tool and prints every number that moved by at least a threshold (default 0.01; rates are shown in percentage points):
+
+```bash
+JSON=1 node tools/balance.mjs 1000 > before.json
+# change CFG, RUN_CFG or a rule
+JSON=1 node tools/balance.mjs 1000 > after.json
+node tools/balance-diff.mjs before.json after.json 0.02
+```
+
+### Baselines
+
+`tools/baseline/` holds reports for the rules as they are, to diff a change against:
+
+| File | Command |
+|---|---|
+| `lives.json` | `JSON=1 node tools/balance.mjs 1000` |
+| `netruns.json` | `JSON=1 node tools/netrun-balance.mjs 1000 all` |
+| `lineages.json` | `JSON=1 LIVES=4 node tools/balance.mjs 200` |
+
+Regenerate all three in the same pull request as any change to the rules or to the tools, and say in the pull request what moved. They take about four minutes together.
+
+### Balance targets
+
+Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-far)). Status is from the baselines above.
+
+| Target | Measured by | Status |
+|---|---|---|
+| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 99% and at most 4% (`sysadmin`) |
+| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 96 to 100%. Glitch costs about one heat fault a life (`steer-glitch`, 2.0 faults) |
+| Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Reached (100%) but costly: 3.6 faults of 10, by starving the netling. The plan adds deliberate-fault items |
+| The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Not met: attentive-style players finish in 1 life 1 to 5% of the time and within 2 lives 20 to 46% |
+| The Deep stays a wall: careful disconnects well above the Ruins' | `netruns.json` | Met: 27% against 8% |
+| No regression in survival: full-life rates within 3 points of the baseline | `lives.json` | The baseline |
 
 ### `tools/make-icons.mjs`
 
