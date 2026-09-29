@@ -1,7 +1,10 @@
-// Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory:
-// placement comes from anchors computed from the sprite's own pixels, not per-form tables.
+// Accessories: cosmetic pixel add-ons drawn over the pet. Every form can wear every accessory. Placement comes from
+// anchors: four rows per sprite that are authored in ANCHOR_ROWS below (so a wearable sits on the same part of the body
+// in every frame), with everything else read from the sprite's own pixels. A sprite that is not in the table falls back
+// to guessing all four rows from its pixels, and tests/accessories.test.js checks that every form has its rows.
 // Props (PROPS below) are style items too, but sit on the ground beside the pet in their own slot.
 // source 'earned' items are granted by events, never sold or dropped.
+import { SPRITES } from './sprites.js';
 
 export const RARITY = {
   common: { weight: 6, hint: 'sold in markets.' },
@@ -9,10 +12,41 @@ export const RARITY = {
   veryrare: { weight: 1, hint: 'almost never for sale.' },
 };
 
+// Authored anchor rows, in sprite rows, per form and pose (a, b, sleep). headTop: the first row of the head proper
+// (not antennae or horns). eyeRow: the row the eyes are on. mouthRow: the row a mouthpiece sits on. neckRow: where a
+// scarf goes. A pose that is missing uses the form's A frame (a form with no dedicated sleep sprite draws its A frame).
+// Guessing eyeRow from "the first row with an accent pixel" failed on the small forms, whose B frames put an accent
+// pixel in the top of the head, so eye wearables jumped up to four rows between frames.
+const ANCHOR_ROWS = {
+  bitling: {
+    a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 },
+    sleep: { headTop: 3, eyeRow: 6, mouthRow: 8, neckRow: 9 },
+  },
+  kernel: { a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
+  stub: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
+  shell: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 } },
+  chrome: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 } },
+  firewall: { a: { headTop: 1, eyeRow: 6, mouthRow: 8, neckRow: 10 }, b: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 10 } },
+  daemon: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
+  glitch: { a: { headTop: 1, eyeRow: 4, mouthRow: 8, neckRow: 9 } },
+  ghost: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
+};
+export const anchorRowsFor = (form, pose) => ANCHOR_ROWS[form]?.[pose] ?? ANCHOR_ROWS[form]?.a ?? null;
+
+// sprite array -> its authored rows. The same array can be several poses (a missing pose falls back to A).
+const authored = new Map();
+for (const form of Object.keys(ANCHOR_ROWS)) {
+  for (const [key, pose] of [['A', 'a'], ['B', 'b'], ['Sleep', 'sleep']]) {
+    const sprite = SPRITES[`${form}${key}`];
+    if (sprite) authored.set(sprite, anchorRowsFor(form, pose));
+  }
+}
+
 // Anchors for a sprite (array of strings). Cached per sprite array.
 const cache = new WeakMap();
 export function anchorsFor(sprite) {
   if (cache.has(sprite)) return cache.get(sprite);
+  const rows = authored.get(sprite);
   const w = sprite[0].length;
   const span = (row) => {
     const cols = [...row].map((ch, i) => (ch !== '.' ? i : -1)).filter((i) => i >= 0);
@@ -20,11 +54,11 @@ export function anchorsFor(sprite) {
   };
   const spans = sprite.map(span);
   const top = spans.findIndex(Boolean); // first painted row (antenna tips included)
-  // Head top: first row that's clearly body, not antennae or horns.
-  let headTop = spans.findIndex((s) => s && s.count >= w * 0.4);
+  // Head top: the authored row, else the first row that's clearly body, not antennae or horns.
+  let headTop = rows?.headTop ?? spans.findIndex((s) => s && s.count >= w * 0.4);
   if (headTop < 0) headTop = top;
-  // Eye row: first row at/below the head top holding accent pixels.
-  let eyeRow = sprite.findIndex((row, i) => i >= headTop && row.includes('o'));
+  // Eye row: the authored row, else the first row at/below the head top holding accent pixels.
+  let eyeRow = rows?.eyeRow ?? sprite.findIndex((row, i) => i >= headTop && row.includes('o'));
   if (eyeRow < 0) eyeRow = Math.min(sprite.length - 1, headTop + 2);
   const eyeCols = [...sprite[eyeRow]].map((ch, i) => (ch === 'o' ? i : -1)).filter((i) => i >= 0);
   let bottom = sprite.length - 1;
@@ -32,10 +66,13 @@ export function anchorsFor(sprite) {
   const mid = Math.min(bottom, eyeRow + Math.max(2, Math.round((bottom - eyeRow) / 2)));
   const head = spans[headTop];
   const body = spans[mid] ?? head;
-  // Mouth: first row below the eyes with highlight pixels ('+'); otherwise a guess.
-  let mouthRow = sprite.findIndex((row, i) => i > eyeRow && row.includes('+'));
+  // Mouth: the authored row, else the first row below the eyes with highlight pixels ('+'), else a guess.
+  let mouthRow = rows?.mouthRow ?? sprite.findIndex((row, i) => i > eyeRow && row.includes('+'));
   if (mouthRow < 0) mouthRow = Math.min(bottom, eyeRow + 2);
   const mouthCols = [...sprite[mouthRow]].map((ch, i) => (ch === '+' ? i : -1)).filter((i) => i >= 0);
+  // Neck: the authored row, else the row under the mouth.
+  const neckRow = Math.min(sprite.length - 1, rows?.neckRow ?? mouthRow + 1);
+  const neck = spans[neckRow] ?? body;
   const a = {
     top,
     headTop,
@@ -52,6 +89,9 @@ export function anchorsFor(sprite) {
     mouthRow,
     mouthLeft: mouthCols.length ? mouthCols[0] : Math.floor((head.left + head.right) / 2) - 1,
     mouthRight: mouthCols.length ? mouthCols[mouthCols.length - 1] : Math.floor((head.left + head.right) / 2) + 1,
+    neckRow,
+    neckLeft: neck.left,
+    neckRight: neck.right,
   };
   cache.set(sprite, a);
   return a;
@@ -78,9 +118,9 @@ export const ACCESSORIES = [
     colors: [['scarf', '#ff2a6d']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#ff2a6d'];
-      for (let x = a.bodyLeft; x <= a.bodyRight; x++) px(x, a.mid, c);
-      px(a.bodyRight - 1, a.mid + 1, c);
-      px(a.bodyRight - 1, a.mid + 2, c);
+      for (let x = a.neckLeft; x <= a.neckRight; x++) px(x, a.neckRow, c);
+      px(a.neckRight - 1, a.neckRow + 1, c);
+      px(a.neckRight - 1, a.neckRow + 2, c);
     },
   },
   {

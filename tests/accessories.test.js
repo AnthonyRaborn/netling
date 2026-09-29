@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ACCESSORIES, STYLE_ITEMS, anchorsFor, rollAccessory, accessoryById, RARITY } from '../src/accessories.js';
+import { ACCESSORIES, STYLE_ITEMS, anchorsFor, anchorRowsFor, rollAccessory, accessoryById, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
 import { SPECIES, mulberry32 } from '../src/sim.js';
 
@@ -130,5 +130,53 @@ test('scarf, mohawk, visor, cap, shades, rebreather and tattoo are recolorable',
     const seen = new Set();
     ACCESSORIES.find((x) => x.id === id).draw((x, y, c) => seen.add(c), anchorsFor(SPRITES.chromeA), 0, 0, ['#0000ff', '#0000fe']);
     assert.ok(seen.has('#0000ff'), id);
+  }
+});
+
+test('every form has authored anchor rows, and they point at the right pixels in every frame', () => {
+  for (const form of Object.keys(SPECIES)) {
+    for (const [key, pose] of [['A', 'a'], ['B', 'b'], ['Sleep', 'sleep']]) {
+      const sprite = SPRITES[`${form}${key}`];
+      if (!sprite) continue;
+      const rows = anchorRowsFor(form, pose);
+      assert.ok(rows, `${form} has no authored anchor rows`);
+      const name = `${form}${key}`;
+      assert.ok(sprite[rows.eyeRow].includes('o'), `${name}: eyeRow ${rows.eyeRow} has no eye pixels`);
+      assert.ok(rows.headTop < rows.eyeRow && rows.eyeRow < rows.mouthRow && rows.mouthRow < rows.neckRow, `${name}: rows out of order`);
+      assert.ok(sprite[rows.headTop].replace(/\./g, '').length >= 3, `${name}: headTop row is nearly empty`);
+      assert.ok(sprite[rows.neckRow].replace(/\./g, '').length >= 3, `${name}: neckRow row is nearly empty`);
+      const a = anchorsFor(sprite);
+      assert.equal(a.eyeRow, rows.eyeRow);
+      assert.equal(a.neckRow, rows.neckRow);
+    }
+  }
+});
+
+test('a wearable stays on the same part of the body between the A and B frames (within one row)', () => {
+  for (const form of Object.keys(SPECIES)) {
+    const A = SPRITES[`${form}A`];
+    const B = SPRITES[`${form}B`];
+    for (const acc of ACCESSORIES) {
+      if (acc.id === 'drone' || acc.id === 'dataaura') continue; // they orbit
+      const rowsOf = (sprite) => {
+        const ys = [];
+        acc.draw((x, y) => ys.push(y), anchorsFor(sprite), 0, 0);
+        return [Math.min(...ys), Math.max(...ys)];
+      };
+      const [a0, a1] = rowsOf(A);
+      const [b0, b1] = rowsOf(B);
+      assert.ok(Math.abs(b0 - a0) <= 1 && Math.abs(b1 - a1) <= 1, `${acc.id} on ${form} jumps between frames: ${a0}-${a1} vs ${b0}-${b1}`);
+    }
+  }
+});
+
+test('the scarf sits on the neck row, below the mouth', () => {
+  const scarf = ACCESSORIES.find((x) => x.id === 'scarf');
+  for (const form of Object.keys(SPECIES)) {
+    const a = anchorsFor(SPRITES[`${form}A`]);
+    const ys = [];
+    scarf.draw((x, y) => ys.push(y), a, 0, 0);
+    assert.equal(Math.min(...ys), a.neckRow, form);
+    assert.ok(a.neckRow > a.mouthRow, form);
   }
 });
