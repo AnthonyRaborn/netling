@@ -39,14 +39,30 @@
     <div id="nav"></div>
     <div id="out"></div>
     <script>
-      // Nothing below runs if the ES modules fail to load (a file:// URL blocks them), so say why instead of showing a blank page.
-      setTimeout(() => {
+      // Nothing in the module runs if it fails to load or throws, so say why instead of showing a blank page: any script
+      // error with its file and line, and the HTTP status and content type of every module the page imports (a wrong
+      // type, a 404 or a service worker answering with something else all show up here).
+      const problems = [];
+      addEventListener('error', (e) => problems.push(`${e.message || 'script error'} (${(e.filename || '').split('/').slice(-2).join('/')}:${e.lineno || '?'})`));
+      addEventListener('unhandledrejection', (e) => problems.push(`unhandled: ${e.reason && (e.reason.message || e.reason)}`));
+      const MODULES = ['src/render.js', 'src/sim.js', 'src/sprites.js', 'src/accessories.js', 'src/cosmetics.js', 'src/random.js', 'src/games/common.js', 'src/games/session.js', 'src/games/breach.js', 'src/games/dodge.js', 'src/games/tune.js', 'src/games/feast.js', 'src/netrun/regions.js', 'src/netrun/view.js', 'src/netrun/map.js', 'src/netrun/run.js', 'src/netrun/codex.js', 'src/netrun/anomalies.js', 'tools/lib/sprite-checks.mjs'];
+      setTimeout(async () => {
         if (window.__galleryReady) return;
         const box = document.getElementById('fail');
         box.style.display = 'block';
-        box.innerHTML = location.protocol === 'file:'
-          ? '<b>The gallery did not load.</b> Browsers block ES modules on <code>file://</code> pages. From the repo folder run <code>npm run serve</code> (or <code>python3 -m http.server 5174</code>) and open <code>http://localhost:5174/gallery.html</code>.'
-          : '<b>The gallery did not load.</b> A script failed to import: open the browser console for the file name. Serve the whole repo folder (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
+        const hint = location.protocol === 'file:'
+          ? 'Browsers block ES modules on <code>file://</code> pages. From the repo folder run <code>npm run serve</code> (or <code>python3 -m http.server 5174</code>) and open <code>http://localhost:5174/gallery.html</code>.'
+          : 'Serve the whole repo folder (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
+        box.innerHTML = `<b>The gallery did not load.</b> ${hint}<br><small></small>`;
+        const detail = box.querySelector('small');
+        const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+        const lines = [`browser: ${navigator.userAgent}`, `page: ${location.href}`, problems.length ? `script errors:\n  ${problems.join('\n  ')}` : 'script errors: none reported (a module failed to load, see below)'];
+        if (location.protocol !== 'file:') {
+          const rows = await Promise.all(MODULES.map((m) => fetch(m).then((r) => `${r.status} ${r.headers.get('content-type')} ${m}`, (err) => `failed ${m}: ${err.message}`)));
+          lines.push('modules (status, content type):', ...rows.map((r) => `  ${r}`));
+          lines.push(`service worker: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'controlling this page' : 'not controlling this page'}`);
+        }
+        detail.innerHTML = `<pre style="white-space:pre-wrap;color:#c7f9ff;font-size:14px">${esc(lines.join('\n'))}</pre>`;
       }, 2500);
     </script>
     <script type="module">
