@@ -371,7 +371,7 @@ export function drawSprite(ctx, rows, x, y, colors) {
 }
 
 // --- colors of the sprite marks in the states a netling is drawn in ------------------------------------------------------
-export const DEAD_COLORS = { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d', x: '#27363a' };
+export const DEAD_COLORS = { '#': '#3a4a4d', o: '#0a1214', '+': '#3a4a4d', x: '#27363a' };
 export const DIM_COLORS = { '#': '#1c3a3f', o: '#0f2528', '+': '#1c3a3f', x: '#12292d' }; // resting in the dark
 export const POWERED_DOWN_COLORS = { '#': '#1c3a3f', o: '#2f6b73', '+': '#2f6b73', x: '#12292d' }; // crashed and rebooting
 export const LOCKED_COLORS = { '#': '#1c3a3f', o: '#1c3a3f', '+': '#1c3a3f', x: '#1c3a3f' }; // a form not yet discovered
@@ -390,7 +390,11 @@ export const ANCHOR_ROWS = {
     sleep: { headTop: 3, eyeRow: 6, mouthRow: 8, neckRow: 9 },
   },
   kernel: { a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 }, sleep: { headTop: 2, eyeRow: 5, mouthRow: 7, neckRow: 8 } },
-  stub: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 9 } },
+  // Stub's body has holes that differ between frames, so its body and neck columns are authored (bodySpan, neckSpan).
+  stub: {
+    a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9, bodySpan: [2, 11], neckSpan: [3, 10] },
+    sleep: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 9, bodySpan: [2, 11], neckSpan: [3, 10] },
+  },
   shell: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
   // shine: its eyes are the bright '+' cells on the visor, and show through eyewear.
   chrome: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8, shine: true }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
@@ -446,31 +450,32 @@ const centre = (cells, width) => {
   return [mx < mid ? Math.floor(mx) : mx > mid ? Math.ceil(mx) : Math.round(mx), Math.round(my)];
 };
 
+// Where each X goes when the eye groups do not give two clean, symmetric centres (the two eyes of Stub are not alike).
+const DEAD_CENTRES = { stub: [[4, 6], [9, 6]] };
+
 function generatedPose(form, pose) {
   const src = SPRITES[`${form}A`];
   const g = src.map((r) => [...r]);
   const fill = form === 'shell' ? 'x' : '#';
   const groups = eyeGroups(src, ANCHOR_ROWS[form].a.eyeRow);
   if (form === 'chrome') {
-    const bandTop = pose === 'dead' ? 3 : 4;
-    for (let y = 3; y <= 5; y++) for (let x = 3; x <= 12; x++) if (g[y][x] === 'o' || g[y][x] === '+') g[y][x] = y >= bandTop ? 'o' : '#';
-    if (pose === 'dead') {
-      for (let x = 4; x <= 11; x++) g[3][x] = 'o'; // a taller visor, room for an X on each side
-      for (const cx of [5, 10]) stampX(g, cx, 4, '#');
-    } else {
-      for (let x = 3; x <= 12; x++) g[4][x] = '#'; // the visor dims to a slit
-    }
+    // The visor is one wide band. Dead, the band goes dark and the X's sit on the bare face like every other form's; asleep,
+    // it dims to a single line.
+    for (let y = 4; y <= 5; y++) for (let x = 3; x <= 12; x++) if (g[y][x] === 'o' || g[y][x] === '+') g[y][x] = pose === 'dead' || y === 4 ? '#' : 'o';
+    if (pose === 'dead') for (const cx of [5, 10]) stampX(g, cx, 5, 'o');
   } else if (form === 'glitch') {
     // Two eyes on row 5, each with a shifted double image on row 4.
     for (const cells of groups) for (const [x, y] of cells) if (pose === 'dead' || y === 4) g[y][x] = fill;
     if (pose === 'dead') for (const cx of [4, 10]) stampX(g, cx, 5, 'o');
   } else {
-    for (const cells of groups) {
-      for (const [x, y] of cells) g[y][x] = fill;
-      if (pose === 'dead') {
-        const [cx, cy] = centre(cells, src[0].length);
-        stampX(g, cx, cy, 'o');
-      } else {
+    for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
+    if (pose === 'dead') {
+      const centres = DEAD_CENTRES[form] ?? groups.map((cells) => centre(cells, src[0].length));
+      for (const [cx, cy] of centres) stampX(g, cx, cy, 'o');
+      // The Shell has no face for a mouth to sit on, and it would crowd the X's.
+      if (form === 'shell') g.forEach((row, y) => row.forEach((ch, x) => ch === '+' && (g[y][x] = 'x')));
+    } else {
+      for (const cells of groups) {
         const bottom = Math.max(...cells.map(([, y]) => y));
         for (const [x, y] of cells) if (y === bottom) g[y][x] = 'o';
       }

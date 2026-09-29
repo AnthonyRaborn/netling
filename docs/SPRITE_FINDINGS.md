@@ -17,23 +17,25 @@ Decisions taken: Shell gets a dim void fill; dead and sleep poses are generated 
 | SR-03 | Fixed | Every form except Bitling gets a generated dead pose (an X on each eye) and sleep pose (slit eyes). |
 | SR-04 | Fixed | Idle motion leaves five rows above the sprite (the halo needs five) and the hover idle is clamped like the others. |
 | SR-05 | Fixed | A `neckRow` anchor; the Scarf sits on it. |
-| SR-06 | Done | The Visor has a dark frame above and below its band. On Chrome, its bright eye cells shine through the Shades. Shades and Visor now overlap 0.67 on Chrome by pixel count (different colors); look at them together. |
+| SR-06 | Done | The Visor was first a framed band, which read as a Star Trek visor (its automatic color was orange). It is now two tinted lenses with a bridge, rounded corners, a scan light per lens and a readout blip, and its automatic band color is never orange or gold. On Chrome, its bright eye cells shine through the Shades. Shades and Visor overlap 0.58 to 0.59 by pixel count (different colors). The game has no description text for the Visor, only the rarity hint. |
 | SR-07 | Done | Spark (plus and X twinkle), Neural jack, Circuit tattoo, Earpiece (2x2 bud and boom), Bandage (a plaster strip), Data aura (2 wide echoes) and Drone buddy (rotors and light) are larger. |
-| SR-08 | Open | Not part of this pass (near-duplicate pairs: Chrome jaw and Rebreather 0.80 to 0.83, Mohawk and Party hat 0.60, Cap and Crown 0.57). |
-| SR-09 | Done, with a caveat | Props are drawn in front, so they are always whole (prop visible: 1). The Plush has a one pixel outline. In front, the Plush covers up to 32% of the pet at the far right and up to 46% with a visitor (the Cyberdeck, Boom box and Mini device cover 9% at most). Decide whether that is acceptable. |
+| SR-08 | Done | Chrome jaw has a heavy chin and the Rebreather a filter can on each side (overlap 0.83 to 0.47 to 0.50); the Mohawk is a swept crest and the Party hat a tall cone with a pom-pom (0.60 to under 0.44); the Cap is a dome with a brim (Cap and Crown 0.57 to 0.47). Cap and Party hat now overlap 0.58, the highest pair left besides Shades and Visor. |
+| SR-09 | Done, accepted | Props are drawn in front, so they are always whole (prop visible: 1). The Plush has a one pixel outline. In front, the Plush covers up to 32% of the pet at the far right and up to 46% with a visitor (the Cyberdeck, Boom box and Mini device cover 9% at most). Accepted by the maintainer: players can remove it, and it can be revisited if there are complaints. |
 | SR-10 | Done | A visitor and its host keep at least two columns between them (the swing shrinks to fit two adults). |
-| SR-11 | Open | An icon can still be drawn over a wearable that has moved under it (17 to 9 wearables on the virus and event icons, 9 on the sleep Z). The clamp above keeps hats on screen but not clear of the icons. |
+| SR-11 | Accepted as intended | Alerts drawn over everything else is intended. There is no room to separate them: the screen is 28 rows, the floor is row 20 with the cache icons below it, and the tallest adult (15 rows) plus a halo (5) already fills rows 0 to 20, while the alerts are 5 rows tall at the top. |
 | SR-12 | Done | Segfault is a skull, Overclock a gear. |
-| SR-13 | Awaiting your verdict | The exit is drawn as a door (frame, two panels, knob). It may read as an 8 at small size. |
-| SR-14 | Helix redrawn, awaiting your verdict | The Helix is a twisted double strand with rungs. Real shells still to be checked in the app. |
-| SR-15 | Open | Any `#rrggbb` is still allowed; the automatic state means a player only meets a clashing color by choosing it. |
+| SR-13 | Accepted | The exit is drawn as a door (frame, two panels, knob). It still reads as a door at 3x, and it only appears at the end of a run. |
+| SR-14 | Helix accepted; real shells pending | The Helix is a twisted double strand with rungs. The crests still need checking on the real shells when they exist. |
+| SR-15 | Accepted | Any `#rrggbb` is allowed: players can do what they will. The automatic state means a player only meets a clashing color by choosing it. |
 | SR-16 | Fixed | A Ghost's wearable is drawn at full alpha. |
 | SR-17 | Fixed | The Shell casing is filled with a dim void mark (`x`), so wearables no longer merge with an outline. |
-| SR-18 | Open | Animation still to be judged in motion. |
+| SR-18 | Accepted | Daemon's animation reads about as distinct as the other adults (the Ghost aside, for its changing translucency). |
 
 Also found while fixing:
 - **The anchor cause was confirmed by measurement.** On the B frame the eye row was 2 for Bitling, Kernel and Stub (4 or 5 in the A frame), so 11 wearables on each moved up to 4 rows (3 on Kernel) against the body. All other forms were stable. Now no wearable moves more than one row between frames, and a test enforces it.
-- The automatic swap also applies to pixels that sit on the dark room rather than on the body (for example a Data aura echo away from the head), where the original color would have been fine. Judge it in the gallery.
+- The automatic swap first also recolored pixels floating over the dark room (a Data aura echo away from the head), where the original color was fine. It now applies only where a pixel sits on the body or right beside it.
+- **Kernel's scarf** stretched out to its side arms on the B frame: the body and neck spans were read as the first and last painted cell of the row, which included the arms. They are now the solid run through the middle (Stub, whose body has holes that change between frames, has authored spans). This also fixes Kernel's Barcode and KERNEL pin, and small differences on Shell, Chrome and Glitch.
+- **Dead eyes** are now one consistent 3x3 X on every form, in a darker color (`#0a1214` on `#3a4a4d`). Stub's X's are placed by hand (its eyes differ), Chrome's visor goes dark so its X's sit on the bare face, and the Shell loses its mouth when dead.
 - Audit numbers, before to after: off-screen cases 18 to 0; wearables that lose half or more of their pixels awake and lit 20 to 2 (Crown in 1 of 54 form/palette cases, Earpiece in 1); lights-off sleeping 15 (all 54 cases) to 0.
 
 ## What works

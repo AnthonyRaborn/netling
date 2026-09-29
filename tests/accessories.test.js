@@ -6,6 +6,7 @@ import { SPECIES, PALETTES, mulberry32 } from '../src/sim.js';
 import { readFileSync } from 'node:fs';
 import { computeAutoColors, renderModule, slotClearance, CLEAR } from '../tools/wearable-colors.mjs';
 import { deltaE } from '../src/colors.js';
+import { jaccard } from '../tools/lib/sprite-checks.mjs';
 
 const FORM_SPRITES = Object.keys(SPECIES).flatMap((form) =>
   ['A', 'B', 'Sleep'].map((k) => [`${form}${k}`, SPRITES[`${form}${k}`]]).filter(([, s]) => s),
@@ -211,14 +212,63 @@ test('src/wearable-colors.js is up to date, and every default stands clear of ev
   }
 });
 
-test('a wearable with fixed colors is painted in a color that stands clear of the body it is worn on', () => {
+test('a wearable with fixed colors is swapped where it sits on the body, and left alone where it floats clear', () => {
   const acid = PALETTES.find((p) => p.name === 'acid');
-  const drawn = [];
-  const ctx = { set fillStyle(v) { this._c = v; }, fillRect() { drawn.push(this._c); } };
-  drawAccessory(ctx, 'crown', SPRITES.chromeA, 0, 0, 0, false, 0, null, acid); // a yellow crown on a yellow body
-  assert.ok(drawn.length > 0);
-  for (const c of drawn) assert.ok(deltaE(c, acid.main) >= 30, `${c} blends into ${acid.main}`);
-  drawn.length = 0;
-  drawAccessory(ctx, 'crown', SPRITES.chromeA, 0, 0, 0, false, 0, null, PALETTES.find((p) => p.name === 'ice'));
-  assert.ok(drawn.includes('#f9f002'), 'where yellow stands clear, the crown stays yellow');
+  const sprite = SPRITES.chromeA;
+  const painted = (pal) => {
+    const out = [];
+    const ctx = { set fillStyle(v) { this._c = v; }, fillRect(x, y) { out.push([x, y, this._c]); } };
+    drawAccessory(ctx, 'crown', sprite, 0, 0, 0, false, 0, null, pal);
+    return out;
+  };
+  const touches = (x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (sprite[y + dy]?.[x + dx] ?? '.') !== '.');
+  const crown = ACCESSORIES.find((a) => a.id === 'crown');
+  const own = new Map();
+  crown.draw((x, y, c) => own.set(`${x},${y}`, c), anchorsFor(sprite), 0, 0);
+  let swapped = 0;
+  let kept = 0;
+  for (const [x, y, c] of painted(acid)) {
+    if (touches(x, y)) {
+      if (deltaE(own.get(`${x},${y}`), acid.main) < 30) {
+        swapped++;
+        assert.ok(deltaE(c, acid.main) >= 30, `${c} at ${x},${y} blends into ${acid.main}`);
+      }
+    } else {
+      kept++;
+      assert.equal(c, own.get(`${x},${y}`), `a pixel floating clear of the body at ${x},${y} is left as drawn`);
+    }
+  }
+  assert.ok(swapped > 0, 'the crown band on a yellow body is swapped');
+  assert.ok(kept > 0, 'the crown points above the head are left alone');
+  assert.ok(painted(PALETTES.find((p) => p.name === 'ice')).some(([, , c]) => c === '#f9f002'), 'where yellow stands clear, the crown stays yellow');
+});
+
+test('wearables that used to look alike now differ in silhouette', () => {
+  const pts = (id, sprite) => {
+    const out = [];
+    accessoryById(id).draw((x, y) => out.push({ x, y }), anchorsFor(sprite), 0, 0, accessoryColors(id, null));
+    return out;
+  };
+  const overlap = (a, b, sprite) => jaccard(pts(a, sprite), pts(b, sprite));
+  for (const sprite of [SPRITES.chromeA, SPRITES.bitlingA]) {
+    assert.ok(overlap('chromejaw', 'rebreather', sprite) < 0.7, 'jaw and rebreather');
+    assert.ok(overlap('mohawk', 'partyhat', sprite) < 0.5, 'mohawk and party hat');
+    assert.ok(overlap('cap', 'crown', sprite) < 0.5, 'cap and crown');
+    assert.ok(overlap('shades', 'visor', sprite) < 0.6, 'shades and visor');
+  }
+});
+
+test('a wearable\'s body and neck are the solid run through the middle, so side arms do not stretch a scarf', () => {
+  // Kernel's B frame has arms on the neck row; they are not the neck.
+  const a = anchorsFor(SPRITES.kernelA);
+  const b = anchorsFor(SPRITES.kernelB);
+  assert.equal(b.neckLeft, a.neckLeft);
+  assert.equal(b.neckRight, a.neckRight);
+  for (const form of Object.keys(SPECIES)) {
+    if (form === 'glitch') continue; // its body is torn differently in each frame on purpose
+    const A = anchorsFor(SPRITES[`${form}A`]);
+    const B = anchorsFor(SPRITES[`${form}B`]);
+    assert.ok(Math.abs(A.neckLeft - B.neckLeft) <= 1 && Math.abs(A.neckRight - B.neckRight) <= 1, `${form}: the neck changes width between frames`);
+    assert.ok(Math.abs(A.bodyLeft - B.bodyLeft) <= 1 && Math.abs(A.bodyRight - B.bodyRight) <= 1, `${form}: the body changes width between frames`);
+  }
 });

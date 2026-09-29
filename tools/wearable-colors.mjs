@@ -18,6 +18,7 @@ export const ROOM = '#0b2226'; // the default screen tint; every tint is similar
 export const CLEAR = 40; // a default should stand at least this far (CIE76) from what it sits on or beside
 const STRONG = 60; // and if any candidate stands this far, the nearest of those is preferred, so a pale grey never beats a bright color
 const STEEL = ['#c8d0dc', '#8a93a3', '#3a3f49', '#2a2f3a']; // greys, for the wearables whose signature is metal
+const AVOID = { visor: ['#ff9f1c', '#f9f002'] }; // an orange or gold band reads as a Star Trek visor, not a futuristic one
 const PIN = {}; // hand-picked exceptions: { wearableId: { slot: { paletteName: '#rrggbb' } } }
 
 const forms = Object.keys(SPECIES);
@@ -68,7 +69,7 @@ export function computeAutoColors() {
       acc.colors.forEach(([label, def], slot) => {
         const pinned = PIN[acc.id]?.[slot]?.[pal.name];
         const others = chosen.map((c, i) => [i, c]);
-        const candidates = [def, ...[...SWAP_COLORS, ...STEEL].filter((c) => c !== def)];
+        const candidates = [def, ...[...SWAP_COLORS, ...STEEL].filter((c) => c !== def)].filter((c) => !(AVOID[acc.id] ?? []).includes(c));
         const scored = candidates.map((c) => ({ c, score: slotClearance(acc, slot, c, pal, others) }));
         // The signature color if it stands clear; else the candidate that stands clearly clear (STRONG, else CLEAR) nearest to it in color; else the clearest.
         const strong = scored.filter((s) => s.score >= STRONG);
