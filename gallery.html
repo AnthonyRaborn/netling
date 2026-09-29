@@ -26,15 +26,29 @@
       .grid { display: grid; gap: 3px; align-items: center; }
       .grid > span { color: var(--dim); font-size: 15px; }
       .grid > span.h { text-align: center; }
+      #fail { display: none; border: 2px solid var(--pink); padding: 10px 14px; margin: 12px 0; max-width: 90ch; color: #f5f5f5; }
+      #fail code { color: #f9f002; }
       .swatch { display: inline-flex; padding: 8px; gap: 8px; align-items: center; }
     </style>
   </head>
   <body>
     <h1>SPRITE GALLERY</h1>
-    <p class="note"><span class="warn">Spoilers:</span> shows every form, secret and earned item. Development only; not deployed. Everything is drawn by the game's own code (<code>renderLCD</code> and friends), so what you see is what ships. Review plan: <code>docs/SPRITE_REVIEW_PLAN.md</code>. Pink outlines mark a wearable that a check (<code>tools/lib/sprite-checks.mjs</code>) thinks blends into the pet: half or more of its pixels look like what is under or beside them. Hover a cell for the reason. Candidates only; <code>node tools/sprite-audit.mjs</code> lists them all.</p>
+    <div id="fail" role="alert"></div>
+    <p class="note"><span class="warn">Spoilers:</span> shows every form, secret and earned item. Development only; not deployed. Open it through <code>npm run serve</code> (http://localhost:5174/gallery.html): opening the file directly does not work. Everything is drawn by the game's own code (<code>renderLCD</code> and friends), so what you see is what ships. Review plan: <code>docs/SPRITE_REVIEW_PLAN.md</code>. Pink outlines mark a wearable that a check (<code>tools/lib/sprite-checks.mjs</code>) thinks blends into the pet: half or more of its pixels look like what is under or beside them. Hover a cell for the reason. Candidates only; <code>node tools/sprite-audit.mjs</code> lists them all.</p>
     <div id="bar"></div>
     <div id="nav"></div>
     <div id="out"></div>
+    <script>
+      // Nothing below runs if the ES modules fail to load (a file:// URL blocks them), so say why instead of showing a blank page.
+      setTimeout(() => {
+        if (window.__galleryReady) return;
+        const box = document.getElementById('fail');
+        box.style.display = 'block';
+        box.innerHTML = location.protocol === 'file:'
+          ? '<b>The gallery did not load.</b> Browsers block ES modules on <code>file://</code> pages. From the repo folder run <code>npm run serve</code> (or <code>python3 -m http.server 5174</code>) and open <code>http://localhost:5174/gallery.html</code>.'
+          : '<b>The gallery did not load.</b> A script failed to import: open the browser console for the file name. Serve the whole repo folder (the page imports <code>./src/</code> and <code>./tools/lib/</code>); the deployed site does not include this page.';
+      }, 2500);
+    </script>
     <script type="module">
       import { renderLCD, LCD_W, LCD_H, setLcdTint } from './src/render.js';
       import { createScript, SPECIES, FORM_MODS, PALETTES, IDLES } from './src/sim.js';
@@ -498,6 +512,7 @@
         const out = document.getElementById('out');
         out.replaceChildren(...SECTIONS.filter((id) => !P.sec || P.sec === id).map((id) => build[id]()));
         document.title = `Netling Sprites (${cells.length} screens)`;
+        window.__galleryReady = true;
       }
       addEventListener('hashchange', render);
       render();
