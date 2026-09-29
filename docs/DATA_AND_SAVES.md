@@ -69,6 +69,7 @@ Built by `createScript()` in `sim.js`. Fields:
 | `lastSurgeAt` | ms epoch or null | Drives the surge flash |
 | `inventory` | array of item ids | Max 6 |
 | `scrip` | int | Corpo scrip, 0..100. Missing: 0 |
+| `zone` | int -840..840 | The time zone its sleep follows, in minutes as `getTimezoneOffset` gives it; refreshed when it wakes. Missing or junk: the device's zone |
 | `buffs` | `{ shieldUntilAge, traceSkip, boost }` | |
 | `run` | the netrun or null | Cleaned by `cleanRun` |
 | `rootAccess`, `rootUsed`, `rootCooling` | booleans | |
@@ -87,9 +88,9 @@ The netling belongs to one generation. Everything shared across generations (lin
 
 ## Other stored values
 
-**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer and `lineageRows` tolerate that.
+**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
 
-**Wardrobe**: `shell`, `tint`, `effect`, `sound` (ids from `COSMETICS`), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
+**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest` (ids from `COSMETICS`; a missing slot uses its default, so `crest` needed no migration), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
 
 **Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, and `rootEarned` (true once Root Access has been earned; absent otherwise).
 

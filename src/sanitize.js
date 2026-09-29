@@ -19,6 +19,7 @@ import {
   LEGACY_LIFE,
   SCRIP,
   TRAIT_CFG,
+  deviceZone,
   fragmentOf,
   leaningForm,
 } from './sim.js';
@@ -323,6 +324,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     trait: keyOf(raw.trait, TRAITS),
     traitLevel: int(raw.traitLevel, 1, 1, TRAIT_CFG.maxLevel),
     history: keyOf(raw.history, TRAITS),
+    zone: int(raw.zone, deviceZone(now), -14 * 60, 14 * 60), // UTC offsets run from -12:00 to +14:00
     inheritedQuirk: oneOf(raw.inheritedQuirk, QUIRK_KEYS, null),
     quirk: cleanQuirk(raw.quirk),
     log: Array.isArray(raw.log)

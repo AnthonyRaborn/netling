@@ -1,7 +1,8 @@
-// Wardrobe cosmetics: shell, screen tint, screen effect. Purely visual, shared across generations.
+// Wardrobe cosmetics: shell, screen tint, screen effect, sound pack and crest. Purely visual, shared across generations.
 // Each locked item shows only its hint; unlock checks read a progress context:
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits } }
 import { FRAGMENTS } from './netrun/codex.js';
+import { FORMS, TRAITS, TRAIT_CFG } from './sim.js';
 
 const regionDone = (ctx, region) => FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
 const fullLives = (ctx) => ctx.lineage.filter((e) => e.cause === 'end of life cycle').length;
@@ -17,7 +18,28 @@ function fullLifeStreak(ctx) {
 const streak = (ctx, game) => ctx.progress.streaks?.[game]?.best ?? 0;
 const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[a] ?? 0), 0);
 
-export const SLOTS = ['shell', 'tint', 'effect', 'sound'];
+// Legacy goals: read from the lineage records, in the order the generations ended.
+// A full life NL-0 never had to pull back.
+function unbrokenStreak(ctx) {
+  let best = 0;
+  let cur = 0;
+  for (const e of ctx.lineage) {
+    cur = e.cause === 'end of life cycle' && !e.rescued ? cur + 1 : 0;
+    best = Math.max(best, cur);
+  }
+  return best;
+}
+export const LEGACY = {
+  unbroken: 5,
+  traitsHeld: (ctx) => new Set(ctx.lineage.map((e) => e.trait).filter((t) => TRAITS[t])).size,
+  // A level III trait was held, or passed on: the same form three generations running.
+  levelThree: (ctx) => ctx.lineage.some((e) => (e.traitLevel ?? 1) >= TRAIT_CFG.maxLevel || (e.fragmentLevel ?? 1) >= TRAIT_CFG.maxLevel),
+  // Adult forms raised to adulthood in this line (not the dex, which counts any line on this device).
+  adultsRaised: (ctx) => new Set(ctx.lineage.filter((e) => e.realized && FORMS[e.form]).map((e) => e.form)).size,
+  unbrokenStreak,
+};
+
+export const SLOTS = ['shell', 'tint', 'effect', 'sound', 'crest'];
 
 export const COSMETICS = {
   shell: [
@@ -61,6 +83,38 @@ export const COSMETICS = {
     // gamesPlayed counts PLAY games and netrun ICE fights; streaks (above) count PLAY games only.
     { id: 'arcade', name: 'Arcade', wave: 'triangle', mult: 0.75, hint: 'fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 50 },
   ],
+  // A pixel emblem beside the device label, earned by the line itself. `pixels`: '#' lit, '.' dark.
+  crest: [
+    { id: 'none', name: 'No crest', free: true },
+    {
+      id: 'helix',
+      name: 'Helix',
+      hint: 'inherit every trait there is, once.',
+      check: (c) => LEGACY.traitsHeld(c) >= Object.keys(TRAITS).length,
+      pixels: ['#.......#', '.#.....#.', '..#####..', '...#.#...', '....#....', '...#.#...', '..#####..', '.#.....#.', '#.......#'],
+    },
+    {
+      id: 'triad',
+      name: 'Triad',
+      hint: 'the same shape, three times running.',
+      check: (c) => LEGACY.levelThree(c),
+      pixels: ['....#....', '...#.#...', '..#...#..', '....#....', '...#.#...', '..#...#..', '....#....', '...#.#...', '..#...#..'],
+    },
+    {
+      id: 'loop',
+      name: 'Closed loop',
+      hint: 'five whole lives in a row, nobody pulled back.',
+      check: (c) => LEGACY.unbrokenStreak(c) >= LEGACY.unbroken,
+      pixels: ['...###...', '..#...#..', '.#.....#.', '#.......#', '#...#...#', '#.......#', '.#.....#.', '..#...#..', '...###...'],
+    },
+    {
+      id: 'star',
+      name: 'Full house',
+      hint: 'raise every grown shape in one line.',
+      check: (c) => LEGACY.adultsRaised(c) >= Object.keys(FORMS).length,
+      pixels: ['....#....', '....#....', '...###...', '#########', '.#######.', '..#####..', '..##.##..', '.##...##.', '.#.....#.'],
+    },
+  ],
 };
 
 // The device label: naming the line is earned by losing the first netling.
@@ -81,7 +135,7 @@ export function sanitizeLabel(raw) {
   return clean || LABEL.fallback;
 }
 
-export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep' };
+export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep', crest: 'none' };
 
 export const cosmeticById = (slot, id) => COSMETICS[slot].find((c) => c.id === id);
 

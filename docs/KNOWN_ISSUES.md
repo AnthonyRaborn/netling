@@ -1,6 +1,6 @@
 # Known issues and risks
 
-Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-11 and KI-18 are fixed, KI-16 is mostly fixed (only `ui/*` and the gamepad remain smoke-only), and KI-17's Tier 1 is done (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
+Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-14 and KI-18 are fixed, KI-16 is mostly fixed (only `ui/*` and the gamepad remain smoke-only), and KI-17's Tier 1 is done (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
 
 - **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
 - **Read**: derived by reading the code; not run.
@@ -25,9 +25,9 @@ Not checked by me: real-device behaviour beyond what the maintainer confirmed (P
 | [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Fixed |
 | [KI-10](#ki-10) | Low | Read | Duplicated helpers | Fixed |
 | [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Fixed |
-| [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Open |
-| [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Open |
-| [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Open |
+| [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Fixed |
+| [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Fixed |
+| [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Fixed |
 | [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Fixed |
 | [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
 | [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Mostly fixed |
@@ -141,17 +141,23 @@ Not checked by me: real-device behaviour beyond what the maintainer confirmed (P
 
 **Sleep uses the device's local time zone.** Severity Note.
 
+**Status: Fixed.** The netling stores its zone (`s.zone`) at compile and reads the device's zone again only when it wakes, keeping it asleep if it is still night there. A day keeps one zone, so travel and daylight saving change the window from the next morning, not halfway through a night (`tests/zone.test.js`). The readout shows bedtime on the device's clock. The description below is the original finding.
+
 - `step()` decides sleep with `new Date(t).getHours()`. Travelling, daylight saving changes and importing a netling onto a device in another time zone all shift the sleep window. Tests pin `TZ=UTC`.
 
 ### KI-13
 
 **Time in transit counts.** Severity Note.
 
+**Status: Fixed** (kept as designed, now stated in the game). The maintainer chose to keep the clock running: a transfer does not halt the netling. TRANSFER OUT and the IN TRANSIT screen now say its clock keeps running until the code is loaded; the README already did. The description below is the original finding.
+
 - A transfer code stores `lastTick`. The imported netling is ticked from that moment (clamped to now), so a netling left in a code for two days ages two days on load. The source device stops simulating while locked, so nothing is duplicated, but a code is not a pause. Hibernation is the pause.
 
 ### KI-14
 
 **Boosted wins count double toward Ghost.** Severity Note.
+
+**Status: Fixed** (working as intended). The maintainer confirmed that counting a boosted win twice matches the Signal booster's text and purpose. The description below is the original finding.
 
 - A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned. (The requirement is now 18 wins with 3 in each game; the maintainer chose to keep boosted wins counting double, and SIMULATION.md says so.)
 

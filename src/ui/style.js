@@ -135,14 +135,26 @@ export function applyWardrobe() {
   const pack = cosmeticById('sound', w.sound);
   setSoundPack(pack.wave, pack.mult);
   const label = app.unlocked.includes('label') ? sanitizeLabel(app.wardrobe.label) : LABEL.fallback;
-  document.querySelector('.logo').textContent = label;
+  const logo = document.querySelector('.logo');
+  logo.textContent = label;
+  const crest = cosmeticById('crest', w.crest);
+  $('crest').hidden = !crest.pixels;
+  if (crest.pixels) drawCrest($('crest'), crest.pixels, getComputedStyle(logo).color); // after the shell class, which can recolor the logo
+}
+
+// A 9x9 crest onto a canvas of the same size; CSS scales it up.
+function drawCrest(canvas, pixels, color) {
+  const g = canvas.getContext('2d');
+  g.clearRect(0, 0, canvas.width, canvas.height);
+  g.fillStyle = color;
+  pixels.forEach((row, y) => [...row].forEach((p, x) => p === '#' && g.fillRect(x, y, 1, 1)));
 }
 
 export function renderWardrobe() {
   const w = resolveWardrobe(app.wardrobe, app.unlocked);
   const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + STYLE_ITEMS.length; // + label + accessories/props
   $('wardrobe-count').textContent = `${app.unlocked.length + app.ownedAccessories.length}/${total}`;
-  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK' };
+  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
       const h = document.createElement('h3');
@@ -161,6 +173,13 @@ export function renderWardrobe() {
         sw.style.background = open ? c.swatch ?? 'transparent' : 'transparent';
         if (slot === 'effect') sw.textContent = open ? '~' : '';
         if (slot === 'sound') sw.textContent = open ? '♪' : '';
+        if (slot === 'crest' && open && c.pixels) {
+          const cv = document.createElement('canvas');
+          cv.width = cv.height = 9;
+          cv.className = 'crest-sw';
+          drawCrest(cv, c.pixels, '#ff2a6d');
+          sw.append(cv);
+        }
         const name = document.createElement('span');
         name.textContent = open ? c.name : '???';
         const hint = document.createElement('span');

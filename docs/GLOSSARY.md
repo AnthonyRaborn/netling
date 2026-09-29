@@ -48,6 +48,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Corp trace** | Timed event: HIDE or COMPLY within 2 hours or lose Integrity and lean corp | `sim.js` |
 | **Corp voucher** | Item: full Charge, waves off a trace | `sim.js` |
 | **Crash** | What an ignored memory overflow does: -15 Integrity, cache full, 20 minute reboot | `sim.js` |
+| **Crest** | Wardrobe slot: a pixel emblem beside the device label, earned by a legacy goal | `cosmetics.js` |
 | **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead and repairs as it moves in runs | `sim.js` |
 | **Dark** | Lights off. Deep rest when asleep, boredom when awake | `sim.js` |
 | **Dead / flatline** | The end of a netling. Leaves a fragment | `sim.js` `flatline` |
@@ -63,6 +64,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Event** | A timed thing that needs a response (trace, intrusion, overflow). One at a time | `sim.js` `EVENTS` |
 | **Evolution** | Baby to teen at 17 hours, teen to adult at 51 hours (`s.life`; 24 and 72 for older netlings) | `sim.js` |
 | **Exit node** | The last node of a map. Banks everything and gives a bonus | `netrun/run.js` |
+| **Family tree** | The Lineage tab: every generation oldest first, linked by what each passed down | `archive.js` `lineageChain` |
 | **Field manual** | The in-game help dialog, built from live `CFG` values | `ui/onboarding.js` |
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
 | **Firewall Dodge** | Mini-game: slide between five lanes to avoid falling blocks for 15 seconds | `games/dodge.js` |
@@ -87,6 +89,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **KERNEL (project)** | The in-world corp project that made netlings. Not the same as the Kernel form | `netrun/codex.js` |
 | **Label (device label)** | A name for the line, earned when the first netling dies | `cosmetics.js` |
 | **Leaning** | Which adult form the axes currently point to (`leaningForm`) | `sim.js` |
+| **Legacy goal** | A goal for the whole line (every trait held, a level III trait, five unbroken lives, every adult form raised). Each unlocks a crest | `cosmetics.js` `LEGACY` |
 | **Lease** | The `localStorage` fallback for the one-tab rule | `lease.js` |
 | **Lights** | The LIGHTS OFF/ON toggle. Affects drain, regeneration and screen | `sim.js` |
 | **Lineage** | The record of every dead netling, plus inheritance from parent to child | `archive.js` |
@@ -128,6 +131,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Shield** | Antivirus effect: blocks new infections and intrusions for 6 hours | `sim.js` |
 | **Skew** | Dev-mode time offset added to "now" | `ui/app.js` |
 | **Sleep offset** | Quirk: shifts bedtime by -2 to +2 hours | `sim.js` |
+| **Sleep zone** | `s.zone`: the time zone a netling sleeps by. Taken from the device at compile and at each wake-up, so a day keeps one zone | `sim.js` `deviceZone` |
 | **Stability** | Hidden axis: positive is orderly, negative is chaotic. Picks Daemon or Glitch | `sim.js` |
 | **Streak** | Consecutive mini-game wins. 10 in a row unlocks a screen effect | `cosmetics.js` |
 | **Strict cleaning** | Sanitizing that drops unknown fields, used for imported codes | `sanitize.js` |

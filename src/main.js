@@ -2,6 +2,7 @@
 // and the render loop. The UI itself lives in src/ui/.
 import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
 import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
+import { text, W, H } from './games/common.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -223,8 +224,15 @@ function drawFrame(time) {
   if (!session && !anim && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) return;
   if (!session) lastIdleDraw = time;
   if (session) {
-    session.update(dt);
-    app.session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);
+    if (!app.quitArmed) session.update(dt); // paused while the touch quit confirm is up
+    const ctx = canvas.getContext('2d');
+    const pal = PALETTES[state.quirk.palette] ?? PALETTES[0];
+    app.session?.draw(ctx, pal, time);
+    if (app.quitArmed && app.session?.game) {
+      ctx.fillStyle = 'rgba(3, 9, 10, 0.6)';
+      ctx.fillRect(0, 0, W, H);
+      text(ctx, 'PAUSED', W / 2, H / 2, { size: 40, align: 'center', color: pal.accent, glow: pal.accent });
+    }
   } else {
     renderLCD(canvas, state, time, {
       accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
