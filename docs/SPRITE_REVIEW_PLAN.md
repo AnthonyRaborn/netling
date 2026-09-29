@@ -2,7 +2,7 @@
 
 Plan for a full art review of every code-drawn sprite, and of the ways they are layered. **Contains spoilers** (secret forms, earned items). Written against branch `claude/vibrant-cerf-kthozk`, now merged with `main` at `c121f59` (which includes the crest slot).
 
-**Status (2026-09-29):** steps 1 to 3 are done. The gallery is rewritten (section 3), `tools/sprite-audit.mjs` and its tests exist (section 4), and the screenshot pass has been run, with the results in [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md). Step 4 (the human pass in a browser) is the maintainer's. The sections below are kept as the plan; where reality differed, a note says so. Section 8's suspicions are now resolved in the findings (most confirmed; the silhouette one was not).
+**Status (2026-09-29):** steps 1 to 3 are done. The gallery is rewritten (section 3), `tools/sprite-audit.mjs` and its tests exist (section 4), and the screenshot pass has been run, with the results in [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md). Step 4 (the human pass in a browser) is the maintainer's. Step 6 (fixes) started on 2026-09-29: see the Fix pass in SPRITE_FINDINGS.md. The sections below are kept as the plan; where reality differed, a note says so. Section 8's suspicions are now resolved in the findings (most confirmed; the silhouette one was not).
 
 Decisions recorded from the maintainer: the review covers all art; it is done by both an automated pass and a human pass; and the output is **findings only** (severity and a suggested fix, no art or code changes as part of the review).
 

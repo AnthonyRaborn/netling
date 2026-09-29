@@ -1,10 +1,40 @@
 # Sprite review findings
 
-First pass of the [sprite review plan](SPRITE_REVIEW_PLAN.md): the automated audit (`node tools/sprite-audit.mjs`) plus a look at every gallery sheet at 5x (screenshots rendered in headless Chromium). **Contains spoilers.** Findings only: nothing here has been changed. Written against the merge of `main` at `c121f59` (2026-09-29), so it includes the crest slot.
+First pass of the [sprite review plan](SPRITE_REVIEW_PLAN.md): the automated audit (`node tools/sprite-audit.mjs`) plus a look at every gallery sheet at 5x (screenshots rendered in headless Chromium). **Contains spoilers.** The findings table below is the first pass as logged; the **Fix pass** section says what has been done about each since (the maintainer's decisions of 2026-09-29). Written against the merge of `main` at `c121f59` (2026-09-29), so it includes the crest slot.
 
 Confidence follows [KNOWN_ISSUES.md](KNOWN_ISSUES.md): **Reproduced** (seen in the gallery), **Read** (from the audit or code only), **Unverified**. Severity is defined in the plan (section 7). Gallery links assume `npm run serve` (open `http://localhost:5174/gallery.html#...`).
 
 Not covered by this pass: the human pass in a browser (motion, flicker, phone-size legibility, anything flashing), the smoke test, the real game's CSS shells around the LCD, and the crest on the real shell art (the gallery uses the picker swatch colors). Sheets not looked at closely: the palette-`all` matrices (the audit covers their numbers) and the wearable-plus-prop matrix.
+
+## Fix pass
+
+Decisions taken: Shell gets a dim void fill; dead and sleep poses are generated with a helper; anchors are an authored table; wearable colors are a precomputed per-palette table; the art changes ship as a release (`netling-v40`). Ghost wearables stay solid; wearables are lighter than the body in the dark; the idle motion is clamped; the Visor gets a dark border and Chrome's eyes shine through Shades; the smallest wearables are enlarged; props are drawn in front and the Plush is outlined; visitors are pushed apart; the Segfault is a skull and the Overclock a gear; the exit node is a door; the Helix is twisted.
+
+| Id | Status | What changed |
+|---|---|---|
+| SR-01 | Fixed | Recolorable wearables take a generated per-palette default (`src/wearable-colors.js`); a slot the player has not picked is automatic (`null`). Other wearables swap any pixel that would blend into the body (`contrastColor`). |
+| SR-02 | Fixed | A resting pet's wearable is drawn `#2f6b73`, one step lighter than the dimmed body `#1c3a3f`. |
+| SR-03 | Fixed | Every form except Bitling gets a generated dead pose (an X on each eye) and sleep pose (slit eyes). |
+| SR-04 | Fixed | Idle motion leaves five rows above the sprite (the halo needs five) and the hover idle is clamped like the others. |
+| SR-05 | Fixed | A `neckRow` anchor; the Scarf sits on it. |
+| SR-06 | Done | The Visor has a dark frame above and below its band. On Chrome, its bright eye cells shine through the Shades. Shades and Visor now overlap 0.67 on Chrome by pixel count (different colors); look at them together. |
+| SR-07 | Done | Spark (plus and X twinkle), Neural jack, Circuit tattoo, Earpiece (2x2 bud and boom), Bandage (a plaster strip), Data aura (2 wide echoes) and Drone buddy (rotors and light) are larger. |
+| SR-08 | Open | Not part of this pass (near-duplicate pairs: Chrome jaw and Rebreather 0.80 to 0.83, Mohawk and Party hat 0.60, Cap and Crown 0.57). |
+| SR-09 | Done, with a caveat | Props are drawn in front, so they are always whole (prop visible: 1). The Plush has a one pixel outline. In front, the Plush covers up to 32% of the pet at the far right and up to 46% with a visitor (the Cyberdeck, Boom box and Mini device cover 9% at most). Decide whether that is acceptable. |
+| SR-10 | Done | A visitor and its host keep at least two columns between them (the swing shrinks to fit two adults). |
+| SR-11 | Open | An icon can still be drawn over a wearable that has moved under it (17 to 9 wearables on the virus and event icons, 9 on the sleep Z). The clamp above keeps hats on screen but not clear of the icons. |
+| SR-12 | Done | Segfault is a skull, Overclock a gear. |
+| SR-13 | Awaiting your verdict | The exit is drawn as a door (frame, two panels, knob). It may read as an 8 at small size. |
+| SR-14 | Helix redrawn, awaiting your verdict | The Helix is a twisted double strand with rungs. Real shells still to be checked in the app. |
+| SR-15 | Open | Any `#rrggbb` is still allowed; the automatic state means a player only meets a clashing color by choosing it. |
+| SR-16 | Fixed | A Ghost's wearable is drawn at full alpha. |
+| SR-17 | Fixed | The Shell casing is filled with a dim void mark (`x`), so wearables no longer merge with an outline. |
+| SR-18 | Open | Animation still to be judged in motion. |
+
+Also found while fixing:
+- **The anchor cause was confirmed by measurement.** On the B frame the eye row was 2 for Bitling, Kernel and Stub (4 or 5 in the A frame), so 11 wearables on each moved up to 4 rows (3 on Kernel) against the body. All other forms were stable. Now no wearable moves more than one row between frames, and a test enforces it.
+- The automatic swap also applies to pixels that sit on the dark room rather than on the body (for example a Data aura echo away from the head), where the original color would have been fine. Judge it in the gallery.
+- Audit numbers, before to after: off-screen cases 18 to 0; wearables that lose half or more of their pixels awake and lit 20 to 2 (Crown in 1 of 54 form/palette cases, Earpiece in 1); lights-off sleeping 15 (all 54 cases) to 0.
 
 ## What works
 

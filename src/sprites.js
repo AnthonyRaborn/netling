@@ -333,8 +333,8 @@ export const ITEM_SPRITES = {
   booster: ['...#...', '.#.#.#.', '#..#..#', '.#.#.#.', '...#...', '..###..', '.#####.'],
   memory: ['#.#.#.#', '.#####.', '##o+o##', '.#ooo#.', '##o+o##', '.#####.', '#.#.#.#'],
   repair: ['.#...#.', '.##.##.', '..#+#..', '...#...', '..#+#..', '.##.##.', '.#...#.'],
-  overclock: ['.#.#.#.', '#######', '.#o+o#.', '##+++##', '.#o+o#.', '#######', '.#.#.#.'],
-  segfault: ['.#####.', '#oo.oo#', '#o.#.o#', '#.#+#.#', '#o.#.o#', '#oo.oo#', '.#####.'],
+  overclock: ['..#.#..', '.#####.', '##o+o##', '.#+o+#.', '##o+o##', '.#####.', '..#.#..'],
+  segfault: ['.#####.', '#######', '#oo#oo#', '#oo#oo#', '###.###', '.#+#+#.', '..###..'],
 };
 
 export const ITEM_COLORS = {
@@ -392,7 +392,8 @@ export const ANCHOR_ROWS = {
   kernel: { a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 }, sleep: { headTop: 2, eyeRow: 5, mouthRow: 7, neckRow: 8 } },
   stub: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 9 } },
   shell: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
-  chrome: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
+  // shine: its eyes are the bright '+' cells on the visor, and show through eyewear.
+  chrome: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8, shine: true }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
   firewall: {
     a: { headTop: 1, eyeRow: 6, mouthRow: 8, neckRow: 10 },
     b: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 10 },

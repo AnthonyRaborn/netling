@@ -234,40 +234,37 @@ if (wants('forms') || wants('poses')) {
 }
 
 if (wants('props')) {
-  // How much of each prop stays visible with the pet standing at the far right, and with a visitor beside it.
+  // The prop stands in front of the pet. With the pet at its far right (and with the host moved right for a visitor, which
+  // is where the prop is), how much of the pet does the prop cover, and does the prop stay whole?
   const rows = [];
   const plush = { sprite: formSprite('bitling', 'a'), colors: paletteColors(PALETTES[0]) };
+  const measure = (s, t, prop) => {
+    const cells = spriteCells(formSprite(s.form, poseFor(s.asleep, t))).length;
+    const without = drawnPixels(s, t);
+    const withProp = drawnPixels(s, t, { prop: prop.id, propExtra: prop.id === 'plush' ? plush : null });
+    const first = withProp.findIndex((p, i) => !without[i] || p.x !== without[i].x || p.y !== without[i].y || p.color !== without[i].color);
+    const n = withProp.length - without.length; // the prop's own pixels sit where the two runs diverge
+    const propCalls = new Set(withProp.slice(first, first + n));
+    const winner = new Map();
+    for (const p of withProp) winner.set(`${p.x},${p.y}`, p);
+    const pet = withProp.slice(0, cells);
+    const hidden = pet.filter((p) => propCalls.has(winner.get(`${p.x},${p.y}`))).length;
+    const shown = [...propCalls].filter((p) => winner.get(`${p.x},${p.y}`) === p).length;
+    return { petHidden: cells ? hidden / cells : 0, propShown: n ? shown / n : 1 };
+  };
   for (const prop of PROPS) {
     for (const form of FORMS) {
-      const idles = report.ranges;
-      let worst = 1;
-      let where = '';
+      let worst = { petHidden: 0, propShown: 1, where: '' };
       for (const idle of IDLES) {
-        const r = idles[`${form}/${idle}`];
-        for (const frame of Object.values(r)) {
-          const s = netling(form, { idle });
-          const t = frame.tx1;
-          const opts = { prop: prop.id, propExtra: prop.id === 'plush' ? plush : null };
-          const without = drawnPixels(s, t).length;
-          const withProp = drawnPixels(s, t, opts);
-          const propPixels = withProp.length - without;
-          const final = new Map();
-          for (const p of withProp) final.set(`${p.x},${p.y}`, p);
-          const shown = withProp.slice(0, propPixels).filter((p) => final.get(`${p.x},${p.y}`) === p).length;
-          const ratio = propPixels ? shown / propPixels : 1;
-          if (ratio < worst) [worst, where] = [ratio, `${idle} at ${t} ms`];
+        for (const frame of Object.values(report.ranges[`${form}/${idle}`])) {
+          const m = measure(netling(form, { idle }), frame.tx1, prop);
+          if (m.petHidden > worst.petHidden || m.propShown < worst.propShown) worst = { petHidden: Math.max(m.petHidden, worst.petHidden), propShown: Math.min(m.propShown, worst.propShown), where: `${idle} at ${frame.tx1} ms` };
         }
       }
-      // With a visitor the host moves to the right edge, where the prop is, and the visitor stands on the left.
       const v = netling(form);
       v.visit = { startedAge: 0, len: 8, form: 'chrome', palette: 2, accessory: null };
-      const withProp = drawnPixels(v, 2000, { prop: prop.id, propExtra: prop.id === 'plush' ? plush : null });
-      const noProp = drawnPixels(v, 2000);
-      const n = withProp.length - noProp.length;
-      const final = new Map();
-      for (const p of withProp) final.set(`${p.x},${p.y}`, p);
-      const visitorRatio = n ? withProp.slice(0, n).filter((p) => final.get(`${p.x},${p.y}`) === p).length / n : 1;
-      rows.push({ prop: prop.id, form, worstVisible: Number(worst.toFixed(2)), where, visitorVisible: Number(visitorRatio.toFixed(2)) });
+      const withVisitor = measure(v, 2000, prop);
+      rows.push({ prop: prop.id, form, petHidden: Number(worst.petHidden.toFixed(2)), propShown: Number(worst.propShown.toFixed(2)), where: worst.where, visitorPetHidden: Number(withVisitor.petHidden.toFixed(2)), visitorPropShown: Number(withVisitor.propShown.toFixed(2)) });
     }
   }
   note('props', rows);
@@ -393,11 +390,11 @@ if (JSON_OUT) {
     for (const r of report.poses) line(`  ${r.form.padEnd(9)} A/B ${String(r.abCells).padStart(2)}   sleep ${r.hasSleep ? String(r.sleepCells).padStart(2) : 'falls back to A'}   dead ${r.hasDead ? String(r.deadCells).padStart(2) : 'falls back to A'}`);
   }
   if (report.props) {
-    head('props: share of the prop still visible (by last pixel drawn, ignoring the Ghost\'s transparency) with the pet at its far right, and with the host moved right for a visitor (1 = all, lower = hidden)');
+    head('props: the prop stands in front of the pet. Share of the pet the prop covers (worst over the idle motion) and share of the prop that stays visible; with a visitor, the host stands at the far right');
     for (const prop of PROPS) {
       const rows = report.props.filter((r) => r.prop === prop.id);
-      line(`  ${prop.id.padEnd(10)} pet at far right: ${rows.map((r) => `${r.form} ${r.worstVisible}`).join(', ')}`);
-      line(`  ${''.padEnd(10)} host with a visitor: ${rows.map((r) => `${r.form} ${r.visitorVisible}`).join(', ')}`);
+      line(`  ${prop.id.padEnd(10)} pet covered: ${rows.map((r) => `${r.form} ${r.petHidden}`).join(', ')}`);
+      line(`  ${''.padEnd(10)} prop visible: min ${Math.min(...rows.map((r) => r.propShown))}; with a visitor, pet covered: ${rows.map((r) => `${r.form} ${r.visitorPetHidden}`).join(', ')}`);
     }
   }
   if (report.crests) {

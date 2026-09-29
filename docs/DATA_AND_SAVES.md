@@ -90,7 +90,7 @@ The netling belongs to one generation. Everything shared across generations (lin
 
 **Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
 
-**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest` (ids from `COSMETICS`; a missing slot uses its default, so `crest` needed no migration), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
+**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest` (ids from `COSMETICS`; a missing slot uses its default, so `crest` needed no migration), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays with one entry per color slot: a `#rrggbb` the player picked, or `null` for automatic, meaning the wearable's color for the netling's palette, see `accessoryColors`). Old saves hold concrete hex values, which stay as the player's picks; the cleaner turns anything that is not a `#rrggbb` into `null`. No version bump: the value domain widened, the shape did not.
 
 **Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, and `rootEarned` (true once Root Access has been earned; absent otherwise).
 

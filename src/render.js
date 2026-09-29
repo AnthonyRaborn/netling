@@ -121,10 +121,14 @@ export function renderLCD(canvas, s, time, opts = {}) {
 
     // A visiting netling: the two bounce around each other, one on each side of the screen.
     const visit = s.visit && !rest && !rebooting ? s.visit : null;
-    const swing = (phase) => (opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
+    // They bounce toward each other by up to four columns each, but never closer than two columns apart: two adults
+    // (16 wide) have room for only two columns of swing each.
+    const visitorWidth = visit ? formSprite(visit.form, 'a')[0].length : 0;
+    const swingCap = visit ? Math.max(0, Math.floor((LCD_W - 4 - sprite[0].length - visitorWidth) / 2)) : 4;
+    const swing = (phase) => Math.min(swingCap, opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
     const hop = (up) => (opts.calm ? 0 : up ? 1 : 0);
     if (visit) {
-      x = LCD_W - 3 - sprite[0].length - swing(Math.PI);
+      x = LCD_W - 1 - sprite[0].length - swing(Math.PI);
       y = 20 - sprite.length - hop(!frame);
     }
 
@@ -150,18 +154,19 @@ export function renderLCD(canvas, s, time, opts = {}) {
       spriteColors = WHITE_COLORS;
     }
 
-    if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
     bctx.globalAlpha = 1; // a Ghost fades, what it wears does not
     if (opts.accessory && !strobe) {
       drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors, pal);
     }
+    // The prop stands in front of the pet, so a pet at the right edge does not hide it.
+    if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
 
     if (visit) {
       const vs = formSprite(visit.form, frame ? 'a' : 'b');
       const vp = PALETTES[visit.palette] ?? PALETTES[0];
-      const vx = 3 + swing(0);
+      const vx = 1 + swing(0);
       const vy = 20 - vs.length - hop(frame);
       drawSprite(bctx, vs, vx, vy, paletteColors(vp));
       if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time, null, vp);

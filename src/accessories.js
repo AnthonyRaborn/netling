@@ -24,6 +24,12 @@ for (const form of Object.keys(ANCHOR_ROWS)) {
   }
 }
 
+const spriteCellsOf = (sprite, ch, fromRow, toRow) => {
+  const out = [];
+  for (let y = fromRow; y <= toRow; y++) [...(sprite[y] ?? '')].forEach((c, x) => c === ch && out.push([x, y]));
+  return out;
+};
+
 // Anchors for a sprite (array of strings). Cached per sprite array.
 const cache = new WeakMap();
 export function anchorsFor(sprite) {
@@ -74,6 +80,8 @@ export function anchorsFor(sprite) {
     neckRow,
     neckLeft: neck.left,
     neckRight: neck.right,
+    // Cells of the sprite that shine through eyewear: a form whose eyes are bright highlights ('+') on a visor (Chrome).
+    shine: rows?.shine ? spriteCellsOf(sprite, '+', eyeRow, eyeRow + 1) : [],
   };
   cache.set(sprite, a);
   return a;
@@ -159,6 +167,8 @@ export const ACCESSORIES = [
       }
       for (let x = a.eyeLeft; x <= a.eyeRight; x++) px(x, a.eyeRow, lens);
       px(a.eyeLeft, a.eyeRow, glint);
+      // Eyes that are too bright to hide (Chrome's) shine through the lenses.
+      for (const [x, y] of a.shine) px(x, y, '#ffffff');
     },
   },
   {
@@ -171,8 +181,15 @@ export const ACCESSORIES = [
     ],
     draw: (px, a, frame, time, colors) => {
       const [band, light] = colors ?? ['#ff2a6d', '#ffffff'];
-      for (let x = a.headLeft; x <= a.headRight; x++) px(x, a.eyeRow, band);
-      px(a.headLeft + 1 + (frame % 2) * 2, a.eyeRow, light); // scanning light
+      // A dark frame above and below the band, so it shows even on a body that already has a band of its own (Chrome).
+      const left = Math.min(a.headLeft, a.eyeLeft);
+      const right = Math.max(a.headRight, a.eyeRight);
+      for (let x = left; x <= right; x++) {
+        px(x, a.eyeRow - 1, '#050508');
+        px(x, a.eyeRow, band);
+        px(x, a.eyeRow + 1, '#050508');
+      }
+      px(left + 1 + (frame % 2) * 2, a.eyeRow, light); // scanning light
     },
   },
   {
@@ -204,9 +221,10 @@ export const ACCESSORIES = [
     name: 'Spark',
     rarity: 'veryrare',
     draw: (px, a, frame) => {
+      // A twinkle: a plus on one frame, an X on the other, always with the bright centre.
       const y = a.top - 3;
       px(a.cx, y, '#ffffff');
-      if (frame % 2) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(a.cx + dx, y + dy, '#05d9e8');
+      for (const [dx, dy] of frame % 2 ? [[-1, -1], [1, -1], [-1, 1], [1, 1]] : [[-1, 0], [1, 0], [0, -1], [0, 1]]) px(a.cx + dx, y + dy, frame % 2 ? '#ffffff' : '#05d9e8');
     },
   },
 
@@ -276,6 +294,7 @@ export const ACCESSORIES = [
     hint: 'sold in the Darknet Bazaar.',
     draw: (px, a) => {
       px(a.headLeft, a.eyeRow, '#f9f002'); // the plug
+      px(a.headLeft, a.eyeRow + 1, '#f9f002');
       for (const [dx, dy] of [[-1, 0], [-2, 1], [-2, 2], [-3, 3], [-3, 4]]) px(a.headLeft + dx, a.eyeRow + dy, '#9a9ab8');
     },
   },
@@ -288,7 +307,7 @@ export const ACCESSORIES = [
     colors: [['glow', '#39ff14']],
     draw: (px, a, frame, time, colors) => {
       const [c] = colors ?? ['#39ff14'];
-      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [1, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, c);
+      for (const [dx, dy] of [[0, 2], [0, 3], [1, 3], [2, 3], [2, 4], [3, 4]]) px(a.eyeLeft + dx, a.eyeRow + dy, c);
     },
   },
   {
@@ -347,7 +366,9 @@ export const ACCESSORIES = [
       px(x - 1, y, '#8a93a3');
       px(x, y, '#c8d0dc');
       px(x + 1, y, '#8a93a3');
-      if (frame % 2) px(x, y - 1, '#39ff14');
+      px(x - 2, y - 1, '#c8d0dc'); // rotors
+      px(x + 2, y - 1, '#c8d0dc');
+      px(x, y + 1, frame % 2 ? '#39ff14' : '#5a5a6a'); // its light blinks
     },
   },
 ];
@@ -381,10 +402,12 @@ ACCESSORIES.push(
     source: 'earned',
     hint: 'you have to survive something first.',
     draw: (px, a) => {
-      const x = a.headRight - 2;
+      // A plaster across the cheek: a strip with a pad in the middle.
+      const x = a.headRight - 3;
       const y = a.headTop + 1;
-      for (const [dx, dy] of [[-1, -1], [0, 0], [1, 1], [1, -1], [-1, 1]]) px(x + dx, y + dy, '#f0e6d8');
+      for (let dx = -2; dx <= 2; dx++) for (const dy of [0, 1]) px(x + dx, y + dy, '#f0e6d8');
       px(x, y, '#ff8fa8');
+      px(x, y + 1, '#ff8fa8');
     },
   },
   // --- more wearables -----------------------------------------------------------------------
@@ -395,8 +418,11 @@ ACCESSORIES.push(
     regions: ['corp'],
     hint: 'standard issue in the Corp Grid.',
     draw: (px, a) => {
-      px(a.headRight + 1, a.eyeRow, '#3a3f49');
-      px(a.headRight + 1, a.eyeRow + 1, '#8a93a3');
+      for (const dy of [0, 1]) {
+        px(a.headRight + 1, a.eyeRow + dy, '#3a3f49'); // the bud, two by two
+        px(a.headRight + 2, a.eyeRow + dy, '#8a93a3');
+      }
+      px(a.headRight + 1, a.eyeRow + 2, '#8a93a3'); // the boom, curving to the mouth
       px(a.headRight, a.mouthRow, '#8a93a3');
       px(a.headRight - 1, a.mouthRow, '#ff2a6d'); // mic
     },
@@ -412,7 +438,11 @@ ACCESSORIES.push(
       const cy = a.eyeRow + 2;
       for (let i = 0; i < 5; i++) {
         const t = time / 1600 + (i * Math.PI * 2) / 5;
-        px(a.cx + Math.round(Math.cos(t) * rx), cy + Math.round(Math.sin(t * 1.3) * 5), i % 2 ? '#39ff14' : '#05d9e8');
+        const x = a.cx + Math.round(Math.cos(t) * rx);
+        const y = cy + Math.round(Math.sin(t * 1.3) * 5);
+        const c = i % 2 ? '#39ff14' : '#05d9e8';
+        px(x, y, c);
+        px(x + 1, y, c); // each echo is two wide, so it reads as a mark rather than a speck
       }
     },
   },
@@ -482,16 +512,25 @@ export const PROPS = [
     rarity: 'rare',
     source: 'earned',
     hint: 'a keepsake, after the first goodbye.',
-    size: [8, 8],
+    size: [10, 10], // the half-scale body is 8 by 8, inside a one pixel outline
     // extra: { sprite, colors } of the previous netling; drawn at half scale.
     draw: (px, frame, time, extra) => {
       if (!extra?.sprite) return;
       const s = extra.sprite;
+      const lit = new Set();
       for (let y = 0; y < s.length; y += 2) {
         for (let x = 0; x < s[0].length; x += 2) {
           const c = extra.colors[s[y][x]];
-          if (c) px(Math.floor(x / 2), Math.floor(y / 2), c);
+          if (c) {
+            px(1 + Math.floor(x / 2), 1 + Math.floor(y / 2), c);
+            lit.add(`${1 + Math.floor(x / 2)},${1 + Math.floor(y / 2)}`);
+          }
         }
+      }
+      // A one pixel dark outline, so the plush stays a shape when it overlaps the pet.
+      for (const key of [...lit]) {
+        const [x, y] = key.split(',').map(Number);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (!lit.has(`${x + dx},${y + dy}`)) px(x + dx, y + dy, '#050508');
       }
     },
   },

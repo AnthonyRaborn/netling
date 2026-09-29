@@ -394,10 +394,15 @@ export function drawNode(ctx, type, x, y, pal, spent) {
       ctx.fillText('?', x, y);
       break;
     case 'exit':
+      // A door: a frame, two panels and a knob.
       ctx.strokeStyle = '#f9f002';
       ctx.lineWidth = 2;
-      ctx.strokeRect(x - 9, y - 9, 18, 18);
-      ctx.strokeRect(x - 4, y - 4, 8, 8);
+      ctx.strokeRect(x - 7, y - 10, 14, 20);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x - 4, y - 7, 8, 6);
+      ctx.strokeRect(x - 4, y + 1, 8, 6);
+      ctx.fillStyle = '#f9f002';
+      ctx.fillRect(x + 2, y - 1, 2, 2);
       break;
   }
   ctx.globalAlpha = 1;
