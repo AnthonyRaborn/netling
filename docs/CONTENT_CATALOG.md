@@ -21,12 +21,12 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 | Bitling | baby | Compile a script | none | none | n/a | n/a |
 | Kernel | teen | 2 or fewer mistakes at the teen stage (17 hours; 24 for netlings compiled before the 5-day life), and not a Shell | none | none | n/a | n/a |
 | Stub | teen | 3 or more mistakes at the teen stage | none | none | n/a | n/a |
-| Shell | teen | On Ghost's path at the teen stage: allegiance under 2 either way, stability 0 or more, at most 1 mistake, every game won at least twice | none | none | n/a | n/a |
+| Shell | teen | On Ghost's path at the teen stage: allegiance under 2 either way, stability 0 or more, at most 1 mistake, every game won at least 3 times | none | none | n/a | n/a |
 | Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through; corp insurance saves it from one disconnect a run | Corp voucher | Licensed |
 | Firewall | adult | Allegiance dominant and negative | -30% virus chance | ICE deals half damage | Antivirus patch | Hardened |
 | Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead; +6 Integrity each move | Coolant cell | Persistent |
 | Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run, and 35% of later ones | Black ICE shard | Volatile |
-| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 18+ wins with 3+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it, and 45% of ICE miss it | Memory shard | Untraceable |
+| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 29+ wins with 4+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it, and 45% of ICE miss it | Memory shard | Untraceable |
 
 "Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
 

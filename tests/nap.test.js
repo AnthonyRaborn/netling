@@ -1,7 +1,7 @@
 import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, blockReason, createScript, tick, mulberry32, napBlockReason, napMinutesLeft, CFG, MIN } from '../src/sim.js';
+import { act, blockReason, createScript, drainCurve, tick, mulberry32, napBlockReason, napMinutesLeft, CFG, MIN } from '../src/sim.js';
 import { runBlockReason } from '../src/netrun/run.js';
 import { cleanSave } from '../src/sanitize.js';
 
@@ -27,8 +27,10 @@ test('a nap slows drain but time still passes', () => {
   const napping = booted();
   assert.equal(act(napping, 'nap', napping.lastTick).ok, true);
   const age = napping.ageMin;
-  const ratio = drainOver(napping, 60) / drainOver(awake, 60);
-  assert.ok(Math.abs(ratio - CFG.napDrainMult) < 0.01, `ratio ${ratio}`);
+  awake.stats.charge = napping.stats.charge = 80;
+  const ratio = drainOver(napping, 1) / drainOver(awake, 1);
+  assert.ok(Math.abs(ratio - CFG.napDrainMult) < 1e-9, `ratio ${ratio}`);
+  tick(napping, napping.lastTick + 59 * MIN, noRng);
   assert.equal(napping.ageMin, age + 60);
 });
 
@@ -82,9 +84,9 @@ test('sleeping in the dark drains far less than sleeping with the lights on', ()
   tick(dark, bed, noRng);
   act(dark, 'lights', dark.lastTick);
   lit.stats.charge = dark.stats.charge = 80; // it ran flat on the way to bedtime
-  const awakeRate = CFG.drainPerHour.charge;
-  assert.ok(Math.abs(drainOver(lit, 60) - awakeRate * CFG.sleepDrainMult) < 0.01);
-  assert.ok(Math.abs(drainOver(dark, 60) - awakeRate * CFG.sleepDarkDrainMult) < 0.01);
+  const awakeRate = (CFG.drainPerHour.charge / 60) * drainCurve(80); // per minute at 80
+  assert.ok(Math.abs(drainOver(lit, 1) - awakeRate * CFG.sleepDrainMult) < 1e-9);
+  assert.ok(Math.abs(drainOver(dark, 1) - awakeRate * CFG.sleepDarkDrainMult) < 1e-9);
 });
 
 test('a stored nap survives loading', () => {

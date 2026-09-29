@@ -9,7 +9,11 @@ export const SAVE_VERSION = 1;
 
 export const CFG = {
   bootMinutes: 3,
-  drainPerHour: { charge: 14, sync: 12 },
+  drainPerHour: { charge: 15.4, sync: 13.2 },
+  // Charge and Sync drain faster the fuller they are: the rate above is scaled from `empty` at 0 to
+  // `full` at 100. Topping up often means more to do; a stat left low eases off, so long gaps
+  // (a work day, the night) still cost faults without being fatal.
+  drainCurve: { empty: 0.39, full: 2 },
   sleepDrainMult: 0.5, // asleep with the lights on: restless
   sleepDarkDrainMult: 0.33, // asleep in the dark: real rest
   // Naps: a short rest on demand. Drains slow down but time still passes; a cooldown stops
@@ -39,7 +43,7 @@ export const CFG = {
   // The Shell: a teen on Ghost's path (Ghost's allegiance band, no chaos, few faults, and every
   // game won at least this often).
   shellMaxMistakes: 1,
-  shellMinWinsEach: 2,
+  shellMinWinsEach: 3,
   // Adult evolution: axes within this of each other (or of zero) are a tie, broken at random,
   // with forms the player has never raised weighted up.
   tieBand: 0.5,
@@ -51,8 +55,8 @@ export const CFG = {
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
-  ghostMinGameWins: 18,
-  ghostMinWinsEach: 3,
+  ghostMinGameWins: 29,
+  ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
   // Packet Feast: it ate, so it gets some Charge too (digestion isn't reset: no cache files).
@@ -370,6 +374,12 @@ export function log(s, t, msg) {
   if (s.log.length > 50) s.log.splice(0, s.log.length - 50);
 }
 
+// How much faster (or slower) than the base rate a stat at `value` drains.
+export function drainCurve(value) {
+  const { empty, full } = CFG.drainCurve;
+  return empty + ((full - empty) * value) / 100;
+}
+
 export function bedtimeHour(s) {
   return (CFG.sleepStart + (s.quirk?.sleepOffset ?? 0) + 24) % 24;
 }
@@ -445,9 +455,9 @@ function step(s, t, rng) {
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * mod(s, 'chargeDrainMult'));
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult'));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * mod(s, 'syncDrainMult'));
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult'));
   st.heat = clamp(
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
   );

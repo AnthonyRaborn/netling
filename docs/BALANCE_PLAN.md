@@ -1,6 +1,6 @@
 # Balance plan
 
-An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. All of it is implemented: Pass 0 (tooling), the three passes, and lineage Step 3. Spoiler-heavy, like the rest of `docs/`.
+An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. All of it is implemented: Pass 0 (tooling), the three passes, lineage Step 3 and the drain pass. Spoiler-heavy, like the rest of `docs/`.
 
 First measured on commit `767b7c5` (2026-09-29). After Pass 0 the numbers come from the baselines in `tools/baseline/` (see [TESTING.md](TESTING.md#baselines)), with the netrun bot planning by what the player can see; where the two differ, this document says so. The simulators are scripted players, not people: treat the numbers as relative. The agreed targets and whether they are met are in [TESTING.md](TESTING.md#balance-targets).
 
@@ -12,6 +12,7 @@ First measured on commit `767b7c5` (2026-09-29). After Pass 0 the numbers come f
 - [Pass 1: forms](#pass-1-forms)
 - [Pass 2: netruns](#pass-2-netruns)
 - [Pass 3: lineage](#pass-3-lineage)
+- [Drain pass](#drain-pass)
 - [Still to decide](#still-to-decide)
 
 ## Decisions so far
@@ -89,6 +90,12 @@ Ninth round, 2026-09-29:
 45. **The Shell is approved** as drafted: sprite, DEX hint and lore.
 46. **Segfault's drop chances** and market weight are approved as measured in Pass 1.
 47. **No fourth stage** for now. It is left for a possible expansion or a separate game.
+
+Tenth round, 2026-09-29:
+
+48. **Attentive players need more to do, and inattention must still cost something.** Charge and Sync drain 10% faster at base, and a drain curve makes a full stat drain faster than a low one.
+49. **Targets**: casual players at about 3.5 faults a life and workers at about 5, from 2.6 and 4.4 at the time. The bot was corrected during the pass, which moved both starting points up, so the shipped tuning keeps the increases (about +0.9 and +0.7) rather than the absolute numbers; see [Drain pass](#drain-pass).
+50. **Opt-in rewards for attention** come next, to be brainstormed.
 
 ## How the passes work
 
@@ -372,6 +379,32 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 2. **Legacy goals**: streaks across generations (for example three full lives in a line, or every trait held once), rewarded with cosmetics only so power stays bounded.
 3. **Inherited scrip** (decided): half, rounded down, passes to the next generation, as a small head start and a reason to end a life well.
 
+## Drain pass
+
+**Status: implemented** (release `netling-v41`). Attentive players had little to do: at 14 Charge and 12 Sync an hour, an hourly check found the bars barely moved. A flat speedup barely helps them, and it quickly hurts casual players and workers, whose limit is the night and the long midday gap: at 1.15x worker full lives fell from 83% to 39%. What shipped:
+
+- **Base drain +10%**: 15.4 Charge and 13.2 Sync an hour (`drainPerHour`).
+- **Drain curve** (`drainCurve`, `empty` 0.39, `full` 2): the rate is scaled from 0.39x at 0 to 2x at 100. Awake, Charge drains about 31/hr when full, 18 at half and 6 near empty. Keeping the bars topped up costs more actions, and a stat left low eases off, so a long gap costs faults rather than a life.
+- **Ghost needs 29 wins with 4 in each game** (was 18 and 3), and **the Shell needs every game won 3 times** (was twice): more care means more play, and at the old numbers Daemon-steering players became Ghost 95% of the time.
+- **The balance bot feeds before deciding to netrun**, as a player would. Before, it checked Charge first, so with the curve casual players almost never jacked in (0.2 runs a life instead of 5.7).
+
+Measured with 1000 lives each, same bot for both rows:
+
+| Archetype | Care actions a day | Faults a life | Full life |
+|---|---|---|---|
+| attentive | 37.8 to **54.3** (+44%) | 0.16 to 0.16 | 99.7% to 99.7% |
+| casual | 34.6 to 42.8 | 3.59 to **4.47** | 94.6% to 92.5% |
+| worker | 27.0 to 30.9 | 4.70 to **5.44** | 89.9% to 91.7% |
+| neglectful | 11.0 to 11.2 | 4.01 to 3.87 | 0% to 0% |
+
+Care actions are feeds, games, COOL, PURGE and PATCH. Against the previous baselines (older bot): casual faults 2.61 to 4.47 and worker 4.42 to 5.44. The fault numbers are sensitive to `empty`: each 0.01 moves casual faults by about 0.2.
+
+Side effects, all within the targets in [TESTING.md](TESTING.md#balance-targets):
+
+- **More play moves the axes.** Playing hot costs stability, so fewer attentive players drift into Daemon (attentive 62% to 49%, sysadmin 78% to 60%; Firewall and Chrome take the difference), and risk-takers lean Glitch (`overclocker` 58% to 87%, `daredevil` 20% to 58%). Every `steer-*` archetype still reaches its form 99% or more.
+- **Ghost**: `ghosthunter` 99% to 97%, nobody else above 2.3% (`sysadmin`). The Shell catches 47% of Ghost chasers (was 63%) and at most 2.6% of anyone else.
+- **Casual players jack in three times as often** (5.7 to 17.9 runs a life) because the bot now feeds first; their inventory is full at 47% of check-ins (was 17%).
+
 ## Still to decide
 
-Nothing. The last open items were settled in the ninth round (decisions 45 to 47).
+Opt-in rewards for attention (decision 50).

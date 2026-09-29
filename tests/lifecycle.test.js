@@ -64,28 +64,31 @@ test('stored life lengths are cleaned: missing, disordered or longer than seven 
 
 // --- ghost's scaled requirement ---
 
-test('ghost needs 18 wins with at least 3 in each game', () => {
+test('ghost needs 29 wins with at least 4 in each game', () => {
+  assert.equal(CFG.ghostMinGameWins, 29);
+  assert.equal(CFG.ghostMinWinsEach, 4);
   const s = booted();
   s.axes = { allegiance: 0, stability: 0 };
-  wins(s, 4); // 16 in total
+  wins(s, 7); // 28 in total
   assert.notEqual(leaningForm(s), 'ghost');
-  s.games.breach.won = 6; // 18
+  s.games.breach.won = 8; // 29
   assert.equal(leaningForm(s), 'ghost');
-  s.games.feast.won = 2;
-  s.games.breach.won = 8; // still 18, but one game under 3
+  s.games.feast.won = 3;
+  s.games.breach.won = 12; // still 29, but one game under 4
   assert.notEqual(leaningForm(s), 'ghost');
 });
 
 // --- the Shell ---
 
-test('the Shell: a teen on Ghost path with every game won twice', () => {
+test('the Shell: a teen on Ghost path with every game won three times', () => {
+  assert.equal(CFG.shellMinWinsEach, 3);
   const s = booted();
   s.axes = { allegiance: 1, stability: 2 };
-  wins(s, 2);
+  wins(s, 3);
   assert.equal(teenForm(s), 'shell');
-  s.games.tune.won = 1;
-  assert.equal(teenForm(s), 'kernel', 'every game must be won twice');
-  wins(s, 2);
+  s.games.tune.won = 2;
+  assert.equal(teenForm(s), 'kernel', 'every game must be won three times');
+  wins(s, 3);
   s.axes.allegiance = -2.5;
   assert.equal(teenForm(s), 'kernel', 'allegiance outside the band');
   s.axes = { allegiance: 0, stability: -0.1 };
@@ -100,7 +103,7 @@ test('the Shell: a teen on Ghost path with every game won twice', () => {
 test('the Shell is what the netling becomes at the teen stage', () => {
   const s = booted();
   s.axes = { allegiance: 0, stability: 1 };
-  wins(s, 2);
+  wins(s, 3);
   reach(s, s.life.teenAt);
   assert.equal(s.form, 'shell');
   assert.equal(s.teenForm, 'shell');

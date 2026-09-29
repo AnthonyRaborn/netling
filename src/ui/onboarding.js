@@ -1,6 +1,6 @@
 // The field manual, and onboarding:
 // intro (terminal) -> readme (field manual) -> nudge (go explore) -> tutorial (first run) -> done
-import { createScript, isAlive, CFG, MIN } from '../sim.js';
+import { createScript, drainCurve, isAlive, CFG, MIN } from '../sim.js';
 import { startRun } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
@@ -15,12 +15,14 @@ import { advance } from './life.js';
 function renderHelp() {
   const d = CFG.drainPerHour;
   const pct = (mult) => `${Math.round(mult * 100)}%`;
+  // Awake drain per hour when full, at half and near empty (it drains faster the fuller it is).
+  const rates = (base) => [100, 50, 0].map((v) => Math.round(base * drainCurve(v)));
   const sections = [
     [
       'STATS',
       [
-        ['CHG · Charge', `Power. Drains about ${d.charge}/hr awake, much slower while it rests (see REST). Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
-        ['SYN · Sync', `Its bond with you. Drains about ${d.sync}/hr. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
+        ['CHG · Charge', `Power. Drains faster the fuller it is: awake, about ${rates(d.charge).join(', ')}/hr when full, half full and nearly empty; much slower while it rests (see REST). Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
+        ['SYN · Sync', `Its bond with you. Drains like Charge: about ${rates(d.sync).join(', ')}/hr when full, half full and nearly empty. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
         ['INT · Integrity', `Its health. Viruses, a full cache, overheating and an empty Charge all wear it down. It recovers ${CFG.integrityRegenPerHour}/hr when nothing is wrong, ${CFG.integrityRestRegenPerHour}/hr while it sleeps in the dark or naps; COOL and PURGE each restore ${CFG.careIntegrity} more.`, `At zero for ${CFG.flatlineIntegrityMin / 60} hours, it flatlines.`],
         ['HEAT', 'Rises while it is awake, when it plays, on netruns and in power surges. COOL vents it; it cools on its own while it rests.', 'At 85+ it damages Integrity; at 100 it is a fault.'],
         ['CACHE', 'Corrupted files it writes after eating, up to four. PURGE clears them.', '3+ files damage Integrity and make viruses more likely.'],

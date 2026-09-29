@@ -86,6 +86,19 @@ export function checkIn(s, p, now, rng, ctx) {
   if (p.gamer && !s.buffs?.boost) useItem('booster');
   ctx.itemsHeld = Math.max(ctx.itemsHeld ?? 0, s.inventory.length);
 
+  // Taking faults on purpose as a baby: let Charge and Sync run out until enough faults have
+  // landed. A fault only counts once until the stat recovers, so a flagged one is topped up again.
+  const holdBack = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
+  const mayFeed = !holdBack || s.flagged.charge;
+  const mayPlay = !holdBack || s.flagged.sync;
+  const feed = () => {
+    for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
+      const corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
+      doAct(corp ? 'corp' : 'scav');
+    }
+  };
+  // A runner feeds before deciding to jack in, as a player would.
+  if (p.runs && !p.noRuns && mayFeed && s.stats.charge <= 60) feed();
   // Netrun when healthy. Until the deepest open region is cleared it heads there (the way down);
   // after that, any open region.
   // Careful runners only jack in healthy, and only when they'll be back soon to patch things up.
@@ -124,18 +137,7 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.virus) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3)) doAct('purge');
   const coolAt = p.coolAt ?? (p.hot ? 80 : 50);
-  // Taking faults on purpose as a baby: let Charge and Sync run out until enough faults have
-  // landed. A fault only counts once until the stat recovers, so a flagged one is topped up again.
-  const holdBack = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
-  const mayFeed = !holdBack || s.flagged.charge;
-  const mayPlay = !holdBack || s.flagged.sync;
   if (s.stats.heat > coolAt) doAct('cool');
-  const feed = () => {
-    for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
-      const corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
-      doAct(corp ? 'corp' : 'scav');
-    }
-  };
   if (mayFeed && s.stats.charge < 30) feed();
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {

@@ -43,8 +43,8 @@ Four bars and a small icon row sit under the screen. Everything the game asks of
 
 | Stat | What it is | Goes down when | Looks like trouble at |
 |---|---|---|---|
-| **CHG** (Charge) | Its power | Time passes (about 14 an hour awake) | 0: it becomes a fault, and Integrity starts slipping |
-| **SYN** (Sync) | Its bond with you, and how happy it is | Time passes (about 12 an hour awake) | 0: it becomes a fault |
+| **CHG** (Charge) | Its power | Time passes, faster the fuller it is (awake, about 31 an hour when full, 18 at half, 6 near empty) | 0: it becomes a fault, and Integrity starts slipping |
+| **SYN** (Sync) | Its bond with you, and how happy it is | Time passes, the same way (about 26 an hour when full, 16 at half, 5 near empty) | 0: it becomes a fault |
 | **INT** (Integrity) | Its health | A virus, a full cache, overheating or empty Charge wear it down | 0 for two hours in a row: it flatlines |
 | **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 85 and up hurts Integrity; 100 is a fault |
 | **Cache** (the little file icons) | Corrupted files it writes while digesting a meal, up to four | Each file makes viruses likelier; 3 or more damage Integrity | Clear it with PURGE |

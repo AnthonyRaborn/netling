@@ -159,7 +159,7 @@ Not checked by me: real-device behaviour beyond what the maintainer confirmed (P
 
 **Status: Fixed** (working as intended). The maintainer confirmed that counting a boosted win twice matches the Signal booster's text and purpose. The description below is the original finding.
 
-- A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned. (The requirement is now 18 wins with 3 in each game; the maintainer chose to keep boosted wins counting double, and SIMULATION.md says so.)
+- A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned. (The requirement is now 29 wins with 4 in each game; the maintainer chose to keep boosted wins counting double, and SIMULATION.md says so.)
 
 ### KI-15
 
