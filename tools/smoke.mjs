@@ -1117,6 +1117,25 @@ await scenario('legacy: the family tree links generations, and an earned crest s
   assert(lit > 10, `crest canvas is blank (${lit} pixels)`);
 });
 
+await scenario('a 100-generation line: the tree opens scrolled to the running netling, with its stats', async ({ open }) => {
+  const lineage = Array.from({ length: 100 }, (_, i) => ({ generation: i + 1, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait: i ? 'persistent' : null, fragmentTrait: 'persistent', keepsake: 'coolant', palette: i % 4 }));
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 101, trait: 'persistent' }), 'netling.lineage': lineage }));
+  const inView = () =>
+    page.evaluate(() => {
+      const box = document.getElementById('tab-lineage').getBoundingClientRect();
+      const run = document.querySelector('#lineage-list li.running').getBoundingClientRect();
+      return run.top >= box.top - 1 && run.bottom <= box.bottom + 1;
+    });
+  await page.click('#open-archive');
+  assert((await page.locator('#lineage-list li.link').count()) === 100, 'expected 100 links');
+  assert(await inView(), 'the running netling is not in view when the archive opens');
+  assert(/CHG \d+ · SYNC \d+ · INT \d+ · HEAT \d+/.test(await page.textContent('#lineage-list li.running')), 'no stats on the running netling');
+  await page.evaluate(() => (document.getElementById('tab-lineage').scrollTop = 0));
+  await page.click('#tab-btn-dex');
+  await page.click('#tab-btn-lineage');
+  assert(await inView(), 'returning to the tab does not scroll back to the running netling');
+});
+
 await scenario('flatline screen and next generation', async ({ open }) => {
   const dead = awakeNetling({ stage: 'dead', form: 'daemon', deathCause: 'neglect', diedAt: Date.now() });
   dead.fragment = { form: 'daemon', trait: 'persistent', quirk: { ...dead.quirk }, keepsake: 'coolant', rootUsed: false };

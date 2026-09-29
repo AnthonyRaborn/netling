@@ -81,12 +81,16 @@ test('the family tree runs oldest first, with what passed down between parent an
     { generation: 2, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait: 'persistent', traitLevel: 1, fragmentTrait: 'persistent', fragmentLevel: 2 },
   ];
   const current = createScript({ now: T0, generation: 3, fragment: { form: 'daemon', trait: 'persistent', level: 2, history: 'persistent', quirk: null } });
+  tick(current, T0 + CFG.bootMinutes * MIN, () => 0.999); // booted: a compiling script has no stats yet
   const chain = lineageChain(lineage, current);
   assert.deepEqual(chain.map((c) => c.kind), ['node', 'link', 'node', 'link', 'node']);
   assert.deepEqual(chain.filter((c) => c.kind === 'node').map((c) => c.version), ['v1.0', 'v2.0', 'v3.0']);
   assert.equal(chain[1].text, 'Persistent + Coolant cell');
   assert.equal(chain[3].text, 'Persistent II · history Persistent');
   assert.equal(chain[4].status, 'running');
+  assert.match(chain[4].stats, /^CHG \d+ · SYNC \d+ · INT \d+ · HEAT \d+ · scrip \d+$/, 'the running netling shows its stats');
+  assert.equal(chain[2].stats, undefined, 'dead generations have none');
+  assert.equal(lineageChain([], createScript({ now: T0 }))[0].stats, null, 'nor does a compiling script');
   assert.equal(chain[2].inherited, null, 'shown on the link instead');
   assert.equal(chain[2].left, null, 'its child is in the chain');
 });

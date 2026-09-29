@@ -101,6 +101,8 @@ export function lineageRows(lineage, current) {
       mistakes: current.careMistakes,
       trait: inheritedLabel(current.trait, current.traitLevel, current.history),
       fragment: null,
+      // The running netling's bars as the HUD labels them, and its scrip.
+      stats: current.stage === 'script' ? null : `CHG ${Math.round(current.stats.charge)} · SYNC ${Math.round(current.stats.sync)} · INT ${Math.round(current.stats.integrity)} · HEAT ${Math.round(current.stats.heat)} · scrip ${current.scrip ?? 0}`,
       palette: current.quirk.palette,
       dead: false,
     });

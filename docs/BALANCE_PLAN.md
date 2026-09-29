@@ -82,6 +82,7 @@ Eighth round, 2026-09-29 (lineage Step 3):
 41. **Four legacy goals**: every trait held, a level III trait, five full lives in a row with no rescue, and every adult form raised in the line.
 42. **Rewards are crests**, a new wardrobe slot drawn beside the device label, not more shells or tints.
 43. **Hints only**, like the rest of the wardrobe; no checklist.
+44. **The tree opens at the running netling**, which also shows its current stats (Charge, Sync, Integrity, Heat and scrip). Checked with a 100-generation line of simulated lives: every record survives the sanitizer, the Archive opens in about 40 ms, and the line earns all four crests.
 
 ## How the passes work
 

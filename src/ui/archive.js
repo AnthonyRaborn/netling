@@ -153,6 +153,7 @@ function renderArchive() {
         [bold(r.version), ` ${r.formLabel}`],
         [
           `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
+          r.stats ? { cls: 'stats', text: r.stats } : null,
           r.inherited ? `inherited ${r.inherited}` : null,
           r.left ? `left ${r.left}${r.keepsake ? ` + ${r.keepsake}` : ''}` : null,
           r.rescued ? { cls: 'perk', text: 'pulled back once by NL-0' } : null,
@@ -222,6 +223,14 @@ function selectTab(name) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
+  if (name === 'lineage') scrollToCurrent();
+}
+
+// The tree runs oldest first, so a long line would hide the running netling at the bottom.
+function scrollToCurrent() {
+  if ($('tab-lineage').hidden) return;
+  const list = $('lineage-list');
+  (list.querySelector('li.running') ?? list.lastElementChild)?.scrollIntoView({ block: 'end' });
 }
 
 export function initArchive() {
@@ -229,6 +238,7 @@ export function initArchive() {
   $('open-archive').addEventListener('click', () => {
     renderArchive();
     archive.showModal();
+    scrollToCurrent();
   });
   $('close-archive').addEventListener('click', () => archive.close());
   archive.addEventListener('click', (e) => {
