@@ -58,6 +58,7 @@ export const app = {
   lastLogKey: '',
   lastAttention: false,
   flashUntil: 0,
+  calm: false, // reduced motion, from the MOTION setting or the system (ui/device.js)
   surgeUntil: 0,
   anim: null, // { kind, start }: see playAnim
   lastSurgeAt: null,

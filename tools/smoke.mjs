@@ -25,12 +25,15 @@ const { chromium } = await loadPlaywright();
 
 // --- a static server for the app ---
 
+// A scenario can serve a changed sw.js, as a new release would.
+let swPatch = null;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^[/\\]+/, '') || 'index.html';
   if (path.startsWith('..')) return res.writeHead(403).end();
   try {
-    const body = await readFile(join(root, path));
+    let body = await readFile(join(root, path));
+    if (path === 'sw.js' && swPatch) body = swPatch(body.toString());
     res.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream' }).end(body);
   } catch {
     res.writeHead(404).end();
@@ -345,6 +348,151 @@ await scenario('offline: service worker serves every module', async ({ open }) =
     await serverUp();
   }
 }, { allow: [/Failed to load resource/] });
+
+await scenario('a new release while open offers a reload, which waits for a running game', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller);
+  await page.waitForTimeout(500);
+  assert(!(await visible(page, '#update-bar')), 'the first install offered an update');
+  swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v999'");
+  try {
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    assert(/NEW VERSION/.test(await page.textContent('#update-bar')), 'bar has no message');
+
+    await page.click('#btn-play');
+    await page.click('[data-game="breach"]');
+    assert(!(await visible(page, '#update-bar')), 'the bar covers the game pad');
+    await page.evaluate(() => {
+      window.__stillHere = true;
+      document.getElementById('update-reload').click();
+    });
+    await page.waitForTimeout(500);
+    assert(await page.evaluate(() => window.__stillHere), 'reloaded in the middle of a game');
+    assert(/finish the game/.test(await page.textContent('#status')), 'refusal not explained');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(2500);
+    assert(await visible(page, '#update-bar'), 'the bar did not come back after the game');
+
+    const before = (await saved(page)).ageMin;
+    await Promise.all([page.waitForEvent('load'), page.click('#update-reload')]);
+    await page.waitForTimeout(800);
+    assert(!(await page.evaluate(() => window.__stillHere)), 'RELOAD did not reload');
+    assert(!(await visible(page, '#update-bar')), 'the reloaded page still offers the update');
+    assert((await saved(page)).ageMin >= before, 'the netling was not kept across the reload');
+    assert(await loopRunning(page), 'app did not boot after the update');
+
+    swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v1000'");
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    await page.click('#update-later');
+    assert(!(await visible(page, '#update-bar')), 'LATER did not dismiss the bar');
+  } finally {
+    swPatch = null;
+  }
+});
+
+// Records wake lock and badge calls in window.__device; headless Chromium has neither for real, and
+// refuses notifications even when granted, so permission is faked too.
+const FAKE_DEVICE = `(() => {
+  window.__device = [];
+  const log = (e) => window.__device.push(e);
+  Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: { request: async () => {
+    log('lock');
+    const s = new EventTarget();
+    s.release = async () => { log('unlock'); s.dispatchEvent(new Event('release')); };
+    return s;
+  } } });
+  navigator.setAppBadge = async () => log('badge');
+  navigator.clearAppBadge = async () => log('clear');
+  Object.defineProperty(Notification, 'permission', { configurable: true, get: () => 'granted' });
+})()`;
+
+await scenario('the screen stays on for games and when asked; the badge follows its needs with ALERTS on', async ({ open }) => {
+  const needy = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': needy, 'netling.prefs': { sound: false, alerts: true, volume: 0.8 } }) + ';' + FAKE_DEVICE);
+  const events = () => page.evaluate(() => window.__device.slice());
+  const waitFor = async (name, count = 1) => {
+    for (let i = 0; i < 30; i++) {
+      if ((await events()).filter((e) => e === name).length >= count) return;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`no ${name} (x${count}): ${(await events()).join(',')}`);
+  };
+  await waitFor('badge');
+  await page.waitForTimeout(1200);
+  assert(!(await events()).includes('lock'), 'the screen was kept on at home without being asked');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await waitFor('lock');
+  await page.keyboard.press('Escape');
+  await waitFor('unlock');
+
+  await page.waitForTimeout(2500); // the result card
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(await visible(page, '#screen-prefs'), 'no screen setting');
+  await page.click('#pref-awake');
+  await waitFor('lock', 2);
+  assert((await saved(page, 'netling.prefs')).awake === true, 'setting not saved');
+  assert(/YES/.test(await page.textContent('#pref-awake')), 'button does not show the setting');
+  await page.click('#pref-awake');
+  await waitFor('unlock', 2);
+  await page.click('#close-transfer');
+
+  await page.click('#pref-alerts'); // ALERTS off: the badge goes
+  await waitFor('clear');
+  assert((await events()).filter((e) => e === 'badge').length === 1, `badge set more than once: ${(await events()).join(',')}`);
+});
+
+await scenario('screen readers get values, a summary, new needs and only new log lines; MOTION overrides the system', async ({ open }) => {
+  const low = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': low }));
+  const attr = (sel, name) => page.getAttribute(sel, name);
+  assert((await attr('#bar-charge', 'aria-valuenow')) === '70', `charge meter says ${await attr('#bar-charge', 'aria-valuenow')}`);
+  assert(/^\d+, low$/.test(await attr('#bar-sync', 'aria-valuetext')), `sync meter says ${await attr('#bar-sync', 'aria-valuetext')}`);
+  assert(await page.locator('#bar-sync').evaluate((el) => el.closest('.stat').classList.contains('danger')), 'low sync has no danger mark');
+  assert(!(await page.locator('#bar-charge').evaluate((el) => el.closest('.stat').classList.contains('danger'))), 'charge marked in danger');
+  const mark = await page.locator('#bar-sync').evaluate((el) => getComputedStyle(el.closest('.stat').querySelector('label'), '::after').content);
+  assert(/!/.test(mark), `no ! beside the label: ${mark}`);
+  assert(/Bitling, awake.*Sync is fading/.test(await attr('#lcd', 'aria-label')), `summary: ${await attr('#lcd', 'aria-label')}`);
+  assert(/Sync is fading/.test(await page.textContent('#sr-announce')), 'the need was not announced');
+
+  // A new log line is added to the list; the lines already there stay put.
+  const count = await page.locator('#log li').count();
+  await page.evaluate(() => (window.__firstLine = document.querySelector('#log li')));
+  await page.click('[data-act="scav"]');
+  await page.waitForTimeout(300);
+  assert((await page.locator('#log li').count()) > count, 'no new log line');
+  assert(await page.evaluate(() => window.__firstLine.isConnected), 'the log was rebuilt instead of added to');
+
+  // MOTION: AUTO follows the system; REDUCED and FULL override it.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  const calm = () => page.evaluate(() => document.body.classList.contains('calm'));
+  assert(await calm(), 'AUTO ignored the system asking for reduced motion');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForTimeout(100);
+  assert(!(await calm()), 'AUTO stayed calm');
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not start on AUTO');
+  await page.click('#pref-motion');
+  assert(/REDUCED/.test(await page.textContent('#pref-motion')) && (await calm()), 'REDUCED did not calm the screen');
+  assert((await saved(page, 'netling.prefs')).motion === 'reduce', 'motion setting not saved');
+  const still = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(still === 'none', `animations still run: ${still}`);
+  await page.click('#pref-motion');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  assert(/FULL/.test(await page.textContent('#pref-motion')) && !(await calm()), 'FULL did not override the system');
+  const moving = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(moving !== 'none', 'FULL still stops animations when the system asks for less');
+  await page.click('#pref-motion');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not cycle back to AUTO');
+});
 
 await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
   const foreign = [];

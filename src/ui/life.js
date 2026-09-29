@@ -1,6 +1,7 @@
 // The netling's life: the clock tick, evolution, flatline and the next generation, and the care buttons.
 import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../sim.js';
 import { deathRecord } from '../archive.js';
+import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
@@ -46,7 +47,7 @@ export function advance() {
   if (state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
   if (state.lastSurgeAt !== app.lastSurgeAt) {
     app.lastSurgeAt = state.lastSurgeAt;
-    app.surgeUntil = performance.now() + 900;
+    app.surgeUntil = performance.now() + SURGE_MS;
     if (now() - state.lastSurgeAt < 2 * 60_000) sfx('surge', state.quirk.pitch); // not for one caught up on load
   }
   // A visitor pinging in gets a greeting; one leaving may have left an accessory behind.

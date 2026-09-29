@@ -1,7 +1,7 @@
 // Boot: load and check saved data, claim the caretaker tab, wire the UI, then run the clock
 // and the render loop. The UI itself lives in src/ui/.
 import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
-import { renderLCD, ANIM_MS } from './render.js';
+import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
@@ -12,10 +12,12 @@ import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plush
 import { drainCodexInbox, initArchive } from './ui/archive.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
-import { importFromUrl, initSystem, protectStorage, renderTestBadge, showLock, storageProtected } from './ui/system.js';
+import { importFromUrl, initSystem, protectStorage, renderTestBadge, sessionBlockReason, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
 import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
+import { watchForUpdates } from './update.js';
+import { initDevice, syncDevice } from './ui/device.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -29,6 +31,7 @@ initOnboarding();
 initSystem();
 initTabs();
 initGamepad();
+initDevice();
 
 // --- settings ---
 
@@ -59,10 +62,31 @@ $('pref-alerts').addEventListener('click', async () => {
   }
   store.set(KEYS.prefs, app.prefs);
   renderPrefs();
+  syncDevice();
 });
 
 renderPrefs();
 registerServiceWorker();
+
+// --- updates ---
+
+// A newer release took over while the page was open: offer a reload instead of forcing one. Like a
+// transfer, it waits for a running mini-game or netrun to finish.
+const UPDATE_CHECK_MS = 60 * 60 * 1000;
+const checkForUpdate = watchForUpdates(() => ($('update-bar').hidden = false));
+setInterval(checkForUpdate, UPDATE_CHECK_MS);
+
+$('update-reload').addEventListener('click', () => {
+  const busy = sessionBlockReason();
+  if (busy) {
+    sfx('error', app.state.quirk.pitch);
+    flashStatus(busy);
+    return;
+  }
+  flushSave();
+  location.reload();
+});
+$('update-later').addEventListener('click', () => ($('update-bar').hidden = true));
 
 if (DEV) {
   const dev = $('dev');
@@ -116,7 +140,11 @@ if (DEV) {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) flushSave();
-  else advance();
+  else {
+    advance();
+    checkForUpdate();
+  }
+  syncDevice();
 });
 addEventListener('pagehide', flushSave);
 
@@ -158,13 +186,16 @@ drainAccessoryInbox();
 backfillEarned();
 if (app.state.stage === 'dead') showFlatline();
 else if (app.state.run) openRun(); // resume a run after a reload
-setInterval(advance, 1000);
+syncDevice();
+setInterval(() => {
+  advance();
+  syncDevice();
+}, 1000);
 
 // The home LCD animates in half-second steps, so ~10 fps is plenty and saves battery.
 // Mini-games and netruns get every frame.
 const IDLE_FRAME_MS = 100;
 const canvas = $('lcd');
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let lastFrame = performance.now();
 let lastIdleDraw = 0;
 const loggedErrors = new Set();
@@ -201,8 +232,8 @@ function drawFrame(time) {
       prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
       propExtra: wardrobe.prop === 'plush' ? app.plushCache : null,
       flash: time < app.flashUntil,
-      surge: time < app.surgeUntil,
-      calm: reducedMotion.matches,
+      surge: time < app.surgeUntil ? (app.surgeUntil - time) / SURGE_MS : 0,
+      calm: app.calm,
       anim,
     });
   }

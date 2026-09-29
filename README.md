@@ -170,6 +170,8 @@ ARCHIVE > **SYSTEM** has:
 - **Restart**: erases everything and replays the intro.
 - **Storage**: shows whether the browser has agreed to keep your data, and warns if a save has failed.
 - **Volume**: a slider (the header's SND toggle still mutes).
+- **Motion**: AUTO follows your device's reduced-motion setting; REDUCED keeps the screen still (no glitching, flicker or scrolling effects) and FULL keeps every effect. Nothing flashes more than three times a second in any setting.
+- **Keep screen on**: the screen always stays on during mini-games and netruns; turn this on to keep it on whenever the game is showing (where the browser supports it).
 
 If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
 
@@ -177,13 +179,13 @@ Only one browser tab looks after the netling at a time. Other tabs show a guard 
 
 ## Install, offline and controllers
 
-Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari on macOS 14+), or "Add to Home Screen" (iOS and Android). It caches itself, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
+Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari on macOS 14+), or "Add to Home Screen" (iOS and Android). It caches itself, so it plays offline. When a new version comes out while the game is open, a NEW VERSION READY bar offers a reload (finish any game or netrun first); otherwise you get it the next time you open the game. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
 
 **Controllers** work with no setup. In mini-games and netruns the d-pad or left stick moves, A confirms and B quits. Elsewhere the d-pad moves between buttons, A presses, and B backs out or closes a dialog. Browsers only notice a controller after you press one of its buttons on the page.
 
 Wide, short screens (Steam Deck, laptops) put the screen beside the controls so everything fits without scrolling; phones and tall windows use one column.
 
-**Notifications**: turn on **ALERTS** in the header and the game notifies you while it is open or in the background. A fully closed app can't be woken without a push server, which this static game doesn't have.
+**Notifications**: turn on **ALERTS** in the header and the game notifies you while it is open or in the background. With ALERTS on, the installed app's icon also shows a badge while your netling needs something (on devices that support it). A fully closed app can't be woken without a push server, which this static game doesn't have, so the badge shows how things stood when you closed it.
 
 ## For developers
 

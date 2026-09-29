@@ -8,6 +8,7 @@ import { KEYS } from '../storage.js';
 import { $, app, armed, flashStatus, now, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
 import { advance } from './life.js';
+import { renderScreenPrefs } from './device.js';
 
 let pendingImport = null;
 
@@ -83,6 +84,7 @@ export function openSystem() {
   renderOldSave();
   $('volume').value = Math.round(app.prefs.volume * 100);
   $('volume-value').textContent = `${Math.round(app.prefs.volume * 100)}%`;
+  renderScreenPrefs();
   $('import-preview').hidden = true;
   renderHibernateNote();
   renderTestMode();
@@ -121,7 +123,7 @@ function watchLogoTaps() {
 
 // A mini-game or netrun on screen must finish first: hibernating would freeze the pad under the
 // overlay, and a transfer would leave it running on a locked device.
-function sessionBlockReason() {
+export function sessionBlockReason() {
   if (!app.session) return null;
   return app.state.run ? 'finish the netrun first.' : 'finish the game first.';
 }

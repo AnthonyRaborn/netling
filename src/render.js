@@ -1,6 +1,7 @@
 import { SPRITES, drawSprite, formSprite } from './sprites.js';
 import { drawAccessory, drawProp } from './accessories.js';
 import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting } from './sim.js';
+import { FLASH_TOGGLE_MS } from './games/common.js';
 
 export const LCD_W = 40;
 export const LCD_H = 28;
@@ -10,6 +11,22 @@ let LCD_BG_DARK = '#03090a';
 export function setLcdTint(bg, dark) {
   LCD_BG = bg;
   LCD_BG_DARK = dark;
+}
+
+// Flash safety: nothing flashes more than three times a second, whatever the motion setting (see
+// FLASH_TOGGLE_MS). The glitch and the surge follow the same limit.
+export const GLITCH_STEP_MS = 350; // the glitch picks a new look at most this often
+export const SURGE_MS = 900;
+
+// A repeatable 0..1 sequence for one glitch step, so the look holds for the whole step.
+function stepRandom(step) {
+  let a = (step * 2654435761) >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 const buf = document.createElement('canvas');
@@ -127,14 +144,15 @@ export function renderLCD(canvas, s, time, opts = {}) {
         : { ...colors, o: hasSleepPose ? pal.accent : pal.main };
     }
     // Evolution: strobe a white silhouette.
-    if (opts.flash && Math.floor(time / 120) % 2) {
+    const strobe = opts.flash && Math.floor(time / FLASH_TOGGLE_MS) % 2;
+    if (strobe) {
       spriteColors = { '#': '#ffffff', o: '#ffffff', '+': '#ffffff' };
     }
 
     if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
-    if (opts.accessory && !(opts.flash && Math.floor(time / 120) % 2)) {
+    if (opts.accessory && !strobe) {
       drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors);
     }
     bctx.globalAlpha = 1;
@@ -190,16 +208,17 @@ export function renderLCD(canvas, s, time, opts = {}) {
   const g = isAlive(s) && !opts.calm
     ? Math.max(0, (60 - s.stats.integrity) / 60) + (s.virus ? 0.35 : 0) + (s.form === 'glitch' ? 0.2 : 0)
     : 0;
-  if (g > 0 && Math.random() < g * 0.5) {
+  const rnd = stepRandom(Math.floor(time / GLITCH_STEP_MS));
+  if (g > 0 && rnd() < g * 0.5) {
     ctx.globalAlpha = 0.5;
-    ctx.drawImage(buf, sx * (Math.random() < 0.5 ? -1 : 1), 0, canvas.width, canvas.height);
+    ctx.drawImage(buf, sx * (rnd() < 0.5 ? -1 : 1), 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
   }
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
-  if (g > 0 && Math.random() < g * 0.4) {
-    const row = Math.floor(Math.random() * LCD_H);
-    const h = 1 + Math.floor(Math.random() * 3);
-    const shift = Math.round((Math.random() - 0.5) * 6 * g) * sx;
+  if (g > 0 && rnd() < g * 0.4) {
+    const row = Math.floor(rnd() * LCD_H);
+    const h = 1 + Math.floor(rnd() * 3);
+    const shift = Math.round((rnd() - 0.5) * 6 * g) * sx;
     ctx.drawImage(buf, 0, row, LCD_W, h, shift, row * sy, canvas.width, h * sy);
   }
 
@@ -209,9 +228,11 @@ export function renderLCD(canvas, s, time, opts = {}) {
     ctx.fillStyle = `rgba(255, 42, 109, ${(0.06 + 0.1 * pulse) * ((s.stats.heat - 80) / 20)})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
-  // Power surge: a hard white flicker.
-  if (opts.surge && (opts.calm || Math.floor(time / 70) % 2)) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+  // Power surge: one white flash that fades (opts.surge runs 1..0; true means its start). Calm mode
+  // holds a fainter, steady wash instead.
+  const surge = opts.surge === true ? 1 : Math.max(0, Math.min(1, Number(opts.surge) || 0));
+  if (surge > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${opts.calm ? 0.2 : (0.35 * surge).toFixed(3)})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
