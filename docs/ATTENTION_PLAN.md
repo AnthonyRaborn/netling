@@ -16,6 +16,7 @@ Decided 2026-09-29, after the draft below:
 7. **Notifications share the ALERTS switch.**
 8. **The four cosmetics are approved** as listed.
 9. **Guest pink needs 5 greetings**, not 10, after measuring how rarely hourly check-ins catch a visitor.
+10. **The 50 chatter lines are approved** as drafted.
 
 ## Measured
 
@@ -39,7 +40,7 @@ So an attentive player earns Purr in about three lives and Aurora in about two, 
 | 3. Flow state, visual only | Implemented |
 | 4. Daily check-in reward | Parked: the maintainer is thinking about rewards and balance |
 | 5. Netrun contracts | Parked: its time window can clash with the uplink cooldown (see [Later](#later)) |
-| 6. Chatter logs | Implemented (50 lines, drafted by Claude; the maintainer reviews the text before release) |
+| 6. Chatter logs | Implemented (50 lines, drafted by Claude, approved by the maintainer) |
 
 ## 1. Requests
 
@@ -83,7 +84,7 @@ The netling mutters to itself. Lines you catch are kept in the Archive.
 
 - **When**: awake and idle, about 0.15 an hour (`chatterChancePerHour`). A line stays on screen for 20 minutes, then fades.
 - **Caught**: a line counts as heard only if the page is visible while it is showing. That is recorded by the UI in the cross-life progress store (`progress.chatter`, a list of line ids, cleaned in `sanitize.js` like the codex). Missing one costs nothing; it comes round again later.
-- **Content**: pools by stage and form (for example a Chrome muttering about compliance scores, a Glitch talking over itself), a few that mention its parent's form or trait, and visitor lines about other netlings. About 50 lines to start, drafted by Claude for the maintainer's approval. Line ids are permanent once shipped.
+- **Content**: pools by stage and form (for example a Chrome muttering about compliance scores, a Glitch talking over itself), a few that mention its parent's form or trait, and visitor lines about other netlings. 50 lines, drafted by Claude and approved by the maintainer (decision 10). Line ids are permanent.
 - **Archive**: a CHATTER tab (decision 6), showing lines heard and a count of lines left per group, with hints for the empty ones in the style of the DEX.
 
 ## Notifications
@@ -116,7 +117,7 @@ Placeholder names and thresholds, to be confirmed with the art:
 
 ## Questions for the maintainer
 
-All answered (decisions 4 to 9).
+All answered (decisions 4 to 10).
 
 ## Later
 
