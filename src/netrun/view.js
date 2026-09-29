@@ -337,7 +337,7 @@ function bracket(ctx, x, y, r) {
   }
 }
 
-function drawNode(ctx, type, x, y, pal, spent) {
+export function drawNode(ctx, type, x, y, pal, spent) {
   ctx.globalAlpha = spent ? 0.45 : 1;
   switch (type) {
     case 'entry':
