@@ -70,6 +70,32 @@ body {
   margin-bottom: 12px;
 }
 
+.brand-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The wardrobe crest: a 9x9 pixel emblem drawn in the logo's color (see applyWardrobe). */
+.crest {
+  width: 27px;
+  height: 27px;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 0 0 var(--cyan));
+}
+
+.crest-sw {
+  display: block;
+  margin: 1px;
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+}
+
+.crest[hidden] {
+  display: none;
+}
+
 .logo {
   font-size: 30px;
   letter-spacing: 6px;
@@ -680,6 +706,37 @@ button:active {
 
 .lineage li.running {
   border-color: var(--cyan);
+}
+
+/* The family tree: a line down from each thumbnail to the child, labelled with what passed down. */
+.lineage li.link {
+  display: block;
+  position: relative;
+  margin: -8px 0;
+  padding: 10px 8px 10px 52px;
+  background: none;
+  border: 0;
+  color: var(--yellow);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.lineage li.link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 36px;
+  width: 2px;
+  background: var(--shell-edge);
+}
+
+.lineage li.link.gap {
+  color: var(--dim);
+}
+
+.lineage li.link.gap::before {
+  background: repeating-linear-gradient(var(--shell-edge) 0 4px, transparent 4px 8px);
 }
 
 .thumb {

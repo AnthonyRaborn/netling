@@ -46,7 +46,7 @@ These explain most decisions in the code.
 | `src/migrations.js` | Save upgrade steps (`STEPS`) and `upgradeSave` |
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
-| `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
+| `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, legacy goals (`LEGACY`), mini-game streaks |
 | `src/archive.js` | Lineage records and the form dex (pure data helpers) |
 | `src/games/` | Four mini-games plus `session.js` (intro, result card) and `common.js` (drawing helpers) |
 | `src/netrun/` | `run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js` (drawing and input) |

@@ -76,6 +76,13 @@ Seventh round, 2026-09-29 (Pass 3):
 38. **Untraceable** becomes fewer traces (60% less at strength 1), not an immunity.
 39. **The grandparent's trait is called its history**, not an echo, which already names an anomaly and an unrealized form. The stored field is `history` (renamed before release, so no save ever held `echo`).
 
+Eighth round, 2026-09-29 (lineage Step 3):
+
+40. **The family tree is a chain** in the Lineage tab, oldest first, replacing the list: every netling has one parent and one child. Links show the child's trait (level and history) and the keepsake.
+41. **Four legacy goals**: every trait held, a level III trait, five full lives in a row with no rescue, and every adult form raised in the line.
+42. **Rewards are crests**, a new wardrobe slot drawn beside the device label, not more shells or tints.
+43. **Hints only**, like the rest of the wardrobe; no checklist.
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -352,6 +359,8 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 ### Step 3: lineage UI and goals
 
+**Status: implemented** (release `netling-v39`): the Lineage tab is a chain from the oldest generation to the running one, with a link between each parent and child naming what passed down (`lineageChain` in `archive.js`), and four legacy goals unlock crests, a new fifth wardrobe slot (`LEGACY` and `COSMETICS.crest` in `cosmetics.js`; listed in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#crests-5)). No rule or number changed, so the baselines did not move.
+
 1. **Family tree** in the Archive, from the lineage records the game already keeps, showing each generation's trait and history.
 2. **Legacy goals**: streaks across generations (for example three full lives in a line, or every trait held once), rewarded with cosmetics only so power stays bounded.
 3. **Inherited scrip** (decided): half, rounded down, passes to the next generation, as a small head start and a reason to end a life well.
@@ -361,4 +370,3 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 1. **The Shell**: approve or revise the draft sprite, DEX hint and lore (Pass 1, item 5).
 2. **Segfault's new drop chances** after DEFEND, PURGE and power surges, and its market weight; measured in Pass 1.
 3. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
-4. **Lineage Step 3** (a later pass): the family tree in the Archive and cosmetic legacy goals.

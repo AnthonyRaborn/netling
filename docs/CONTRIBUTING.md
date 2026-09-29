@@ -88,7 +88,7 @@ Events are the most cross-cutting addition. Touch: `EVENTS` and its CFG numbers 
 
 ### Add a cosmetic
 
-Add to the slot's list in `cosmetics.js` with `id`, `name`, and either `free: true` or a `hint` and a `check(ctx)` over `{ dex, codex, lineage, generation, progress }`. A tint needs `lcd` and `dark` colors; a shell needs a `.device.shell-<id>` rule and an effect a `.screen.fx-<id>` rule in `style.css` (`applyWardrobe` in `ui/style.js` sets those classes); a sound needs `wave` and `mult`. Unlock ids (`slot:id`) are stored, so never rename. Unlocks are never revoked once stored.
+Add to the slot's list in `cosmetics.js` with `id`, `name`, and either `free: true` or a `hint` and a `check(ctx)` over `{ dex, codex, lineage, generation, progress }`. A tint needs `lcd` and `dark` colors; a shell needs a `.device.shell-<id>` rule and an effect a `.screen.fx-<id>` rule in `style.css` (`applyWardrobe` in `ui/style.js` sets those classes); a sound needs `wave` and `mult`; a crest needs 9 rows of 9 `#` or `.` in `pixels`. Unlock ids (`slot:id`) are stored, so never rename. Unlocks are never revoked once stored.
 
 ### Add a UI element
 

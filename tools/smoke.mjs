@@ -1098,6 +1098,25 @@ await scenario('changing shell keeps the equipped accessory and label', async ({
   assert(w.accessory === 'partyhat' && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
 });
 
+await scenario('legacy: the family tree links generations, and an earned crest shows on the device', async ({ open }) => {
+  const life = (generation, trait) => ({ generation, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait, fragmentTrait: 'persistent', fragmentLevel: 1, keepsake: 'coolant', palette: 0 });
+  const lineage = [1, 2, 3, 4, 5].map((g) => life(g, g > 1 ? 'persistent' : null));
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 6, trait: 'persistent' }), 'netling.lineage': lineage }));
+  assert(!(await visible(page, '#crest')), 'a crest is shown before one is equipped');
+  await page.click('#open-archive');
+  assert((await page.locator('#lineage-list li.link').count()) === 5, 'expected a link between each of the six generations');
+  const first = await page.locator('#lineage-list li').first().textContent();
+  assert(/v1\.0/.test(first), `the tree does not start with the oldest generation: ${first}`);
+  assert(/Persistent \+ Coolant cell/.test(await page.locator('#lineage-list li.link').first().textContent()), 'the link does not say what passed down');
+  assert(/full lives/.test(await page.textContent('#record')), 'record label not updated');
+  await page.click('#tab-btn-wardrobe');
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Closed loop' }).click();
+  assert((await saved(page, 'netling.wardrobe')).crest === 'loop', 'crest not saved');
+  assert(await visible(page, '#crest'), 'equipped crest not shown on the device');
+  const lit = await page.evaluate(() => [...document.getElementById('crest').getContext('2d').getImageData(0, 0, 9, 9).data].filter((v, i) => i % 4 === 3 && v > 0).length);
+  assert(lit > 10, `crest canvas is blank (${lit} pixels)`);
+});
+
 await scenario('flatline screen and next generation', async ({ open }) => {
   const dead = awakeNetling({ stage: 'dead', form: 'daemon', deathCause: 'neglect', diedAt: Date.now() });
   dead.fragment = { form: 'daemon', trait: 'persistent', quirk: { ...dead.quirk }, keepsake: 'coolant', rootUsed: false };

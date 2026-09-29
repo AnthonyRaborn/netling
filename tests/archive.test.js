@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deathRecord, dexEntries, discover, formsSeenIn, lineageRows, DEX_ORDER } from '../src/archive.js';
+import { deathRecord, dexEntries, discover, formsSeenIn, lineageChain, lineageRows, DEX_ORDER } from '../src/archive.js';
 import { createScript, tick, CFG, MIN } from '../src/sim.js';
 
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -73,4 +73,35 @@ test('dex lists run abilities for discovered adult forms only', () => {
   assert.match(entries.find((e) => e.id === 'firewall').runAbility, /ICE/);
   assert.equal(entries.find((e) => e.id === 'daemon').runAbility, null);
   assert.equal(dexEntries(['kernel']).find((e) => e.id === 'kernel').runAbility, null);
+});
+
+test('the family tree runs oldest first, with what passed down between parent and child', () => {
+  const lineage = [
+    { generation: 1, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, fragmentTrait: 'persistent', fragmentLevel: 1, keepsake: 'coolant' },
+    { generation: 2, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait: 'persistent', traitLevel: 1, fragmentTrait: 'persistent', fragmentLevel: 2 },
+  ];
+  const current = createScript({ now: T0, generation: 3, fragment: { form: 'daemon', trait: 'persistent', level: 2, history: 'persistent', quirk: null } });
+  const chain = lineageChain(lineage, current);
+  assert.deepEqual(chain.map((c) => c.kind), ['node', 'link', 'node', 'link', 'node']);
+  assert.deepEqual(chain.filter((c) => c.kind === 'node').map((c) => c.version), ['v1.0', 'v2.0', 'v3.0']);
+  assert.equal(chain[1].text, 'Persistent + Coolant cell');
+  assert.equal(chain[3].text, 'Persistent II · history Persistent');
+  assert.equal(chain[4].status, 'running');
+  assert.equal(chain[2].inherited, null, 'shown on the link instead');
+  assert.equal(chain[2].left, null, 'its child is in the chain');
+});
+
+test('the family tree marks missing records and shows what the last netling left', () => {
+  const chain = lineageChain(
+    [
+      { generation: 2, form: 'chrome', realized: true, cause: 'neglect', trait: 'volatile', fragmentTrait: 'licensed' },
+      { generation: 4, form: 'glitch', realized: false, cause: 'neglect', trait: 'hardened', fragmentTrait: 'volatile' },
+    ],
+    null,
+  );
+  assert.equal(chain[0].inherited, 'Volatile', 'nothing above the oldest record');
+  assert.deepEqual([chain[1].kind, chain[1].gap, chain[1].text], ['link', true, 'records missing']);
+  assert.equal(chain[2].inherited, 'Hardened', 'after a gap the node shows its own inheritance');
+  assert.equal(chain[2].left, 'Volatile');
+  assert.deepEqual(lineageChain([], null), []);
 });
