@@ -25,12 +25,15 @@ const { chromium } = await loadPlaywright();
 
 // --- a static server for the app ---
 
+// A scenario can serve a changed sw.js, as a new release would.
+let swPatch = null;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^[/\\]+/, '') || 'index.html';
   if (path.startsWith('..')) return res.writeHead(403).end();
   try {
-    const body = await readFile(join(root, path));
+    let body = await readFile(join(root, path));
+    if (path === 'sw.js' && swPatch) body = swPatch(body.toString());
     res.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream' }).end(body);
   } catch {
     res.writeHead(404).end();
@@ -345,6 +348,50 @@ await scenario('offline: service worker serves every module', async ({ open }) =
     await serverUp();
   }
 }, { allow: [/Failed to load resource/] });
+
+await scenario('a new release while open offers a reload, which waits for a running game', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller);
+  await page.waitForTimeout(500);
+  assert(!(await visible(page, '#update-bar')), 'the first install offered an update');
+  swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v999'");
+  try {
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    assert(/NEW VERSION/.test(await page.textContent('#update-bar')), 'bar has no message');
+
+    await page.click('#btn-play');
+    await page.click('[data-game="breach"]');
+    assert(!(await visible(page, '#update-bar')), 'the bar covers the game pad');
+    await page.evaluate(() => {
+      window.__stillHere = true;
+      document.getElementById('update-reload').click();
+    });
+    await page.waitForTimeout(500);
+    assert(await page.evaluate(() => window.__stillHere), 'reloaded in the middle of a game');
+    assert(/finish the game/.test(await page.textContent('#status')), 'refusal not explained');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(2500);
+    assert(await visible(page, '#update-bar'), 'the bar did not come back after the game');
+
+    const before = (await saved(page)).ageMin;
+    await Promise.all([page.waitForEvent('load'), page.click('#update-reload')]);
+    await page.waitForTimeout(800);
+    assert(!(await page.evaluate(() => window.__stillHere)), 'RELOAD did not reload');
+    assert(!(await visible(page, '#update-bar')), 'the reloaded page still offers the update');
+    assert((await saved(page)).ageMin >= before, 'the netling was not kept across the reload');
+    assert(await loopRunning(page), 'app did not boot after the update');
+
+    swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v1000'");
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    await page.click('#update-later');
+    assert(!(await visible(page, '#update-bar')), 'LATER did not dismiss the bar');
+  } finally {
+    swPatch = null;
+  }
+});
 
 await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
   const foreign = [];

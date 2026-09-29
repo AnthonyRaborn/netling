@@ -38,7 +38,7 @@ These explain most decisions in the code.
 |---|---|
 | `index.html` | All markup: the device, dialogs (archive, system, field manual, NL-0 transmission), lock screens |
 | `style.css` | All styling (about 1500 lines), theme variables in `:root`, one landscape media query, one reduced-motion query |
-| `sw.js`, `manifest.webmanifest`, `icons/` | PWA shell |
+| `sw.js`, `manifest.webmanifest`, `icons/`, `screenshots/` | PWA shell (the screenshots are for the install dialog) |
 | `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
 | `src/random.js` | The shared weighted-pick helper |
@@ -54,10 +54,11 @@ These explain most decisions in the code.
 | `src/transfer.js`, `src/qr.js` | Transfer codes and the QR encoder |
 | `src/lease.js` | Fallback one-tab lease for browsers without Web Locks |
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
+| `src/version.js`, `src/update.js` | The page's release name, and noticing a newer release while the page is open |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 24 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators, icon generator |
+| `tests/` | 25 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
+| `tools/` | Browser smoke test, balance simulators, icon and screenshot generators |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
@@ -168,11 +169,12 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 
 ## Offline, the service worker, and deploys
 
-- `sw.js` is **network-first**: it fetches every same-origin GET and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline.
+- `sw.js` is **network-first**: it fetches every same-origin GET and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline. Files other than the page itself are fetched with `cache: 'no-cache'` (the browser revalidates, usually a 304), and install pre-caches with `cache: 'reload'`, so the browser's HTTP cache (GitHub Pages allows 10 minutes) can't mix old and new files after a release.
 - Install pre-caches the `SHELL` list. `addAll` fails as a whole if any listed file 404s, so a missing or misspelled entry breaks installation. `tests/shell.test.js` follows the static `import`/`export ... from` graph from `src/main.js` and checks that every module it reaches is listed (icons and other non-module assets are not checked). **When you add a file, add it to `SHELL`.**
-- `CACHE` (`netling-v34`) is a manual version name. Bumping it on release drops old caches on activate.
+- `CACHE` (`netling-v35`) is a manual release name, and `VERSION` in `src/version.js` must equal it (`tests/shell.test.js` checks). **Bump both on every release.** Bumping drops old caches on activate, and the changed `sw.js` is how an open page learns about the release.
+- **Update prompt** (`update.js`): the new worker takes control at once (`skipWaiting`, `clients.claim`). On each `controllerchange` the page asks the new controller for its `CACHE` name (a `version?` message); a name that differs from the page's `VERSION` shows the NEW VERSION READY bar. The first install and a reload that already runs the new code report the page's own name, so they stay quiet. The page asks the browser to look for a new `sw.js` every hour and when it becomes visible again (at most every 15 minutes); browsers also look on each navigation. RELOAD saves first and is refused while a mini-game or netrun is on screen (the same rule as transfers); LATER hides the bar until the next release. A release that doesn't change `sw.js` is still picked up on the next launch, just not offered to an open page.
 - Notification clicks focus an open window or open the app.
-- `pages.yml` deploys to GitHub Pages after `test.yml` succeeds on `main`. It copies only `index.html`, `style.css`, `sw.js`, `manifest.webmanifest`, `icons` and `src`, so tests, tools, docs and the spoiler gallery stay out. All paths in the app are relative so it works under a `/netling/` subpath.
+- `pages.yml` deploys to GitHub Pages after `test.yml` succeeds on `main`. It copies only `index.html`, `style.css`, `sw.js`, `manifest.webmanifest`, `icons`, `fonts`, `screenshots` and `src`, so tests, tools, docs and the spoiler gallery stay out. All paths in the app are relative so it works under a `/netling/` subpath.
 - Native wrappers (Capacitor, TWA, Tauri) are planned but not built. See [PLATFORMS.md](PLATFORMS.md).
 
 ## Input
@@ -197,7 +199,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (41 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (42 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

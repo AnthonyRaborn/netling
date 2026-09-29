@@ -10,7 +10,7 @@ Test devices available: Android phone, Windows PC, Mac, Steam Deck (the only Lin
 
 **Effort:** a day or two. **Cost:** none.
 
-Netling is already an installable web app (PWA): `manifest.webmanifest` has relative `start_url` and `scope`, `sw.js` caches every module for offline play, and all paths are relative, so it works under a `username.github.io/netling/` subpath.
+Netling is already an installable web app (PWA): `manifest.webmanifest` has relative `start_url` and `scope`, an explicit `id` (`./`, which resolves to the same identity browsers derived from `start_url` before, so existing installs are unaffected), screenshots for the richer install dialog, `sw.js` caches every module for offline play, and all paths are relative, so it works under a `username.github.io/netling/` subpath.
 
 | Platform | How to install | Notes |
 |---|---|---|
@@ -23,7 +23,7 @@ Netling is already an installable web app (PWA): `manifest.webmanifest` has rela
 
 - [x] **Deploy workflow.** `.github/workflows/pages.yml`: after the test workflow passes on a push to `main`, copies only the files the game loads (no `tests/`, `tools/`, `docs/`, or the spoiler-heavy `gallery.html`) and deploys to GitHub Pages. Can also be run by hand (Actions > pages > Run workflow). Checked locally: the game works from a `/netling/` subpath, with the service worker and manifest scoped to it. The workflow has run: the site is live and follows `main`.
 - [x] **Enable Pages** (repo owner, one time): Settings > Pages > Source: **GitHub Actions**. Done.
-- [x] **Landscape and large-screen layout.** On landscape screens at least 860px wide and at most 1000px tall, the screen sits on the left and everything else on the right. Fits without scrolling at 1280x800 (Deck), 1366x768 and 1024x768, including the region list, game pad, dialogs and intro. Phones and 1080p windows keep the one-column layout. The manifest keeps `"orientation": "portrait"`: it only affects installed apps on phones and tablets, where portrait is the right layout for phones.
+- [x] **Landscape and large-screen layout.** On landscape screens at least 860px wide and at most 1000px tall, the screen sits on the left and everything else on the right. Fits without scrolling at 1280x800 (Deck), 1366x768 and 1024x768, including the region list, game pad, dialogs and intro. Phones and 1080p windows keep the one-column layout. The manifest no longer sets `orientation` (it used to lock installed apps to portrait), so an installed app on a tablet can turn and use the landscape layout. A phone turned sideways is too short for it and gets the one-column layout, which scrolls, as it always did in a browser tab.
 - [x] **Gamepad support.** `src/ui/gamepad.js`: in mini-games and netruns, d-pad/left stick left/right, A, B to quit; elsewhere the d-pad moves focus between buttons (dimmed or covered controls are skipped), A presses, B closes a dialog or backs out of a submenu, left/right adjust the volume slider. Focused controls now show a yellow outline (keyboard users get it too).
 - [x] **Smoke test**: a fake controller drives menus and a mini-game; the Deck and laptop sizes are checked for no scrolling, and a phone size for the one-column layout. All scenarios pass (41 at last count).
 - [x] **Install and update on macOS**: installing works, and the installed PWA receives updates.

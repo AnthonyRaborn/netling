@@ -11,15 +11,16 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
+| `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 227 tests in 24 files and all pass. The smoke test has 41 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 235 tests in 25 files and all pass. The smoke test has 42 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
 ## Unit tests
 
-They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls), and per-file fakes for `AudioContext`, `Notification` and the service worker API. `tests/helpers/` is not matched by the test glob.
+They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls), and per-file fakes for `AudioContext`, `Notification` and the service worker API (including its `controllerchange` and `message` events, in `update.test.js`). `tests/helpers/` is not matched by the test glob.
 
 ### Conventions used by the tests
 
@@ -49,14 +50,15 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
-| `content.test.js` | 13 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game loads |
+| `content.test.js` | 14 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game and the manifest load, install screenshots match their stated sizes |
 | `draw.test.js` | 7 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument |
 | `audio.test.js` | 7 | Sound playback against a fake `AudioContext`: notes and pitch, sound packs, the low-frequency floor, mute and volume, and a scan that every sound name used in the source really exists |
 | `notify.test.js` | 6 | Notification support, permission, service-worker delivery and fallback, and quiet failure |
 | `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
-| `shell.test.js` | 1 | Every module reachable from `main.js` is in the service worker's `SHELL` |
+| `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
+| `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
 
 Run one file: `TZ=UTC node --test tests/sim.test.js`. Filter by name: add `--test-name-pattern="nap"`.
 
@@ -71,6 +73,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Transfer out locks and reloads keep the lock; loading a code unlocks; malformed and hostile `#import=` links and codes.
 - Corrupted or unreadable saves; full storage; blocked storage.
 - Offline: the service worker serves every module.
+- A new release while the page is open: the first install stays quiet, a changed `sw.js` shows the update bar, RELOAD waits for a running game, then reloads and keeps the netling; LATER hides the bar.
 - Two tabs: guard screen, takeover (Web Locks and the lease fallback).
 - Stale confirm timers, discard confirm.
 - System actions waiting for a running mini-game; refused results explain why.

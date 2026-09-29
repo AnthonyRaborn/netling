@@ -5,7 +5,7 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 227 unit tests, Node 22
+npm test          # 235 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype
 npm run serve     # http://localhost:5174
@@ -17,7 +17,7 @@ npm run serve     # http://localhost:5174
 - `src/netrun/`: expeditions (`run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js`).
 - `src/ui/`: DOM code; `ui/app.js` holds the shared `app` object, the write gate and `loadAll`.
 - `src/storage.js`, `src/sanitize.js`, `src/transfer.js`: everything about persistence and moving saves.
-- `sw.js`: network-first service worker with a hand-written `SHELL` file list.
+- `sw.js`: network-first service worker with a hand-written `SHELL` file list. Its `CACHE` name must equal `VERSION` in `src/version.js`; bump both per release so open pages are offered the update.
 
 ## Rules that are easy to break
 

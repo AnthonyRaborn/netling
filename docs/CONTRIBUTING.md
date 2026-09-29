@@ -26,7 +26,7 @@ The code has no linter or formatter configured. Match what is there: 2-space ind
 1. `npm test` (must pass).
 2. If you changed UI, storage, the service worker or anything visible: `npm run smoke` (needs Playwright).
 3. If you changed rules or numbers: `npm run balance` and compare with the targets in [TESTING.md](TESTING.md#balance-tools).
-4. If you changed files loaded by the game: consider bumping `CACHE` in `sw.js`.
+4. If you changed files loaded by the game: bump `CACHE` in `sw.js` and `VERSION` in `src/version.js` together (a test checks they match). That is what offers the update to players who have the game open.
 5. If you changed a number that the README or docs quote, update the docs. The field manual is generated from `CFG`, so it stays right by itself; prose docs do not.
 
 ## Checklists
@@ -100,7 +100,7 @@ Add a key to `KEYS` (`storage.js`), a `clean*` function and, if it should travel
 
 ## Releasing
 
-There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` when you want old caches dropped. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
+There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` (and `VERSION` in `src/version.js`) for each release: it drops old caches and shows open pages a NEW VERSION READY bar. If you change the look of the home screen, rerun `node tools/make-screenshots.mjs` for the install dialog's screenshots. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
 
 ## Working with AI sessions
 

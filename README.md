@@ -177,7 +177,7 @@ Only one browser tab looks after the netling at a time. Other tabs show a guard 
 
 ## Install, offline and controllers
 
-Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari on macOS 14+), or "Add to Home Screen" (iOS and Android). It caches itself, so it plays offline. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
+Netling is a PWA: use the browser's "Install app" (desktop Chrome or Edge), "Add to Dock" (Safari on macOS 14+), or "Add to Home Screen" (iOS and Android). It caches itself, so it plays offline. When a new version comes out while the game is open, a NEW VERSION READY bar offers a reload (finish any game or netrun first); otherwise you get it the next time you open the game. On a Steam Deck, install it from Chrome in Desktop Mode, then add it to Steam as a non-Steam game to play in Game Mode.
 
 **Controllers** work with no setup. In mini-games and netruns the d-pad or left stick moves, A confirms and B quits. Elsewhere the d-pad moves between buttons, A presses, and B backs out or closes a dialog. Browsers only notice a controller after you press one of its buttons on the page.
 

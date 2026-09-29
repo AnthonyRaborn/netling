@@ -121,7 +121,7 @@ function watchLogoTaps() {
 
 // A mini-game or netrun on screen must finish first: hibernating would freeze the pad under the
 // overlay, and a transfer would leave it running on a locked device.
-function sessionBlockReason() {
+export function sessionBlockReason() {
   if (!app.session) return null;
   return app.state.run ? 'finish the netrun first.' : 'finish the game first.';
 }

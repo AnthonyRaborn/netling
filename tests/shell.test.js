@@ -27,3 +27,10 @@ test('the service worker caches every module, so the app boots offline', () => {
   const missing = [...moduleGraph('src/main.js')].filter((f) => !shell.has(f));
   assert.deepEqual(missing, []);
 });
+
+test('the page and the service worker name the same release, so an update is offered only for a new one', () => {
+  const sw = readFileSync(join(root, 'sw.js'), 'utf8');
+  const version = readFileSync(join(root, 'src/version.js'), 'utf8');
+  const cache = sw.match(/const CACHE = '([^']+)'/)[1];
+  assert.equal(version.match(/export const VERSION = '([^']+)'/)[1], cache, 'bump VERSION in src/version.js together with CACHE in sw.js');
+});

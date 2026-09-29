@@ -1,16 +1,20 @@
 {
+  "id": "./",
   "name": "Netling",
   "short_name": "Netling",
   "description": "A cyberpunk virtual pet living in a corrupted memory sector.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#07070c",
   "theme_color": "#14121f",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/narrow.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "A netling on the home screen, with its vitals and care buttons" },
+    { "src": "screenshots/wide.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "The two-column layout on a wide screen" }
   ]
 }

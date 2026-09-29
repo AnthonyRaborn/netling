@@ -1158,6 +1158,41 @@ body.frozen .event-bar {
   margin: 0 0 6px;
 }
 
+/* A newer release is ready. Fixed to the bottom so it never changes the layout. */
+.update-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 6px 8px;
+  border: 1px solid var(--cyan);
+  background: var(--shell);
+  box-shadow: 0 0 12px rgba(5, 217, 232, 0.35);
+}
+
+/* Room to scroll the page clear of it, and out of the way of the game pad. */
+body:has(.update-bar:not([hidden])) {
+  padding-bottom: 64px;
+}
+
+body:has(#pad:not([hidden])) .update-bar {
+  display: none;
+}
+
+.update-label {
+  color: var(--cyan);
+}
+
+.update-bar button {
+  padding: 4px 12px;
+}
+
 /* --- field manual ------------------------------------------------------------ */
 
 .help-body {

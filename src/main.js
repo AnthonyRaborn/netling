@@ -12,10 +12,11 @@ import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plush
 import { drainCodexInbox, initArchive } from './ui/archive.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
-import { importFromUrl, initSystem, protectStorage, renderTestBadge, showLock, storageProtected } from './ui/system.js';
+import { importFromUrl, initSystem, protectStorage, renderTestBadge, sessionBlockReason, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
 import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
+import { watchForUpdates } from './update.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -63,6 +64,26 @@ $('pref-alerts').addEventListener('click', async () => {
 
 renderPrefs();
 registerServiceWorker();
+
+// --- updates ---
+
+// A newer release took over while the page was open: offer a reload instead of forcing one. Like a
+// transfer, it waits for a running mini-game or netrun to finish.
+const UPDATE_CHECK_MS = 60 * 60 * 1000;
+const checkForUpdate = watchForUpdates(() => ($('update-bar').hidden = false));
+setInterval(checkForUpdate, UPDATE_CHECK_MS);
+
+$('update-reload').addEventListener('click', () => {
+  const busy = sessionBlockReason();
+  if (busy) {
+    sfx('error', app.state.quirk.pitch);
+    flashStatus(busy);
+    return;
+  }
+  flushSave();
+  location.reload();
+});
+$('update-later').addEventListener('click', () => ($('update-bar').hidden = true));
 
 if (DEV) {
   const dev = $('dev');
@@ -116,7 +137,10 @@ if (DEV) {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) flushSave();
-  else advance();
+  else {
+    advance();
+    checkForUpdate();
+  }
 });
 addEventListener('pagehide', flushSave);
 
