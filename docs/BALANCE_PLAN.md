@@ -51,6 +51,13 @@ Fourth round, 2026-09-29:
 22. **Segfault**: the deliberate-fault item, uncommon tier. Using it adds **2 faults**, so a Stub takes one Segfault and one other deliberate mistake.
 23. **Casual codex pacing is acceptable** as it is: casual lines may take many lives.
 
+Fifth round, 2026-09-29:
+
+24. **Ghost needs 18 wins, at least 3 in each game**, with the scaled stages.
+25. **Netlings alive when the change ships keep their 7-day life.** Each netling stores the life lengths it was compiled with (an added field; saves without it get the 7-day values), so nothing already alive changes and the next generation gets 5 days. No save version bump.
+26. **Segfault drops**: Public Net loot weight 2 (Coolant cell drops from 3 to 2 there), weight 1 in the other regions' loot, weight 1 in the mini-game win and HIDE drop tables, weight 1 in market stock (Public Net and Bazaar), and small new chances after answering an intrusion (DEFEND), containing an overflow (PURGE) and after a power surge.
+27. **The Shell's sprite comes first**, for review before any rule changes (see Pass 1, item 5).
+
 ## How the passes work
 
 - **Order**: tooling first, then forms, then netruns, then lineage. Form odds decide which traits and abilities players see, so lineage is tuned last. Any new evolution forms that come out of Pass 3 feed back into Pass 1's targets.
@@ -122,6 +129,8 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
 
    "Both axes balanced" is a poor hint: tidy play raises stability by about 0.1 an hour, so Ghost chasers are at about +3.5 by 24 hours, and the rule mostly picks casual players who won't reach Ghost. **Decided: the third row, and the teen is called the Shell.** It stays a hint, not a promise: the Shell still needs Ghost's adult conditions.
 
+   **Draft art** (in `src/sprites.js` as `shellA` and `shellB`, not yet a form): a hollow, cracked casing with the eyes floating inside, the empty shell that a Ghost later fills. In the second idle frame the eyes drift, as if something inside moves. Accessories anchor on it like any form. Forms take their colors from the netling's palette quirk, so the Shell has no palette of its own; a slow inner glow (within the flash limit) is a possible later touch. Draft text: DEX hint "sides with no one on its first day, and plays every game."; lore "A hollow casing with something looking out from inside. Empty, for now." It sits after Stub in `DEX_ORDER`.
+
    With the scaled stages (item 6) the check happens at 17 hours instead of 24. Measured there: every game won twice catches 63% of Ghost chasers and at most 1% of anyone else; every game won once catches 96% of chasers but also 59% of Daemon-steering players and about 20% of attentive ones. **Keep "twice"**: the Shell is a sign for players already on the chase, and chasers reach Ghost 98% of the time either way. A new form needs:
    - a permanent id and sprites;
    - a DEX entry with hints, and `DEX_ORDER`;
@@ -151,7 +160,7 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
      | 16 wins, 4 in each game | 92% | 3% |
      | 16 wins, 3 in each game | 98% | 10% (steer-daemon) |
 
-     **Recommended: 18 and 3**, which keeps Ghost as secret as it is today. Other results with that setting: survival rises (casual full life 87%, worker 78%), steer-glitch reaches Glitch 89%, and every other steering player 99% or more.
+     **Decided: 18 and 3**, which keeps Ghost as secret as it is today. Other results with that setting: survival rises (casual full life 87%, worker 78%), steer-glitch reaches Glitch 89%, and every other steering player 99% or more.
    - **Codex** with scaled stages (200 lineages): attentive lines finish in a median of 4 lives, 9% within 2 and 36% within 3; about 14 fragments a life. The per-life cap is still needed for the at-least-3-lives rule. Casual lines rarely finish, which is accepted (decision 23).
 
 ### Candidate targets (to confirm)
@@ -267,8 +276,7 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 ## Still to decide
 
-1. **Ghost's scaled win requirement**: 18 wins and 3 in each game (recommended, Pass 1, item 6)?
-2. **The Shell's look**: sprite, palette and its DEX hint.
-3. **Segfault drop chances**: enough for one in a baby's first 17 hours in the Public Net.
-4. **Trait numbers**: strengths, level steps and caps, after measuring.
-5. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
+1. **The Shell**: approve or revise the draft sprite, DEX hint and lore (Pass 1, item 5).
+2. **Segfault's new drop chances** after DEFEND, PURGE and power surges, and its market weight; measured in Pass 1.
+3. **Trait numbers**: strengths, level steps and caps, after measuring.
+4. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
