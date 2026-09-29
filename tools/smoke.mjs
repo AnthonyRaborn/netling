@@ -725,12 +725,14 @@ await scenario('system actions wait for a running mini-game; a refused result ex
   await dev.click('[data-game="tune"]');
   await dev.click('[data-skip="60"]');
   await dev.keyboard.press('Escape');
+  // Usually it ran out of charge. A random memory overflow in the skipped hour can crash it instead,
+  // and then the refusal names the reboot: either way the player is told why.
   let status = '';
-  for (let i = 0; i < 30 && !/charge/.test(status); i++) {
+  for (let i = 0; i < 30 && !/charge|rebooting/.test(status); i++) {
     await dev.waitForTimeout(100);
     status = await dev.textContent('#status');
   }
-  assert(/not enough charge/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
+  assert(/not enough charge|rebooting/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
 });
 
 // Plugs in a fake controller: window.__pad is what navigator.getGamepads() reports.
