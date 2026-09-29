@@ -82,13 +82,13 @@ Loot tables (weights), used for caches, ICE wins, exit bonuses and anomaly loot:
 
 | Region | Loot |
 |---|---|
-| Public Net | coolant 3, antivirus 2, booster 2, repair 2, voucher 1, memory 1, blackice 1 |
-| Corp Grid | voucher 4, antivirus 3, coolant 2, repair 2, booster 1 |
-| Darknet Bazaar | blackice 4, memory 2, booster 2, coolant 1 |
-| Old Web Ruins | memory 4, repair 3, coolant 2, antivirus 2, booster 1 |
-| The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1 |
+| Public Net | coolant 2, antivirus 2, booster 2, repair 2, voucher 1, memory 1, blackice 1, segfault 2 |
+| Corp Grid | voucher 4, antivirus 3, coolant 2, repair 2, booster 1, segfault 1 |
+| Darknet Bazaar | blackice 4, memory 2, booster 2, coolant 1, segfault 1 |
+| Old Web Ruins | memory 4, repair 3, coolant 2, antivirus 2, booster 1, segfault 1 |
+| The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1, segfault 1 |
 
-Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1`). Bazaar items cost 10 Charge, all others 12. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
+Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1, segfault 1`). Bazaar items cost 10 Charge, all others 12. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
 
 ## Map generation
 

@@ -19,7 +19,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Archive** | The dialog with LINEAGE, DEX, CODEX and STYLE tabs, and the SYSTEM button | `ui/archive.js` |
 | **Armed button** | A button that needs a second press within a few seconds to confirm (discard, transfer out, restart) | `ui/app.js` `armed` |
 | **Attack / Intrusion** | Timed event: a virus attempt. DEFEND within 60 minutes by winning a mini-game | `sim.js` |
-| **Baby** | First life stage, form Bitling. Age 0 to 24 hours | `sim.js` |
+| **Baby** | First life stage, form Bitling. Age 0 to 17 hours (24 for netlings compiled before the 5-day life) | `sim.js` |
 | **Bandage** | Earned accessory for surviving a netrun disconnect or an NL-0 rescue | `ui/style.js` |
 | **Bazaar** | The Darknet Bazaar netrun region: markets and Black ICE | `netrun/regions.js` |
 | **Bitling** | The baby form | `sim.js` `SPECIES` |
@@ -54,13 +54,13 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Deep (The Deep)** | Hidden fifth netrun region. Opens with codex fragment `ruins-4` | `netrun/regions.js` |
 | **DEFEND** | The answer to an intrusion: a random mini-game | `ui/play.js` |
 | **Dev mode** | `?dev` in the URL. Time-skip and forced-event buttons | `main.js` |
-| **Dex** | The list of the 8 forms seen. Undiscovered forms show a silhouette and a hint | `archive.js` |
+| **Dex** | The list of the 9 forms seen. Undiscovered forms show a silhouette and a hint | `archive.js` |
 | **Digesting** | The 240 minutes after a meal, during which cache files can appear | `sim.js` |
 | **Disconnect** | A netrun ends in failure (Integrity or Charge hit 0). Loot lost, one care mistake, emergency reboot | `netrun/run.js` |
 | **Echo** | 1) An anomaly with a codex fragment. 2) An "unrealized" adult form: a netling that died before adulthood but whose fragment shows the form it was leaning toward | `netrun/anomalies.js`, `archive.js` |
 | **Effect** | A screen effect cosmetic (scanlines, clean, interlace, rain, bloom, curve, packets, static) | `cosmetics.js` |
 | **Event** | A timed thing that needs a response (trace, intrusion, overflow). One at a time | `sim.js` `EVENTS` |
-| **Evolution** | Baby to teen at 24 hours, teen to adult at 72 hours | `sim.js` |
+| **Evolution** | Baby to teen at 17 hours, teen to adult at 51 hours (`s.life`; 24 and 72 for older netlings) | `sim.js` |
 | **Exit node** | The last node of a map. Banks everything and gives a bonus | `netrun/run.js` |
 | **Field manual** | The in-game help dialog, built from live `CFG` values | `ui/onboarding.js` |
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
@@ -131,7 +131,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Style** | The Archive tab for cosmetics: shells, tints, effects, sounds, label, accessories, props | `ui/style.js` |
 | **Surge (power surge)** | Instant event: +25 Heat, +10 Charge | `sim.js` |
 | **Sync** | Stat: bond with the player. Drains 12/hr. Raised by play | `sim.js` |
-| **Teen** | Second stage: Kernel or Stub. 24 to 72 hours | `sim.js` |
+| **Teen** | Second stage: Kernel, Stub or Shell. 17 to 51 hours | `sim.js` |
 | **Test mode** | A separate netling on a fast clock, in its own storage | `ui/app.js` |
 | **Tick** | One simulated minute, or the function that runs many | `sim.js` |
 | **Tint** | The screen color cosmetic | `cosmetics.js` |

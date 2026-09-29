@@ -37,7 +37,7 @@ The simulation is pure in the sense that matters: every function takes the state
 `step()` does this, in order:
 
 1. `ageMin++`. Stage `script` only waits for `bootMinutes` (3) and becomes `baby`. Nothing else happens while compiling.
-2. Evolution check (baby to teen at 1440 min, teen to adult at 4320 min).
+2. Evolution check (baby to teen at `life.teenAt`, teen to adult at `life.adultAt`: 1020 and 3060 minutes for a netling compiled now; see [Life length](#life-length)).
 3. Sleep and nap transitions for this minute.
 4. Drain Charge, Sync, and move Heat.
 5. Cache file roll (awake and digesting only).
@@ -55,7 +55,9 @@ Created by `createScript()`. The full field list with meanings is in [DATA_AND_S
 | Field | Meaning |
 |---|---|
 | `stage` | `script` (compiling), `baby`, `teen`, `adult`, `dead` |
-| `form` | Current body. `bitling` for babies, `kernel`/`stub` for teens, one of five adult forms |
+| `form` | Current body. `bitling` for babies, `kernel`/`stub`/`shell` for teens, one of five adult forms |
+| `life` | `{ teenAt, adultAt, lifespan }` in minutes, fixed when it compiles (see [Life length](#life-length)) |
+| `newForms` | Adult forms the player had never raised when it compiled; they win ties a little more often |
 | `stats` | `charge`, `sync`, `integrity`, `heat`, each 0 to 100 |
 | `cache` | 0 to 4 corrupted files |
 | `sinceFed` | Minutes since the last meal. Starts at 240 so a new netling is not "digesting" |
@@ -144,11 +146,11 @@ A **care mistake** is a need left unmet for a grace period. It is counted once p
 | heat | Heat at 100 | 15 min |
 | lights | Asleep with lights on | 60 min |
 
-Each mistake adds 1 to `careMistakes` and removes 2 stability. A netling dies when any of these fires, checked in this order:
+Each mistake adds 1 to `careMistakes` and removes 2 stability. A Segfault (see [Items](#items)) adds 2 of them at once, with the same stability cost. A netling dies when any of these fires, checked in this order:
 
 1. **integrity collapse**: Integrity at 0 for 120 consecutive minutes.
 2. **neglect**: 10 care mistakes (`maxMistakes`).
-3. **end of life cycle**: age reaches 7 days (`lifespanMin`).
+3. **end of life cycle**: age reaches `life.lifespan` (5 days, 7200 minutes, for a netling compiled now).
 
 Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) and sets `stage = 'dead'`. Root Access can undo the first two (see below).
 
@@ -214,17 +216,20 @@ Six slots (`INVENTORY_SLOTS`). Extra finds are refused with "inventory is full".
 | `memory` | Memory shard | Rerolls one of palette, pitch, idle, favorite packet | no |
 | `repair` | Repair kit | Integrity +40 (refused at 100) | no |
 | `overclock` | Overclock chip | Cuts 60 min off the netrun cooldown (refused if none left or at the 2 hour floor) | no |
+| `segfault` | Segfault | 2 care mistakes on purpose (`ITEM_CFG.segfaultFaults`), stability -4. Can end its life at the limit. The UI asks for a second press | yes |
 
 Drop tables (weights):
 
 | Source | Table |
 |---|---|
-| Mini-game win (25%) | coolant 3, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1 |
-| Hide (30%) | blackice 2, memory 1, coolant 1, overclock 1 |
+| Mini-game win (25%) | coolant 3, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1 |
+| Hide (30%) | blackice 2, memory 1, coolant 1, overclock 1, segfault 1 |
 | Comply (30%) | voucher 3, antivirus 1, repair 1 |
 | Visitor gift (10%) | coolant 2, booster 2, repair 2, memory 1, overclock 1 |
 
 Netrun loot uses per-region tables, see [NETRUN.md](NETRUN.md).
+
+A **Segfault** can also turn up after a DEFEND (won or lost), a contained overflow (PURGE), or a power surge, each with a 10% chance (`ITEM_CFG.eventSegfaultChance`). It exists so a player can steer toward a Stub on purpose: one Segfault plus one other mistake before the teen stage.
 
 **Keepsakes.** When a netling of an adult form dies, its fragment carries one item that starts in the next generation's inventory: Chrome gives a voucher, Firewall an antivirus patch, Daemon a coolant cell, Glitch a Black ICE shard, Ghost a memory shard.
 
@@ -253,17 +258,23 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 | -0.5 | A mini-game that leaves Heat above 70 |
 | -1 | Slow PATCH, Black ICE shard, a netrun disconnect |
 
-**Baby to teen** at 1440 minutes: Kernel if `careMistakes <= 2`, otherwise Stub.
+**Baby to teen** at `life.teenAt` (`teenForm()`):
 
-**Teen to adult** at 4320 minutes: `leaningForm()`:
+1. **Stub** if `careMistakes > 2`.
+2. **Shell** if it is on Ghost's path: `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1` (`shellMaxMistakes`), and at least 2 wins in each of the four games (`shellMinWinsEach`). A hint, not a promise: the Shell still needs Ghost's adult conditions.
+3. Otherwise **Kernel**.
 
-1. **Ghost** if `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1`, at least 4 wins in each of the four games, and at least 22 wins in total (a boosted win counts as 2).
-2. Otherwise, if `|allegiance| >= |stability|`: Chrome when allegiance is 0 or more, Firewall when negative.
-3. Otherwise: Daemon when stability is 0 or more, Glitch when negative.
+**Teen to adult** at `life.adultAt`: `leaningForm(s, rng)`:
 
-Ties go to allegiance, and a perfectly neutral netling that misses the Ghost conditions becomes Chrome.
+1. **Ghost** if `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1`, at least 3 wins in each of the four games (`ghostMinWinsEach`), and at least 18 wins in total (`ghostMinGameWins`; a boosted win counts as 2, which is kept on purpose: boosters are part of the chase).
+2. Otherwise the larger axis (in size) decides: allegiance gives Chrome (0 or more) or Firewall (negative); stability gives Daemon (0 or more) or Glitch (negative). `leaningCandidates()` lists the forms in play.
+3. **Ties** (`tieBand`, 0.5): if the two axes are within 0.5 of each other in size, both axes' forms are candidates; an axis within 0.5 of zero puts both of its forms in. A perfectly neutral netling that misses Ghost can become any of the four. The pick is random, each candidate weighted 1, or 1.2 (`newFormWeight`) if it is in `newForms`, the adult forms the player had never raised when this netling compiled.
 
 Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data; Firewall -30% virus chance; Daemon Charge drains 20% slower; Glitch play is a gamble (+10 to +40 Sync); Ghost all drains 15% slower. Run abilities are in [NETRUN.md](NETRUN.md).
+
+### Life length
+
+`CFG.lifespanMin`, `teenAtMin` and `adultAtMin` (5 days, 17 hours, 51 hours) are copied into `s.life` when a netling compiles, and the rules read `s.life`, so changing them never shortens a netling that is already alive. Saves from before `s.life` existed get `LEGACY_LIFE` (7 days, 24 hours, 72 hours) from `migrate` and the sanitizer; a stored `life` that is out of order or longer than 7 days is replaced with the same.
 
 **Dying before adulthood.** `flatline()` uses the current form if it is an adult form, else `leaningForm()` at the moment of death. The record marks it `realized: false` and the UI calls it an echo or "(unrealized)".
 
@@ -308,7 +319,7 @@ These follow from the code and are easy to get wrong when changing balance.
 - Resting suppresses new infections, cache files and new events, but not existing damage: a virus keeps eating Integrity at -12/hr through the night.
 - The 15-minute care mistake grace is in **simulated** minutes. In test mode at 168x that is about 5 real seconds.
 - Charge from a corp packet above 95 is refused, so meals cannot be stacked to skip drain.
-- A boosted win adds 2 to `games[id].won`, which makes the Ghost requirement slightly easier than "22 wins".
-- Tie handling in `leaningForm` favors Chrome over everything else except Ghost.
+- A boosted win adds 2 to `games[id].won`, which makes the Ghost requirement slightly easier than "18 wins". Kept on purpose.
+- Ties within 0.5 are broken at random, weighted toward forms the player has never raised (`newForms`). Repairs of a damaged save (no rng) take the heaviest candidate, then the first.
 - COOL is refused under 30 Heat, PATCH is refused with no virus, PURGE is refused with an empty cache. A refused action costs nothing and does not count toward unlock counters.
 - The shield from an Antivirus patch is stored as an age (`shieldUntilAge`), so it survives hibernation correctly.

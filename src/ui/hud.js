@@ -157,6 +157,7 @@ function renderInventory() {
     lastInvKey = key;
     // A DISCARD confirm belongs to the item it was pressed for: a new selection starts over.
     disarm($('inv-discard'), 'DISCARD');
+    disarm($('inv-use'), 'USE');
     const slots = [];
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
       const id = inv[i];
@@ -197,6 +198,8 @@ export function initInventory() {
     unlockAudio();
     tick(app.state, now());
     const id = app.state.inventory[selectedSlot];
+    // A Segfault adds faults, and faults can end a life: it takes a second press.
+    if (id === 'segfault' && !armed($('inv-use'), '+2 FAULTS?', 'USE', 3000)) return;
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
     playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');

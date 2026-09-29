@@ -55,7 +55,7 @@ The line under the bars, the **readout**, shows the generation, its form, its ag
 
 ### Faults
 
-A **fault** (care mistake) is a need left unmet for 15 minutes: Charge at 0, Sync at 0, or Heat at 100. Sleeping with the lights on counts after 60 minutes. Ten faults, two hours at zero Integrity, or seven days of age ends its life. Faults also nudge how it grows up, so a tidy life matters for more than survival.
+A **fault** (care mistake) is a need left unmet for 15 minutes: Charge at 0, Sync at 0, or Heat at 100. Sleeping with the lights on counts after 60 minutes. Ten faults, two hours at zero Integrity, or five days of age ends its life. Faults also nudge how it grows up, so a tidy life matters for more than survival.
 
 ## Caring for it
 
@@ -112,8 +112,9 @@ The inventory holds six items. Tap an item to see what it does, then **USE** it 
 | Memory shard | Rewrites one of its quirks at random |
 | Repair kit | Restores 40 Integrity |
 | Overclock chip | Shortens the wait before the next netrun by an hour |
+| Segfault | Adds two faults on purpose (it asks you to press twice). Faults shape how it grows up, and ten end its life |
 
-Items drop from mini-game wins, from handling traces, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation.
+Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation.
 
 ## Mini-games
 
@@ -148,10 +149,10 @@ The Public Net is open to every age. More regions open as the netling grows up. 
 
 ## Growing up, and what comes after
 
-- **Baby**: the first day. Good care through it (two faults or fewer) grows a healthier teen.
-- **Teen**: from 24 hours. The teen years shape what comes next.
-- **Adult**: from 72 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
-- **Old age**: a netling lives for at most seven days.
+- **Baby**: the first 17 hours. How it is raised through them decides which teen it becomes; good care (two faults or fewer) grows a healthier one.
+- **Teen**: from 17 hours. The teen years shape what comes next.
+- **Adult**: from 51 hours. What it becomes depends on how you raised it: what you fed it, how you handled traces, how tidy you kept it, how much you played. The **DEX** in the Archive lists the forms with hints for the ones you haven't found.
+- **Old age**: a netling lives for at most five days. (One that was already alive when lives were shortened keeps its seven days, and its old 24 and 72 hour milestones.)
 
 When it flatlines it leaves a **fragment**. The next generation inherits that netling's form as a **trait** (a small permanent perk), one of its quirks, and a keepsake item. The **ARCHIVE** shows every generation you have raised, a lifetime record, the DEX and the CODEX.
 

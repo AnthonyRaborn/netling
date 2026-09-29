@@ -328,6 +328,7 @@ export const ITEM_SPRITES = {
   memory: ['#.#.#.#', '.#####.', '##o+o##', '.#ooo#.', '##o+o##', '.#####.', '#.#.#.#'],
   repair: ['.#...#.', '.##.##.', '..#+#..', '...#...', '..#+#..', '.##.##.', '.#...#.'],
   overclock: ['.#.#.#.', '#######', '.#o+o#.', '##+++##', '.#o+o#.', '#######', '.#.#.#.'],
+  segfault: ['.#####.', '#oo.oo#', '#o.#.o#', '#.#+#.#', '#o.#.o#', '#oo.oo#', '.#####.'],
 };
 
 export const ITEM_COLORS = {
@@ -339,6 +340,7 @@ export const ITEM_COLORS = {
   memory: '#c7f9ff',
   repair: '#ff9f1c',
   overclock: '#f9f002',
+  segfault: '#ff4040',
 };
 
 // Frame lookup per form; falls back to frame A for missing sleep/dead poses.

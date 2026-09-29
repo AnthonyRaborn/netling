@@ -93,6 +93,17 @@ The planning bot changes a few old numbers. Against the one-step bot at 300 runs
 
 ## Pass 1: forms
 
+**Status: implemented** (release `netling-v36`). What shipped:
+
+- **5-day life, stages scaled** (teen at 17 hours, adult at 51), stored per netling in `s.life`; netlings alive before the change keep 7 days.
+- **Ghost** needs 18 wins with at least 3 in each game (boosted wins still count double).
+- **The Shell**, a third teen for netlings on Ghost's path, with its sprite, DEX hint and lore.
+- **Segfault** (2 faults, awake only, two presses to use), with the drop weights in decision 26 and a 10% chance after DEFEND, a contained overflow or a power surge.
+- **Tie-breaks** within 0.5, random, with forms the player has never raised weighted 1.2 (KI-15 fixed).
+
+Measured against the previous baselines (details in [TESTING.md](TESTING.md#balance-targets)): Ghost chasers still reach Ghost 99% of the time and no one else above 1%; 63% of them pass through the Shell; every steering player reaches its form 91% or more; `steer-stub` reaches Stub 98% of the time; full-life rates rose (casual 80% to 88%, worker 52% to 81%); fragments a life fell by about 15% (attentive 16.9 to 14.3). Not done in this pass: lowering the passive stability gain (item 1), which was never decided.
+
+
 ### Findings
 
 | Archetype | Teen | Adult forms | Axes at adulthood |

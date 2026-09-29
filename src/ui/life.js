@@ -4,7 +4,7 @@ import { deathRecord } from '../archive.js';
 import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
+import { $, app, newForms, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
 import { closeStaleSession } from './play.js';
@@ -90,7 +90,7 @@ const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', co
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked() });
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms() });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;

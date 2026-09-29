@@ -19,15 +19,16 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 | Form | Stage | How it is reached | Perk | Netrun ability | Keepsake | Trait passed on |
 |---|---|---|---|---|---|---|
 | Bitling | baby | Compile a script | none | none | n/a | n/a |
-| Kernel | teen | 2 or fewer mistakes by 24 hours | none | none | n/a | n/a |
-| Stub | teen | 3 or more mistakes by 24 hours | none | none | n/a | n/a |
+| Kernel | teen | 2 or fewer mistakes at the teen stage (17 hours; 24 for netlings compiled before the 5-day life), and not a Shell | none | none | n/a | n/a |
+| Stub | teen | 3 or more mistakes at the teen stage | none | none | n/a | n/a |
+| Shell | teen | On Ghost's path at the teen stage: allegiance under 2 either way, stability 0 or more, at most 1 mistake, every game won at least twice | none | none | n/a | n/a |
 | Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through | Corp voucher | Licensed |
 | Firewall | adult | Allegiance dominant and negative | -30% virus chance | ICE deals half damage | Antivirus patch | Hardened |
 | Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead | Coolant cell | Persistent |
 | Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run | Black ICE shard | Volatile |
-| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 22+ wins with 4+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it | Memory shard | Untraceable |
+| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 18+ wins with 3+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it | Memory shard | Untraceable |
 
-"Dominant" means larger in absolute value, ties going to allegiance. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
+"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
 
 ## Traits and perks
 
@@ -41,7 +42,7 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 
 ## Items
 
-Eight items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`).
+Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`).
 
 | Name | Effect |
 |---|---|
@@ -53,6 +54,7 @@ Eight items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`).
 | Memory shard | Rewrites one of its quirks at random |
 | Repair kit | Restores 40 Integrity. Works while asleep |
 | Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) |
+| Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press |
 
 ## Mini-games
 
@@ -242,6 +244,7 @@ The story in one line: a corp project (KERNEL) made self-improving maintenance p
 | Bitling | compile a script. | A freshly compiled netling. Mostly curiosity and antennae. |
 | Kernel | raise it well through its first day. | A well-kept adolescent, neatly pinned and humming. |
 | Stub | what grows from a rough first day? | An adolescent with missing sectors. Scrappy, not broken. |
+| Shell | sides with no one on its first day, and plays every game. | A hollow casing with something looking out from inside. Empty, for now. |
 | Chrome | loyal to the grid. | Corp-issue and proud of it. Polished, licensed, a little smug. |
 | Firewall | trusts no one upstream. | A personal shield that decided it was a person. |
 | Daemon | never misses a cycle. | A background process with horns. Silent, tireless, exact. |

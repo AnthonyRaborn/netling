@@ -2,13 +2,14 @@
 import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES } from './sim.js';
 import { FORM_ABILITIES } from './netrun/run.js';
 
-export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
+export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
 
 // Shown for undiscovered forms. Vague on purpose.
 export const DEX_HINTS = {
   bitling: 'compile a script.',
   kernel: 'raise it well through its first day.',
   stub: 'what grows from a rough first day?',
+  shell: 'sides with no one on its first day, and plays every game.',
   chrome: 'loyal to the grid.',
   firewall: 'trusts no one upstream.',
   daemon: 'never misses a cycle.',
@@ -20,6 +21,7 @@ export const DEX_LORE = {
   bitling: 'A freshly compiled netling. Mostly curiosity and antennae.',
   kernel: 'A well-kept adolescent, neatly pinned and humming.',
   stub: 'An adolescent with missing sectors. Scrappy, not broken.',
+  shell: 'A hollow casing with something looking out from inside. Empty, for now.',
   chrome: 'Corp-issue and proud of it. Polished, licensed, a little smug.',
   firewall: 'A personal shield that decided it was a person.',
   daemon: 'A background process with horns. Silent, tireless, exact.',

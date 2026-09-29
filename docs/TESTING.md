@@ -14,7 +14,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 250 tests in 27 files and all pass. The smoke test has 44 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 265 tests in 28 files and all pass. The smoke test has 45 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -58,6 +58,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
+| `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 18 and 3, the Shell, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
 | `tools.test.js` | 6 | The balance tools: the netrun bot plans only with visible nodes, simulated lives are repeatable, a child starts from its parent, a lineage carries the codex, stats and the report diff |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
@@ -163,12 +164,13 @@ Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-f
 
 | Target | Measured by | Status |
 |---|---|---|
-| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 99% and at most 4% (`sysadmin`) |
-| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 96 to 100%. Glitch costs about one heat fault a life (`steer-glitch`, 2.0 faults) |
-| Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Reached (100%) but costly: 3.6 faults of 10, by starving the netling. The plan adds deliberate-fault items |
-| The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Not met: attentive-style players finish in 1 life 1 to 5% of the time and within 2 lives 20 to 46% |
+| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 99% and at most 0.9% |
+| The Shell hints at Ghost: most Ghost chasers pass through it, almost nobody else | `lives.json`, `teens` | Met: 63% of `ghosthunter` teens, at most 0.4% of anyone else |
+| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 91 to 100%. Glitch costs about one fault a life (`steer-glitch`, 1.3 faults) |
+| Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Met: 98% Stub at 3.5 faults. A Segfault turns up before the teen stage in 59% of its lives; without one it still starves the netling for the faults |
+| The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Not met: attentive-style lines finish within 2 lives 4 to 22% of the time (and once in 200, in 1). Pass 2 adds the per-life cap |
 | The Deep stays a wall: careful disconnects well above the Ruins' | `netruns.json` | Met: 27% against 8% |
-| No regression in survival: full-life rates within 3 points of the baseline | `lives.json` | The baseline |
+| No regression in survival: full-life rates within 3 points of the previous baseline | `lives.json` | Met: every archetype held or rose with the 5-day life (casual 80% to 88%, worker 52% to 81%) |
 
 ### `tools/make-icons.mjs`
 

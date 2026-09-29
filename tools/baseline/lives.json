@@ -7,282 +7,283 @@
     "attentive": {
       "runs": 1000,
       "teen": 1,
-      "adult": 0.998,
-      "fullLife": 0.991,
-      "medianDays": 7,
-      "mistakes": 0.57,
+      "segfaultBeforeTeen": 0.621,
+      "adult": 0.999,
+      "fullLife": 0.996,
+      "medianDays": 5,
+      "mistakes": 0.32,
       "deaths": {
-        "end of life cycle": 0.991,
-        "integrity collapse": 0.009
+        "end of life cycle": 0.996,
+        "integrity collapse": 0.004
       },
       "teens": {
-        "kernel": 1
+        "kernel": 0.997,
+        "shell": 0.003
       },
       "adults": {
-        "daemon": 0.639,
-        "firewall": 0.277,
-        "chrome": 0.071,
-        "ghost": 0.01,
-        "glitch": 0.001
+        "daemon": 0.587,
+        "firewall": 0.303,
+        "chrome": 0.108,
+        "ghost": 0.001
       },
       "mistakeKinds": {
-        "heat": 0,
-        "charge": 0.01,
-        "sync": 0.01
+        "sync": 0,
+        "charge": 0.01
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.98
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
-        "allegiance": -7.94,
-        "stability": 18.75
+        "allegiance": -5.69,
+        "stability": 13.55
       },
       "atAdult": {
-        "allegiance": -3.33,
-        "absAllegiance": 6.67,
-        "stability": 8.41,
-        "wins": 18.41,
-        "mistakes": 0.21
+        "allegiance": -2.37,
+        "absAllegiance": 5.59,
+        "stability": 6.26,
+        "wins": 13.63,
+        "mistakes": 0.12
       },
       "atTeen": {
-        "allegiance": -0.62,
-        "absAllegiance": 3.41,
-        "stability": 2.98,
-        "absStability": 3.08,
+        "allegiance": -0.46,
+        "absAllegiance": 3.06,
+        "stability": 3.02,
+        "absStability": 3.1,
         "mistakes": 0.04,
         "balancedWithin": {
-          "w1": 0.028,
-          "w1.5": 0.069,
-          "w2": 0.133,
-          "w3": 0.279
+          "w1": 0.03,
+          "w1.5": 0.065,
+          "w2": 0.122,
+          "w3": 0.286
         },
-        "wins": 6.11,
-        "minWins": 0.79,
-        "ghostPathPlay": 0.02,
-        "ghostPathPlayOnce": 0.227,
-        "ghostPath": 0.301
+        "wins": 5.27,
+        "minWins": 0.62,
+        "ghostPathPlay": 0.003,
+        "ghostPathPlayOnce": 0.2,
+        "ghostPath": 0.322
       },
-      "wins": 43.81,
-      "events": 13.83,
-      "traces": 7.86,
-      "tracesIgnored": 0.01,
+      "wins": 31,
+      "events": 9.68,
+      "traces": 5.5,
+      "tracesIgnored": 0,
       "itemsHeld": 6,
       "netruns": {
-        "runs": 30.65,
-        "disconnects": 0.55,
-        "fragments": 16.88
+        "runs": 21.93,
+        "disconnects": 0.31,
+        "fragments": 14.3
       }
     },
     "casual": {
       "runs": 1000,
-      "teen": 0.977,
-      "adult": 0.931,
-      "fullLife": 0.792,
-      "medianDays": 7,
-      "mistakes": 4,
+      "teen": 0.999,
+      "segfaultBeforeTeen": 0.302,
+      "adult": 0.947,
+      "fullLife": 0.88,
+      "medianDays": 5,
+      "mistakes": 2.86,
       "deaths": {
-        "end of life cycle": 0.792,
-        "integrity collapse": 0.148,
-        "neglect": 0.06
+        "end of life cycle": 0.88,
+        "integrity collapse": 0.12
       },
       "teens": {
-        "kernel": 0.966,
-        "stub": 0.011
+        "kernel": 0.997,
+        "shell": 0.002
       },
       "adults": {
-        "chrome": 0.285,
-        "firewall": 0.28,
-        "daemon": 0.252,
-        "glitch": 0.113,
-        "ghost": 0.001
+        "firewall": 0.329,
+        "chrome": 0.288,
+        "daemon": 0.221,
+        "glitch": 0.109
       },
       "mistakeKinds": {
-        "sync": 2.56,
-        "charge": 0.59,
-        "heat": 0.03
+        "sync": 1.85,
+        "charge": 0.41,
+        "heat": 0.02
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 1.92,
-        "adult": 3.57
+        "baby": 0.71,
+        "teen": 1.38,
+        "adult": 2.63
       },
       "axes": {
-        "allegiance": 0.36,
-        "stability": 1.34
+        "allegiance": 0.15,
+        "stability": 1.2
       },
       "atAdult": {
-        "allegiance": 0.17,
-        "absAllegiance": 4.97,
-        "stability": 1,
-        "wins": 17.87,
-        "mistakes": 1.76
+        "allegiance": -0.21,
+        "absAllegiance": 4.36,
+        "stability": 0.73,
+        "wins": 13.33,
+        "mistakes": 1.24
       },
       "atTeen": {
-        "allegiance": 0.03,
-        "absAllegiance": 2.81,
-        "stability": 0.53,
-        "absStability": 1.7,
-        "mistakes": 0.52,
+        "allegiance": 0.08,
+        "absAllegiance": 2.43,
+        "stability": 1.34,
+        "absStability": 1.69,
+        "mistakes": 0.12,
         "balancedWithin": {
-          "w1": 0.098,
-          "w1.5": 0.161,
-          "w2": 0.311,
-          "w3": 0.553
+          "w1": 0.113,
+          "w1.5": 0.188,
+          "w2": 0.356,
+          "w3": 0.641
         },
-        "wins": 6.01,
-        "minWins": 0.68,
-        "ghostPathPlay": 0.004,
-        "ghostPathPlayOnce": 0.125,
-        "ghostPath": 0.216
+        "wins": 4.9,
+        "minWins": 0.49,
+        "ghostPathPlay": 0.002,
+        "ghostPathPlayOnce": 0.163,
+        "ghostPath": 0.321
       },
-      "wins": 39.08,
-      "events": 12.22,
-      "traces": 6.78,
-      "tracesIgnored": 2.03,
-      "itemsHeld": 5.85,
+      "wins": 28.15,
+      "events": 8.87,
+      "traces": 4.95,
+      "tracesIgnored": 1.46,
+      "itemsHeld": 5.76,
       "netruns": {
-        "runs": 7.36,
-        "disconnects": 0.82,
-        "fragments": 5.93
+        "runs": 5.21,
+        "disconnects": 0.57,
+        "fragments": 4.26
       }
     },
     "worker": {
       "runs": 1000,
-      "teen": 0.982,
-      "adult": 0.89,
-      "fullLife": 0.516,
-      "medianDays": 7,
-      "mistakes": 5.99,
+      "teen": 0.992,
+      "segfaultBeforeTeen": 0.155,
+      "adult": 0.932,
+      "fullLife": 0.81,
+      "medianDays": 5,
+      "mistakes": 4.29,
       "deaths": {
-        "end of life cycle": 0.516,
-        "integrity collapse": 0.277,
-        "neglect": 0.207
+        "end of life cycle": 0.81,
+        "integrity collapse": 0.178,
+        "neglect": 0.012
       },
       "teens": {
-        "kernel": 0.981,
-        "stub": 0.001
+        "kernel": 0.992
       },
       "adults": {
-        "glitch": 0.348,
-        "chrome": 0.3,
-        "firewall": 0.204,
-        "daemon": 0.038
+        "chrome": 0.312,
+        "glitch": 0.295,
+        "firewall": 0.247,
+        "daemon": 0.078
       },
       "mistakeKinds": {
-        "charge": 2.76,
-        "sync": 3.13,
-        "heat": 0.07
+        "sync": 2.25,
+        "charge": 1.98,
+        "heat": 0.04
       },
       "stageDays": {
-        "baby": 0.99,
-        "teen": 1.87,
-        "adult": 2.96
+        "baby": 0.71,
+        "teen": 1.36,
+        "adult": 2.5
       },
       "axes": {
-        "allegiance": 1.49,
-        "stability": -8.7
+        "allegiance": 0.96,
+        "stability": -5.93
       },
       "atAdult": {
-        "allegiance": 0.77,
-        "absAllegiance": 4.96,
-        "stability": -3.34,
-        "wins": 16.47,
-        "mistakes": 2.58
+        "allegiance": 0.48,
+        "absAllegiance": 3.87,
+        "stability": -2.02,
+        "wins": 11.05,
+        "mistakes": 1.74
       },
       "atTeen": {
-        "allegiance": 0.23,
-        "absAllegiance": 2.72,
-        "stability": 0.26,
-        "absStability": 1.46,
-        "mistakes": 0.26,
+        "allegiance": 0.19,
+        "absAllegiance": 2.5,
+        "stability": 0.62,
+        "absStability": 1.21,
+        "mistakes": 0.06,
         "balancedWithin": {
-          "w1": 0.141,
-          "w1.5": 0.204,
-          "w2": 0.377,
-          "w3": 0.626
+          "w1": 0.182,
+          "w1.5": 0.242,
+          "w2": 0.446,
+          "w3": 0.693
         },
-        "wins": 5.55,
-        "minWins": 0.6,
-        "ghostPathPlay": 0.002,
-        "ghostPathPlayOnce": 0.131,
-        "ghostPath": 0.225
+        "wins": 4.58,
+        "minWins": 0.42,
+        "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0.12,
+        "ghostPath": 0.263
       },
-      "wins": 30.47,
-      "events": 10.87,
-      "traces": 5.98,
-      "tracesIgnored": 2.77,
-      "itemsHeld": 5.04,
+      "wins": 24.2,
+      "events": 8.49,
+      "traces": 4.67,
+      "tracesIgnored": 2.2,
+      "itemsHeld": 4.55,
       "netruns": {
-        "runs": 1.02,
-        "disconnects": 0.03,
-        "fragments": 0.93
+        "runs": 0.88,
+        "disconnects": 0.02,
+        "fragments": 0.8
       }
     },
     "neglectful": {
       "runs": 1000,
-      "teen": 0.408,
-      "adult": 0.033,
+      "teen": 0.598,
+      "segfaultBeforeTeen": 0.058,
+      "adult": 0.146,
       "fullLife": 0,
       "medianDays": 0.82,
-      "mistakes": 3.96,
+      "mistakes": 4,
       "deaths": {
-        "integrity collapse": 0.95,
-        "neglect": 0.05
+        "integrity collapse": 0.944,
+        "neglect": 0.056
       },
       "teens": {
-        "stub": 0.316,
-        "kernel": 0.092
+        "kernel": 0.315,
+        "stub": 0.282
       },
       "adults": {
-        "glitch": 0.033
+        "glitch": 0.142,
+        "chrome": 0.004
       },
       "mistakeKinds": {
-        "charge": 1.78,
-        "sync": 2.08,
-        "heat": 0.1,
+        "charge": 1.8,
+        "sync": 2.1,
+        "heat": 0.11,
         "lights": 0
       },
       "stageDays": {
-        "baby": 0.76,
-        "teen": 0.37,
-        "adult": 0.01
+        "baby": 0.62,
+        "teen": 0.43,
+        "adult": 0.09
       },
       "axes": {
-        "allegiance": 1.01,
-        "stability": -8.35
+        "allegiance": 0.98,
+        "stability": -8.45
       },
       "atAdult": {
-        "allegiance": 4,
-        "absAllegiance": 5.27,
-        "stability": -16.37,
-        "wins": 9.03,
-        "mistakes": 8.09
+        "allegiance": 1.8,
+        "absAllegiance": 3.6,
+        "stability": -12.6,
+        "wins": 6.69,
+        "mistakes": 6.19
       },
       "atTeen": {
-        "allegiance": 1.21,
-        "absAllegiance": 2.18,
-        "stability": -6.49,
-        "absStability": 6.49,
-        "mistakes": 3.14,
+        "allegiance": 0.81,
+        "absAllegiance": 1.82,
+        "stability": -5.48,
+        "absStability": 5.48,
+        "mistakes": 2.6,
         "balancedWithin": {
-          "w1": 0,
-          "w1.5": 0,
-          "w2": 0,
-          "w3": 0.011
+          "w1": 0.001,
+          "w1.5": 0.001,
+          "w2": 0.001,
+          "w3": 0.019
         },
-        "wins": 2.82,
-        "minWins": 0.12,
+        "wins": 2.06,
+        "minWins": 0.04,
         "ghostPathPlay": 0,
         "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
-      "wins": 2.77,
+      "wins": 2.74,
       "events": 2.46,
       "traces": 1.38,
-      "tracesIgnored": 0.91,
-      "itemsHeld": 0.33,
+      "tracesIgnored": 0.92,
+      "itemsHeld": 0.31,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -292,10 +293,11 @@
     "corpo": {
       "runs": 1000,
       "teen": 1,
-      "adult": 0.998,
+      "segfaultBeforeTeen": 0.143,
+      "adult": 0.997,
       "fullLife": 0.995,
-      "medianDays": 7,
-      "mistakes": 0.4,
+      "medianDays": 5,
+      "mistakes": 0.26,
       "deaths": {
         "end of life cycle": 0.995,
         "integrity collapse": 0.005
@@ -304,52 +306,52 @@
         "kernel": 1
       },
       "adults": {
-        "chrome": 0.998
+        "chrome": 0.997
       },
       "mistakeKinds": {
-        "sync": 0.31,
-        "charge": 0.07,
-        "heat": 0.02
+        "sync": 0.2,
+        "charge": 0.05,
+        "heat": 0.01
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.99
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
-        "allegiance": 78.35,
-        "stability": 20.72
+        "allegiance": 56.05,
+        "stability": 14.83
       },
       "atAdult": {
-        "allegiance": 33.89,
-        "absAllegiance": 33.89,
-        "stability": 8.73,
-        "wins": 19.49,
-        "mistakes": 0.2
+        "allegiance": 25.14,
+        "absAllegiance": 25.14,
+        "stability": 6.25,
+        "wins": 14.47,
+        "mistakes": 0.15
       },
       "atTeen": {
-        "allegiance": 11.23,
-        "absAllegiance": 11.23,
-        "stability": 2.98,
-        "absStability": 3.01,
-        "mistakes": 0.04,
+        "allegiance": 9.72,
+        "absAllegiance": 9.72,
+        "stability": 2.95,
+        "absStability": 2.97,
+        "mistakes": 0.01,
         "balancedWithin": {
           "w1": 0,
           "w1.5": 0,
           "w2": 0,
           "w3": 0
         },
-        "wins": 6.36,
-        "minWins": 0.74,
+        "wins": 5.49,
+        "minWins": 0.59,
         "ghostPathPlay": 0,
         "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
-      "wins": 42.6,
-      "events": 13.46,
-      "traces": 7.42,
-      "tracesIgnored": 0.39,
-      "itemsHeld": 5.78,
+      "wins": 30.52,
+      "events": 9.71,
+      "traces": 5.38,
+      "tracesIgnored": 0.27,
+      "itemsHeld": 5.13,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -358,65 +360,66 @@
     },
     "runner": {
       "runs": 1000,
-      "teen": 0.998,
-      "adult": 0.993,
-      "fullLife": 0.987,
-      "medianDays": 7,
-      "mistakes": 0.51,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.2,
+      "adult": 0.999,
+      "fullLife": 0.994,
+      "medianDays": 5,
+      "mistakes": 0.38,
       "deaths": {
-        "end of life cycle": 0.987,
-        "integrity collapse": 0.013
+        "end of life cycle": 0.994,
+        "integrity collapse": 0.006
       },
       "teens": {
-        "kernel": 0.998
+        "kernel": 1
       },
       "adults": {
-        "firewall": 0.993
+        "firewall": 0.999
       },
       "mistakeKinds": {
-        "sync": 0.35,
-        "charge": 0.15,
-        "heat": 0.02
+        "charge": 0.12,
+        "sync": 0.25,
+        "heat": 0.01
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 1.99,
-        "adult": 3.96
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
-        "allegiance": -95.97,
-        "stability": 11.65
+        "allegiance": -68.79,
+        "stability": 8.53
       },
       "atAdult": {
-        "allegiance": -41.02,
-        "absAllegiance": 41.02,
-        "stability": 4.43,
-        "wins": 18.23,
-        "mistakes": 0.2
+        "allegiance": -30.2,
+        "absAllegiance": 30.2,
+        "stability": 3.15,
+        "wins": 13.62,
+        "mistakes": 0.17
       },
       "atTeen": {
-        "allegiance": -13.32,
-        "absAllegiance": 13.32,
-        "stability": 1.68,
-        "absStability": 2,
-        "mistakes": 0.04,
+        "allegiance": -11.46,
+        "absAllegiance": 11.46,
+        "stability": 1.73,
+        "absStability": 1.99,
+        "mistakes": 0,
         "balancedWithin": {
           "w1": 0,
           "w1.5": 0,
           "w2": 0,
           "w3": 0
         },
-        "wins": 6,
-        "minWins": 0.7,
+        "wins": 5.24,
+        "minWins": 0.58,
         "ghostPathPlay": 0,
         "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
-      "wins": 42.74,
-      "events": 12.96,
-      "traces": 7.41,
-      "tracesIgnored": 0.37,
-      "itemsHeld": 5.82,
+      "wins": 30.68,
+      "events": 9.48,
+      "traces": 5.52,
+      "tracesIgnored": 0.29,
+      "itemsHeld": 5.28,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -425,70 +428,70 @@
     },
     "overclocker": {
       "runs": 1000,
-      "teen": 0.995,
-      "adult": 0.983,
-      "fullLife": 0.954,
-      "medianDays": 7,
-      "mistakes": 1.22,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.157,
+      "adult": 0.988,
+      "fullLife": 0.973,
+      "medianDays": 5,
+      "mistakes": 0.86,
       "deaths": {
-        "end of life cycle": 0.954,
-        "integrity collapse": 0.046
+        "end of life cycle": 0.973,
+        "integrity collapse": 0.027
       },
       "teens": {
-        "kernel": 0.993,
-        "stub": 0.002
+        "kernel": 0.999,
+        "shell": 0.001
       },
       "adults": {
-        "glitch": 0.655,
-        "firewall": 0.174,
-        "chrome": 0.152,
-        "daemon": 0.001,
-        "ghost": 0.001
+        "glitch": 0.578,
+        "firewall": 0.213,
+        "chrome": 0.186,
+        "daemon": 0.011
       },
       "mistakeKinds": {
-        "sync": 0.36,
-        "heat": 0.73,
-        "charge": 0.13
+        "heat": 0.51,
+        "sync": 0.26,
+        "charge": 0.09
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 1.98,
-        "adult": 3.89
+        "baby": 0.71,
+        "teen": 1.41,
+        "adult": 2.83
       },
       "axes": {
-        "allegiance": -0.94,
-        "stability": -15.02
+        "allegiance": -0.98,
+        "stability": -10.74
       },
       "atAdult": {
-        "allegiance": -0.53,
-        "absAllegiance": 5.05,
-        "stability": -7.15,
-        "wins": 18.49,
-        "mistakes": 0.53
+        "allegiance": -0.63,
+        "absAllegiance": 4.26,
+        "stability": -4.99,
+        "wins": 13.77,
+        "mistakes": 0.38
       },
       "atTeen": {
-        "allegiance": -0.29,
-        "absAllegiance": 2.75,
-        "stability": -2.09,
-        "absStability": 2.32,
-        "mistakes": 0.15,
+        "allegiance": -0.15,
+        "absAllegiance": 2.6,
+        "stability": -2.03,
+        "absStability": 2.26,
+        "mistakes": 0.1,
         "balancedWithin": {
-          "w1": 0.088,
-          "w1.5": 0.137,
-          "w2": 0.273,
-          "w3": 0.473
+          "w1": 0.096,
+          "w1.5": 0.147,
+          "w2": 0.287,
+          "w3": 0.509
         },
-        "wins": 5.95,
-        "minWins": 0.67,
-        "ghostPathPlay": 0.004,
-        "ghostPathPlayOnce": 0.031,
-        "ghostPath": 0.04
+        "wins": 5.11,
+        "minWins": 0.53,
+        "ghostPathPlay": 0.001,
+        "ghostPathPlayOnce": 0.035,
+        "ghostPath": 0.051
       },
-      "wins": 40.14,
-      "events": 14.24,
-      "traces": 7.36,
-      "tracesIgnored": 0.39,
-      "itemsHeld": 5.05,
+      "wins": 29.27,
+      "events": 10.28,
+      "traces": 5.3,
+      "tracesIgnored": 0.28,
+      "itemsHeld": 4.1,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -498,67 +501,69 @@
     "sysadmin": {
       "runs": 1000,
       "teen": 1,
+      "segfaultBeforeTeen": 0.222,
       "adult": 1,
-      "fullLife": 0.999,
-      "medianDays": 7,
+      "fullLife": 1,
+      "medianDays": 5,
       "mistakes": 0.02,
       "deaths": {
-        "end of life cycle": 0.999,
-        "integrity collapse": 0.001
+        "end of life cycle": 1
       },
       "teens": {
-        "kernel": 1
+        "kernel": 0.998,
+        "shell": 0.002
       },
       "adults": {
-        "daemon": 0.832,
-        "firewall": 0.072,
-        "chrome": 0.055,
-        "ghost": 0.041
+        "daemon": 0.777,
+        "firewall": 0.135,
+        "chrome": 0.078,
+        "ghost": 0.009,
+        "glitch": 0.001
       },
       "mistakeKinds": {
         "sync": 0.01,
-        "heat": 0,
-        "charge": 0.01
+        "charge": 0,
+        "heat": 0.01
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 4
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.88
       },
       "axes": {
-        "allegiance": -0.95,
-        "stability": 24.72
+        "allegiance": -1.09,
+        "stability": 17.61
       },
       "atAdult": {
-        "allegiance": -0.1,
-        "absAllegiance": 5.06,
-        "stability": 10.43,
-        "wins": 19.9,
+        "allegiance": -0.23,
+        "absAllegiance": 4.41,
+        "stability": 7.49,
+        "wins": 14.98,
         "mistakes": 0.01
       },
       "atTeen": {
-        "allegiance": 0.02,
-        "absAllegiance": 2.81,
-        "stability": 3.51,
-        "absStability": 3.53,
+        "allegiance": 0,
+        "absAllegiance": 2.76,
+        "stability": 3.42,
+        "absStability": 3.44,
         "mistakes": 0,
         "balancedWithin": {
-          "w1": 0.018,
-          "w1.5": 0.032,
-          "w2": 0.082,
-          "w3": 0.253
+          "w1": 0.013,
+          "w1.5": 0.024,
+          "w2": 0.078,
+          "w3": 0.259
         },
-        "wins": 6.61,
-        "minWins": 0.87,
-        "ghostPathPlay": 0.036,
-        "ghostPathPlayOnce": 0.276,
-        "ghostPath": 0.331
+        "wins": 5.62,
+        "minWins": 0.69,
+        "ghostPathPlay": 0.002,
+        "ghostPathPlayOnce": 0.213,
+        "ghostPath": 0.307
       },
-      "wins": 47.53,
-      "events": 13.74,
-      "traces": 7.75,
+      "wins": 34.21,
+      "events": 9.82,
+      "traces": 5.6,
       "tracesIgnored": 0,
-      "itemsHeld": 5.94,
+      "itemsHeld": 5.56,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -568,64 +573,66 @@
     "ghosthunter": {
       "runs": 1000,
       "teen": 1,
+      "segfaultBeforeTeen": 0.26,
       "adult": 0.999,
-      "fullLife": 0.999,
-      "medianDays": 7,
+      "fullLife": 0.997,
+      "medianDays": 5,
       "mistakes": 0,
       "deaths": {
-        "end of life cycle": 0.999,
-        "integrity collapse": 0.001
+        "end of life cycle": 0.997,
+        "integrity collapse": 0.003
       },
       "teens": {
-        "kernel": 1
+        "shell": 0.627,
+        "kernel": 0.373
       },
       "adults": {
-        "ghost": 0.992,
-        "daemon": 0.007
+        "ghost": 0.993,
+        "daemon": 0.006
       },
       "mistakeKinds": {
         "charge": 0,
         "heat": 0
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 4
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
         "allegiance": 0.52,
-        "stability": 24.64
+        "stability": 17.61
       },
       "atAdult": {
         "allegiance": 0.49,
         "absAllegiance": 0.49,
-        "stability": 10.48,
-        "wins": 34.84,
+        "stability": 7.42,
+        "wins": 25.79,
         "mistakes": 0
       },
       "atTeen": {
-        "allegiance": 0.5,
-        "absAllegiance": 0.5,
-        "stability": 3.5,
-        "absStability": 3.52,
+        "allegiance": 0.53,
+        "absAllegiance": 0.53,
+        "stability": 3.37,
+        "absStability": 3.38,
         "mistakes": 0,
         "balancedWithin": {
-          "w1": 0.048,
-          "w1.5": 0.088,
-          "w2": 0.154,
-          "w3": 0.374
+          "w1": 0.043,
+          "w1.5": 0.086,
+          "w2": 0.17,
+          "w3": 0.417
         },
-        "wins": 11.79,
-        "minWins": 1.95,
-        "ghostPathPlay": 0.743,
-        "ghostPathPlayOnce": 0.968,
-        "ghostPath": 0.985
+        "wins": 10.57,
+        "minWins": 1.71,
+        "ghostPathPlay": 0.627,
+        "ghostPathPlayOnce": 0.952,
+        "ghostPath": 0.983
       },
-      "wins": 72.33,
-      "events": 13.8,
-      "traces": 7.84,
+      "wins": 51.98,
+      "events": 9.71,
+      "traces": 5.53,
       "tracesIgnored": 0,
-      "itemsHeld": 5.98,
+      "itemsHeld": 5.79,
       "netruns": {
         "runs": 0,
         "disconnects": 0,
@@ -634,82 +641,83 @@
     },
     "daredevil": {
       "runs": 1000,
-      "teen": 0.999,
-      "adult": 0.994,
-      "fullLife": 0.987,
-      "medianDays": 7,
-      "mistakes": 1.22,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.694,
+      "adult": 0.998,
+      "fullLife": 0.991,
+      "medianDays": 5,
+      "mistakes": 0.86,
       "deaths": {
-        "end of life cycle": 0.987,
-        "integrity collapse": 0.013
+        "end of life cycle": 0.991,
+        "integrity collapse": 0.009
       },
       "teens": {
-        "kernel": 0.999
+        "kernel": 1
       },
       "adults": {
-        "firewall": 0.61,
-        "glitch": 0.194,
-        "chrome": 0.125,
-        "daemon": 0.06,
-        "ghost": 0.005
+        "firewall": 0.575,
+        "glitch": 0.176,
+        "chrome": 0.161,
+        "daemon": 0.086
       },
       "mistakeKinds": {
-        "heat": 0.49,
+        "heat": 0.33,
         "sync": 0.01,
         "charge": 0.01
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.96
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.86
       },
       "axes": {
-        "allegiance": -14.89,
-        "stability": -7.81
+        "allegiance": -10.59,
+        "stability": -5.6
       },
       "atAdult": {
-        "allegiance": -5.93,
-        "absAllegiance": 7.81,
-        "stability": -2.05,
-        "wins": 18.04,
-        "mistakes": 0.56
+        "allegiance": -4.47,
+        "absAllegiance": 6.63,
+        "stability": -1.56,
+        "wins": 13.35,
+        "mistakes": 0.39
       },
       "atTeen": {
-        "allegiance": -1.85,
-        "absAllegiance": 3.81,
-        "stability": -0.46,
-        "absStability": 1.82,
-        "mistakes": 0.13,
+        "allegiance": -1.82,
+        "absAllegiance": 3.58,
+        "stability": -0.64,
+        "absStability": 1.77,
+        "mistakes": 0.15,
         "balancedWithin": {
-          "w1": 0.078,
-          "w1.5": 0.152,
-          "w2": 0.233,
-          "w3": 0.41
+          "w1": 0.085,
+          "w1.5": 0.181,
+          "w2": 0.269,
+          "w3": 0.455
         },
-        "wins": 5.75,
-        "minWins": 0.7,
-        "ghostPathPlay": 0.002,
-        "ghostPathPlayOnce": 0.072,
-        "ghostPath": 0.117
+        "wins": 4.81,
+        "minWins": 0.52,
+        "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0.064,
+        "ghostPath": 0.136
       },
-      "wins": 41.96,
-      "events": 13.43,
-      "traces": 7.72,
+      "wins": 30,
+      "events": 9.61,
+      "traces": 5.61,
       "tracesIgnored": 0.01,
       "itemsHeld": 6,
       "netruns": {
-        "runs": 30.19,
-        "disconnects": 0.71,
-        "fragments": 16.69
+        "runs": 21.66,
+        "disconnects": 0.51,
+        "fragments": 14.31
       }
     },
     "steer-chrome": {
       "runs": 1000,
       "teen": 1,
-      "adult": 0.998,
+      "segfaultBeforeTeen": 0.638,
+      "adult": 1,
       "fullLife": 0.997,
-      "medianDays": 7,
-      "mistakes": 0.63,
+      "medianDays": 5,
+      "mistakes": 0.34,
       "deaths": {
         "end of life cycle": 0.997,
         "integrity collapse": 0.003
@@ -718,34 +726,34 @@
         "kernel": 1
       },
       "adults": {
-        "chrome": 0.998
+        "chrome": 1
       },
       "mistakeKinds": {
         "sync": 0.01,
-        "heat": 0,
-        "charge": 0
+        "charge": 0,
+        "heat": 0
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.99
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
-        "allegiance": 118.23,
-        "stability": 34.65
+        "allegiance": 84.32,
+        "stability": 24.78
       },
       "atAdult": {
-        "allegiance": 52.73,
-        "absAllegiance": 52.73,
-        "stability": 14.13,
-        "wins": 19.01,
-        "mistakes": 0.15
+        "allegiance": 38.44,
+        "absAllegiance": 38.44,
+        "stability": 10.15,
+        "wins": 14.12,
+        "mistakes": 0.09
       },
       "atTeen": {
-        "allegiance": 16.51,
-        "absAllegiance": 16.51,
-        "stability": 4.68,
-        "absStability": 4.68,
+        "allegiance": 14.66,
+        "absAllegiance": 14.66,
+        "stability": 4.5,
+        "absStability": 4.5,
         "mistakes": 0.03,
         "balancedWithin": {
           "w1": 0,
@@ -753,297 +761,306 @@
           "w2": 0,
           "w3": 0
         },
-        "wins": 6.3,
-        "minWins": 0.82,
+        "wins": 5.37,
+        "minWins": 0.63,
         "ghostPathPlay": 0,
         "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
-      "wins": 38.82,
-      "events": 13.84,
-      "traces": 7.73,
+      "wins": 27.74,
+      "events": 10,
+      "traces": 5.64,
       "tracesIgnored": 0.01,
       "itemsHeld": 6,
       "netruns": {
-        "runs": 30.66,
-        "disconnects": 0.62,
-        "fragments": 16.95
+        "runs": 21.96,
+        "disconnects": 0.33,
+        "fragments": 14.66
       }
     },
     "steer-firewall": {
       "runs": 1000,
-      "teen": 0.999,
-      "adult": 0.997,
-      "fullLife": 0.996,
-      "medianDays": 7,
-      "mistakes": 0.25,
-      "deaths": {
-        "end of life cycle": 0.996,
-        "integrity collapse": 0.004
-      },
-      "teens": {
-        "kernel": 0.999
-      },
-      "adults": {
-        "firewall": 0.997
-      },
-      "mistakeKinds": {
-        "charge": 0.02,
-        "heat": 0,
-        "sync": 0.01
-      },
-      "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.99
-      },
-      "axes": {
-        "allegiance": -161.14,
-        "stability": 23.2
-      },
-      "atAdult": {
-        "allegiance": -67.48,
-        "absAllegiance": 67.48,
-        "stability": 8.75,
-        "wins": 17.19,
-        "mistakes": 0.19
-      },
-      "atTeen": {
-        "allegiance": -20.45,
-        "absAllegiance": 20.45,
-        "stability": 3.49,
-        "absStability": 3.55,
-        "mistakes": 0.03,
-        "balancedWithin": {
-          "w1": 0,
-          "w1.5": 0,
-          "w2": 0,
-          "w3": 0
-        },
-        "wins": 5.74,
-        "minWins": 0.72,
-        "ghostPathPlay": 0,
-        "ghostPathPlayOnce": 0,
-        "ghostPath": 0
-      },
-      "wins": 39.54,
-      "events": 13.51,
-      "traces": 7.82,
-      "tracesIgnored": 0.01,
-      "itemsHeld": 6,
-      "netruns": {
-        "runs": 30.72,
-        "disconnects": 0.23,
-        "fragments": 17.41
-      }
-    },
-    "steer-daemon": {
-      "runs": 1000,
-      "teen": 0.999,
-      "adult": 0.999,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.636,
+      "adult": 0.998,
       "fullLife": 0.995,
-      "medianDays": 7,
-      "mistakes": 0.59,
+      "medianDays": 5,
+      "mistakes": 0.17,
       "deaths": {
         "end of life cycle": 0.995,
         "integrity collapse": 0.005
       },
       "teens": {
-        "kernel": 0.999
+        "kernel": 1
       },
       "adults": {
-        "daemon": 0.967,
-        "ghost": 0.032
+        "firewall": 0.998
       },
       "mistakeKinds": {
-        "heat": 0,
-        "sync": 0.01,
-        "charge": 0
+        "heat": 0.01,
+        "charge": 0.01,
+        "sync": 0
       },
       "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.99
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
       },
       "axes": {
-        "allegiance": 0.25,
-        "stability": 28.86
+        "allegiance": -115.22,
+        "stability": 16.68
       },
       "atAdult": {
-        "allegiance": 0.27,
-        "absAllegiance": 0.5,
-        "stability": 12.03,
-        "wins": 17.84,
-        "mistakes": 0.15
+        "allegiance": -49.25,
+        "absAllegiance": 49.25,
+        "stability": 6.55,
+        "wins": 12.82,
+        "mistakes": 0.14
       },
       "atTeen": {
-        "allegiance": 0.3,
-        "absAllegiance": 0.52,
-        "stability": 4.12,
-        "absStability": 4.14,
-        "mistakes": 0.02,
-        "balancedWithin": {
-          "w1": 0.03,
-          "w1.5": 0.057,
-          "w2": 0.102,
-          "w3": 0.251
-        },
-        "wins": 5.94,
-        "minWins": 0.75,
-        "ghostPathPlay": 0.045,
-        "ghostPathPlayOnce": 0.697,
-        "ghostPath": 0.984
-      },
-      "wins": 42.29,
-      "events": 13.67,
-      "traces": 7.89,
-      "tracesIgnored": 0.01,
-      "itemsHeld": 6,
-      "netruns": {
-        "runs": 30.72,
-        "disconnects": 0.58,
-        "fragments": 17.08
-      }
-    },
-    "steer-glitch": {
-      "runs": 1000,
-      "teen": 0.999,
-      "adult": 0.993,
-      "fullLife": 0.977,
-      "medianDays": 7,
-      "mistakes": 2.03,
-      "deaths": {
-        "end of life cycle": 0.977,
-        "integrity collapse": 0.023
-      },
-      "teens": {
-        "kernel": 0.999
-      },
-      "adults": {
-        "glitch": 0.96,
-        "daemon": 0.018,
-        "chrome": 0.011,
-        "firewall": 0.003,
-        "ghost": 0.001
-      },
-      "mistakeKinds": {
-        "heat": 0.95,
-        "sync": 0.01,
-        "charge": 0.01
-      },
-      "stageDays": {
-        "baby": 1,
-        "teen": 1.99,
-        "adult": 3.96
-      },
-      "axes": {
-        "allegiance": 0.25,
-        "stability": -26.08
-      },
-      "atAdult": {
-        "allegiance": 0.28,
-        "absAllegiance": 0.53,
-        "stability": -8.89,
-        "wins": 18.42,
-        "mistakes": 0.83
-      },
-      "atTeen": {
-        "allegiance": 0.29,
-        "absAllegiance": 0.53,
-        "stability": -1.82,
-        "absStability": 2.56,
-        "mistakes": 0.18,
-        "balancedWithin": {
-          "w1": 0.253,
-          "w1.5": 0.377,
-          "w2": 0.484,
-          "w3": 0.658
-        },
-        "wins": 6.16,
-        "minWins": 0.79,
-        "ghostPathPlay": 0.009,
-        "ghostPathPlayOnce": 0.189,
-        "ghostPath": 0.253
-      },
-      "wins": 39.88,
-      "events": 13.54,
-      "traces": 7.73,
-      "tracesIgnored": 0,
-      "itemsHeld": 6,
-      "netruns": {
-        "runs": 27.87,
-        "disconnects": 1.06,
-        "fragments": 15.95
-      }
-    },
-    "steer-stub": {
-      "runs": 1000,
-      "teen": 1,
-      "adult": 0.999,
-      "fullLife": 0.991,
-      "medianDays": 7,
-      "mistakes": 3.57,
-      "deaths": {
-        "end of life cycle": 0.991,
-        "integrity collapse": 0.009
-      },
-      "teens": {
-        "stub": 1
-      },
-      "adults": {
-        "firewall": 0.54,
-        "chrome": 0.23,
-        "daemon": 0.146,
-        "glitch": 0.083
-      },
-      "mistakeKinds": {
-        "charge": 2.01,
-        "sync": 1.16,
-        "heat": 0
-      },
-      "stageDays": {
-        "baby": 1,
-        "teen": 2,
-        "adult": 3.99
-      },
-      "axes": {
-        "allegiance": -8.17,
-        "stability": 11.31
-      },
-      "atAdult": {
-        "allegiance": -3.29,
-        "absAllegiance": 6.55,
-        "stability": 0.66,
-        "wins": 17.34,
-        "mistakes": 3.32
-      },
-      "atTeen": {
-        "allegiance": -0.78,
-        "absAllegiance": 3.24,
-        "stability": -4.83,
-        "absStability": 4.83,
-        "mistakes": 3.17,
+        "allegiance": -17.99,
+        "absAllegiance": 17.99,
+        "stability": 3.47,
+        "absStability": 3.53,
+        "mistakes": 0.04,
         "balancedWithin": {
           "w1": 0,
           "w1.5": 0,
           "w2": 0,
           "w3": 0
         },
-        "wins": 4.88,
-        "minWins": 0.53,
+        "wins": 4.87,
+        "minWins": 0.55,
         "ghostPathPlay": 0,
         "ghostPathPlayOnce": 0,
         "ghostPath": 0
       },
-      "wins": 42.3,
-      "events": 13.77,
-      "traces": 7.93,
+      "wins": 28.07,
+      "events": 9.57,
+      "traces": 5.53,
+      "tracesIgnored": 0,
+      "itemsHeld": 6,
+      "netruns": {
+        "runs": 21.92,
+        "disconnects": 0.16,
+        "fragments": 14.85
+      }
+    },
+    "steer-daemon": {
+      "runs": 1000,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.608,
+      "adult": 0.998,
+      "fullLife": 0.997,
+      "medianDays": 5,
+      "mistakes": 0.4,
+      "deaths": {
+        "end of life cycle": 0.997,
+        "integrity collapse": 0.003
+      },
+      "teens": {
+        "kernel": 0.996,
+        "shell": 0.004
+      },
+      "adults": {
+        "daemon": 0.991,
+        "ghost": 0.005,
+        "chrome": 0.002
+      },
+      "mistakeKinds": {
+        "charge": 0.01,
+        "heat": 0.01,
+        "sync": 0.01
+      },
+      "stageDays": {
+        "baby": 0.71,
+        "teen": 1.42,
+        "adult": 2.87
+      },
+      "axes": {
+        "allegiance": 0.24,
+        "stability": 20.62
+      },
+      "atAdult": {
+        "allegiance": 0.25,
+        "absAllegiance": 0.51,
+        "stability": 8.64,
+        "wins": 13.27,
+        "mistakes": 0.12
+      },
+      "atTeen": {
+        "allegiance": 0.31,
+        "absAllegiance": 0.53,
+        "stability": 4,
+        "absStability": 4.02,
+        "mistakes": 0.03,
+        "balancedWithin": {
+          "w1": 0.032,
+          "w1.5": 0.058,
+          "w2": 0.1,
+          "w3": 0.269
+        },
+        "wins": 5.06,
+        "minWins": 0.6,
+        "ghostPathPlay": 0.004,
+        "ghostPathPlayOnce": 0.585,
+        "ghostPath": 0.988
+      },
+      "wins": 30.18,
+      "events": 9.59,
+      "traces": 5.45,
       "tracesIgnored": 0.01,
       "itemsHeld": 6,
       "netruns": {
-        "runs": 29.39,
-        "disconnects": 0.39,
-        "fragments": 16.84
+        "runs": 21.91,
+        "disconnects": 0.38,
+        "fragments": 14.51
+      }
+    },
+    "steer-glitch": {
+      "runs": 1000,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.657,
+      "adult": 0.997,
+      "fullLife": 0.988,
+      "medianDays": 5,
+      "mistakes": 1.32,
+      "deaths": {
+        "end of life cycle": 0.988,
+        "integrity collapse": 0.012
+      },
+      "teens": {
+        "kernel": 0.997,
+        "shell": 0.002,
+        "stub": 0.001
+      },
+      "adults": {
+        "glitch": 0.912,
+        "daemon": 0.045,
+        "chrome": 0.032,
+        "firewall": 0.007,
+        "ghost": 0.001
+      },
+      "mistakeKinds": {
+        "heat": 0.61,
+        "sync": 0.01,
+        "charge": 0.01
+      },
+      "stageDays": {
+        "baby": 0.71,
+        "teen": 1.41,
+        "adult": 2.86
+      },
+      "axes": {
+        "allegiance": 0.24,
+        "stability": -18.36
+      },
+      "atAdult": {
+        "allegiance": 0.24,
+        "absAllegiance": 0.49,
+        "stability": -6,
+        "wins": 13.64,
+        "mistakes": 0.53
+      },
+      "atTeen": {
+        "allegiance": 0.32,
+        "absAllegiance": 0.53,
+        "stability": -2.19,
+        "absStability": 2.75,
+        "mistakes": 0.19,
+        "balancedWithin": {
+          "w1": 0.219,
+          "w1.5": 0.325,
+          "w2": 0.44,
+          "w3": 0.613
+        },
+        "wins": 5.26,
+        "minWins": 0.61,
+        "ghostPathPlay": 0.002,
+        "ghostPathPlayOnce": 0.138,
+        "ghostPath": 0.21
+      },
+      "wins": 28.59,
+      "events": 9.56,
+      "traces": 5.49,
+      "tracesIgnored": 0.01,
+      "itemsHeld": 6,
+      "netruns": {
+        "runs": 19.92,
+        "disconnects": 0.69,
+        "fragments": 13.18
+      }
+    },
+    "steer-stub": {
+      "runs": 1000,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.593,
+      "adult": 0.997,
+      "fullLife": 0.995,
+      "medianDays": 5,
+      "mistakes": 3.54,
+      "deaths": {
+        "end of life cycle": 0.995,
+        "integrity collapse": 0.005
+      },
+      "teens": {
+        "stub": 0.977,
+        "kernel": 0.023
+      },
+      "adults": {
+        "firewall": 0.449,
+        "glitch": 0.247,
+        "chrome": 0.245,
+        "daemon": 0.056
+      },
+      "mistakeKinds": {
+        "charge": 1.49,
+        "sync": 0.81,
+        "heat": 0
+      },
+      "stageDays": {
+        "baby": 0.71,
+        "teen": 1.41,
+        "adult": 2.87
+      },
+      "axes": {
+        "allegiance": -5.13,
+        "stability": 5.56
+      },
+      "atAdult": {
+        "allegiance": -2,
+        "absAllegiance": 5.32,
+        "stability": -1.76,
+        "wins": 13.01,
+        "mistakes": 3.41
+      },
+      "atTeen": {
+        "allegiance": -0.54,
+        "absAllegiance": 2.94,
+        "stability": -4.79,
+        "absStability": 4.8,
+        "mistakes": 3.26,
+        "balancedWithin": {
+          "w1": 0,
+          "w1.5": 0,
+          "w2": 0.001,
+          "w3": 0.003
+        },
+        "wins": 4.35,
+        "minWins": 0.45,
+        "ghostPathPlay": 0,
+        "ghostPathPlayOnce": 0,
+        "ghostPath": 0
+      },
+      "wins": 29.58,
+      "events": 9.79,
+      "traces": 5.61,
+      "tracesIgnored": 0.01,
+      "itemsHeld": 6,
+      "netruns": {
+        "runs": 21.01,
+        "disconnects": 0.23,
+        "fragments": 14.22
       }
     }
   }

@@ -46,7 +46,8 @@ export const ARCHETYPES = {
   'steer-firewall': { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie' },
   'steer-daemon': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', anomaly: 'orderly' },
   'steer-glitch': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', coolAt: 88, anomaly: 'risky' },
-  // Attentive, but lets three faults happen in the first day to get a Stub teen: what that costs today.
+  // Attentive, but takes three faults as a baby for a Stub teen: a Segfault (2) if it finds one,
+// then lets Charge or Sync run out for the rest.
   'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
 };
 
@@ -57,6 +58,10 @@ export function checkIn(s, p, now, rng, ctx) {
     if (slot < 0 || p.noItems) return false;
     return doAct('use', { slot }).ok;
   };
+  // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else throws it away.
+  const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
+  for (let i = s.inventory.length - 1; i >= 0 && !wantsFaults; i--) if (s.inventory[i] === 'segfault') doAct('discard', { slot: i });
+  if (wantsFaults) useItem('segfault');
   // Items first: they can resolve things more cheaply than actions.
   if (s.event?.type === 'trace' && p.trace !== 'hide') useItem('voucher');
   if (s.stats.heat > 70) useItem('coolant');
@@ -141,11 +146,12 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let teenForm = null;
   const mistakeKinds = {};
   let prevFlags = { ...s.flagged };
+  let segfaultAt = null; // the minute a Segfault first turned up
   let events = 0; // every timed event: traces, intrusions, overflows
   let traces = 0;
   let tracesIgnored = 0;
   let prevEvent = null;
-  while (s.stage !== 'dead' && minute < CFG.lifespanMin + 60) {
+  while (s.stage !== 'dead' && minute < s.life.lifespan + 60) {
     const dayMin = (at(8) + minute) % DAY;
     if (dayMin === 0 || minute === 0) {
       schedule = p.checks.map((c) => ({ c, t: c + Math.round((rng() * 2 - 1) * p.jitter) }));
@@ -166,6 +172,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     // A trace left to run out costs Integrity at once.
     if (prevEvent?.type === 'trace' && !s.event && s.stats.integrity < integrityBefore - 10) tracesIgnored++;
     prevEvent = s.event;
+    if (segfaultAt === null && s.inventory.includes('segfault')) segfaultAt = minute;
     if (s.stage === 'teen' && teenAt === null) {
       teenAt = minute;
       teenForm = s.form;
@@ -198,6 +205,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     atTeen: ctx.atTeen ?? null,
     rootUsed: s.rootUsed,
     trait: s.trait ?? null,
+    life: { ...s.life },
+    segfaultAt,
     fragment: s.fragment ?? null,
     codex: ctx.codex,
     newFragments: ctx.codex.length - codexAtStart,
@@ -241,7 +250,9 @@ export function stats(results) {
   for (const r of results) for (const [k, v] of Object.entries(r.mistakeKinds)) kinds[k] = (kinds[k] ?? 0) + v;
   return {
     runs: n,
-    teen: rate((r) => r.ageMin >= CFG.teenAtMin),
+    teen: rate((r) => r.ageMin >= r.life.teenAt),
+    // A Segfault turned up before the teen stage (what a player steering for a Stub needs).
+    segfaultBeforeTeen: rate((r) => r.segfaultAt !== null && r.segfaultAt < r.life.teenAt),
     adult: rate((r) => r.adultForm),
     fullLife: rate((r) => r.cause === 'end of life cycle'),
     medianDays: round(ages[Math.floor(n / 2)] / DAY, 2),
@@ -348,6 +359,7 @@ function printLife(st, detail) {
   const t = st.atTeen;
   if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
+  console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
   console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments`);
 }
 

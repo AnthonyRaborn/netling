@@ -631,6 +631,19 @@ await scenario('a DISCARD confirm does not carry over to another item', async ({
   assert(JSON.stringify(inv) === '["coolant"]', `wrong item discarded: ${JSON.stringify(inv)}`);
 });
 
+await scenario('a Segfault takes a second press, then adds two faults', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['segfault'] }) }));
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  assert(/FAULTS/.test(await page.textContent('#inv-use')), 'no confirm on the button');
+  assert((await saved(page)).careMistakes === 0, 'used on the first press');
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
+});
+
 await scenario('system actions wait for a running mini-game; a refused result explains why', async ({ open }) => {
   const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stats: { charge: 25, sync: 70, integrity: 100, heat: 20 } }) }));
   await page.click('#btn-play');

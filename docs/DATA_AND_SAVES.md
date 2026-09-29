@@ -53,6 +53,8 @@ Built by `createScript()` in `sim.js`. Fields:
 |---|---|---|
 | `saveVersion` | number | Always `1` today (`SAVE_VERSION`) |
 | `generation` | int | 1-based, shown as `v<generation>.0` |
+| `life` | `{ teenAt, adultAt, lifespan }` | Minutes, fixed at compile from `CFG`. Missing (a save from before the 5-day life), out of order or over 7 days: the 7-day `LEGACY_LIFE` |
+| `newForms` | string[] | Adult forms the player had never raised at compile (tie-break weights). Unknown ids dropped |
 | `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached |
 | `evolvedAt`, `bornAt`, `lastTick`, `diedAt` | ms epoch | `lastTick` is clamped to "now" when loading |
 | `ageMin` | int | Simulated minutes. Excludes hibernation |
@@ -129,7 +131,7 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 - **Strict** (imported codes): only known fields survive.
 - `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free").
 - Fragments are rebuilt from the dead netling if the stored one is unusable.
-- `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel or Stub, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
+- `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel, Stub or Shell, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
 
 ## Versioning and migration
 

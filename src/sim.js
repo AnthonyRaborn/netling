@@ -29,10 +29,20 @@ export const CFG = {
   uptimeStabilityPerHour: 0.1, // awake hours with nothing wrong build stability
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
-  lifespanMin: 7 * 24 * 60,
-  teenAtMin: 24 * 60,
-  adultAtMin: 72 * 60,
+  // A five-day life. Each netling keeps the lengths it compiled with (s.life), so a change here
+  // never shortens one that is already alive.
+  lifespanMin: 5 * 24 * 60,
+  teenAtMin: 17 * 60,
+  adultAtMin: 51 * 60,
   teenGoodCareMaxMistakes: 2,
+  // The Shell: a teen on Ghost's path (Ghost's allegiance band, no chaos, few faults, and every
+  // game won at least this often).
+  shellMaxMistakes: 1,
+  shellMinWinsEach: 2,
+  // Adult evolution: axes within this of each other (or of zero) are a tie, broken at random,
+  // with forms the player has never raised weighted up.
+  tieBand: 0.5,
+  newFormWeight: 1.2,
   // Hibernation: a long pause that freezes the clock. Minimum stay and cooldown keep it for
   // vacations, not for skipping a work day.
   hibernateMinMin: 24 * 60,
@@ -40,8 +50,8 @@ export const CFG = {
   sleepStart: 22,
   sleepEnd: 7,
   ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
-  ghostMinGameWins: 22,
-  ghostMinWinsEach: 4,
+  ghostMinGameWins: 18,
+  ghostMinWinsEach: 3,
   playWinSync: 25,
   playLoseSync: 8,
   // Packet Feast: it ate, so it gets some Charge too (digestion isn't reset: no cache files).
@@ -101,6 +111,10 @@ export const ITEM_CFG = {
   complyDropChance: 0.3,
   shieldMinutes: 360,
   blackIceVirusChance: 0.25,
+  // Segfault: faults on purpose (they count like any other, so ten still end its life).
+  segfaultFaults: 2,
+  // A Segfault can shake loose after a DEFEND, a contained overflow, or a power surge.
+  eventSegfaultChance: 0.1,
 };
 
 // awake: can only be used while it's awake.
@@ -113,12 +127,13 @@ export const ITEMS = {
   memory: { name: 'Memory shard', desc: 'Rewrites one of its quirks at random.' },
   repair: { name: 'Repair kit', desc: 'Restores 40 Integrity. Works while asleep.' },
   overclock: { name: 'Overclock chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
+  segfault: { name: 'Segfault', desc: 'Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life.', awake: true },
 };
 
 // Weighted drop tables per source.
 const DROPS = {
-  win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, repair: 2, memory: 1, overclock: 1 },
-  hide: { blackice: 2, memory: 1, coolant: 1, overclock: 1 },
+  win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, repair: 2, memory: 1, overclock: 1, segfault: 1 },
+  hide: { blackice: 2, memory: 1, coolant: 1, overclock: 1, segfault: 1 },
   comply: { voucher: 3, antivirus: 1, repair: 1 },
   visit: { coolant: 2, booster: 2, repair: 2, memory: 1, overclock: 1 },
 };
@@ -145,6 +160,7 @@ export const SPECIES = {
   bitling: { name: 'Bitling', stage: 'baby' },
   kernel: { name: 'Kernel', stage: 'teen' },
   stub: { name: 'Stub', stage: 'teen' },
+  shell: { name: 'Shell', stage: 'teen' },
   chrome: { name: 'Chrome', stage: 'adult' },
   firewall: { name: 'Firewall', stage: 'adult' },
   daemon: { name: 'Daemon', stage: 'adult' },
@@ -214,10 +230,15 @@ export function rollQuirk(rng, { origin = false } = {}) {
   };
 }
 
+// The seven-day life every netling had before lives were shortened; saves without s.life get it.
+export const LEGACY_LIFE = { teenAt: 24 * 60, adultAt: 72 * 60, lifespan: 7 * 24 * 60 };
+const lifeFromCfg = () => ({ teenAt: CFG.teenAtMin, adultAt: CFG.adultAtMin, lifespan: CFG.lifespanMin });
+
 // A new generation: fresh quirk, with one quirk key copied from the fragment.
+// newForms: adult forms the player has never raised; they win ties a little more often.
 // rootAccess: the codex is complete, so NL-0 watches over this generation,
 // unless NL-0 spent itself rescuing the previous one: then it rests for a generation.
-export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false }) {
+export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [] }) {
   const rootCooling = rootAccess && Boolean(fragment?.rootUsed);
   if (rootCooling) rootAccess = false;
   const quirk = rollQuirk(rng, { origin: rootAccess || rootCooling });
@@ -229,6 +250,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
   return {
     saveVersion: SAVE_VERSION,
     generation,
+    life: lifeFromCfg(),
+    newForms: newForms.filter((f) => FORMS[f]),
     stage: 'script',
     form: 'bitling',
     teenForm: null,
@@ -319,10 +342,10 @@ function step(s, t, rng) {
     return;
   }
 
-  if (s.stage === 'baby' && s.ageMin >= CFG.teenAtMin) {
-    evolve(s, t, 'teen', s.careMistakes <= CFG.teenGoodCareMaxMistakes ? 'kernel' : 'stub');
-  } else if (s.stage === 'teen' && s.ageMin >= CFG.adultAtMin) {
-    evolve(s, t, 'adult', leaningForm(s));
+  if (s.stage === 'baby' && s.ageMin >= s.life.teenAt) {
+    evolve(s, t, 'teen', teenForm(s));
+  } else if (s.stage === 'teen' && s.ageMin >= s.life.adultAt) {
+    evolve(s, t, 'adult', leaningForm(s, rng));
   }
 
   const shouldSleep = isSleepHour(new Date(t).getHours(), s.quirk.sleepOffset);
@@ -393,9 +416,9 @@ function step(s, t, rng) {
 
   s.integrityZeroMin = st.integrity <= 0 ? s.integrityZeroMin + 1 : 0;
 
-  if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse');
-  else if (s.careMistakes >= CFG.maxMistakes) flatline(s, t, 'neglect');
-  else if (s.ageMin >= CFG.lifespanMin) flatline(s, t, 'end of life cycle');
+  if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse', rng);
+  else if (s.careMistakes >= CFG.maxMistakes) flatline(s, t, 'neglect', rng);
+  else if (s.ageMin >= s.life.lifespan) flatline(s, t, 'end of life cycle', rng);
 }
 
 function stepEvents(s, t, rng) {
@@ -447,7 +470,7 @@ function stepEvents(s, t, rng) {
     st.heat = clamp(st.heat + 25);
     st.charge = clamp(st.charge + 10);
     s.lastSurgeAt = t;
-    log(s, t, '> !! power surge. running hot.');
+    log(s, t, `> !! power surge. running hot.${segfaultDrop(s, rng)}`);
   } else if (!s.visit && !s.run && rebootMinutesLeft(s) === 0 && rng() < CFG.visitChancePerHour / 60) {
     startVisit(s, t, rng);
   }
@@ -534,6 +557,11 @@ export function grantItem(s, id) {
   return ` found: ${ITEMS[id].name}.`;
 }
 
+// After a timed event is answered (or a surge), a Segfault now and then.
+function segfaultDrop(s, rng) {
+  return rng() < ITEM_CFG.eventSegfaultChance ? grantItem(s, 'segfault') : '';
+}
+
 function maybeDrop(s, source, chance, rng) {
   return rng() < chance ? grantItem(s, weighted(DROPS[source], rng)) : '';
 }
@@ -563,14 +591,42 @@ function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   }
 }
 
-// Which adult form the current axes lean toward.
-export function leaningForm(s) {
+// The teen form: Stub after a rough first stretch, the Shell on Ghost's path, else Kernel.
+export function teenForm(s) {
+  if (s.careMistakes > CFG.teenGoodCareMaxMistakes) return 'stub';
+  const { allegiance: a, stability: b } = s.axes;
+  const played = GAME_IDS.every((id) => (s.games?.[id]?.won ?? 0) >= CFG.shellMinWinsEach);
+  if (Math.abs(a) < CFG.ghostBand && b >= 0 && s.careMistakes <= CFG.shellMaxMistakes && played) return 'shell';
+  return 'kernel';
+}
+
+// The adult forms the axes point to, with their weights. Usually one; within CFG.tieBand it is a
+// tie: allegiance and stability about as strong as each other, or an axis about zero (both of its
+// forms). Forms the player has never raised (s.newForms) weigh a little more.
+export function leaningCandidates(s) {
+  const { allegiance: a, stability: b } = s.axes;
+  const band = CFG.tieBand;
+  const side = (v, pos, neg) => (Math.abs(v) < band ? [pos, neg] : [v >= 0 ? pos : neg]);
+  const byAllegiance = side(a, 'chrome', 'firewall');
+  const byStability = side(b, 'daemon', 'glitch');
+  const gap = Math.abs(a) - Math.abs(b);
+  const forms = Math.abs(gap) < band ? [...byAllegiance, ...byStability] : gap > 0 ? byAllegiance : byStability;
+  const fresh = new Set(s.newForms ?? []);
+  return Object.fromEntries(forms.map((f) => [f, fresh.has(f) ? CFG.newFormWeight : 1]));
+}
+
+// Which adult form the current axes lean toward. Ties are broken with rng; without one (a save
+// being repaired), the heaviest candidate wins, then the first.
+export function leaningForm(s, rng = null) {
   const { allegiance: a, stability: b } = s.axes;
   if (Math.abs(a) < CFG.ghostBand && b >= 0 && s.careMistakes <= 1 && ghostWinsMet(s)) {
     return 'ghost';
   }
-  if (Math.abs(a) >= Math.abs(b)) return a >= 0 ? 'chrome' : 'firewall';
-  return b >= 0 ? 'daemon' : 'glitch';
+  const pool = leaningCandidates(s);
+  const forms = Object.keys(pool);
+  if (forms.length === 1) return forms[0];
+  if (rng) return weighted(pool, rng);
+  return forms.reduce((best, f) => (pool[f] > pool[best] ? f : best));
 }
 
 export function ghostWinsMet(s) {
@@ -611,6 +667,8 @@ export function migrate(s) {
   s.runCooldownCut ??= 0;
   s.visit ??= null;
   s.visitAccGifts ??= 0;
+  s.life ??= { ...LEGACY_LIFE }; // compiled before lives were shortened: it keeps its seven days
+  s.newForms ??= [];
   return s;
 }
 
@@ -629,7 +687,7 @@ function rootRescue(s, t, cause) {
   return true;
 }
 
-function flatline(s, t, cause) {
+function flatline(s, t, cause, rng = null) {
   if (rootRescue(s, t, cause)) return;
   s.stage = 'dead';
   s.deathCause = cause;
@@ -637,7 +695,7 @@ function flatline(s, t, cause) {
   // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
-  const form = FORMS[s.form] ? s.form : leaningForm(s);
+  const form = FORMS[s.form] ? s.form : leaningForm(s, rng);
   s.fragment = { form, trait: FORMS[form].trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed };
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
@@ -845,7 +903,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         s.cache = 0;
         s.axes.stability += 0.5;
         st.integrity = clamp(st.integrity + CFG.careIntegrity);
-        res = ok('buffers flushed. overflow contained.', 'purge');
+        res = ok(`buffers flushed. overflow contained.${segfaultDrop(s, rng)}`, 'purge');
         break;
       }
       if (s.cache === 0) return fail('cache is clean.');
@@ -860,10 +918,10 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.event = null;
       if (opts.won) {
         s.axes.stability += CFG.attackRepelledStability;
-        res = ok('intrusion repelled.', 'win');
+        res = ok(`intrusion repelled.${segfaultDrop(s, rng)}`, 'win');
       } else {
         infect(s, CFG.attackLandedIntegrity);
-        res = ok(`defense breached. virus installed. -${CFG.attackLandedIntegrity} integrity.`, 'lose');
+        res = ok(`defense breached. virus installed. -${CFG.attackLandedIntegrity} integrity.${segfaultDrop(s, rng)}`, 'lose');
       }
       break;
     }
@@ -932,6 +990,12 @@ function useItem(s, id, rng) {
     case 'repair':
       st.integrity = clamp(st.integrity + 40);
       return `${name} applied. integrity restored.`;
+    case 'segfault': {
+      // Deliberate faults count like any other: the same stability cost, the same limit.
+      s.careMistakes += ITEM_CFG.segfaultFaults;
+      s.axes.stability -= 2 * ITEM_CFG.segfaultFaults;
+      return `${name} triggered. care mistakes on purpose. [${s.careMistakes}/${CFG.maxMistakes}]`;
+    }
     case 'overclock': {
       const before = runCooldownLeft(s);
       s.runCooldownCut = (s.runCooldownCut ?? 0) + CFG.overclockCutMin;

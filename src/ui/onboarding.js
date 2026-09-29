@@ -4,7 +4,7 @@ import { createScript, isAlive, CFG, MIN } from '../sim.js';
 import { startRun } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, now, save, store } from './app.js';
+import { $, app, newForms, rootUnlocked, now, save, store } from './app.js';
 import { grantStyle } from './style.js';
 import { openRun } from './play.js';
 import { advance } from './life.js';
@@ -163,7 +163,7 @@ export function advanceIntro() {
   $('intro').hidden = true;
   document.body.classList.remove('intro-active');
   // The script compiles for real: a fresh netling that boots on the next tick.
-  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked() });
+  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked(), newForms: newForms() });
   app.lastStage = app.state.stage;
   app.lastLogKey = '';
   save();

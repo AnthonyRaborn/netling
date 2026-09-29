@@ -17,6 +17,7 @@ import {
   QUIRK_KEYS,
   CFG,
   EVENTS,
+  LEGACY_LIFE,
   leaningForm,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
@@ -193,6 +194,15 @@ function cleanVisit(raw) {
   };
 }
 
+// The life lengths a netling compiled with. Anything missing or out of order means a save from
+// before lives were shortened (or a damaged one): it gets the old seven days, and never longer.
+function cleanLife(raw) {
+  if (!isObj(raw)) return { ...LEGACY_LIFE };
+  const { teenAt, adultAt, lifespan } = raw;
+  const ok = [teenAt, adultAt, lifespan].every(Number.isInteger) && teenAt >= 60 && teenAt < adultAt && adultAt < lifespan && lifespan <= LEGACY_LIFE.lifespan;
+  return ok ? { teenAt, adultAt, lifespan } : { ...LEGACY_LIFE };
+}
+
 // A flatlined netling's fragment, rebuilt the way sim.js makes it if the stored one is unusable.
 function cleanFragment(raw, s) {
   if (isObj(raw) && has(FORMS, raw.form)) {
@@ -251,6 +261,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     ...(strict ? {} : raw),
     saveVersion: SAVE_VERSION,
     generation: int(raw.generation, 1, 1, 1e6),
+    life: cleanLife(raw.life),
+    newForms: Array.isArray(raw.newForms) ? [...new Set(raw.newForms.filter((f) => has(FORMS, f)))] : [],
     stage,
     form,
     teenForm: keyOf(raw.teenForm, SPECIES),
