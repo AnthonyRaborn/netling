@@ -676,6 +676,28 @@ await scenario('quitting on touch needs a confirm somewhere else; Esc still quit
   assert(!(await visible(page, '#pad-confirm')), 'Esc left a confirm on screen');
 });
 
+await scenario('the touch quit confirm pauses the game; a game button resumes it without playing', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const frame = () => page.evaluate(() => document.getElementById('lcd').toDataURL());
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await page.click('#pad [data-key="a"]'); // past the intro card
+  await page.waitForTimeout(300);
+  const running = await frame();
+  await page.waitForTimeout(300);
+  assert((await frame()) !== running, 'the game is not moving before the pause');
+  await page.click('#pad-quit');
+  await page.waitForTimeout(100);
+  const held = await frame();
+  await page.waitForTimeout(600);
+  assert((await frame()) === held, 'the game kept running under the confirm');
+  await page.click('#pad [data-key="left"]');
+  assert(!(await visible(page, '#pad-confirm')), 'a game button did not answer the confirm');
+  assert(await visible(page, '#pad'), 'the game ended');
+  await page.waitForTimeout(300);
+  assert((await frame()) !== held, 'the game did not resume');
+});
+
 await scenario('ABORT RUN on touch confirms at the top of the screen', async ({ open }) => {
   const s = awakeNetling();
   startRun(s, 'public', Math.random);

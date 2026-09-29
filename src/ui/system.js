@@ -156,7 +156,7 @@ export function showLock() {
   const { lock } = app;
   document.body.classList.add('locked');
   $('lock').hidden = false;
-  $('lock-note').textContent = `netling.v${lock.generation}.0 left this device on ${new Date(lock.at).toLocaleString()}. Load it on the other device.`;
+  $('lock-note').textContent = `netling.v${lock.generation}.0 left this device on ${new Date(lock.at).toLocaleString()}. Load it on the other device; its clock keeps running until you do.`;
   $('lock-code').value = lock.code;
   try {
     drawQR($('lock-qr'), encodeQR(importUrl(lock.code)), 3);

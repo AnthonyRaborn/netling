@@ -1,6 +1,6 @@
 # Balance plan
 
-An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. Pass 0 (tooling) is done; nothing in the game has changed yet. Spoiler-heavy, like the rest of `docs/`.
+An outline of three balance passes (adult and teen forms, netruns, lineage), with the measurements that motivate them and the maintainer's decisions so far. All of it is implemented: Pass 0 (tooling), the three passes, and lineage Step 3. Spoiler-heavy, like the rest of `docs/`.
 
 First measured on commit `767b7c5` (2026-09-29). After Pass 0 the numbers come from the baselines in `tools/baseline/` (see [TESTING.md](TESTING.md#baselines)), with the netrun bot planning by what the player can see; where the two differ, this document says so. The simulators are scripted players, not people: treat the numbers as relative. The agreed targets and whether they are met are in [TESTING.md](TESTING.md#balance-targets).
 
@@ -71,7 +71,7 @@ Sixth round, 2026-09-29 (Pass 2):
 Seventh round, 2026-09-29 (Pass 3):
 
 35. **Trait levels are a streak**: each generation in a row that ends as the same form adds a level (1.0, 1.25, 1.5); a different form starts over. The grandparent's trait (its history, half strength) adds on top when it matches, under the per-trait cap.
-36. **Pass 3 scope**: Step 1 plus levels. The family tree and legacy goals (Step 3) wait for a later pass.
+36. **Pass 3 scope**: Step 1 plus levels. The family tree and legacy goals (Step 3) followed separately (decisions 40 to 44).
 37. **Display**: the readout shows the trait with its level and its history (for example "Persistent II · history Hardened"); the flatline screen shows what the next generation inherits; the field manual explains levels and history without numbers.
 38. **Untraceable** becomes fewer traces (60% less at strength 1), not an immunity.
 39. **The grandparent's trait is called its history**, not an echo, which already names an anomaly and an unrealized form. The stored field is `history` (renamed before release, so no save ever held `echo`).
@@ -83,6 +83,12 @@ Eighth round, 2026-09-29 (lineage Step 3):
 42. **Rewards are crests**, a new wardrobe slot drawn beside the device label, not more shells or tints.
 43. **Hints only**, like the rest of the wardrobe; no checklist.
 44. **The tree opens at the running netling**, which also shows its current stats (Charge, Sync, Integrity, Heat and scrip). Checked with a 100-generation line of simulated lives: every record survives the sanitizer, the Archive opens in about 40 ms, and the line earns all four crests.
+
+Ninth round, 2026-09-29:
+
+45. **The Shell is approved** as drafted: sprite, DEX hint and lore.
+46. **Segfault's drop chances** and market weight are approved as measured in Pass 1.
+47. **No fourth stage** for now. It is left for a possible expansion or a separate game.
 
 ## How the passes work
 
@@ -368,6 +374,4 @@ Four ways lineage could lead to new forms. They can be combined; each new form n
 
 ## Still to decide
 
-1. **The Shell**: approve or revise the draft sprite, DEX hint and lore (Pass 1, item 5).
-2. **Segfault's new drop chances** after DEFEND, PURGE and power surges, and its market weight; measured in Pass 1.
-3. **The fourth stage** (later): whether a stage after adult earns a place in the five days.
+Nothing. The last open items were settled in the ninth round (decisions 45 to 47).

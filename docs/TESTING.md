@@ -14,7 +14,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 310 tests in 30 files and all pass. The smoke test has 53 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+On this branch, `npm test` runs 315 tests in 31 files and all pass. The smoke test has 54 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -61,6 +61,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 18 and 3, the Shell, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
 | `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
 | `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
+| `zone.test.js` | 5 | KI-12: the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
 | `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |

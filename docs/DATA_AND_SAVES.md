@@ -69,6 +69,7 @@ Built by `createScript()` in `sim.js`. Fields:
 | `lastSurgeAt` | ms epoch or null | Drives the surge flash |
 | `inventory` | array of item ids | Max 6 |
 | `scrip` | int | Corpo scrip, 0..100. Missing: 0 |
+| `zone` | int -840..840 | The time zone its sleep follows, in minutes as `getTimezoneOffset` gives it; refreshed when it wakes. Missing or junk: the device's zone |
 | `buffs` | `{ shieldUntilAge, traceSkip, boost }` | |
 | `run` | the netrun or null | Cleaned by `cleanRun` |
 | `rootAccess`, `rootUsed`, `rootCooling` | booleans | |

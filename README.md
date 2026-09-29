@@ -77,7 +77,7 @@ Each netling also has **quirks** you can discover by watching it: its colors, th
 
 ## Rest: sleep, lights and naps
 
-- **Sleep**: it goes to bed at night by itself. Its bedtime is on the readout and differs a little from netling to netling. Turn the **lights off** when it sleeps: stats drain at about a third of the awake rate, against half with the lights on, and Integrity heals faster. Leaving the lights on all night is a fault.
+- **Sleep**: it goes to bed at night by itself. Its bedtime is on the readout and differs a little from netling to netling. If you change time zones, it keeps the old one until it wakes up the next morning, then settles into the new one. Turn the **lights off** when it sleeps: stats drain at about a third of the awake rate, against half with the lights on, and Integrity heals faster. Leaving the lights on all night is a fault.
 - **Nothing new happens while it rests**: no new viruses, cache files or alerts start. Anything already wrong keeps hurting, though, so patch a virus before bed. An open alert's timer holds until morning.
 - **Nap**: up to two hours of rest on demand, at about a third of the awake drain. It can't eat, play or jack in while napping, and needs four hours awake before it can nap again. WAKE UP ends a nap early. Unlike sleep, a nap does not pause an alert's timer.
 - **Lights off while awake** darkens the screen and bores it: Sync drains faster. Use it sparingly.

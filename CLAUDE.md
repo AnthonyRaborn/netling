@@ -5,7 +5,7 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 310 unit tests, Node 22
+npm test          # 315 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174
@@ -40,4 +40,4 @@ npm run serve     # http://localhost:5174
 
 ## Known traps
 
-See `docs/KNOWN_ISSUES.md` (each entry has a Status). Still open and easy to trip over: a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour).
+See `docs/KNOWN_ISSUES.md` (each entry has a Status). Easy to trip over even though it is settled: a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour). Sleep follows the netling's stored `zone`, not the device's hour directly (KI-12).

@@ -131,6 +131,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Shield** | Antivirus effect: blocks new infections and intrusions for 6 hours | `sim.js` |
 | **Skew** | Dev-mode time offset added to "now" | `ui/app.js` |
 | **Sleep offset** | Quirk: shifts bedtime by -2 to +2 hours | `sim.js` |
+| **Sleep zone** | `s.zone`: the time zone a netling sleeps by. Taken from the device at compile and at each wake-up, so a day keeps one zone | `sim.js` `deviceZone` |
 | **Stability** | Hidden axis: positive is orderly, negative is chaotic. Picks Daemon or Glitch | `sim.js` |
 | **Streak** | Consecutive mini-game wins. 10 in a row unlocks a screen effect | `cosmetics.js` |
 | **Strict cleaning** | Sanitizing that drops unknown fields, used for imported codes | `sanitize.js` |
