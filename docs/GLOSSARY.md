@@ -1,6 +1,6 @@
 # Glossary
 
-Terms used in the game, the UI and the code, alphabetical. "Code" means the identifier you will see in the source. Written against commit `ea87757`.
+Terms used in the game, the UI and the code, alphabetical. "Code" means the identifier you will see in the source.
 
 Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 

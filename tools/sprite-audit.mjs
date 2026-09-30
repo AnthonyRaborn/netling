@@ -1,4 +1,4 @@
-// Sprite audit: candidate problems in the art and in how it layers (docs/SPRITE_REVIEW_PLAN.md, step 2).
+// Sprite audit: candidate problems in the art and in how it layers (docs/SPRITES.md).
 // It runs the real renderLCD under a fake canvas and reads back which pixels were drawn, so what it measures is what the
 // game draws. It flags candidates only; a person decides whether each is a problem (see the plan's findings log).
 //

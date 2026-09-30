@@ -40,4 +40,4 @@ npm run serve     # http://localhost:5174
 
 ## Known traps
 
-See `docs/KNOWN_ISSUES.md` (each entry has a Status). Easy to trip over even though it is settled: a nap does not pause an open event's timer while sleep does (KI-11, documented behaviour). Sleep follows the netling's stored `zone`, not the device's hour directly (KI-12).
+See `docs/KNOWN_ISSUES.md` for behaviour that is easy to misread and for open questions. Two to know: a nap does not pause an open event's timer while sleep does, and sleep follows the netling's stored `zone`, not the device's hour directly.

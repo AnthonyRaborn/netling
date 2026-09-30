@@ -1,6 +1,6 @@
 # Testing and tools
 
-What tests exist, how to run them, what each tool does, and where coverage is thin. Written against commit `ea87757`.
+What tests exist, how to run them, what each tool does, and where coverage is thin.
 
 ## Quick reference
 
@@ -11,13 +11,13 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
-| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md) | Node only |
-| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
+| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITES.md](SPRITES.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 354 tests in 35 files and all pass. The smoke test has 58 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+`npm test` runs 354 tests in 35 files. The smoke test has 58 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -68,7 +68,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 29 and 4, the Shell's 3 each, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
 | `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
 | `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
-| `zone.test.js` | 5 | KI-12: the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
+| `zone.test.js` | 5 | the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
 | `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
@@ -107,7 +107,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 
 ## Balance tools
 
-The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance plan ([BALANCE_PLAN.md](BALANCE_PLAN.md)) says what each pass is trying to move.
+The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance notes ([BALANCE.md](BALANCE.md)) say what each pass is trying to move.
 
 ### `tools/balance.mjs`
 
@@ -141,7 +141,9 @@ Settings (environment variables and arguments):
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
 
-Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
+It sets `TZ=UTC` itself. Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
+
+Reference results are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#verified-facts).
 
 ### `tools/netrun-balance.mjs` and `tools/netrun-bot.mjs`
 
@@ -176,7 +178,7 @@ Regenerate all three in the same pull request as any change to the rules or to t
 
 ### Balance targets
 
-Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-far)). Status is from the baselines above.
+Agreed with the maintainer (see [BALANCE.md](BALANCE.md#design-goals)). Status is from the baselines above.
 
 | Target | Measured by | Status |
 |---|---|---|
@@ -204,12 +206,9 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 
 ## Coverage gaps
 
-Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
-
-- `ui/*` (including `advance`, the flatline handling and `dropSession`) and `ui/gamepad.js` still have no unit tests: they need a real DOM, so only the smoke test covers them. Rendering, the run view, mini-game drawing, audio, notifications and the content tables are unit tested (KI-16).
-- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html`, `tools/sprite-audit.mjs` and playtesting cover that (the audit flags candidates; a person judges them).
-- A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
-- Upgrade steps are tested through an injected step table and the frozen version 1 fixture. `cleanSave` cannot be pointed at a fake table, so its wiring to real steps only gets exercised once a first real step exists.
+- `ui/*` (including `advance` and `dropSession`) and `ui/gamepad.js` have no unit tests: they need a real DOM, so only the smoke test covers them.
+- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html`, `tools/sprite-audit.mjs` (it flags candidates; a person judges them) and playtesting cover that.
+- `cleanSave` cannot be pointed at a fake step table, so its wiring to real upgrade steps is exercised only once a first real step exists. The runner is tested through an injected table and the frozen version 1 fixture.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
 
 ## Adding tests

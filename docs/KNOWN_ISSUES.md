@@ -1,207 +1,29 @@
-# Known issues and risks
+# Known behaviour and open questions
 
-Found by reading the code at commit `ea87757` (2026-09-28). The **Status** column shows what has been done since: KI-01 to KI-14 and KI-18 are fixed, KI-16 is mostly fixed (only `ui/*` and the gamepad remain smoke-only), and KI-17's Tier 1 is done (each in its own commit, with tests where practical); the rest are open, are notes on behaviour that works as designed, or are gaps. Each entry says how sure the original finding was:
+Things that work as coded but are easy to misunderstand, and things not yet verified. Fixed defects are not listed; see `git log`.
 
-- **Reproduced**: shown with a small Node script against `sim.js` or `run.js`.
-- **Read**: derived by reading the code; not run.
-- **Unverified**: a suspicion or a gap I could not confirm.
+## Behaviour to know about
 
-Severity: **Medium** (wrong behaviour a player could hit, or a latent trap), **Low** (cosmetic, rare, or cleanup), **Note** (works as coded, but easy to misunderstand).
+- **A nap does not hold an open event's timer; sleep does.** With a trace open, a 60 minute nap takes 60 minutes off the remaining time. HIDE, COMPLY, DEFEND and PURGE stay available during a nap. The field manual says so.
+- **Sleep follows the netling's stored zone.** `s.zone` is set at compile and re-read from the device only on waking, so travel, daylight saving and importing onto a device elsewhere take effect the next morning (`tests/zone.test.js`). Tests pin `TZ=UTC` (`tests/helpers/utc.js`).
+- **Time in transit counts.** A transfer code stores `lastTick`, and the imported netling is ticked from that moment (clamped to now). A netling left in a code for two days ages two days on load. The source device stops simulating while locked, so nothing is duplicated. Hibernation is the pause, not a code. TRANSFER OUT and the IN TRANSIT screen say so.
+- **Boosted wins count double toward Ghost.** A win with a Signal booster adds 2 to `games[id].won`. Intended.
+- **Tied forms are chosen at random.** When the axes are within 0.5 of each other, or an axis is within 0.5 of zero, `leaningCandidates` picks among the tied forms, weighting forms the player has never raised at 1.2.
+- **`pickByRarity` (`accessories.js`) is separate from `weighted()` (`random.js`).** It weights an array by a rarity table, not an object of weights.
+- **Adding a codex fragment does not revoke Root Access.** It is recorded as `progress.rootEarned`; the NL-0 transmission does not replay.
+- **`cleanSave` cannot be pointed at a fake step table**, so its wiring to real upgrade steps is first exercised when a real step exists. The runner itself is tested with an injected table and the frozen version 1 fixture.
 
-Not checked by me: real-device behaviour beyond what the maintainer confirmed (Pages live, PWA updates, install on macOS; see [PLATFORMS.md](PLATFORMS.md)). The original findings were made without a browser; the fixes were checked with the unit tests and the full Playwright smoke suite in headless Chromium.
+## Open questions
 
-## Summary
+- **Integrity regeneration: 14 or 16 hours for a full recovery?** The comment on `integrityRegenPerHour` in `sim.js` says about 16. Never measured.
+- **Real-device behaviour is untested** beyond what the maintainer confirmed: Pages is live, pushes to `main` update it, the installed PWA updates, and a manual install works on macOS. Android, Windows, Steam Deck (controller behaviour included) and iOS storage eviction are untested. Native wrappers are unbuilt stretch goals ([PLATFORMS.md](PLATFORMS.md)).
+- **`ui/*` and `ui/gamepad.js` have no unit tests.** They need a real DOM, so only the smoke test covers them.
+- **The draw and audio tests cannot judge appearance or sound.** They prove nothing throws, arguments are finite and every sound name exists.
 
-| Id | Severity | Confidence | Title | Status |
-|---|---|---|---|---|
-| [KI-01](#ki-01) | Medium | Reproduced (sim), Read (UI) | A netling can die mid-netrun and leave the run screen bound to the dead one | Fixed |
-| [KI-02](#ki-02) | Medium | Read | `SAVE_VERSION` has no migration path: a bump would set aside every save | Fixed |
-| [KI-03](#ki-03) | Low | Read | A DEFEND result is discarded if the intrusion lands while the mini-game is running | Fixed |
-| [KI-04](#ki-04) | Low | Read | The Archive's RECORD omits the Packet Feast streak | Fixed |
-| [KI-05](#ki-05) | Low | Read | Storage is rewritten every second | Fixed |
-| [KI-06](#ki-06) | Low | Read | The "no dependencies" claim ignores the Google Fonts request | Fixed |
-| [KI-07](#ki-07) | Low | Read | Import in test mode says it replaces "this device" | Fixed |
-| [KI-08](#ki-08) | Low | Read | The sanitizer accepts inconsistent stage and form pairs | Fixed |
-| [KI-09](#ki-09) | Low | Read | Docs and comments that disagreed with the code | Fixed |
-| [KI-10](#ki-10) | Low | Read | Duplicated helpers | Fixed |
-| [KI-11](#ki-11) | Note | Reproduced | A nap does not hold an open event's timer | Fixed |
-| [KI-12](#ki-12) | Note | Read | Sleep uses the device's local time zone | Fixed |
-| [KI-13](#ki-13) | Note | Read | Time in transit counts when a netling is transferred | Fixed |
-| [KI-14](#ki-14) | Note | Read | Boosted wins count double toward Ghost | Fixed |
-| [KI-15](#ki-15) | Note | Read | Neutral netlings that miss Ghost become Chrome | Fixed |
-| [KI-18](#ki-18) | Note | Read | Adding a codex fragment makes finished codexes incomplete | Fixed |
-| [KI-16](#ki-16) | Gap | Read | Test coverage gaps | Mostly fixed |
-| [KI-17](#ki-17) | Open work | Read | Unfinished platform steps | Tier 1 done |
+## Verified facts
 
-## Findings
-
-### KI-01
-
-**A netling can die mid-netrun and leave the run screen bound to the dead one.** Severity Medium.
-
-**Status: Fixed.** `flatline()` now drops the open run, and `advance()` closes any session belonging to a dead or replaced netling (`closeStaleSession` in `ui/play.js`). Covered by two unit tests and a smoke scenario. The description below is the original finding.
-
-- `sim.js` `flatline()` sets the stage to `dead` but never touches `state.run`. Reproduced: a netling with an open run, aged to the last minutes of its life, ticks to `dead` with `run` still set (phase `map`).
-- In the UI, `ui/life.js` `advance()` calls `onFlatline()` and shows the flatline overlay, but nothing closes `app.session`. Neither `ui/play.js` nor `netrun/view.js` checks for a dead netling.
-- The `RunView` holds `this.pet`, the old state object. After the player presses COMPILE, `app.state` is a new netling but `app.session` still drives the old one. Moving, ICE results and `close()` mutate the dead object, while `onClose` still runs `bumpProgress` and the disconnect bandage grant against the new game's progress.
-- How it can happen: the simulation keeps ticking while a run is open, and a run has no time limit. Leaving the map open long enough for neglect, integrity collapse or the 7 day limit to trigger is enough. It is more likely near the end of a life.
-- Impact is awkward rather than corrupting: the pad stays on screen until the player presses ABORT RUN, and progress counters can be bumped by the ghost run. The new netling is not modified.
-- Suggested fix (not applied): in `advance()`, when the stage becomes `dead`, close `app.session` (abort the run and skip progress); or have `RunView` refuse input when its pet is no longer `app.state`. Add a `tests/` case for a flatline with an open run.
-
-### KI-02
-
-**`SAVE_VERSION` has no migration path.** Severity Medium (latent).
-
-**Status: Fixed.** Added `src/migrations.js` (`STEPS` and `upgradeSave`); `cleanSave` now upgrades any older version step by step before cleaning, sets aside saves it cannot upgrade (with a specific notice for saves and codes from a newer build), and a pre-upgrade backup is kept. There are no steps yet because version 1 is still current. A frozen version 1 fixture and 7 tests guard the path, and the rules for adding a step are in DATA_AND_SAVES.md. The description below is the original finding.
-
-- `SAVE_VERSION` is 1 and `cleanSave` returns `null` for any other value, which sends the save down the "set aside, compile a new netling" path (`corruptSave`).
-- `migrate()` only fills missing fields with `??=` defaults. Every mechanic added so far (nap, visitors, hibernation, Packet Feast, run cooldown cuts) was handled that way, so no bump was ever needed.
-- The first change that cannot be expressed as "add a field with a default" will need a version bump, and the bump will orphan every existing save unless `cleanSave` accepts the old version and upgrades it. Transfer codes carry the same version (`payload.v` and `saveVersion`).
-- Suggested approach: keep accepting version 1, add an ordered list of upgrade steps run from `cleanSave`, and add a test that loads a frozen version 1 fixture.
-
-### KI-03
-
-**A DEFEND result is discarded if the intrusion lands during the mini-game.** Severity Low.
-
-**Status: Fixed.** While a DEFEND mini-game runs, the UI sets `event.defending` and `stepEvents` holds the intrusion timer (like sleep does). The flag is cleared on finish, or by `closeStaleSession` if the session ends without reporting, and `cleanSave` never keeps it. Unit tests added. The description below is the original finding.
-
-- `ui/play.js` `startDefense` starts a random mini-game with up to 60 minutes on the intrusion timer. The simulation keeps ticking. If the timer runs out while the game is open, `stepEvents` clears the event and installs the virus.
-- On finish, `act('defend')` is refused with "no intrusion to defend against" and the flash message shows that, even if the player just won. The virus and the -10 Integrity have already landed.
-- Rare in practice (a mini-game lasts seconds, and the player usually starts DEFEND with time to spare), and the outcome is consistent with the timer, but the message is confusing.
-
-### KI-04
-
-**The RECORD tab omits the Packet Feast streak.** Severity Low.
-
-**Status: Fixed.** The RECORD row now lists all four streaks.
-
-- `renderRecord` in `ui/archive.js` lists "best streak: breach / dodge / tune". Packet Feast was added later and has its own unlock (the Packet rain effect needs a Feast streak of 10), but its streak is not shown.
-
-### KI-05
-
-**Storage is rewritten every second.** Severity Low.
-
-**Status: Fixed.** The clock tick now saves at most every 5 seconds (and on stage changes), actions still save at once, and `flushSave` writes when the page is hidden or closing.
-
-- `advance()` ends with `save()` and runs each second (and on every action), so the whole netling, including its log and any open netrun map, is serialized and written continuously while the tab is open.
-- It is cheap for a save this small, but it costs battery on phones and makes storage-full failures appear as soon as space runs out rather than at a meaningful moment. Saving on change or every N seconds would do.
-
-### KI-06
-
-**"No dependencies" ignores the font.** Severity Low.
-
-**Status: Fixed.** VT323 is now served from `fonts/` (with its OFL license) through an `@font-face` rule; the Google Fonts links and the service worker's font hosts are gone, the font is in `SHELL`, and Pages copies `fonts/`. A smoke scenario asserts no third-party requests.
-
-- `index.html` loads VT323 from Google Fonts, and the service worker caches those hosts. First launch with no network shows the fallback monospace font (canvas text included) until a cached copy exists. It also sends a request to a third party. Self-hosting the font file would remove both.
-
-### KI-07
-
-**Import in test mode says it replaces "this device".** Severity Low.
-
-**Status: Fixed.** In test mode the import preview now says it replaces the test data.
-
-- Transfer out is disabled in test mode, but importing is not. `applyImport` writes through `store`, which is the test store, so it replaces the **test** data only. The preview button still says "REPLACE THIS DEVICE". Real data is not touched (the test namespace is separate), but the wording is wrong.
-
-### KI-08
-
-**The sanitizer accepts inconsistent stage and form pairs.** Severity Low.
-
-**Status: Fixed.** New `settle()` in `sanitize.js` makes the form fit the stage (a dead netling keeps its body) and clamps timers that start in the netling's future (run and nap cooldowns, open event, hibernation start). Without the clamp a hostile or damaged value such as `lastRunEndAge: 1e9` would lock netruns for good.
-
-- `cleanSave` checks that stage and form are each valid, not that they agree (for example stage `adult` with form `bitling`). A hand-edited or hostile save can therefore hold an impossible netling. The game tolerates it (lookups fall back), but it is not validated. Also, `hibernation`, `nap` and `rebootUntilAge` are not cross-checked against `ageMin`.
-
-### KI-09
-
-**Docs and comments that disagreed with the code.** Severity Low.
-
-**Status: Fixed.** README rewritten earlier; the three misplaced or duplicated comments are fixed, `sw.js` now has a reminder about `CACHE` and `SHELL`, and `gallery.html` sizes its accessory grid from the list instead of a fixed 20 columns. The 14 versus 16 hour Integrity recovery figure was never measured; the README no longer quotes it, and the `sim.js` comment is unchanged.
-
-- The old README said accessories number 20; the code has 24 wearable accessories plus 4 props (22 wearables are findable, 2 are earned). `gallery.html` also lays out a fixed 20-column grid. (README trimmed in this pass.)
-- The old README said a full Integrity recovery takes "about 14 hours"; the comment on `integrityRegenPerHour` in `sim.js` says "about 16 hours". Neither was measured here. (README trimmed in this pass.)
-- Misplaced or duplicated comments: `netrun/run.js` has "Picks up the region's next unread fragment" above `takeAccessory` instead of `takeFragment`; `ui/system.js` has a comment about sessions blocking hibernate and transfer sitting above the test mode section instead of `sessionBlockReason`; `accessories.js` opens with two overlapping header comments.
-- `sw.js` `CACHE` is a hand-bumped name (`netling-v34`) with no reminder anywhere to bump it.
-
-### KI-10
-
-**Duplicated helpers.** Severity Low.
-
-**Status: Fixed.** The three copies now share `weighted()` in `src/random.js` (added to `SHELL`, with tests). `pickByRarity` in `accessories.js` was left alone: it weights an array by a rarity table, not an object of weights.
-
-- The weighted random pick exists three times: `weighted` in `netrun/map.js`, `weighted` in `netrun/run.js`, `rollTable` in `sim.js` (and a fourth variant, `pickByRarity`, in `accessories.js`). Behaviour is the same; consolidating would remove a place for drift.
-
-### KI-11
-
-**A nap does not hold an open event's timer.** Severity Note. Reproduced.
-
-**Status: Fixed.** Kept as designed (a nap does not pause event timers) but the field manual's NAP entry now says so; the README already did. The rule itself is unchanged.
-
-- Real sleep holds an open event's timer (the field manual says so). A nap does not: with a trace open, a 60 minute nap takes the remaining time from 120 to 60. A player can nap through a trace, intrusion or overflow and wake to the consequence. HIDE, COMPLY, DEFEND and PURGE stay available during a nap, so it is avoidable, but the manual's NAP entry does not mention it.
-
-### KI-12
-
-**Sleep uses the device's local time zone.** Severity Note.
-
-**Status: Fixed.** The netling stores its zone (`s.zone`) at compile and reads the device's zone again only when it wakes, keeping it asleep if it is still night there. A day keeps one zone, so travel and daylight saving change the window from the next morning, not halfway through a night (`tests/zone.test.js`). The readout shows bedtime on the device's clock. The description below is the original finding.
-
-- `step()` decides sleep with `new Date(t).getHours()`. Travelling, daylight saving changes and importing a netling onto a device in another time zone all shift the sleep window. Tests pin `TZ=UTC`.
-
-### KI-13
-
-**Time in transit counts.** Severity Note.
-
-**Status: Fixed** (kept as designed, now stated in the game). The maintainer chose to keep the clock running: a transfer does not halt the netling. TRANSFER OUT and the IN TRANSIT screen now say its clock keeps running until the code is loaded; the README already did. The description below is the original finding.
-
-- A transfer code stores `lastTick`. The imported netling is ticked from that moment (clamped to now), so a netling left in a code for two days ages two days on load. The source device stops simulating while locked, so nothing is duplicated, but a code is not a pause. Hibernation is the pause.
-
-### KI-14
-
-**Boosted wins count double toward Ghost.** Severity Note.
-
-**Status: Fixed** (working as intended). The maintainer confirmed that counting a boosted win twice matches the Signal booster's text and purpose. The description below is the original finding.
-
-- A win with a Signal booster adds 2 to `games[id].won`. The Ghost condition of "22 wins" and "4 in each game" can therefore be met with fewer actual wins. Probably fine, but document it if the requirement is ever tuned. (The requirement is now 29 wins with 4 in each game; the maintainer chose to keep boosted wins counting double, and SIMULATION.md says so.)
-
-### KI-15
-
-**Status: Fixed.** Ties (the axes within 0.5 of each other, or an axis within 0.5 of zero) are now broken at random, with forms the player has never raised weighted 1.2 (`leaningCandidates` in `sim.js`). A neutral netling that misses Ghost can become any of the four. The description below is the original finding.
-
-**Neutral netlings that miss Ghost become Chrome.** Severity Note.
-
-- `leaningForm` breaks ties in favour of allegiance, and allegiance 0 counts as positive. A netling with both axes near zero that does not qualify for Ghost evolves into Chrome. The balance run reflects this indirectly (a tidy, neutral player gets Daemon most of the time because stability accrues steadily).
-
-### KI-18
-
-**Adding a codex fragment makes finished codexes incomplete.** Severity Note.
-
-**Status: Fixed.** Root Access is now recorded when earned (`progress.rootEarned`, transferable) and `rootUnlocked()` in `netrun/codex.js` checks that or the full codex, so adding a fragment can't revoke it or replay the transmission. Older saves are backfilled at load from a complete codex or a netling that already has Root Access. Unit tests plus three smoke scenarios. The description below is the original finding.
-
-- `codexComplete()` (`ui/app.js`) is `FRAGMENTS.every(...)`. It decides Root Access for each new script, and `drainCodexInbox` plays the NL-0 transmission when it flips from false to true. Shipping fragment 23 would leave every player who had completed the codex without Root Access for new netlings until they find it, and would replay the transmission. Unlocked shells and tints stay unlocked (unlocks are stored, never revoked), but the "gold" shell check reads the same list.
-
-### KI-16
-
-**Test coverage gaps.** Severity Gap.
-
-**Status: Mostly fixed.** New unit tests cover rendering, mini-game drawing, the run view (a whole run in every region), audio, notifications and the content tables (`draw`, `audio`, `notify`, `content` tests), plus fixtures for saves. The suite also passes in any time zone now (`tests/helpers/utc.js`): before, five files failed outside UTC. Still smoke-only: `ui/*` and `ui/gamepad.js`, which need a real DOM. The description below is the original finding.
-
-- Covered well: `sim`, netrun rules, sanitizing, transfer, storage, lease, events, items, root access, mini-game logic (headless).
-- Only covered by the browser smoke test (or not at all): `render.js`, `sprites.js` (only anchors are unit tested), `audio.js`, `notify.js`, `ui/*` (including `advance`, the flatline handling and `dropSession`), `netrun/view.js`, `ui/gamepad.js`.
-- Since the fixes, a flatline with an open netrun (KI-01) and the DEFEND timing (KI-03) are covered; a save with a different `saveVersion` is still only tested as "rejected".
-- `npm test` sets `TZ=UTC`. Running `node --test` directly in another time zone was not tried, and the sim tests assume the noon-UTC start is awake.
-
-### KI-17
-
-**Unfinished platform steps.** Open work, not a defect.
-
-**Status: Tier 1 done.** The maintainer confirmed that GitHub Pages is live, pushes to `main` update https://anthonyraborn.github.io/netling, the installed PWA receives the updates, and a manual install on macOS worked. Testing on Android, Windows and the Steam Deck, and all native wrappers, are untested stretch goals (see PLATFORMS.md). The description below is the original finding.
-
-From [PLATFORMS.md](PLATFORMS.md), at the time of writing: enable Pages in the repository settings, confirm the Pages workflow runs (it had not run when the doc was written), and manually install and play on Android, Windows, macOS and Steam Deck. Tier 2 native wrappers are unstarted and untested.
-
-## Checked and found consistent
-
-Useful when deciding what to trust:
-
-- `npm test`: 176 tests passing at the commit these findings were made against (227 after the fixes and new coverage below).
-- `npm run balance` (300 runs per archetype) matches the README's old balance table within sampling noise: attentive 100% adult and 99% full life; casual 93% and 83%; worker 87% and 49% (README said 85% and 51%); neglectful 4% adult, dying around day 1; deliberate strategies reach their forms (Chrome 100%, Firewall 100%, Glitch 65%, Daemon 83%, Ghost 100%).
-- Every module reachable from `main.js` is in the service worker's `SHELL`.
-- The codex has 22 fragments (4, 5, 5, 4, 4 by region), as documented.
+- `npm test`: 354 tests pass.
+- Every module reachable from `main.js` is in the service worker's `SHELL` (`tests/shell.test.js`).
+- The codex has 22 fragments.
 - Every Breach puzzle is generated from a legal path, so it is solvable.
+- Balance reference results are in `tools/baseline/`; regenerate them when a rule or number changes ([TESTING.md](TESTING.md)).

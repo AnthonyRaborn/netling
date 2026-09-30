@@ -1,4 +1,4 @@
-// Pure checks for the sprite review (docs/SPRITE_REVIEW_PLAN.md). No DOM, no storage, no clock: the audit tool
+// Pure checks for the sprite review (docs/SPRITES.md). No DOM, no storage, no clock: the audit tool
 // (tools/sprite-audit.mjs) and gallery.html both import this file, so a flag means the same in both.
 // Everything here reports candidates. Whether a candidate is a real problem is a human call.
 

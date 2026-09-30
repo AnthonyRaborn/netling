@@ -7,7 +7,7 @@ import {
 import { ACCESSORIES, anchorsFor } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
 
-// The sprite review tools (docs/SPRITE_REVIEW_PLAN.md): their arithmetic is tested here; whether the art is good is not.
+// The sprite review tools (docs/SPRITES.md): their arithmetic is tested here; whether the art is good is not.
 
 test('colors: identical is zero, black to white is 100, and the game palette neons are far apart', () => {
   assert.equal(deltaE('#05d9e8', '#05d9e8'), 0);

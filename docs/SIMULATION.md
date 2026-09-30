@@ -1,8 +1,8 @@
 # Simulation reference
 
-Everything here comes from `src/sim.js` unless another file is named. Numbers are the values of `CFG` (and friends) at commit `ea87757`. If a number here disagrees with the code, the code wins: fix this file.
+Everything here comes from `src/sim.js` unless another file is named. Numbers are the values of `CFG` (and friends). If a number here disagrees with the code, the code wins: fix this file.
 
-The simulation is pure in the sense that matters: every function takes the state, a time in epoch milliseconds and an `rng` function. There is no hidden clock, no `Math.random` call that cannot be replaced, and no DOM. That is why 176 unit tests can run a whole life in milliseconds.
+The simulation is pure in the sense that matters: every function takes the state, a time in epoch milliseconds and an `rng` function. There is no hidden clock, no `Math.random` call that cannot be replaced, and no DOM. That is why the unit tests can run a whole life in milliseconds.
 
 ## Contents
 
@@ -28,7 +28,7 @@ The simulation is pure in the sense that matters: every function takes the state
 - `state.ageMin` counts simulated minutes. It is the netling's own timeline: events, naps, cooldowns and shields are all stored as ages, not wall-clock times, so hibernation (which freezes the clock) cannot break them.
 - If `now < lastTick` (the device clock moved backwards), `lastTick` is reset to `now` and the netling resumes from there instead of pausing until real time catches up.
 - Hibernation makes `tick` return immediately. `wake()` sets `lastTick = now`, so the frozen stretch never happened.
-- The step decides sleep by the hour in the netling's own **zone** (`s.zone`, the device's UTC offset in minutes as `getTimezoneOffset` gives it). The zone is set at compile and read again from the device only when the netling wakes; if it is still night in the new zone, it keeps sleeping. So travel, daylight saving or importing onto a device elsewhere takes effect the next morning, and a day never changes zone halfway (KI-12). Tests pin `TZ=UTC` and set `s.zone` to act out a move.
+- The step decides sleep by the hour in the netling's own **zone** (`s.zone`, the device's UTC offset in minutes as `getTimezoneOffset` gives it). The zone is set at compile and read again from the device only when the netling wakes; if it is still night in the new zone, it keeps sleeping. So travel, daylight saving or importing onto a device elsewhere takes effect the next morning, and a day never changes zone halfway. Tests pin `TZ=UTC` and set `s.zone` to act out a move.
 - The UI calls `advance()` (`ui/life.js`) once per second, on tab focus, and before every action, so the simulation is always caught up when the player acts.
 - Test mode replaces "now" with a scaled clock (see [DATA_AND_SAVES.md](DATA_AND_SAVES.md#test-mode)). The simulation does not know.
 
@@ -81,7 +81,7 @@ Four stats, all clamped to 0..100.
 | Integrity | see below | At 0 for 120 minutes: death |
 | Heat | +3/hr | At 85+: -8 Integrity/hr and -1 stability/hr; at 100: 15 minutes makes a care mistake |
 
-**Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, so a long gap still costs faults without being fatal. Tuned so casual players take about one more fault a life than before and workers about 0.7 more, while attentive players act about a third more often (see [BALANCE_PLAN.md](BALANCE_PLAN.md#drain-pass)).
+**Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, so a long gap still costs faults without being fatal. Casual players take about 4.5 faults a life and workers about 5.4; attentive players act about 54 times a day (see [BALANCE.md](BALANCE.md)).
 
 Drain multipliers stack multiplicatively on the base rate (and on the curve):
 
@@ -112,7 +112,7 @@ Damage sources add up. If there are none, Integrity regenerates.
 
 Care actions add flat Integrity on top: COOL +4, PURGE that clears something +4, PATCH +10, Repair kit +40.
 
-The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "about 16 hours". The old README said 14. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "about 16 hours". Not measured. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md#open-questions).
 
 ### Cache and digestion
 
@@ -208,7 +208,7 @@ A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 
 
 ## Attention rewards
 
-Opt-in extras for a player who is around (design and decisions in [ATTENTION_PLAN.md](ATTENTION_PLAN.md)). Missing any of them costs nothing: no fault, no stat change.
+Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.md](ATTENTION.md)). Missing any of them costs nothing: no fault, no stat change.
 
 **Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
 
