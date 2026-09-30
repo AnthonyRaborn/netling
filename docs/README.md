@@ -19,6 +19,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
 | See what the balance passes changed and what is still open | [BALANCE.md](BALANCE.md) |
 | Look up the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION.md](ATTENTION.md) |
+| Plan the background music (tracks, engine, unlocks; not built yet) | [MUSIC_PLAN.md](MUSIC_PLAN.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
