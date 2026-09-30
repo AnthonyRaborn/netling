@@ -236,7 +236,7 @@ const sceneStart = (name) => SCENES.find((s) => s.name === name)?.start ?? NaN; 
 // Captions type out in the band at the top. [from, to, text], trailer seconds.
 const TIMELINE = {
   captions: [
-    [sceneStart('intro') + 0.6, sceneStart('intro') + 4.9, 'YOU RAN A SCRIPT BY ACCIDENT.'],
+    [sceneStart('intro') + 0.6, sceneStart('intro') + 4.9, 'YOU RAN A SCRIPT\nBY ACCIDENT.'],
     [sceneStart('intro') + 5.4, sceneStart('care'), "IT'S ALIVE."],
     [sceneStart('care') + 0.3, sceneStart('care') + 2.0, 'KEEP IT CHARGED.'],
     [sceneStart('care') + 2.0, sceneStart('care') + 3.6, 'KEEP IT PATCHED.'],
@@ -309,6 +309,7 @@ const TRAILER_CSS = `
   #tr-band { position: fixed; inset: 0 0 auto 0; height: 118px; display: flex; align-items: center; justify-content: center;
     padding: 0 18px; text-align: center; font: 38px/1.05 'VT323', monospace; letter-spacing: 2px; color: #c7f9ff;
     text-shadow: 0 0 6px #05d9e8, 0 0 14px #05d9e8aa; z-index: 50; pointer-events: none; }
+  #tr-band > span { white-space: pre-line; } /* a \n in a caption is a forced break */
   #tr-band .cur { color: #ff2a6d; text-shadow: 0 0 8px #ff2a6d; margin-left: 2px; }
   #tr-card { position: fixed; inset: 0; background: #07070c; z-index: 60; display: none; flex-direction: column;
     align-items: center; justify-content: center; gap: 18px; text-align: center; font-family: 'VT323', monospace; color: #c7f9ff; padding: 0 24px; }
@@ -514,7 +515,8 @@ function wav(pcm) {
 // (docs/MUSIC.md) on the trailer's timeline: silent until the first tap, the home track (30% quieter
 // in mini-games), the netrun theme on the run, the home track picking up where it left off, a dip
 // under the evolve jingle, a 2 s fade at the flatline, silence while compiling, and the home track
-// again once the next netling is online. Only for a full render: previews stay effects-only.
+// again once the next netling is online: Night drive, which its generation unlocks. Only for a full
+// render: previews stay effects-only.
 
 const MUSIC_VOLUME = 0.4; // the game's default MUSIC slider
 const MUSIC_DB = Number(process.env.MUSIC_DB ?? 4); // over the game's own level, which sits well under effects
@@ -537,12 +539,12 @@ function musicPlan() {
       { render: 'home', from: 0, at: on, len: first },
       { render: 'run', from: runFrom, at: run, len: evolve - run, db: 4 },
       { render: 'home', from: first, at: evolve, len: flatlineAt + 2 - evolve },
-      { render: 'next', from: 0, at: hatch, len: TOTAL - hatch },
+      { render: 'next', from: 0, at: hatch, len: TOTAL - hatch, db: 2 }, // Night drive sits about 2 dB under idle
     ],
     renders: {
       home: { track: 'idle', seed: 7, seconds: first + (flatlineAt + 2 - evolve) + 1 },
       run: { track: 'netrun', region: 'public', seed: 7, seconds: runFrom + evolve - run + 1 },
-      next: { track: 'idle', seed: 8, seconds: TOTAL - hatch + 1 },
+      next: { track: 'nightdrive', seed: 8, seconds: TOTAL - hatch + 1 }, // the track generation 2 unlocks
     },
     // Gain over trailer time: [from, to, level], eased over 0.3 s at each change.
     levels: [

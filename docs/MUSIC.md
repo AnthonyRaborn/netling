@@ -86,7 +86,7 @@ Keys, tempos and unlocks are also in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#mus
 - `tests/music.test.js`: phrase and form checks, the arranger (seeded, no phrase twice running, flourish spacing, the low-note floor in every variant and region), each variant, the wind-down, the netrun theme per region, `musicMode`'s priorities, and the player against a fake `AudioContext`.
 - `tests/cosmetics.test.js`: each track's unlock threshold and the wardrobe slot.
 - Smoke: no audio before a gesture, hidden and menus, the sliders and SND, the mini-game duck, the netrun theme, sleep, alert, flow, equipping a track in STYLE, and the DEV row.
-- The trailer (`tools/make-trailer.mjs`) mutes the music in its scenes, since each is a fresh page and the music would restart at every cut, and lays one continuous take from `renderMusic` under the whole trailer instead, following the table above.
+- The trailer (`tools/make-trailer.mjs`) mutes the music in its scenes, since each is a fresh page and the music would restart at every cut, and lays one continuous take from `renderMusic` under the whole trailer instead, following the table above. After the next generation hatches it plays Night drive, the track that generation unlocks.
 - By ear: `node tools/render-music.mjs <dir>` renders every track and variant at the game's own level, with `reference-effects.wav` to compare.
 
 ## Open
