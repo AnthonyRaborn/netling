@@ -142,6 +142,7 @@ export function startIntro() {
 function typeNextLine() {
   if (introShown >= INTRO_LINES.length) {
     $('intro-next').hidden = false;
+    scrollIntro(); // the prompt takes room from the text
     return;
   }
   const [line, cls] = INTRO_LINES[introShown++];
@@ -149,8 +150,15 @@ function typeNextLine() {
   if (cls) span.className = cls;
   span.textContent = `${line}\n`;
   $('intro-text').append(span);
+  scrollIntro();
   sfx('move', 520);
   introTimer = setTimeout(typeNextLine, line ? 520 : 260);
+}
+
+// Keeps the newest line in view when the screen is too short for all of them.
+function scrollIntro() {
+  const pre = $('intro-text');
+  pre.scrollTop = pre.scrollHeight;
 }
 
 export const introWaiting = () => app.onboarding === 'intro' && !$('intro').hidden;
@@ -163,6 +171,7 @@ export function advanceIntro() {
     clearTimeout(introTimer);
     while (introShown < INTRO_LINES.length) typeNextLine();
     clearTimeout(introTimer);
+    typeNextLine(); // all typed: shows the prompt
     return;
   }
   $('intro').hidden = true;
@@ -220,4 +229,5 @@ export function initOnboarding() {
     }
   });
   $('intro').addEventListener('click', advanceIntro);
+  addEventListener('resize', () => !$('intro').hidden && scrollIntro());
 }

@@ -986,11 +986,19 @@ button:active {
 .intro pre {
   margin: 0;
   flex: 1;
+  min-height: 0; /* on a short screen the text scrolls like a terminal, so the prompt below stays in view */
+  overflow: hidden;
   font: inherit;
   font-size: 17px;
   line-height: 1.25;
   color: #6fd6e0;
   white-space: pre-wrap;
+}
+
+@media (max-width: 420px) {
+  .intro pre {
+    font-size: 15px;
+  }
 }
 
 .intro .hl {

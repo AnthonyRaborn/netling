@@ -18,7 +18,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (41 s, 1080x1920, 30 fps, with the game's own sound) from the real app to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes, `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 7 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 354 tests in 35 files. The smoke test has 58 scenarios (Playwright 1.56.1).
+`npm test` runs 354 tests in 35 files. The smoke test has 59 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
