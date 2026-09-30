@@ -277,7 +277,8 @@ export const TRACKS = {
       { bars: 4, parts: ['bass', 'hiss'] },
       { bars: 8, parts: ['bass', 'keys', 'melody', 'hiss'] },
     ],
-    flourishEvery: [6, 10], // the handshake, often
+    flourishEvery: [4, 6], // the handshake, often
+    flourish: 'handshake',
   },
 
   // Elevator music, a little ironic: seventh chords, walking bass, woodblock. G major.
@@ -332,7 +333,7 @@ export const TRACKS = {
       { bars: 8, parts: ['bass', 'epiano', 'drums'] },
       { bars: 8, parts: ['bass', 'epiano', 'melody', 'drums'] },
     ],
-    flourishEvery: [16, 24],
+    flourishEvery: [4, 8],
     flourish: 'chime', // the elevator's ding
   },
 

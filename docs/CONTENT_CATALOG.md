@@ -157,8 +157,8 @@ The home screen's background music (`tracks.js`, played by `music.js`; see [MUSI
 |---|---|---|---|---|
 | `idle` | Idle loop | Calm chiptune, A minor, 84 BPM | free | |
 | `nightdrive` | Night drive | Synthwave, B minor, 100 BPM | Generation 2 or later | "pass it on." |
-| `dialup` | Dial-up | Old web, G minor, 72 BPM, with frequent handshake squeals | 10 codex fragments | "read ten pages of the old net." |
-| `lobby` | Corp lobby | Elevator music, G major, 96 BPM, with an elevator ding | 25 corp meals, across lives | "eat what the grid serves, twenty-five times." |
+| `dialup` | Dial-up | Old web, G minor, 72 BPM, with a full modem handshake every 4 to 6 bars (dialing tones, the 2100 Hz answer tone, the data warbles, the screech and the hiss) | 10 codex fragments | "read ten pages of the old net." |
+| `lobby` | Corp lobby | Elevator music, G major, 96 BPM, with an elevator ding every 4 to 8 bars | 25 corp meals, across lives | "eat what the grid serves, twenty-five times." |
 | `tracker` | Tracker | Fast demoscene, A minor, 132 BPM | 150 games played (PLAY and netrun ICE) | "a hundred and fifty games, win or lose." |
 | `undertow` | Undertow | Dark ambient, E minor, 60 BPM, no drums | 3 exits from the Deep | "come back from the bottom three times." |
 | `forum` | Forum | Call-and-answer chirps, G major, 90 BPM, with a disk-seek flourish | 25 chatter lines heard | "hear twenty-five things it says to itself." |

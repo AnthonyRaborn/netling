@@ -176,6 +176,69 @@ function modem(graph, t, seed) {
   noiseHit(graph, t + 0.36, 0.25, 0.05, 'bandpass', 2400);
 }
 
+// One oscillator whose pitch jumps every stepS seconds (freqAt(k) for the k-th step): modem data.
+function stepped(graph, wave, t, dur, vol, stepS, freqAt) {
+  const { ctx } = graph;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = wave;
+  for (let k = 0, at = t; at < t + dur; k++, at += stepS) osc.frequency.setValueAtTime(freqAt(k), at);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.01);
+  g.gain.setValueAtTime(vol, t + dur - 0.01);
+  g.gain.linearRampToValueAtTime(0, t + dur);
+  osc.connect(g).connect(graph.level);
+  osc.start(t);
+  track(graph, osc, t + dur + 0.01);
+}
+
+// Steady noise that ends sharply (the line going quiet once modems connect).
+function noiseBed(graph, t, dur, vol, type, freq) {
+  const { ctx } = graph;
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer(ctx);
+  src.loop = true;
+  const filter = ctx.createBiquadFilter();
+  filter.type = type;
+  filter.frequency.value = freq;
+  filter.Q.value = 0.5;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.08);
+  g.gain.setValueAtTime(vol, t + dur - 0.02);
+  g.gain.linearRampToValueAtTime(0, t + dur);
+  src.connect(filter).connect(g).connect(graph.level);
+  src.start(t);
+  track(graph, src, t + dur + 0.01);
+}
+
+// A dial-up connection, about 4 s: dialing, the answer tone, the two data warbles, the screech,
+// and the hiss that cuts off when it connects.
+const DTMF_ROWS = [697, 770, 852, 941];
+const DTMF_COLS = [1209, 1336, 1477];
+function handshake(graph, t, seed) {
+  let x = seed >>> 0 || 1;
+  const r = () => ((x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 2 ** 32);
+  const pick = (list) => list[Math.floor(r() * list.length)];
+  const V = 0.05;
+  for (let i = 0; i < 5; i++) {
+    const at = t + i * 0.12; // five digits, each a pair of tones
+    tone(graph, graph.level, 'sine', pick(DTMF_ROWS), at, 0.08, V, 'hold');
+    tone(graph, graph.level, 'sine', pick(DTMF_COLS), at, 0.08, V, 'hold');
+  }
+  let at = t + 0.8;
+  tone(graph, graph.level, 'sine', 2100, at, 0.75, V * 1.2, 'hold'); // the answer tone
+  at += 0.85;
+  stepped(graph, 'sine', at, 0.45, V * 1.2, 0.013, () => (r() < 0.5 ? 980 : 1180)); // low data warble
+  stepped(graph, 'sine', at + 0.3, 0.4, V, 0.011, () => (r() < 0.5 ? 1650 : 1850)); // high data warble
+  at += 0.75;
+  // The screech: two voices jumping around the band, a falling chirp, noise swelling under them.
+  stepped(graph, 'square', at, 1.0, V * 0.6, 0.03, () => 600 + r() * 2400);
+  stepped(graph, 'square', at, 1.0, V * 0.5, 0.045, () => 1200 + r() * 1800);
+  stepped(graph, 'sine', at, 0.5, V, 0.01, (k) => 3000 - k * 50);
+  noiseBed(graph, at + 0.2, 1.6, V * 0.9, 'bandpass', 1800);
+}
+
 // A disk seeking: an uneven run of clicks with a low thunk at the start.
 function seek(graph, t, seed) {
   let x = seed >>> 0 || 1;
@@ -190,7 +253,7 @@ function chime(graph, t) {
   tone(graph, graph.level, 'triangle', midiHz(84), t + 0.35, 0.7, 0.12, 'fade');
 }
 
-const FLOURISHES = { modem, seek, chime };
+const FLOURISHES = { modem, handshake, seek, chime };
 
 // Queues one arranged bar at time t0 and returns its length in seconds.
 export function scheduleBar(graph, bar, settings, t0) {

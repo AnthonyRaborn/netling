@@ -136,7 +136,7 @@ Forum (decision 9) is the attention-rewards track: a chattering old message boar
 ## Phases
 
 1. **Built.** Engine, controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row, for the maintainer to listen to.
-2. **Built.** The six unlockable tracks, the `music` wardrobe slot and the unlocks. The phrase language grew for them: several notes at once (`1+3+5`), passing notes in chord parts (2, 4, 6), chip arpeggios, detuned drones, a filter sweep, key clicks, woodblock and tape hiss, and two more flourishes (a disk seek for Forum, an elevator ding for Corp lobby).
+2. **Built.** The six unlockable tracks, the `music` wardrobe slot and the unlocks. The phrase language grew for them: several notes at once (`1+3+5`), passing notes in chord parts (2, 4, 6), chip arpeggios, detuned drones, a filter sweep, key clicks, woodblock and tape hiss, and more flourishes: a full modem handshake for Dial-up (dialing, answer tone, data warbles, screech, hiss; every 4 to 6 bars after the maintainer found the first squeal too sparse and not dial-up enough), an elevator ding for Corp lobby (every 4 to 8 bars, after the maintainer heard only one in 40 s), and a disk seek for Forum.
 3. Alert and flow reactions, after auditioning in the DEV panel.
 
 ## Questions for the maintainer
