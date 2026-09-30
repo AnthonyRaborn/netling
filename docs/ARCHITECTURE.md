@@ -60,7 +60,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
 | `tests/` | 28 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators, the sprite audit (`sprite-audit.mjs`, with `lib/sprite-checks.mjs`) |
+| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon, screenshot and trailer generators, the sprite audit (`sprite-audit.mjs`, with `lib/sprite-checks.mjs`) |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
