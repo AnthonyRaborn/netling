@@ -337,9 +337,11 @@ function drawOverlay({ first, t, sceneT, sceneLen, caption, card, cards, redact,
     const shown = Math.min(str.length, Math.floor((t - from) * 32));
     const blinkOn = Math.floor(t * 2) % 2 === 0; // 1 Hz: far under the three-flashes-a-second limit
     const cursor = shown < str.length || blinkOn ? '<span class="cur">_</span>' : '<span class="cur" style="opacity:0">_</span>';
-    band.innerHTML = '';
-    band.append(str.slice(0, shown));
-    band.insertAdjacentHTML('beforeend', cursor);
+    // Text and cursor in one element, so the cursor follows the last letter when the caption wraps.
+    const line = document.createElement('span');
+    line.append(str.slice(0, shown));
+    line.insertAdjacentHTML('beforeend', cursor);
+    band.replaceChildren(line);
   } else band.textContent = '';
 
   const el = document.getElementById('tr-card');
