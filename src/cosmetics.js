@@ -1,4 +1,4 @@
-// Wardrobe cosmetics: shell, screen tint, screen effect, sound pack and crest. Purely visual, shared across generations.
+// Wardrobe cosmetics: shell, screen tint, screen effect, sound pack, crest and music. Purely visual, shared across generations.
 // Each locked item shows only its hint; unlock checks read a progress context:
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits } }
 import { FRAGMENTS } from './netrun/codex.js';
@@ -22,6 +22,7 @@ const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[
 // Attention rewards (docs/ATTENTION.md). ctx.flowMin is every life's time in flow, the living one's included.
 export const ATTENTION = {
   requests: 25,
+  chatterHeard: 25, // the Forum track
   greetings: 5,
   flowHours: 24,
   groupHeard: (ctx) => {
@@ -51,7 +52,7 @@ export const LEGACY = {
   unbrokenStreak,
 };
 
-export const SLOTS = ['shell', 'tint', 'effect', 'sound', 'crest'];
+export const SLOTS = ['shell', 'tint', 'effect', 'sound', 'crest', 'music'];
 
 export const COSMETICS = {
   shell: [
@@ -137,6 +138,16 @@ export const COSMETICS = {
       pixels: ['.........', '.#######.', '#.......#', '#.#.#.#.#', '#.......#', '.#######.', '..#......', '.#.......', '.........'],
     },
   ],
+  // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.
+  music: [
+    { id: 'idle', name: 'Idle loop', free: true },
+    { id: 'nightdrive', name: 'Night drive', hint: 'pass it on.', check: (c) => c.generation >= 2 },
+    { id: 'dialup', name: 'Dial-up', hint: 'read ten pages of the old net.', check: (c) => c.codex.length >= 10 },
+    { id: 'lobby', name: 'Corp lobby', hint: 'eat what the grid serves, twenty-five times.', check: (c) => acts(c, 'corp') >= 25 },
+    { id: 'tracker', name: 'Tracker', hint: 'a hundred and fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 150 },
+    { id: 'undertow', name: 'Undertow', hint: 'come back from the bottom three times.', check: (c) => (c.progress.deepExits ?? 0) >= 3 },
+    { id: 'forum', name: 'Forum', hint: 'hear twenty-five things it says to itself.', check: (c) => (c.progress.chatter?.length ?? 0) >= ATTENTION.chatterHeard },
+  ],
 };
 
 // The device label: naming the line is earned by losing the first netling.
@@ -157,7 +168,7 @@ export function sanitizeLabel(raw) {
   return clean || LABEL.fallback;
 }
 
-export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep', crest: 'none' };
+export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep', crest: 'none', music: 'idle' };
 
 export const cosmeticById = (slot, id) => COSMETICS[slot].find((c) => c.id === id);
 

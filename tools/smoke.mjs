@@ -1258,6 +1258,135 @@ await scenario('dev mode: time skip and evolve', async ({ open }) => {
   assert((await saved(page)).stage === 'teen', 'did not evolve');
 });
 
+// --- music ---
+
+const musicStatus = (page) => page.evaluate(async () => (await import('./src/music.js')).musicStatus());
+const setHidden = (page, hidden) =>
+  page.evaluate((h) => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => h });
+    document.dispatchEvent(new Event('visibilitychange'));
+  }, hidden);
+
+await scenario('music: silent until the first tap, then plays; pauses while hidden', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.waitForTimeout(1200);
+  assert(await page.evaluate(async () => (await import('./src/audio.js')).audioContext() === null), 'audio started without a gesture');
+  assert(!(await musicStatus(page)).playing, 'music autoplayed');
+  await page.click('#open-archive');
+  await page.click('#close-archive');
+  await page.waitForTimeout(800);
+  let m = await musicStatus(page);
+  assert(m.playing && m.key === 'idle:' && m.variant === 'awake', `not playing after a tap: ${JSON.stringify(m)}`);
+  assert(m.voices > 0, `no notes queued (context not running?): ${JSON.stringify(m)}`);
+  await setHidden(page, true);
+  assert(!(await musicStatus(page)).playing, 'still playing while hidden');
+  await setHidden(page, false);
+  await page.waitForTimeout(300);
+  assert((await musicStatus(page)).playing, 'did not come back when shown');
+  await page.click('#open-archive'); // menus keep the music going
+  m = await musicStatus(page);
+  assert(m.playing, 'stopped behind a menu');
+});
+
+await scenario('music: its own slider (40% by default, 0 stops it), SND OFF, mini-game duck', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert((await page.inputValue('#music-volume')) === '40', 'music does not default to 40%');
+  assert((await page.textContent('.volume-row')).startsWith('EFFECTS'), 'the effects slider is not labelled');
+  await page.fill('#music-volume', '0');
+  assert((await saved(page, 'netling.prefs')).musicVolume === 0, 'music volume not saved');
+  assert(!(await musicStatus(page)).playing, 'music plays at 0%');
+  await page.fill('#music-volume', '60');
+  assert((await musicStatus(page)).playing, 'music did not start from the slider');
+  await page.click('#close-transfer');
+  await page.click('#pref-sound');
+  assert(!(await musicStatus(page)).playing, 'SND OFF did not stop the music');
+  await page.click('#pref-sound');
+  await page.waitForTimeout(300);
+  assert((await musicStatus(page)).playing, 'SND ON did not bring the music back');
+  await page.click('#btn-play');
+  await page.click('[data-game="breach"]');
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'idle:' && m.duck === 0.7, `mini-game should keep the home track, ducked: ${JSON.stringify(m)}`);
+  await page.click('#pad-quit');
+  await page.click('#pad-confirm');
+});
+
+await scenario('music: a netrun plays its own theme', async ({ open }) => {
+  const s = awakeNetling();
+  startRun(s, 'public', Math.random);
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  await page.click('#pad-quit'); // a tap starts the audio
+  await page.click('#pad-quit'); // KEEP RUNNING
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'netrun:public', `netrun theme not playing: ${JSON.stringify(m)}`);
+});
+
+// Its own scenario: a second tab in the same profile would be the waiting tab, which stays quiet.
+await scenario('music: resting plays the sleep variant', async ({ open }) => {
+  const napping = awakeNetling();
+  napping.nap = { startedAge: napping.ageMin }; // resting, like sleep, and the page won't wake it on load
+  const page = await open(BASE, seed({ 'netling.save': napping }));
+  await page.keyboard.press('Shift');
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'idle:' && m.variant === 'sleep', `sleep variant not playing: ${JSON.stringify(m)}`);
+});
+
+await scenario('music: an earned track can be equipped in STYLE and plays at once', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.progress': { gamesPlayed: 150 } }));
+  await page.click('#open-archive'); // also the tap that starts the audio
+  await page.click('#tab-btn-wardrobe');
+  const tracker = page.locator('#wardrobe-list button.cosmetic', { hasText: 'Tracker' });
+  assert(await tracker.isEnabled(), 'Tracker not unlocked by 150 games');
+  // Locked items show only their hint.
+  assert(await page.locator('#wardrobe-list button.cosmetic', { hasText: 'pass it on.' }).isDisabled(), 'a locked track can be equipped');
+  await tracker.click();
+  await page.waitForTimeout(1200);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'tracker:', `equipped track not playing: ${JSON.stringify(m)}`);
+  assert((await saved(page, 'netling.wardrobe')).music === 'tracker', 'music choice not saved');
+});
+
+await scenario('music: an open alert plays the alert variant, and ends with the alert', async ({ open }) => {
+  const alarmed = awakeNetling();
+  Object.assign(alarmed.stats, { charge: 10, sync: 90, integrity: 100, heat: 20 }); // low Charge is the only alert
+  const page = await open(BASE, seed({ 'netling.save': alarmed }));
+  await page.keyboard.press('Shift');
+  await page.waitForTimeout(1300);
+  let m = await musicStatus(page);
+  assert(m.playing && m.variant === 'alert', `alert variant not playing: ${JSON.stringify(m)}`);
+  await page.click('#controls [data-act="corp"]'); // feed it past the alert
+  await page.click('#controls [data-act="corp"]');
+  await page.waitForTimeout(1300);
+  m = await musicStatus(page);
+  assert(m.variant === 'awake', `still alarmed after feeding: ${JSON.stringify(m)}`);
+});
+
+// Its own scenario: a second tab in the same profile would be the waiting tab, which stays quiet.
+await scenario('music: flow plays the flow variant', async ({ open }) => {
+  const save = awakeNetling({ flowMin: 400 });
+  Object.assign(save.stats, { charge: 90, sync: 90, integrity: 100, heat: 20 });
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  await page.keyboard.press('Shift');
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.variant === 'flow', `flow variant not playing: ${JSON.stringify(m)}`);
+});
+
+await scenario('music: the DEV row forces a track and a state', async ({ open }) => {
+  const page = await open(`${BASE}?dev`, seed());
+  await page.click('#dev-music-track'); // the tap that starts the audio
+  await page.selectOption('#dev-music-track', 'netrun:deep');
+  await page.selectOption('#dev-music-state', 'flow');
+  await page.waitForTimeout(300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'netrun:deep' && m.variant === 'flow', `DEV override not applied: ${JSON.stringify(m)}`);
+});
+
 await browser.close();
 server.close();
 const failed = results.filter(([, f]) => f).length;

@@ -631,6 +631,16 @@ button:active {
   font-size: 16px;
 }
 
+.dev select {
+  flex: 1;
+  font: inherit;
+  font-size: 15px;
+  padding: 4px;
+  color: var(--yellow);
+  background: transparent;
+  border: 1px solid var(--yellow);
+}
+
 .dev button {
   flex: 1;
   font-size: 15px;
