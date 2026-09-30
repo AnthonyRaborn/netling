@@ -1,0 +1,356 @@
+{
+  "runs": 1000,
+  "region": "all",
+  "archetypes": {
+    "public.careful": {
+      "jacked": 0.962,
+      "disconnected": 0.038,
+      "items": 1.88,
+      "fragments": 0.78,
+      "intSpent": 11.77,
+      "chargeSpent": 14.41,
+      "allegiance": -0.19,
+      "stability": -0.13
+    },
+    "public.skilled": {
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 2.2,
+      "fragments": 0.91,
+      "intSpent": 6.81,
+      "chargeSpent": 16.33,
+      "allegiance": -0.22,
+      "stability": -0.12
+    },
+    "public.chrome": {
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 1.94,
+      "fragments": 0.8,
+      "intSpent": 10.82,
+      "chargeSpent": 12.96,
+      "allegiance": 0.02,
+      "stability": -0.09
+    },
+    "public.firewall": {
+      "jacked": 0.997,
+      "disconnected": 0.003,
+      "items": 2.08,
+      "fragments": 0.88,
+      "intSpent": 7.4,
+      "chargeSpent": 15.98,
+      "allegiance": -0.25,
+      "stability": -0.1
+    },
+    "public.daemon": {
+      "jacked": 0.997,
+      "disconnected": 0.003,
+      "items": 2.14,
+      "fragments": 0.91,
+      "intSpent": -7.61,
+      "chargeSpent": 16.29,
+      "allegiance": -0.24,
+      "stability": -0.08
+    },
+    "public.glitch": {
+      "jacked": 0.995,
+      "disconnected": 0.005,
+      "items": 2.03,
+      "fragments": 0.91,
+      "intSpent": 4.61,
+      "chargeSpent": 16.81,
+      "allegiance": -0.25,
+      "stability": -0.09
+    },
+    "public.ghost": {
+      "jacked": 0.994,
+      "disconnected": 0.006,
+      "items": 2.06,
+      "fragments": 0.89,
+      "intSpent": 5.99,
+      "chargeSpent": 14.1,
+      "allegiance": 0.02,
+      "stability": -0.09
+    },
+    "bazaar.careful": {
+      "jacked": 0.955,
+      "disconnected": 0.045,
+      "items": 1.76,
+      "fragments": 0.77,
+      "intSpent": 11.59,
+      "chargeSpent": 15.2,
+      "allegiance": 0.01,
+      "stability": -0.16
+    },
+    "bazaar.skilled": {
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 2.07,
+      "fragments": 0.89,
+      "intSpent": 6.42,
+      "chargeSpent": 17.33,
+      "allegiance": 0,
+      "stability": -0.13
+    },
+    "bazaar.chrome": {
+      "jacked": 0.987,
+      "disconnected": 0.013,
+      "items": 1.8,
+      "fragments": 0.79,
+      "intSpent": 11.21,
+      "chargeSpent": 15.29,
+      "allegiance": 0.01,
+      "stability": -0.13
+    },
+    "bazaar.firewall": {
+      "jacked": 0.994,
+      "disconnected": 0.006,
+      "items": 1.97,
+      "fragments": 0.86,
+      "intSpent": 6.95,
+      "chargeSpent": 16.81,
+      "allegiance": 0,
+      "stability": -0.13
+    },
+    "bazaar.daemon": {
+      "jacked": 0.989,
+      "disconnected": 0.011,
+      "items": 2.04,
+      "fragments": 0.89,
+      "intSpent": -9.04,
+      "chargeSpent": 17.32,
+      "allegiance": 0.01,
+      "stability": -0.13
+    },
+    "bazaar.glitch": {
+      "jacked": 0.993,
+      "disconnected": 0.007,
+      "items": 1.95,
+      "fragments": 0.85,
+      "intSpent": 4.15,
+      "chargeSpent": 17.4,
+      "allegiance": 0.01,
+      "stability": -0.12
+    },
+    "bazaar.ghost": {
+      "jacked": 0.991,
+      "disconnected": 0.009,
+      "items": 1.96,
+      "fragments": 0.85,
+      "intSpent": 6,
+      "chargeSpent": 16.39,
+      "allegiance": 0,
+      "stability": -0.13
+    },
+    "corp.careful": {
+      "jacked": 0.926,
+      "disconnected": 0.074,
+      "items": 1.63,
+      "fragments": 0.67,
+      "intSpent": 16.54,
+      "chargeSpent": 21.93,
+      "allegiance": -0.91,
+      "stability": -0.13
+    },
+    "corp.skilled": {
+      "jacked": 0.975,
+      "disconnected": 0.025,
+      "items": 2.17,
+      "fragments": 0.87,
+      "intSpent": 11.15,
+      "chargeSpent": 26.71,
+      "allegiance": -1.14,
+      "stability": -0.07
+    },
+    "corp.chrome": {
+      "jacked": 0.977,
+      "disconnected": 0.023,
+      "items": 1.81,
+      "fragments": 0.74,
+      "intSpent": 13.57,
+      "chargeSpent": 14.29,
+      "allegiance": 0.01,
+      "stability": -0.09
+    },
+    "corp.firewall": {
+      "jacked": 0.979,
+      "disconnected": 0.021,
+      "items": 1.95,
+      "fragments": 0.8,
+      "intSpent": 11.77,
+      "chargeSpent": 25.71,
+      "allegiance": -1.31,
+      "stability": -0.09
+    },
+    "corp.daemon": {
+      "jacked": 0.993,
+      "disconnected": 0.007,
+      "items": 2.12,
+      "fragments": 0.89,
+      "intSpent": -3.39,
+      "chargeSpent": 25.78,
+      "allegiance": -1.19,
+      "stability": -0.06
+    },
+    "corp.glitch": {
+      "jacked": 0.984,
+      "disconnected": 0.016,
+      "items": 1.91,
+      "fragments": 0.85,
+      "intSpent": 8.5,
+      "chargeSpent": 26.61,
+      "allegiance": -1.25,
+      "stability": -0.07
+    },
+    "corp.ghost": {
+      "jacked": 0.986,
+      "disconnected": 0.014,
+      "items": 2.05,
+      "fragments": 0.87,
+      "intSpent": 7.4,
+      "chargeSpent": 15.94,
+      "allegiance": -0.01,
+      "stability": -0.06
+    },
+    "ruins.careful": {
+      "jacked": 0.912,
+      "disconnected": 0.088,
+      "items": 2.86,
+      "fragments": 0.82,
+      "intSpent": 15.76,
+      "chargeSpent": 14.22,
+      "allegiance": -0.03,
+      "stability": -0.27
+    },
+    "ruins.skilled": {
+      "jacked": 0.967,
+      "disconnected": 0.033,
+      "items": 3.5,
+      "fragments": 1.01,
+      "intSpent": 9.72,
+      "chargeSpent": 16.63,
+      "allegiance": -0.03,
+      "stability": -0.22
+    },
+    "ruins.chrome": {
+      "jacked": 0.972,
+      "disconnected": 0.028,
+      "items": 3,
+      "fragments": 0.86,
+      "intSpent": 14.98,
+      "chargeSpent": 14.44,
+      "allegiance": -0.03,
+      "stability": -0.21
+    },
+    "ruins.firewall": {
+      "jacked": 0.988,
+      "disconnected": 0.012,
+      "items": 3.39,
+      "fragments": 0.98,
+      "intSpent": 9.88,
+      "chargeSpent": 16.18,
+      "allegiance": -0.02,
+      "stability": -0.21
+    },
+    "ruins.daemon": {
+      "jacked": 0.98,
+      "disconnected": 0.02,
+      "items": 3.43,
+      "fragments": 1.01,
+      "intSpent": -3.71,
+      "chargeSpent": 15.9,
+      "allegiance": -0.03,
+      "stability": -0.2
+    },
+    "ruins.glitch": {
+      "jacked": 0.982,
+      "disconnected": 0.018,
+      "items": 3.4,
+      "fragments": 1.04,
+      "intSpent": 6.35,
+      "chargeSpent": 16.12,
+      "allegiance": -0.04,
+      "stability": -0.29
+    },
+    "ruins.ghost": {
+      "jacked": 0.977,
+      "disconnected": 0.023,
+      "items": 3.35,
+      "fragments": 0.98,
+      "intSpent": 8.45,
+      "chargeSpent": 15.5,
+      "allegiance": -0.04,
+      "stability": -0.23
+    },
+    "deep.careful": {
+      "jacked": 0.653,
+      "disconnected": 0.347,
+      "items": 1.45,
+      "fragments": 0.37,
+      "intSpent": 31.33,
+      "chargeSpent": 12.38,
+      "allegiance": 0.01,
+      "stability": -0.48
+    },
+    "deep.skilled": {
+      "jacked": 0.797,
+      "disconnected": 0.203,
+      "items": 2.74,
+      "fragments": 0.69,
+      "intSpent": 23.29,
+      "chargeSpent": 18.07,
+      "allegiance": 0.02,
+      "stability": -0.37
+    },
+    "deep.chrome": {
+      "jacked": 0.815,
+      "disconnected": 0.185,
+      "items": 1.7,
+      "fragments": 0.43,
+      "intSpent": 28.92,
+      "chargeSpent": 12.8,
+      "allegiance": 0.01,
+      "stability": -0.33
+    },
+    "deep.firewall": {
+      "jacked": 0.854,
+      "disconnected": 0.146,
+      "items": 2.21,
+      "fragments": 0.57,
+      "intSpent": 22.55,
+      "chargeSpent": 15.51,
+      "allegiance": 0,
+      "stability": -0.31
+    },
+    "deep.daemon": {
+      "jacked": 0.808,
+      "disconnected": 0.192,
+      "items": 2.39,
+      "fragments": 0.64,
+      "intSpent": 17.22,
+      "chargeSpent": 15.98,
+      "allegiance": 0.01,
+      "stability": -0.35
+    },
+    "deep.glitch": {
+      "jacked": 0.83,
+      "disconnected": 0.17,
+      "items": 2.42,
+      "fragments": 0.68,
+      "intSpent": 21.45,
+      "chargeSpent": 18.44,
+      "allegiance": 0.03,
+      "stability": -0.31
+    },
+    "deep.ghost": {
+      "jacked": 0.853,
+      "disconnected": 0.147,
+      "items": 2.42,
+      "fragments": 0.68,
+      "intSpent": 20.64,
+      "chargeSpent": 16.71,
+      "allegiance": -0.01,
+      "stability": -0.31
+    }
+  }
+}

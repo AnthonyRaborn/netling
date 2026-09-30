@@ -10,16 +10,20 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run smoke` | Drives the real app in headless Chromium | Playwright (`npm install --no-save playwright && npx playwright install chromium`) |
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
+| `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md) | Node only |
+| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
+| `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 227 tests in 24 files. The smoke test has 41 scenarios (Playwright 1.56.1).
+`npm test` runs 354 tests in 35 files. The smoke test has 58 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
 ## Unit tests
 
-They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls), and per-file fakes for `AudioContext`, `Notification` and the service worker API. `tests/helpers/` is not matched by the test glob.
+They use `node:test` and `node:assert/strict` and import the modules under test directly. Time and randomness are injected. Code that needs a browser API is tested against small fakes: `tests/helpers/fake-canvas.js` (a canvas that records its draw calls, and its fill, stroke and alpha changes), and per-file fakes for `AudioContext`, `Notification` and the service worker API (including its `controllerchange` and `message` events, in `update.test.js`). `tests/helpers/` is not matched by the test glob.
 
 ### Conventions used by the tests
 
@@ -33,30 +37,41 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 
 | File | Tests | Covers |
 |---|---|---|
-| `sim.test.js` | 27 | Compile and boot, drain, care mistakes, lights, neglect death, feeding, patch, leaning, inheritance, sleep window, evolution, form perks, migrate, Ghost rule, play, traces, alerts, clock rollback, Packet Feast |
-| `netrun.test.js` | 28 | Map connectivity for all regions, run gating, movement, jack out, disconnect, relay, abort, checkpoints, markets, anomalies, form abilities, fog, region locks, fragment order, codex grouping, accessories, the tutorial run, a flatline mid-run |
+| `sim.test.js` | 28 | Compile and boot, drain and the drain curve, care mistakes, lights, neglect death, feeding, patch, leaning, inheritance, sleep window, evolution, form perks, migrate, Ghost rule, play, traces, alerts, clock rollback, Packet Feast |
+| `netrun.test.js` | 28 | Map connectivity for all regions, run gating, movement, jack out, disconnect, relay, abort, checkpoints, markets (scrip and Charge), anomalies, form abilities, fog, region locks, fragment order, codex grouping, accessories, the tutorial run, a flatline mid-run |
 | `recovery.test.js` | 14 | Integrity regeneration, care restores, quiet nights, event timers overnight, visitors, uplink cooldown, overclock, repair kit |
 | `sanitize.test.js` | 14 | Repairing every kind of stored data, hostile input, run validation, strict cleaning, stage and form agreement, future timers |
 | `items.test.js` | 10 | Inventory limits, each item, drops, keepsakes, discard |
 | `games.test.js` | 10 | Breach solvability, Dodge, Tune, Feast, session result and forfeit |
-| `accessories.test.js` | 10 | Sprite anchors, every accessory on every form, rarity rolls, regions, earned exclusion, props, colors |
+| `sprites.test.js` | 5 | Every form has its own dead and sleep sprite, dead eyes are X's, asleep eyes are slits, the Shell is solid with a void, every color map covers every mark |
+| `colors.test.js` | 2 | Color distance and the contrast swap |
+| `sprite-checks.test.js` | 7 | The sprite review arithmetic: color distance, blending, clipping, lost pixels, overlap, silhouettes |
+| `accessories.test.js` | 18 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
-| `cosmetics.test.js` | 8 | Unlock conditions, hints, streaks, defaults, label |
-| `archive.test.js` | 7 | Dex, death records, lineage rows, back-compat |
+| `cosmetics.test.js` | 17 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, and the four attention cosmetics |
+| `attention.test.js` | 12 | Attention rewards: requests (game and COOL, expiry without a fault, when none are asked), GREET and the gift chance, flow and that it changes nothing, chatter (pool, fading, content rules), saves |
+| `archive.test.js` | 9 | Dex, death records, lineage rows, the family tree chain (links, gaps, the running netling's stats), back-compat |
 | `nap.test.js` | 7 | Naps: drain, duration, cooldown, blocking, bedtime override, persistence |
 | `transfer.test.js` | 7 | Round trip, whitespace tolerance, rejection messages, summary, rounding, per-key repair, size caps |
 | `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
-| `content.test.js` | 13 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game loads |
-| `draw.test.js` | 7 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument |
+| `content.test.js` | 14 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game and the manifest load, install screenshots match their stated sizes |
+| `draw.test.js` | 10 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument. Flash safety: the evolution strobe and the glitch change at most three times a second, and a surge is one fading flash |
 | `audio.test.js` | 7 | Sound playback against a fake `AudioContext`: notes and pitch, sound packs, the low-frequency floor, mute and volume, and a scan that every sound name used in the source really exists |
-| `notify.test.js` | 6 | Notification support, permission, service-worker delivery and fallback, and quiet failure |
+| `notify.test.js` | 7 | Notification support, permission, service-worker delivery and fallback, the app badge, and quiet failure |
+| `wake.test.js` | 5 | The screen wake lock against a fake API: taken once while wanted, released, re-taken after the browser drops it, a refusal waits, missing support is quiet |
 | `migrations.test.js` | 7 | The upgrade runner, error cases, the frozen version 1 fixture, transfer codes across versions |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
-| `shell.test.js` | 1 | Every module reachable from `main.js` is in the service worker's `SHELL` |
+| `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 29 and 4, the Shell's 3 each, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
+| `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
+| `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
+| `zone.test.js` | 5 | the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
+| `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
+| `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
+| `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
 
 Run one file: `TZ=UTC node --test tests/sim.test.js`. Filter by name: add `--test-name-pattern="nap"`.
 
@@ -71,8 +86,15 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Transfer out locks and reloads keep the lock; loading a code unlocks; malformed and hostile `#import=` links and codes.
 - Corrupted or unreadable saves; full storage; blocked storage.
 - Offline: the service worker serves every module.
+- Accessibility: meter values and danger text, the danger mark, the screen summary, a new need announced, a new log line added without rebuilding the log, and MOTION (AUTO follows the emulated system setting; REDUCED and FULL override it).
+- Device: the screen is kept on during a mini-game and with KEEP SCREEN ON, not otherwise; the badge follows its needs with ALERTS on (wake lock, badge and notification permission are faked, as headless Chromium lacks them).
+- A new release while the page is open: the first install stays quiet, a changed `sw.js` shows the update bar, RELOAD waits for a running game, then reloads and keeps the netling; LATER hides the bar.
 - Two tabs: guard screen, takeover (Web Locks and the lease fallback).
-- Stale confirm timers, discard confirm.
+- Stale confirm timers, the SCRAP confirm, a Segfault's second press.
+- The readout shows the trait level and its history.
+- Quitting on touch: QUIT arms a confirm at the top of the screen, a second tap on QUIT only cancels, it times out, CONFIRM forfeits, Esc still quits at once; ABORT RUN confirms the same way.
+- Scrip: SCRAP pays a quarter and the scrip line updates; at an open market the button sells for half and a purchase opens up.
+- Regions open in order: only the Public Net until its exit is reached, then the Bazaar; the codex memory line and FULL.
 - System actions waiting for a running mini-game; refused results explain why.
 - A controller drives menus and a mini-game.
 - Screen sizes: Steam Deck and laptop without scrolling, phone in one column.
@@ -85,29 +107,98 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 
 ## Balance tools
 
+The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance plan ([BALANCE_PLAN.md](BALANCE_PLAN.md)) says what each pass is trying to move.
+
 ### `tools/balance.mjs`
 
-Simulates `runs` lifetimes (default 300) for each **archetype**: scripted players with check-in times, a diet (`corp` share), a trace policy (`hide`, `comply`, `mix`, `balance`), a mini-game win rate and a netrun style. Archetypes: `attentive`, `casual`, `worker`, `neglectful`, `corpo`, `runner`, `overclocker`, `sysadmin`, `ghosthunter`. It reports reach-teen, reach-adult, full-life rates, median lifespan, mistakes, causes of death, and the mix of teen and adult forms.
+Simulates `runs` lifetimes (default 300) for each **archetype**: scripted players with check-in times, a diet (`corp` share), a trace policy (`hide`, `comply`, `mix`, `balance`), a mini-game win rate and a netrun style. It reports reach-teen, reach-adult and full-life rates, median lifespan, faults, causes of death and the mix of teen and adult forms. It sets `TZ=UTC` itself, and every run is seeded, so the same settings always give the same numbers.
 
-Options (environment variables and arguments):
+| Archetype | Plays like |
+|---|---|
+| `attentive` | Checks in hourly, mixed choices, careful netruns |
+| `casual` | Six check-ins a day, greedy netruns |
+| `worker` | Five check-ins around a working day |
+| `neglectful` | Twice a day |
+| `corpo`, `runner`, `overclocker`, `sysadmin`, `ghosthunter` | Deliberate strategies for Chrome, Firewall, Glitch (hot and sloppy), Daemon and Ghost, with no netruns |
+| `daredevil` | Attentive, but takes every risk that costs no fault: plays hot, Overclock rigs, SALVAGE, RAID |
+| `steer-chrome`, `steer-firewall`, `steer-daemon`, `steer-glitch` | Attentive players choosing everything (diet, traces, checkpoints, anomalies, markets) for one adult form. Ghost's is `ghosthunter` |
+| `steer-stub` | Attentive, but lets Charge and Sync run out as a baby until 3 faults have landed, for a Stub teen |
+
+Every player that runs follows the way down: it heads for the deepest open region until it has cleared it, then picks any open region. Items: each player keeps what it has a use for (Coolant, Antivirus, Repair kits, Overclock chips, Black ICE; vouchers unless it always hides; boosters if it chases Ghost; a Segfault while it wants faults), sells the rest at markets down to one free slot, scraps surplus at home when the inventory is full, and buys only items it keeps. The report adds, per archetype: `netruns.cleared` (share of lives that reached each exit), `netruns.byRegion` (runs a life), `netruns.codexCapped`, `scrip` (at the end, peak, bought, sold, `affordable` and `marketsPerRun`) and `fullAtCheckIn`.
+
+Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop` and `babyFaults`.
+
+Settings (environment variables and arguments):
 
 | Setting | Effect |
 |---|---|
 | `node tools/balance.mjs 500 casual` | 500 runs, only archetypes whose name contains `casual` (the second argument is a substring filter) |
-| `DETAIL=1` | Adds mistakes per run by kind, stats at adulthood, traces and peak items held, and netrun totals |
-| `CFG='{"drainPerHour":{"charge":15},"teenAtMin":1200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
+| `DETAIL=1` | Adds faults by kind, days spent in each stage; at the teen evolution, the axes, faults and wins, how often both axes were within 1, 1.5, 2 or 3 of zero, and how often it was on Ghost's path (alone, with every game won once, and with every game won twice); the axes and wins at adulthood, timed events and corp traces, peak items held, netrun totals, and attention rewards a life (requests answered, visitors greeted, hours in flow, chatter lines seen at check-ins) |
+| `JSON=1` | Prints the whole report as JSON (rates as fractions) instead of text, for `tools/balance-diff.mjs` |
+| `CFG='{"drainPerHour":{"charge":15},"lifespanMin":7200}'` | Override `CFG` values without editing the game. Top-level keys are replaced; `drainPerHour` is merged key by key. Other nested objects (such as `runCooldownMin`) are replaced whole |
+| `TRAIT=ghost` | Every netling starts as the child of that adult form: its trait and keepsake, generation 2. Add `TRAIT_LEVEL=2` for a streak, `HISTORY=daemon` for a grandparent whose trait carries on as history |
+| `LIVES=4` | Simulates lineages of that many lives instead of single lives. Each child inherits its parent's fragment (trait, quirk, keepsake), the codex found so far, and Root Access from the life after the codex completes. Reports the share of lineages that finished the codex by each life, the fastest and median, new fragments per life, and every life's results. `runs` is then the number of lineages |
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
 
-It sets `TZ=UTC` itself. `simulate(profile, seed)` is exported.
+It sets `TZ=UTC` itself. Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
 
 Reference results are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#verified-facts).
 
 ### `tools/netrun-balance.mjs` and `tools/netrun-bot.mjs`
 
-`netrun-bot.mjs` is a scripted netrun player shared by both balance tools. `RUN_STYLES`: `careful` (banks at a relay when Integrity is under 55, avoids ICE under 45), `greedy` (always pushes to the exit) and `skilled` (higher win rate). The bot picks checkpoint answers by lean (`corp`, `indie`, `mix`), buys the first market offer when Charge is over 50, and picks anomaly options at random.
+`netrun-bot.mjs` is a scripted netrun player shared by both balance tools. `RUN_STYLES`: `careful` (banks at a relay when Integrity is under 55, avoids ICE under 45), `greedy` (always pushes to the exit, judging only the next step) and `skilled` (higher win rate). Careful and skilled players **plan**: `planMove` scores each way on by the best path up to three steps ahead, using only the nodes the player can see (`visibleNodeIds`: adjacent, visited, revealed, plus Daemon's and Ghost's sight). Unseen nodes count as nothing, so sight is the only thing planning gains, and a tie keeps the first option as the one-step bot did.
 
-`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. Styles include a weak baby and each adult form with its ability. `region` may be `all`, which instead prints disconnect rate, items, fragments per run and Integrity spent for careful, skilled and Firewall players in every region.
+The bot answers checkpoints by lean (`corp`, `indie`, `mix`, `balance`; an indie player won't spend a voucher), buys the first market offer when Charge is over 50 unless the style says `shop: false`, and picks anomaly options from an `ANOMALY_PREFS` list (`random`, `risky`, `orderly`, `corp`, `indie`).
+
+`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. Styles include a weak baby and each adult form with its ability. `region` may be `all`, which prints the disconnect rate, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region. `JSON=1` prints JSON.
+
+### `tools/balance-diff.mjs`
+
+Compares two JSON reports from either tool and prints every number that moved by at least a threshold (default 0.01; rates are shown in percentage points):
+
+```bash
+JSON=1 node tools/balance.mjs 1000 > before.json
+# change CFG, RUN_CFG or a rule
+JSON=1 node tools/balance.mjs 1000 > after.json
+node tools/balance-diff.mjs before.json after.json 0.02
+```
+
+### Baselines
+
+`tools/baseline/` holds reports for the rules as they are, to diff a change against:
+
+| File | Command |
+|---|---|
+| `lives.json` | `JSON=1 node tools/balance.mjs 1000` |
+| `netruns.json` | `JSON=1 node tools/netrun-balance.mjs 1000 all` |
+| `lineages.json` | `JSON=1 LIVES=4 node tools/balance.mjs 200` |
+
+Regenerate all three in the same pull request as any change to the rules or to the tools, and say in the pull request what moved. They take about four minutes together.
+
+### Balance targets
+
+Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-far)). Status is from the baselines above.
+
+| Target | Measured by | Status |
+|---|---|---|
+| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 97% and at most 2.3% (`sysadmin`) |
+| The Shell hints at Ghost: most Ghost chasers pass through it, almost nobody else | `lives.json`, `teens` | Met: 47% of `ghosthunter` teens (63% before the drain pass), at most 2.6% of anyone else |
+| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 99 to 100%. Glitch costs about one fault a life (`steer-glitch`, 1.2 faults) |
+| Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Met: 95% Stub at 3.4 faults. A Segfault turns up before the teen stage in 59% of its lives; without one it still starves the netling for the faults |
+| The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Met: fastest is life 3 for every archetype (the per-life cap of 8); attentive-style lines finish in life 3 (23 to 47%) or 4 (median 4); casual lines now finish in life 3 or 4 about half the time |
+| Players who run have a free slot at least half the time at check-ins | `lives.json`, `fullAtCheckIn` | Met: the inventory is full at 23 to 32% of check-ins for attentive-style players and 47% for casual ones |
+| A market purchase is affordable about every second run | `lives.json`, `scrip.affordable`, `scrip.marketsPerRun` | Met for attentive players (0.66 markets a run, affordable at 82 to 92%). Casual players: 74% of markets |
+| Careful disconnects rise down the way: Public < Bazaar < Corp < Ruins < Deep | `netruns.json` | Met: 4%, 5%, 7%, 8%, 35% |
+| The Deep stays a wall: careful disconnects well above the Ruins' | `netruns.json` | Met: 35% against 8%; adults with their abilities 15 to 19% against 1 to 3% |
+| No adult ability is more than about 4 points better than another at avoiding disconnects | `netruns.json` | Met: in the Deep, 14.3 to 18.1% at 4000 runs each (the 1000-run baseline shows 14.6 to 19.2%, within its noise) |
+| Traits stay bounded: no trait at its cap moves the casual full-life rate by more than about 5 points, or any adult form's share by more than about 10 | `node tools/trait-balance.mjs 800` | Met, at the edge: at most 3.2 points (Persistent) and 10.5 points (Persistent at its cap; it was 8 before the drain pass) |
+| Steering survives inheritance: every `steer-*`, `corpo`, `runner` and `ghosthunter` reaches its form in every generation of a lineage | `lineages.json` | Met: 89 to 100% in lives 1 to 4 (lowest: `steer-stub`'s Stub teen, 89 to 95%; `ghosthunter` 96 to 98%) |
+| No regression in survival: full-life rates within 3 points of the previous baseline | `lives.json` | Met: the drain pass costs casual players 2 points (94.6% to 92.5% on the same bot) while faults rise as intended (casual 3.6 to 4.5, worker 4.7 to 5.4). Against the previous baseline, worker full lives rose (84% to 92%) because the corrected bot feeds before a netrun |
+
+### `tools/trait-balance.mjs`
+
+`node tools/trait-balance.mjs [lives=400] [archetypes=casual,attentive] [forms=all] [strengths=0,0.5,1,cap]` measures each trait at several strengths for a child of that form, against the same parent with the trait switched off (strength 0), so the keepsake and the parent's form stay the same. A strength scales `TRAIT_CFG.full` (and Volatile's Integrity cost); 0.5 is a history alone and `cap` the trait's cap. It prints the full-life rate and its change, the largest change in any adult form's share, corp traces and faults a life. `TRAIT=<form>`, `TRAIT_LEVEL=<1-3>` and `HISTORY=<form>` on `balance.mjs` run whole reports for a given inheritance.
 
 ### `tools/make-icons.mjs`
 
@@ -116,7 +207,7 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 ## Coverage gaps
 
 - `ui/*` (including `advance` and `dropSession`) and `ui/gamepad.js` have no unit tests: they need a real DOM, so only the smoke test covers them.
-- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html` and playtesting cover that.
+- The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html`, `tools/sprite-audit.mjs` (it flags candidates; a person judges them) and playtesting cover that.
 - `cleanSave` cannot be pointed at a fake step table, so its wiring to real upgrade steps is exercised only once a first real step exists. The runner is tested through an injected table and the frozen version 1 fixture.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
 

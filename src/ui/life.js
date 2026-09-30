@@ -1,13 +1,14 @@
 // The netling's life: the clock tick, evolution, flatline and the next generation, and the care buttons.
-import { act, createScript, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, createScript, isAlive, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS, traitLabel } from '../sim.js';
 import { deathRecord } from '../archive.js';
+import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
-import { fmtAge, pushAlert, updateHUD } from './hud.js';
+import { $, app, newForms, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
+import { fmtAge, pushAlert, requestText, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
-import { closeStaleSession } from './play.js';
-import { checkUnlocks, countAct, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
+import { closeStaleSession, playRequested } from './play.js';
+import { bankFlow, checkUnlocks, countAct, countAttention, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
 
 // The clock tick runs every second, but the netling only needs writing now and then: actions save
 // themselves, and a hidden or closing page flushes (see flushSave).
@@ -46,13 +47,23 @@ export function advance() {
   if (state.rootUsed) grantStyle('bandage', 'earned: bandage. it came back once.');
   if (state.lastSurgeAt !== app.lastSurgeAt) {
     app.lastSurgeAt = state.lastSurgeAt;
-    app.surgeUntil = performance.now() + 900;
+    app.surgeUntil = performance.now() + SURGE_MS;
     if (now() - state.lastSurgeAt < 2 * 60_000) sfx('surge', state.quirk.pitch); // not for one caught up on load
   }
   // A visitor pinging in gets a greeting; one leaving may have left an accessory behind.
   const visiting = Boolean(state.visit);
-  if (visiting && !app.lastVisit) sfx('visit', state.quirk.pitch);
+  if (visiting && !app.lastVisit) {
+    sfx('visit', state.quirk.pitch);
+    if (isAlive(state)) pushAlert('A visitor pinged in', 'Say hello before it logs off.');
+  }
   app.lastVisit = visiting;
+  // A new request: a soft chirp (never the alert sound), or a notification when the page is hidden.
+  const asking = state.request ? `${state.request.kind}:${state.request.game ?? ''}:${state.request.startedAge}` : null;
+  if (asking && asking !== app.lastRequest && app.lastRequest !== undefined) {
+    sfx('ask', state.quirk.pitch);
+    pushAlert('Netling wants something', requestText(state.request));
+  }
+  app.lastRequest = asking;
   if (state.visitAccGifts > 0) drainAccessoryInbox();
   if (stageChanged || performance.now() - lastClockSave >= SAVE_EVERY_MS) saveClock();
   updateHUD();
@@ -63,6 +74,7 @@ function onFlatline() {
   sfx('flatline', state.quirk.pitch);
   pushAlert('FLATLINE', `netling.v${state.generation}.0 is gone: ${state.deathCause}.`);
   app.lineage.push(deathRecord(state));
+  bankFlow(state);
   store.set(KEYS.lineage, app.lineage);
   showFlatline();
   grantStyle('plush', 'a keepsake: a plush of your last netling.');
@@ -77,7 +89,9 @@ export function showFlatline() {
   $('fl-cause').textContent = state.deathCause;
   $('fl-age').textContent = fmtAge(state.ageMin);
   $('fl-faults').textContent = `${state.careMistakes}/${CFG.maxMistakes}`;
-  $('fl-trait').textContent = `${TRAITS[f.trait].name} — ${TRAITS[f.trait].desc}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
+  // What the next generation gets: this trait (levelled up by a streak of one form), and this netling's own trait as its history.
+  const history = f.history && f.history !== f.trait ? ` · history: ${TRAITS[f.history].name}` : f.history ? ' · and its history' : '';
+  $('fl-trait').textContent = `${traitLabel(f.trait, f.level)} — ${TRAITS[f.trait].desc}${history}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
   $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[state.form] ? '' : ' (unrealized)'}`;
   $('fl-next').textContent = `COMPILE v${state.generation + 1}.0`;
   $('flatline').hidden = false;
@@ -89,7 +103,7 @@ const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', co
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked() });
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms() });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;
@@ -98,20 +112,30 @@ export function initLife() {
     updateHUD();
   });
 
-  document.querySelectorAll('[data-act]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      unlockAudio();
-      const state = app.state;
-      tick(state, now());
-      const res = act(state, btn.dataset.act, now());
-      sfx(res.sfx, state.quirk.pitch);
-      if (res.ok) countAct(btn.dataset.act);
-      if (!res.ok) playAnim('refuse');
-      else if (ACT_ANIMS[btn.dataset.act]) playAnim(ACT_ANIMS[btn.dataset.act]);
-      if (!res.ok) flashStatus(res.msg);
-      else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
-      save();
-      updateHUD();
-    });
-  });
+  document.querySelectorAll('[data-act]').forEach((btn) => btn.addEventListener('click', () => performAct(btn.dataset.act)));
+  // The request bar: straight to what it asked for, or a hello for the visitor.
+  $('wish-play').addEventListener('click', () => app.state.request?.game && playRequested(app.state.request.game));
+  $('wish-cool').addEventListener('click', () => performAct('cool'));
+  $('wish-greet').addEventListener('click', () => performAct('greet'));
 }
+
+// A care action from a button: the rule, its sound and animation, and what it counts toward.
+export function performAct(action) {
+  unlockAudio();
+  const state = app.state;
+  tick(state, now());
+  const res = act(state, action, now());
+  sfx(res.sfx, state.quirk.pitch);
+  if (res.ok) {
+    countAct(action);
+    countAttention(res);
+  }
+  if (!res.ok) playAnim('refuse');
+  else if (res.requestMet) playAnim('play');
+  else if (ACT_ANIMS[action]) playAnim(ACT_ANIMS[action]);
+  if (!res.ok) flashStatus(res.msg);
+  else if (res.msg.includes('found')) flashStatus(res.msg.slice(res.msg.indexOf('found')));
+  save();
+  updateHUD();
+}
+

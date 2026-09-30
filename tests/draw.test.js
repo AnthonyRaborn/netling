@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { fakeCanvas, badArgs } from './helpers/fake-canvas.js';
 
 // render.js makes an offscreen canvas when it loads; give it a fake document before importing it.
-globalThis.document = { createElement: () => fakeCanvas(40, 28) };
-const { renderLCD } = await import('../src/render.js');
+const offscreen = [];
+globalThis.document = { createElement: () => offscreen[offscreen.push(fakeCanvas(40, 28)) - 1] };
+const { renderLCD, GLITCH_STEP_MS, SURGE_MS } = await import('../src/render.js');
+const { FLASH_TOGGLE_MS } = await import('../src/games/common.js');
 const { createScript, tick, mulberry32, SPECIES, PALETTES, IDLES, CFG, MIN } = await import('../src/sim.js');
 const { ACCESSORIES, PROPS } = await import('../src/accessories.js');
 const { GameSession, GAMES } = await import('../src/games/session.js');
@@ -94,6 +96,63 @@ test('every accessory, prop, reaction and flourish draws on every form', () => {
   }
 });
 
+// --- flash safety: no more than three flashes a second ----------------------------------------------
+
+// Everything one frame draws: [the offscreen LCD buffer's calls, the screen canvas's calls].
+function frameAt(s, time, opts = {}) {
+  const buf = offscreen[0].ctx.calls;
+  const before = buf.length;
+  const canvas = fakeCanvas(400, 280);
+  renderLCD(canvas, s, time, opts);
+  return [JSON.stringify(buf.slice(before)), JSON.stringify(canvas.ctx.calls)];
+}
+
+// How often a yes/no look changes over `ms` of 60 fps frames.
+function changes(ms, look) {
+  let n = 0;
+  let prev;
+  for (let t = 5000; t < 5000 + ms; t += 1000 / 60) {
+    const now = look(t);
+    if (prev !== undefined && now !== prev) n++;
+    prev = now;
+  }
+  return n;
+}
+
+test('the evolution strobe flashes at most three times a second', () => {
+  assert.ok(FLASH_TOGGLE_MS >= 1000 / 6);
+  const s = netling('bitling', 'teen');
+  const strobing = (t) => frameAt(s, t, { calm: true, flash: true })[0] !== frameAt(s, t, { calm: true })[0];
+  assert.ok(changes(3000, strobing) <= 3 * 3 * 2, 'more than three flashes a second');
+  assert.ok(changes(3000, strobing) > 0, 'the strobe never showed');
+});
+
+test('a power surge is one fading flash, not a flicker', () => {
+  const s = netling();
+  const alphas = [];
+  for (let t = 0; t <= SURGE_MS; t += 1000 / 60) {
+    const [, screen] = frameAt(s, 5000 + t, { surge: 1 - t / SURGE_MS });
+    const white = JSON.parse(screen).find(([k, [v]]) => k === '=fillStyle' && String(v).startsWith('rgba(255, 255, 255,'));
+    alphas.push(white ? parseFloat(white[1][0].split(',').pop()) : 0);
+  }
+  assert.ok(alphas[0] > 0.3, 'no flash at the start');
+  assert.ok(alphas.every((a, i) => i === 0 || a <= alphas[i - 1]), `the overlay brightened again: ${alphas.join(' ')}`);
+  assert.equal(frameAt(s, 5000, { surge: 0 })[1].includes('255, 255, 255'), false, 'a finished surge still draws');
+});
+
+test('the glitch changes its look at most three times a second', () => {
+  assert.ok(GLITCH_STEP_MS >= 1000 / 3);
+  const s = netling('glitch', 'adult');
+  s.stats.integrity = 5;
+  s.virus = true;
+  // The screen canvas only copies the buffer, with the glitch's offsets: its calls change with the glitch alone.
+  const look = (t) => frameAt(s, t)[1];
+  const n = changes(3000, look);
+  assert.ok(n <= 9, `the glitch changed ${n} times in 3 seconds`);
+  assert.ok(n > 0, 'the glitch never showed');
+  assert.equal(changes(3000, (t) => frameAt(s, t, { calm: true })[1]), 0, 'calm mode still glitches');
+});
+
 // --- mini-games ------------------------------------------------------------------------------------
 
 test('every mini-game draws through its intro, play and result cards', () => {
@@ -141,6 +200,8 @@ function playThrough(region, seed, { winIce = true } = {}) {
       view.game.game.won = winIce;
       view.update(0.05);
       view.update(3); // result card, then the fight reports
+    } else if (pet.run.phase === 'choice' && pet.run.pending.options[view.choiceCursor]?.disabled) {
+      view.input('right'); // a market it can't afford: move on to what it can pick
     } else {
       view.input('a');
     }

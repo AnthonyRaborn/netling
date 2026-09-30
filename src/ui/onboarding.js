@@ -1,10 +1,10 @@
 // The field manual, and onboarding:
 // intro (terminal) -> readme (field manual) -> nudge (go explore) -> tutorial (first run) -> done
-import { createScript, isAlive, CFG, MIN } from '../sim.js';
+import { createScript, drainCurve, isAlive, CFG, MIN } from '../sim.js';
 import { startRun } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, rootUnlocked, now, save, store } from './app.js';
+import { $, app, newForms, rootUnlocked, now, save, store } from './app.js';
 import { grantStyle } from './style.js';
 import { openRun } from './play.js';
 import { advance } from './life.js';
@@ -15,12 +15,14 @@ import { advance } from './life.js';
 function renderHelp() {
   const d = CFG.drainPerHour;
   const pct = (mult) => `${Math.round(mult * 100)}%`;
+  // Awake drain per hour when full, at half and near empty (it drains faster the fuller it is).
+  const rates = (base) => [100, 50, 0].map((v) => Math.round(base * drainCurve(v)));
   const sections = [
     [
       'STATS',
       [
-        ['CHG · Charge', `Power. Drains about ${d.charge}/hr awake, much slower while it rests (see REST). Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
-        ['SYN · Sync', `Its bond with you. Drains about ${d.sync}/hr. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
+        ['CHG · Charge', `Power. Drains faster the fuller it is: awake, about ${rates(d.charge).join(', ')}/hr when full, half full and nearly empty; much slower while it rests (see REST). Feed it with CORP PKT or SCAV DATA.`, 'At zero it becomes a fault and Integrity starts slipping.'],
+        ['SYN · Sync', `Its bond with you. Drains like Charge: about ${rates(d.sync).join(', ')}/hr when full, half full and nearly empty. PLAY a mini-game to raise it; wins count for more.`, 'At zero it becomes a fault.'],
         ['INT · Integrity', `Its health. Viruses, a full cache, overheating and an empty Charge all wear it down. It recovers ${CFG.integrityRegenPerHour}/hr when nothing is wrong, ${CFG.integrityRestRegenPerHour}/hr while it sleeps in the dark or naps; COOL and PURGE each restore ${CFG.careIntegrity} more.`, `At zero for ${CFG.flatlineIntegrityMin / 60} hours, it flatlines.`],
         ['HEAT', 'Rises while it is awake, when it plays, on netruns and in power surges. COOL vents it; it cools on its own while it rests.', 'At 85+ it damages Integrity; at 100 it is a fault.'],
         ['CACHE', 'Corrupted files it writes after eating, up to four. PURGE clears them.', '3+ files damage Integrity and make viruses more likely.'],
@@ -46,7 +48,7 @@ function renderHelp() {
         ['v1.0 Kernel', 'Generation number and its current form.'],
         ['age · bed', 'How long it has been running, and the hour it goes to sleep.'],
         ['faults', `Care mistakes. A need left unmet for ${CFG.mistakeGraceMin} minutes counts as one (${CFG.lightsGraceMin} for sleeping with the lights on). ${CFG.maxMistakes} ends its life.`],
-        ['trait', 'What it inherited from the netling before it.'],
+        ['trait', 'What it inherited from the netling before it. A numeral (II, III) means that form ran in the family for generations in a row, and the trait is stronger. Its history is a weaker trait from the generation before that.'],
         // Hidden until earned: the codex holds the secret.
         rootUnlocked()
           ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]
@@ -63,7 +65,10 @@ function renderHelp() {
         ['overflowing chip', `A memory overflow. PURGE within ${CFG.overflowWindowMin} minutes, or it crashes and reboots for ${CFG.rebootMin} minutes with its cache full.`, 'Cache files make overflows likelier.'],
         ['file icons', `Corrupted cache files, bottom left: one per file, up to ${CFG.maxCache}. It writes them now and then while digesting a meal. PURGE clears them.`, '3+ files damage Integrity; every file makes a virus more likely.'],
         ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
-        ['a second netling', `A stray visitor, playing with it for a few minutes: +${CFG.visitSync} Sync, +${CFG.visitHeat} Heat.`, 'Sometimes it leaves a gift.'],
+        ['a second netling', `A stray visitor, playing with it for ${CFG.visitMinMin} to ${CFG.visitMaxMin} minutes: +${CFG.visitSync} Sync, +${CFG.visitHeat} Heat. GREET it while it is here and it may pass on a line from the wider net.`, 'Sometimes it leaves a gift; more often if you said hello.'],
+        ['a request', `Now and then it asks for one game, or for a COOL when it is warm, and waits ${CFG.requestWindowMin} minutes. Answer it from the bar below the inventory.`, 'Nothing bad happens if you miss one.'],
+        ['a speech bubble', `It mutters to itself while it is awake and idle. Lines you see are kept in the Archive under CHATTER.`, 'Lines only count while the app is open.'],
+        ['a glow', `Kept in good shape for ${CFG.flowAfterMin / 60} hours in a row while awake (Charge and Sync ${CFG.flowMinStat}+, Integrity ${CFG.flowMinIntegrity}+, Heat under ${CFG.flowMaxHeat}, nothing wrong), it glows. It is only a look.`],
       ],
     ],
   ];
@@ -163,7 +168,7 @@ export function advanceIntro() {
   $('intro').hidden = true;
   document.body.classList.remove('intro-active');
   // The script compiles for real: a fresh netling that boots on the next tick.
-  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked() });
+  app.state = createScript({ now: now() - CFG.bootMinutes * MIN, rootAccess: rootUnlocked(), newForms: newForms() });
   app.lastStage = app.state.stage;
   app.lastLogKey = '';
   save();
@@ -175,9 +180,12 @@ export function advanceIntro() {
 // The netling asks to go exploring; NETRUN glows until the first run.
 export function renderNudge() {
   const nudging = app.onboarding === 'nudge' && isAlive(app.state) && !app.session;
-  $('speech').hidden = !nudging;
-  if (nudging) $('speech').textContent = 'the net is out there... take me?';
+  if (nudging) {
+    $('speech').hidden = false;
+    $('speech').textContent = 'the net is out there... take me?';
+  }
   $('btn-netrun').classList.toggle('nudge', nudging);
+  return nudging; // the speech bubble is the nudge's; chatter waits (see renderSpeech)
 }
 
 export function startTutorial() {

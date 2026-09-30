@@ -26,7 +26,7 @@ The code has no linter or formatter configured. Match what is there: 2-space ind
 1. `npm test` (must pass).
 2. If you changed UI, storage, the service worker or anything visible: `npm run smoke` (needs Playwright).
 3. If you changed rules or numbers: `npm run balance` and compare with the targets in [TESTING.md](TESTING.md#balance-tools).
-4. If you changed files loaded by the game: consider bumping `CACHE` in `sw.js`.
+4. If you changed files loaded by the game: bump `CACHE` in `sw.js` and `VERSION` in `src/version.js` together (a test checks they match). That is what offers the update to players who have the game open.
 5. If you changed a number that the README or docs quote, update the docs. The field manual is generated from `CFG`, so it stays right by itself; prose docs do not.
 
 ## Checklists
@@ -61,7 +61,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 3. The rule that selects it in `leaningForm`, and its netrun ability in `FORM_ABILITIES` and `visibleNodeIds` or the relevant case in `netrun/run.js`.
 4. Dex entries in `archive.js`: `DEX_ORDER`, `DEX_HINTS`, `DEX_LORE`.
 5. A shell cosmetic unlocked by discovering it (`cosmetics.js`) if wanted.
-6. Update `gallery.html` if it lists forms by hand, the balance tool's adult tallies, and tests (`sim.test.js`, `archive.test.js`, `accessories.test.js` already loops over all forms).
+6. `gallery.html` and `tools/sprite-audit.mjs` read forms, wearables, props and crests from the source arrays, so a new one appears with no edit (check it in the gallery and run the audit); update the balance tool's adult tallies, and tests (`sim.test.js`, `archive.test.js`, `accessories.test.js` already loops over all forms).
 
 ### Add an accessory or prop
 
@@ -69,7 +69,7 @@ Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, `r
 
 ### Add a netrun region
 
-1. `REGIONS` and `REGION_ORDER` in `netrun/regions.js`: name, blurb, `minStage`, optional `requires` (a codex fragment id), `layers`, `width`, `nodes` weights, `loot`, optional `market` and `marketPrice`, `iceDamage`, `exitBonus`, `palette`, `sound`.
+1. `REGIONS` and `REGION_ORDER` in `netrun/regions.js` (the order is the way down: each region opens once a netling has cleared the one before it, so a new region's place in the list decides what unlocks it, and `clearedForStage` what older saves get): name, blurb, `minStage`, optional `requires` (a codex fragment id), `layers`, `width`, `nodes` weights, `loot`, optional `market` and `marketPrice`, `iceDamage`, `exitBonus`, `palette`, `sound`.
 2. Codex fragments for it (below), a tint cosmetic that unlocks on finishing them, and possibly regional accessories.
 3. `tests/netrun.test.js` already checks every region generates valid maps; add access-rule tests.
 4. Regions are stored by id inside a saved run, so the id must never change.
@@ -88,7 +88,7 @@ Events are the most cross-cutting addition. Touch: `EVENTS` and its CFG numbers 
 
 ### Add a cosmetic
 
-Add to the slot's list in `cosmetics.js` with `id`, `name`, and either `free: true` or a `hint` and a `check(ctx)` over `{ dex, codex, lineage, generation, progress }`. A tint needs `lcd` and `dark` colors; a shell needs a `.device.shell-<id>` rule and an effect a `.screen.fx-<id>` rule in `style.css` (`applyWardrobe` in `ui/style.js` sets those classes); a sound needs `wave` and `mult`. Unlock ids (`slot:id`) are stored, so never rename. Unlocks are never revoked once stored.
+Add to the slot's list in `cosmetics.js` with `id`, `name`, and either `free: true` or a `hint` and a `check(ctx)` over `{ dex, codex, lineage, generation, progress }`. A tint needs `lcd` and `dark` colors; a shell needs a `.device.shell-<id>` rule and an effect a `.screen.fx-<id>` rule in `style.css` (`applyWardrobe` in `ui/style.js` sets those classes); a sound needs `wave` and `mult`; a crest needs 9 rows of 9 `#` or `.` in `pixels`. Unlock ids (`slot:id`) are stored, so never rename. Unlocks are never revoked once stored.
 
 ### Add a UI element
 
@@ -100,7 +100,7 @@ Add a key to `KEYS` (`storage.js`), a `clean*` function and, if it should travel
 
 ## Releasing
 
-There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` when you want old caches dropped. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
+There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` (and `VERSION` in `src/version.js`) for each release: it drops old caches and shows open pages a NEW VERSION READY bar. If you change the look of the home screen, rerun `node tools/make-screenshots.mjs` for the install dialog's screenshots. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
 
 ## Working with AI sessions
 

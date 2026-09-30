@@ -101,8 +101,9 @@ test('a visitor plays for a few minutes: sync and heat rise, then it logs off', 
   tick(s, s.lastTick + CFG.visitMinMin * MIN, noRng);
   assert.equal(s.visit, null);
   assert.match(s.log.at(-1).msg, /logged off/);
-  // Drains keep running meanwhile, so the gain is a little under the full amount.
-  assert.ok(s.stats.sync > sync + CFG.visitSync - 2, `sync ${s.stats.sync}`);
+  // Drains keep running meanwhile, so the gain is under the full amount by at most a full stat's drain.
+  const maxDrain = (CFG.drainPerHour.sync * CFG.drainCurve.full * CFG.visitMinMin) / 60;
+  assert.ok(s.stats.sync > sync + CFG.visitSync - maxDrain, `sync ${s.stats.sync}`);
   assert.ok(s.stats.heat > heat + CFG.visitHeat - 1, `heat ${s.stats.heat}`);
 });
 

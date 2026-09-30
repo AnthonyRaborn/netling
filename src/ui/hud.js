@@ -1,9 +1,12 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeHour, eventMinutesLeft, isAlive, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SPECIES, TRAITS } from '../sim.js';
+import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
+import { atMarket, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
 import { $, app, armed, disarm, flashStatus, now, playAnim, save } from './app.js';
+import { chatterById } from '../chatter.js';
+import { hearChatter } from './style.js';
 import { renderNudge } from './onboarding.js';
 import { renderHibernation } from './system.js';
 
@@ -14,25 +17,72 @@ export function fmtAge(min) {
   return d ? `${d}d ${h}h` : h ? `${h}h ${m}m` : `${m}m`;
 }
 
-function setBar(id, value, danger) {
+// A stat bar: its fill, a danger look that doesn't rely on color alone, and its value for screen
+// readers (the bar is a meter).
+function setBar(id, value, danger, dangerWord) {
   const el = $(id);
+  const v = Math.round(value);
   el.style.setProperty('--v', `${value}%`);
   el.classList.toggle('danger', danger);
+  el.closest('.stat').classList.toggle('danger', danger);
+  el.setAttribute('aria-valuenow', v);
+  el.setAttribute('aria-valuetext', danger ? `${v}, ${dangerWord}` : String(v));
+}
+
+// What the LCD shows, in words, for screen readers (the canvas is an image with this label).
+function screenSummary(state) {
+  if (app.session) return state.run ? 'Netrun map on screen.' : 'Mini-game on screen.';
+  if (state.stage === 'dead') return 'Flatlined.';
+  if (state.stage === 'script') return 'Compiling a new netling.';
+  const parts = [SPECIES[state.form].name];
+  if (state.hibernation) parts.push('hibernating');
+  else if (rebootMinutesLeft(state) > 0) parts.push('rebooting');
+  else if (state.nap) parts.push('napping');
+  else parts.push(resting(state) ? 'asleep' : 'awake');
+  parts.push(state.lightsOn ? 'lights on' : 'lights off');
+  if (state.virus) parts.push('infected');
+  const reason = alertReason(state);
+  return `${parts.join(', ')}.${reason ? ` ${reason.msg}` : ''}`;
+}
+
+// Log lines: added one by one, so a screen reader (the log is a polite live region) hears only
+// the new ones rather than the whole log again.
+const logKeyOf = (e) => `${e.t}|${e.msg}`;
+function logItem(e) {
+  const li = document.createElement('li');
+  li.dataset.key = logKeyOf(e);
+  li.textContent = `${new Date(e.t).toTimeString().slice(0, 5)} ${e.msg}`;
+  if (e.msg.includes('!!') || e.msg.includes('mistake') || e.msg.includes('FLATLINE')) li.className = 'warn';
+  return li;
+}
+function renderLog(logEl, lines) {
+  const lastShown = logEl.lastElementChild?.dataset.key;
+  const from = lastShown ? lines.findLastIndex((e) => logKeyOf(e) === lastShown) : -1;
+  if (lastShown && from === -1) return logEl.replaceChildren(...lines.map(logItem)); // a new netling
+  logEl.append(...lines.slice(from + 1).map(logItem));
+  while (logEl.childElementCount > lines.length) logEl.firstElementChild.remove(); // the log is capped
 }
 
 export function updateHUD() {
   const state = app.state;
   const st = state.stats;
-  setBar('bar-charge', st.charge, st.charge < 20);
-  setBar('bar-sync', st.sync, st.sync < 20);
-  setBar('bar-integrity', st.integrity, st.integrity < 30);
-  setBar('bar-heat', st.heat, st.heat > 80);
+  setBar('bar-charge', st.charge, st.charge < 20, 'low');
+  setBar('bar-sync', st.sync, st.sync < 20, 'low');
+  setBar('bar-integrity', st.integrity, st.integrity < 30, 'low');
+  setBar('bar-heat', st.heat, st.heat > 80, 'too hot');
   document.querySelectorAll('#cache-pips i').forEach((pip, i) => pip.classList.toggle('on', i < state.cache));
+  $('cache-pips').setAttribute('aria-valuenow', state.cache);
+  $('cache-pips').setAttribute('aria-valuetext', state.cache >= 3 ? `${state.cache} files, piling up` : `${state.cache} files`);
+  $('stat-cache').classList.toggle('danger', state.cache >= 3);
+  const summary = screenSummary(state);
+  if ($('lcd').getAttribute('aria-label') !== summary) $('lcd').setAttribute('aria-label', summary);
 
-  const trait = state.trait ? TRAITS[state.trait].name : '—';
+  const trait = `${traitLabel(state.trait, state.traitLevel) ?? '—'}${state.history ? ` · history ${TRAITS[state.history].name}` : ''}`;
   const species = state.stage === 'script' ? 'compiling' : SPECIES[state.form].name;
+  const bed = bedtimeOnDevice(state, now());
+  const clock = (n) => String(n).padStart(2, '0');
   $('readout').textContent =
-    `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${String(bedtimeHour(state)).padStart(2, '0')}:00 · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
+    `v${state.generation}.0 ${species} · age ${fmtAge(state.ageMin)} · bed ${clock(Math.floor(bed / 60))}:${clock(bed % 60)} · faults ${state.careMistakes}/${CFG.maxMistakes} · trait ${trait}`;
   if (state.stage !== 'script' && (state.rootAccess || state.rootCooling)) {
     $('readout').textContent += ` · root ${state.rootCooling ? 'cooling' : state.rootUsed ? 'spent' : 'ready'}`;
   }
@@ -40,11 +90,13 @@ export function updateHUD() {
   $('readout').title = perk ? `${SPECIES[state.form].name}: ${perk.desc}` : '';
   if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
   if (rebootMinutesLeft(state) > 0) $('readout').textContent += ` · rebooting, ${rebootMinutesLeft(state)}m left`;
+  if (inFlow(state)) $('readout').textContent += ' · in flow';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
   $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;
   renderInventory();
-  renderNudge();
+  renderSpeech(renderNudge());
+  renderWish(state);
   renderHibernation();
   // The timed event, if any, with the buttons that answer it.
   const eventLeft = eventMinutesLeft(state);
@@ -65,25 +117,55 @@ export function updateHUD() {
     app.lastLogKey = logKey;
     // Follow new lines unless the player has scrolled up to read older ones.
     const atBottom = logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 8;
-    logEl.replaceChildren(
-      ...state.log.map((e) => {
-        const li = document.createElement('li');
-        const t = new Date(e.t);
-        li.textContent = `${t.toTimeString().slice(0, 5)} ${e.msg}`;
-        if (e.msg.includes('!!') || e.msg.includes('mistake') || e.msg.includes('FLATLINE')) li.className = 'warn';
-        return li;
-      }),
-    );
+    renderLog(logEl, state.log);
     if (atBottom) logEl.scrollTop = logEl.scrollHeight;
   }
 
-  // Chirp (or notify, when backgrounded) each time a new need appears.
+  // Chirp (or notify, when backgrounded) each time a new need appears. Screen readers hear it too;
+  // timed events are already announced by the event bar (an alert).
   const reason = alertReason(state);
   if (reason && reason.key !== app.lastAttention) {
     if (document.hidden) pushAlert('Netling needs you', reason.msg);
     else sfx('alert', state.quirk.pitch);
+    if (!EVENTS[reason.key]) $('sr-announce').textContent = reason.msg;
   }
   app.lastAttention = reason?.key ?? false;
+}
+
+// What an open request asks for, in words.
+export function requestText(r) {
+  return r.kind === 'cool' ? 'It is running warm and wants a COOL.' : `It wants to play ${r.game.toUpperCase()}.`;
+}
+
+// The request bar: what it wants and how long it will wait, and GREET while a visitor is here.
+// Calm on purpose (not an alert): missing any of it costs nothing.
+function renderWish(state) {
+  const on = isAlive(state) && !resting(state) && !app.session && !state.run;
+  const r = on ? state.request : null;
+  const v = on && state.visit && !state.visit.greeted ? state.visit : null;
+  $('wish-bar').hidden = !r && !v;
+  if (!r && !v) return;
+  const parts = [];
+  if (r) parts.push(`${r.kind === 'cool' ? 'it is fanning itself' : `it wants ${r.game.toUpperCase()}`} · ${requestMinutesLeft(state)}m`);
+  if (v) parts.push(`a ${SPECIES[v.form].name.toLowerCase()} dropped by`);
+  $('wish-text').textContent = parts.join(' · ');
+  $('wish-play').hidden = r?.kind !== 'game';
+  if (r?.kind === 'game') $('wish-play').textContent = `PLAY ${r.game.toUpperCase()}`;
+  $('wish-cool').hidden = r?.kind !== 'cool';
+  $('wish-greet').hidden = !v;
+}
+
+// Chatter in the speech bubble (the onboarding nudge has it first). A line counts as heard once it
+// has been on screen with the page visible.
+function renderSpeech(nudging) {
+  if (nudging) return;
+  const state = app.state;
+  const line = isAlive(state) && !resting(state) && !app.session && !state.run && state.chatter ? chatterById(state.chatter.id) : null;
+  $('speech').hidden = !line;
+  if (!line) return;
+  if ($('speech').textContent !== line.text) $('speech').textContent = line.text;
+  $('speech').classList.toggle('visitor', line.group === 'visitor');
+  if (!document.hidden && $('flatline').hidden && hearChatter(line.id)) $('sr-announce').textContent = line.text;
 }
 
 export function pushAlert(title, body) {
@@ -110,14 +192,21 @@ function itemIcon(id) {
   return c;
 }
 
+// At an open netrun market an item sells for half its price; anywhere else it scraps for a quarter.
+const sellLabel = (id) => (atMarket(app.state) ? `SELL +${sellValue(id, true)}` : `SCRAP +${sellValue(id)}`);
+
 function renderInventory() {
   const inv = app.state.inventory ?? [];
   if (selectedSlot !== null && !inv[selectedSlot]) selectedSlot = null;
-  const key = `${inv.join(',')}|${selectedSlot}`;
+  const scrip = app.state.scrip ?? 0;
+  $('inv-scrip').textContent = `SCRIP ${scrip}/${SCRIP.max}${scrip >= SCRIP.max ? ' FULL' : ''}`;
+  $('inv-scrip').classList.toggle('full', scrip >= SCRIP.max);
+  const key = `${inv.join(',')}|${selectedSlot}|${atMarket(app.state)}`;
   if (key !== lastInvKey) {
     lastInvKey = key;
-    // A DISCARD confirm belongs to the item it was pressed for: a new selection starts over.
-    disarm($('inv-discard'), 'DISCARD');
+    // A SCRAP confirm belongs to the item it was pressed for: a new selection starts over.
+    disarm($('inv-discard'), selectedSlot === null ? 'SCRAP' : sellLabel(inv[selectedSlot]));
+    disarm($('inv-use'), 'USE');
     const slots = [];
     for (let i = 0; i < INVENTORY_SLOTS; i++) {
       const id = inv[i];
@@ -158,6 +247,8 @@ export function initInventory() {
     unlockAudio();
     tick(app.state, now());
     const id = app.state.inventory[selectedSlot];
+    // A Segfault adds faults, and faults can end a life: it takes a second press.
+    if (id === 'segfault' && !armed($('inv-use'), '+2 FAULTS?', 'USE', 3000)) return;
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
     playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');
@@ -168,9 +259,14 @@ export function initInventory() {
   });
   $('inv-discard').addEventListener('click', () => {
     if (selectedSlot === null) return;
-    if (!armed($('inv-discard'), 'SURE?', 'DISCARD', 3000)) return;
-    const res = act(app.state, 'discard', now(), Math.random, { slot: selectedSlot });
-    sfx(res.sfx, app.state.quirk.pitch);
+    if (!armed($('inv-discard'), 'SURE?', sellLabel(app.state.inventory[selectedSlot]), 3000)) return;
+    if (atMarket(app.state)) {
+      sellItem(app.state, selectedSlot);
+      sfx('feed', app.state.quirk.pitch);
+    } else {
+      const res = act(app.state, 'discard', now(), Math.random, { slot: selectedSlot });
+      sfx(res.sfx, app.state.quirk.pitch);
+    }
     selectedSlot = null;
     save();
     updateHUD();

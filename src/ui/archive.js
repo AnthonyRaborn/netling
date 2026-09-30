@@ -1,10 +1,11 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
 import { PALETTES, SPECIES } from '../sim.js';
-import { dexEntries, discover, lineageRows } from '../archive.js';
+import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
-import { drawSprite, formSprite } from '../sprites.js';
+import { CHATTER, CHATTER_GROUPS, chatterProgress } from '../chatter.js';
+import { drawSprite, formSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, rootUnlocked, flashStatus, save, store } from './app.js';
@@ -55,10 +56,10 @@ function thumb(form, paletteIdx, { dead = false, locked = false } = {}) {
   c.height = 16;
   const pal = PALETTES[paletteIdx] ?? PALETTES[0];
   const colors = locked
-    ? { '#': '#1c3a3f', o: '#1c3a3f', '+': '#1c3a3f' }
+    ? LOCKED_COLORS
     : dead
-      ? { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' }
-      : { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
+      ? DEAD_COLORS
+      : paletteColors(pal);
   drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);
   wrap.append(c);
   return wrap;
@@ -104,7 +105,7 @@ function renderRecord(lineage) {
   const rows = [
     ['LIFE'],
     ['generations', lineage.length + (state.stage === 'dead' ? 0 : 1)],
-    ['full 7-day lives', full],
+    ['full lives', full],
     ['longest full-life streak', bestStreak],
     ['CARE'],
     ['meals served', (acts.corp ?? 0) + (acts.scav ?? 0)],
@@ -139,23 +140,30 @@ function renderRecord(lineage) {
 function renderArchive() {
   const { lineage } = app;
   renderRecord(lineage);
-  const rows = lineageRows(lineage, app.state);
+  const chain = lineageChain(lineage, app.state);
   $('lineage-list').replaceChildren(
-    ...rows.map((r) =>
-      row(
+    ...chain.map((r) => {
+      if (r.kind === 'link') {
+        const li = document.createElement('li');
+        li.className = r.gap ? 'link gap' : 'link';
+        li.textContent = r.text;
+        return li;
+      }
+      return row(
         thumb(r.form, r.palette, { dead: r.dead }),
         [bold(r.version), ` ${r.formLabel}`],
         [
           `${fmtAge(r.ageMin)} · ${r.status}${r.mistakes !== undefined ? ` · faults ${r.mistakes}` : ''}`,
-          r.trait || r.fragment ? `inherited ${r.trait ?? '—'}${r.fragment ? ` · left ${r.fragment}` : ''}` : null,
-          r.keepsake ? `keepsake: ${r.keepsake}` : null,
+          r.stats ? { cls: 'stats', text: r.stats } : null,
+          r.inherited ? `inherited ${r.inherited}` : null,
+          r.left ? `left ${r.left}${r.keepsake ? ` + ${r.keepsake}` : ''}` : null,
           r.rescued ? { cls: 'perk', text: 'pulled back once by NL-0' } : null,
         ],
         r.dead ? '' : 'running',
-      ),
-    ),
+      );
+    }),
   );
-  if (!rows.length) {
+  if (!chain.length) {
     const li = document.createElement('li');
     li.className = 'empty';
     li.textContent = 'no generations yet.';
@@ -192,6 +200,8 @@ function renderArchive() {
     }),
   );
 
+  renderChatter();
+
   const entries = dexEntries(app.dex);
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
   $('dex-grid').replaceChildren(
@@ -211,11 +221,49 @@ function renderArchive() {
   );
 }
 
+// Lines heard, by group; a group with nothing heard yet shows only its hint.
+function renderChatter() {
+  const heard = new Set(app.progress.chatter ?? []);
+  const prog = chatterProgress([...heard]);
+  $('chatter-count').textContent = `${heard.size}/${CHATTER.length}`;
+  $('chatter-list').replaceChildren(
+    ...CHATTER_GROUPS.flatMap((g) => {
+      const { heard: got, total } = prog[g.id];
+      const h = document.createElement('h3');
+      h.textContent = got ? `${g.name.toUpperCase()} ` : '??? ';
+      const count = document.createElement('span');
+      count.textContent = `${got}/${total}`;
+      h.append(count);
+      if (!got) {
+        const d = document.createElement('div');
+        d.className = 'frag missing';
+        d.textContent = g.hint;
+        return [h, d];
+      }
+      const lines = CHATTER.filter((c) => c.group === g.id).map((c) => {
+        const d = document.createElement('div');
+        d.className = heard.has(c.id) ? 'frag' : 'frag missing';
+        d.textContent = heard.has(c.id) ? `"${c.text}"` : '[ not heard yet ]';
+        return d;
+      });
+      return [h, ...lines];
+    }),
+  );
+}
+
 function selectTab(name) {
-  for (const t of ['lineage', 'dex', 'codex', 'wardrobe']) {
+  for (const t of ['lineage', 'dex', 'codex', 'chatter', 'wardrobe']) {
     $(`tab-btn-${t}`).setAttribute('aria-selected', t === name);
     $(`tab-${t}`).hidden = t !== name;
   }
+  if (name === 'lineage') scrollToCurrent();
+}
+
+// The tree runs oldest first, so a long line would hide the running netling at the bottom.
+function scrollToCurrent() {
+  if ($('tab-lineage').hidden) return;
+  const list = $('lineage-list');
+  (list.querySelector('li.running') ?? list.lastElementChild)?.scrollIntoView({ block: 'end' });
 }
 
 export function initArchive() {
@@ -223,12 +271,13 @@ export function initArchive() {
   $('open-archive').addEventListener('click', () => {
     renderArchive();
     archive.showModal();
+    scrollToCurrent();
   });
   $('close-archive').addEventListener('click', () => archive.close());
   archive.addEventListener('click', (e) => {
     if (e.target === archive) archive.close(); // backdrop click
   });
-  for (const t of ['lineage', 'dex', 'codex', 'wardrobe']) $(`tab-btn-${t}`).addEventListener('click', () => selectTab(t));
+  for (const t of ['lineage', 'dex', 'codex', 'chatter', 'wardrobe']) $(`tab-btn-${t}`).addEventListener('click', () => selectTab(t));
 
   $('close-transmission').addEventListener('click', () => $('transmission').close());
   $('replay-transmission').addEventListener('click', showTransmission);

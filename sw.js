@@ -1,7 +1,9 @@
 // Network-first service worker: always fresh when online, fully playable offline.
-// Bump the name when you want players' old caches dropped. Add every new module or asset to SHELL
-// (tests/shell.test.js checks the modules), or the app won't install for offline use.
-const CACHE = 'netling-v34';
+// Bump CACHE on every release, together with VERSION in src/version.js (tests/shell.test.js checks
+// they match): a changed sw.js is how an open page learns a release is out and offers a reload, and
+// the old cache is dropped. Add every new module or asset to SHELL (the test checks the modules),
+// or the app won't install for offline use.
+const CACHE = 'netling-v42';
 const SHELL = [
   './',
   'index.html',
@@ -12,13 +14,19 @@ const SHELL = [
   'fonts/VT323-latin.woff2',
   'src/main.js',
   'src/sim.js',
+  'src/colors.js',
   'src/random.js',
+  'src/version.js',
+  'src/wearable-colors.js',
+  'src/update.js',
+  'src/wake.js',
   'src/migrations.js',
   'src/render.js',
   'src/sprites.js',
   'src/audio.js',
   'src/notify.js',
   'src/archive.js',
+  'src/chatter.js',
   'src/cosmetics.js',
   'src/accessories.js',
   'src/transfer.js',
@@ -36,6 +44,7 @@ const SHELL = [
   'src/ui/system.js',
   'src/ui/tabs.js',
   'src/ui/gamepad.js',
+  'src/ui/device.js',
   'src/netrun/regions.js',
   'src/netrun/map.js',
   'src/netrun/run.js',
@@ -50,7 +59,9 @@ const SHELL = [
   'src/games/feast.js',
 ];
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // 'reload' skips the browser's HTTP cache, so a new release never caches files from the old one.
+  const fresh = SHELL.map((url) => new Request(url, { cache: 'reload' }));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(fresh)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -66,8 +77,12 @@ self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
   if (url.origin !== location.origin) return;
+  // Files are checked with the server ('no-cache'; unchanged ones cost a 304), so a reload after a
+  // release gets all of it rather than a mix with copies the browser still thinks are fresh.
+  // Navigations keep their own request: the browser already revalidates the page on a reload.
+  const request = e.request.mode === 'navigate' ? e.request : new Request(e.request, { cache: 'no-cache' });
   e.respondWith(
-    fetch(e.request)
+    fetch(request)
       .then((res) => {
         if (res.ok || res.type === 'opaque') {
           const copy = res.clone();
@@ -77,6 +92,11 @@ self.addEventListener('fetch', (e) => {
       })
       .catch(() => caches.match(e.request, { ignoreSearch: true })),
   );
+});
+
+// An open page asks which release this worker caches, to know whether to offer a reload (update.js).
+self.addEventListener('message', (e) => {
+  if (e.data?.type === 'version?') e.source?.postMessage({ type: 'version', version: CACHE });
 });
 
 // Tapping a notification brings the pet back to the front.

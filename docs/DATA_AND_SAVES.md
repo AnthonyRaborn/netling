@@ -33,7 +33,7 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 | `netling.progress` | Counters and streaks | yes | See below |
 | `netling.unlocked` | Array of unlocked style ids | yes | `slot:id` strings, plus `label` |
 | `netling.accessories` | Array of owned accessory and prop ids | yes | Ids in `STYLE_ITEMS` |
-| `netling.prefs` | `{ sound, alerts, volume }` | yes | |
+| `netling.prefs` | `{ sound, alerts, volume, awake, motion }` (`motion`: `auto`, `reduce` or `full`) | yes | |
 | `netling.onboarding` | `intro`, `readme`, `nudge`, `tutorial` or `done` | yes | |
 | `netling.helpSeen` | `true` | yes | |
 | `netling.lock` | `{ code, at, generation }` | no | Present while the netling is on another device |
@@ -53,6 +53,8 @@ Built by `createScript()` in `sim.js`. Fields:
 |---|---|---|
 | `saveVersion` | number | Always `1` today (`SAVE_VERSION`) |
 | `generation` | int | 1-based, shown as `v<generation>.0` |
+| `life` | `{ teenAt, adultAt, lifespan }` | Minutes, fixed at compile from `CFG`. Missing (a save from before the 5-day life), out of order or over 7 days: the 7-day `LEGACY_LIFE` |
+| `newForms` | string[] | Adult forms the player had never raised at compile (tie-break weights). Unknown ids dropped |
 | `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached |
 | `evolvedAt`, `bornAt`, `lastTick`, `diedAt` | ms epoch | `lastTick` is clamped to "now" when loading |
 | `ageMin` | int | Simulated minutes. Excludes hibernation |
@@ -66,26 +68,34 @@ Built by `createScript()` in `sim.js`. Fields:
 | `event` | `{ type, startedAge }` or null | `trace`, `attack` or `overflow` |
 | `lastSurgeAt` | ms epoch or null | Drives the surge flash |
 | `inventory` | array of item ids | Max 6 |
+| `scrip` | int | Corpo scrip, 0..100. Missing: 0 |
+| `zone` | int -840..840 | The time zone its sleep follows, in minutes as `getTimezoneOffset` gives it; refreshed when it wakes. Missing or junk: the device's zone |
 | `buffs` | `{ shieldUntilAge, traceSkip, boost }` | |
 | `run` | the netrun or null | Cleaned by `cleanRun` |
 | `rootAccess`, `rootUsed`, `rootCooling` | booleans | |
 | `lastRunEndAge`, `runCooldownCut`, `runStats` | | Uplink cooldown state and lifetime counts for this netling |
-| `visit`, `visitAccGifts` | | A visitor in progress; pending accessory gifts (max 10) |
+| `cleared` | region ids | Regions whose exit this netling reached, in `REGION_ORDER` order. Unknown ids and repeats dropped. Missing (a save from before the unlock order): every region its stage can enter (`clearedForStage`) |
+| `codexFound` | int | New codex fragments banked this life (the per-life cap). Missing: 0 |
+| `visit`, `visitAccGifts` | | A visitor in progress (`greeted: true` once GREET is used); pending accessory gifts (max 10) |
+| `request` | `{ kind: 'game', game, startedAge }`, `{ kind: 'cool', startedAge }` or null | What it is asking for. Unknown kinds or games: null. Missing: null |
+| `flowMin`, `flowTotalMin` | int | Minutes in a row in good shape (flow at 180), and minutes in flow this life. Missing: 0 |
+| `chatter` | `{ id, startedAge }` or null | The chatter line on screen. Unknown ids: null. Missing: null |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
+| `traitLevel`, `history` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |
-| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed }` |
+| `deathCause`, `fragment` | | Set on death; `fragment` is `{ form, trait, quirk, keepsake, rootUsed, scrip, level, history }`, where `level` is 1..3 (1 for older fragments), `history` the dying netling's own trait, and `scrip` the inheritance (half, rounded down; cleaned to 0..50) |
 | `codexInbox`, `accessoryInbox` | arrays of ids | Finds waiting for the UI to bank them into the shared codex and wardrobe |
 
 The netling belongs to one generation. Everything shared across generations (lineage, dex, codex, wardrobe, unlocks, accessories, progress) is stored separately.
 
 ## Other stored values
 
-**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, fragmentTrait, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer and `lineageRows` tolerate that.
+**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
 
-**Wardrobe**: `shell`, `tint`, `effect`, `sound` (ids from `COSMETICS`), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays of `#rrggbb`).
+**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest` (ids from `COSMETICS`; a missing slot uses its default, so `crest` needed no migration), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays with one entry per color slot: a `#rrggbb` the player picked, or `null` for automatic, meaning the wearable's color for the netling's palette, see `accessoryColors`). Old saves hold concrete hex values, which stay as the player's picks; the cleaner turns anything that is not a `#rrggbb` into `null`. No version bump: the value domain widened, the shape did not.
 
-**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, and `rootEarned` (true once Root Access has been earned; absent otherwise).
+**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, `requestsMet`, `visitorsGreeted`, `flowMin` (minutes in flow of lives that have ended; the living netling's `flowTotalMin` is added for the Aurora check), `chatter` (heard line ids, unknown ones dropped), and `rootEarned` (true once Root Access has been earned; absent otherwise).
 
 ## The write gate
 
@@ -127,9 +137,9 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 - `lastTick` is clamped to `[0, now]`; a future value (clock set back) would otherwise freeze the netling.
 - **Non-strict** (local storage): unknown fields are kept (`...raw`), so a newer build's data survives a downgrade.
 - **Strict** (imported codes): only known fields survive.
-- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free").
+- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free"). Loose scrip carried in a run (`run.scrip`) is cleaned to 0..1000, and `run.insured` (Chrome's corp insurance, spent) to a boolean.
 - Fragments are rebuilt from the dead netling if the stored one is unusable.
-- `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel or Stub, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
+- `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel, Stub or Shell, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
 
 ## Versioning and migration
 

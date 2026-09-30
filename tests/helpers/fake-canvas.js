@@ -1,6 +1,8 @@
 // A canvas that records what is drawn on it, so rendering code can run under Node with no browser.
 // Not a test file (the test glob is tests/*.test.js).
 
+const STYLES = new Set(['fillStyle', 'strokeStyle', 'globalAlpha']);
+
 export function fakeCtx() {
   const calls = [];
   const props = {};
@@ -15,6 +17,7 @@ export function fakeCtx() {
       };
     },
     set(target, key, value) {
+      if (STYLES.has(key)) calls.push([`=${key}`, [value]]); // colors and alpha, so a flash shows up
       target[key] = value;
       return true;
     },

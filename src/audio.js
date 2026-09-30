@@ -90,6 +90,7 @@ const PATTERNS = {
   lose: [[1, 0, 0.12], [0.84, 0.14, 0.12], [0.7, 0.28, 0.12], [0.56, 0.42, 0.3]],
   surge: [[2, 0, 0.05], [3, 0.04, 0.05], [2, 0.08, 0.05]],
   visit: [[1.25, 0], [1.5, 0.08], [1.25, 0.3], [2, 0.38]],
+  ask: [[1, 0], [1.5, 0.1]], // a request: a questioning chirp, gentler than an alert
 };
 
 // Failure sounds sit low, where phone speakers drop out. If a pattern's lowest note would

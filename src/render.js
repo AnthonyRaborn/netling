@@ -1,6 +1,7 @@
-import { SPRITES, drawSprite, formSprite } from './sprites.js';
+import { SPRITES, drawSprite, formSprite, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, WHITE_COLORS } from './sprites.js';
 import { drawAccessory, drawProp } from './accessories.js';
 import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting } from './sim.js';
+import { FLASH_TOGGLE_MS } from './games/common.js';
 
 export const LCD_W = 40;
 export const LCD_H = 28;
@@ -10,6 +11,24 @@ let LCD_BG_DARK = '#03090a';
 export function setLcdTint(bg, dark) {
   LCD_BG = bg;
   LCD_BG_DARK = dark;
+}
+
+// Flash safety: nothing flashes more than three times a second, whatever the motion setting (see
+// FLASH_TOGGLE_MS). The glitch and the surge follow the same limit.
+export const GLITCH_STEP_MS = 350; // the glitch picks a new look at most this often
+export const SURGE_MS = 900;
+// The flow glow's slow breath (radians per ms divisor): about a ten-second cycle, far from a flash.
+export const FLOW_BREATH_MS = 1600;
+
+// A repeatable 0..1 sequence for one glitch step, so the look holds for the whole step.
+function stepRandom(step) {
+  let a = (step * 2654435761) >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 const buf = document.createElement('canvas');
@@ -45,7 +64,7 @@ function wanderPos(time) {
 
 export function renderLCD(canvas, s, time, opts = {}) {
   const pal = PALETTES[s.quirk.palette] ?? PALETTES[0];
-  const colors = { '#': pal.main, o: pal.accent, '+': '#f5f5f5' };
+  const colors = paletteColors(pal);
   const rest = resting(s); // asleep or napping
   // Lights off darkens the room; the pet itself only dims when it's resting in the dark.
   const dark = !s.lightsOn && s.stage !== 'dead';
@@ -68,7 +87,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
   } else if (s.stage === 'dead') {
     const sprite = formSprite(s.form, 'dead');
     const x = Math.floor((LCD_W - sprite[0].length) / 2);
-    drawSprite(bctx, sprite, x, 21 - sprite.length, { '#': '#3a4a4d', o: '#1c2a2d', '+': '#3a4a4d' });
+    drawSprite(bctx, sprite, x, 21 - sprite.length, DEAD_COLORS);
     // flatline trace
     bctx.fillStyle = pal.accent;
     bctx.fillRect(0, 23, LCD_W, 1);
@@ -82,8 +101,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
       y = 21 - sprite.length;
     } else {
       // Every idle wanders the screen: side to side, and up and down as far as a hat still fits
-      // above it (tall adults have little room) and the cache icons below.
-      const up = Math.max(0, Math.min(3, y - 4));
+      // above it (tall adults have little room) and the cache icons below. The tallest wearable (the halo) needs
+      // five rows above the sprite, so no idle may lift the sprite higher than that leaves.
+      const up = Math.max(0, Math.min(3, y - 5));
       const down = 1;
       const depth = (period) => Math.round(((Math.sin(time / period) + 1) / 2) * (up + down)) - up;
       if (s.quirk.idle === 'sway') {
@@ -92,21 +112,25 @@ export function renderLCD(canvas, s, time, opts = {}) {
       } else if (s.quirk.idle === 'hover') {
         // Drifts slowly while it floats.
         x += Math.round(Math.sin(time / 2600) * 7);
-        y += Math.round(Math.sin(time / 600) * 2) - 1;
+        y += Math.max(-up, Math.round(Math.sin(time / 600) * 2) - 1);
       } else {
         // Walks from spot to spot in hops, pausing between.
         const walk = wanderPos(time);
         x += walk.x;
-        y += Math.round(walk.y * (up + down)) - up + (walk.moving && !frame ? -1 : 0);
+        y += Math.max(-up, Math.round(walk.y * (up + down)) - up + (walk.moving && !frame ? -1 : 0));
       }
     }
 
     // A visiting netling: the two bounce around each other, one on each side of the screen.
     const visit = s.visit && !rest && !rebooting ? s.visit : null;
-    const swing = (phase) => (opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
+    // They bounce toward each other by up to four columns each, but never closer than two columns apart: two adults
+    // (16 wide) have room for only two columns of swing each.
+    const visitorWidth = visit ? formSprite(visit.form, 'a')[0].length : 0;
+    const swingCap = visit ? Math.max(0, Math.floor((LCD_W - 4 - sprite[0].length - visitorWidth) / 2)) : 4;
+    const swing = (phase) => Math.min(swingCap, opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
     const hop = (up) => (opts.calm ? 0 : up ? 1 : 0);
     if (visit) {
-      x = LCD_W - 3 - sprite[0].length - swing(Math.PI);
+      x = LCD_W - 1 - sprite[0].length - swing(Math.PI);
       y = 20 - sprite.length - hop(!frame);
     }
 
@@ -119,33 +143,46 @@ export function renderLCD(canvas, s, time, opts = {}) {
     }
 
     let spriteColors = colors;
-    if (rebooting) spriteColors = { '#': '#1c3a3f', o: '#2f6b73', '+': '#2f6b73' }; // powered down
+    if (rebooting) spriteColors = POWERED_DOWN_COLORS;
     if (rest) {
       // Forms without a dedicated sleep pose close their eyes by painting them body-colored.
       spriteColors = dimPet
-        ? { '#': '#1c3a3f', o: hasSleepPose ? '#0f2528' : '#1c3a3f', '+': '#1c3a3f' }
+        ? { ...DIM_COLORS, o: hasSleepPose ? DIM_COLORS.o : DIM_COLORS['#'] }
         : { ...colors, o: hasSleepPose ? pal.accent : pal.main };
     }
     // Evolution: strobe a white silhouette.
-    if (opts.flash && Math.floor(time / 120) % 2) {
-      spriteColors = { '#': '#ffffff', o: '#ffffff', '+': '#ffffff' };
+    const strobe = opts.flash && Math.floor(time / FLASH_TOGGLE_MS) % 2;
+    if (strobe) {
+      spriteColors = WHITE_COLORS;
     }
 
-    if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
+    // Flow: kept in good shape for hours, it glows. A soft outline that breathes slowly (a still
+    // glow in calm mode); it never flashes.
+    if (opts.flow && !rest && !rebooting && !strobe) {
+      const glow = Object.fromEntries([...new Set(sprite.join(''))].filter((c) => spriteColors[c]).map((c) => [c, pal.accent]));
+      bctx.globalAlpha = opts.calm ? 0.5 : 0.45 + 0.15 * Math.sin(time / FLOW_BREATH_MS);
+      for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) drawSprite(bctx, sprite, x + dx, y + dy, glow);
+      bctx.globalAlpha *= 0.5; // a fainter second ring
+      for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawSprite(bctx, sprite, x + dx, y + dy, glow);
+      bctx.globalAlpha = 1;
+    }
+
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
-    if (opts.accessory && !(opts.flash && Math.floor(time / 120) % 2)) {
-      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors);
+    bctx.globalAlpha = 1; // a Ghost fades, what it wears does not
+    if (opts.accessory && !strobe) {
+      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors, pal);
     }
-    bctx.globalAlpha = 1;
+    // The prop stands in front of the pet, so a pet at the right edge does not hide it.
+    if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
 
     if (visit) {
       const vs = formSprite(visit.form, frame ? 'a' : 'b');
       const vp = PALETTES[visit.palette] ?? PALETTES[0];
-      const vx = 3 + swing(0);
+      const vx = 1 + swing(0);
       const vy = 20 - vs.length - hop(frame);
-      drawSprite(bctx, vs, vx, vy, { '#': vp.main, o: vp.accent, '+': '#f5f5f5' });
-      if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time);
+      drawSprite(bctx, vs, vx, vy, paletteColors(vp));
+      if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time, null, vp);
       // A spark passes between them.
       if (frame) plus(bctx, '#f9f002', Math.round((vx + vs[0].length + x) / 2), 6);
     }
@@ -190,16 +227,17 @@ export function renderLCD(canvas, s, time, opts = {}) {
   const g = isAlive(s) && !opts.calm
     ? Math.max(0, (60 - s.stats.integrity) / 60) + (s.virus ? 0.35 : 0) + (s.form === 'glitch' ? 0.2 : 0)
     : 0;
-  if (g > 0 && Math.random() < g * 0.5) {
+  const rnd = stepRandom(Math.floor(time / GLITCH_STEP_MS));
+  if (g > 0 && rnd() < g * 0.5) {
     ctx.globalAlpha = 0.5;
-    ctx.drawImage(buf, sx * (Math.random() < 0.5 ? -1 : 1), 0, canvas.width, canvas.height);
+    ctx.drawImage(buf, sx * (rnd() < 0.5 ? -1 : 1), 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1;
   }
   ctx.drawImage(buf, 0, 0, canvas.width, canvas.height);
-  if (g > 0 && Math.random() < g * 0.4) {
-    const row = Math.floor(Math.random() * LCD_H);
-    const h = 1 + Math.floor(Math.random() * 3);
-    const shift = Math.round((Math.random() - 0.5) * 6 * g) * sx;
+  if (g > 0 && rnd() < g * 0.4) {
+    const row = Math.floor(rnd() * LCD_H);
+    const h = 1 + Math.floor(rnd() * 3);
+    const shift = Math.round((rnd() - 0.5) * 6 * g) * sx;
     ctx.drawImage(buf, 0, row, LCD_W, h, shift, row * sy, canvas.width, h * sy);
   }
 
@@ -209,9 +247,11 @@ export function renderLCD(canvas, s, time, opts = {}) {
     ctx.fillStyle = `rgba(255, 42, 109, ${(0.06 + 0.1 * pulse) * ((s.stats.heat - 80) / 20)})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
-  // Power surge: a hard white flicker.
-  if (opts.surge && (opts.calm || Math.floor(time / 70) % 2)) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+  // Power surge: one white flash that fades (opts.surge runs 1..0; true means its start). Calm mode
+  // holds a fainter, steady wash instead.
+  const surge = opts.surge === true ? 1 : Math.max(0, Math.min(1, Number(opts.surge) || 0));
+  if (surge > 0) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${opts.calm ? 0.2 : (0.35 * surge).toFixed(3)})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }

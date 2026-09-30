@@ -22,6 +22,20 @@ export async function notify(title, body) {
   }
 }
 
+// The installed app's icon badge: a plain dot while the netling needs something. It only changes
+// while the page runs, so a closed app keeps the last badge it had. Some platforms (iOS) show it
+// only with notification permission; everywhere, a refusal is quiet.
+export const badgeSupported = (nav = globalThis.navigator) => typeof nav?.setAppBadge === 'function';
+
+export function setBadge(on, nav = globalThis.navigator) {
+  if (!badgeSupported(nav)) return;
+  try {
+    Promise.resolve(on ? nav.setAppBadge() : nav.clearAppBadge?.()).catch(() => {});
+  } catch {
+    // Not installed, or not allowed here.
+  }
+}
+
 export function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('sw.js').catch(() => {});

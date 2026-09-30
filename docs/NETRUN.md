@@ -43,7 +43,7 @@ The run is stored on the netling, so it survives a reload. `main.js` reopens it 
 4. The tutorial region is always allowed.
 5. Resting (asleep or napping).
 6. Rebooting.
-7. Region lock (`regionLock`): stage too young, or The Deep without codex fragment `ruins-4`.
+7. Region lock (`regionLock(region, stage, codex, cleared)`): stage too young, the region before it in `REGION_ORDER` not yet cleared by this netling, or The Deep without codex fragment `ruins-4`.
 8. Uplink cooldown still running.
 9. Charge under 30 (`RUN_CFG.minCharge`).
 
@@ -66,29 +66,51 @@ The tutorial run neither starts nor resets the cooldown (`noCooldown`).
 
 ## Regions
 
-`REGION_ORDER` is public, corp, bazaar, ruins, deep. `tutorial` is defined too but is not in the picker.
+`REGION_ORDER` is public, bazaar, corp, ruins, deep: the way down. `tutorial` is defined too but is not in the picker.
+
+### The way down
+
+Each region after the first opens once **this netling** has reached the exit of the region before it (`pet.cleared`, a list of region ids). Only the exit node counts: jacking out at a relay, a disconnect, an abort and the tutorial do not. The stage gates still apply on top, so a baby that clears the Public Net waits for the teen stage before the Bazaar opens. Every new netling starts with only the Public Net; clears are not inherited.
+
+Netlings from before the order existed (no `cleared` field) are given every region their current stage can enter (`clearedForStage`), so nothing they could reach closes on them and the Ruins still open when a teen grows up.
 
 | Region | Unlock | Middle layers | Node weights (cache / ICE / relay / checkpoint / market / anomaly) | ICE damage | Exit bonus items | Home sound |
 |---|---|---|---|---|---|---|
 | Public Net | any stage | 6 | 3 / 6 / 1 / 1 / 1 / 2 | 35 | 1 | square, x1 |
-| Corp Grid | teen+ | 7 | 3 / 6 / 1 / 4 / 0 / 1 | 40 | 1 | triangle, x1.25 |
-| Darknet Bazaar | teen+ | 7 | 2 / 5 / 1 / 0 / 4 / 2 | 38 | 1 | sawtooth, x0.9 |
-| Old Web Ruins | adult | 7 | 3 / 5 / 1 / 0 / 0 / 4 | 45 | 2 | sine, x0.75 |
-| The Deep | adult and codex fragment `ruins-4` | 8 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
+| Darknet Bazaar | teen+, Public Net cleared | 7 | 2 / 5 / 1 / 0 / 4 / 2 | 40 | 1 | sawtooth, x0.9 |
+| Corp Grid | teen+, Bazaar cleared | 7 | 3 / 6 / 1 / 4 / 0 / 1 | 35 | 1 | triangle, x1.25 |
+| Old Web Ruins | adult, Corp Grid cleared | 7 | 3 / 5 / 1 / 0 / 0 / 4 | 48 | 2 | sine, x0.75 |
+| The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 10 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
 
-While locked, The Deep shows as `???` in the picker. Each region has its own palette and its own netrun sound voice. The player's chosen sound pack applies only at home.
+ICE damage was tuned in balance pass 2 so careful players disconnect more often at each step down: about 4% in the Public Net, 5% in the Bazaar, 7% in the Corp Grid (whose checkpoints add their own damage), 8% in the Ruins and 35% in The Deep, which stays a wall (`tools/baseline/netruns.json`). The Deep is hard by distance (10 middle layers, from 8 in pass 2) rather than by ICE damage, because more ICE damage pulls the adult abilities apart again; with their abilities, careful adults disconnect 14 to 19% there against 1 to 3% in the Ruins.
+
+While locked, The Deep shows as `???` in the picker, and the exit message of the Ruins never names it. The picker also shows how many new codex fragments this netling has recovered against the per-life cap. Each region has its own palette and its own netrun sound voice. The player's chosen sound pack applies only at home.
 
 Loot tables (weights), used for caches, ICE wins, exit bonuses and anomaly loot:
 
 | Region | Loot |
 |---|---|
-| Public Net | coolant 3, antivirus 2, booster 2, repair 2, voucher 1, memory 1, blackice 1 |
-| Corp Grid | voucher 4, antivirus 3, coolant 2, repair 2, booster 1 |
-| Darknet Bazaar | blackice 4, memory 2, booster 2, coolant 1 |
-| Old Web Ruins | memory 4, repair 3, coolant 2, antivirus 2, booster 1 |
-| The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1 |
+| Public Net | coolant 2, antivirus 2, booster 2, repair 2, voucher 1, memory 1, blackice 1, segfault 2 |
+| Corp Grid | voucher 4, antivirus 3, coolant 2, repair 2, booster 1, segfault 1 |
+| Darknet Bazaar | blackice 4, memory 2, booster 2, coolant 1, segfault 1 |
+| Old Web Ruins | memory 4, repair 3, coolant 2, antivirus 2, booster 1, segfault 1 |
+| The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1, segfault 1 |
 
-Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1`). Bazaar items cost 10 Charge, all others 12. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
+Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1, segfault 1`). Items cost corpo scrip (below) plus Charge: 10 Charge in the Bazaar, 12 elsewhere. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
+
+### Corpo scrip
+
+Scrip is the netling's money (`pet.scrip`, 0 to `SCRIP.max` = 100; anything over the cap is lost, and the inventory panel shows FULL). It is defined in `sim.js` (`SCRIP`, `sellValue`, `addScrip`).
+
+| Tier | Items | Price | Sells at a market (half) | Scraps elsewhere (a quarter) |
+|---|---|---|---|---|
+| Common | Coolant cell, Antivirus patch, Repair kit, Signal booster, Memory shard | 15 | 7 | 3 |
+| Uncommon | Black ICE shard, Corp voucher, Segfault | 25 | 12 | 6 |
+| Rarest | Overclock chip | 50 | 25 | 12 |
+
+- **Earning**: selling an inventory item while a market is open (the inventory's button reads SELL +n; `sellItem`), SCRAP at home (a quarter), any pickup that meets a full inventory (scrapped for a quarter automatically, at home or on jack-out), and loose scrip on runs: 3 at every exit (`exitScrip`) and 3 in 30% of empty caches (`cacheScripChance`, `cacheScrip`). Loose scrip is carried in `run.scrip` and banked on jack-out like loot; a disconnect or abort loses it. Selling is neutral for allegiance.
+- **Spending**: a market item costs its price plus the region's Charge price; an accessory costs 25 scrip (common) or 50 (rare or very rare) plus 20 Charge (`accScrip`, `accPrice`). A button is enabled only while the netling has the scrip and more than Charge price + 5; `refreshMarket` recomputes this whenever the inventory sells mid-choice. Each item bought still leans allegiance by -0.5.
+- **Inheritance**: the flatline fragment carries `Math.floor(scrip / 2)` (`inheritedScrip`), and the next netling starts with it.
 
 ## Map generation
 
@@ -111,15 +133,15 @@ Every move first costs Charge and Heat (see below), then the node triggers.
 | Node | What happens |
 |---|---|
 | `entry` | Start only |
-| `cache` | 40% chance of a loot item (`cacheFindChance`). Independent 15% chance of a codex fragment, 3% chance of an accessory |
+| `cache` | 40% chance of a loot item (`cacheFindChance`); an empty cache holds 3 loose scrip 30% of the time. Independent 15% chance of a codex fragment, 3% chance of an accessory |
 | `ice` | A random mini-game (any of the four). Win: 20% chance of loot, 5% of an accessory. Loss: Integrity minus the region's ICE damage (halved for Firewall), Heat +12. Integrity 0 disconnects |
 | `relay` | Charge +15, Heat -20. Then a choice: CONTINUE or JACK OUT (banks loot, ends the run) |
 | `checkpoint` | Chrome and Ghost pass automatically. Others choose: **HIDE** (Charge -8, Heat +8, allegiance -1, 25% chance of -15 Integrity), **COMPLY** (allegiance +1, a random carried item is confiscated, or -5 Integrity if carrying nothing), **VOUCHER** (spend a voucher from the inventory, pass clean, allegiance +1) |
-| `market` | Two different offered items at the region price, plus a 50% chance of an accessory offer at 20 Charge. Buying needs Charge above price + 5. Each item bought leans allegiance by -0.5 |
+| `market` | Two different offered items for their scrip price plus the region's Charge price, and a 50% chance of an accessory offer (25 or 50 scrip plus 20 Charge). While it is open the inventory sells for half price. Each item bought leans allegiance by -0.5 |
 | `anomaly` | A random anomaly from the list below |
-| `exit` | Adds the region's exit bonus item(s), rolls 60% for a fragment (100% in the tutorial) and 8% for an accessory, then jacks out |
+| `exit` | Adds the region's exit bonus item(s) and 3 loose scrip, rolls 60% for a fragment (100% in the tutorial) and 8% for an accessory, marks the region cleared for this netling (not the tutorial), then jacks out |
 
-Glitch form skips the first ICE of each run entirely (`run.phased`).
+Glitch form skips the first ICE of each run entirely (`run.phased`), and each later ICE with a 35% chance (`glitchPhaseChance`). A Ghost goes unnoticed by 45% of ICE (`ghostSlipChance`).
 
 ## Movement costs
 
@@ -132,7 +154,8 @@ Per move: Charge -4 (`moveCharge`), Heat +5 (`moveHeat`).
 
 **Jack out** (`jackOut`): via the exit node or a relay.
 
-- Every carried item goes to the inventory; anything that does not fit is lost ("N lost: inventory full").
+- Every carried item goes to the inventory; anything that does not fit is scrapped for a quarter of its price ("N scrapped for S scrip: inventory full"). Loose scrip is added, up to the cap.
+- `pet.codexFound` grows by the number of fragments banked (see the per-life cap below).
 - Half of the Integrity lost during the run is restored (`jackOutRestore = 0.5`, based on `startStats.integrity`).
 - Fragments and accessories found this run go into `pet.codexInbox` and `pet.accessoryInbox`. The UI (`drainCodexInbox`, `drainAccessoryInbox`) banks them into the shared codex and wardrobe.
 - `clean` is true when no ICE was lost. A clean clear cuts 1 hour off the next cooldown.
@@ -141,10 +164,10 @@ Per move: Charge -4 (`moveCharge`), Heat +5 (`moveHeat`).
 
 - Integrity is raised to at least 30, Charge to at least 5, Sync -20, stability -1.
 - One care mistake is logged, unless the netling is already at 9 of 10 (a disconnect can never be the killing mistake).
-- All loot, fragments and accessories from the run are lost.
+- All loot, loose scrip, fragments and accessories from the run are lost.
 - The UI grants the earned "bandage" accessory on the first disconnect.
 
-**Abort** (ABORT RUN pressed twice within 2.5 s): loot, fragments and accessories are forfeited, nothing else. Counts as `aborted`; the cooldown starts and any clean-clear bonus is reset.
+**Abort** (touch: ABORT RUN, then CONFIRM ABORT at the top of the screen within 3 s; Esc or a controller's B: pressed twice within 2.5 s): loot, fragments and accessories are forfeited, nothing else. Counts as `aborted`; the cooldown starts and any clean-clear bonus is reset.
 
 All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` and increments `runStats`.
 
@@ -154,11 +177,13 @@ All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` 
 
 | Form | Ability |
 |---|---|
-| Chrome | Corp credentials: checkpoints wave it through |
+| Chrome | Corp credentials: checkpoints wave it through. Corp insurance: once a run, a blow that would disconnect it leaves it at 12 Integrity instead (`chromeInsurance`, `run.insured`) |
 | Firewall | ICE deals half damage |
-| Daemon | Sees node types two steps ahead |
-| Glitch | Slips through the first ICE of each run |
-| Ghost | Sees every node; checkpoints never notice it |
+| Daemon | Sees node types two steps ahead. Upkeep: +6 Integrity with every move (`daemonMoveRepair`) |
+| Glitch | Slips through the first ICE of each run, and each later one 35% of the time (`glitchPhaseChance`) |
+| Ghost | Sees every node; checkpoints never notice it; 45% of ICE never notice it either (`ghostSlipChance`) |
+
+The second effects (insurance, upkeep, the later phases, slipping past ICE) were added in balance pass 2 so no form is far ahead where it matters most. Careful play, 4000 runs each, disconnect rates in The Deep: Firewall 14%, Ghost 14%, Glitch 17%, Chrome 18%, Daemon 18%, against 35% with no ability.
 
 ## Anomalies
 
@@ -189,6 +214,10 @@ After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Char
 Fragment ids are permanent: saved codexes store them, and `sanitize.js` drops unknown ids. Never rename or remove a shipped id.
 
 Fragment sources: cache (15%), exit (60%, tutorial 100%), Echo anomaly (50%). `run.known` snapshots the codex at jack-in and `run.fragments` holds finds this run, so two finds in one run never repeat. Fragments found in a run that ends in a disconnect or abort are lost.
+
+### Per-life cap
+
+A netling's memory holds at most 8 new fragments (`RUN_CFG.codexPerLife`), so the 22 take at least three generations however often a player runs (8 + 8 + 6). `pet.codexFound` counts the fragments banked this life; fragments in the current run hold a place while it lasts (`codexRoom(pet)`). Once it is full, a roll that would have found a fragment logs "a codex fragment, but its memory is full" and the fragment stays for the next generation. The counter starts at 0 for each new netling, and for netlings from before the cap. Measured (`tools/baseline/lineages.json`): attentive-style lineages finish the codex in life 3 or 4 (median 4), never sooner; casual lines rarely finish within 4 lives.
 
 Completing all 22 grants Root Access (see [SIMULATION.md](SIMULATION.md#root-access-nl-0)). The Deep opens when `ruins-4` is known. Full text is in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#codex-fragments).
 

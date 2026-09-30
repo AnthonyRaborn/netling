@@ -9,50 +9,55 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 3. [Items](#items)
 4. [Mini-games](#mini-games)
 5. [Style: cosmetics](#style-cosmetics)
-6. [Accessories and props](#accessories-and-props)
-7. [Codex fragments](#codex-fragments)
-8. [Onboarding and NL-0 text](#onboarding-and-nl-0-text)
-9. [Dex lore and hints](#dex-lore-and-hints)
+6. [Chatter](#chatter)
+7. [Accessories and props](#accessories-and-props)
+8. [Codex fragments](#codex-fragments)
+9. [Onboarding and NL-0 text](#onboarding-and-nl-0-text)
+10. [Dex lore and hints](#dex-lore-and-hints)
 
 ## Forms
 
 | Form | Stage | How it is reached | Perk | Netrun ability | Keepsake | Trait passed on |
 |---|---|---|---|---|---|---|
 | Bitling | baby | Compile a script | none | none | n/a | n/a |
-| Kernel | teen | 2 or fewer mistakes by 24 hours | none | none | n/a | n/a |
-| Stub | teen | 3 or more mistakes by 24 hours | none | none | n/a | n/a |
-| Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through | Corp voucher | Licensed |
+| Kernel | teen | 2 or fewer mistakes at the teen stage (17 hours; 24 for netlings compiled before the 5-day life), and not a Shell | none | none | n/a | n/a |
+| Stub | teen | 3 or more mistakes at the teen stage | none | none | n/a | n/a |
+| Shell | teen | On Ghost's path at the teen stage: allegiance under 2 either way, stability 0 or more, at most 1 mistake, every game won at least 3 times | none | none | n/a | n/a |
+| Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through; corp insurance saves it from one disconnect a run | Corp voucher | Licensed |
 | Firewall | adult | Allegiance dominant and negative | -30% virus chance | ICE deals half damage | Antivirus patch | Hardened |
-| Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead | Coolant cell | Persistent |
-| Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run | Black ICE shard | Volatile |
-| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 22+ wins with 4+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it | Memory shard | Untraceable |
+| Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead; +6 Integrity each move | Coolant cell | Persistent |
+| Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run, and 35% of later ones | Black ICE shard | Volatile |
+| Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 29+ wins with 4+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it, and 45% of ICE miss it | Memory shard | Untraceable |
 
-"Dominant" means larger in absolute value, ties going to allegiance. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
+"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
 
 ## Traits and perks
 
-| Trait | Source form | Effect |
-|---|---|---|
-| Licensed | Chrome | Corp packets restore +25% Charge |
-| Hardened | Firewall | -50% virus chance |
-| Persistent | Daemon | Drains 30% slower while resting |
-| Volatile | Glitch | Play rewards x1.5, Integrity drains an extra 1/hr |
-| Untraceable | Ghost | Immune to corp traces |
+Effects at strength 1; levels, history and caps are in [SIMULATION.md](SIMULATION.md#trait-strength-balance-pass-3). The in-game text (`TRAITS[id].desc`) names the effect without numbers.
+
+| Trait | Source form | Effect | Cap |
+|---|---|---|---|
+| Licensed | Chrome | Corp packets restore +25% Charge | 1.5 |
+| Hardened | Firewall | -50% virus chance | 1.5 |
+| Persistent | Daemon | Drains 30% slower while resting | 1.25 |
+| Volatile | Glitch | Play rewards x1.5, Integrity drains an extra 0.75/hr | 1.25 |
+| Untraceable | Ghost | Corp traces 60% less often | 1.25 |
 
 ## Items
 
-Eight items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`).
+Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`). Prices are in corpo scrip (`SCRIP.price` in `sim.js`); markets add Charge, and selling pays half at a market or a quarter elsewhere.
 
-| Name | Effect |
-|---|---|
-| Coolant cell | Vents 50 Heat. Works while asleep |
-| Antivirus patch | Cures any virus and shields against new ones for 6 hours |
-| Corp voucher | Full Charge, waves off the current or next corp trace. Leans corp |
-| Black ICE shard | +40 Sync, +20 Heat, may carry a virus. Leans indie and unstable. Awake only |
-| Signal booster | Your next mini-game win counts double. Awake only |
-| Memory shard | Rewrites one of its quirks at random |
-| Repair kit | Restores 40 Integrity. Works while asleep |
-| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) |
+| Name | Effect | Scrip price |
+|---|---|---|
+| Coolant cell | Vents 50 Heat. Works while asleep | 15 |
+| Antivirus patch | Cures any virus and shields against new ones for 6 hours | 15 |
+| Corp voucher | Full Charge, waves off the current or next corp trace. Leans corp | 25 |
+| Black ICE shard | +40 Sync, +20 Heat, may carry a virus. Leans indie and unstable. Awake only | 25 |
+| Signal booster | Your next mini-game win counts double. Awake only | 15 |
+| Memory shard | Rewrites one of its quirks at random | 15 |
+| Repair kit | Restores 40 Integrity. Works while asleep | 15 |
+| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
+| Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press | 25 |
 
 ## Mini-games
 
@@ -85,7 +90,7 @@ Slots: shell, tint, effect, sound. `free: true` items are available from the sta
 
 Owning all nine shells grants the secret **Mini device** prop.
 
-### Tints (7)
+### Tints (8)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -95,9 +100,10 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `violet` | Bazaar violet | All Bazaar fragments | "hear every rumor in the market." |
 | `phosphor` | Green phosphor | All Old Web Ruins fragments | "learn what the ruins remember." |
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
+| `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (8)
+### Effects (9)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -108,11 +114,12 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `bloom` | Bloom | Best Dodge streak 10 | "slip every wall, ten times over." |
 | `curved` | Deep curve | Best Tune streak 10 | "hold the signal and never lose it." |
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
+| `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
-### Sounds (7)
+### Sounds (8)
 
 | Id | Name | Wave, multiplier | Unlock | Hint |
 |---|---|---|---|---|
@@ -122,13 +129,43 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 | `glass` | Glass | sine, 2 | 20 patches | "catch it before it spreads, twenty times." |
 | `chime` | Chime | triangle, 1.25 | 10 complies | "answer when they call, ten times." |
 | `buzz` | Buzz | sawtooth, 0.9 | 10 hides | "vanish when they call, ten times." |
+| `purr` | Purr | sine, 0.6 | 25 requests answered | "give it what it asks for, twenty-five times." |
 | `arcade` | Arcade | triangle, 0.75 | 50 games played (PLAY plus netrun ICE) | "fifty games, win or lose." |
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
+### Crests (6)
+
+A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
+
+| Id | Name | Unlock | Hint |
+|---|---|---|---|
+| `none` | No crest | free | |
+| `helix` | Helix | Every trait inherited at least once, anywhere in the line | "inherit every trait there is, once." |
+| `triad` | Triad | A level III trait held or passed on (the same form three generations running) | "the same shape, three times running." |
+| `loop` | Closed loop | 5 full lives in a row with no NL-0 rescue | "five whole lives in a row, nobody pulled back." |
+| `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
+| `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
+
+Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark is the one crest not read from the lineage: it comes from the chatter heard (see [Chatter](#chatter)).
+
 ### Device label
 
 Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlocked when the first netling has died: "lose one before you name the line."
+
+## Chatter
+
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 50 lines in 11 groups; a group with nothing heard shows only its hint.
+
+| Group | Lines | When | Hint |
+|---|---|---|---|
+| Bitling | 5 | A baby | "listen to it while it is new." |
+| Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
+| Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
+| Lineage | 7 | One per inherited trait, one with a history, one while NL-0 watches | "listen to one that remembers who came before." |
+| Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
+
+The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).
 
 ## Accessories and props
 
@@ -167,7 +204,7 @@ Props, 4 (drawn on the ground, own slot):
 | Mini device | very rare | Earned: own every shell ("collect every shell. then look closer.") |
 | Plush | rare | Earned: after the first netling dies. Drawn as a half-scale copy of the previous netling in its colors |
 
-Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe.
+Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat. A slot the player has not picked is automatic: `src/wearable-colors.js` (generated by `tools/wearable-colors.mjs`, kept current by a test) holds the color for each palette, chosen to stand clear of that palette's body and eye colors, so the same wearable is a different color on different netlings when its signature color would blend in. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe (`null` = automatic). The other wearables keep their own colors, but any pixel that sits on the body (or right beside it) and would blend into it is swapped for a color that does not (`contrastColor`, `src/colors.js`); a pixel floating clear of the body keeps its own color. The Visor is two tinted lenses with a bridge, a scan light and a readout blip, and its automatic band color is never orange or gold. A Ghost's wearable is drawn solid while the Ghost fades. In the dark, a resting pet's wearable is drawn one step lighter than the dimmed body.
 
 The tutorial run never drops accessories (`noStyleDrops`), so the party hat is the first one a player owns. Visitors wear random findable wearables (no props, no earned items) from any region.
 
@@ -242,6 +279,7 @@ The story in one line: a corp project (KERNEL) made self-improving maintenance p
 | Bitling | compile a script. | A freshly compiled netling. Mostly curiosity and antennae. |
 | Kernel | raise it well through its first day. | A well-kept adolescent, neatly pinned and humming. |
 | Stub | what grows from a rough first day? | An adolescent with missing sectors. Scrappy, not broken. |
+| Shell | sides with no one on its first day, and plays every game. | A hollow casing with something looking out from inside. Empty, for now. |
 | Chrome | loyal to the grid. | Corp-issue and proud of it. Polished, licensed, a little smug. |
 | Firewall | trusts no one upstream. | A personal shield that decided it was a person. |
 | Daemon | never misses a cycle. | A background process with horns. Silent, tireless, exact. |

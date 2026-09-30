@@ -17,7 +17,10 @@
   <body>
     <main class="device">
       <header class="brand">
-        <span class="logo">NETLING</span>
+        <span class="brand-id">
+          <canvas id="crest" class="crest" width="9" height="9" aria-hidden="true" hidden></canvas>
+          <span class="logo">NETLING</span>
+        </span>
         <span id="test-badge" class="test-badge" hidden></span>
         <span class="prefs">
           <button type="button" id="pref-sound" class="pref" aria-pressed="true">SND ON</button>
@@ -28,11 +31,13 @@
       </header>
 
       <div class="screen">
-        <canvas id="lcd" width="400" height="280" aria-label="Netling display"></canvas>
+        <canvas id="lcd" width="400" height="280" role="img" aria-label="Netling display"></canvas>
+        <button type="button" id="pad-confirm" class="screen-confirm" hidden>CONFIRM QUIT</button>
         <div class="scanlines"></div>
         <div class="fx-layer"></div>
         <div class="crt-glare"></div>
         <div id="status" class="status" role="status"></div>
+        <p id="sr-announce" class="sr-only" aria-live="polite"></p>
         <div id="speech" class="speech" hidden></div>
         <section id="intro" class="intro" hidden aria-live="polite">
           <pre id="intro-text"></pre>
@@ -53,13 +58,13 @@
       </div>
 
       <section class="hud" aria-label="Vitals">
-        <div class="stat" title="Charge: power. Feed it."><label>CHG</label><div id="bar-charge" class="bar" role="meter" aria-label="Charge"></div></div>
-        <div class="stat" title="Sync: its bond with you. Play with it."><label>SYN</label><div id="bar-sync" class="bar" role="meter" aria-label="Sync"></div></div>
-        <div class="stat" title="Integrity: its health. At zero too long, it flatlines."><label>INT</label><div id="bar-integrity" class="bar" role="meter" aria-label="Integrity"></div></div>
-        <div class="stat" title="Heat: running hot hurts it. Cool it down."><label>HEAT</label><div id="bar-heat" class="bar heat" role="meter" aria-label="Heat"></div></div>
-        <div class="stat" title="Cache: corrupted files. Purge them.">
+        <div class="stat" title="Charge: power. Feed it."><label>CHG</label><div id="bar-charge" class="bar" role="meter" aria-label="Charge" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Sync: its bond with you. Play with it."><label>SYN</label><div id="bar-sync" class="bar" role="meter" aria-label="Sync" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Integrity: its health. At zero too long, it flatlines."><label>INT</label><div id="bar-integrity" class="bar" role="meter" aria-label="Integrity" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div class="stat" title="Heat: running hot hurts it. Cool it down."><label>HEAT</label><div id="bar-heat" class="bar heat" role="meter" aria-label="Heat" aria-valuemin="0" aria-valuemax="100"></div></div>
+        <div id="stat-cache" class="stat" title="Cache: corrupted files. Purge them.">
           <label>CACHE</label>
-          <div id="cache-pips" class="pips"><i></i><i></i><i></i><i></i></div>
+          <div id="cache-pips" class="pips" role="meter" aria-label="Cache" aria-valuemin="0" aria-valuemax="4"><i></i><i></i><i></i><i></i></div>
         </div>
       </section>
 
@@ -70,11 +75,12 @@
       </section>
 
       <div class="inventory" aria-label="Inventory">
+        <p id="inv-scrip" class="inv-scrip" title="Corpo scrip: sell items at netrun markets, spend it there with Charge. Half passes to the next generation."></p>
         <div id="inv-slots" class="inv-slots"></div>
         <div id="inv-detail" class="inv-detail" hidden>
           <div class="inv-text"><b id="inv-name"></b> <span id="inv-desc"></span></div>
           <button type="button" id="inv-use">USE</button>
-          <button type="button" id="inv-discard" class="pref">DISCARD</button>
+          <button type="button" id="inv-discard" class="pref">SCRAP</button>
           <button type="button" id="inv-cancel" class="pref">KEEP</button>
         </div>
       </div>
@@ -85,6 +91,13 @@
         <button type="button" data-act="comply" data-event="trace">COMPLY</button>
         <button type="button" id="event-defend" data-event="attack">DEFEND</button>
         <button type="button" data-act="purge" data-event="overflow">PURGE</button>
+      </div>
+
+      <div id="wish-bar" class="wish-bar" hidden>
+        <span id="wish-text" class="wish-text"></span>
+        <button type="button" id="wish-play" hidden>PLAY</button>
+        <button type="button" id="wish-cool" hidden>COOL</button>
+        <button type="button" id="wish-greet" hidden>GREET</button>
       </div>
 
       <nav id="controls" class="controls" aria-label="Actions">
@@ -108,6 +121,7 @@
       </nav>
 
       <nav id="regions" class="regions" aria-label="Netrun regions" hidden>
+        <p id="region-memory" class="inv-scrip"></p>
         <div id="region-list" class="region-list"></div>
         <button type="button" id="regions-back" class="wide">BACK</button>
       </nav>
@@ -164,6 +178,12 @@
       </div>
     </main>
 
+    <div id="update-bar" class="update-bar" role="status" hidden>
+      <span class="update-label">NEW VERSION READY</span>
+      <button type="button" id="update-reload">RELOAD</button>
+      <button type="button" id="update-later" class="pref">LATER</button>
+    </div>
+
     <dialog id="archive" class="archive" aria-labelledby="archive-title">
       <header>
         <h2 id="archive-title">ARCHIVE</h2>
@@ -176,6 +196,7 @@
         <button type="button" role="tab" id="tab-btn-lineage" aria-selected="true" aria-controls="tab-lineage">LINEAGE</button>
         <button type="button" role="tab" id="tab-btn-dex" aria-selected="false" aria-controls="tab-dex">DEX <span id="dex-count"></span></button>
         <button type="button" role="tab" id="tab-btn-codex" aria-selected="false" aria-controls="tab-codex">CODEX <span id="codex-count"></span></button>
+        <button type="button" role="tab" id="tab-btn-chatter" aria-selected="false" aria-controls="tab-chatter">CHATTER <span id="chatter-count"></span></button>
         <button type="button" role="tab" id="tab-btn-wardrobe" aria-selected="false" aria-controls="tab-wardrobe">STYLE <span id="wardrobe-count"></span></button>
       </div>
       <section id="tab-lineage" role="tabpanel" aria-labelledby="tab-btn-lineage">
@@ -187,6 +208,10 @@
       </section>
       <section id="tab-wardrobe" role="tabpanel" aria-labelledby="tab-btn-wardrobe" hidden>
         <div id="wardrobe-list" class="wardrobe"></div>
+      </section>
+      <section id="tab-chatter" role="tabpanel" aria-labelledby="tab-btn-chatter" hidden>
+        <p class="tx-note">Things it said while you were watching. Each netling mutters now and then while it is awake and idle.</p>
+        <div id="chatter-list" class="codex chatter"></div>
       </section>
       <section id="tab-codex" role="tabpanel" aria-labelledby="tab-btn-codex" hidden>
         <div id="codex-gift" class="gift" hidden>
@@ -204,7 +229,7 @@
       </header>
       <section class="transfer-body">
         <h3>TRANSFER OUT</h3>
-        <p class="tx-note">Moves everything (netling, lineage, dex, codex, style) to another device as a code or QR. This device locks until you load it back or restart.</p>
+        <p class="tx-note">Moves everything (netling, lineage, dex, codex, style) to another device as a code or QR. This device locks until you load it back or restart. A transfer does not pause the netling: its clock keeps running until the code is loaded.</p>
         <button type="button" id="transfer-out">TRANSFER OUT</button>
 
         <h3>BRING ONE HERE</h3>
@@ -229,6 +254,14 @@
 
         <h3>SOUND</h3>
         <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
+
+        <h3>SCREEN</h3>
+        <p class="tx-note" id="motion-note"></p>
+        <button type="button" id="pref-motion">MOTION: AUTO</button>
+        <div id="screen-prefs" hidden>
+          <p class="tx-note">The screen stays on during mini-games and netruns. Turn this on to keep it on whenever the game is showing (uses more battery).</p>
+          <button type="button" id="pref-awake" aria-pressed="false">KEEP SCREEN ON: NO</button>
+        </div>
 
         <h3>HIBERNATE</h3>
         <p class="tx-note" id="hibernate-note"></p>

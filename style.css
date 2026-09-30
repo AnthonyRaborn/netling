@@ -15,7 +15,7 @@
   --cyan: #05d9e8;
   --yellow: #f9f002;
   --text: #c7f9ff;
-  --dim: #5d7a80;
+  --dim: #809fa6; /* at least 4.5:1 on the dark shells */
   --lcd: #0b2226;
 }
 
@@ -70,6 +70,32 @@ body {
   margin-bottom: 12px;
 }
 
+.brand-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The wardrobe crest: a 9x9 pixel emblem drawn in the logo's color (see applyWardrobe). */
+.crest {
+  width: 27px;
+  height: 27px;
+  image-rendering: pixelated;
+  filter: drop-shadow(1px 0 0 var(--cyan));
+}
+
+.crest-sw {
+  display: block;
+  margin: 1px;
+  width: 18px;
+  height: 18px;
+  image-rendering: pixelated;
+}
+
+.crest[hidden] {
+  display: none;
+}
+
 .logo {
   font-size: 30px;
   letter-spacing: 6px;
@@ -87,7 +113,7 @@ body {
 .pref {
   font-size: 14px;
   padding: 2px 8px;
-  color: #5d7a80; /* fixed: buttons sit on their own dark fill, whatever the shell */
+  color: #809fa6; /* fixed: buttons sit on their own dark fill, whatever the shell */
   border-color: var(--shell-edge);
   text-shadow: none;
 }
@@ -100,6 +126,18 @@ body {
 .pref[aria-pressed='true'] {
   color: var(--cyan);
   border-color: var(--cyan);
+}
+
+.screen-confirm {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 8px 16px;
+  border-color: var(--magenta);
+  color: var(--magenta);
+  background: rgba(3, 9, 10, 0.92);
 }
 
 .screen {
@@ -273,9 +311,19 @@ body {
 }
 
 .bar.danger::after {
-  background: var(--magenta);
+  /* Stripes as well as the color, so danger doesn't rely on seeing magenta. */
+  background: repeating-linear-gradient(135deg, var(--magenta) 0 4px, #8a1238 4px 8px);
   box-shadow: 0 0 8px var(--magenta);
   animation: flicker 0.8s infinite;
+}
+
+/* ...and a mark beside the label. */
+.stat.danger label {
+  color: var(--magenta);
+}
+
+.stat.danger label::after {
+  content: ' !';
 }
 
 .pips {
@@ -417,6 +465,17 @@ button:active {
   margin-top: 12px;
 }
 
+.inv-scrip {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--dim);
+  text-align: right;
+}
+
+.inv-scrip.full {
+  color: var(--yellow);
+}
+
 .inv-slots {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -477,6 +536,28 @@ button:active {
 
 .inv-detail button {
   padding: 4px 12px;
+}
+
+.wish-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 6px 0;
+  padding: 6px 10px;
+  border: 1px dashed var(--cyan);
+  color: var(--cyan);
+  font-size: 16px;
+}
+.wish-bar[hidden] {
+  display: none;
+}
+.wish-text {
+  flex: 1 1 12em;
+}
+.speech.visitor {
+  border-color: var(--yellow, #f9f002);
+  color: var(--yellow, #f9f002);
 }
 
 .event-bar {
@@ -608,9 +689,16 @@ button:active {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   margin: 12px 0;
+}
+
+.tabs button {
+  min-width: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+  letter-spacing: 0;
 }
 
 .tabs [aria-selected='false'] {
@@ -647,6 +735,41 @@ button:active {
 
 .lineage li.running {
   border-color: var(--cyan);
+}
+
+.lineage .stats {
+  color: var(--cyan);
+}
+
+/* The family tree: a line down from each thumbnail to the child, labelled with what passed down. */
+.lineage li.link {
+  display: block;
+  position: relative;
+  margin: -8px 0;
+  padding: 10px 8px 10px 52px;
+  background: none;
+  border: 0;
+  color: var(--yellow);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.lineage li.link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 36px;
+  width: 2px;
+  background: var(--shell-edge);
+}
+
+.lineage li.link.gap {
+  color: var(--dim);
+}
+
+.lineage li.link.gap::before {
+  background: repeating-linear-gradient(var(--shell-edge) 0 4px, transparent 4px 8px);
 }
 
 .thumb {
@@ -946,7 +1069,7 @@ body.intro-active .brand .prefs {
 .tx-note {
   margin: 0;
   font-size: 15px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .tx-row {
@@ -1008,7 +1131,7 @@ body.intro-active .brand .prefs {
 }
 
 .tx-preview dt {
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .tx-preview dd {
@@ -1106,7 +1229,7 @@ body.frozen .event-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .volume-row input {
@@ -1125,7 +1248,7 @@ body.frozen .event-bar {
 }
 
 .record dt {
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .record dd {
@@ -1156,6 +1279,41 @@ body.frozen .event-bar {
 
 .ios-hint p {
   margin: 0 0 6px;
+}
+
+/* A newer release is ready. Fixed to the bottom so it never changes the layout. */
+.update-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 6px 8px;
+  border: 1px solid var(--cyan);
+  background: var(--shell);
+  box-shadow: 0 0 12px rgba(5, 217, 232, 0.35);
+}
+
+/* Room to scroll the page clear of it, and out of the way of the game pad. */
+body:has(.update-bar:not([hidden])) {
+  padding-bottom: 64px;
+}
+
+body:has(#pad:not([hidden])) .update-bar {
+  display: none;
+}
+
+.update-label {
+  color: var(--cyan);
+}
+
+.update-bar button {
+  padding: 4px 12px;
 }
 
 /* --- field manual ------------------------------------------------------------ */
@@ -1200,7 +1358,7 @@ body.frozen .event-bar {
 
 .help-body dd small {
   display: block;
-  color: #5d7a80;
+  color: #809fa6;
   font-size: 15px;
 }
 
@@ -1314,7 +1472,7 @@ body.frozen .event-bar {
   padding: 6px 8px;
   border: 1px solid var(--shell-edge);
   font-size: 16px;
-  color: #5d7a80;
+  color: #809fa6;
 }
 
 .color-row span {
@@ -1394,6 +1552,15 @@ body.frozen .event-bar {
 }
 
 /* screen effects */
+.screen.fx-aurora .fx-layer {
+  background: linear-gradient(115deg, rgba(57, 255, 20, 0.08), rgba(5, 217, 232, 0.12), rgba(185, 103, 255, 0.1), rgba(57, 255, 20, 0.08)) 0 0 / 300% 100%;
+  animation: aurora 24s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  to {
+    background-position: 100% 0;
+  }
+}
 .fx-layer {
   position: absolute;
   inset: 0;
@@ -1462,13 +1629,34 @@ body.frozen .event-bar {
   }
 }
 
+/* Calm: no animation or transition. body.calm comes from the MOTION setting (ui/device.js); until
+   it is applied, and in AUTO, the system setting decides. MOTION: FULL sets .motion-full. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  body:not(.motion-full) *,
+  body:not(.motion-full) *::before,
+  body:not(.motion-full) *::after {
     animation: none !important;
     transition: none !important;
   }
+}
+body.calm *,
+body.calm *::before,
+body.calm *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* For screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Wide, short screens (Steam Deck, laptops, desktop windows): the screen on the left, everything

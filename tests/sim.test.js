@@ -1,7 +1,7 @@
 import './helpers/utc.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, alertReason, createScript, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, GAME_IDS, MIN } from '../src/sim.js';
+import { act, alertReason, createScript, drainCurve, tick, leaningForm, isSleepHour, migrate, mulberry32, CFG, GAME_IDS, MIN } from '../src/sim.js';
 
 // Noon UTC so the pet starts awake (tests run with TZ=UTC).
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -23,10 +23,36 @@ test('script compiles into a baby after boot', () => {
 
 test('charge and sync drain over time', () => {
   const s = booted();
-  const before = { ...s.stats };
-  tick(s, s.lastTick + 60 * MIN, noRng);
-  assert.ok(Math.abs(before.charge - s.stats.charge - CFG.drainPerHour.charge) < 0.01);
-  assert.ok(Math.abs(before.sync - s.stats.sync - CFG.drainPerHour.sync) < 0.01);
+  Object.assign(s.stats, { charge: 50, sync: 50 });
+  tick(s, s.lastTick + MIN, noRng);
+  assert.ok(Math.abs(50 - s.stats.charge - (CFG.drainPerHour.charge / 60) * drainCurve(50)) < 1e-9);
+  assert.ok(Math.abs(50 - s.stats.sync - (CFG.drainPerHour.sync / 60) * drainCurve(50)) < 1e-9);
+});
+
+test('a full stat drains faster than a low one', () => {
+  assert.equal(drainCurve(0), CFG.drainCurve.empty);
+  assert.equal(drainCurve(100), CFG.drainCurve.full);
+  const hourFrom = (v) => {
+    const s = booted();
+    Object.assign(s.stats, { charge: v, sync: v });
+    tick(s, s.lastTick + 60 * MIN, noRng);
+    return { charge: v - s.stats.charge, sync: v - s.stats.sync };
+  };
+  const high = hourFrom(95);
+  const low = hourFrom(25);
+  assert.ok(high.charge > 2 * low.charge, `charge ${high.charge} vs ${low.charge}`);
+  assert.ok(high.sync > 2 * low.sync, `sync ${high.sync} vs ${low.sync}`);
+  // Draining from 100 to 0 awake takes longer than the base rate alone would suggest, because the
+  // last stretch eases off.
+  const s = booted();
+  Object.assign(s.stats, { charge: 100, sync: 100 });
+  let minutes = 0;
+  while (s.stats.charge > 0) {
+    s.stats.sync = 100;
+    tick(s, s.lastTick + MIN, noRng);
+    minutes++;
+  }
+  assert.ok(minutes > (100 / CFG.drainPerHour.charge) * 60, `${minutes} minutes`);
 });
 
 test('a stat stuck at zero past the grace period is one care mistake', () => {
@@ -230,12 +256,17 @@ test('hiding from a trace resolves it and leans indie', () => {
   assert.equal(s.axes.allegiance, -1);
 });
 
-test('untraceable netlings never get traced', () => {
+test('untraceable netlings are traced less often', () => {
+  // A roll between the reduced chance (40% of normal) and the normal one: only the plain netling is traced.
+  const roll = () => (0.7 * CFG.traceChancePerHour) / 60;
+  const plain = booted();
+  tick(plain, plain.lastTick + MIN, roll);
+  assert.equal(plain.event?.type, 'trace');
   const s = booted({ fragment: { trait: 'untraceable', quirk: null } });
-  s.quirk.sleepOffset = 0;
-  const alwaysRoll = () => 0; // every random check fires
-  tick(s, s.lastTick + 60 * MIN, alwaysRoll);
+  tick(s, s.lastTick + MIN, roll);
   assert.notEqual(s.event?.type, 'trace');
+  tick(s, s.lastTick + MIN, () => 0);
+  assert.equal(s.event?.type, 'trace', 'no longer immune');
 });
 
 test('alertReason picks the most urgent need', () => {

@@ -8,6 +8,9 @@ export function setGameBg(color) {
 }
 export const DIM = '#2f6b73';
 export const FONT = "'VT323', monospace";
+// Flash safety: an on/off strobe toggles at most this often, so nothing flashes more than three
+// times a second (a flash is a pair of changes). The home screen (render.js) uses it too.
+export const FLASH_TOGGLE_MS = 200;
 
 export function clear(ctx) {
   ctx.fillStyle = BG;

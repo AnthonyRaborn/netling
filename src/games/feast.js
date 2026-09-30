@@ -1,6 +1,6 @@
 // Packet Feast: packets rain down the lanes; move under the clean ones to eat them and keep
 // clear of the corrupted ones. Eat enough before time runs out; two bad bites and it's sick.
-import { clear, text, timerBar, DIM, W, H } from './common.js';
+import { clear, text, timerBar, DIM, FLASH_TOGGLE_MS, W, H } from './common.js';
 
 export const LANES = 5;
 const LANE_W = W / LANES;
@@ -134,7 +134,7 @@ export class Feast {
     text(ctx, `${this.eaten}/${NEEDED}`, 16, 24, { size: 24, color: pal.main });
     for (let i = 0; i < MAX_BAD; i++) {
       const fresh = i === this.bad - 1 && this.hurt > 0;
-      ctx.fillStyle = i < this.bad ? (fresh && Math.floor(this.hurt * 12) % 2 ? '#ffffff' : pal.accent) : DIM;
+      ctx.fillStyle = i < this.bad ? (fresh && Math.floor((this.hurt * 1000) / FLASH_TOGGLE_MS) % 2 ? '#ffffff' : pal.accent) : DIM;
       const grow = fresh ? 3 : 0;
       ctx.fillRect(W - 28 - i * 18 - grow, 18 - grow, 12 + grow * 2, 12 + grow * 2);
     }

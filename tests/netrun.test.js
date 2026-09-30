@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createScript, tick, mulberry32, CFG, MIN } from '../src/sim.js';
+import { createScript, tick, mulberry32, CFG, MIN, SCRIP } from '../src/sim.js';
 import { generateMap, nodeById } from '../src/netrun/map.js';
 import { REGIONS } from '../src/netrun/regions.js';
 import {
@@ -181,14 +181,16 @@ test('chrome and ghost pass checkpoints automatically', () => {
   }
 });
 
-test('market trades charge for an item', () => {
+test('market trades scrip and charge for an item', () => {
   const { s, next } = runInto('baby', 'market');
+  s.scrip = 60;
   moveTo(s, next.id, noRng);
   const charge = s.stats.charge;
   const offer = s.run.pending.offers[0];
   choose(s, 'buy0', noRng);
   assert.deepEqual(s.run.loot, [offer]);
   assert.equal(s.stats.charge, charge - RUN_CFG.marketPrice);
+  assert.equal(s.scrip, 60 - SCRIP.price[offer]);
 });
 
 test('anomalies resolve and stats stay in range', () => {
@@ -241,12 +243,13 @@ import { regionLock, REGION_ORDER } from '../src/netrun/regions.js';
 import { FRAGMENTS, nextFragment, codexByRegion } from '../src/netrun/codex.js';
 
 test('region access follows stage, and The Deep needs the last Ruins fragment', () => {
+  const all = REGION_ORDER;
   assert.equal(regionLock('public', 'baby'), null);
-  assert.match(regionLock('corp', 'baby'), /teen/);
-  assert.equal(regionLock('bazaar', 'teen'), null);
-  assert.match(regionLock('ruins', 'teen'), /adult/);
-  assert.match(regionLock('deep', 'adult', []), /hidden/);
-  assert.equal(regionLock('deep', 'adult', ['ruins-4']), null);
+  assert.match(regionLock('corp', 'baby', [], all), /teen/);
+  assert.equal(regionLock('bazaar', 'teen', [], all), null);
+  assert.match(regionLock('ruins', 'teen', [], all), /adult/);
+  assert.match(regionLock('deep', 'adult', [], all), /hidden/);
+  assert.equal(regionLock('deep', 'adult', ['ruins-4'], all), null);
   const s = pet('baby');
   assert.match(runBlockReason(s, 'corp'), /Corp Grid/);
 });
@@ -314,9 +317,11 @@ test('markets can offer an unowned accessory, bought for charge and banked on ja
     if (!acc) continue;
     found = true;
     assert.notEqual(acc, 'cap', 'never offers an owned accessory');
+    s.scrip = SCRIP.max;
     const charge = s.stats.charge;
-    choose(s, 'buyacc', noRng);
+    assert.ok(choose(s, 'buyacc', noRng).ok);
     assert.equal(s.stats.charge, charge - RUN_CFG.accPrice);
+    assert.equal(s.scrip, SCRIP.max - RUN_CFG.accScrip[ACCESSORIES.find((a) => a.id === acc)?.rarity === 'common' ? 'common' : 'rare']);
     jackOut(s);
     assert.deepEqual(s.accessoryInbox, [acc]);
   }

@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
-import { startRun } from '../src/netrun/run.js';
+import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -25,12 +25,15 @@ const { chromium } = await loadPlaywright();
 
 // --- a static server for the app ---
 
+// A scenario can serve a changed sw.js, as a new release would.
+let swPatch = null;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 const server = createServer(async (req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^[/\\]+/, '') || 'index.html';
   if (path.startsWith('..')) return res.writeHead(403).end();
   try {
-    const body = await readFile(join(root, path));
+    let body = await readFile(join(root, path));
+    if (path === 'sw.js' && swPatch) body = swPatch(body.toString());
     res.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream' }).end(body);
   } catch {
     res.writeHead(404).end();
@@ -171,6 +174,7 @@ await scenario('home: care actions, games, archive, system dialog', async ({ ope
   await page.click('[data-game="breach"]');
   await page.waitForTimeout(300);
   await page.click('#pad-quit');
+  await page.click('#pad-confirm');
   await page.waitForTimeout(2500);
   const progress = await saved(page, 'netling.progress');
   assert(progress?.acts?.corp === 1, `care action not counted: ${JSON.stringify(progress)}`);
@@ -346,6 +350,151 @@ await scenario('offline: service worker serves every module', async ({ open }) =
   }
 }, { allow: [/Failed to load resource/] });
 
+await scenario('a new release while open offers a reload, which waits for a running game', async ({ open }) => {
+  const page = await open(BASE, seed());
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller);
+  await page.waitForTimeout(500);
+  assert(!(await visible(page, '#update-bar')), 'the first install offered an update');
+  swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v999'");
+  try {
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    assert(/NEW VERSION/.test(await page.textContent('#update-bar')), 'bar has no message');
+
+    await page.click('#btn-play');
+    await page.click('[data-game="breach"]');
+    assert(!(await visible(page, '#update-bar')), 'the bar covers the game pad');
+    await page.evaluate(() => {
+      window.__stillHere = true;
+      document.getElementById('update-reload').click();
+    });
+    await page.waitForTimeout(500);
+    assert(await page.evaluate(() => window.__stillHere), 'reloaded in the middle of a game');
+    assert(/finish the game/.test(await page.textContent('#status')), 'refusal not explained');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(2500);
+    assert(await visible(page, '#update-bar'), 'the bar did not come back after the game');
+
+    const before = (await saved(page)).ageMin;
+    await Promise.all([page.waitForEvent('load'), page.click('#update-reload')]);
+    await page.waitForTimeout(800);
+    assert(!(await page.evaluate(() => window.__stillHere)), 'RELOAD did not reload');
+    assert(!(await visible(page, '#update-bar')), 'the reloaded page still offers the update');
+    assert((await saved(page)).ageMin >= before, 'the netling was not kept across the reload');
+    assert(await loopRunning(page), 'app did not boot after the update');
+
+    swPatch = (src) => src.replace(/const CACHE = '[^']+'/, "const CACHE = 'netling-v1000'");
+    await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
+    await page.waitForSelector('#update-bar', { state: 'visible', timeout: 10000 });
+    await page.click('#update-later');
+    assert(!(await visible(page, '#update-bar')), 'LATER did not dismiss the bar');
+  } finally {
+    swPatch = null;
+  }
+});
+
+// Records wake lock and badge calls in window.__device; headless Chromium has neither for real, and
+// refuses notifications even when granted, so permission is faked too.
+const FAKE_DEVICE = `(() => {
+  window.__device = [];
+  const log = (e) => window.__device.push(e);
+  Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: { request: async () => {
+    log('lock');
+    const s = new EventTarget();
+    s.release = async () => { log('unlock'); s.dispatchEvent(new Event('release')); };
+    return s;
+  } } });
+  navigator.setAppBadge = async () => log('badge');
+  navigator.clearAppBadge = async () => log('clear');
+  Object.defineProperty(Notification, 'permission', { configurable: true, get: () => 'granted' });
+})()`;
+
+await scenario('the screen stays on for games and when asked; the badge follows its needs with ALERTS on', async ({ open }) => {
+  const needy = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': needy, 'netling.prefs': { sound: false, alerts: true, volume: 0.8 } }) + ';' + FAKE_DEVICE);
+  const events = () => page.evaluate(() => window.__device.slice());
+  const waitFor = async (name, count = 1) => {
+    for (let i = 0; i < 30; i++) {
+      if ((await events()).filter((e) => e === name).length >= count) return;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`no ${name} (x${count}): ${(await events()).join(',')}`);
+  };
+  await waitFor('badge');
+  await page.waitForTimeout(1200);
+  assert(!(await events()).includes('lock'), 'the screen was kept on at home without being asked');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await waitFor('lock');
+  await page.keyboard.press('Escape');
+  await waitFor('unlock');
+
+  await page.waitForTimeout(2500); // the result card
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(await visible(page, '#screen-prefs'), 'no screen setting');
+  await page.click('#pref-awake');
+  await waitFor('lock', 2);
+  assert((await saved(page, 'netling.prefs')).awake === true, 'setting not saved');
+  assert(/YES/.test(await page.textContent('#pref-awake')), 'button does not show the setting');
+  await page.click('#pref-awake');
+  await waitFor('unlock', 2);
+  await page.click('#close-transfer');
+
+  await page.click('#pref-alerts'); // ALERTS off: the badge goes
+  await waitFor('clear');
+  assert((await events()).filter((e) => e === 'badge').length === 1, `badge set more than once: ${(await events()).join(',')}`);
+});
+
+await scenario('screen readers get values, a summary, new needs and only new log lines; MOTION overrides the system', async ({ open }) => {
+  const low = awakeNetling({ stats: { charge: 70, sync: 10, integrity: 100, heat: 20 } });
+  const page = await open(BASE, seed({ 'netling.save': low }));
+  const attr = (sel, name) => page.getAttribute(sel, name);
+  assert((await attr('#bar-charge', 'aria-valuenow')) === '70', `charge meter says ${await attr('#bar-charge', 'aria-valuenow')}`);
+  assert(/^\d+, low$/.test(await attr('#bar-sync', 'aria-valuetext')), `sync meter says ${await attr('#bar-sync', 'aria-valuetext')}`);
+  assert(await page.locator('#bar-sync').evaluate((el) => el.closest('.stat').classList.contains('danger')), 'low sync has no danger mark');
+  assert(!(await page.locator('#bar-charge').evaluate((el) => el.closest('.stat').classList.contains('danger'))), 'charge marked in danger');
+  const mark = await page.locator('#bar-sync').evaluate((el) => getComputedStyle(el.closest('.stat').querySelector('label'), '::after').content);
+  assert(/!/.test(mark), `no ! beside the label: ${mark}`);
+  assert(/Bitling, awake.*Sync is fading/.test(await attr('#lcd', 'aria-label')), `summary: ${await attr('#lcd', 'aria-label')}`);
+  assert(/Sync is fading/.test(await page.textContent('#sr-announce')), 'the need was not announced');
+
+  // A new log line is added to the list; the lines already there stay put.
+  const count = await page.locator('#log li').count();
+  await page.evaluate(() => (window.__firstLine = document.querySelector('#log li')));
+  await page.click('[data-act="scav"]');
+  await page.waitForTimeout(300);
+  assert((await page.locator('#log li').count()) > count, 'no new log line');
+  assert(await page.evaluate(() => window.__firstLine.isConnected), 'the log was rebuilt instead of added to');
+
+  // MOTION: AUTO follows the system; REDUCED and FULL override it.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  const calm = () => page.evaluate(() => document.body.classList.contains('calm'));
+  assert(await calm(), 'AUTO ignored the system asking for reduced motion');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.waitForTimeout(100);
+  assert(!(await calm()), 'AUTO stayed calm');
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not start on AUTO');
+  await page.click('#pref-motion');
+  assert(/REDUCED/.test(await page.textContent('#pref-motion')) && (await calm()), 'REDUCED did not calm the screen');
+  assert((await saved(page, 'netling.prefs')).motion === 'reduce', 'motion setting not saved');
+  const still = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(still === 'none', `animations still run: ${still}`);
+  await page.click('#pref-motion');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(100);
+  assert(/FULL/.test(await page.textContent('#pref-motion')) && !(await calm()), 'FULL did not override the system');
+  const moving = await page.evaluate(() => getComputedStyle(document.querySelector('.crt-glare')).animationName);
+  assert(moving !== 'none', 'FULL still stops animations when the system asks for less');
+  await page.click('#pref-motion');
+  assert(/AUTO/.test(await page.textContent('#pref-motion')), 'motion does not cycle back to AUTO');
+});
+
 await scenario('the font is served from this site: no third-party requests', async ({ open, ctx }) => {
   const foreign = [];
   ctx.on('request', (r) => {
@@ -483,6 +632,151 @@ await scenario('a DISCARD confirm does not carry over to another item', async ({
   assert(JSON.stringify(inv) === '["coolant"]', `wrong item discarded: ${JSON.stringify(inv)}`);
 });
 
+await scenario('a Segfault takes a second press, then adds two faults', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['segfault'] }) }));
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  assert(/FAULTS/.test(await page.textContent('#inv-use')), 'no confirm on the button');
+  assert((await saved(page)).careMistakes === 0, 'used on the first press');
+  await page.click('#inv-use');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.careMistakes === 2 && s.inventory.length === 0, `after confirming: ${s.careMistakes} faults, ${JSON.stringify(s.inventory)}`);
+});
+
+await scenario('quitting on touch needs a confirm somewhere else; Esc still quits at once', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const played = async () => (await saved(page, 'netling.progress'))?.gamesPlayed ?? 0;
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await page.click('#pad-quit');
+  await page.click('#pad-quit'); // the same spot again only cancels
+  await page.waitForTimeout(300);
+  assert(await visible(page, '#pad'), 'a second tap in the same place quit the game');
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm stayed up after KEEP PLAYING');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-quit')) === 'KEEP PLAYING', 'the quit button did not change');
+  const confirm = await page.locator('#pad-confirm').boundingBox();
+  const quit = await page.locator('#pad-quit').boundingBox();
+  assert(confirm.y + confirm.height < quit.y, 'the confirm is not away from the pad');
+  await page.waitForTimeout(3300);
+  assert(!(await visible(page, '#pad-confirm')), 'the confirm never timed out');
+  await page.click('#pad-quit');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'CONFIRM QUIT did not end the game');
+  assert((await played()) === 1, 'the forfeited game was not counted');
+
+  await page.click('#btn-play');
+  await page.click('[data-game="tune"]');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(2600);
+  assert(!(await visible(page, '#pad')), 'Esc no longer quits in one press');
+  assert(!(await visible(page, '#pad-confirm')), 'Esc left a confirm on screen');
+});
+
+await scenario('the touch quit confirm pauses the game; a game button resumes it without playing', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const frame = () => page.evaluate(() => document.getElementById('lcd').toDataURL());
+  await page.click('#btn-play');
+  await page.click('[data-game="dodge"]');
+  await page.click('#pad [data-key="a"]'); // past the intro card
+  await page.waitForTimeout(300);
+  const running = await frame();
+  await page.waitForTimeout(300);
+  assert((await frame()) !== running, 'the game is not moving before the pause');
+  await page.click('#pad-quit');
+  await page.waitForTimeout(100);
+  const held = await frame();
+  await page.waitForTimeout(600);
+  assert((await frame()) === held, 'the game kept running under the confirm');
+  await page.click('#pad [data-key="left"]');
+  assert(!(await visible(page, '#pad-confirm')), 'a game button did not answer the confirm');
+  assert(await visible(page, '#pad'), 'the game ended');
+  await page.waitForTimeout(300);
+  assert((await frame()) !== held, 'the game did not resume');
+});
+
+await scenario('ABORT RUN on touch confirms at the top of the screen', async ({ open }) => {
+  const s = awakeNetling();
+  startRun(s, 'public', Math.random);
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.click('#pad-quit');
+  assert((await page.textContent('#pad-confirm')) === 'CONFIRM ABORT', 'wrong confirm label');
+  assert((await page.textContent('#pad-quit')) === 'KEEP RUNNING', 'wrong cancel label');
+  assert((await saved(page)).run.phase !== 'done', 'aborted on the first tap');
+  await page.click('#pad-confirm');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).run?.result === 'aborted', `not aborted: ${JSON.stringify((await saved(page)).run?.result)}`);
+  assert((await page.textContent('#pad-quit')) === 'ABORT RUN', 'the pad label was not restored');
+  await page.click('#pad-quit'); // the summary card closes on one tap
+  await page.waitForTimeout(300);
+  assert(!(await visible(page, '#pad')), 'the summary card did not close');
+});
+
+await scenario('the readout shows the trait level and its history', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 3, trait: 'persistent', traitLevel: 2, history: 'hardened' }) }));
+  const text = await page.textContent('#readout');
+  assert(/trait Persistent II · history Hardened/.test(text), `readout: ${text}`);
+});
+
+await scenario('SCRAP sells for a quarter, and the scrip line shows it', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ inventory: ['overclock'], scrip: 30 }) }));
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 30/100', `scrip line: ${await page.textContent('#inv-scrip')}`);
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SCRAP +12', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(200);
+  const s = await saved(page);
+  assert(s.scrip === 42 && s.inventory.length === 0, `after scrapping: ${s.scrip} scrip, ${JSON.stringify(s.inventory)}`);
+  assert((await page.textContent('#inv-scrip')) === 'SCRIP 42/100', 'scrip line not updated');
+});
+
+await scenario('regions open in order: only the Public Net until its exit is reached', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: [] }) }));
+  await page.click('#btn-netrun');
+  const buttons = page.locator('#region-list button');
+  assert(!(await buttons.nth(0).isDisabled()), 'the Public Net is closed');
+  assert(await buttons.nth(1).isDisabled(), 'the Bazaar is open without a clear');
+  assert(/exit of the Public Net/.test(await buttons.nth(1).textContent()), `no reason shown: ${await buttons.nth(1).textContent()}`);
+  assert(/CODEX MEMORY 0\/8/.test(await page.textContent('#region-memory')), 'no codex memory line');
+  await page.close();
+
+  const page2 = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', cleared: ['public'], codexFound: 8 }) }));
+  await page2.click('#btn-netrun');
+  const b2 = page2.locator('#region-list button');
+  assert(!(await b2.nth(1).isDisabled()), 'the Bazaar stayed closed after a Public Net clear');
+  assert(/DARKNET BAZAAR/.test(await b2.nth(1).textContent()), 'the Bazaar is not second');
+  assert(await b2.nth(2).isDisabled(), 'the Corp Grid opened early');
+  assert(/FULL/.test(await page2.textContent('#region-memory')), 'a full memory is not shown');
+});
+
+await scenario('at a netrun market the inventory sells for half, and a purchase opens up', async ({ open }) => {
+  const s = awakeNetling({ stage: 'teen', form: 'kernel', teenForm: 'kernel', inventory: ['overclock'], scrip: 0 });
+  s.stats.charge = 90;
+  let seedN = 1;
+  const rng = () => ((seedN = (seedN * 16807) % 2147483647) / 2147483647);
+  startRun(s, 'public', rng);
+  const next = runOptions(s.run)[0];
+  next.type = 'market';
+  moveTo(s, next.id, rng);
+  const cheapest = Math.min(...s.run.pending.offers.map((id) => ({ coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15 })[id] ?? 25));
+  const page = await open(BASE, seed({ 'netling.save': s }));
+  assert(await visible(page, '#pad'), 'run screen not open');
+  await page.locator('#inv-slots .inv-slot.filled').nth(0).click();
+  assert((await page.textContent('#inv-discard')) === 'SELL +25', `button: ${await page.textContent('#inv-discard')}`);
+  await page.click('#inv-discard');
+  await page.click('#inv-discard');
+  await page.waitForTimeout(300);
+  const after = await saved(page);
+  assert(after.scrip === 25 && after.inventory.length === 0, `after selling: ${after.scrip} scrip`);
+  const buys = after.run.pending.options.filter((o) => o.id.startsWith('buy') && o.id !== 'buyacc');
+  assert(buys.some((o) => !o.disabled) === cheapest <= 25, `purchases: ${JSON.stringify(buys)}`);
+});
+
 await scenario('system actions wait for a running mini-game; a refused result explains why', async ({ open }) => {
   const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stats: { charge: 25, sync: 70, integrity: 100, heat: 20 } }) }));
   await page.click('#btn-play');
@@ -509,12 +803,14 @@ await scenario('system actions wait for a running mini-game; a refused result ex
   await dev.click('[data-game="tune"]');
   await dev.click('[data-skip="60"]');
   await dev.keyboard.press('Escape');
+  // Usually it ran out of charge. A random memory overflow in the skipped hour can crash it instead,
+  // and then the refusal names the reboot: either way the player is told why.
   let status = '';
-  for (let i = 0; i < 30 && !/charge/.test(status); i++) {
+  for (let i = 0; i < 30 && !/charge|rebooting/.test(status); i++) {
     await dev.waitForTimeout(100);
     status = await dev.textContent('#status');
   }
-  assert(/not enough charge/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
+  assert(/not enough charge|rebooting/.test(status), `refusal not explained: ${JSON.stringify(status)}`);
 });
 
 // Plugs in a fake controller: window.__pad is what navigator.getGamepads() reports.
@@ -824,6 +1120,44 @@ await scenario('changing shell keeps the equipped accessory and label', async ({
   assert(w.accessory === 'partyhat' && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
 });
 
+await scenario('legacy: the family tree links generations, and an earned crest shows on the device', async ({ open }) => {
+  const life = (generation, trait) => ({ generation, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait, fragmentTrait: 'persistent', fragmentLevel: 1, keepsake: 'coolant', palette: 0 });
+  const lineage = [1, 2, 3, 4, 5].map((g) => life(g, g > 1 ? 'persistent' : null));
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 6, trait: 'persistent' }), 'netling.lineage': lineage }));
+  assert(!(await visible(page, '#crest')), 'a crest is shown before one is equipped');
+  await page.click('#open-archive');
+  assert((await page.locator('#lineage-list li.link').count()) === 5, 'expected a link between each of the six generations');
+  const first = await page.locator('#lineage-list li').first().textContent();
+  assert(/v1\.0/.test(first), `the tree does not start with the oldest generation: ${first}`);
+  assert(/Persistent \+ Coolant cell/.test(await page.locator('#lineage-list li.link').first().textContent()), 'the link does not say what passed down');
+  assert(/full lives/.test(await page.textContent('#record')), 'record label not updated');
+  await page.click('#tab-btn-wardrobe');
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Closed loop' }).click();
+  assert((await saved(page, 'netling.wardrobe')).crest === 'loop', 'crest not saved');
+  assert(await visible(page, '#crest'), 'equipped crest not shown on the device');
+  const lit = await page.evaluate(() => [...document.getElementById('crest').getContext('2d').getImageData(0, 0, 9, 9).data].filter((v, i) => i % 4 === 3 && v > 0).length);
+  assert(lit > 10, `crest canvas is blank (${lit} pixels)`);
+});
+
+await scenario('a 100-generation line: the tree opens scrolled to the running netling, with its stats', async ({ open }) => {
+  const lineage = Array.from({ length: 100 }, (_, i) => ({ generation: i + 1, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 7200, trait: i ? 'persistent' : null, fragmentTrait: 'persistent', keepsake: 'coolant', palette: i % 4 }));
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ generation: 101, trait: 'persistent' }), 'netling.lineage': lineage }));
+  const inView = () =>
+    page.evaluate(() => {
+      const box = document.getElementById('tab-lineage').getBoundingClientRect();
+      const run = document.querySelector('#lineage-list li.running').getBoundingClientRect();
+      return run.top >= box.top - 1 && run.bottom <= box.bottom + 1;
+    });
+  await page.click('#open-archive');
+  assert((await page.locator('#lineage-list li.link').count()) === 100, 'expected 100 links');
+  assert(await inView(), 'the running netling is not in view when the archive opens');
+  assert(/CHG \d+ · SYNC \d+ · INT \d+ · HEAT \d+/.test(await page.textContent('#lineage-list li.running')), 'no stats on the running netling');
+  await page.evaluate(() => (document.getElementById('tab-lineage').scrollTop = 0));
+  await page.click('#tab-btn-dex');
+  await page.click('#tab-btn-lineage');
+  assert(await inView(), 'returning to the tab does not scroll back to the running netling');
+});
+
 await scenario('flatline screen and next generation', async ({ open }) => {
   const dead = awakeNetling({ stage: 'dead', form: 'daemon', deathCause: 'neglect', diedAt: Date.now() });
   dead.fragment = { form: 'daemon', trait: 'persistent', quirk: { ...dead.quirk }, keepsake: 'coolant', rootUsed: false };
@@ -860,6 +1194,60 @@ await scenario('hibernate from the system dialog', async ({ open }) => {
   await page.waitForTimeout(300);
   assert(await page.evaluate(() => document.body.classList.contains('frozen')), 'not frozen');
   assert(await visible(page, '#hibernating'), 'hibernation panel not shown');
+});
+
+await scenario('attention: a request bar with a direct PLAY into the game it asked for', async ({ open }) => {
+  const game = awakeNetling();
+  game.request = { kind: 'game', game: 'tune', startedAge: game.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': game }));
+  assert(await visible(page, '#wish-bar'), 'request bar not shown');
+  assert((await page.textContent('#wish-text')).includes('TUNE'), 'request does not name the game');
+  assert((await page.textContent('#wish-play')) === 'PLAY TUNE', 'no direct PLAY button');
+  assert(!(await visible(page, '#event-bar')), 'a request must not look like an alert');
+  await page.click('#wish-play');
+  await page.waitForTimeout(300);
+  assert(await visible(page, '#pad'), 'PLAY TUNE did not start the game');
+  assert(!(await visible(page, '#wish-bar')), 'the request bar stays up during the game');
+});
+
+await scenario('attention: COOL answers a COOL request, and it counts', async ({ open }) => {
+  const warm = awakeNetling();
+  warm.stats.heat = 50;
+  warm.request = { kind: 'cool', startedAge: warm.ageMin };
+  const page2 = await open(BASE, seed({ 'netling.save': warm }));
+  assert(await visible(page2, '#wish-cool'), 'no COOL button for a COOL request');
+  await page2.click('#wish-cool');
+  await page2.waitForTimeout(300);
+  assert(!(await visible(page2, '#wish-bar')), 'request bar still up after COOL');
+  const progress = await page2.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(progress.requestsMet === 1, `requests met: ${progress.requestsMet}`);
+});
+
+await scenario('attention: GREET a visitor, hear its line, find it in the CHATTER tab', async ({ open }) => {
+  const save = awakeNetling();
+  save.visit = { startedAge: save.ageMin, len: 20, form: 'daemon', palette: 1, accessory: null };
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert(await visible(page, '#wish-greet'), 'no GREET while a visitor is here');
+  await page.click('#wish-greet');
+  await page.waitForTimeout(1300);
+  assert(!(await visible(page, '#wish-greet')), 'GREET still offered after saying hello');
+  assert(await visible(page, '#speech'), 'the visitor said nothing');
+  assert((await page.textContent('#speech')).startsWith('visitor:'), 'not a visitor line');
+  const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(progress.visitorsGreeted === 1, `greeted: ${progress.visitorsGreeted}`);
+  assert(progress.chatter.length === 1, `heard: ${progress.chatter}`);
+  await page.click('#open-archive');
+  await page.click('#tab-btn-chatter');
+  assert((await page.textContent('#chatter-count')).startsWith('1/'), 'chatter count');
+  assert((await page.textContent('#chatter-list')).includes('VISITORS'), 'visitor group not shown');
+});
+
+await scenario('attention: flow shows in the readout and glows on screen', async ({ open }) => {
+  const save = awakeNetling({ flowMin: 400 });
+  Object.assign(save.stats, { charge: 90, sync: 90, integrity: 100, heat: 20 });
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert((await page.textContent('#readout')).includes('in flow'), 'flow not in the readout');
+  assert(await animating(page), 'screen not drawing');
 });
 
 await scenario('dev mode: time skip and evolve', async ({ open }) => {

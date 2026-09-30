@@ -33,7 +33,7 @@ function install({ permission = 'granted', registration = null, requestResult = 
   return FakeNotification;
 }
 
-const { notifySupported, notifyGranted, requestNotify, notify, registerServiceWorker } = await import('../src/notify.js');
+const { notifySupported, notifyGranted, requestNotify, notify, registerServiceWorker, badgeSupported, setBadge } = await import('../src/notify.js');
 
 test('support and permission are read from the browser', () => {
   install({ permission: 'granted' });
@@ -97,4 +97,19 @@ test('registering the service worker is quiet when it fails or is unavailable', 
   await new Promise((r) => setTimeout(r, 0)); // an unhandled rejection would fail the run here
   set('navigator', {});
   assert.doesNotThrow(() => registerServiceWorker());
+});
+
+test('the badge is set and cleared, and a refusal or missing support is quiet', async () => {
+  const calls = [];
+  const nav = { setAppBadge: async (n) => calls.push(['set', n]), clearAppBadge: async () => calls.push(['clear']) };
+  assert.equal(badgeSupported(nav), true);
+  setBadge(true, nav);
+  setBadge(false, nav);
+  assert.deepEqual(calls, [['set', undefined], ['clear']], 'a plain dot, not a number');
+  assert.equal(badgeSupported({}), false);
+  assert.doesNotThrow(() => setBadge(true, {}));
+  const refusing = { setAppBadge: async () => { throw new DOMException('no', 'NotAllowedError'); }, clearAppBadge: () => { throw new TypeError('no'); } };
+  assert.doesNotThrow(() => setBadge(true, refusing));
+  assert.doesNotThrow(() => setBadge(false, refusing));
+  await new Promise((r) => setImmediate(r)); // an unhandled rejection would fail the run
 });

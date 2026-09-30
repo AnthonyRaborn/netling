@@ -13,13 +13,14 @@ import { DEX_ORDER, DEX_HINTS, DEX_LORE } from '../src/archive.js';
 import { COSMETICS, SLOTS, DEFAULT_WARDROBE, LABEL } from '../src/cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, RARITY } from '../src/accessories.js';
 import { GAMES } from '../src/games/session.js';
+import { CHATTER } from '../src/chatter.js';
 
 // Cross-checks between the game's content tables. Each of these is a typo or a forgotten entry waiting to
 // happen when someone adds a form, item, region or cosmetic (see docs/CONTRIBUTING.md).
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const unique = (list) => new Set(list).size === list.length;
-const PIXELS = /^[#o+.]+$/;
+const PIXELS = /^[#o+x.]+$/;
 
 test('every body has a sprite, and every sprite is a clean rectangle of known pixels', () => {
   for (const form of Object.keys(SPECIES)) {
@@ -131,9 +132,17 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
   const full = {
     dex: Object.keys(SPECIES),
     codex: FRAGMENTS.map((f) => f.id),
-    lineage: Array.from({ length: 6 }, () => ({ cause: 'end of life cycle' })),
+    // A line that raised every adult form, each passing its trait on, with a level III streak at the end.
+    lineage: [...Object.keys(FORMS), 'daemon', 'daemon'].map((form, i, all) => ({
+      cause: 'end of life cycle',
+      form,
+      realized: true,
+      trait: i ? FORMS[all[i - 1]].trait : null,
+      fragmentLevel: i === all.length - 1 ? 3 : 1,
+    })),
     generation: 9,
-    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 99, cleanJackouts: 20, deepExits: 2 },
+    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 99, cleanJackouts: 20, deepExits: 2, requestsMet: 30, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
+    flowMin: 25 * 60,
   };
   for (const slot of SLOTS) {
     const list = COSMETICS[slot];
@@ -184,11 +193,25 @@ test('the pages deploy publishes every top-level thing the game loads', () => {
   const copied = workflow.match(/cp -r ([^\n]+) _site\//)[1].split(/\s+/);
   const html = readFileSync(join(root, 'index.html'), 'utf8');
   const css = readFileSync(join(root, 'style.css'), 'utf8');
-  const refs = [...html.matchAll(/(?:href|src)="([^"#?]+)"/g)].map((m) => m[1]).concat([...css.matchAll(/url\(([^)]+)\)/g)].map((m) => m[1].replace(/['"]/g, '')));
+  const manifest = JSON.parse(readFileSync(join(root, 'manifest.webmanifest'), 'utf8'));
+  const refs = [...html.matchAll(/(?:href|src)="([^"#?]+)"/g)]
+    .map((m) => m[1])
+    .concat([...css.matchAll(/url\(([^)]+)\)/g)].map((m) => m[1].replace(/['"]/g, '')))
+    .concat([...manifest.icons, ...manifest.screenshots].map((entry) => entry.src));
   for (const ref of refs.filter((r) => !/^(https?:|data:)/.test(r))) {
     const top = ref.split('/')[0];
     assert.ok(copied.includes(top), `${ref} is loaded by the game but ${top} is not copied by pages.yml`);
     assert.ok(existsSync(join(root, ref)), `${ref} is referenced but missing`);
   }
   for (const name of copied) assert.ok(existsSync(join(root, name)) && (statSync(join(root, name)).isFile() || readdirSync(join(root, name)).length > 0), `${name} is copied by pages.yml but empty or missing`);
+});
+
+// Browsers skip a manifest screenshot whose real size differs from the one it states.
+test('the install screenshots are the sizes the manifest says', () => {
+  const manifest = JSON.parse(readFileSync(join(root, 'manifest.webmanifest'), 'utf8'));
+  assert.deepEqual(manifest.screenshots.map((s) => s.form_factor).sort(), ['narrow', 'wide']);
+  for (const { src, sizes } of manifest.screenshots) {
+    const png = readFileSync(join(root, src));
+    assert.equal(`${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, sizes, `${src}: rerun node tools/make-screenshots.mjs`);
+  }
 });

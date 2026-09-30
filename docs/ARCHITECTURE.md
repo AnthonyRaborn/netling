@@ -13,13 +13,14 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 5. [The frame loop and the clock](#the-frame-loop-and-the-clock)
 6. [Shared UI state](#shared-ui-state)
 7. [Rendering](#rendering)
-8. [Mini-games and netruns as sessions](#mini-games-and-netruns-as-sessions)
-9. [One active tab](#one-active-tab)
-10. [Offline, the service worker, and deploys](#offline-the-service-worker-and-deploys)
-11. [Input](#input)
-12. [Audio and notifications](#audio-and-notifications)
-13. [Crash containment](#crash-containment)
-14. [Tools and CI](#tools-and-ci)
+8. [Accessibility](#accessibility)
+9. [Mini-games and netruns as sessions](#mini-games-and-netruns-as-sessions)
+10. [One active tab](#one-active-tab)
+11. [Offline, the service worker, and deploys](#offline-the-service-worker-and-deploys)
+12. [Input](#input)
+13. [Audio and notifications](#audio-and-notifications)
+14. [Crash containment](#crash-containment)
+15. [Tools and CI](#tools-and-ci)
 
 ## Design principles
 
@@ -37,15 +38,15 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | Path | Owns |
 |---|---|
 | `index.html` | All markup: the device, dialogs (archive, system, field manual, NL-0 transmission), lock screens |
-| `style.css` | All styling (about 1500 lines), theme variables in `:root`, one landscape media query, one reduced-motion query |
-| `sw.js`, `manifest.webmanifest`, `icons/` | PWA shell |
-| `gallery.html` | Sprite and accessory gallery for development (contains spoilers; not deployed) |
+| `style.css` | All styling (about 1550 lines), theme variables in `:root`, one landscape media query, calm mode (`body.calm` and the reduced-motion query) |
+| `sw.js`, `manifest.webmanifest`, `icons/`, `screenshots/` | PWA shell (the screenshots are for the install dialog) |
+| `gallery.html` | Development gallery of every sprite, wearable, prop, icon, node marker, mini-game frame and crest, in every valid combination, built from the source arrays (contains spoilers; not deployed) |
 | `src/sim.js` | All game rules, `CFG`, items, forms, traits, `tick`, `act` |
 | `src/random.js` | The shared weighted-pick helper |
 | `src/migrations.js` | Save upgrade steps (`STEPS`) and `upgradeSave` |
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
-| `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, mini-game streaks |
+| `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, legacy goals (`LEGACY`), mini-game streaks |
 | `src/archive.js` | Lineage records and the form dex (pure data helpers) |
 | `src/games/` | Four mini-games plus `session.js` (intro, result card) and `common.js` (drawing helpers) |
 | `src/netrun/` | `run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js` (drawing and input) |
@@ -54,10 +55,12 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/transfer.js`, `src/qr.js` | Transfer codes and the QR encoder |
 | `src/lease.js` | Fallback one-tab lease for browsers without Web Locks |
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
+| `src/wake.js` | Keeping the screen on (Screen Wake Lock), re-asked after the page was hidden |
+| `src/version.js`, `src/update.js` | The page's release name, and noticing a newer release while the page is open |
 | `src/main.js` | Boot, settings buttons, dev bar, the render loop |
 | `src/ui/` | DOM behaviour, one module per area (below) |
-| `tests/` | 24 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
-| `tools/` | Browser smoke test, balance simulators, icon generator |
+| `tests/` | 28 unit test files (plus `tests/fixtures/` and `tests/helpers/`), run with `node --test` |
+| `tools/` | Browser smoke test, balance simulators and their report diff and baselines (`tools/baseline/`), icon and screenshot generators, the sprite audit (`sprite-audit.mjs`, with `lib/sprite-checks.mjs`) |
 | `.github/workflows/` | `test.yml` (unit and smoke tests) and `pages.yml` (deploy) |
 | `docs/` | This documentation |
 
@@ -75,6 +78,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `system.js` | SYSTEM dialog: transfer out, lock screen, import, hibernate, restart, storage note, volume, test mode |
 | `tabs.js` | The one-active-tab rule |
 | `gamepad.js` | Controller input |
+| `device.js` | The app icon badge and the screen wake lock, synced once a second; the SCREEN settings (MOTION, KEEP SCREEN ON) and calm mode |
 
 ## Layers and dependencies
 
@@ -125,7 +129,7 @@ Rules of thumb:
 Two independent loops:
 
 - **Simulation**: `advance()` every 1000 ms, on `visibilitychange`, and before every player action. It calls `tick`, reacts to stage changes (boot chime, evolution flash, flatline handling), fires the surge and visitor effects, refreshes the HUD, and saves at most every 5 seconds (`SAVE_EVERY_MS` in `ui/life.js`; actions save immediately and `flushSave` runs when the page is hidden or closing). It also closes any session that belongs to a dead or replaced netling (`closeStaleSession`).
-- **Drawing**: `requestAnimationFrame`. The next frame is booked before drawing so one failed frame cannot stop the loop. The home screen redraws at about 10 fps (`IDLE_FRAME_MS = 100`) unless an animation, flash or surge is running; sessions run at full rate. `prefers-reduced-motion` switches the LCD to a calm mode.
+- **Drawing**: `requestAnimationFrame`. The next frame is booked before drawing so one failed frame cannot stop the loop. The home screen redraws at about 10 fps (`IDLE_FRAME_MS = 100`) unless an animation, flash or surge is running; sessions run at full rate. Calm mode (`app.calm`) stills the LCD; see Accessibility below.
 
 `now()` in `ui/app.js` is the game clock: real time plus dev skew, or the scaled test clock. Always use `now()`, never `Date.now()`, for anything the simulation sees.
 
@@ -145,10 +149,18 @@ Data that outlives a generation is kept outside the netling and updated by the U
 ## Rendering
 
 - **Home LCD**: `renderLCD()` draws a 40x28 buffer (`LCD_W`, `LCD_H`) from code-drawn sprites, then the visible canvas scales it up with nearest-neighbour. Layers: background (tint, darker with lights off), the pet or compile bar, accessory and prop, cache icons, event icons, reboot bar, visitors, action reaction animations, evolution strobe, then screen effects (scanlines, glitch when Integrity is low or infected, overheat wash, surge flash).
-- **Sprites** (`sprites.js`) are arrays of strings using `#` main color, `o` accent, `+` highlight, `.` empty. Poses are looked up by `formSprite(form, pose)`: `A`, `B`, `Sleep`, `Dead`, with fallback to `A`. Colors come from the netling's palette quirk.
-- **Accessories** are drawn by `accessories.js` through anchors computed from each sprite's own pixels (`anchorsFor`: head top, eye row, mouth, body span), so every accessory fits every form. Props draw on the ground at the right edge.
+- **Sprites** (`sprites.js`) are arrays of strings using `#` main color, `o` accent, `+` highlight, `x` dim fill (the inside of the Shell's casing), `.` empty. Poses are looked up by `formSprite(form, pose)`: `A`, `B`, `Sleep`, `Dead`. Bitling's Sleep and Dead are drawn by hand; every other form's are generated from its A frame at load (each eye becomes an X when dead and a slit when asleep). Colors come from the netling's palette quirk (`paletteColors`); the states have their own maps (`DEAD_COLORS`, `DIM_COLORS`, ...), each with a color for every mark.
+- **Accessories** are drawn by `accessories.js` through anchors (`anchorsFor`): four rows per form and frame are authored in `ANCHOR_ROWS` (`sprites.js`: head top, eye row, mouth row, neck row) so a wearable stays on the same part of the body between frames, and the rest (spans, eye columns) is read from the sprite's pixels, so every accessory fits every form. Props draw on the ground at the right edge, in front of the pet.
 - **Mini-games and netruns** draw straight onto the 400x280 canvas via `common.js` helpers (`clear`, `text`, `timerBar`). The wardrobe tint feeds `setGameBg`.
 - **Idle motion** is a pure function of time (`wanderPos`), so it needs no stored state.
+
+## Accessibility
+
+- **Flash safety**, in every motion setting: an on/off strobe toggles no faster than `FLASH_TOGGLE_MS` (200 ms, in `games/common.js`; 2.5 flashes a second, under the usual limit of three). The evolution strobe, Firewall Dodge's loss blink and Packet Feast's strike blink use it. The glitch picks a new look every `GLITCH_STEP_MS` (350 ms) from a seeded sequence instead of every frame, and a power surge is one white flash that fades over `SURGE_MS` (`opts.surge` runs 1 to 0). `tests/draw.test.js` checks the home screen.
+- **Calm mode** (`ui/device.js` `applyMotion`): the MOTION setting in SYSTEM (`prefs.motion`: `auto`, `reduce`, `full`). AUTO follows `prefers-reduced-motion` and updates when it changes. Calm sets `app.calm` (the LCD drops the glitch, wobble, reaction bounces and heat pulse, and the surge becomes a steady faint wash) and `body.calm` (no CSS animation or transition). FULL sets `body.motion-full`, which the reduced-motion media query respects, so the page is calm before the script runs. Mini-games keep their motion.
+- **Screen readers**: the stat bars and cache are `role="meter"` with `aria-valuenow` and an `aria-valuetext` that adds "low", "too hot" or "piling up". The LCD canvas is `role="img"` with a summary label (form, awake or asleep, lights, infection, the current need; a session says what is on screen). A new need is written to a polite live region (`#sr-announce`) as the chirp plays; timed events are left to the event bar (`role="alert"`). The log is a polite live region, so new lines are appended (`renderLog`) instead of rebuilding it, and only rebuilt for a new netling.
+- **Danger is not color-only**: a stat in danger also gets diagonal stripes and a `!` beside its label (`.stat.danger`).
+- **Contrast**: `--dim` text is `#809fa6`, at least 4.5:1 on the standard shell and the dark shells' main tones (the light shells set their own dark `--dim`).
 
 ## Mini-games and netruns as sessions
 
@@ -168,16 +180,18 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 
 ## Offline, the service worker, and deploys
 
-- `sw.js` is **network-first**: it fetches every same-origin GET and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline.
+- `sw.js` is **network-first**: it fetches every same-origin GET and stores a copy; if the network fails it answers from cache. So an installed app always gets the newest files when online and still boots offline. Files other than the page itself are fetched with `cache: 'no-cache'` (the browser revalidates, usually a 304), and install pre-caches with `cache: 'reload'`, so the browser's HTTP cache (GitHub Pages allows 10 minutes) can't mix old and new files after a release.
 - Install pre-caches the `SHELL` list. `addAll` fails as a whole if any listed file 404s, so a missing or misspelled entry breaks installation. `tests/shell.test.js` follows the static `import`/`export ... from` graph from `src/main.js` and checks that every module it reaches is listed (icons and other non-module assets are not checked). **When you add a file, add it to `SHELL`.**
-- `CACHE` (`netling-v34`) is a manual version name. Bumping it on release drops old caches on activate.
+- `CACHE` (`netling-v35`) is a manual release name, and `VERSION` in `src/version.js` must equal it (`tests/shell.test.js` checks). **Bump both on every release.** Bumping drops old caches on activate, and the changed `sw.js` is how an open page learns about the release.
+- **Update prompt** (`update.js`): the new worker takes control at once (`skipWaiting`, `clients.claim`). On each `controllerchange` the page asks the new controller for its `CACHE` name (a `version?` message); a name that differs from the page's `VERSION` shows the NEW VERSION READY bar. The first install and a reload that already runs the new code report the page's own name, so they stay quiet. The page asks the browser to look for a new `sw.js` every hour and when it becomes visible again (at most every 15 minutes); browsers also look on each navigation. RELOAD saves first and is refused while a mini-game or netrun is on screen (the same rule as transfers); LATER hides the bar until the next release. A release that doesn't change `sw.js` is still picked up on the next launch, just not offered to an open page.
 - Notification clicks focus an open window or open the app.
-- `pages.yml` deploys to GitHub Pages after `test.yml` succeeds on `main`. It copies only `index.html`, `style.css`, `sw.js`, `manifest.webmanifest`, `icons` and `src`, so tests, tools, docs and the spoiler gallery stay out. All paths in the app are relative so it works under a `/netling/` subpath.
+- `pages.yml` deploys to GitHub Pages after `test.yml` succeeds on `main`. It copies only `index.html`, `style.css`, `sw.js`, `manifest.webmanifest`, `icons`, `fonts`, `screenshots` and `src`, so tests, tools, docs and the spoiler gallery stay out. All paths in the app are relative so it works under a `/netling/` subpath.
 - Native wrappers (Capacitor, TWA, Tauri) are planned but not built. See [PLATFORMS.md](PLATFORMS.md).
 
 ## Input
 
 - **Keyboard**: arrows move, Space, Enter, Z, X are A, Escape quits the session.
+- **Touch and mouse**: the pad's QUIT / ABORT RUN button only arms a confirm (`armQuit` in `ui/play.js`): a CONFIRM button (`#pad-confirm`) appears over the top of the screen, away from where thumbs rest, and the pad button becomes KEEP PLAYING (or KEEP RUNNING) to cancel. It disarms after 3 s or when the pad closes. Confirming forfeits a mini-game or calls `RunView.abortNow()`. A click with `detail === 0` (Enter or Space on the focused button) counts as a key press and skips the confirm.
 - **On-screen pad**: `data-key` buttons on `pointerdown`.
 - **Controller** (`ui/gamepad.js`): standard mapping (buttons 0 A, 1 B, 12 to 15 d-pad, left stick with a 0.5 threshold). In a session: left/right and A go to the game, B quits. In menus: the d-pad moves focus between usable buttons in the topmost dialog or overlay, A presses, B closes or backs out, left/right adjust the volume slider. Polling starts on `gamepadconnected`; browsers only report a pad after a button press.
 - **Layout**: the one-column phone layout is the default; landscape screens at least 860 px wide and at most 1000 px tall put the screen beside the controls (Steam Deck, laptops).
@@ -185,6 +199,8 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Audio and notifications
 
 - `audio.js` synthesizes everything with WebAudio (`blip`, `noise`); sound effects are note patterns keyed by name (`PATTERNS`). The netling's `pitch` quirk transposes them and the sound pack (wave and multiplier) shapes them. Failure sounds (`error`, `hit`, `lose`) are moved up an octave if they would drop under 350 Hz, because phone speakers lose low notes. Audio is unlocked on the first user gesture.
+- **Badge** (`notify.js` `setBadge`, driven by `ui/device.js` once a second): with ALERTS on and permission granted, the installed app's icon shows a plain badge whenever `needsAttention` is true (the same test as the blinking icon), and it is cleared otherwise, when ALERTS goes off, or while the netling is on another device. It is only set on a change, and the first sync clears a badge left from the last session. It cannot change while the app is fully closed, so it shows the state at closing. A waiting tab leaves it to the caretaker.
+- **Wake lock** (`wake.js`, driven by `ui/device.js`): held while a mini-game or netrun is on screen, or always while the page is visible if the player turned on KEEP SCREEN ON in SYSTEM (`prefs.awake`). The browser drops it when the page is hidden; the next sync asks again once visible. A refusal waits 30 seconds before asking again.
 - Notifications are local only (`notify.js`): they fire while the app is open or backgrounded, through the service worker's `showNotification` when available. A fully closed app cannot be woken without a push server, which this static build does not have.
 
 ## Crash containment
@@ -197,7 +213,7 @@ Two tabs simulating the same save would overwrite each other. `ui/tabs.js` makes
 ## Tools and CI
 
 - `npm test` runs `node --test` over `tests/*.test.js` with `TZ=UTC`.
-- `npm run smoke` drives the real app in headless Chromium with Playwright (41 scenarios).
+- `npm run smoke` drives the real app in headless Chromium with Playwright (43 scenarios).
 - `npm run balance` and `node tools/netrun-balance.mjs` are Monte Carlo balance simulators.
 - `npm run serve` serves the folder on port 5174 with Python's `http.server`.
 - CI (`test.yml`) runs on pull requests and pushes to `main`: Node 22, unit tests, then Playwright 1.56.1 and the smoke test.

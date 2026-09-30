@@ -149,8 +149,12 @@ test('lineage records are repaired and still render', () => {
 
 test('progress, wardrobe, prefs, onboarding and lock fall back to safe shapes', () => {
   const progress = cleanProgress(JSON.parse('{"acts":{"corp":3,"scav":"x","__proto__":5},"streaks":{"breach":{"cur":2,"best":"x"},"fake":{}},"gamesPlayed":-4,"runs":{"jacked":2,"hacked":9}}'));
-  assert.deepEqual(progress, { runs: { jacked: 2 }, streaks: { breach: { cur: 2, best: 0 } }, acts: { corp: 3 }, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0 });
-  assert.deepEqual(cleanProgress('lots'), { streaks: {}, acts: {}, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0 });
+  assert.deepEqual(progress, { runs: { jacked: 2 }, streaks: { breach: { cur: 2, best: 0 } }, acts: { corp: 3 }, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, requestsMet: 0, visitorsGreeted: 0, flowMin: 0, chatter: [] });
+  const empty = { gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, requestsMet: 0, visitorsGreeted: 0, flowMin: 0, chatter: [] };
+  assert.deepEqual(cleanProgress('lots'), { streaks: {}, acts: {}, ...empty });
+  // Attention counters: numbers are clamped, and only known chatter ids survive (once each).
+  const att = cleanProgress({ requestsMet: 7.6, visitorsGreeted: -1, flowMin: 'x', chatter: ['bit-hello', 'nope', 'bit-hello', 3] });
+  assert.deepEqual([att.requestsMet, att.visitorsGreeted, att.flowMin, att.chatter], [8, 0, 0, ['bit-hello']]);
   // Unlock checks run on the cleaned shape.
   unlockedIds({ dex: [], codex: [], lineage: [], generation: 1, progress: cleanProgress(null) });
 
@@ -160,12 +164,14 @@ test('progress, wardrobe, prefs, onboarding and lock fall back to safe shapes', 
   assert.equal(w.prop, undefined);
   assert.equal(w.label, undefined);
   assert.equal(w.colors.partyhat[0], '#00ff00');
-  assert.match(w.colors.partyhat[1], /^#[0-9a-f]{6}$/i);
+  assert.equal(w.colors.partyhat[1], null, 'a bad color drops the slot back to automatic');
+  assert.deepEqual(cleanWardrobe({ colors: { partyhat: [null, '#112233'] } }).colors.partyhat, [null, '#112233'], 'null stays automatic');
   assert.equal(w.colors.nope, undefined);
   assert.deepEqual(resolveWardrobe(cleanWardrobe([1, 2]), []), resolveWardrobe({}, []));
 
-  assert.deepEqual(cleanPrefs({ volume: 'loud', sound: 'yes', alerts: true }), { sound: true, alerts: true, volume: 0.8 });
-  assert.deepEqual(cleanPrefs({ volume: 7 }), { sound: true, alerts: false, volume: 1 });
+  assert.deepEqual(cleanPrefs({ volume: 'loud', sound: 'yes', alerts: true, awake: 'on' }), { sound: true, alerts: true, volume: 0.8, awake: false, motion: 'auto' });
+  assert.deepEqual(cleanPrefs({ volume: 7, awake: true, motion: 'reduce' }), { sound: true, alerts: false, volume: 1, awake: true, motion: 'reduce' });
+  assert.equal(cleanPrefs({ motion: 'slow' }).motion, 'auto');
   assert.equal(cleanOnboarding('nudge'), 'nudge');
   assert.equal(cleanOnboarding(42), null);
   assert.equal(cleanLock({ code: 5 }), null);

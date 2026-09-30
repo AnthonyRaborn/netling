@@ -1,21 +1,24 @@
 // Boot: load and check saved data, claim the caretaker tab, wire the UI, then run the clock
 // and the render loop. The UI itself lives in src/ui/.
-import { createScript, isAlive, CFG, MIN, PALETTES } from './sim.js';
-import { renderLCD, ANIM_MS } from './render.js';
+import { createScript, inFlow, isAlive, CFG, MIN, PALETTES } from './sim.js';
+import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
+import { text, W, H } from './games/common.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
-import { $, app, DEV, TEST, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
+import { $, app, DEV, TEST, newForms, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
-import { importFromUrl, initSystem, protectStorage, renderTestBadge, showLock, storageProtected } from './ui/system.js';
+import { importFromUrl, initSystem, protectStorage, renderTestBadge, sessionBlockReason, showLock, storageProtected } from './ui/system.js';
 import { becomeInactive, claimTab, initTabs } from './ui/tabs.js';
 import { initGamepad } from './ui/gamepad.js';
 import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
+import { watchForUpdates } from './update.js';
+import { initDevice, syncDevice } from './ui/device.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -29,6 +32,7 @@ initOnboarding();
 initSystem();
 initTabs();
 initGamepad();
+initDevice();
 
 // --- settings ---
 
@@ -59,10 +63,31 @@ $('pref-alerts').addEventListener('click', async () => {
   }
   store.set(KEYS.prefs, app.prefs);
   renderPrefs();
+  syncDevice();
 });
 
 renderPrefs();
 registerServiceWorker();
+
+// --- updates ---
+
+// A newer release took over while the page was open: offer a reload instead of forcing one. Like a
+// transfer, it waits for a running mini-game or netrun to finish.
+const UPDATE_CHECK_MS = 60 * 60 * 1000;
+const checkForUpdate = watchForUpdates(() => ($('update-bar').hidden = false));
+setInterval(checkForUpdate, UPDATE_CHECK_MS);
+
+$('update-reload').addEventListener('click', () => {
+  const busy = sessionBlockReason();
+  if (busy) {
+    sfx('error', app.state.quirk.pitch);
+    flashStatus(busy);
+    return;
+  }
+  flushSave();
+  location.reload();
+});
+$('update-later').addEventListener('click', () => ($('update-bar').hidden = true));
 
 if (DEV) {
   const dev = $('dev');
@@ -79,7 +104,7 @@ if (DEV) {
   );
   $('dev-evolve').addEventListener('click', () => {
     const state = app.state;
-    const target = state.stage === 'baby' ? CFG.teenAtMin : state.stage === 'teen' ? CFG.adultAtMin : null;
+    const target = state.stage === 'baby' ? state.life.teenAt : state.stage === 'teen' ? state.life.adultAt : null;
     if (target === null) return;
     const skip = target - state.ageMin;
     setSkew(app.skew + skip * MIN);
@@ -104,7 +129,7 @@ if (DEV) {
   }
   $('dev-reset').addEventListener('click', () => {
     setSkew(0);
-    app.state = createScript({ now: now(), rootAccess: rootUnlocked() });
+    app.state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms() });
     app.lastStage = app.state.stage;
     $('flatline').hidden = true;
     save();
@@ -116,7 +141,11 @@ if (DEV) {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) flushSave();
-  else advance();
+  else {
+    advance();
+    checkForUpdate();
+  }
+  syncDevice();
 });
 addEventListener('pagehide', flushSave);
 
@@ -158,13 +187,16 @@ drainAccessoryInbox();
 backfillEarned();
 if (app.state.stage === 'dead') showFlatline();
 else if (app.state.run) openRun(); // resume a run after a reload
-setInterval(advance, 1000);
+syncDevice();
+setInterval(() => {
+  advance();
+  syncDevice();
+}, 1000);
 
 // The home LCD animates in half-second steps, so ~10 fps is plenty and saves battery.
 // Mini-games and netruns get every frame.
 const IDLE_FRAME_MS = 100;
 const canvas = $('lcd');
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let lastFrame = performance.now();
 let lastIdleDraw = 0;
 const loggedErrors = new Set();
@@ -192,8 +224,15 @@ function drawFrame(time) {
   if (!session && !anim && time - lastIdleDraw < IDLE_FRAME_MS && !(time < app.flashUntil) && !(time < app.surgeUntil)) return;
   if (!session) lastIdleDraw = time;
   if (session) {
-    session.update(dt);
-    app.session?.draw(canvas.getContext('2d'), PALETTES[state.quirk.palette] ?? PALETTES[0], time);
+    if (!app.quitArmed) session.update(dt); // paused while the touch quit confirm is up
+    const ctx = canvas.getContext('2d');
+    const pal = PALETTES[state.quirk.palette] ?? PALETTES[0];
+    app.session?.draw(ctx, pal, time);
+    if (app.quitArmed && app.session?.game) {
+      ctx.fillStyle = 'rgba(3, 9, 10, 0.6)';
+      ctx.fillRect(0, 0, W, H);
+      text(ctx, 'PAUSED', W / 2, H / 2, { size: 40, align: 'center', color: pal.accent, glow: pal.accent });
+    }
   } else {
     renderLCD(canvas, state, time, {
       accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
@@ -201,8 +240,9 @@ function drawFrame(time) {
       prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
       propExtra: wardrobe.prop === 'plush' ? app.plushCache : null,
       flash: time < app.flashUntil,
-      surge: time < app.surgeUntil,
-      calm: reducedMotion.matches,
+      surge: time < app.surgeUntil ? (app.surgeUntil - time) / SURGE_MS : 0,
+      calm: app.calm,
+      flow: inFlow(state),
       anim,
     });
   }

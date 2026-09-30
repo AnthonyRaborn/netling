@@ -2,7 +2,7 @@
 import { PALETTES } from '../sim.js';
 import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
-import { formSprite } from '../sprites.js';
+import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
@@ -71,7 +71,7 @@ export function plushExtra() {
   if (!e) return null;
   const form = e.realized ? e.form : e.teenForm ?? 'bitling';
   const pal = PALETTES[e.palette ?? 0] ?? PALETTES[0];
-  return { sprite: formSprite(form, 'a'), colors: { '#': pal.main, o: pal.accent, '+': '#f5f5f5' } };
+  return { sprite: formSprite(form, 'a'), colors: paletteColors(pal) };
 }
 
 // Counts toward every non-streak game unlock, from PLAY and from netrun ICE alike.
@@ -81,6 +81,31 @@ export function countGame() {
   checkUnlocks();
 }
 
+// Answered requests and greeted visitors count toward their cosmetics.
+export function countAttention(res) {
+  if (!res?.ok || !(res.requestMet || res.greeted)) return;
+  if (res.requestMet) app.progress.requestsMet = (app.progress.requestsMet ?? 0) + 1;
+  if (res.greeted) app.progress.visitorsGreeted = (app.progress.visitorsGreeted ?? 0) + 1;
+  store.set(KEYS.progress, app.progress);
+  checkUnlocks();
+}
+
+// A flatlined netling's time in flow joins the running total (the living one adds its own; see unlockContext).
+export function bankFlow(state) {
+  app.progress.flowMin = (app.progress.flowMin ?? 0) + (state.flowTotalMin ?? 0);
+  store.set(KEYS.progress, app.progress);
+}
+
+// A chatter line seen on screen: kept for the Archive, once.
+export function hearChatter(id) {
+  const heard = app.progress.chatter ?? [];
+  if (heard.includes(id)) return false;
+  app.progress.chatter = [...heard, id];
+  store.set(KEYS.progress, app.progress);
+  checkUnlocks();
+  return true;
+}
+
 export function countAct(action) {
   app.progress.acts = { ...app.progress.acts, [action]: (app.progress.acts?.[action] ?? 0) + 1 };
   store.set(KEYS.progress, app.progress);
@@ -88,7 +113,8 @@ export function countAct(action) {
 }
 
 function unlockContext() {
-  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress };
+  const living = app.state.stage === 'dead' ? 0 : app.state.flowTotalMin ?? 0; // a dead one's is banked already
+  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress, flowMin: (app.progress.flowMin ?? 0) + living };
 }
 
 // Announce anything newly earned. First run of a save just records what's already earned.
@@ -135,14 +161,26 @@ export function applyWardrobe() {
   const pack = cosmeticById('sound', w.sound);
   setSoundPack(pack.wave, pack.mult);
   const label = app.unlocked.includes('label') ? sanitizeLabel(app.wardrobe.label) : LABEL.fallback;
-  document.querySelector('.logo').textContent = label;
+  const logo = document.querySelector('.logo');
+  logo.textContent = label;
+  const crest = cosmeticById('crest', w.crest);
+  $('crest').hidden = !crest.pixels;
+  if (crest.pixels) drawCrest($('crest'), crest.pixels, getComputedStyle(logo).color); // after the shell class, which can recolor the logo
+}
+
+// A 9x9 crest onto a canvas of the same size; CSS scales it up.
+function drawCrest(canvas, pixels, color) {
+  const g = canvas.getContext('2d');
+  g.clearRect(0, 0, canvas.width, canvas.height);
+  g.fillStyle = color;
+  pixels.forEach((row, y) => [...row].forEach((p, x) => p === '#' && g.fillRect(x, y, 1, 1)));
 }
 
 export function renderWardrobe() {
   const w = resolveWardrobe(app.wardrobe, app.unlocked);
   const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + STYLE_ITEMS.length; // + label + accessories/props
   $('wardrobe-count').textContent = `${app.unlocked.length + app.ownedAccessories.length}/${total}`;
-  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK' };
+  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
       const h = document.createElement('h3');
@@ -161,6 +199,13 @@ export function renderWardrobe() {
         sw.style.background = open ? c.swatch ?? 'transparent' : 'transparent';
         if (slot === 'effect') sw.textContent = open ? '~' : '';
         if (slot === 'sound') sw.textContent = open ? '♪' : '';
+        if (slot === 'crest' && open && c.pixels) {
+          const cv = document.createElement('canvas');
+          cv.width = cv.height = 9;
+          cv.className = 'crest-sw';
+          drawCrest(cv, c.pixels, '#ff2a6d');
+          sw.append(cv);
+        }
         const name = document.createElement('span');
         name.textContent = open ? c.name : '???';
         const hint = document.createElement('span');
@@ -194,7 +239,9 @@ function colorSection() {
   const id = app.wardrobe.accessory;
   const acc = app.ownedAccessories.includes(id) ? accessoryById(id) : null;
   if (!acc?.colors) return [];
-  const current = accessoryColors(id, app.wardrobe.colors?.[id]);
+  const pal = PALETTES[app.state.quirk.palette] ?? PALETTES[0];
+  const picked = [...(app.wardrobe.colors?.[id] ?? [])]; // null = automatic
+  const current = accessoryColors(id, picked, pal);
   const row = document.createElement('div');
   row.className = 'color-row';
   const label = document.createElement('span');
@@ -206,8 +253,8 @@ function colorSection() {
     input.value = current[i];
     input.setAttribute('aria-label', `${acc.name} ${name} ${i + 1}`);
     input.addEventListener('input', () => {
-      current[i] = input.value;
-      setWardrobe({ ...app.wardrobe, colors: { ...app.wardrobe.colors, [id]: [...current] } });
+      picked[i] = input.value;
+      setWardrobe({ ...app.wardrobe, colors: { ...app.wardrobe.colors, [id]: acc.colors.map((_, j) => picked[j] ?? null) } });
     });
     row.append(input);
   });

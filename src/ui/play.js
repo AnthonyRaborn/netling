@@ -3,14 +3,14 @@ import { act, blockReason, tick, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
-import { abortRun, closeRun, runBlockReason, startRun } from '../netrun/run.js';
+import { abortRun, closeRun, codexRoom, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
-import { FRAGMENTS } from '../netrun/codex.js';
+import { FRAGMENTS, allFragmentsFound } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
-import { checkUnlocks, countGame, drainAccessoryInbox, grantStyle } from './style.js';
+import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
@@ -19,6 +19,7 @@ function showPanel(name) {
   $('picker').hidden = name !== 'picker';
   $('pad').hidden = name !== 'pad';
   $('regions').hidden = name !== 'regions';
+  if (name !== 'pad') disarmQuit(); // a confirm never outlives its game
 }
 
 // A mini-game or netrun that throws is closed rather than left frozen on screen. A broken run is
@@ -37,7 +38,7 @@ export function dropSession(err) {
     }
     if (run.region === 'tutorial') finishOnboarding(); // never leave onboarding stuck on a broken tutorial
   }
-  $('pad-quit').textContent = 'QUIT (ESC)';
+  resetPadQuit();
   showPanel('controls');
   save();
   updateHUD();
@@ -56,7 +57,7 @@ export function closeStaleSession() {
   const stale = app.state.stage === 'dead' || (s.pet && s.pet !== app.state);
   if (!stale) return;
   app.session = null;
-  $('pad-quit').textContent = 'QUIT (ESC)';
+  resetPadQuit();
   showPanel('controls');
 }
 
@@ -70,8 +71,58 @@ function sendInput(fn) {
 }
 
 // Pad, keyboard and controller input for the running session.
-export const sendKey = (key) => app.session && sendInput((s) => s.input(key));
-export const quitSession = () => app.session && sendInput((s) => s.forfeit());
+export const sendKey = (key) => {
+  if (app.quitArmed) return disarmQuit(); // any game input answers the confirm with KEEP PLAYING, and is not played
+  return app.session && sendInput((s) => s.input(key));
+};
+export const quitSession = () => {
+  disarmQuit();
+  return app.session && sendInput((s) => s.forfeit());
+};
+
+// On touch, QUIT (or ABORT RUN) asks for a confirm somewhere else: a button over the top of the
+// screen, away from the pad where thumbs rest, so a second tap in the same place never quits.
+// While it shows, the game is paused.
+// Keyboard (Esc) and controller (B) keep their own behaviour through quitSession.
+const QUIT_CONFIRM_MS = 3000;
+let quitTimer = null;
+
+export function resetPadQuit() {
+  const run = app.session instanceof RunView;
+  $('pad-quit').textContent = run ? 'ABORT RUN' : 'QUIT (ESC)';
+  $('pad-confirm').textContent = run ? 'CONFIRM ABORT' : 'CONFIRM QUIT';
+}
+
+function disarmQuit() {
+  clearTimeout(quitTimer);
+  quitTimer = null;
+  app.quitArmed = false;
+  $('pad-confirm').hidden = true;
+  resetPadQuit();
+}
+
+function armQuit() {
+  const run = app.session instanceof RunView;
+  // An ICE fight inside a run is a mini-game: losing it is the cost, not the loot.
+  $('pad-confirm').textContent = run && !app.session.game ? 'CONFIRM ABORT' : 'CONFIRM QUIT';
+  $('pad-confirm').hidden = false;
+  app.quitArmed = true; // the render loop holds the session still until it is answered
+  $('pad-quit').textContent = run && !app.session.game ? 'KEEP RUNNING' : 'KEEP PLAYING';
+  quitTimer = setTimeout(disarmQuit, QUIT_CONFIRM_MS);
+}
+
+function padQuit(e) {
+  if (!app.session) return;
+  if (e.detail === 0) return quitSession(); // Enter or Space on the focused button: a key press
+  if (quitTimer) return disarmQuit(); // KEEP PLAYING
+  if (app.session instanceof RunView && app.session.run?.phase === 'done') return quitSession(); // the summary card just closes
+  armQuit();
+}
+
+function confirmQuit() {
+  disarmQuit();
+  if (app.session) sendInput((s) => (s.abortNow ? s.abortNow() : s.forfeit()));
+}
 
 function bumpProgress(run) {
   const progress = app.progress;
@@ -104,13 +155,13 @@ export function openRun() {
       if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
       bumpProgress(run);
       checkUnlocks();
-      $('pad-quit').textContent = 'QUIT (ESC)';
+      resetPadQuit();
       showPanel('controls');
       save();
       updateHUD();
     },
   });
-  $('pad-quit').textContent = 'ABORT RUN';
+  resetPadQuit();
   showPanel('pad');
 }
 
@@ -129,10 +180,14 @@ function jackIn(region) {
 }
 
 function renderRegions() {
+  const room = codexRoom(app.state);
+  $('region-memory').textContent = `CODEX MEMORY ${RUN_CFG.codexPerLife - room}/${RUN_CFG.codexPerLife} THIS LIFE${room ? '' : ' · FULL'}`;
+  $('region-memory').classList.toggle('full', !room);
+  $('region-memory').hidden = allFragmentsFound(app.codex); // nothing left to find
   $('region-list').replaceChildren(
     ...REGION_ORDER.map((id) => {
       const r = REGIONS[id];
-      const lock = regionLock(id, app.state.stage, app.codex);
+      const lock = regionLock(id, app.state.stage, app.codex, app.state.cleared);
       const secret = lock && r.requires;
       const regionFrags = FRAGMENTS.filter((f) => f.region === id);
       const found = regionFrags.filter((f) => app.codex.includes(f.id)).length;
@@ -170,6 +225,7 @@ function startGame(id) {
       if (res.ok) {
         app.progress.streaks = recordGame(app.progress.streaks, id, won); // streak unlocks: PLAY games only
         countGame();
+        countAttention(res);
       }
       playAnim(res.ok ? 'play' : 'refuse');
       if (!res.ok) {
@@ -182,6 +238,7 @@ function startGame(id) {
     },
   });
   showPanel('pad');
+  updateHUD(); // hides the request bar and the chatter bubble while the game runs
 }
 
 // DEFEND: an intrusion is fought off with a random mini-game, like netrun ICE. It counts toward
@@ -214,6 +271,20 @@ function startDefense() {
     },
   });
   showPanel('pad');
+}
+
+// PLAY straight into the game it asked for (the request bar's button).
+export function playRequested(game) {
+  unlockAudio();
+  tick(app.state, now());
+  const blocked = blockReason(app.state, 'play');
+  if (blocked) {
+    sfx('error', app.state.quirk.pitch);
+    playAnim('refuse');
+    return flashStatus(blocked);
+  }
+  sfx('select', app.state.quirk.pitch);
+  startGame(game);
 }
 
 const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ' ': 'a', Enter: 'a', z: 'a', x: 'a' };
@@ -258,7 +329,8 @@ export function initPlay() {
       sendKey(btn.dataset.key);
     }),
   );
-  $('pad-quit').addEventListener('click', quitSession);
+  $('pad-quit').addEventListener('click', padQuit);
+  $('pad-confirm').addEventListener('click', confirmQuit);
 
   document.addEventListener('keydown', (e) => {
     if (introWaiting() && [' ', 'Enter', 'z', 'x'].includes(e.key)) {

@@ -13,7 +13,7 @@ The simulation is pure in the sense that matters: every function takes the state
 5. [Care mistakes and death](#care-mistakes-and-death)
 6. [Care actions](#care-actions)
 7. [Events](#events)
-8. [Visitors](#visitors)
+8. [Visitors](#visitors), and [Attention rewards](#attention-rewards)
 9. [Items](#items)
 10. [Evolution and the hidden axes](#evolution-and-the-hidden-axes)
 11. [Lineage: fragments, traits, quirks](#lineage-fragments-traits-quirks)
@@ -28,7 +28,7 @@ The simulation is pure in the sense that matters: every function takes the state
 - `state.ageMin` counts simulated minutes. It is the netling's own timeline: events, naps, cooldowns and shields are all stored as ages, not wall-clock times, so hibernation (which freezes the clock) cannot break them.
 - If `now < lastTick` (the device clock moved backwards), `lastTick` is reset to `now` and the netling resumes from there instead of pausing until real time catches up.
 - Hibernation makes `tick` return immediately. `wake()` sets `lastTick = now`, so the frozen stretch never happened.
-- The step uses the **local hour** (`new Date(t).getHours()`) to decide sleep. Time zone changes and daylight saving shift the bedtime window. Tests pin `TZ=UTC` for this reason.
+- The step decides sleep by the hour in the netling's own **zone** (`s.zone`, the device's UTC offset in minutes as `getTimezoneOffset` gives it). The zone is set at compile and read again from the device only when the netling wakes; if it is still night in the new zone, it keeps sleeping. So travel, daylight saving or importing onto a device elsewhere takes effect the next morning, and a day never changes zone halfway. Tests pin `TZ=UTC` and set `s.zone` to act out a move.
 - The UI calls `advance()` (`ui/life.js`) once per second, on tab focus, and before every action, so the simulation is always caught up when the player acts.
 - Test mode replaces "now" with a scaled clock (see [DATA_AND_SAVES.md](DATA_AND_SAVES.md#test-mode)). The simulation does not know.
 
@@ -37,14 +37,14 @@ The simulation is pure in the sense that matters: every function takes the state
 `step()` does this, in order:
 
 1. `ageMin++`. Stage `script` only waits for `bootMinutes` (3) and becomes `baby`. Nothing else happens while compiling.
-2. Evolution check (baby to teen at 1440 min, teen to adult at 4320 min).
+2. Evolution check (baby to teen at `life.teenAt`, teen to adult at `life.adultAt`: 1020 and 3060 minutes for a netling compiled now; see [Life length](#life-length)).
 3. Sleep and nap transitions for this minute.
 4. Drain Charge, Sync, and move Heat.
 5. Cache file roll (awake and digesting only).
 6. Virus roll, or `virusMin++` if already infected.
 7. Integrity change from all current damage sources or regeneration.
 8. Stability drift.
-9. `stepVisit`, then `stepEvents`.
+9. `stepVisit`, then `stepEvents`, then the attention rewards: `stepRequest`, `stepFlow`, `stepChatter` (see [Attention rewards](#attention-rewards)).
 10. Care mistake checks (Charge, Sync, Heat, Lights).
 11. Death checks, in this priority: integrity collapse, neglect, end of life.
 
@@ -55,7 +55,9 @@ Created by `createScript()`. The full field list with meanings is in [DATA_AND_S
 | Field | Meaning |
 |---|---|
 | `stage` | `script` (compiling), `baby`, `teen`, `adult`, `dead` |
-| `form` | Current body. `bitling` for babies, `kernel`/`stub` for teens, one of five adult forms |
+| `form` | Current body. `bitling` for babies, `kernel`/`stub`/`shell` for teens, one of five adult forms |
+| `life` | `{ teenAt, adultAt, lifespan }` in minutes, fixed when it compiles (see [Life length](#life-length)) |
+| `newForms` | Adult forms the player had never raised when it compiled; they win ties a little more often |
 | `stats` | `charge`, `sync`, `integrity`, `heat`, each 0 to 100 |
 | `cache` | 0 to 4 corrupted files |
 | `sinceFed` | Minutes since the last meal. Starts at 240 so a new netling is not "digesting" |
@@ -74,19 +76,21 @@ Four stats, all clamped to 0..100.
 
 | Stat | Awake drain or drift | Effect at the extremes |
 |---|---|---|
-| Charge | -14/hr | At 0: 15 minutes makes a care mistake; also -6 Integrity/hr |
-| Sync | -12/hr | At 0: 15 minutes makes a care mistake |
+| Charge | -15.4/hr, scaled by the drain curve | At 0: 15 minutes makes a care mistake; also -6 Integrity/hr |
+| Sync | -13.2/hr, scaled by the drain curve | At 0: 15 minutes makes a care mistake |
 | Integrity | see below | At 0 for 120 minutes: death |
 | Heat | +3/hr | At 85+: -8 Integrity/hr and -1 stability/hr; at 100: 15 minutes makes a care mistake |
 
-Drain multipliers stack multiplicatively on the base rate:
+**Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, so a long gap still costs faults without being fatal. Tuned so casual players take about one more fault a life than before and workers about 0.7 more, while attentive players act about a third more often (see [BALANCE_PLAN.md](BALANCE_PLAN.md#drain-pass)).
+
+Drain multipliers stack multiplicatively on the base rate (and on the curve):
 
 | Situation | Multiplier |
 |---|---|
 | Asleep, lights off | 0.33 (`sleepDarkDrainMult`) |
 | Asleep, lights on | 0.5 (`sleepDrainMult`) |
 | Napping | 0.35 (`napDrainMult`) |
-| Resting with trait Persistent | x0.7 extra |
+| Resting with trait Persistent | x0.7 extra at strength 1 (see [Trait strength](#trait-strength-balance-pass-3)) |
 | Daemon form (Charge only) | x0.8 |
 | Ghost form (Charge and Sync) | x0.85 |
 | Awake with lights off (Sync only) | x2 (`darkAwakeSyncMult`) |
@@ -104,7 +108,7 @@ Damage sources add up. If there are none, Integrity regenerates.
 | Heat 85 or more | -8 |
 | Charge at 0 | -6 |
 | Nothing wrong | +5 (`integrityRegenPerHour`), or +8 when in "deep rest" (napping, or asleep with lights off) |
-| Trait Volatile | an extra -1 always applies |
+| Trait Volatile | an extra -0.75 at strength 1 always applies |
 
 Care actions add flat Integrity on top: COOL +4, PURGE that clears something +4, PATCH +10, Repair kit +40.
 
@@ -118,14 +122,14 @@ The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "abou
 
 ### Viruses
 
-- Infection chance per hour: `0.02 + 0.03 * cache`. It is multiplied by 0.5 for trait Hardened and by 0.7 for the Firewall form (they stack: x0.35).
+- Infection chance per hour: `0.02 + 0.03 * cache`. It is multiplied by 0.5 for trait Hardened at strength 1 and by 0.7 for the Firewall form (they stack: x0.35).
 - Never while resting, while shielded (Antivirus patch), or while already infected.
-- Other infection routes: a scavenged packet (12%, or 6% with Hardened, times the Firewall multiplier), Black ICE shard (25%), a landed intrusion (certain).
+- Other infection routes: a scavenged packet (12%, or 6% with Hardened at strength 1, times the Firewall multiplier), Black ICE shard (25%), a landed intrusion (certain).
 - `virusMin` counts minutes since infection. PATCHing within 30 minutes gives +1 stability, later gives -1.
 
 ## Rest: sleep, lights, naps
 
-**Sleep.** A netling sleeps from `22 + sleepOffset` to `7 + sleepOffset` local time. `sleepOffset` is a quirk from -2 to +2, so bedtime is 20:00 to 00:00 and wake time 05:00 to 09:00. It falls asleep and wakes on its own. On waking, `lightsOn` is reset to true.
+**Sleep.** A netling sleeps from `22 + sleepOffset` to `7 + sleepOffset` in its own zone (see above). The readout shows its bedtime converted to the device's clock (`bedtimeOnDevice`), which differs from `bedtimeHour` only between a zone change and the next wake. `sleepOffset` is a quirk from -2 to +2, so bedtime is 20:00 to 00:00 and wake time 05:00 to 09:00. It falls asleep and wakes on its own. On waking, `lightsOn` is reset to true.
 
 **Lights.** `LIGHTS OFF` while asleep gives the dark drain multiplier and deep-rest regeneration. Sleeping with the lights on for 60 minutes (`lightsGraceMin`) is a care mistake. Lights off while awake makes it bored (Sync x2) and darkens the screen. Lights state is not touched at bedtime, so turning them off during the day carries into the night.
 
@@ -144,11 +148,11 @@ A **care mistake** is a need left unmet for a grace period. It is counted once p
 | heat | Heat at 100 | 15 min |
 | lights | Asleep with lights on | 60 min |
 
-Each mistake adds 1 to `careMistakes` and removes 2 stability. A netling dies when any of these fires, checked in this order:
+Each mistake adds 1 to `careMistakes` and removes 2 stability. A Segfault (see [Items](#items)) adds 2 of them at once, with the same stability cost. A netling dies when any of these fires, checked in this order:
 
 1. **integrity collapse**: Integrity at 0 for 120 consecutive minutes.
 2. **neglect**: 10 care mistakes (`maxMistakes`).
-3. **end of life cycle**: age reaches 7 days (`lifespanMin`).
+3. **end of life cycle**: age reaches `life.lifespan` (5 days, 7200 minutes, for a netling compiled now).
 
 Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) and sets `stage = 'dead'`. Root Access can undo the first two (see below).
 
@@ -158,7 +162,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 
 | Action | Requires | Effect |
 |---|---|---|
-| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
+| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed at strength 1), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
 | `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -1, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
 | `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss. Charge -6, Heat +12. Records win/loss. Wins can drop items (25%) |
 | `hide` | Open trace | Ends it. Charge -10, Heat +10, allegiance -1. 30% drop from the hide table |
@@ -168,11 +172,11 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 | `cool` | Heat 30+ | Heat -35, Integrity +4 |
 | `purge` | Cache above 0, or an overflow event | Clears cache. Stability +0.5, Integrity +4. Cancels an overflow |
 | `use` | Item in slot, item's own conditions | See [Items](#items) |
-| `discard` | Item in slot | Removes it |
+| `discard` | Item in slot | SCRAP: removes it for a quarter of its scrip price (see [NETRUN.md](NETRUN.md#corpo-scrip)) |
 | `nap` | Not asleep, no netrun, cooldown over | Starts a nap; pressing again wakes it |
 | `lights` | always allowed except dead/hibernating | Toggles `lightsOn` |
 
-Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability.
+Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5 at strength 1. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability.
 
 The UI runs the mini-game first, then calls `act('play', { game, won })`. The result can be refused if the netling fell asleep or hit 0 charge while the game ran.
 
@@ -182,11 +186,11 @@ At most one timed event is open at a time (`state.event`). While one is open, no
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
-| **Corp trace** | 8% (never for Untraceable) | 120 min | Integrity -15, allegiance +1 | HIDE or COMPLY, or a Corp voucher |
+| **Corp trace** | 8% (60% less for Untraceable at strength 1) | 120 min | Integrity -15, allegiance +1 | HIDE or COMPLY, or a Corp voucher |
 | **Intrusion** | 4% (not while infected) | 60 min | Virus, Integrity -10 | DEFEND (random mini-game) |
 | **Memory overflow** | 2% + 2% per cache file | 45 min | Integrity -15, cache set to 4, reboot for 20 min | PURGE |
 | **Power surge** | 3% | instant | Heat +25, Charge +10 | none |
-| **Visitor** | 3% (no event, no netrun, not rebooting) | 5 to 10 min | none | none |
+| **Visitor** | 6% (no event, no netrun, not rebooting) | 10 to 20 min | none | GREET (optional) |
 
 Details:
 
@@ -198,11 +202,23 @@ Details:
 
 ## Visitors
 
-A stray netling appears for 5 to 10 minutes (`visitMinMin`, `visitMaxMin`). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory. Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory. Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+
+**GREET** (`act(s, 'greet')`): once per visit (`visit.greeted`). It sets a visitor chatter line on screen and raises the accessory chance above; nothing else. Refused with no visitor, or once already greeted.
+
+## Attention rewards
+
+Opt-in extras for a player who is around (design and decisions in [ATTENTION_PLAN.md](ATTENTION_PLAN.md)). Missing any of them costs nothing: no fault, no stat change.
+
+**Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
+
+**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat or axis.
+
+**Chatter** (`s.chatter`, `stepChatter`, `src/chatter.js`). While idle, 0.15 an hour (`chatterChancePerHour`), it picks a line from its pool: the lines of its current body, plus lineage lines whose condition holds (its trait, a history, NL-0 watching). A line stays for 20 minutes (`chatterShowMin`) or until it rests. GREET shows a visitor line instead. The UI records a line as heard (`progress.chatter`) once it is on screen with the page visible.
 
 ## Items
 
-Six slots (`INVENTORY_SLOTS`). Extra finds are refused with "inventory is full".
+Six slots (`INVENTORY_SLOTS`). A find that meets a full inventory is scrapped for a quarter of its scrip price (`grantItem`), up to the scrip cap of 100.
 
 | Id | Name | Effect | Needs awake |
 |---|---|---|---|
@@ -214,17 +230,20 @@ Six slots (`INVENTORY_SLOTS`). Extra finds are refused with "inventory is full".
 | `memory` | Memory shard | Rerolls one of palette, pitch, idle, favorite packet | no |
 | `repair` | Repair kit | Integrity +40 (refused at 100) | no |
 | `overclock` | Overclock chip | Cuts 60 min off the netrun cooldown (refused if none left or at the 2 hour floor) | no |
+| `segfault` | Segfault | 2 care mistakes on purpose (`ITEM_CFG.segfaultFaults`), stability -4. Can end its life at the limit. The UI asks for a second press | yes |
 
 Drop tables (weights):
 
 | Source | Table |
 |---|---|
-| Mini-game win (25%) | coolant 3, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1 |
-| Hide (30%) | blackice 2, memory 1, coolant 1, overclock 1 |
+| Mini-game win (25%) | coolant 3, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1 |
+| Hide (30%) | blackice 2, memory 1, coolant 1, overclock 1, segfault 1 |
 | Comply (30%) | voucher 3, antivirus 1, repair 1 |
 | Visitor gift (10%) | coolant 2, booster 2, repair 2, memory 1, overclock 1 |
 
 Netrun loot uses per-region tables, see [NETRUN.md](NETRUN.md).
+
+A **Segfault** can also turn up after a DEFEND (won or lost), a contained overflow (PURGE), or a power surge, each with a 10% chance (`ITEM_CFG.eventSegfaultChance`). It exists so a player can steer toward a Stub on purpose: one Segfault plus one other mistake before the teen stage.
 
 **Keepsakes.** When a netling of an adult form dies, its fragment carries one item that starts in the next generation's inventory: Chrome gives a voucher, Firewall an antivirus patch, Daemon a coolant cell, Glitch a Black ICE shard, Ghost a memory shard.
 
@@ -253,31 +272,49 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 | -0.5 | A mini-game that leaves Heat above 70 |
 | -1 | Slow PATCH, Black ICE shard, a netrun disconnect |
 
-**Baby to teen** at 1440 minutes: Kernel if `careMistakes <= 2`, otherwise Stub.
+**Baby to teen** at `life.teenAt` (`teenForm()`):
 
-**Teen to adult** at 4320 minutes: `leaningForm()`:
+1. **Stub** if `careMistakes > 2`.
+2. **Shell** if it is on Ghost's path: `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1` (`shellMaxMistakes`), and at least 3 wins in each of the four games (`shellMinWinsEach`). A hint, not a promise: the Shell still needs Ghost's adult conditions.
+3. Otherwise **Kernel**.
 
-1. **Ghost** if `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1`, at least 4 wins in each of the four games, and at least 22 wins in total (a boosted win counts as 2).
-2. Otherwise, if `|allegiance| >= |stability|`: Chrome when allegiance is 0 or more, Firewall when negative.
-3. Otherwise: Daemon when stability is 0 or more, Glitch when negative.
+**Teen to adult** at `life.adultAt`: `leaningForm(s, rng)`:
 
-Ties go to allegiance, and a perfectly neutral netling that misses the Ghost conditions becomes Chrome.
+1. **Ghost** if `|allegiance| < 2`, `stability >= 0`, `careMistakes <= 1`, at least 4 wins in each of the four games (`ghostMinWinsEach`), and at least 29 wins in total (`ghostMinGameWins`; a boosted win counts as 2, which is kept on purpose: boosters are part of the chase).
+2. Otherwise the larger axis (in size) decides: allegiance gives Chrome (0 or more) or Firewall (negative); stability gives Daemon (0 or more) or Glitch (negative). `leaningCandidates()` lists the forms in play.
+3. **Ties** (`tieBand`, 0.5): if the two axes are within 0.5 of each other in size, both axes' forms are candidates; an axis within 0.5 of zero puts both of its forms in. A perfectly neutral netling that misses Ghost can become any of the four. The pick is random, each candidate weighted 1, or 1.2 (`newFormWeight`) if it is in `newForms`, the adult forms the player had never raised when this netling compiled.
 
 Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data; Firewall -30% virus chance; Daemon Charge drains 20% slower; Glitch play is a gamble (+10 to +40 Sync); Ghost all drains 15% slower. Run abilities are in [NETRUN.md](NETRUN.md).
+
+### Life length
+
+`CFG.lifespanMin`, `teenAtMin` and `adultAtMin` (5 days, 17 hours, 51 hours) are copied into `s.life` when a netling compiles, and the rules read `s.life`, so changing them never shortens a netling that is already alive. Saves from before `s.life` existed get `LEGACY_LIFE` (7 days, 24 hours, 72 hours) from `migrate` and the sanitizer; a stored `life` that is out of order or longer than 7 days is replaced with the same.
 
 **Dying before adulthood.** `flatline()` uses the current form if it is an adult form, else `leaningForm()` at the moment of death. The record marks it `realized: false` and the UI calls it an echo or "(unrealized)".
 
 ## Lineage: fragments, traits, quirks
 
-On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed }`.
+On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed, scrip, level, history }` (`fragmentOf`).
 
-| Adult form | Trait passed on | Trait effect |
-|---|---|---|
-| Chrome | Licensed | Corp packets restore +25% Charge |
-| Firewall | Hardened | -50% virus chance |
-| Daemon | Persistent | Drains 30% slower while resting |
-| Glitch | Volatile | Play rewards x1.5, Integrity drains an extra 1/hr |
-| Ghost | Untraceable | Immune to corp traces |
+| Adult form | Trait passed on | Effect at strength 1 | Cap |
+|---|---|---|---|
+| Chrome | Licensed | Corp packets restore +25% Charge | 1.5 |
+| Firewall | Hardened | -50% virus chance (per hour and from scavenged data) | 1.5 |
+| Daemon | Persistent | Drains 30% slower while resting | 1.25 |
+| Glitch | Volatile | Play rewards x1.5, Integrity drains an extra 0.75/hr | 1.25 |
+| Ghost | Untraceable | Corp traces 60% less often | 1.25 |
+
+### Trait strength (balance pass 3)
+
+Every trait effect is its strength-1 value (`TRAIT_CFG.full`) times the netling's strength in that trait (`traitStrength`), so a stronger trait does more of the same, costs included (Volatile's Integrity drain scales too).
+
+- **The parent's trait** (`trait`) applies at its level's strength: level 1 is 1.0, and each level adds 0.25 (`levelStep`), up to level 3 (`maxLevel`, 1.5).
+- **Levels are a streak.** A netling that ends as the same adult form as its parent passes the trait on one level higher (Daemon, Daemon, Daemon gives Persistent III). Ending as any other form starts the new trait at level 1.
+- **The grandparent's trait comes back as its history** (`history`) at half strength (`TRAIT_CFG.history`): the fragment stores the dying netling's own inherited trait. When the history is the same trait as the parent's, the two add up.
+- **Each trait is capped** (`TRAIT_CFG.cap`, table above), after measuring: Persistent's fewer faults shift adult forms, Volatile's cost hurts casual players, and a stronger Untraceable would be an immunity again. So Persistent III with a Persistent history (1.5 + 0.5) is still 1.25.
+- A first-generation netling has neither. Saves from before levels get level 1 and no history.
+
+Measured with 400 to 800 simulated lives per case, against the same parent with the trait switched off: no trait at its cap moves the casual full-life rate by more than about 4 points, or any adult form's share by more than about 8 points. The Untraceable child of a Ghost meets about 2 corp traces a life at strength 1 (1.3 at the cap) instead of 5, so it can still steer its allegiance.
 
 **Quirks** (`rollQuirk`): `palette` (0 to 4, plus 5 "origin" only with Root Access), `pitch` (440 to 880 Hz), `idle` (bounce, sway, hover), `favPacket` (corp or scav), `sleepOffset` (-2 to +2). A new generation rolls a fresh quirk and then overwrites exactly one random key (from all five) with the parent's value. `createScript` records which one in `inheritedQuirk`.
 
@@ -308,7 +345,7 @@ These follow from the code and are easy to get wrong when changing balance.
 - Resting suppresses new infections, cache files and new events, but not existing damage: a virus keeps eating Integrity at -12/hr through the night.
 - The 15-minute care mistake grace is in **simulated** minutes. In test mode at 168x that is about 5 real seconds.
 - Charge from a corp packet above 95 is refused, so meals cannot be stacked to skip drain.
-- A boosted win adds 2 to `games[id].won`, which makes the Ghost requirement slightly easier than "22 wins".
-- Tie handling in `leaningForm` favors Chrome over everything else except Ghost.
+- A boosted win adds 2 to `games[id].won`, which makes the Ghost requirement slightly easier than "29 wins". Kept on purpose.
+- Ties within 0.5 are broken at random, weighted toward forms the player has never raised (`newForms`). Repairs of a damaged save (no rng) take the heaviest candidate, then the first.
 - COOL is refused under 30 Heat, PATCH is refused with no virus, PURGE is refused with an empty cache. A refused action costs nothing and does not count toward unlock counters.
 - The shield from an Antivirus patch is stored as an age (`shieldUntilAge`), so it survives hibernation correctly.

@@ -5,9 +5,9 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 227 unit tests, Node 22
+npm test          # 354 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
-npm run balance   # lifetime simulations per player archetype
+npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174
 ```
 
@@ -17,7 +17,7 @@ npm run serve     # http://localhost:5174
 - `src/netrun/`: expeditions (`run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js`).
 - `src/ui/`: DOM code; `ui/app.js` holds the shared `app` object, the write gate and `loadAll`.
 - `src/storage.js`, `src/sanitize.js`, `src/transfer.js`: everything about persistence and moving saves.
-- `sw.js`: network-first service worker with a hand-written `SHELL` file list.
+- `sw.js`: network-first service worker with a hand-written `SHELL` file list. Its `CACHE` name must equal `VERSION` in `src/version.js`; bump both per release so open pages are offered the update.
 
 ## Rules that are easy to break
 
@@ -27,7 +27,8 @@ npm run serve     # http://localhost:5174
 4. **Never call `localStorage` directly** (except the lease); use `store` so the write gate applies. Use `now()` from `ui/app.js`, not `Date.now()`.
 5. **Treat stored and imported data as hostile**: new values need a `clean*` function in `sanitize.js`.
 6. **Keep `sim.js` and `netrun/run.js` pure** so tests and the balance tools can drive them.
-7. The field manual (`ui/onboarding.js`) is generated from `CFG`; prose docs are not, so update `docs/` when numbers change.
+7. **Nothing flashes more than three times a second**, in any motion setting: strobes toggle no faster than `FLASH_TOGGLE_MS` (`games/common.js`), and `tests/draw.test.js` checks the home screen.
+8. The field manual (`ui/onboarding.js`) is generated from `CFG`; prose docs are not, so update `docs/` when numbers change.
 
 ## Workflow
 
@@ -35,7 +36,8 @@ npm run serve     # http://localhost:5174
 - Say plainly what you did not run (the smoke test in particular, which needs Playwright and a browser).
 - Avoid emojis and em dashes in written text.
 - Add tests for rule changes (`tests/*.test.js`, deterministic: inject `now` and `rng`; import `./helpers/utc.js` first if the test depends on the time of day).
+- When a rule or number changes, regenerate `tools/baseline/` and report what moved with `tools/balance-diff.mjs` (commands in `docs/TESTING.md`).
 
 ## Known traps
 
-See `docs/KNOWN_ISSUES.md` for behaviour that is easy to misread and for open questions. One to know: a nap does not pause an open event's timer while sleep does.
+See `docs/KNOWN_ISSUES.md` for behaviour that is easy to misread and for open questions. Two to know: a nap does not pause an open event's timer while sleep does, and sleep follows the netling's stored `zone`, not the device's hour directly.
