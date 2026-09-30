@@ -3,6 +3,7 @@ import { act, createScript, isAlive, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS, t
 import { deathRecord } from '../archive.js';
 import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
+import { duckMusic } from '../music.js';
 import { KEYS } from '../storage.js';
 import { $, app, newForms, rootUnlocked, flashStatus, now, playAnim, save, store } from './app.js';
 import { fmtAge, pushAlert, requestText, updateHUD } from './hud.js';
@@ -37,6 +38,7 @@ export function advance() {
     if (state.stage === 'teen' || state.stage === 'adult') {
       app.flashUntil = performance.now() + 2400;
       sfx('evolve', state.quirk.pitch);
+      duckMusic(2.4); // under the evolve jingle
       pushAlert('Netling is evolving', `It recompiled into ${SPECIES[state.form].name.toUpperCase()}.`);
     }
     if (state.stage === 'dead') onFlatline();

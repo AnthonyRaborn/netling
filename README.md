@@ -183,7 +183,7 @@ ARCHIVE > **SYSTEM** has:
 - **Hibernate**: freezes the clock for a long break. It lasts at least 24 hours and needs three days to recover after waking, so it's for vacations, not for skipping a work day.
 - **Restart**: erases everything and replays the intro.
 - **Storage**: shows whether the browser has agreed to keep your data, and warns if a save has failed.
-- **Volume**: a slider (the header's SND toggle still mutes).
+- **Effects** and **Music**: a volume slider each (music starts at 40% with your first tap; set it to 0 to turn music off). The header's SND toggle mutes both. On iPhone and iPad, the ringer switch can silence the game.
 - **Motion**: AUTO follows your device's reduced-motion setting; REDUCED keeps the screen still (no glitching, flicker or scrolling effects) and FULL keeps every effect. Nothing flashes more than three times a second in any setting.
 - **Keep screen on**: the screen always stays on during mini-games and netruns; turn this on to keep it on whenever the game is showing (where the browser supports it).
 

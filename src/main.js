@@ -5,6 +5,7 @@ import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
 import { text, W, H } from './games/common.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
+import { setMusicHidden, setMusicMuted, setMusicVolume } from './music.js';
 import { notifyGranted, notifySupported, requestNotify, registerServiceWorker } from './notify.js';
 import { KEYS } from './storage.js';
 import { $, app, DEV, TEST, newForms, rootUnlocked, flashStatus, loadAll, now, save, store } from './ui/app.js';
@@ -19,10 +20,13 @@ import { initGamepad } from './ui/gamepad.js';
 import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
 import { watchForUpdates } from './update.js';
 import { initDevice, syncDevice } from './ui/device.js';
+import { syncMusicMode } from './ui/soundtrack.js';
 
 loadAll();
 setVolume(app.prefs.volume);
 setMuted(!app.prefs.sound);
+setMusicVolume(app.prefs.musicVolume);
+setMusicMuted(!app.prefs.sound);
 
 initLife();
 initInventory();
@@ -48,6 +52,7 @@ function renderPrefs() {
 $('pref-sound').addEventListener('click', () => {
   app.prefs.sound = !app.prefs.sound;
   setMuted(!app.prefs.sound);
+  setMusicMuted(!app.prefs.sound);
   store.set(KEYS.prefs, app.prefs);
   unlockAudio();
   sfx('select', app.state.quirk.pitch);
@@ -127,6 +132,15 @@ if (DEV) {
       updateHUD();
     });
   }
+  // Audition the music: force a track or a state (not saved).
+  $('dev-music-row').hidden = false;
+  app.devMusic = {};
+  for (const [id, key] of [['dev-music-track', 'track'], ['dev-music-state', 'variant']]) {
+    $(id).addEventListener('change', () => {
+      app.devMusic[key] = $(id).value || undefined;
+      syncMusicMode();
+    });
+  }
   $('dev-reset').addEventListener('click', () => {
     setSkew(0);
     app.state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms() });
@@ -139,7 +153,16 @@ if (DEV) {
   });
 }
 
+// Music never autoplays: the first tap or key press anywhere starts the audio, and the music with it.
+const startAudio = () => {
+  unlockAudio();
+  syncMusicMode();
+};
+document.addEventListener('click', startAudio, true);
+document.addEventListener('keydown', startAudio, true);
+
 document.addEventListener('visibilitychange', () => {
+  setMusicHidden(document.hidden);
   if (document.hidden) flushSave();
   else {
     advance();
@@ -191,6 +214,7 @@ syncDevice();
 setInterval(() => {
   advance();
   syncDevice();
+  syncMusicMode();
 }, 1000);
 
 // The home LCD animates in half-second steps, so ~10 fps is plenty and saves battery.

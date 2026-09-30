@@ -1,6 +1,6 @@
 # Music plan
 
-Background music, synthesized in code. Nothing here is built yet; this is the plan for the maintainer to approve. Once built, it becomes a reference doc (`MUSIC.md`) of facts and open questions, like [ATTENTION.md](ATTENTION.md). Spoiler-heavy, like the rest of `docs/`.
+Background music, synthesized in code. **Phase 1 is built** (release `netling-v43`): the engine, the controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row. Phases 2 and 3 are still plans. Once built, it becomes a reference doc (`MUSIC.md`) of facts and open questions, like [ATTENTION.md](ATTENTION.md). Spoiler-heavy, like the rest of `docs/`.
 
 ## Decisions (from the maintainer, 2026-09-30)
 
@@ -12,6 +12,13 @@ Background music, synthesized in code. Nothing here is built yet; this is the pl
 6. **The music reacts to state.** Sleep comes first (softer, lower). Alerts (faster, higher) and flow come later, after the maintainer has heard them.
 7. **Unlockable tracks in the STYLE menu**, with milestones proposed below.
 8. **Plan first**, then build.
+
+Decided 2026-09-30, after the draft below:
+
+9. **The unlock milestones are approved**, plus a sixth track for chatter: **Forum**.
+10. **The track feels are approved**, the netrun theme's included.
+11. **Mini-games duck the music by 30%.**
+12. **Existing players get music at 40% too** after the update.
 
 ## Controls
 
@@ -28,9 +35,11 @@ Background music, synthesized in code. Nothing here is built yet; this is the pl
 
 ### Engine
 
-- **`src/tracks.js`** (new, pure data and pure functions, no Web Audio): each track is a tempo, a key, instrument settings and a bank of short phrases (1 or 2 bars each, note lists). `arrange(track, bar, seed)` returns the notes for one bar. Tests and a Node script can run it without a browser.
-- **`src/music.js`** (new, Web Audio only): a lookahead scheduler. A timer every 25 ms queues any notes due in the next 100 ms at exact `AudioContext` times. This is the standard way to keep time steady in a browser without drift.
-- **Shared context.** `audio.js` gains two gain buses, effects and music, over one `AudioContext`. `SND OFF` sets both to zero and stops the scheduler.
+- **`src/tracks.js`** (new, pure data and pure functions, no Web Audio): each track is a tempo, a key, instrument settings and a bank of short phrases (1 or 2 bars each, note lists). `createArranger(track, seed).next()` returns the notes for the next bar, and `musicMode(snapshot)` decides what should play. Tests and a Node script can run it without a browser.
+- **`src/music.js`** (new, Web Audio only): a lookahead scheduler. A timer every 50 ms queues any bar that starts in the next 300 ms at exact `AudioContext` times. This is the standard way to keep time steady in a browser without drift.
+- **Shared context.** `audio.js` exports its `AudioContext` (`audioContext()`); the music has its own master gain on it, and effects are unchanged. `SND OFF` mutes both and stops the scheduler.
+- **Level** (`MUSIC_LEVEL = 0.08`): at the default 40% the Idle loop measures RMS 0.010 and peaks at 0.042, the netrun theme RMS 0.005 to 0.007; a square sound effect at the default 80% peaks at 0.048 (`tools/render-music.mjs` prints these).
+- **Low-note floor**: no note plays under E2 (about 82 Hz); lower ones move up an octave, as failure sounds do in `audio.js`.
 - **Instruments**: oscillators (square, triangle, sawtooth, sine), the existing band-passed noise for hats and snares, and one lowpass filter per track. There are 4 or 5 voices at most, and each note is a short-lived oscillator, as the effects already are. A `DelayNode` echo is used only by the tracks that need one.
 
 ### Keeping it listenable for hours
@@ -53,15 +62,17 @@ The seed comes from the netling's quirk, so two netlings on the same track do no
 | Menus and dialogs | Keeps playing (decision 4) |
 | Mini-game | The home track keeps playing, 30% quieter while the game runs so its sounds read clearly |
 | Netrun, including ICE fights | The netrun theme (below) |
-| Evolution strobe | Home track ducks under the evolve jingle for 2.4 s |
+| Evolution strobe | Home track ducks to 30% under the evolve jingle for 2.4 s |
 | Flatline | Fades out over 2 s; silent until the next netling boots |
-| Page hidden | Fades out over 0.3 s and the scheduler stops; on return it fades back in from the next bar |
+| Page hidden | Fades out over 0.3 s and the scheduler stops; on return it fades back in where the track left off |
+| Compiling (the first 3 minutes of a new netling) | Silent, like a flatline: the music starts when it comes online |
+| A waiting tab, or a netling transferred away | Silent |
 
-Changes of state crossfade over about 2 seconds, and a track change waits for the end of the bar, so nothing cuts off mid-note.
+A change of state (falling asleep) takes effect at the next bar and settles over about 2 seconds. A change of track (a netrun) crossfades over 0.8 s.
 
 ### Sleep variant (decision 6, first pass)
 
-- Tempo x0.8, transposed down a fourth (5 semitones).
+- Tempo x0.8, transposed down a fourth (5 semitones); the bass floor lifts its lowest notes.
 - Drums drop out; the lead plays at half level through a lowpass at about 1.2 kHz.
 - Volume x0.6.
 
@@ -72,7 +83,7 @@ Changes of state crossfade over about 2 seconds, and a track change waits for th
 | Open alert or event | Tempo x1.15, up a whole tone, hats double time |
 | Flow | An extra high sparkle layer (sine arpeggio with echo); tempo and key unchanged |
 
-To make them easy to judge, the DEV panel (test mode) gets a `MUSIC` row that forces awake, sleep, alert or flow, and switches tracks without unlocking them. Nothing is shown to players.
+Both are built as drafts but not reached in play. To judge them, the DEV panel (test mode, or `?dev`) has a `MUSIC` row that forces a track (Idle, or the netrun theme in any region) and a state (awake, sleep, alert, flow). Nothing is shown to players. `node tools/render-music.mjs <dir>` also renders every track and state to WAV files.
 
 ## Tracks
 
@@ -86,6 +97,7 @@ Tempos and keys are starting points and will change once they can be heard.
 | `lobby` | Corp lobby | Elevator music, a little ironic | 96 | Triangle "electric piano" seventh chords, walking bass, woodblock clicks |
 | `tracker` | Tracker | Fast demoscene | 132 | Square lead, classic three-note chip arpeggios, pulse bass, noise kit |
 | `undertow` | Undertow | Dark ambient | 60 | Low detuned sine drones, distant echoing pings, no drums |
+| `forum` | Forum | Old message board, chattering | 90 | Short square "voices" answering each other, soft bass, keyboard-click hats |
 
 **Netrun theme** (not a wardrobe item, decision 5): minor key, 110 BPM, a steady pulse bass and a tense two-note lead. Each region colors it with the wave and pitch it already has for its sounds (`REGIONS[*].sound`), so the Corp Grid rings in triangle and the Bazaar buzzes in sawtooth. The Deep drops to 70 BPM, bass and pings only.
 
@@ -102,7 +114,9 @@ A new wardrobe slot, `music`, uses the existing cosmetics system (hint while loc
 | Tracker | "a hundred and fifty games, win or lose." | 150 games played (Arcade needs 50) | several lives |
 | Undertow | "come back from the bottom three times." | 3 exits from the Deep (Static needs 1) | late game |
 
-Possible sixth, for the attention rewards: **Chorus** ("hear twenty-five things it says to itself"), 25 chatter lines heard across lives. Included only if the maintainer wants it.
+| Forum | "hear twenty-five things it says to itself." | 25 chatter lines heard across lives (`progress.chatter`, of 50) | an attentive player's first few lives |
+
+Forum (decision 9) is the attention-rewards track: a chattering old message board, overlapping short square "voices" that answer each other over a soft bass.
 
 ## Save and code notes
 
@@ -120,13 +134,10 @@ Possible sixth, for the attention rewards: **Chorus** ("hear twenty-five things 
 
 ## Phases
 
-1. Engine, controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row. Released so the maintainer can listen.
-2. The five unlockable tracks, the `music` wardrobe slot and the unlocks.
+1. **Built.** Engine, controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row, for the maintainer to listen to.
+2. The six unlockable tracks, the `music` wardrobe slot and the unlocks.
 3. Alert and flow reactions, after auditioning in the DEV panel.
 
 ## Questions for the maintainer
 
-1. Are the unlock milestones right, and should Chorus be included?
-2. Are the track names and feels right, or is there a sound you want that is missing?
-3. Should mini-games duck the music by 30%, or keep it at full level?
-4. Should existing players get music at 40% after the update too (as proposed), or should it start at 0 for them and 40% only for new players?
+All answered (decisions 9 to 12). The alert and flow reactions wait for a listen (decision 6).

@@ -441,7 +441,7 @@ export function cleanWardrobe(raw) {
 export const MOTION_MODES = ['auto', 'reduce', 'full'];
 export function cleanPrefs(raw) {
   const p = isObj(raw) ? raw : {};
-  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1), awake: bool(p.awake), motion: oneOf(p.motion, MOTION_MODES, 'auto') };
+  return { sound: bool(p.sound, true), alerts: bool(p.alerts), volume: num(p.volume, 0.8, 0, 1), musicVolume: num(p.musicVolume, 0.4, 0, 1), awake: bool(p.awake), motion: oneOf(p.motion, MOTION_MODES, 'auto') };
 }
 
 export const cleanOnboarding = (raw) => oneOf(raw, ONBOARDING_STEPS, null);
