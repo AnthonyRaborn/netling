@@ -18,6 +18,8 @@ export const TRANSFER_KEYS = [
   'progress',
   'unlocked',
   'accessories',
+  'checkin',
+  'rewardBox',
   'prefs',
   'onboarding',
   'helpSeen',

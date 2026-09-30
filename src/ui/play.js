@@ -3,7 +3,7 @@ import { act, blockReason, tick, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
-import { abortRun, closeRun, codexRoom, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
+import { abortRun, closeRun, codexRoom, contractMinutesLeft, contractPay, contractText, fmtLeft, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
 import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
 import { FRAGMENTS, allFragmentsFound } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -14,11 +14,12 @@ import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyl
 import { drainCodexInbox } from './archive.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
-function showPanel(name) {
+export function showPanel(name) {
   $('controls').hidden = name !== 'controls';
   $('picker').hidden = name !== 'picker';
   $('pad').hidden = name !== 'pad';
   $('regions').hidden = name !== 'regions';
+  $('box').hidden = name !== 'box';
   if (name !== 'pad') disarmQuit(); // a confirm never outlives its game
 }
 
@@ -131,6 +132,7 @@ function bumpProgress(run) {
     if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
     const at = run.map.nodes.find((n) => n.id === run.pos);
     if (run.region === 'deep' && at?.type === 'exit') progress.deepExits = (progress.deepExits ?? 0) + 1;
+    if (run.contract?.settled === 'met') progress.contractsDone = (progress.contractsDone ?? 0) + 1;
   }
   if (run?.result) store.set(KEYS.progress, progress);
 }
@@ -184,6 +186,9 @@ function renderRegions() {
   $('region-memory').textContent = `CODEX MEMORY ${RUN_CFG.codexPerLife - room}/${RUN_CFG.codexPerLife} THIS LIFE${room ? '' : ' · FULL'}`;
   $('region-memory').classList.toggle('full', !room);
   $('region-memory').hidden = allFragmentsFound(app.codex); // nothing left to find
+  const c = app.state.contract;
+  $('region-contract').hidden = !c;
+  if (c) $('region-contract').textContent = `CONTRACT: ${contractText(c).toUpperCase()}. PAYS ${contractPay(c).toUpperCase()}. ${fmtLeft(contractMinutesLeft(app.state)).toUpperCase()} LEFT`;
   $('region-list').replaceChildren(
     ...REGION_ORDER.map((id) => {
       const r = REGIONS[id];
@@ -205,7 +210,8 @@ function renderRegions() {
       frag.textContent = secret ? '' : `codex ${found}/${regionFrags.length}`;
       const meta = document.createElement('span');
       meta.className = 'rmeta';
-      meta.textContent = lock ?? r.blurb;
+      meta.textContent = lock ?? (c?.region === id ? `contract: ${contractText(c)}.` : r.blurb);
+      if (c?.region === id && !lock) meta.classList.add('contract');
       b.append(name, frag, meta);
       b.addEventListener('click', () => jackIn(id));
       return b;
@@ -305,6 +311,7 @@ export function initPlay() {
   $('picker-back').addEventListener('click', () => showPanel('controls'));
   document.querySelectorAll('[data-game]').forEach((btn) => btn.addEventListener('click', () => startGame(btn.dataset.game)));
 
+  $('wish-run').addEventListener('click', () => $('btn-netrun').click());
   $('btn-netrun').addEventListener('click', () => {
     unlockAudio();
     tick(app.state, now());

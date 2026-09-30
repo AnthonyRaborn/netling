@@ -109,6 +109,7 @@ export const ACCESSORIES = [
   {
     id: 'cap',
     name: 'Cap',
+    slot: 'head',
     rarity: 'common',
     colors: [['cap', '#05d9e8']],
     draw: (px, a, frame, time, colors) => {
@@ -122,6 +123,7 @@ export const ACCESSORIES = [
   {
     id: 'scarf',
     name: 'Scarf',
+    slot: 'body',
     rarity: 'common',
     colors: [['scarf', '#ff2a6d']],
     draw: (px, a, frame, time, colors) => {
@@ -134,6 +136,7 @@ export const ACCESSORIES = [
   {
     id: 'headphones',
     name: 'Headphones',
+    slot: 'head',
     rarity: 'common',
     draw: (px, a) => {
       for (let x = a.headLeft + 1; x <= a.headRight - 1; x++) px(x, a.headTop - 1, '#9a9ab8');
@@ -146,6 +149,7 @@ export const ACCESSORIES = [
   {
     id: 'flower',
     name: 'Flower',
+    slot: 'head',
     rarity: 'common',
     draw: (px, a) => {
       const x = a.headLeft + 1;
@@ -160,6 +164,7 @@ export const ACCESSORIES = [
   {
     id: 'bow',
     name: 'Bow',
+    slot: 'head',
     rarity: 'common',
     draw: (px, a) => {
       // two loops and a knot:  ##.##  /  ##o##  /  ##.##
@@ -172,6 +177,7 @@ export const ACCESSORIES = [
   {
     id: 'shades',
     name: 'Shades',
+    slot: 'face',
     rarity: 'rare',
     colors: [
       ['lenses', '#050508'],
@@ -192,6 +198,7 @@ export const ACCESSORIES = [
   {
     id: 'visor',
     name: 'Visor',
+    slot: 'face',
     rarity: 'rare',
     colors: [
       ['band', '#ff2a6d'],
@@ -223,6 +230,7 @@ export const ACCESSORIES = [
   {
     id: 'crown',
     name: 'Crown',
+    slot: 'head',
     rarity: 'rare',
     draw: (px, a) => {
       for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, a.headTop - 1, '#f9f002');
@@ -233,6 +241,7 @@ export const ACCESSORIES = [
   {
     id: 'halo',
     name: 'Halo',
+    slot: 'float',
     rarity: 'veryrare',
     draw: (px, a, frame) => {
       const y = a.top - 3 - (frame % 2);
@@ -247,6 +256,7 @@ export const ACCESSORIES = [
   {
     id: 'spark',
     name: 'Spark',
+    slot: 'float',
     rarity: 'veryrare',
     draw: (px, a, frame) => {
       // A twinkle: a plus on one frame, an X on the other, always with the bright centre.
@@ -260,6 +270,7 @@ export const ACCESSORIES = [
   {
     id: 'barcode',
     name: 'Corp barcode',
+    slot: 'body',
     rarity: 'common',
     regions: ['corp'],
     hint: 'stamped on assets in the Corp Grid.',
@@ -275,6 +286,7 @@ export const ACCESSORIES = [
   {
     id: 'chromejaw',
     name: 'Chrome jaw',
+    slot: 'face',
     rarity: 'rare',
     regions: ['corp'],
     hint: 'rarely sold in the Corp Grid.',
@@ -289,6 +301,7 @@ export const ACCESSORIES = [
   {
     id: 'cybereye',
     name: 'Cyber eye',
+    slot: 'face',
     rarity: 'rare',
     regions: ['corp'],
     hint: 'rarely sold in the Corp Grid.',
@@ -306,6 +319,7 @@ export const ACCESSORIES = [
   {
     id: 'mohawk',
     name: 'Neon mohawk',
+    slot: 'head',
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
@@ -319,6 +333,7 @@ export const ACCESSORIES = [
   {
     id: 'neuraljack',
     name: 'Neural jack',
+    slot: 'face',
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
@@ -331,6 +346,7 @@ export const ACCESSORIES = [
   {
     id: 'tattoo',
     name: 'Circuit tattoo',
+    slot: 'face',
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'inked in the Darknet Bazaar.',
@@ -343,6 +359,7 @@ export const ACCESSORIES = [
   {
     id: 'rebreather',
     name: 'Rebreather',
+    slot: 'face',
     rarity: 'common',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
@@ -362,6 +379,7 @@ export const ACCESSORIES = [
   {
     id: 'satdish',
     name: 'Sat-dish antenna',
+    slot: 'head',
     rarity: 'rare',
     regions: ['ruins'],
     hint: 'left behind in the Old Web Ruins.',
@@ -374,6 +392,7 @@ export const ACCESSORIES = [
   {
     id: 'kernelpin',
     name: 'KERNEL pin',
+    slot: 'body',
     rarity: 'veryrare',
     regions: ['ruins'],
     hint: 'a relic of the old project. the ruins might still have one.',
@@ -387,6 +406,7 @@ export const ACCESSORIES = [
   {
     id: 'drone',
     name: 'Drone buddy',
+    slot: 'float',
     rarity: 'veryrare',
     regions: ['deep'],
     hint: 'something small follows runners up from the deep.',
@@ -410,6 +430,7 @@ ACCESSORIES.push(
   {
     id: 'partyhat',
     name: 'Party hat',
+    slot: 'head',
     rarity: 'common',
     source: 'earned',
     hint: 'a gift for a first birthday.',
@@ -431,6 +452,7 @@ ACCESSORIES.push(
   {
     id: 'bandage',
     name: 'Bandage',
+    slot: 'head',
     rarity: 'rare',
     source: 'earned',
     hint: 'you have to survive something first.',
@@ -447,6 +469,7 @@ ACCESSORIES.push(
   {
     id: 'earpiece',
     name: 'Earpiece',
+    slot: 'face',
     rarity: 'common',
     regions: ['corp'],
     hint: 'standard issue in the Corp Grid.',
@@ -463,6 +486,7 @@ ACCESSORIES.push(
   {
     id: 'dataaura',
     name: 'Data aura',
+    slot: 'float',
     rarity: 'rare',
     regions: ['ruins'],
     hint: 'echoes cling to runners in the Old Web Ruins.',
@@ -480,7 +504,16 @@ ACCESSORIES.push(
     },
   },
 );
-for (const x of ACCESSORIES) x.slot ??= 'wear';
+// Worn slots: one accessory from each can be worn at once, drawn in this order (later ones on top).
+export const WEAR_SLOTS = ['body', 'face', 'head', 'float'];
+const slotRank = (id) => WEAR_SLOTS.indexOf(ACCESSORIES.find((x) => x.id === id)?.slot);
+// Worn entries ({ id, ... }) in draw order; unknown ids and props are dropped.
+export const wearOrder = (list) => list.filter((w) => slotRank(w.id) >= 0).sort((a, b) => slotRank(a.id) - slotRank(b.id));
+// What the wardrobe has on ([{ id, colors }]): one owned accessory per wear slot.
+export const wornFrom = (wardrobe, owned) =>
+  WEAR_SLOTS.map((slot) => wardrobe?.[slot]).filter((id) => owned.includes(id)).map((id) => ({ id, colors: wardrobe.colors?.[id] ?? null }));
+// What a visitor wears: a list of ids (older visits stored one id as `accessory`).
+export const visitAccessories = (visit) => visit?.accessories ?? (visit?.accessory ? [visit.accessory] : []);
 
 // --- props: drawn on the ground at the right of the screen, behind the pet --------------------
 // draw(px, frame, time, extra) paints in prop-local coordinates; the prop's feet sit on its bottom row.
@@ -597,9 +630,10 @@ export function rollAccessory(exclude, rng, region = null) {
 }
 
 // What a visiting netling wears: any accessory that can be found (not props, not earned ones),
-// from any region, weighted by rarity. A glimpse of what's out there.
-export function rollWornAccessory(rng) {
-  return pickByRarity(ACCESSORIES.filter((x) => x.source !== 'earned'), rng);
+// from any region, weighted by rarity. A glimpse of what's out there. `taken`: ids already worn, whose slots are full.
+export function rollWornAccessory(rng, taken = []) {
+  const full = new Set(taken.map((id) => accessoryById(id)?.slot));
+  return pickByRarity(ACCESSORIES.filter((x) => x.source !== 'earned' && !full.has(x.slot)), rng);
 }
 
 function pickByRarity(pool, rng) {
@@ -614,22 +648,64 @@ function pickByRarity(pool, rng) {
 // still shows as a shape against it.
 export const DIM_WEARABLE = '#2f6b73';
 
-// Draw onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark. pal ({ name, main, accent }) is the
-// wearer's palette: recolorable wearables take their automatic colors for it, and any other wearable pixel that sits on
-// the body and would blend into it is swapped for a color that does not.
-export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null, pal = null) {
-  const acc = accessoryById(id);
-  if (!acc) return;
+// Where each worn accessory lands on a sprite: [{ id, dy, pts: [{ x, y, color }] }] in draw order, sprite-local, colors
+// before dimming. pal ({ name, main, accent }) is the wearer's palette: recolorable wearables take their automatic colors
+// for it, and any other wearable pixel that sits on the body and would blend into it is swapped for a color that does not.
+// Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
+// above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
+// pixels covered, the smallest on a tie. Orbiting ones (the drone, the data aura) pass in front instead of jumping.
+const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, halo: -1, spark: -1 };
+const ROOM_MAX = 4;
+export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRow = -Infinity } = {}) {
   const a = anchorsFor(sprite);
-  const fixed = !acc.colors;
-  // A fixed color is only swapped where it sits on the pet or right beside it; floating clear of the body (an orbiting
-  // echo, a halo) it is seen against the room, where the wearable's own color is fine.
   const touchesBody = (x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (sprite[y + dy]?.[x + dx] ?? '.') !== '.');
-  const px = (x, y, color) => {
-    ctx.fillStyle = dim ? DIM_WEARABLE : fixed && pal && touchesBody(x, y) ? contrastColor(color, pal.main) : color;
-    ctx.fillRect(ox + x, oy + y, 1, 1);
+  const pixelsOf = (w) => {
+    const acc = accessoryById(w.id);
+    const fixed = !acc.colors;
+    const pts = [];
+    // A fixed color is only swapped where it sits on the pet or right beside it; floating clear of the body (an orbiting
+    // echo, a halo) it is seen against the room, where the wearable's own color is fine.
+    acc.draw((x, y, color) => pts.push({ x, y, color: fixed && pal && touchesBody(x, y) ? contrastColor(color, pal.main) : color }), a, frame, time, accessoryColors(w.id, w.colors ?? null, pal));
+    return pts;
   };
-  acc.draw(px, a, frame, time, accessoryColors(id, custom, pal));
+  const worn = wearOrder(list).map((w) => ({ id: w.id, dy: 0, pts: pixelsOf(w) }));
+  const key = (x, y) => `${x},${y}`;
+  const taken = new Set();
+  for (const w of worn) if (!ROOM[w.id]) for (const p of w.pts) taken.add(key(p.x, p.y));
+  // Body items settle first (lowest in the draw order), then the risers see them too.
+  for (const w of [...worn].filter((x) => ROOM[x.id]).sort((x, y) => ROOM[y.id] - ROOM[x.id])) {
+    const dir = ROOM[w.id];
+    let best = { dy: 0, hits: Infinity };
+    for (let n = 0; n <= ROOM_MAX; n++) {
+      const dy = n ? n * dir : 0;
+      const ys = w.pts.map((p) => p.y + dy);
+      if (n && (Math.min(...ys) < minRow || Math.max(...ys) >= sprite.length)) break;
+      const hits = w.pts.filter((p) => taken.has(key(p.x, p.y + dy))).length;
+      if (hits < best.hits) best = { dy, hits };
+      if (!hits) break;
+    }
+    w.dy = best.dy;
+    w.pts = w.pts.map((p) => ({ ...p, y: p.y + best.dy }));
+    for (const p of w.pts) taken.add(key(p.x, p.y));
+  }
+  return worn;
+}
+
+// Draw worn accessories ([{ id, colors }]) onto a canvas context at sprite origin (ox, oy). dim for sleep in the dark.
+// minRow keeps a rising accessory on screen: -oy is the screen's top row.
+export function drawWorn(ctx, list, sprite, ox, oy, frame = 0, dim = false, time = 0, pal = null) {
+  for (const w of placeWorn(list, sprite, { frame, time, pal, minRow: -oy })) {
+    for (const p of w.pts) {
+      ctx.fillStyle = dim ? DIM_WEARABLE : p.color;
+      ctx.fillRect(ox + p.x, oy + p.y, 1, 1);
+    }
+  }
+}
+
+// One accessory: the gallery and the tests draw them alone.
+export function drawAccessory(ctx, id, sprite, ox, oy, frame = 0, dim = false, time = 0, custom = null, pal = null) {
+  if (accessoryById(id)?.slot === 'prop') return;
+  drawWorn(ctx, [{ id, colors: custom }], sprite, ox, oy, frame, dim, time, pal);
 }
 
 // Props stand on the LCD floor at the right edge. Returns nothing if the prop has nothing to draw.

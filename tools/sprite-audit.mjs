@@ -7,7 +7,7 @@
 //   node tools/sprite-audit.mjs --json          everything, machine readable
 //   node tools/sprite-audit.mjs --strict        exit 1 if any hard candidate (an off-screen pixel, an accessory nobody can see)
 //
-// Checks: clip, hud, contrast, occlusion, similar, forms, poses, props, crests, icons.
+// Checks: clip, hud, contrast, occlusion, similar, combos, forms, poses, props, crests, icons.
 import { fakeCanvas } from '../tests/helpers/fake-canvas.js';
 import {
   LCD, extents, hudHits, offScreen, lostPixels, blend, jaccard, silhouetteIou, poseDistance, markDistance,
@@ -19,7 +19,7 @@ globalThis.document = { createElement: () => offscreen[offscreen.push(fakeCanvas
 const { renderLCD } = await import('../src/render.js');
 const { createScript, SPECIES, PALETTES, IDLES } = await import('../src/sim.js');
 const { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, paletteColors } = await import('../src/sprites.js');
-const { ACCESSORIES, PROPS, anchorsFor, accessoryColors } = await import('../src/accessories.js');
+const { ACCESSORIES, PROPS, anchorsFor, accessoryColors, placeWorn } = await import('../src/accessories.js');
 const { COSMETICS } = await import('../src/cosmetics.js');
 
 const args = process.argv.slice(2);
@@ -300,6 +300,42 @@ if (wants('icons')) {
   note('icons', rows.sort((x, y) => y.match - x.match));
 }
 
+if (wants('combos')) {
+  // Accessories from different slots are worn together (placeWorn: drawn body, face, head, float, with some making room).
+  // For each pair, the worst share of the lower one's pixels that the upper one still paints over, over every form, pose
+  // and (for the moving ones) time. The screen top is taken as a pet standing on the floor one row up mid-hop.
+  const times = [0, 350, 700, 1050, 1400, 1750, 2100, 2450, 2800, 3150, 3500, 3850, 4200, 4550];
+  const rows = [];
+  for (let i = 0; i < ACCESSORIES.length; i++) {
+    for (let j = i + 1; j < ACCESSORIES.length; j++) {
+      if (ACCESSORIES[i].slot === ACCESSORIES[j].slot) continue;
+      let worst = { covered: 0 };
+      let cases = 0;
+      let hit = 0;
+      let moved = 0;
+      for (const form of FORMS) {
+        for (const pose of ['a', 'b', 'sleep']) {
+          const sprite = formSprite(form, pose);
+          const frame = pose === 'b' ? 1 : 0;
+          for (const time of times) {
+            const [under, over] = placeWorn([{ id: ACCESSORIES[i].id }, { id: ACCESSORIES[j].id }], sprite, { frame, time: time + frame * 500, minRow: -(20 - sprite.length - 1) });
+            const o = new Set(over.pts.map((p) => `${p.x},${p.y}`));
+            const u = new Set(under.pts.map((p) => `${p.x},${p.y}`));
+            const shared = [...u].filter((k) => o.has(k)).length;
+            const covered = u.size ? shared / u.size : 0;
+            cases++;
+            if (shared) hit++;
+            moved = Math.max(moved, Math.abs(under.dy), Math.abs(over.dy));
+            if (covered > worst.covered) worst = { covered, form, pose, time, under: under.id, over: over.id };
+          }
+        }
+      }
+      if (worst.covered > 0) rows.push({ under: worst.under, over: worst.over, covered: Number(worst.covered.toFixed(2)), share: Number((hit / cases).toFixed(2)), moved, form: worst.form, pose: worst.pose, time: worst.time });
+    }
+  }
+  note('combos', rows.sort((x, y) => y.covered - x.covered || y.share - x.share));
+}
+
 // --- output ----------------------------------------------------------------------------------------------------------
 
 const summary = {};
@@ -382,6 +418,10 @@ if (JSON_OUT) {
   if (report.similar) {
     head('similar: pairs of accessories whose pixels overlap (0 to 1) on the same body');
     for (const r of report.similar.slice(0, 14)) line(`  ${r.a} + ${r.b} on ${r.form}: ${r.overlap}${r.colorSame ? ' (same color too)' : ''}`);
+  }
+  if (report.combos) {
+    head(`combos: pairs worn together where the upper slot paints over the lower one (${report.combos.length} pairs). covered: worst share of the lower one hidden; seen: share of form/pose/time cases with any overlap`);
+    for (const r of report.combos.slice(0, 40)) line(`  ${r.over.padEnd(10)} over ${r.under.padEnd(10)} covered ${r.covered.toFixed(2)}  seen ${r.share.toFixed(2)}${r.moved ? `  moved ${r.moved}` : ''}  (worst: ${r.form}/${r.pose}${r.time ? ` at ${r.time} ms` : ''})`);
   }
   if (report.silhouettes) {
     head('forms: silhouette overlap (IoU, centred), highest first; same-stage pairs are the ones that must differ most');

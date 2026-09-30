@@ -25,10 +25,12 @@ import {
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { CHATTER_IDS } from './chatter.js';
-import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
+import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
+import { CHECKIN } from './checkin.js';
 import { upgradeSave } from './migrations.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
@@ -171,7 +173,15 @@ function cleanRun(raw, s, strict) {
     accessories: cleanAccessories(raw.accessories),
     scrip: int(raw.scrip, 0, 0, 1000),
     startStats: cleanStats(raw.startStats),
-    tally: { nodes: int(tally.nodes, 0, 0), iceWon: int(tally.iceWon, 0, 0), iceLost: int(tally.iceLost, 0, 0) },
+    tally: {
+      nodes: int(tally.nodes, 0, 0),
+      iceWon: int(tally.iceWon, 0, 0),
+      iceLost: int(tally.iceLost, 0, 0),
+      icePhased: int(tally.icePhased, 0, 0),
+      caches: int(tally.caches, 0, 0),
+      bought: int(tally.bought, 0, 0),
+    },
+    ...(cleanContract(raw.contract, true) ? { contract: cleanContract(raw.contract, true) } : {}), // only a run that took one along
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
     messages: Array.isArray(raw.messages) ? raw.messages.filter((m) => typeof m === 'string').slice(-20) : [],
     startedAge: num(raw.startedAge, s.ageMin, 0),
@@ -188,7 +198,17 @@ function cleanStats(raw) {
   };
 }
 
-// A stray netling playing with it: { startedAge, len, form, palette }.
+// What a visitor wears: known accessories, one per wear slot.
+function cleanVisitWear(raw) {
+  const out = [];
+  for (const id of Array.isArray(raw) ? raw : []) {
+    const slot = WORN_IDS.has(id) ? accessoryById(id).slot : null;
+    if (slot && !out.some((x) => accessoryById(x).slot === slot)) out.push(id);
+  }
+  return out.slice(0, WEAR_SLOTS.length);
+}
+
+// A stray netling playing with it: { startedAge, len, form, palette, accessories }.
 function cleanVisit(raw) {
   if (!isObj(raw) || !has(SPECIES, raw.form) || !Number.isFinite(raw.startedAge)) return null;
   return {
@@ -196,7 +216,7 @@ function cleanVisit(raw) {
     len: int(raw.len, CFG.visitMinMin, 1, 60),
     form: raw.form,
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
-    accessory: WORN_IDS.has(raw.accessory) ? raw.accessory : null,
+    accessories: cleanVisitWear(raw.accessories ?? (raw.accessory ? [raw.accessory] : [])), // older visits wore one: `accessory`
     ...(raw.greeted === true ? { greeted: true } : {}),
   };
 }
@@ -208,6 +228,22 @@ function cleanRequest(raw) {
   if (raw.kind === 'cool') return { kind: 'cool', startedAge };
   if (raw.kind === 'game' && GAME_IDS.includes(raw.game)) return { kind: 'game', game: raw.game, startedAge };
   return null;
+}
+
+// An open netrun job, or the one a run carries (onRun: it may be settled).
+const CONTRACT_SETTLED = ['met', 'missed', 'void'];
+function cleanContract(raw, onRun = false) {
+  if (!isObj(raw) || !CONTRACT_KINDS.includes(raw.kind) || !REGION_ORDER.includes(raw.region) || !Number.isFinite(raw.postedAge)) return null;
+  const counted = raw.kind === 'ice' || raw.kind === 'caches';
+  return {
+    kind: raw.kind,
+    region: raw.region,
+    ...(counted ? { n: int(raw.n, 2, 1, 5) } : {}),
+    scrip: int(raw.scrip, RUN_CFG.contractScrip[raw.kind], 0, SCRIP.max),
+    item: has(ITEMS, raw.item) ? raw.item : null,
+    postedAge: Math.max(0, raw.postedAge),
+    ...(onRun && CONTRACT_SETTLED.includes(raw.settled) ? { settled: raw.settled } : {}),
+  };
 }
 
 // The chatter line on screen: { id, startedAge }.
@@ -333,6 +369,9 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
     request: cleanRequest(raw.request),
+    contract: cleanContract(raw.contract),
+    contractCheckAge: numOrNull(raw.contractCheckAge),
+    wokeAt: numOrNull(raw.wokeAt),
     flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
     flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
     chatter: cleanChatter(raw.chatter),
@@ -407,6 +446,7 @@ export function cleanProgress(raw) {
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
     requestsMet: int(p.requestsMet, 0, 0),
+    contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
@@ -420,9 +460,13 @@ export function cleanWardrobe(raw) {
   for (const slot of SLOTS) {
     if (COSMETICS[slot].some((c) => c.id === w[slot])) out[slot] = w[slot];
   }
-  for (const key of ['accessory', 'prop']) {
-    if (w[key] === 'none' || STYLE_IDS.has(w[key])) out[key] = w[key];
+  // One accessory per wear slot, and a prop. Older wardrobes held a single `accessory`: it moves to its own slot.
+  const legacy = ACCESSORIES.find((x) => x.id === w.accessory);
+  for (const slot of WEAR_SLOTS) {
+    const id = w[slot] ?? (legacy?.slot === slot ? legacy.id : undefined);
+    if (id === 'none' || ACCESSORIES.some((x) => x.id === id && x.slot === slot)) out[slot] = id;
   }
+  if (w.prop === 'none' || PROPS.some((x) => x.id === w.prop)) out.prop = w.prop;
   if (typeof w.label === 'string') out.label = w.label.slice(0, LABEL.max * 4);
   if (isObj(w.colors)) {
     const colors = {};
@@ -435,6 +479,26 @@ export function cleanWardrobe(raw) {
     out.colors = colors;
   }
   return out;
+}
+
+// The daily check-in: the next ladder day (0 to 6), when the last one was claimed, and how many in all.
+export function cleanCheckin(raw) {
+  const c = isObj(raw) ? raw : {};
+  return { day: int(c.day, 0, 0, CHECKIN.days - 1), claimedAt: numOrNull(c.claimedAt), claims: int(c.claims, 0, 0) };
+}
+
+// The reward box: [{ kind: 'scrip', n, day } | { kind: 'item', id, day } | { kind: 'accessory', id, day }].
+export function cleanRewardBox(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const e of raw) {
+    if (!isObj(e)) continue;
+    const day = int(e.day, 1, 1, CHECKIN.days);
+    if (e.kind === 'scrip' && Number.isFinite(e.n) && e.n >= 1) out.push({ kind: 'scrip', n: int(e.n, 1, 1, 1000), day });
+    else if (e.kind === 'item' && has(ITEMS, e.id)) out.push({ kind: 'item', id: e.id, day });
+    else if (e.kind === 'accessory' && STYLE_IDS.has(e.id)) out.push({ kind: 'accessory', id: e.id, day });
+  }
+  return out.slice(0, CHECKIN.boxMax);
 }
 
 // MOTION: 'auto' follows the system's reduced-motion setting; 'reduce' and 'full' override it.
@@ -474,6 +538,8 @@ export const CLEANERS = {
   progress: cleanProgress,
   unlocked: cleanUnlocked,
   accessories: cleanAccessories,
+  checkin: cleanCheckin,
+  rewardBox: cleanRewardBox,
   prefs: cleanPrefs,
   onboarding: cleanOnboarding,
   helpSeen: (v) => v === true,

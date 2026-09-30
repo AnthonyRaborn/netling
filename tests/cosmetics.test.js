@@ -136,6 +136,11 @@ test('the crest slot defaults to none, has pixels for every crest, and survives 
 
 const earns = (ctx, id) => unlockedIds({ ...empty, ...ctx }).includes(id);
 
+test('Seal: ten contracts seen through', () => {
+  assert.equal(earns({ progress: { contractsDone: 9 } }, 'crest:seal'), false);
+  assert.equal(earns({ progress: { contractsDone: 10 } }, 'crest:seal'), true);
+});
+
 test('Purr: twenty-five requests answered', () => {
   assert.equal(earns({ progress: { requestsMet: 24 } }, 'sound:purr'), false);
   assert.equal(earns({ progress: { requestsMet: 25 } }, 'sound:purr'), true);

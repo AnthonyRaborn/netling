@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ACCESSORIES, STYLE_ITEMS, anchorsFor, anchorRowsFor, rollAccessory, accessoryById, drawAccessory, RARITY } from '../src/accessories.js';
+import { ACCESSORIES, STYLE_ITEMS, WEAR_SLOTS, anchorsFor, anchorRowsFor, rollAccessory, rollWornAccessory, accessoryById, drawAccessory, placeWorn, wearOrder, wornFrom, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
 import { SPECIES, PALETTES, mulberry32 } from '../src/sim.js';
 import { readFileSync } from 'node:fs';
@@ -270,5 +270,58 @@ test('a wearable\'s body and neck are the solid run through the middle, so side 
     const B = anchorsFor(SPRITES[`${form}B`]);
     assert.ok(Math.abs(A.neckLeft - B.neckLeft) <= 1 && Math.abs(A.neckRight - B.neckRight) <= 1, `${form}: the neck changes width between frames`);
     assert.ok(Math.abs(A.bodyLeft - B.bodyLeft) <= 1 && Math.abs(A.bodyRight - B.bodyRight) <= 1, `${form}: the body changes width between frames`);
+  }
+});
+
+// --- wear slots ------------------------------------------------------------------------------------
+
+test('every accessory has one wear slot, and every slot has a few to choose from', () => {
+  for (const acc of ACCESSORIES) assert.ok(WEAR_SLOTS.includes(acc.slot), `${acc.id}: slot ${acc.slot}`);
+  for (const slot of WEAR_SLOTS) assert.ok(ACCESSORIES.filter((x) => x.slot === slot).length >= 3, `${slot} has too few`);
+});
+
+test('worn accessories draw body, face, head, float; props and unknown ids are skipped', () => {
+  const ids = wearOrder([{ id: 'halo' }, { id: 'cap' }, { id: 'deck' }, { id: 'scarf' }, { id: 'nope' }, { id: 'shades' }]).map((w) => w.id);
+  assert.deepEqual(ids, ['scarf', 'shades', 'cap', 'halo']);
+  const wardrobe = { head: 'cap', face: 'shades', body: 'scarf', float: 'halo', colors: { cap: ['#123456'] } };
+  assert.deepEqual(wornFrom(wardrobe, ['cap', 'scarf', 'halo']), [{ id: 'scarf', colors: null }, { id: 'cap', colors: ['#123456'] }, { id: 'halo', colors: null }], 'only owned ones');
+  assert.deepEqual(wornFrom({}, ['cap']), []);
+});
+
+test('worn together, body items slide down and halos rise, never off the sprite or above the screen', () => {
+  const sprites = FORM_SPRITES.map(([, s]) => s);
+  const cells = (w) => new Set(w.pts.map((p) => `${p.x},${p.y}`));
+  let moved = 0;
+  for (const sprite of sprites) {
+    for (const body of ['scarf', 'barcode', 'kernelpin']) {
+      for (const face of ['chromejaw', 'rebreather', 'tattoo']) {
+        const [b, f] = placeWorn([{ id: body }, { id: face }], sprite);
+        assert.ok(b.dy >= 0 && b.dy <= 4, `${body} moved ${b.dy}`);
+        assert.ok(b.pts.every((p) => p.y < sprite.length), `${body} slid off the sprite`);
+        if (b.dy) moved++;
+        // The shift never makes things worse than where it started.
+        const [b0] = placeWorn([{ id: body }], sprite);
+        const fc = cells(f);
+        assert.ok([...cells(b)].filter((k) => fc.has(k)).length <= [...cells(b0)].filter((k) => fc.has(k)).length);
+      }
+    }
+    for (const hat of ['partyhat', 'mohawk', 'satdish']) {
+      for (const float of ['halo', 'spark']) {
+        const [, up] = placeWorn([{ id: hat }, { id: float }], sprite, { minRow: -4 });
+        assert.ok(up.dy <= 0 && up.pts.every((p) => p.y >= -4), `${float} over ${hat} left the screen`);
+      }
+    }
+  }
+  assert.ok(moved > 0, 'something made room');
+  // Alone, nothing moves.
+  for (const acc of ACCESSORIES) assert.equal(placeWorn([{ id: acc.id }], sprites[0])[0].dy, 0);
+});
+
+test('a second accessory on a visitor comes from another slot', () => {
+  const rng = mulberry32(11);
+  for (let i = 0; i < 500; i++) {
+    const first = rollWornAccessory(rng);
+    const second = rollWornAccessory(rng, [first]);
+    assert.notEqual(accessoryById(first).slot, accessoryById(second).slot);
   }
 });

@@ -94,6 +94,7 @@ export const CFG = {
   visitAccessoryChance: 0.01,
   visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
+  visitSecondAccessoryChance: 0.5, // and half of those a second, from another slot
   // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
   requestChancePerHour: 0.25,
@@ -364,6 +365,9 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     visit: null,
     visitAccGifts: 0,
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
+    contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
+    contractCheckAge: null, // the netling minute the UI last looked at posting one
+    wokeAt: null, // when it last woke from the night's sleep (not a nap or hibernation)
     flowMin: 0, // minutes in a row in good shape, awake
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
@@ -468,6 +472,7 @@ function step(s, t, rng) {
   } else if (!shouldSleep && s.asleep) {
     s.asleep = false;
     s.lightsOn = true;
+    s.wokeAt = t; // a new day: the daily check-in keys off this (checkin.js)
     log(s, t, '> resuming from low-power mode.');
   }
 
@@ -598,9 +603,13 @@ function startVisit(s, t, rng) {
   const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
   let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));
   if (own >= 0 && palette >= own) palette++;
-  const accessory = rng() < CFG.visitWearsAccessoryChance ? rollWornAccessory(rng) : null;
-  s.visit = { startedAge: s.ageMin, len, form, palette, accessory };
-  const wearing = accessory ? ` in a ${accessoryById(accessory).name.toLowerCase()}` : '';
+  const accessories = [];
+  if (rng() < CFG.visitWearsAccessoryChance) {
+    accessories.push(rollWornAccessory(rng));
+    if (rng() < CFG.visitSecondAccessoryChance) accessories.push(rollWornAccessory(rng, accessories));
+  }
+  s.visit = { startedAge: s.ageMin, len, form, palette, accessories };
+  const wearing = accessories.length ? ` in a ${accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')}` : '';
   log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
 }
 
@@ -851,6 +860,9 @@ export function migrate(s) {
   s.scrip ??= 0;
   s.zone ??= deviceZone(s.lastTick ?? 0); // from before KI-12: the device's zone, as it always used
   s.request ??= null;
+  s.contract ??= null;
+  s.contractCheckAge ??= null;
+  s.wokeAt ??= null;
   s.flowMin ??= 0;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;

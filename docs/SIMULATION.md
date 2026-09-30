@@ -202,7 +202,7 @@ Details:
 
 ## Visitors
 
-A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory. Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
 
 **GREET** (`act(s, 'greet')`): once per visit (`visit.greeted`). It sets a visitor chatter line on screen and raises the accessory chance above; nothing else. Refused with no visitor, or once already greeted.
 
@@ -213,6 +213,10 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 **Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
 
 **Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat or axis.
+
+**Morning** (`s.wokeAt`): set to the minute the night's sleep ends (not a nap). The daily check-in (`checkin.js`, run by the UI) keys off it.
+
+**Contracts** (`s.contract`) are netrun jobs, posted by the UI through `updateContract` in `netrun/run.js` while the app is open; see [NETRUN.md](NETRUN.md#contracts). `step` never posts or expires one.
 
 **Chatter** (`s.chatter`, `stepChatter`, `src/chatter.js`). While idle, 0.15 an hour (`chatterChancePerHour`), it picks a line from its pool: the lines of its current body, plus lineage lines whose condition holds (its trait, a history, NL-0 watching). A line stays for 20 minutes (`chatterShowMin`) or until it rests. GREET shows a visitor line instead. The UI records a line as heard (`progress.chatter`) once it is on screen with the page visible.
 

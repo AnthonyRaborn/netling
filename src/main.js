@@ -2,6 +2,7 @@
 // and the render loop. The UI itself lives in src/ui/.
 import { createScript, inFlow, isAlive, CFG, MIN, PALETTES } from './sim.js';
 import { renderLCD, ANIM_MS, SURGE_MS } from './render.js';
+import { wornFrom } from './accessories.js';
 import { text, W, H } from './games/common.js';
 import { discover, formsSeenIn } from './archive.js';
 import { sfx, unlockAudio, setMuted, setVolume } from './audio.js';
@@ -21,6 +22,7 @@ import { advance, flushSave, initLife, showFlatline } from './ui/life.js';
 import { watchForUpdates } from './update.js';
 import { initDevice, syncDevice } from './ui/device.js';
 import { syncMusicMode } from './ui/soundtrack.js';
+import { initRewards } from './ui/rewards.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -32,6 +34,7 @@ initLife();
 initInventory();
 initPlay();
 initArchive();
+initRewards();
 initOnboarding();
 initSystem();
 initTabs();
@@ -259,8 +262,7 @@ function drawFrame(time) {
     }
   } else {
     renderLCD(canvas, state, time, {
-      accessory: ownedAccessories.includes(wardrobe.accessory) ? wardrobe.accessory : null,
-      accessoryColors: wardrobe.colors?.[wardrobe.accessory] ?? null,
+      accessories: wornFrom(wardrobe, ownedAccessories),
       prop: ownedAccessories.includes(wardrobe.prop) ? wardrobe.prop : null,
       propExtra: wardrobe.prop === 'plush' ? app.plushCache : null,
       flash: time < app.flashUntil,

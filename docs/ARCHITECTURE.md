@@ -47,6 +47,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
 | `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, legacy goals (`LEGACY`), mini-game streaks |
+| `src/checkin.js` | The daily check-in ladder and the reward box (pure) |
 | `src/archive.js` | Lineage records and the form dex (pure data helpers) |
 | `src/games/` | Four mini-games plus `session.js` (intro, result card) and `common.js` (drawing helpers) |
 | `src/netrun/` | `run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js` (drawing and input) |
@@ -77,6 +78,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `style.js` | Wardrobe UI, unlock checks, earned items, accessory inbox draining |
 | `onboarding.js` | The field manual, intro terminal, nudge, tutorial run |
 | `system.js` | SYSTEM dialog: transfer out, lock screen, import, hibernate, restart, storage note, effects and music volume, test mode |
+| `rewards.js` | The daily check-in (claimed from the clock) and the reward box panel |
 | `soundtrack.js` | Tells the music player what should play (home track, sleep, alert or flow variant, netrun theme, mini-game duck, silence), synced once a second and on the first tap |
 | `tabs.js` | The one-active-tab rule |
 | `gamepad.js` | Controller input |
@@ -104,7 +106,7 @@ Rules of thumb:
 
 - Nothing below `ui/` imports from `ui/`.
 - `sim.js` imports only `accessories.js` (visitors wear accessories).
-- `sanitize.js` imports the tables it validates against (`sim`, `cosmetics`, `accessories`, `codex`, `regions`, `anomalies`), which is why adding an id to a table automatically makes it valid.
+- `sanitize.js` imports the tables it validates against (`sim`, `cosmetics`, `accessories`, `codex`, `regions`, `anomalies`, and `run` for the contract kinds), which is why adding an id to a table automatically makes it valid.
 - `archive.js` imports `FORM_ABILITIES` from `netrun/run.js` for the dex.
 - The `ui/` modules import each other in cycles (`play` and `onboarding`, `life` and `system`, ...). This works because they only call each other's functions at runtime, never at module load. Keep it that way: do not use an import at the top level of a `ui/` module.
 
@@ -139,7 +141,7 @@ Two independent loops:
 
 `app` in `ui/app.js` is a plain object, deliberately not reactive. It holds:
 
-- Loaded data: `state` (the live netling), `prefs`, `progress`, `wardrobe`, `unlocked`, `codex`, `dex`, `ownedAccessories`, `lineage`, `onboarding`.
+- Loaded data: `state` (the live netling), `prefs`, `progress`, `wardrobe`, `unlocked`, `codex`, `dex`, `ownedAccessories`, `checkin`, `rewardBox`, `lineage`, `onboarding`.
 - Mode flags: `claimed`, `inactive`, `leaving`, `lock`, `writeFailed`, `skew`, `testClock`.
 - The running `session` (mini-game or netrun view), or `null`.
 - Render bookkeeping: last stage, last log key, flash timers, `anim`.
@@ -152,7 +154,7 @@ Data that outlives a generation is kept outside the netling and updated by the U
 
 - **Home LCD**: `renderLCD()` draws a 40x28 buffer (`LCD_W`, `LCD_H`) from code-drawn sprites, then the visible canvas scales it up with nearest-neighbour. Layers: background (tint, darker with lights off), the pet or compile bar, accessory and prop, cache icons, event icons, reboot bar, visitors, action reaction animations, evolution strobe, then screen effects (scanlines, glitch when Integrity is low or infected, overheat wash, surge flash).
 - **Sprites** (`sprites.js`) are arrays of strings using `#` main color, `o` accent, `+` highlight, `x` dim fill (the inside of the Shell's casing), `.` empty. Poses are looked up by `formSprite(form, pose)`: `A`, `B`, `Sleep`, `Dead`. Bitling's Sleep and Dead are drawn by hand; every other form's are generated from its A frame at load (each eye becomes an X when dead and a slit when asleep). Colors come from the netling's palette quirk (`paletteColors`); the states have their own maps (`DEAD_COLORS`, `DIM_COLORS`, ...), each with a color for every mark.
-- **Accessories** are drawn by `accessories.js` through anchors (`anchorsFor`): four rows per form and frame are authored in `ANCHOR_ROWS` (`sprites.js`: head top, eye row, mouth row, neck row) so a wearable stays on the same part of the body between frames, and the rest (spans, eye columns) is read from the sprite's pixels, so every accessory fits every form. Props draw on the ground at the right edge, in front of the pet.
+- **Accessories** are drawn by `accessories.js` through anchors (`anchorsFor`): four rows per form and frame are authored in `ANCHOR_ROWS` (`sprites.js`: head top, eye row, mouth row, neck row) so a wearable stays on the same part of the body between frames, and the rest (spans, eye columns) is read from the sprite's pixels, so every accessory fits every form. One accessory per wear slot is worn at once; `placeWorn` places them together (body, face, head, float, with body items sliding down and the Halo and Spark rising to make room) and `drawWorn` paints them for the pet and a visitor. Props draw on the ground at the right edge, in front of the pet.
 - **Mini-games and netruns** draw straight onto the 400x280 canvas via `common.js` helpers (`clear`, `text`, `timerBar`). The wardrobe tint feeds `setGameBg`.
 - **Idle motion** is a pure function of time (`wanderPos`), so it needs no stored state.
 
