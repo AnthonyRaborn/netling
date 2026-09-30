@@ -365,6 +365,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     visit: null,
     visitAccGifts: 0,
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
+    contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
+    contractCheckAge: null, // the netling minute the UI last looked at posting one
     flowMin: 0, // minutes in a row in good shape, awake
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
@@ -856,6 +858,8 @@ export function migrate(s) {
   s.scrip ??= 0;
   s.zone ??= deviceZone(s.lastTick ?? 0); // from before KI-12: the device's zone, as it always used
   s.request ??= null;
+  s.contract ??= null;
+  s.contractCheckAge ??= null;
   s.flowMin ??= 0;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;

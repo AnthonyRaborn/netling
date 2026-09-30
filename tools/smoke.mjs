@@ -1246,6 +1246,26 @@ await scenario('attention: COOL answers a COOL request, and it counts', async ({
   assert(progress.requestsMet === 1, `requests met: ${progress.requestsMet}`);
 });
 
+await scenario('attention: a posted contract shows in the bar and the region picker, and a jack-in takes it along', async ({ open }) => {
+  const save = awakeNetling();
+  save.stats.charge = 90;
+  save.contract = { kind: 'caches', region: 'public', n: 2, scrip: 15, item: 'coolant', postedAge: save.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert(await visible(page, '#wish-bar'), 'no bar for an open contract');
+  const bar = await page.textContent('#wish-text');
+  assert(/contract: crack 2 caches in the Public Net · 6h/.test(bar), `bar: ${bar}`);
+  assert(!(await visible(page, '#event-bar')), 'a contract must not look like an alert');
+  await page.click('#wish-run');
+  assert(await visible(page, '#regions'), 'NETRUN in the bar did not open the region picker');
+  const line = await page.textContent('#region-contract');
+  assert(/CONTRACT: CRACK 2 CACHES IN THE PUBLIC NET\. PAYS 15 SCRIP AND A COOLANT CELL\./.test(line), `picker: ${line}`);
+  assert((await page.locator('#region-list .rmeta.contract').count()) === 1, 'the contract region is not marked');
+  await page.locator('#region-list button:not([disabled])').first().click();
+  await page.waitForTimeout(300);
+  const s = await saved(page);
+  assert(s.contract === null && s.run?.contract?.kind === 'caches', `not taken along: ${JSON.stringify({ c: s.contract, r: s.run?.contract })}`);
+});
+
 await scenario('attention: GREET a visitor, hear its line, find it in the CHATTER tab', async ({ open }) => {
   const save = awakeNetling();
   save.visit = { startedAge: save.ageMin, len: 20, form: 'daemon', palette: 1, accessory: null };

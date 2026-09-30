@@ -1,7 +1,7 @@
 // The field manual, and onboarding:
 // intro (terminal) -> readme (field manual) -> nudge (go explore) -> tutorial (first run) -> done
 import { createScript, drainCurve, isAlive, CFG, MIN } from '../sim.js';
-import { startRun } from '../netrun/run.js';
+import { startRun, RUN_CFG } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, newForms, rootUnlocked, now, save, store } from './app.js';
@@ -67,6 +67,7 @@ function renderHelp() {
         ['Z', 'Resting: asleep for the night (turn the LIGHTS OFF), or napping.'],
         ['a second netling', `A stray visitor, playing with it for ${CFG.visitMinMin} to ${CFG.visitMaxMin} minutes: +${CFG.visitSync} Sync, +${CFG.visitHeat} Heat. GREET it while it is here and it may pass on a line from the wider net.`, 'Sometimes it leaves a gift; more often if you said hello.'],
         ['a request', `Now and then it asks for one game, or for a COOL when it is warm, and waits ${CFG.requestWindowMin} minutes. Answer it from the bar below the inventory.`, 'Nothing bad happens if you miss one.'],
+        ['a contract', `While the uplink is ready and the app is open, a job for one region may come in: reach its exit, get past some ICE, crack caches, buy at a market or bring back a fragment. It waits ${RUN_CFG.contractOpenMin / 60} hours, and every route through that run can meet it. Pays scrip, sometimes an item.`, 'Nothing bad happens if you miss one.'],
         ['a speech bubble', `It mutters to itself while it is awake and idle. Lines you see are kept in the Archive under CHATTER.`, 'Lines only count while the app is open.'],
         ['a glow', `Kept in good shape for ${CFG.flowAfterMin / 60} hours in a row while awake (Charge and Sync ${CFG.flowMinStat}+, Integrity ${CFG.flowMinIntegrity}+, Heat under ${CFG.flowMaxHeat}, nothing wrong), it glows. It is only a look.`],
       ],

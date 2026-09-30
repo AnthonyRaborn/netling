@@ -29,6 +29,7 @@ import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, HEX, accessoryById } from 
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
+import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
 import { upgradeSave } from './migrations.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
@@ -171,7 +172,15 @@ function cleanRun(raw, s, strict) {
     accessories: cleanAccessories(raw.accessories),
     scrip: int(raw.scrip, 0, 0, 1000),
     startStats: cleanStats(raw.startStats),
-    tally: { nodes: int(tally.nodes, 0, 0), iceWon: int(tally.iceWon, 0, 0), iceLost: int(tally.iceLost, 0, 0) },
+    tally: {
+      nodes: int(tally.nodes, 0, 0),
+      iceWon: int(tally.iceWon, 0, 0),
+      iceLost: int(tally.iceLost, 0, 0),
+      icePhased: int(tally.icePhased, 0, 0),
+      caches: int(tally.caches, 0, 0),
+      bought: int(tally.bought, 0, 0),
+    },
+    ...(cleanContract(raw.contract, true) ? { contract: cleanContract(raw.contract, true) } : {}), // only a run that took one along
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
     messages: Array.isArray(raw.messages) ? raw.messages.filter((m) => typeof m === 'string').slice(-20) : [],
     startedAge: num(raw.startedAge, s.ageMin, 0),
@@ -218,6 +227,22 @@ function cleanRequest(raw) {
   if (raw.kind === 'cool') return { kind: 'cool', startedAge };
   if (raw.kind === 'game' && GAME_IDS.includes(raw.game)) return { kind: 'game', game: raw.game, startedAge };
   return null;
+}
+
+// An open netrun job, or the one a run carries (onRun: it may be settled).
+const CONTRACT_SETTLED = ['met', 'missed', 'void'];
+function cleanContract(raw, onRun = false) {
+  if (!isObj(raw) || !CONTRACT_KINDS.includes(raw.kind) || !REGION_ORDER.includes(raw.region) || !Number.isFinite(raw.postedAge)) return null;
+  const counted = raw.kind === 'ice' || raw.kind === 'caches';
+  return {
+    kind: raw.kind,
+    region: raw.region,
+    ...(counted ? { n: int(raw.n, 2, 1, 5) } : {}),
+    scrip: int(raw.scrip, RUN_CFG.contractScrip[raw.kind], 0, SCRIP.max),
+    item: has(ITEMS, raw.item) ? raw.item : null,
+    postedAge: Math.max(0, raw.postedAge),
+    ...(onRun && CONTRACT_SETTLED.includes(raw.settled) ? { settled: raw.settled } : {}),
+  };
 }
 
 // The chatter line on screen: { id, startedAge }.
@@ -343,6 +368,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
     request: cleanRequest(raw.request),
+    contract: cleanContract(raw.contract),
+    contractCheckAge: numOrNull(raw.contractCheckAge),
     flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
     flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
     chatter: cleanChatter(raw.chatter),
@@ -417,6 +444,7 @@ export function cleanProgress(raw) {
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
     requestsMet: int(p.requestsMet, 0, 0),
+    contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),

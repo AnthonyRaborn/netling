@@ -15,8 +15,9 @@ A **netrun** is the game's dungeon crawl: the netling jacks into the net and wal
 9. [Anomalies](#anomalies)
 10. [Codex fragments](#codex-fragments)
 11. [Accessories in runs](#accessories-in-runs)
-12. [The tutorial run](#the-tutorial-run)
-13. [Where the run lives](#where-the-run-lives)
+12. [Contracts](#contracts)
+13. [The tutorial run](#the-tutorial-run)
+14. [Where the run lives](#where-the-run-lives)
 
 ## Run lifecycle
 
@@ -154,6 +155,7 @@ Per move: Charge -4 (`moveCharge`), Heat +5 (`moveHeat`).
 
 **Jack out** (`jackOut`): via the exit node or a relay.
 
+- A carried contract is settled first (see [Contracts](#contracts)).
 - Every carried item goes to the inventory; anything that does not fit is scrapped for a quarter of its price ("N scrapped for S scrip: inventory full"). Loose scrip is added, up to the cap.
 - `pet.codexFound` grows by the number of fragments banked (see the per-life cap below).
 - Half of the Integrity lost during the run is restored (`jackOutRestore = 0.5`, based on `startStats.integrity`).
@@ -233,6 +235,26 @@ Completing all 22 grants Root Access (see [SIMULATION.md](SIMULATION.md#root-acc
 | Exit | 8% |
 
 Accessories found or bought are held in `run.accessories` and are lost on a disconnect or abort, like loot. `noStyleDrops` (tutorial) disables all of it.
+
+## Contracts
+
+`pet.contract` is an open job, `{ kind, region, n?, scrip, item, postedAge }` (`updateContract`, `RUN_CFG.contract*`). The UI calls `updateContract(pet, rng, codex, now)` every clock tick while the app is open and onboarding is done; it expires a job after 360 minutes (`contractOpenMin`, in netling minutes) and otherwise, when `contractReady` (alive, awake, no run, not hibernating or rebooting, cooldown 0), rolls 0.5 an hour (`contractChancePerHour`) for each netling minute since the last call, counting at most 60 of them (`contractCatchUpMin`). It picks an open region, then a kind that can be met there:
+
+| Kind | Job | Met when (at jack-out) | Posted only if | Map fix at jack-in | Pay |
+|---|---|---|---|---|---|
+| `exit` | Reach the region's exit | Jacked out at the exit (not a relay) | always | none | 15 |
+| `clean` | Reach the exit without losing to ICE | At the exit with `tally.iceLost` 0 | always | none | 20 |
+| `ice` | Get past `n` ICE (2 or 3) | `iceWon + icePhased >= n` | always | Every route holds `n + 1` ICE (`contractIceSpare`) | 20 |
+| `caches` | Crack `n` caches (2 or 3) | `tally.caches >= n` | always | Every route holds `n` caches | 15 |
+| `market` | Buy something at a market | `tally.bought >= 1` (item or accessory) | the region has markets and the netling has 15+ scrip | A market in the first half of every route (`contractMarketBy`); each market's first offer is a cheapest-tier item | 15 |
+| `fragment` | Bring back a codex fragment | At least one fragment carried out | an unread fragment waits there and `codexRoom > 0` | The exit's fragment roll is certain | 25 |
+
+`item` (25%, `contractItemChance`) is one of the cheapest-tier items (coolant, antivirus, repair, booster, memory), chosen when posted.
+
+- `startRun` takes the job along only when jacking into its region (`run.contract`, and `pet.contract = null`); another region leaves it posted. The map fix is `ensureOnEveryRoute` (`map.js`): it finds the route with the fewest nodes of the type (`thinnestRoute`, one pass over the layers) and turns one of that route's other middle nodes into the type, relays only when nothing else is left on it, until every route has enough. The map's shape never changes. Tests check the result against every route on hundreds of maps.
+- `run.tally` counts `icePhased` (ICE a Ghost or Glitch slipped past), `caches` and `bought` alongside `nodes`, `iceWon` and `iceLost`. The run screen shows the job and its progress at the top right (`contractShort`).
+- `settleContract` runs first in `jackOut`, `disconnect` and `abortRun`: `run.contract.settled` becomes `met` (the pay joins `run.scrip` and `run.loot`, so it is banked with them), `missed` or `void`. `jackOut` returns `contract: 'met' | 'missed' | null`; the UI counts a met one in `progress.contractsDone` (the Seal crest at 10).
+- The balance bots never take contracts, so the baselines do not include them.
 
 ## The tutorial run
 

@@ -476,6 +476,11 @@ button:active {
   color: var(--yellow);
 }
 
+.inv-scrip.contract {
+  color: var(--yellow);
+  text-align: left;
+}
+
 .inv-slots {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -849,6 +854,10 @@ button:active {
   font-size: 15px;
   color: var(--dim);
   text-shadow: none;
+}
+
+.region .rmeta.contract {
+  color: var(--yellow);
 }
 
 .region .rfrag {

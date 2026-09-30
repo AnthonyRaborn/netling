@@ -18,6 +18,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 | Greet a visitor | One GREET per visit; count is `progress.visitorsGreeted` |
 | Flow | A glow after 3 hours in good shape; time spent counts across lives (`flowMin`) |
 | Chatter | 50 lines; heard lines are kept in the Archive's CHATTER tab (`progress.chatter`) |
+| Contracts | A netrun job for one region, posted while the uplink is ready and the app is open; every route through that run can meet it. Count is `progress.contractsDone` |
 
 ## Unlocks
 
@@ -27,6 +28,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 | effect | Aurora | 24 hours in flow, across lives |
 | tint | Guest pink | 5 visitors greeted |
 | crest | Speech mark | every chatter line of one group heard |
+| crest | Seal | 10 contracts completed, across lives |
 
 ## Measured
 
@@ -41,11 +43,20 @@ Balance bots, 1000 lives each. They answer a request or greet a visitor only if 
 
 An attentive player earns Purr in about three lives and Aurora in about two; casual players rarely reach flow. Hourly check-ins catch about one visit a life.
 
+## Contracts
+
+Rules and numbers are in [NETRUN.md](NETRUN.md#contracts).
+
+- **When.** Only while the app is open (the UI posts them; the sim never does), after the tutorial, with the uplink ready and the netling awake, not rebooting and not on a run: 50% an hour. It waits 6 hours, or until a jack-in into its region takes it along. A jack-in elsewhere leaves it posted, so the uplink cooldown never makes one impossible to take.
+- **Jobs.** Reach the region's exit; reach it without losing an ICE fight; get past 2 or 3 ICE (a win, or a Ghost or Glitch slipping by); crack 2 or 3 caches; buy something at a market; bring back a codex fragment.
+- **Solvable on every route.** When the run starts, the map is fixed so that every route from entry to exit meets the job without perfect play: an ICE job gets one ICE more than it asks for on every route, so one lost fight doesn't sink it; a cache job gets enough caches on every route; a market job gets a market in the first half of every route, each offering one of the cheapest items. A fragment job is only posted where an unread fragment waits and the netling's memory has room, and it makes the exit's fragment certain. A market job needs 15 scrip when posted. Winning ICE fights is still up to the player.
+- **Pay.** 15 to 25 scrip by job, and a 25% chance of one cheapest-tier item, named when posted, paid into the run's loot on jack-out (so a disconnect or abort loses it with the rest). A missed job pays nothing and costs nothing.
+- **Not measured.** The balance bots never take contracts (they are posted by the UI), so the baselines did not move and there is no measured rate yet.
+
 ## Limits
 
 Notifications are local: they fire while the app is open or in a background tab. A closed or suspended app gets nothing, because a static site has no push server. Reliable notifications with the app closed need a native wrapper ([PLATFORMS.md](PLATFORMS.md)).
 
 ## Open ideas
 
-- **Netrun contracts.** A time window can clash with the uplink cooldown. One way round it: post a contract only when the uplink is ready and keep it open until the next jack-in or 6 hours, whichever comes first.
 - **Daily check-in reward.** Needs reward ideas; any version should pay for showing up without taking anything away for a missed day.

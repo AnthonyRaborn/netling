@@ -39,7 +39,7 @@ For regressions (rerun the audit):
 - Wearables that lose half or more of their pixels awake and lit: 2 (Crown in 1 of 54 form and palette cases, Earpiece in 1).
 - Wearables that lose half or more asleep with the lights off: 0.
 - Highest wearable pair overlaps: Shades and Visor 0.58 to 0.59, Cap and Party hat 0.58 (different colors).
-- Highest crest pair overlap: Helix and Star 0.31.
+- Highest crest pair overlap: Full house and Seal 0.30.
 - Worn together (`--check=combos`, worst over every form, pose and orbit time): Chrome jaw over Scarf 0.82 and Rebreather over Scarf 0.73 (Glitch, which has almost no neck), Bandage over Cyber eye 0.60 (Kernel, in 7% of cases), Circuit tattoo over KERNEL pin 0.44. Before the room-making, Chrome jaw and Rebreather hid the Corp barcode and KERNEL pin entirely on Daemon.
 - The gallery outlines a wearable when half or more of its pixels blend in, computed from the sprite's own colors. The audit measures the real render, so counts can differ slightly at the edges.
 

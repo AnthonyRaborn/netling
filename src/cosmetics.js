@@ -25,6 +25,7 @@ export const ATTENTION = {
   chatterHeard: 25, // the Forum track
   greetings: 5,
   flowHours: 24,
+  contracts: 10, // the Seal crest
   groupHeard: (ctx) => {
     const prog = chatterProgress(ctx.progress.chatter ?? []);
     return CHATTER_GROUPS.some((g) => prog[g.id].total > 0 && prog[g.id].heard === prog[g.id].total);
@@ -136,6 +137,14 @@ export const COSMETICS = {
       hint: 'hear everything one kind of netling has to say.',
       check: (c) => ATTENTION.groupHeard(c),
       pixels: ['.........', '.#######.', '#.......#', '#.#.#.#.#', '#.......#', '.#######.', '..#......', '.#.......', '.........'],
+    },
+    {
+      id: 'seal',
+      name: 'Seal',
+      hint: 'take ten jobs and see them through.',
+      check: (c) => (c.progress.contractsDone ?? 0) >= ATTENTION.contracts,
+      // A stamped seal with a tick, and two ribbon tails.
+      pixels: ['..#####..', '.#.....#.', '#.....#.#', '#....#..#', '#.#.#...#', '.#.#...#.', '..#####..', '..#...#..', '.#.....#.'],
     },
   ],
   // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.

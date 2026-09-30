@@ -214,6 +214,8 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 
 **Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat or axis.
 
+**Contracts** (`s.contract`) are netrun jobs, posted by the UI through `updateContract` in `netrun/run.js` while the app is open; see [NETRUN.md](NETRUN.md#contracts). `step` never posts or expires one.
+
 **Chatter** (`s.chatter`, `stepChatter`, `src/chatter.js`). While idle, 0.15 an hour (`chatterChancePerHour`), it picks a line from its pool: the lines of its current body, plus lineage lines whose condition holds (its trait, a history, NL-0 watching). A line stays for 20 minutes (`chatterShowMin`) or until it rests. GREET shows a visitor line instead. The UI records a line as heard (`progress.chatter`) once it is on screen with the page visible.
 
 ## Items

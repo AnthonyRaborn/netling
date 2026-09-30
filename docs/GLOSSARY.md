@@ -49,6 +49,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Corp trace** | Timed event: HIDE or COMPLY within 2 hours or lose Integrity and lean corp | `sim.js` |
 | **Corp voucher** | Item: full Charge, waves off a trace | `sim.js` |
 | **Crash** | What an ignored memory overflow does: -15 Integrity, cache full, 20 minute reboot | `sim.js` |
+| **Contract** | A netrun job for one region (reach the exit, get past ICE, crack caches, buy, bring back a fragment), posted while the uplink is ready; every route through that run can meet it | `netrun/run.js` `updateContract` |
 | **Crest** | Wardrobe slot: a pixel emblem beside the device label, earned by a legacy goal | `cosmetics.js` |
 | **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead and repairs as it moves in runs | `sim.js` |
 | **Drain curve** | Charge and Sync drain faster the fuller they are: 0.39x the base rate near empty, 2x when full (`drainCurve`) | `sim.js` |

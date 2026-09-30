@@ -134,7 +134,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (6)
+### Crests (7)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -146,8 +146,9 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `loop` | Closed loop | 5 full lives in a row with no NL-0 rescue | "five whole lives in a row, nobody pulled back." |
 | `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
+| `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
 
-Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark is the one crest not read from the lineage: it comes from the chatter heard (see [Chatter](#chatter)).
+Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
 ### Music (7)
 

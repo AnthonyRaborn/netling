@@ -104,7 +104,7 @@ Rules of thumb:
 
 - Nothing below `ui/` imports from `ui/`.
 - `sim.js` imports only `accessories.js` (visitors wear accessories).
-- `sanitize.js` imports the tables it validates against (`sim`, `cosmetics`, `accessories`, `codex`, `regions`, `anomalies`), which is why adding an id to a table automatically makes it valid.
+- `sanitize.js` imports the tables it validates against (`sim`, `cosmetics`, `accessories`, `codex`, `regions`, `anomalies`, and `run` for the contract kinds), which is why adding an id to a table automatically makes it valid.
 - `archive.js` imports `FORM_ABILITIES` from `netrun/run.js` for the dex.
 - The `ui/` modules import each other in cycles (`play` and `onboarding`, `life` and `system`, ...). This works because they only call each other's functions at runtime, never at module load. Keep it that way: do not use an import at the top level of a `ui/` module.
 
