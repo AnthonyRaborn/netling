@@ -1,4 +1,4 @@
-// Renders the trailer (about 41 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
+// Renders the trailer (about 49 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
 // real app. Spoiler-free on purpose, like the player README: only a Bitling is ever shown, the
 // evolution cuts away before the new form appears, the flatline card's fragment rows and the next
 // generation's trait are hidden, and the region list names only the Public Net.
@@ -201,13 +201,25 @@ const SCENES = [
   },
   {
     name: 'flatline',
-    duration: 9,
+    duration: 16.5,
     seed: () =>
       settled(bitling({ ageMin: 900, stats: { charge: 0, sync: 4, integrity: 0, heat: 40 }, integrityZeroMin: CFG.flatlineIntegrityMin - 1, careMistakes: 6 })),
     redactFragment: true,
     at: [
       [0.8, skipMinutes(2)],
       [4.6, click('#fl-next')],
+      // The next generation, in other colors (never NL-0's) and the other common hat, as a teaser.
+      [
+        4.7,
+        (page) =>
+          inPage(`(m) => {
+            const a = m.app.app;
+            a.state.quirk.palette = ${(quirk?.palette ?? 3) === 1 ? 0 : 1};
+            if (!a.ownedAccessories.includes('cap')) a.ownedAccessories.push('cap');
+            a.wardrobe = { ...a.wardrobe, accessory: 'cap' };
+          }`)(page),
+      ],
+      [7.2, skipMinutes(CFG.bootMinutes + 1)], // the compile finishes on camera
     ],
   },
 ].filter((s) => !ONLY || ONLY.has(s.name));
@@ -235,11 +247,13 @@ const TIMELINE = {
     [sceneStart('evolve') + 0.1, sceneStart('evolve') + 1.6, 'IT GROWS UP.'],
     [sceneStart('flatline') + 0.3, sceneStart('flatline') + 2.6, 'IT WILL FLATLINE.'],
     [sceneStart('flatline') + 2.6, sceneStart('flatline') + 5.2, 'SOMETHING SURVIVES.'],
+    [sceneStart('flatline') + 5.2, sceneStart('flatline') + 7.6, 'THE NEXT ONE COMPILES.'],
+    [sceneStart('flatline') + 7.8, sceneStart('flatline') + 11.4, 'NO TWO ARE ALIKE.'],
   ],
   // Full-screen cards over the game. [from, to, kind]
   cards: [
     [sceneStart('evolve') + 1.6, sceneStart('evolve') + 3.5, 'evolve'],
-    [sceneStart('flatline') + 5.6, TOTAL + 1, 'end'],
+    [sceneStart('flatline') + 11.6, TOTAL + 1, 'end'],
   ],
 };
 
@@ -260,13 +274,15 @@ function initScript(scene, seed) {
       t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
-    // Sound before recording starts (t0) goes nowhere; after it, into the offline render.
+    // Sound before recording starts (t0) goes nowhere; after it, into the offline render. Every
+    // context the page makes is recorded and mixed (sound effects, and any other player such as music).
     window.__t0 = Infinity;
+    window.__audio = [];
     class TrailerAudio extends OfflineAudioContext {
       constructor() {
         super(1, Math.ceil(${RATE} * ${len}), ${RATE});
         this.muted = this.createGain();
-        window.__audio = this;
+        window.__audio.push(this);
       }
       get currentTime() { return Math.max(0, (performance.now() - window.__t0) / 1000); }
       get destination() { return performance.now() < window.__t0 ? this.muted : super.destination; }
@@ -289,9 +305,7 @@ const TRAILER_CSS = `
   body { overflow: hidden; }
   .brand, .inventory, #log, #dev, #ios-hint, #update-bar, #status:empty { display: none !important; }
   .device { margin-top: 120px !important; }
-  .intro { padding: 8px 10px; }
   #region-list .region:not(:first-child) { visibility: hidden; } /* regions past the Public Net stay unnamed */
-  .intro pre { font-size: 14px; } /* all ten intro lines fit the screen at this width */
   #tr-band { position: fixed; inset: 0 0 auto 0; height: 118px; display: flex; align-items: center; justify-content: center;
     padding: 0 18px; text-align: center; font: 38px/1.05 'VT323', monospace; letter-spacing: 2px; color: #c7f9ff;
     text-shadow: 0 0 6px #05d9e8, 0 0 14px #05d9e8aa; z-index: 50; pointer-events: none; }
@@ -458,11 +472,13 @@ async function recordScene(browser, scene, video, frameIndex) {
   // The scene's sound, exactly as long as its frames, as 16-bit samples.
   const samples = Math.round((frames / FPS) * RATE);
   const b64 = await page.evaluate(async (n) => {
-    const out = new Int16Array(n);
-    if (window.__audio) {
-      const data = (await window.__audio.startRendering()).getChannelData(0);
-      for (let i = 0; i < n && i < data.length; i++) out[i] = Math.max(-1, Math.min(1, data[i])) * 32767;
+    const mix = new Float32Array(n);
+    for (const ctx of window.__audio) {
+      const data = (await ctx.startRendering()).getChannelData(0);
+      for (let i = 0; i < n && i < data.length; i++) mix[i] += data[i];
     }
+    const out = new Int16Array(n);
+    for (let i = 0; i < n; i++) out[i] = Math.max(-1, Math.min(1, mix[i])) * 32767;
     let s = '';
     const bytes = new Uint8Array(out.buffer);
     for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
