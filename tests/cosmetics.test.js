@@ -156,3 +156,25 @@ test('Speech mark: every line of one group heard', () => {
   assert.equal(earns({ progress: { chatter: bitling.slice(1) } }, 'crest:speech'), false);
   assert.equal(earns({ progress: { chatter: bitling } }, 'crest:speech'), true);
 });
+
+// --- music tracks ---
+
+test('music: Idle loop is free; each track has its own milestone', () => {
+  assert.equal(DEFAULT_WARDROBE.music, 'idle');
+  assert.ok(earns({}, 'music:idle'));
+  const edges = [
+    ['nightdrive', { generation: 1 }, { generation: 2 }],
+    ['dialup', { codex: FRAGMENTS.slice(0, 9).map((f) => f.id) }, { codex: FRAGMENTS.slice(0, 10).map((f) => f.id) }],
+    ['lobby', { progress: { acts: { corp: 24, scav: 99 } } }, { progress: { acts: { corp: 25 } } }],
+    ['tracker', { progress: { gamesPlayed: 149 } }, { progress: { gamesPlayed: 150 } }],
+    ['undertow', { progress: { deepExits: 2 } }, { progress: { deepExits: 3 } }],
+    ['forum', { progress: { chatter: CHATTER.slice(0, 24).map((c) => c.id) } }, { progress: { chatter: CHATTER.slice(0, 25).map((c) => c.id) } }],
+  ];
+  for (const [id, before, after] of edges) {
+    assert.equal(earns(before, `music:${id}`), false, `${id} too early`);
+    assert.equal(earns(after, `music:${id}`), true, `${id} not earned`);
+  }
+  assert.equal(cleanWardrobe({ music: 'forum' }).music, 'forum');
+  assert.equal(cleanWardrobe({ music: 'netrun' }).music, undefined, 'the netrun theme is not a wardrobe track');
+  assert.equal(resolveWardrobe({ music: 'forum' }, ['music:idle']).music, 'idle', 'a locked track falls back');
+});

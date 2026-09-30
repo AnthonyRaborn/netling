@@ -4,6 +4,7 @@
 import { isAlive, resting } from '../sim.js';
 import { musicMode } from '../tracks.js';
 import { setMusicMode, setMusicSeed } from '../music.js';
+import { resolveWardrobe } from '../cosmetics.js';
 import { app } from './app.js';
 
 export function syncMusicMode() {
@@ -18,7 +19,7 @@ export function syncMusicMode() {
       resting: resting(s),
       runRegion: s.run?.region ?? null,
       inGame: Boolean(app.session) && !s.run,
-      track: 'idle',
+      track: app.wardrobe && app.unlocked ? resolveWardrobe(app.wardrobe, app.unlocked).music : 'idle',
       force: app.devMusic ?? {},
     }),
   );

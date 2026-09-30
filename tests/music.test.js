@@ -6,6 +6,7 @@ import {
   LOW_MIDI, MUSIC_IDS, STEPS, WIND_DOWN, finalChord, windDownPlan, TRACKS, VARIANTS, applyVariant, createArranger, musicMode, musicSettings, phraseBars,
 } from '../src/tracks.js';
 import { REGIONS } from '../src/netrun/regions.js';
+import { COSMETICS } from '../src/cosmetics.js';
 
 // --- a stand-in for Web Audio that counts started sources ---
 
@@ -67,13 +68,14 @@ test('every phrase is a whole number of bars of valid steps, and each part keeps
       for (const ph of part.phrases) {
         assert.ok([1, 2].includes(phraseBars(ph)), `${track.id}.${name}: ${ph}`);
         assert.equal(phraseBars(ph), bars, `${track.id}.${name}: one phrase length per part`);
-        const ok = part.mode === 'drums' ? /^[.ksh]$/ : /^(\.|-|_?-?\d+)$/;
+        const ok = part.mode === 'drums' ? /^[.kshcwx]$/ : /^(\.|-|_?-?\d+(\+_?-?\d+)*)$/;
         for (const tok of ph.trim().split(/\s+/)) assert.match(tok, ok, `${track.id}.${name}: ${tok}`);
       }
     }
     for (const section of track.form) for (const p of section.parts) assert.ok(track.parts[p], `${track.id}: section plays ${p}`);
   }
   assert.ok(MUSIC_IDS.every((id) => TRACKS[id]) && !MUSIC_IDS.includes('netrun'), 'the netrun theme is not a wardrobe track');
+  assert.deepEqual(COSMETICS.music.map((c) => c.id), MUSIC_IDS, 'every wardrobe track exists, and every track but the netrun theme is in the wardrobe');
 });
 
 test('the arranger is deterministic for a seed, stays in range, and never repeats a phrase back to back', () => {
@@ -89,7 +91,7 @@ test('the arranger is deterministic for a seed, stays in range, and never repeat
     let flourishes = 0;
     for (const bar of one) {
       for (const [part, idx] of Object.entries(bar.phrases)) {
-        assert.notEqual(idx, last[part], `${id}.${part}: bar ${bar.bar} repeats its phrase`);
+        if (TRACKS[id].parts[part].phrases.length > 1) assert.notEqual(idx, last[part], `${id}.${part}: bar ${bar.bar} repeats its phrase`);
         last[part] = idx;
       }
       for (const e of bar.events) {
@@ -107,6 +109,10 @@ test('the arranger is deterministic for a seed, stays in range, and never repeat
         const settings = musicSettings(id, v, region, REGIONS[region]?.sound);
         for (const bar of one) for (const e of applyVariant(bar.events, settings)) if (e.midi !== undefined) assert.ok(e.midi >= LOW_MIDI && e.midi <= 108, `${id} ${v} ${region}: midi ${e.midi}`);
       }
+    }
+    if (!TRACKS[id].flourishEvery) {
+      assert.equal(flourishes, 0, `${id}: no flourishes`);
+      continue;
     }
     const [lo, hi] = TRACKS[id].flourishEvery;
     assert.ok(flourishes >= Math.floor(200 / hi) && flourishes <= Math.ceil(200 / lo), `${id}: ${flourishes} flourishes`);
@@ -159,6 +165,8 @@ test('what plays when: home, asleep, mini-game (ducked), netrun, flatline, and D
   assert.deepEqual(musicMode({ alive: true, runRegion: 'bazaar', inGame: true }), { track: 'netrun', variant: 'awake', region: 'bazaar', duck: 1 });
   assert.equal(musicMode({ alive: true, track: 'netrun' }).track, 'idle', 'the netrun theme cannot be equipped');
   assert.equal(musicMode({ alive: true, track: 'made-up' }).track, 'idle');
+  assert.equal(musicMode({ alive: true, track: 'forum', resting: true }).track, 'forum', 'the equipped track plays, asleep too');
+  assert.equal(musicMode({ alive: true, track: 'forum', runRegion: 'corp' }).track, 'netrun', 'netruns keep their theme');
   const forced = musicMode({ alive: true, force: { track: 'netrun:deep', variant: 'flow' } });
   assert.deepEqual([forced.track, forced.region, forced.variant], ['netrun', 'deep', 'flow']);
 });

@@ -72,12 +72,25 @@ function track(graph, node, stopAt) {
   node.stop(stopAt);
 }
 
-function tone(graph, dest, wave, freq, t, dur, vol, env) {
+// One note. opts.detune (cents) adds a second, slightly detuned voice; opts.arp (semitones)
+// makes the note flutter through those intervals, tracker style.
+const ARP_STEP_S = 1 / 40;
+function tone(graph, dest, wave, freq, t, dur, vol, env, opts = {}) {
   const { ctx } = graph;
-  const osc = ctx.createOscillator();
   const g = ctx.createGain();
-  osc.type = wave;
-  osc.frequency.setValueAtTime(freq, t);
+  const voices = opts.detune ? [0, opts.detune] : [0];
+  const oscs = voices.map((cents) => {
+    const osc = ctx.createOscillator();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq * 2 ** (cents / 1200), t);
+    if (opts.arp) {
+      for (let k = 1, at = t + ARP_STEP_S; at < t + dur; k++, at += ARP_STEP_S) {
+        osc.frequency.setValueAtTime(freq * 2 ** (opts.arp[k % opts.arp.length] / 12), at);
+      }
+    }
+    return osc;
+  });
+  if (voices.length > 1) vol *= 0.7; // two voices, about the same loudness as one
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + 0.005);
   let end;
@@ -93,15 +106,19 @@ function tone(graph, dest, wave, freq, t, dur, vol, env) {
     g.gain.linearRampToValueAtTime(0, end + 0.04);
     end += 0.04;
   }
-  osc.connect(g).connect(dest);
-  osc.start(t);
-  track(graph, osc, end + 0.01);
+  g.connect(dest);
+  for (const osc of oscs) {
+    osc.connect(g);
+    osc.start(t);
+    track(graph, osc, end + 0.01);
+  }
 }
 
 function noiseHit(graph, t, dur, vol, type, freq) {
   const { ctx } = graph;
   const src = ctx.createBufferSource();
   src.buffer = noiseBuffer(ctx);
+  src.loop = true; // the buffer is half a second; a bar of hiss needs longer
   const filter = ctx.createBiquadFilter();
   filter.type = type;
   filter.frequency.value = freq;
@@ -114,7 +131,7 @@ function noiseHit(graph, t, dur, vol, type, freq) {
   track(graph, src, t + dur + 0.01);
 }
 
-function drum(graph, kind, t, vol) {
+function drum(graph, kind, t, vol, barS) {
   if (kind === 'k') {
     const { ctx } = graph;
     const osc = ctx.createOscillator();
@@ -129,6 +146,26 @@ function drum(graph, kind, t, vol) {
     track(graph, osc, t + 0.17);
   } else if (kind === 's') noiseHit(graph, t, 0.12, vol * 0.6, 'bandpass', 1800);
   else if (kind === 'h') noiseHit(graph, t, 0.03, vol * 0.35, 'highpass', 7000);
+  else if (kind === 'c') noiseHit(graph, t, 0.015, vol * 0.5, 'highpass', 4500); // a key click
+  else if (kind === 'w') tone(graph, graph.level, 'triangle', 1050, t, 0.05, vol * 0.5, 'pluck'); // woodblock
+  else if (kind === 'x') {
+    // Tape hiss: a bar of soft high noise that swells and fades, so bars overlap without a seam.
+    const { ctx } = graph;
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer(ctx);
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 3500;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol * 0.06, t + barS * 0.25);
+    g.gain.linearRampToValueAtTime(vol * 0.06, t + barS * 0.9);
+    g.gain.linearRampToValueAtTime(0, t + barS * 1.15);
+    src.connect(filter).connect(g).connect(graph.level);
+    src.start(t);
+    track(graph, src, t + barS * 1.15 + 0.01);
+  }
 }
 
 // A dial-up handshake squeal: a few quick random tones over a burst of static.
@@ -139,6 +176,22 @@ function modem(graph, t, seed) {
   noiseHit(graph, t + 0.36, 0.25, 0.05, 'bandpass', 2400);
 }
 
+// A disk seeking: an uneven run of clicks with a low thunk at the start.
+function seek(graph, t, seed) {
+  let x = seed >>> 0 || 1;
+  const r = () => ((x = (Math.imul(x, 1664525) + 1013904223) >>> 0) / 2 ** 32);
+  tone(graph, graph.level, 'sine', 90, t, 0.06, 0.3, 'pluck');
+  for (let i = 0, at = t; i < 10; i++, at += 0.02 + r() * 0.05) noiseHit(graph, at, 0.012, 0.12, 'bandpass', 2500 + r() * 1500);
+}
+
+// The elevator's ding: two soft chime notes, high then lower.
+function chime(graph, t) {
+  tone(graph, graph.level, 'triangle', midiHz(88), t, 0.5, 0.12, 'fade');
+  tone(graph, graph.level, 'triangle', midiHz(84), t + 0.35, 0.7, 0.12, 'fade');
+}
+
+const FLOURISHES = { modem, seek, chime };
+
 // Queues one arranged bar at time t0 and returns its length in seconds.
 export function scheduleBar(graph, bar, settings, t0) {
   const def = TRACKS[settings.track];
@@ -147,20 +200,22 @@ export function scheduleBar(graph, bar, settings, t0) {
   for (const e of applyVariant(bar.events, settings)) {
     const t = t0 + e.step * stepS;
     if (e.part === 'fx') {
-      modem(graph, t, e.seed);
+      (FLOURISHES[e.kind] ?? modem)(graph, t, e.seed);
       continue;
     }
     const part = e.part === 'sparkle' ? SPARKLE : def.parts[e.part];
     if (e.drum) {
-      drum(graph, e.drum, t, part.vol * e.vel);
+      drum(graph, e.drum, t, part.vol * e.vel, STEPS * stepS);
       continue;
     }
     const c = chain(graph, e.part, part);
-    c.filter.frequency.setTargetAtTime(Math.min(part.cutoff ?? 20000, settings.cutoff, 20000), t0, VARIANT_TAU_S);
+    // A sweep opens and closes the filter over `sweep` bars (0.55x to 1.45x the cutoff).
+    const sweep = part.sweep ? 0.55 + 0.45 * (1 - Math.cos((2 * Math.PI * bar.bar) / part.sweep)) : 1;
+    c.filter.frequency.setTargetAtTime(Math.min((part.cutoff ?? 20000) * sweep, settings.cutoff, 20000), t0, part.sweep ? 1.5 : VARIANT_TAU_S);
     const wave = part.region && settings.wave ? settings.wave : part.wave;
     // softer waves need more level to sit at the same loudness (as in audio.js)
     const lift = wave === 'sine' ? 1.6 : wave === 'triangle' || wave === 'sawtooth' ? 1.4 : 1;
-    tone(graph, c.filter, wave, midiHz(e.midi), t, e.len * stepS, part.vol * e.vel * lift, part.env);
+    tone(graph, c.filter, wave, midiHz(e.midi), t, e.len * stepS, part.vol * e.vel * lift, part.env, { detune: part.detune, arp: e.arp });
   }
   return STEPS * stepS;
 }

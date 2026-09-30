@@ -1336,6 +1336,21 @@ await scenario('music: resting plays the sleep variant', async ({ open }) => {
   assert(m.playing && m.key === 'idle:' && m.variant === 'sleep', `sleep variant not playing: ${JSON.stringify(m)}`);
 });
 
+await scenario('music: an earned track can be equipped in STYLE and plays at once', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.progress': { gamesPlayed: 150 } }));
+  await page.click('#open-archive'); // also the tap that starts the audio
+  await page.click('#tab-btn-wardrobe');
+  const tracker = page.locator('#wardrobe-list button.cosmetic', { hasText: 'Tracker' });
+  assert(await tracker.isEnabled(), 'Tracker not unlocked by 150 games');
+  // Locked items show only their hint.
+  assert(await page.locator('#wardrobe-list button.cosmetic', { hasText: 'pass it on.' }).isDisabled(), 'a locked track can be equipped');
+  await tracker.click();
+  await page.waitForTimeout(1200);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'tracker:', `equipped track not playing: ${JSON.stringify(m)}`);
+  assert((await saved(page, 'netling.wardrobe')).music === 'tracker', 'music choice not saved');
+});
+
 await scenario('music: the DEV row forces a track and a state', async ({ open }) => {
   const page = await open(`${BASE}?dev`, seed());
   await page.click('#dev-music-track'); // the tap that starts the audio

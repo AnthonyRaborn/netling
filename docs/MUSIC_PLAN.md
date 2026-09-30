@@ -1,6 +1,6 @@
 # Music plan
 
-Background music, synthesized in code. **Phase 1 is built** (release `netling-v43`): the engine, the controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row. Phases 2 and 3 are still plans. Once built, it becomes a reference doc (`MUSIC.md`) of facts and open questions, like [ATTENTION.md](ATTENTION.md). Spoiler-heavy, like the rest of `docs/`.
+Background music, synthesized in code. **Phases 1 and 2 are built** (release `netling-v43`): the engine, the controls, the sleep variant and its wind-down, the netrun theme, the DEV audition row, and all seven home tracks in the wardrobe's `music` slot. Phase 3 (alert and flow reactions) is still a plan. Once built, it becomes a reference doc (`MUSIC.md`) of facts and open questions, like [ATTENTION.md](ATTENTION.md). Spoiler-heavy, like the rest of `docs/`.
 
 ## Decisions (from the maintainer, 2026-09-30)
 
@@ -88,7 +88,7 @@ Both are built as drafts but not reached in play. To judge them, the DEV panel (
 
 ## Tracks
 
-Tempos and keys are starting points and will change once they can be heard.
+As built (keys and more detail in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#music-7)). Each track has a `gain` that evens out loudness: at 40% every track measures RMS 0.007 to 0.010 with peaks of 0.042 to 0.062 (`tools/render-music.mjs`).
 
 | Id | Name | Feel | Tempo | Sound |
 |---|---|---|---|---|
@@ -136,7 +136,7 @@ Forum (decision 9) is the attention-rewards track: a chattering old message boar
 ## Phases
 
 1. **Built.** Engine, controls, the Idle loop, the sleep variant, the netrun theme and the DEV audition row, for the maintainer to listen to.
-2. The six unlockable tracks, the `music` wardrobe slot and the unlocks.
+2. **Built.** The six unlockable tracks, the `music` wardrobe slot and the unlocks. The phrase language grew for them: several notes at once (`1+3+5`), passing notes in chord parts (2, 4, 6), chip arpeggios, detuned drones, a filter sweep, key clicks, woodblock and tape hiss, and two more flourishes (a disk seek for Forum, an elevator ding for Corp lobby).
 3. Alert and flow reactions, after auditioning in the DEV panel.
 
 ## Questions for the maintainer

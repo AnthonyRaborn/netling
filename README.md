@@ -171,7 +171,7 @@ When it flatlines it leaves a **fragment**. The next generation inherits that ne
 
 ## Style
 
-The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, the little extras above, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
+The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, background music, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, the little extras above, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
 
 ## Saving, moving and pausing
 
