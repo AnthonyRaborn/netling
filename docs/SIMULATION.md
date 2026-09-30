@@ -108,7 +108,7 @@ Damage sources add up. If there are none, Integrity regenerates.
 
 Care actions add flat Integrity on top: COOL +4, PURGE that clears something +4, PATCH +10, Repair kit +40.
 
-The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "about 16 hours". The old README said 14. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "about 16 hours". Not measured. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md#open-questions).
 
 ### Cache and digestion
 
