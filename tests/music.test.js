@@ -75,6 +75,7 @@ test('every phrase is a whole number of bars of valid steps, and each part keeps
     for (const section of track.form) for (const p of section.parts) assert.ok(track.parts[p], `${track.id}: section plays ${p}`);
   }
   assert.ok(MUSIC_IDS.every((id) => TRACKS[id]) && !MUSIC_IDS.includes('netrun'), 'the netrun theme is not a wardrobe track');
+  for (const id of MUSIC_IDS) assert.ok(Object.values(TRACKS[id].parts).some((p) => p.sparkle), `${id}: flow has something to sparkle`);
   assert.deepEqual(COSMETICS.music.map((c) => c.id), MUSIC_IDS, 'every wardrobe track exists, and every track but the netrun theme is in the wardrobe');
 });
 
@@ -161,6 +162,11 @@ test('what plays when: home, asleep, mini-game (ducked), netrun, flatline, and D
   assert.equal(musicMode({ alive: false }), null);
   assert.deepEqual(musicMode({ alive: true, resting: false }), { track: 'idle', variant: 'awake', region: null, duck: 1 });
   assert.equal(musicMode({ alive: true, resting: true }).variant, 'sleep');
+  assert.equal(musicMode({ alive: true, alert: true }).variant, 'alert');
+  assert.equal(musicMode({ alive: true, flow: true }).variant, 'flow');
+  assert.equal(musicMode({ alive: true, alert: true, flow: true }).variant, 'alert', 'an alert beats flow');
+  assert.equal(musicMode({ alive: true, resting: true, alert: true }).variant, 'sleep', 'sleep beats an alert (the lights-on alert at bedtime)');
+  assert.equal(musicMode({ alive: true, alert: true, runRegion: 'corp' }).variant, 'awake', 'netruns keep their own theme');
   assert.equal(musicMode({ alive: true, inGame: true }).duck, 0.7);
   assert.deepEqual(musicMode({ alive: true, runRegion: 'bazaar', inGame: true }), { track: 'netrun', variant: 'awake', region: 'bazaar', duck: 1 });
   assert.equal(musicMode({ alive: true, track: 'netrun' }).track, 'idle', 'the netrun theme cannot be equipped');

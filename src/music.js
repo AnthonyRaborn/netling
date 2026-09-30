@@ -1,7 +1,7 @@
 // Background music player: schedules the arranger's bars (tracks.js) on the shared Web Audio
 // context a little ahead of time, so the beat stays steady. It only ever starts after a user
 // gesture has created the context (audio.js), and stops while the page is hidden, when muted, or
-// with the music volume at 0. See docs/MUSIC_PLAN.md.
+// with the music volume at 0. See docs/MUSIC.md.
 import { audioContext } from './audio.js';
 import { REGIONS } from './netrun/regions.js';
 import { SPARKLE, STEPS, TRACKS, WIND_DOWN, applyVariant, createArranger, finalChord, floorMidi, musicSettings, windDownPlan } from './tracks.js';

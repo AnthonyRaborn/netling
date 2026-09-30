@@ -1351,6 +1351,32 @@ await scenario('music: an earned track can be equipped in STYLE and plays at onc
   assert((await saved(page, 'netling.wardrobe')).music === 'tracker', 'music choice not saved');
 });
 
+await scenario('music: an open alert plays the alert variant, and ends with the alert', async ({ open }) => {
+  const alarmed = awakeNetling();
+  Object.assign(alarmed.stats, { charge: 10, sync: 90, integrity: 100, heat: 20 }); // low Charge is the only alert
+  const page = await open(BASE, seed({ 'netling.save': alarmed }));
+  await page.keyboard.press('Shift');
+  await page.waitForTimeout(1300);
+  let m = await musicStatus(page);
+  assert(m.playing && m.variant === 'alert', `alert variant not playing: ${JSON.stringify(m)}`);
+  await page.click('#controls [data-act="corp"]'); // feed it past the alert
+  await page.click('#controls [data-act="corp"]');
+  await page.waitForTimeout(1300);
+  m = await musicStatus(page);
+  assert(m.variant === 'awake', `still alarmed after feeding: ${JSON.stringify(m)}`);
+});
+
+// Its own scenario: a second tab in the same profile would be the waiting tab, which stays quiet.
+await scenario('music: flow plays the flow variant', async ({ open }) => {
+  const save = awakeNetling({ flowMin: 400 });
+  Object.assign(save.stats, { charge: 90, sync: 90, integrity: 100, heat: 20 });
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  await page.keyboard.press('Shift');
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.variant === 'flow', `flow variant not playing: ${JSON.stringify(m)}`);
+});
+
 await scenario('music: the DEV row forces a track and a state', async ({ open }) => {
   const page = await open(`${BASE}?dev`, seed());
   await page.click('#dev-music-track'); // the tap that starts the audio

@@ -151,7 +151,7 @@ Records from before trait levels count as level 1, and records from before `real
 
 ### Music (7)
 
-The home screen's background music (`tracks.js`, played by `music.js`; see [MUSIC_PLAN.md](MUSIC_PLAN.md)). Netruns always play their own theme, whatever is equipped. Equipping a track crossfades to it at once.
+The home screen's background music (`tracks.js`, played by `music.js`; see [MUSIC.md](MUSIC.md)). Netruns always play their own theme, whatever is equipped. Equipping a track crossfades to it at once.
 
 | Id | Name | Feel | Unlock | Hint |
 |---|---|---|---|---|

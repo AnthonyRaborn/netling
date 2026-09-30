@@ -138,7 +138,7 @@ export const COSMETICS = {
       pixels: ['.........', '.#######.', '#.......#', '#.#.#.#.#', '#.......#', '.#######.', '..#......', '.#.......', '.........'],
     },
   ],
-  // Background music for home (tracks.js; docs/MUSIC_PLAN.md). Netruns keep their own theme.
+  // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.
   music: [
     { id: 'idle', name: 'Idle loop', free: true },
     { id: 'nightdrive', name: 'Night drive', hint: 'pass it on.', check: (c) => c.generation >= 2 },

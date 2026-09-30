@@ -1,7 +1,7 @@
 // Tells the music player (music.js) what should be playing, from the app's state: the home track,
-// its sleep variant, the netrun theme, the mini-game duck, or silence. The DEV panel can force a
+// its sleep, alert or flow variant, the netrun theme, the mini-game duck, or silence. The DEV panel can force a
 // track or a state to audition it (app.devMusic).
-import { isAlive, resting } from '../sim.js';
+import { alertReason, inFlow, isAlive, resting } from '../sim.js';
 import { musicMode } from '../tracks.js';
 import { setMusicMode, setMusicSeed } from '../music.js';
 import { resolveWardrobe } from '../cosmetics.js';
@@ -17,6 +17,8 @@ export function syncMusicMode() {
       // A waiting tab, or a netling moved to another device, stays quiet.
       alive: isAlive(s) && !app.inactive && !app.lock,
       resting: resting(s),
+      alert: Boolean(alertReason(s)),
+      flow: inFlow(s),
       runRegion: s.run?.region ?? null,
       inGame: Boolean(app.session) && !s.run,
       track: app.wardrobe && app.unlocked ? resolveWardrobe(app.wardrobe, app.unlocked).music : 'idle',

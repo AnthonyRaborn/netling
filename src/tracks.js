@@ -1,6 +1,6 @@
 // Background music as data: tracks, their phrase banks, and a pure arranger that turns a track
 // into one bar of notes at a time. No Web Audio here (that is music.js), so tests and tools can
-// run it in Node. Track ids are permanent: the wardrobe stores them. See docs/MUSIC_PLAN.md.
+// run it in Node. Track ids are permanent: the wardrobe stores them. See docs/MUSIC.md.
 //
 // A phrase is a string of steps, 16 to a bar (sixteenth notes), separated by spaces:
 //   '.'  rest            '-'  hold the previous note one more step
@@ -508,8 +508,9 @@ export const MUSIC_IDS = ['idle', 'nightdrive', 'dialup', 'lobby', 'tracker', 'u
 export const VARIANTS = {
   awake: {},
   sleep: { tempo: 0.8, transpose: -5, mute: ['drums'], partVol: { lead: 0.5 }, cutoff: 1200, vol: 0.6 },
-  // Drafts to audition in the DEV panel (decision 6); not reached in play yet.
+  // An open alert: faster, a tone higher, busier hats.
   alert: { tempo: 1.15, transpose: 2, doubleHats: true },
+  // Flow: a high sparkle doubles the arpeggios.
   flow: { sparkle: true },
 };
 
@@ -544,12 +545,16 @@ export function musicSettings(trackId, variantId = 'awake', region = null, regio
 }
 
 // What should be playing, from a snapshot of the app. null: silence.
-// { alive, resting, runRegion, inGame, track, force: { variant, track, region } }
-export function musicMode({ alive, resting, runRegion = null, inGame = false, track = 'idle', force = {} }) {
+// { alive, resting, alert, flow, runRegion, inGame, track, force: { variant, track, region } }
+// At home the state picks the variant: resting beats an open alert, which beats flow.
+export function musicMode({ alive, resting, alert = false, flow = false, runRegion = null, inGame = false, track = 'idle', force = {} }) {
   if (!alive) return null;
   let mode;
   if (runRegion) mode = { track: 'netrun', variant: 'awake', region: runRegion, duck: 1 };
-  else mode = { track: TRACKS[track] && track !== 'netrun' ? track : 'idle', variant: resting ? 'sleep' : 'awake', region: null, duck: inGame ? 0.7 : 1 };
+  else {
+    const variant = resting ? 'sleep' : alert ? 'alert' : flow ? 'flow' : 'awake';
+    mode = { track: TRACKS[track] && track !== 'netrun' ? track : 'idle', variant, region: null, duck: inGame ? 0.7 : 1 };
+  }
   if (force.track) {
     const [t, region = 'public'] = force.track.split(':');
     mode = { ...mode, track: t, region: t === 'netrun' ? region : null };

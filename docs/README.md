@@ -19,7 +19,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
 | See what the balance passes changed and what is still open | [BALANCE.md](BALANCE.md) |
 | Look up the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION.md](ATTENTION.md) |
-| Plan the background music (tracks, engine, unlocks; not built yet) | [MUSIC_PLAN.md](MUSIC_PLAN.md) |
+| Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
@@ -29,7 +29,7 @@ Netling is a Tamagotchi-style pet that runs in real time in the browser. A pure 
 
 ## Numbers at a glance
 
-- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 36 unit test files (363 tests) and a 64-scenario browser smoke test.
+- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 36 unit test files (363 tests) and a 66-scenario browser smoke test.
 - 9 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost), 9 items, 4 mini-games, 5 netrun regions plus a tutorial, 22 codex fragments, 28 style items (24 accessories, 4 props), 47 cosmetics (9 shells, 8 tints, 9 effects, 8 sounds, 6 crests, 7 music tracks) plus a device label, 50 chatter lines.
 - Life: up to 5 days; teen at 17 hours; adult at 51 hours (netlings compiled before this keep 7 days, 24 and 72); 10 care mistakes end it.
 
