@@ -51,7 +51,7 @@ const seed = {
   'netling.onboarding': 'done',
   'netling.helpSeen': true,
   'netling.accessories': ['partyhat'],
-  'netling.wardrobe': { accessory: 'partyhat' },
+  'netling.wardrobe': { head: 'partyhat' },
 };
 const init = `(() => { const d = ${JSON.stringify(seed)}; for (const [k, v] of Object.entries(d)) localStorage.setItem(k, JSON.stringify(v)); })()`;
 

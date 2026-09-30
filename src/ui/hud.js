@@ -1,6 +1,6 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
 import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel } from '../sim.js';
-import { atMarket, sellItem } from '../netrun/run.js';
+import { atMarket, contractMinutesLeft, contractText, fmtLeft, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { notify } from '../notify.js';
@@ -143,11 +143,14 @@ function renderWish(state) {
   const on = isAlive(state) && !resting(state) && !app.session && !state.run;
   const r = on ? state.request : null;
   const v = on && state.visit && !state.visit.greeted ? state.visit : null;
-  $('wish-bar').hidden = !r && !v;
-  if (!r && !v) return;
+  const c = on ? state.contract : null;
+  $('wish-bar').hidden = !r && !v && !c;
+  $('wish-run').hidden = !c || Boolean(r || v); // the bar has room for one button at a time
+  if (!r && !v && !c) return;
   const parts = [];
   if (r) parts.push(`${r.kind === 'cool' ? 'it is fanning itself' : `it wants ${r.game.toUpperCase()}`} · ${requestMinutesLeft(state)}m`);
   if (v) parts.push(`a ${SPECIES[v.form].name.toLowerCase()} dropped by`);
+  if (c) parts.push(`contract: ${contractText(c)} · ${fmtLeft(contractMinutesLeft(state))}`);
   $('wish-text').textContent = parts.join(' · ');
   $('wish-play').hidden = r?.kind !== 'game';
   if (r?.kind === 'game') $('wish-play').textContent = `PLAY ${r.game.toUpperCase()}`;
@@ -199,6 +202,10 @@ function renderInventory() {
   const inv = app.state.inventory ?? [];
   if (selectedSlot !== null && !inv[selectedSlot]) selectedSlot = null;
   const scrip = app.state.scrip ?? 0;
+  // The reward box: shown once the first check-in is in, with a count of what waits in it.
+  $('open-box').hidden = !app.checkin?.claims && !app.rewardBox?.length;
+  $('open-box').textContent = app.rewardBox?.length ? `BOX ${app.rewardBox.length}` : 'BOX';
+  $('open-box').classList.toggle('full', Boolean(app.rewardBox?.length));
   $('inv-scrip').textContent = `SCRIP ${scrip}/${SCRIP.max}${scrip >= SCRIP.max ? ' FULL' : ''}`;
   $('inv-scrip').classList.toggle('full', scrip >= SCRIP.max);
   const key = `${inv.join(',')}|${selectedSlot}|${atMarket(app.state)}`;

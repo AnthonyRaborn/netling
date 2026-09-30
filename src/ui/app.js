@@ -9,6 +9,8 @@ import {
   cleanDex,
   cleanCodex,
   cleanAccessories,
+  cleanCheckin,
+  cleanRewardBox,
   cleanUnlocked,
   cleanWardrobe,
   cleanProgress,
@@ -31,6 +33,8 @@ export const app = {
   prefs: null,
   progress: null,
   wardrobe: null,
+  checkin: null, // the daily check-in ladder (checkin.js)
+  rewardBox: [], // check-in rewards waiting to be taken
   unlocked: [],
   freshUnlocks: new Set(),
   codex: [],
@@ -143,6 +147,8 @@ export function loadAll() {
   app.lineage = cleanLineage(store.get(KEYS.lineage));
   app.dex = cleanDex(store.get(KEYS.dex));
   app.ownedAccessories = cleanAccessories(store.get(KEYS.accessories));
+  app.checkin = cleanCheckin(store.get(KEYS.checkin));
+  app.rewardBox = cleanRewardBox(store.get(KEYS.rewardBox));
   app.unlocked = cleanUnlocked(store.get(KEYS.unlocked));
   app.wardrobe = cleanWardrobe(store.get(KEYS.wardrobe));
   app.progress = cleanProgress(store.get(KEYS.progress));

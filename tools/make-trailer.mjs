@@ -78,7 +78,7 @@ const settled = (save) => ({
   'netling.onboarding': 'done',
   'netling.helpSeen': true,
   'netling.accessories': ['partyhat'],
-  'netling.wardrobe': { accessory: 'partyhat' },
+  'netling.wardrobe': { head: 'partyhat' },
 });
 
 // --- scenes ---
@@ -216,7 +216,7 @@ const SCENES = [
             const a = m.app.app;
             a.state.quirk.palette = ${(quirk?.palette ?? 3) === 1 ? 0 : 1};
             if (!a.ownedAccessories.includes('cap')) a.ownedAccessories.push('cap');
-            a.wardrobe = { ...a.wardrobe, accessory: 'cap' };
+            a.wardrobe = { ...a.wardrobe, head: 'cap' }; // the party hat's slot
           }`)(page),
       ],
       [7.2, skipMinutes(CFG.bootMinutes + 1)], // the compile finishes on camera

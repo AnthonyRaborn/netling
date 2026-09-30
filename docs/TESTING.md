@@ -11,7 +11,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
-| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, wearables from different slots that cover each other, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
 | `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITES.md](SPRITES.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/render-music.mjs <out dir> [seconds] [track[:state[:region]] ...]` | Renders the background music to WAV files (every track and state by default) with the real player code, at the game's own level (music slider at `VOLUME`, default 0.4), plus `reference-effects.wav` (sound effects at the default 80%) to compare with; prints each file's loudness. Sleep renders run at least 64 s to cover the wind-down | Playwright |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 363 tests in 36 files. The smoke test has 67 scenarios (Playwright 1.56.1).
+`npm test` runs 388 tests in 38 files. The smoke test has 70 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -48,10 +48,12 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `sprites.test.js` | 5 | Every form has its own dead and sleep sprite, dead eyes are X's, asleep eyes are slits, the Shell is solid with a void, every color map covers every mark |
 | `colors.test.js` | 2 | Color distance and the contrast swap |
 | `sprite-checks.test.js` | 7 | The sprite review arithmetic: color distance, blending, clipping, lost pixels, overlap, silhouettes |
-| `accessories.test.js` | 18 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, colors (per-palette defaults, the generated table is current, the contrast swap) |
+| `accessories.test.js` | 22 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, wear slots (every accessory has one, draw order, what the wardrobe has on, making room, a visitor's second item from another slot), colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
-| `cosmetics.test.js` | 18 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, the four attention cosmetics, and the music tracks' milestones and wardrobe slot |
+| `checkin.test.js` | 8 | Daily check-in: the morning wake is recorded (not a nap), due once per morning however many passed, the seven-day ladder and its loop, item tiers (never a Segfault), accessory days from the general pool (never owned or waiting, scrip when none are left), a full box holding it back, taking from the box, cleaning, and transfer keys |
+| `contracts.test.js` | 12 | Netrun contracts: the thinnest-route count against every route, the map fix on every route in every region, posting (only with the uplink ready and awake, the hourly chance and its catch-up cap, only kinds that can be met), taking one along, each kind met or missed, slipped ICE counting, void on a disconnect or abort, the cheap market offer and certain fragment, and save round trips |
+| `cosmetics.test.js` | 19 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, the four attention cosmetics, the music tracks' milestones and wardrobe slot, and the Seal crest |
 | `attention.test.js` | 12 | Attention rewards: requests (game and COOL, expiry without a fault, when none are asked), GREET and the gift chance, flow and that it changes nothing, chatter (pool, fading, content rules), saves |
 | `archive.test.js` | 9 | Dex, death records, lineage rows, the family tree chain (links, gaps, the running netling's stats), back-compat |
 | `nap.test.js` | 7 | Naps: drain, duration, cooldown, blocking, bedtime override, persistence |
@@ -106,7 +108,9 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Test mode: hidden until 7 logo taps, separate fast netling, real one untouched.
 - Reaction animations, Packet Feast payout, intrusion and DEFEND, overflow and PURGE, reboot.
 - Crashes: a crashing mini-game is closed, a crashing netrun is aborted, a crash in the tutorial still finishes onboarding.
-- Shell change keeps accessory and label; flatline and next generation; hibernate; dev mode.
+- The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
+- A posted contract in the bar and the region picker, taken along on a jack-in.
+- Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.
 
 ## Balance tools
 

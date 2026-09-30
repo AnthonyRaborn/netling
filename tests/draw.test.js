@@ -62,7 +62,8 @@ test('sleeping, napping, dark, rebooting and visiting all draw', () => {
   at((s) => (s.nap = { startedAge: s.ageMin }));
   at((s) => (s.lightsOn = false));
   at((s) => (s.rebootUntilAge = s.ageMin + 15));
-  at((s) => (s.visit = { startedAge: s.ageMin, len: 8, form: 'ghost', palette: 2, accessory: 'crown' }));
+  at((s) => (s.visit = { startedAge: s.ageMin, len: 8, form: 'ghost', palette: 2, accessories: ['crown', 'shades'] }));
+  at((s) => (s.visit = { startedAge: s.ageMin, len: 8, form: 'ghost', palette: 2, accessory: 'crown' })); // saved before visitors wore two
   for (const idle of IDLES) at((s) => (s.quirk.idle = idle));
   for (let p = 0; p < PALETTES.length; p++) at((s) => (s.quirk.palette = p));
 });
@@ -91,6 +92,10 @@ test('every accessory, prop, reaction and flourish draws on every form', () => {
       for (const t of [0, 0.3, 0.5, 0.8, 1]) render(s, 900, { anim: { kind, t } });
     }
     render(s, 130, { flash: true, accessory: 'cap' });
+    // One from every wear slot at once, awake, asleep and in the dark.
+    const outfit = { accessories: [{ id: 'partyhat', colors: ['#00ff00', null] }, { id: 'rebreather' }, { id: 'scarf' }, { id: 'halo' }] };
+    for (const time of [0, 500, 2300]) render(s, time, outfit);
+    render({ ...s, asleep: true, lightsOn: false }, 900, outfit);
     render(s, 60, { surge: true });
     render(s, 60, { calm: true, surge: true, anim: { kind: 'refuse', t: 0.2 } });
   }

@@ -83,8 +83,10 @@ None of these ever costs a fault; they are small rewards for checking in often.
 - **Visitors**: say hello with **GREET** while one is here.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
 - **A glow**: keep it in good shape for a few hours and it shows.
+- **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
+- **Contracts**: while the uplink is ready and the app is open, a job for one netrun region may come in (reach the exit, get past some ICE, crack caches, buy at a market, bring back a fragment). It waits 6 hours; take it by jacking into that region. Every way through that run can meet it, and it pays scrip, sometimes an item.
 
-With ALERTS on, requests and visitors also send a notification while the app is open in the background.
+With ALERTS on, requests, visitors and contracts also send a notification while the app is open in the background.
 
 ## Rest: sleep, lights and naps
 
@@ -171,7 +173,7 @@ When it flatlines it leaves a **fragment**. The next generation inherits that ne
 
 ## Style
 
-The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, background music, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, the little extras above, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Everything is purely visual and shared across generations.
+The Archive's **STYLE** tab holds cosmetic shells, screen tints, screen effects, sound packs, crests, background music, a device label, and accessories. All of it is unlocked by playing: raising forms, finishing a region's lore, full-length lives, mini-game streaks, care habits, netrun feats, the little extras above, and what your line achieves over generations. Locked items show only a hint. Accessories fit every form and are mostly bought at netrun markets or found on runs. Your netling can wear one on its head, one on its face, one on its body and one floating nearby, all at once, plus a prop on the ground. Everything is purely visual and shared across generations.
 
 ## Saving, moving and pausing
 

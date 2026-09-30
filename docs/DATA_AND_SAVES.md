@@ -33,6 +33,8 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 | `netling.progress` | Counters and streaks | yes | See below |
 | `netling.unlocked` | Array of unlocked style ids | yes | `slot:id` strings, plus `label` |
 | `netling.accessories` | Array of owned accessory and prop ids | yes | Ids in `STYLE_ITEMS` |
+| `netling.checkin` | `{ day, claimedAt, claims }`: the next ladder day (0 to 6), when the last check-in was claimed (ms or null), how many in all | yes | `cleanCheckin` |
+| `netling.rewardBox` | Array of `{ kind: 'scrip', n, day }`, `{ kind: 'item', id, day }` or `{ kind: 'accessory', id, day }`, at most 30 | yes | `cleanRewardBox`: unknown ids and junk dropped |
 | `netling.prefs` | `{ sound, alerts, volume, musicVolume, awake, motion }` (`volume` is the effects level, default 0.8; `musicVolume` default 0.4, older prefs get 0.4) (`motion`: `auto`, `reduce` or `full`) | yes | |
 | `netling.onboarding` | `intro`, `readme`, `nudge`, `tutorial` or `done` | yes | |
 | `netling.helpSeen` | `true` | yes | |
@@ -76,11 +78,13 @@ Built by `createScript()` in `sim.js`. Fields:
 | `lastRunEndAge`, `runCooldownCut`, `runStats` | | Uplink cooldown state and lifetime counts for this netling |
 | `cleared` | region ids | Regions whose exit this netling reached, in `REGION_ORDER` order. Unknown ids and repeats dropped. Missing (a save from before the unlock order): every region its stage can enter (`clearedForStage`) |
 | `codexFound` | int | New codex fragments banked this life (the per-life cap). Missing: 0 |
-| `visit`, `visitAccGifts` | | A visitor in progress (`greeted: true` once GREET is used); pending accessory gifts (max 10) |
+| `visit`, `visitAccGifts` | | A visitor in progress (`accessories`: what it wears, one per wear slot, at most two rolled; `greeted: true` once GREET is used); pending accessory gifts (max 10). A visit saved before visitors wore two held one id as `accessory`, which the cleaner reads as a one-item list: a visit lasts minutes, so no version bump |
 | `request` | `{ kind: 'game', game, startedAge }`, `{ kind: 'cool', startedAge }` or null | What it is asking for. Unknown kinds or games: null. Missing: null |
+| `contract`, `contractCheckAge` | `{ kind, region, n?, scrip, item, postedAge }` or null; a netling minute or null | An open netrun job (kind in `CONTRACT_KINDS`, region in `REGION_ORDER`, `n` 1 to 5 for `ice` and `caches`, scrip 0 to 100, item an item id or null) and when the UI last looked at posting one. Anything else: null. Missing: null |
 | `flowMin`, `flowTotalMin` | int | Minutes in a row in good shape (flow at 180), and minutes in flow this life. Missing: 0 |
 | `chatter` | `{ id, startedAge }` or null | The chatter line on screen. Unknown ids: null. Missing: null |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
+| `wokeAt` | ms or null | When the night's sleep last ended (the daily check-in keys off it). Missing: null |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
 | `traitLevel`, `history` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |
@@ -93,9 +97,9 @@ The netling belongs to one generation. Everything shared across generations (lin
 
 **Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
 
-**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest`, `music` (ids from `COSMETICS`; a missing slot uses its default, so `crest` and `music` needed no migration), `accessory` and `prop` (a style id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays with one entry per color slot: a `#rrggbb` the player picked, or `null` for automatic, meaning the wearable's color for the netling's palette, see `accessoryColors`). Old saves hold concrete hex values, which stay as the player's picks; the cleaner turns anything that is not a `#rrggbb` into `null`. No version bump: the value domain widened, the shape did not.
+**Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest`, `music` (ids from `COSMETICS`; a missing slot uses its default, so `crest` and `music` needed no migration), `head`, `face`, `body` and `float` (an accessory of that wear slot, or `none`) and `prop` (a prop id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays with one entry per color slot: a `#rrggbb` the player picked, or `null` for automatic, meaning the wearable's color for the netling's palette, see `accessoryColors`). Old saves hold concrete hex values, which stay as the player's picks; the cleaner turns anything that is not a `#rrggbb` into `null`. No version bump: the value domain widened, the shape did not. Wardrobes from before the wear slots held a single `accessory`; the cleaner moves it to its own slot (a slot already set wins) and drops the old field. The wardrobe is not versioned (below), so this needed no migration step.
 
-**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, `requestsMet`, `visitorsGreeted`, `flowMin` (minutes in flow of lives that have ended; the living netling's `flowTotalMin` is added for the Aurora check), `chatter` (heard line ids, unknown ones dropped), and `rootEarned` (true once Root Access has been earned; absent otherwise).
+**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, `requestsMet`, `contractsDone`, `visitorsGreeted`, `flowMin` (minutes in flow of lives that have ended; the living netling's `flowTotalMin` is added for the Aurora check), `chatter` (heard line ids, unknown ones dropped), and `rootEarned` (true once Root Access has been earned; absent otherwise).
 
 ## The write gate
 

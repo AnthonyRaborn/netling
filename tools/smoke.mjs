@@ -126,7 +126,8 @@ function awakeNetling(overrides = {}) {
 
 // Storage writes, once per tab (sessionStorage survives the reloads a scenario triggers).
 function seed(extra = {}) {
-  const data = { 'netling.save': awakeNetling(), 'netling.onboarding': 'done', 'netling.helpSeen': true, ...extra };
+  // Today's check-in is already claimed, so it stays out of scenarios about something else (the check-in one clears it).
+  const data = { 'netling.save': awakeNetling(), 'netling.onboarding': 'done', 'netling.helpSeen': true, 'netling.checkin': { day: 1, claimedAt: Date.now(), claims: 1 }, ...extra };
   const raw = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)]));
   return seedRaw(raw);
 }
@@ -1123,7 +1124,7 @@ await scenario('after a crash it reboots: care is blocked and the readout says s
   assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'refuse', 'no refusal reaction');
 });
 
-await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {
+await scenario('changing shell keeps the equipped accessory and label; an old single accessory moves to its slot', async ({ open }) => {
   const page = await open(
     BASE,
     seed({
@@ -1137,7 +1138,30 @@ await scenario('changing shell keeps the equipped accessory and label', async ({
   await page.locator('#wardrobe-list .cosmetic', { hasText: 'Matte black' }).click();
   const w = await saved(page, 'netling.wardrobe');
   assert(w.shell === 'matte', `shell not set: ${JSON.stringify(w)}`);
-  assert(w.accessory === 'partyhat' && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
+  assert(w.head === 'partyhat' && w.accessory === undefined && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
+});
+
+await scenario('one accessory per slot: a hat and shades together, and a second hat replaces the first', async ({ open }) => {
+  const page = await open(
+    BASE,
+    seed({
+      'netling.accessories': ['partyhat', 'cap', 'shades'],
+      'netling.wardrobe': { head: 'partyhat' },
+    }),
+  );
+  await page.click('#open-archive');
+  await page.click('#tab-btn-wardrobe');
+  const heads = await page.locator('#wardrobe-list h3').allTextContents();
+  for (const h of ['ACCESSORY: HEAD', 'ACCESSORY: FACE', 'ACCESSORY: BODY', 'ACCESSORY: FLOAT', 'PROP']) assert(heads.includes(h), `no ${h} section: ${heads}`);
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Shades' }).click();
+  let w = await saved(page, 'netling.wardrobe');
+  assert(w.head === 'partyhat' && w.face === 'shades', `not both worn: ${JSON.stringify(w)}`);
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Cap' }).click();
+  w = await saved(page, 'netling.wardrobe');
+  assert(w.head === 'cap' && w.face === 'shades', `the hat did not swap: ${JSON.stringify(w)}`);
+  // The party hat's color row belongs to the head slot and goes with it; the shades have their own.
+  assert((await page.locator('.color-row', { hasText: 'shades colors' }).count()) === 1, 'no shades colors');
+  assert((await page.locator('.color-row', { hasText: 'party hat colors' }).count()) === 0, 'a stale party hat color row');
 });
 
 await scenario('legacy: the family tree links generations, and an earned crest shows on the device', async ({ open }) => {
@@ -1241,6 +1265,48 @@ await scenario('attention: COOL answers a COOL request, and it counts', async ({
   assert(!(await visible(page2, '#wish-bar')), 'request bar still up after COOL');
   const progress = await page2.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
   assert(progress.requestsMet === 1, `requests met: ${progress.requestsMet}`);
+});
+
+await scenario('attention: a posted contract shows in the bar and the region picker, and a jack-in takes it along', async ({ open }) => {
+  const save = awakeNetling();
+  save.stats.charge = 90;
+  save.contract = { kind: 'caches', region: 'public', n: 2, scrip: 15, item: 'coolant', postedAge: save.ageMin };
+  const page = await open(BASE, seed({ 'netling.save': save }));
+  assert(await visible(page, '#wish-bar'), 'no bar for an open contract');
+  const bar = await page.textContent('#wish-text');
+  assert(/contract: crack 2 caches in the Public Net · 6h/.test(bar), `bar: ${bar}`);
+  assert(!(await visible(page, '#event-bar')), 'a contract must not look like an alert');
+  await page.click('#wish-run');
+  assert(await visible(page, '#regions'), 'NETRUN in the bar did not open the region picker');
+  const line = await page.textContent('#region-contract');
+  assert(/CONTRACT: CRACK 2 CACHES IN THE PUBLIC NET\. PAYS 15 SCRIP AND A COOLANT CELL\./.test(line), `picker: ${line}`);
+  assert((await page.locator('#region-list .rmeta.contract').count()) === 1, 'the contract region is not marked');
+  await page.locator('#region-list button:not([disabled])').first().click();
+  await page.waitForTimeout(300);
+  const s = await saved(page);
+  assert(s.contract === null && s.run?.contract?.kind === 'caches', `not taken along: ${JSON.stringify({ c: s.contract, r: s.run?.contract })}`);
+});
+
+await scenario('attention: the daily check-in fills the reward box once; TAKE moves it to the netling', async ({ open }) => {
+  const save = awakeNetling();
+  save.scrip = 0;
+  const page = await open(BASE, seed({ 'netling.save': save, 'netling.checkin': null }));
+  await page.waitForTimeout(1500);
+  assert(await visible(page, '#open-box'), 'no BOX after the first check-in');
+  assert((await page.textContent('#open-box')) === 'BOX 1', `box: ${await page.textContent('#open-box')}`);
+  const c = await saved(page, 'netling.checkin');
+  assert(c.day === 1 && c.claims === 1 && c.claimedAt > 0, `check-in: ${JSON.stringify(c)}`);
+  await page.click('#open-box');
+  assert(await visible(page, '#box'), 'the box did not open');
+  assert((await page.locator('#box-ladder .box-day.done').count()) === 1, 'day 1 not marked done');
+  await page.locator('#box-list button', { hasText: '10 SCRIP' }).click();
+  assert((await saved(page)).scrip === 10, 'the scrip did not reach the netling');
+  assert((await saved(page, 'netling.rewardBox')).length === 0, 'the box still holds it');
+  // Same morning: a reload claims nothing more.
+  await page.reload();
+  await page.waitForTimeout(1500);
+  assert((await saved(page, 'netling.checkin')).claims === 1, 'claimed twice in one day');
+  assert((await page.textContent('#open-box')) === 'BOX', 'an empty box still shows its button');
 });
 
 await scenario('attention: GREET a visitor, hear its line, find it in the CHATTER tab', async ({ open }) => {

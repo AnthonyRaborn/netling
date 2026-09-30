@@ -9,6 +9,8 @@ import { $, app, newForms, rootUnlocked, flashStatus, now, playAnim, save, store
 import { fmtAge, pushAlert, requestText, updateHUD } from './hud.js';
 import { recordForm } from './archive.js';
 import { closeStaleSession, playRequested } from './play.js';
+import { contractPay, contractText, updateContract } from '../netrun/run.js';
+import { checkIn } from './rewards.js';
 import { bankFlow, checkUnlocks, countAct, countAttention, drainAccessoryInbox, grantStyle, plushExtra } from './style.js';
 
 // The clock tick runs every second, but the netling only needs writing now and then: actions save
@@ -66,7 +68,13 @@ export function advance() {
     pushAlert('Netling wants something', requestText(state.request));
   }
   app.lastRequest = asking;
+  // Contracts are only posted while the app is open (and after the tutorial): an attention reward, never a chore.
+  if (app.onboarding === 'done' && updateContract(state, Math.random, app.codex, now()) === 'posted') {
+    sfx('ask', state.quirk.pitch);
+    pushAlert('A contract came in', `${contractText(state.contract)}. pays ${contractPay(state.contract)}.`);
+  }
   if (state.visitAccGifts > 0) drainAccessoryInbox();
+  checkIn();
   if (stageChanged || performance.now() - lastClockSave >= SAVE_EVERY_MS) saveClock();
   updateHUD();
 }

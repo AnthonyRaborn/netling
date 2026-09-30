@@ -1,7 +1,7 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, log, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
-import { generateMap, nodeById } from './map.js';
-import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock } from './regions.js';
+import { addScrip, grantItem, isAlive, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
+import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES } from './anomalies.js';
@@ -53,6 +53,16 @@ export const RUN_CFG = {
   daemonMoveRepair: 6, // Integrity restored per move
   ghostSlipChance: 0.45, // chance an ICE never notices it
   glitchPhaseChance: 0.35, // after the first, the chance each later ICE is phased through too
+  // Contracts (docs/ATTENTION.md): a job posted while the uplink is ready and the app is open.
+  contractChancePerHour: 0.5,
+  contractOpenMin: 360, // open until the next jack-in into its region, or 6 hours
+  contractCatchUpMin: 60, // after a long gap, only the last hour counts toward posting one
+  contractScrip: { exit: 15, clean: 20, ice: 20, caches: 15, market: 15, fragment: 25 },
+  contractItemChance: 0.25, // and sometimes one of the cheapest items too
+  contractIce: [2, 3], // get past this many ICE...
+  contractIceSpare: 1, // ...with every route holding this many more, so one lost fight doesn't sink it
+  contractCaches: [2, 3],
+  contractMarketBy: 0.5, // every route passes a market in the first half of the map
 };
 
 // Adult form abilities, applied automatically.
@@ -67,6 +77,9 @@ const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
+// Minutes as "2h 5m", "2h" or "45m".
+export const fmtLeft = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}` : `${m}m`);
+
 // Why a run can't start, or null.
 export function runBlockReason(pet, region = 'public', codex = []) {
   if (!isAlive(pet)) return pet.stage === 'script' ? 'still compiling...' : 'no signal.';
@@ -79,8 +92,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   if (lock) return `${REGIONS[region].name}: ${lock}`;
   const cd = runCooldownLeft(pet);
   if (cd > 0) {
-    const left = cd >= 60 ? `${Math.floor(cd / 60)}h${cd % 60 ? ` ${cd % 60}m` : ''}` : `${cd}m`;
-    return `uplink cooling down${runCooldownAtFloor(pet) ? ', laying low from corp sweeps' : ''}. ${left} left.`;
+    return `uplink cooling down${runCooldownAtFloor(pet) ? ', laying low from corp sweeps' : ''}. ${fmtLeft(cd)} left.`;
   }
   if (pet.stats.charge < RUN_CFG.minCharge) return `needs ${RUN_CFG.minCharge}+ charge to jack in.`;
   return null;
@@ -101,7 +113,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     insured: false, // Chrome's corp insurance used this run
     known: [...codex], // codex at jack-in, so fragments never repeat
     startStats: { ...pet.stats },
-    tally: { nodes: 0, iceWon: 0, iceLost: 0 },
+    tally: { nodes: 0, iceWon: 0, iceLost: 0, icePhased: 0, caches: 0, bought: 0 },
     fragments: [], // found this run; banked on jack-out like loot
     knownAcc: [...ownedAccessories],
     accessories: [], // found or bought this run; banked on jack-out like loot
@@ -110,6 +122,14 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     messages: [],
     startedAge: pet.ageMin,
   };
+  // An open contract for this region comes along, and the map is fixed so every route can meet it.
+  const c = pet.contract;
+  if (c && c.region === region && !REGIONS[region].tutorial) {
+    pet.contract = null;
+    pet.run.contract = { ...c };
+    const need = CONTRACT_ROUTES[c.kind]?.(c, map);
+    if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
+  }
   return pet.run;
 }
 
@@ -163,6 +183,7 @@ export function moveTo(pet, nodeId, rng) {
   const region = REGIONS[run.region];
   switch (node.type) {
     case 'cache': {
+      run.tally.caches++;
       const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(pet) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
       if (rng() < (region.cacheFind ?? RUN_CFG.cacheFindChance)) {
         const item = weighted(region.loot, rng);
@@ -180,15 +201,18 @@ export function moveTo(pet, nodeId, rng) {
     }
     case 'ice': {
       if (ability(pet) === 'ghost' && rng() < RUN_CFG.ghostSlipChance) {
+        run.tally.icePhased++;
         note(run, 'the ICE looked straight through it.');
         return { ok: true, kind: 'ice', phased: true };
       }
       if (ability(pet) === 'glitch' && run.phased && rng() < RUN_CFG.glitchPhaseChance) {
+        run.tally.icePhased++;
         note(run, 'glitched through the ICE again.');
         return { ok: true, kind: 'ice', phased: true };
       }
       if (ability(pet) === 'glitch' && !run.phased) {
         run.phased = true;
+        run.tally.icePhased++;
         note(run, 'glitched straight through the ICE.');
         return { ok: true, kind: 'ice', phased: true };
       }
@@ -233,7 +257,9 @@ export function moveTo(pet, nodeId, rng) {
     }
     case 'market': {
       const table = region.market ?? region.loot;
-      const offers = [weighted(table, rng)];
+      // Under a market contract, the first offer is always one of the cheapest items.
+      const cheap = run.contract?.kind === 'market' ? cheapestOf(table) : null;
+      const offers = [weighted(cheap ?? table, rng)];
       for (let i = 0; i < 10 && offers.length < 2; i++) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
@@ -271,7 +297,8 @@ export function moveTo(pet, nodeId, rng) {
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
       run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip;
-      const frag = (rng() < (region.exitFragment ?? RUN_CFG.exitFragmentChance) ? takeFragment(pet) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
+      const exitFragment = region.exitFragment ?? (run.contract?.kind === 'fragment' ? 1 : RUN_CFG.exitFragmentChance);
+      const frag = (rng() < exitFragment ? takeFragment(pet) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
       const opened = !region.tutorial && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
@@ -427,12 +454,14 @@ export function choose(pet, optionId, rng) {
       st.charge = clamp(st.charge - RUN_CFG.accPrice);
       pet.scrip -= accScrip(p.accOffer);
       run.accessories.push(p.accOffer);
+      run.tally.bought++;
       msg = `bought ${accessoryById(p.accOffer).name} for your style.`;
     } else {
       const item = p.offers[Number(optionId.slice(3))];
       st.charge = clamp(st.charge - p.price);
       pet.scrip -= SCRIP.price[item];
       run.loot.push(item);
+      run.tally.bought++;
       lean(-0.5, 0);
       msg = `bought ${ITEMS[item].name}.`;
     }
@@ -493,6 +522,7 @@ function endRun(pet, result) {
 
 export function jackOut(pet) {
   const run = pet.run;
+  settleContract(pet, 'jacked');
   const lostInt = (run.startStats?.integrity ?? pet.stats.integrity) - pet.stats.integrity;
   const restored = lostInt > 0 ? Math.round(lostInt * RUN_CFG.jackOutRestore) : 0;
   pet.stats.integrity = clamp(pet.stats.integrity + restored);
@@ -522,7 +552,7 @@ export function jackOut(pet) {
   pet.codexInbox = [...(pet.codexInbox ?? []), ...run.fragments];
   pet.accessoryInbox = [...(pet.accessoryInbox ?? []), ...(run.accessories ?? [])];
   endRun(pet, 'jacked');
-  return { ok: true, result: 'jacked', kept, lost, fragments: [...run.fragments] };
+  return { ok: true, result: 'jacked', kept, lost, fragments: [...run.fragments], contract: run.contract?.settled ?? null };
 }
 
 export function disconnect(pet, why) {
@@ -535,6 +565,7 @@ export function disconnect(pet, why) {
   // A care mistake, but never the fatal one.
   const mistake = pet.careMistakes < CFG.maxMistakes - 1;
   if (mistake) pet.careMistakes++;
+  settleContract(pet, 'disconnected');
   note(run, `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
   run.scrip = 0;
@@ -546,6 +577,7 @@ export function disconnect(pet, why) {
 
 // Bail out: forfeit the loot, no other penalty.
 export function abortRun(pet) {
+  settleContract(pet, 'aborted');
   pet.run.loot = [];
   pet.run.scrip = 0;
   pet.run.fragments = [];
@@ -562,4 +594,144 @@ export function closeRun(pet, t) {
   const last = run.messages[run.messages.length - 1] ?? '';
   log(pet, t, `> netrun (${REGIONS[run.region].name}): ${last}`);
   pet.run = null;
+}
+
+// --- contracts -------------------------------------------------------------------------------------
+// A job for one region, posted while the uplink is ready (never during a run, asleep or rebooting). It stays open until
+// a jack-in into its region takes it along, or for contractOpenMin. Each kind is met on every route through the map
+// (startRun fixes the map): a lost ICE fight or a missed cache on the way never makes one impossible. Missing one costs
+// nothing. Posting needs the codex (for fragment jobs), so the UI calls updateContract; the sim never posts one.
+
+export const CONTRACT_KINDS = ['exit', 'clean', 'ice', 'caches', 'market', 'fragment'];
+
+// What each kind needs on every route: { type, count, maxLayer } for the map fix, or null.
+const middleLayers = (map) => map.layerCount - 2;
+const CONTRACT_ROUTES = {
+  ice: (c) => ({ type: 'ice', count: c.n + RUN_CFG.contractIceSpare }),
+  caches: (c) => ({ type: 'cache', count: c.n }),
+  market: (c, map) => ({ type: 'market', count: 1, maxLayer: Math.ceil(middleLayers(map) * RUN_CFG.contractMarketBy) }),
+};
+
+// The cheapest items in a weights table (a table of just them), or null.
+function cheapestOf(table) {
+  const ids = Object.keys(table).filter((id) => SCRIP.price[id] != null);
+  if (!ids.length) return null;
+  const low = Math.min(...ids.map((id) => SCRIP.price[id]));
+  return Object.fromEntries(ids.filter((id) => SCRIP.price[id] === low).map((id) => [id, table[id]]));
+}
+const CHEAPEST = Object.keys(cheapestOf(Object.fromEntries(Object.keys(SCRIP.price).map((id) => [id, 1]))));
+
+export const contractMinutesLeft = (pet) => (pet.contract ? Math.max(0, RUN_CFG.contractOpenMin - (pet.ageMin - pet.contract.postedAge)) : 0);
+
+// Whether a job could be posted now: alive, awake, not on a run or rebooting, and the uplink ready.
+export const contractReady = (pet) =>
+  isAlive(pet) && !pet.run && !pet.hibernation && !resting(pet) && rebootMinutesLeft(pet) === 0 && runCooldownLeft(pet) === 0;
+
+// Kinds that can be met in a region right now.
+function contractKinds(pet, region, codex) {
+  return CONTRACT_KINDS.filter((kind) => {
+    if (kind === 'market') return (REGIONS[region].nodes.market ?? 0) > 0 && (pet.scrip ?? 0) >= Math.min(...CHEAPEST.map((id) => SCRIP.price[id]));
+    if (kind === 'fragment') return codexRoom(pet) > 0 && nextFragment(region, codex) !== null;
+    return true;
+  });
+}
+
+// Called by the UI while the app is open: expires an old job, and may post a new one (contractChancePerHour, counting
+// the netling minutes since the last call, at most contractCatchUpMin). Returns 'posted', 'expired' or null.
+export function updateContract(pet, rng, codex = [], t = Date.now()) {
+  const since = Math.min(RUN_CFG.contractCatchUpMin, Math.max(0, pet.ageMin - (pet.contractCheckAge ?? pet.ageMin)));
+  pet.contractCheckAge = pet.ageMin;
+  if (pet.contract && contractMinutesLeft(pet) === 0) {
+    pet.contract = null;
+    log(pet, t, '> the contract lapsed. no harm done.');
+    return 'expired';
+  }
+  if (pet.contract || !contractReady(pet)) return null;
+  let roll = false;
+  for (let i = 0; i < since && !roll; i++) roll = rng() < RUN_CFG.contractChancePerHour / 60;
+  if (!roll) return null;
+  const regions = REGION_ORDER.filter((r) => regionOpen(r, pet.stage, codex, pet.cleared ?? []));
+  if (!regions.length) return null;
+  const region = regions[Math.floor(rng() * regions.length)];
+  const kinds = contractKinds(pet, region, codex);
+  const kind = kinds[Math.floor(rng() * kinds.length)];
+  const range = kind === 'ice' ? RUN_CFG.contractIce : kind === 'caches' ? RUN_CFG.contractCaches : null;
+  const n = range ? range[0] + Math.floor(rng() * (range[1] - range[0] + 1)) : undefined;
+  const item = rng() < RUN_CFG.contractItemChance ? CHEAPEST[Math.floor(rng() * CHEAPEST.length)] : null;
+  pet.contract = { kind, region, ...(n ? { n } : {}), scrip: RUN_CFG.contractScrip[kind], item, postedAge: pet.ageMin };
+  log(pet, t, `> contract posted: ${contractText(pet.contract)}. pays ${contractPay(pet.contract)}.`);
+  return 'posted';
+}
+
+export function contractText(c) {
+  const where = REGIONS[c.region].name;
+  switch (c.kind) {
+    case 'exit':
+      return `reach the exit of the ${where}`;
+    case 'clean':
+      return `reach the exit of the ${where} without losing to ICE`;
+    case 'ice':
+      return `get past ${c.n} ICE in the ${where}`;
+    case 'caches':
+      return `crack ${c.n} caches in the ${where}`;
+    case 'market':
+      return `buy something at a ${where} market`;
+    default:
+      return `bring back a codex fragment from the ${where}`;
+  }
+}
+export const contractPay = (c) => `${c.scrip} scrip${c.item ? ` and a ${ITEMS[c.item].name.toLowerCase()}` : ''}`;
+
+// Progress on the run's contract: { have, need } (ICE passed counts wins and slips).
+export function contractProgress(run) {
+  const c = run?.contract;
+  if (!c) return null;
+  const t = run.tally ?? {};
+  const atExit = nodeById(run.map, run.pos)?.type === 'exit';
+  switch (c.kind) {
+    case 'ice':
+      return { have: (t.iceWon ?? 0) + (t.icePhased ?? 0), need: c.n };
+    case 'caches':
+      return { have: t.caches ?? 0, need: c.n };
+    case 'market':
+      return { have: t.bought ?? 0, need: 1 };
+    case 'fragment':
+      return { have: run.fragments.length, need: 1 };
+    case 'clean':
+      return { have: atExit && !t.iceLost ? 1 : 0, need: 1, broken: (t.iceLost ?? 0) > 0 };
+    default:
+      return { have: atExit ? 1 : 0, need: 1 };
+  }
+}
+
+// A short line for the run screen: the job and how far along it is.
+export function contractShort(run) {
+  const p = contractProgress(run);
+  if (!p) return null;
+  const c = run.contract;
+  const label = { ice: 'PAST ICE', caches: 'CACHES', market: 'BUY', fragment: 'FRAGMENT' }[c.kind];
+  if (label) return `JOB ${label} ${Math.min(p.have, p.need)}/${p.need}`;
+  if (p.broken) return 'JOB LOST: ICE';
+  return c.kind === 'clean' ? 'JOB EXIT, NO ICE LOST' : 'JOB REACH EXIT';
+}
+
+// At the end of a run: a met contract adds its pay to the run's scrip and loot (banked with them), before banking.
+function settleContract(pet, result) {
+  const run = pet.run;
+  const c = run.contract;
+  if (!c || c.settled) return;
+  const p = contractProgress(run);
+  if (result !== 'jacked') {
+    c.settled = 'void';
+    return;
+  }
+  if (p.have < p.need) {
+    c.settled = 'missed';
+    note(run, 'contract not met. no harm done.');
+    return;
+  }
+  c.settled = 'met';
+  run.scrip = (run.scrip ?? 0) + c.scrip;
+  if (c.item) run.loot.push(c.item);
+  note(run, `contract complete: +${contractPay(c)}.`);
 }

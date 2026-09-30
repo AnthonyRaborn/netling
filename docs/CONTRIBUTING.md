@@ -65,7 +65,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 
 ### Add an accessory or prop
 
-Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, `rarity` (`common`, `rare`, `veryrare`), optional `regions`, optional `source: 'earned'`, optional `hint`, optional `colors: [[label, default]]`, and `draw(px, anchors, frame, time, colors)`. Draw relative to the anchors (`headTop`, `eyeRow`, `cx`, ...), never fixed coordinates, so it fits every form. `tests/accessories.test.js` renders every accessory on every form and checks a sane margin. Earned items need a grant in the UI (`grantStyle`).
+Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, a wear `slot` (`head`, `face`, `body` or `float`; not for props), `rarity` (`common`, `rare`, `veryrare`), optional `regions`, optional `source: 'earned'`, optional `hint`, optional `colors: [[label, default]]`, and `draw(px, anchors, frame, time, colors)`. Draw relative to the anchors (`headTop`, `eyeRow`, `cx`, ...), never fixed coordinates, so it fits every form. `tests/accessories.test.js` renders every accessory on every form and checks a sane margin. Earned items need a grant in the UI (`grantStyle`). Check it next to the other slots in the gallery's COMBINATIONS section and with `node tools/sprite-audit.mjs --check=combos`; a new body item or halo-like float that should make room goes in `ROOM` (`accessories.js`).
 
 ### Add a netrun region
 
