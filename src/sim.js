@@ -94,6 +94,7 @@ export const CFG = {
   visitAccessoryChance: 0.01,
   visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
+  visitSecondAccessoryChance: 0.5, // and half of those a second, from another slot
   // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
   requestChancePerHour: 0.25,
@@ -598,9 +599,13 @@ function startVisit(s, t, rng) {
   const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
   let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));
   if (own >= 0 && palette >= own) palette++;
-  const accessory = rng() < CFG.visitWearsAccessoryChance ? rollWornAccessory(rng) : null;
-  s.visit = { startedAge: s.ageMin, len, form, palette, accessory };
-  const wearing = accessory ? ` in a ${accessoryById(accessory).name.toLowerCase()}` : '';
+  const accessories = [];
+  if (rng() < CFG.visitWearsAccessoryChance) {
+    accessories.push(rollWornAccessory(rng));
+    if (rng() < CFG.visitSecondAccessoryChance) accessories.push(rollWornAccessory(rng, accessories));
+  }
+  s.visit = { startedAge: s.ageMin, len, form, palette, accessories };
+  const wearing = accessories.length ? ` in a ${accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')}` : '';
   log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
 }
 

@@ -200,7 +200,7 @@ export function finishOnboarding() {
   setOnboarding('done');
   if (!app.ownedAccessories.includes('partyhat')) {
     grantStyle('partyhat', 'a gift: party hat. accessories live in ARCHIVE > STYLE.');
-    app.wardrobe = { ...app.wardrobe, accessory: 'partyhat' };
+    app.wardrobe = { ...app.wardrobe, head: 'partyhat' };
     store.set(KEYS.wardrobe, app.wardrobe);
   }
   $('open-archive').classList.add('nudge');

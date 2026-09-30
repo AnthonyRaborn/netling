@@ -167,6 +167,13 @@ test('progress, wardrobe, prefs, onboarding and lock fall back to safe shapes', 
   assert.equal(w.colors.partyhat[1], null, 'a bad color drops the slot back to automatic');
   assert.deepEqual(cleanWardrobe({ colors: { partyhat: [null, '#112233'] } }).colors.partyhat, [null, '#112233'], 'null stays automatic');
   assert.equal(w.colors.nope, undefined);
+  // One accessory per wear slot. A wardrobe from before the slots held one `accessory`: it moves to its own slot.
+  assert.equal(w.head, 'partyhat');
+  assert.equal(w.accessory, undefined);
+  assert.deepEqual(cleanWardrobe({ accessory: 'shades' }), { face: 'shades' });
+  assert.deepEqual(cleanWardrobe({ accessory: 'deck' }), {}, 'a prop was never worn');
+  assert.deepEqual(cleanWardrobe({ accessory: 'cap', head: 'crown' }), { head: 'crown' }, 'the slot wins over the old field');
+  assert.deepEqual(cleanWardrobe({ head: 'shades', face: 'none', body: 'scarf', float: 'drone', prop: 'cap' }), { face: 'none', body: 'scarf', float: 'drone' }, 'an item only fits its own slot');
   assert.deepEqual(resolveWardrobe(cleanWardrobe([1, 2]), []), resolveWardrobe({}, []));
 
   assert.deepEqual(cleanPrefs({ volume: 'loud', sound: 'yes', alerts: true, awake: 'on' }), { sound: true, alerts: true, volume: 0.8, musicVolume: 0.4, awake: false, motion: 'auto' });

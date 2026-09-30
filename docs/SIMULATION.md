@@ -202,7 +202,7 @@ Details:
 
 ## Visitors
 
-A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory. Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
 
 **GREET** (`act(s, 'greet')`): once per visit (`visit.greeted`). It sets a visitor chatter line on screen and raises the accessory chance above; nothing else. Refused with no visitor, or once already greeted.
 

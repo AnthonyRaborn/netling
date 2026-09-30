@@ -25,7 +25,7 @@ import {
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { CHATTER_IDS } from './chatter.js';
-import { ACCESSORIES, STYLE_ITEMS, HEX, accessoryById } from './accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
@@ -188,7 +188,17 @@ function cleanStats(raw) {
   };
 }
 
-// A stray netling playing with it: { startedAge, len, form, palette }.
+// What a visitor wears: known accessories, one per wear slot.
+function cleanVisitWear(raw) {
+  const out = [];
+  for (const id of Array.isArray(raw) ? raw : []) {
+    const slot = WORN_IDS.has(id) ? accessoryById(id).slot : null;
+    if (slot && !out.some((x) => accessoryById(x).slot === slot)) out.push(id);
+  }
+  return out.slice(0, WEAR_SLOTS.length);
+}
+
+// A stray netling playing with it: { startedAge, len, form, palette, accessories }.
 function cleanVisit(raw) {
   if (!isObj(raw) || !has(SPECIES, raw.form) || !Number.isFinite(raw.startedAge)) return null;
   return {
@@ -196,7 +206,7 @@ function cleanVisit(raw) {
     len: int(raw.len, CFG.visitMinMin, 1, 60),
     form: raw.form,
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
-    accessory: WORN_IDS.has(raw.accessory) ? raw.accessory : null,
+    accessories: cleanVisitWear(raw.accessories ?? (raw.accessory ? [raw.accessory] : [])), // older visits wore one: `accessory`
     ...(raw.greeted === true ? { greeted: true } : {}),
   };
 }
@@ -420,9 +430,13 @@ export function cleanWardrobe(raw) {
   for (const slot of SLOTS) {
     if (COSMETICS[slot].some((c) => c.id === w[slot])) out[slot] = w[slot];
   }
-  for (const key of ['accessory', 'prop']) {
-    if (w[key] === 'none' || STYLE_IDS.has(w[key])) out[key] = w[key];
+  // One accessory per wear slot, and a prop. Older wardrobes held a single `accessory`: it moves to its own slot.
+  const legacy = ACCESSORIES.find((x) => x.id === w.accessory);
+  for (const slot of WEAR_SLOTS) {
+    const id = w[slot] ?? (legacy?.slot === slot ? legacy.id : undefined);
+    if (id === 'none' || ACCESSORIES.some((x) => x.id === id && x.slot === slot)) out[slot] = id;
   }
+  if (w.prop === 'none' || PROPS.some((x) => x.id === w.prop)) out.prop = w.prop;
   if (typeof w.label === 'string') out.label = w.label.slice(0, LABEL.max * 4);
   if (isObj(w.colors)) {
     const colors = {};

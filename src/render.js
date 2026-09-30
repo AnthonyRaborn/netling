@@ -1,5 +1,5 @@
 import { SPRITES, drawSprite, formSprite, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, WHITE_COLORS } from './sprites.js';
-import { drawAccessory, drawProp } from './accessories.js';
+import { drawWorn, drawProp, visitAccessories } from './accessories.js';
 import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting } from './sim.js';
 import { FLASH_TOGGLE_MS } from './games/common.js';
 
@@ -170,9 +170,9 @@ export function renderLCD(canvas, s, time, opts = {}) {
     bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
     bctx.globalAlpha = 1; // a Ghost fades, what it wears does not
-    if (opts.accessory && !strobe) {
-      drawAccessory(bctx, opts.accessory, sprite, x, y, frame, dimPet, time, opts.accessoryColors, pal);
-    }
+    // opts.accessories: [{ id, colors }], one per wear slot; opts.accessory (one id) is the short form.
+    const worn = opts.accessories ?? (opts.accessory ? [{ id: opts.accessory, colors: opts.accessoryColors }] : []);
+    if (!strobe) drawWorn(bctx, worn, sprite, x, y, frame, dimPet, time, pal);
     // The prop stands in front of the pet, so a pet at the right edge does not hide it.
     if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
 
@@ -182,7 +182,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
       const vx = 1 + swing(0);
       const vy = 20 - vs.length - hop(frame);
       drawSprite(bctx, vs, vx, vy, paletteColors(vp));
-      if (visit.accessory) drawAccessory(bctx, visit.accessory, vs, vx, vy, frame, false, time, null, vp);
+      drawWorn(bctx, visitAccessories(visit).map((id) => ({ id })), vs, vx, vy, frame, false, time, vp);
       // A spark passes between them.
       if (frame) plus(bctx, '#f9f002', Math.round((vx + vs[0].length + x) / 2), 6);
     }

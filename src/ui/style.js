@@ -1,7 +1,7 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
 import { PALETTES } from '../sim.js';
 import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
-import { ACCESSORIES, PROPS, STYLE_ITEMS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
@@ -230,16 +230,16 @@ export function renderWardrobe() {
       }
       return [h, grid];
     }),
-    ...styleItemSection('accessory', 'ACCESSORY', ACCESSORIES),
-    ...colorSection(),
+    // One accessory from each wear slot at once, each with its color pickers if it's recolorable.
+    ...WEAR_SLOTS.flatMap((slot) => [...styleItemSection(slot, `ACCESSORY: ${slot.toUpperCase()}`, ACCESSORIES.filter((x) => x.slot === slot)), ...colorSection(slot)]),
     ...styleItemSection('prop', 'PROP', PROPS),
     ...labelSection(),
   );
 }
 
-// Color pickers for the equipped accessory, if it's recolorable.
-function colorSection() {
-  const id = app.wardrobe.accessory;
+// Color pickers for the accessory equipped in a wear slot, if it's recolorable.
+function colorSection(slot) {
+  const id = app.wardrobe[slot];
   const acc = app.ownedAccessories.includes(id) ? accessoryById(id) : null;
   if (!acc?.colors) return [];
   const pal = PALETTES[app.state.quirk.palette] ?? PALETTES[0];

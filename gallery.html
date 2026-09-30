@@ -84,7 +84,7 @@
     <script type="module">
       import { renderLCD, LCD_W, LCD_H, setLcdTint } from './src/render.js';
       import { createScript, SPECIES, FORM_MODS, PALETTES, IDLES } from './src/sim.js';
-      import { ACCESSORIES, PROPS, anchorsFor, accessoryColors, drawAccessory, DIM_WEARABLE } from './src/accessories.js';
+      import { ACCESSORIES, PROPS, WEAR_SLOTS, anchorsFor, accessoryColors, drawAccessory, DIM_WEARABLE } from './src/accessories.js';
       import { contrastColor } from './src/colors.js';
       import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, drawSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS, WHITE_COLORS } from './src/sprites.js';
       import { COSMETICS } from './src/cosmetics.js';
@@ -99,10 +99,10 @@
       const TINTS = COSMETICS.tint;
       const DIM = '#1c3a3f'; // a resting pet in the dark, and every accessory it wears (render.js)
       const STATES = { 'awake A': { time: 0 }, 'awake B': { time: 500 }, asleep: { rest: true }, 'asleep dark': { rest: true, lights: false } };
-      const SECTIONS = ['forms', 'silhouettes', 'scenes', 'wearables', 'matrix', 'props', 'propmatrix', 'visitors', 'icons', 'thumbs', 'nodes', 'games', 'crests', 'colors'];
+      const SECTIONS = ['forms', 'silhouettes', 'scenes', 'wearables', 'matrix', 'combos', 'props', 'propmatrix', 'visitors', 'icons', 'thumbs', 'nodes', 'games', 'crests', 'colors'];
 
       // --- settings, kept in the URL hash so any view can be linked ---------------------------------------------------
-      const DEFAULTS = { pal: '0', tint: TINTS[0].id, idle: 'bounce', t: '0', scale: '5', calm: '1', live: '0', wear: '', prop: 'none', form: 'chrome', state: 'awake A', anchors: '1', sec: '' };
+      const DEFAULTS = { pal: '0', tint: TINTS[0].id, idle: 'bounce', t: '0', scale: '5', calm: '1', live: '0', head: '', face: '', body: '', float: '', prop: 'none', form: 'chrome', state: 'awake A', anchors: '1', sec: '' };
       const P = { ...DEFAULTS };
       const read = () => {
         const q = new URLSearchParams(location.hash.slice(1));
@@ -117,6 +117,9 @@
       const palettes = () => (P.pal === 'all' ? PALETTES.map((_, i) => i) : [Number(P.pal) || 0]);
       const scale = () => Math.max(1, Number(P.scale) || 5);
       const at = () => Number(P.t) || 0;
+      // The wearable controls: one per wear slot, worn together.
+      const worn = () => WEAR_SLOTS.map((slot) => P[slot]).filter(Boolean);
+      const wornName = () => worn().join(' + ') || 'nothing';
 
       // --- drawing helpers ---------------------------------------------------------------------------------------------
       let cells = []; // {draw(now)} redrawn each frame in live mode
@@ -246,9 +249,9 @@
 
         scenes() {
           const form = P.form;
-          const s = section('scenes', 'SCENES', `The whole 40x28 screen: compile, states, alerts, effects and dead. Form ${SPECIES[form].name} (form control), wearing ${P.wear || 'nothing'} (wearable control), palette ${PALETTES[palettes()[0]].name}. Icons share the top rows with tall wearables.`);
+          const s = section('scenes', 'SCENES', `The whole 40x28 screen: compile, states, alerts, effects and dead. Form ${SPECIES[form].name} (form control), wearing ${wornName()} (wearable controls), palette ${PALETTES[palettes()[0]].name}. Icons share the top rows with tall wearables.`);
           const pal = palettes()[0];
-          const opts = { accessory: P.wear || null, accessoryColors: null, prop: P.prop && P.prop !== 'none' ? P.prop : null };
+          const opts = { accessories: worn().map((id) => ({ id })), prop: P.prop && P.prop !== 'none' ? P.prop : null };
           const plush = { sprite: formSprite('bitling', 'a'), colors: palColors(pal) };
           const defs = [
             ['compiling', mk(form, { palette: pal, stage: 'script', extra: { ageMin: 10 } }), {}],
@@ -267,7 +270,7 @@
             ['overheating', mk(form, { palette: pal, extra: { stats: { ...createScript({ now: T0 }).stats, heat: 95 } } }), {}],
             ['evolving (white strobe)', mk(form, { palette: pal }), { flash: true }],
             ['power surge', mk(form, { palette: pal }), { surge: 1 }],
-            ['visitor', mk(form, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: 'ghost', palette: (pal + 2) % 5, accessory: P.wear || null } } }), {}],
+            ['visitor', mk(form, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: 'ghost', palette: (pal + 2) % 5, accessories: worn() } } }), {}],
             ['dead', mk(form, { palette: pal, stage: 'dead' }), {}],
             ['reaction: eat', mk(form, { palette: pal }), { anim: { kind: 'eat', t: 0.3 } }],
             ['reaction: cool', mk(form, { palette: pal }), { anim: { kind: 'cool', t: 0.5 } }],
@@ -333,6 +336,27 @@
           return s;
         },
 
+        combos() {
+          const st = STATES[P.state] ?? STATES['awake A'];
+          const form = P.form;
+          const s = section('combos', 'WEARABLES WORN TOGETHER', `One from each of two slots on ${SPECIES[form].name} (form control), state "${P.state}". Rows are the slot drawn first, columns the slot drawn over it (body, face, head, float). Body items slide down and the Halo and Spark rise to make room; the audit's combos check ranks what still overlaps.`);
+          const pal = palettes()[0];
+          for (let i = 0; i < WEAR_SLOTS.length; i++) {
+            for (let j = i + 1; j < WEAR_SLOTS.length; j++) {
+              const rows = ACCESSORIES.filter((a) => a.slot === WEAR_SLOTS[i]);
+              const cols = ACCESSORIES.filter((a) => a.slot === WEAR_SLOTS[j]);
+              s.append(el('h3', { textContent: `${WEAR_SLOTS[i]} + ${WEAR_SLOTS[j]}` }));
+              const g = grid(cols.length, cols.map((c) => c.name));
+              for (const r of rows) {
+                g.append(el('span', { textContent: r.name }));
+                for (const c of cols) g.append(lcd(mk(form, { ...stateOpts(st), palette: pal }), st.time ?? 0, { accessories: [{ id: r.id }, { id: c.id }] }, CROP, Math.max(3, scale() - 1)));
+              }
+              s.append(g);
+            }
+          }
+          return s;
+        },
+
         props() {
           const s = section('props', 'PROPS', 'Each prop stands on the floor at the right edge, behind the pet. Top table: the pet at its far right (the sway idle at 2356 ms), where it covers the prop most. Bottom: the pet in the middle. Plush shows a half-scale Bitling in the palette colors.');
           const pal = palettes()[0];
@@ -364,12 +388,12 @@
         },
 
         visitors() {
-          const s = section('visitors', 'VISITORS', `With a visitor the host moves to the right side and the visitor stands on the left (both wearing ${P.wear || 'nothing'}). Rows are hosts, columns are visitors, so every pair of forms appears. The host is on the right, where the prop is.`);
+          const s = section('visitors', 'VISITORS', `With a visitor the host moves to the right side and the visitor stands on the left (both wearing ${wornName()}). Rows are hosts, columns are visitors, so every pair of forms appears. The host is on the right, where the prop is.`);
           const g = grid(FORMS.length, FORMS.map((f) => SPECIES[f].name));
           const pal = palettes()[0];
           for (const host of FORMS) {
             g.append(el('span', { textContent: SPECIES[host].name }));
-            for (const vis of FORMS) g.append(lcd(mk(host, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: vis, palette: (pal + 2) % 5, accessory: P.wear || null } } }), 700, { accessory: P.wear || null }, FULL, 3));
+            for (const vis of FORMS) g.append(lcd(mk(host, { palette: pal, extra: { visit: { startedAge: 0, len: 8, form: vis, palette: (pal + 2) % 5, accessories: worn() } } }), 700, { accessories: worn().map((id) => ({ id })) }, FULL, 3));
           }
           s.append(g);
           return s;
@@ -528,7 +552,7 @@
           select('state', Object.keys(STATES).map((k) => [k, k]), 'state'),
           select('idle', IDLES.map((i) => [i, i]), 'idle'),
           select('form', FORMS.map((f) => [f, SPECIES[f].name]), 'form'),
-          select('wear', [['', 'none'], ...ACCESSORIES.map((a) => [a.id, a.name])], 'wear'),
+          ...WEAR_SLOTS.map((slot) => select(slot, [['', 'none'], ...ACCESSORIES.filter((a) => a.slot === slot).map((a) => [a.id, a.name])], slot)),
           select('prop', [['none', 'none'], ...PROPS.map((p) => [p.id, p.id])], 'prop'),
           select('scale', ['3', '4', '5', '6', '8'].map((v) => [v, `${v}x`]), 'scale'),
           el('label', { textContent: 'time ms ' }, Object.assign(el('input', { type: 'number', value: P.t, step: 250, style: 'width:7ch' }), { onchange: (e) => write('t', e.target.value) })),

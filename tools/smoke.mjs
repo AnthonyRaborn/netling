@@ -1103,7 +1103,7 @@ await scenario('after a crash it reboots: care is blocked and the readout says s
   assert((await page.evaluate(() => document.getElementById('lcd').dataset.anim)) === 'refuse', 'no refusal reaction');
 });
 
-await scenario('changing shell keeps the equipped accessory and label', async ({ open }) => {
+await scenario('changing shell keeps the equipped accessory and label; an old single accessory moves to its slot', async ({ open }) => {
   const page = await open(
     BASE,
     seed({
@@ -1117,7 +1117,30 @@ await scenario('changing shell keeps the equipped accessory and label', async ({
   await page.locator('#wardrobe-list .cosmetic', { hasText: 'Matte black' }).click();
   const w = await saved(page, 'netling.wardrobe');
   assert(w.shell === 'matte', `shell not set: ${JSON.stringify(w)}`);
-  assert(w.accessory === 'partyhat' && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
+  assert(w.head === 'partyhat' && w.accessory === undefined && w.label === 'ZED', `lost wardrobe fields: ${JSON.stringify(w)}`);
+});
+
+await scenario('one accessory per slot: a hat and shades together, and a second hat replaces the first', async ({ open }) => {
+  const page = await open(
+    BASE,
+    seed({
+      'netling.accessories': ['partyhat', 'cap', 'shades'],
+      'netling.wardrobe': { head: 'partyhat' },
+    }),
+  );
+  await page.click('#open-archive');
+  await page.click('#tab-btn-wardrobe');
+  const heads = await page.locator('#wardrobe-list h3').allTextContents();
+  for (const h of ['ACCESSORY: HEAD', 'ACCESSORY: FACE', 'ACCESSORY: BODY', 'ACCESSORY: FLOAT', 'PROP']) assert(heads.includes(h), `no ${h} section: ${heads}`);
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Shades' }).click();
+  let w = await saved(page, 'netling.wardrobe');
+  assert(w.head === 'partyhat' && w.face === 'shades', `not both worn: ${JSON.stringify(w)}`);
+  await page.locator('#wardrobe-list .cosmetic', { hasText: 'Cap' }).click();
+  w = await saved(page, 'netling.wardrobe');
+  assert(w.head === 'cap' && w.face === 'shades', `the hat did not swap: ${JSON.stringify(w)}`);
+  // The party hat's color row belongs to the head slot and goes with it; the shades have their own.
+  assert((await page.locator('.color-row', { hasText: 'shades colors' }).count()) === 1, 'no shades colors');
+  assert((await page.locator('.color-row', { hasText: 'party hat colors' }).count()) === 0, 'a stale party hat color row');
 });
 
 await scenario('legacy: the family tree links generations, and an earned crest shows on the device', async ({ open }) => {

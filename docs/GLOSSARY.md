@@ -8,7 +8,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 |---|---|---|
 | **A / B (buttons)** | Normalized input names. `a` confirms, `left` and `right` move. On a controller B quits | `ui/play.js`, `ui/gamepad.js` |
 | **Abort** | Ending a netrun early: tap ABORT RUN, then CONFIRM ABORT at the top of the screen (Esc or B: press twice). Loot is forfeited, nothing else | `netrun/run.js` `abortRun` |
-| **Accessory** | A cosmetic pixel item drawn on the netling (24 of them, some earned, some found). Fits every form by anchors | `accessories.js` |
+| **Accessory** | A cosmetic pixel item drawn on the netling (24 of them, some earned, some found). Fits every form by anchors. One per wear slot is worn at once | `accessories.js` |
 | **Advance** | The UI function that ticks the simulation, reacts and saves. Runs each second | `ui/life.js` |
 | **Age (`ageMin`)** | Simulated minutes the netling has lived. Not wall-clock; excludes hibernation | `sim.js` |
 | **Alert** | The single most urgent reason to call the player back (`alertReason`). Drives the chirp and notifications | `sim.js` |
@@ -159,5 +159,6 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Visitor** | A stray netling that plays with yours for 10 to 20 minutes. GREET it for a line and better gift odds | `sim.js` |
 | **Wake (wake it)** | Ending a nap early, or ending hibernation | `sim.js` |
 | **Wardrobe** | The stored equipped cosmetics | `cosmetics.js` |
+| **Wear slot** | Where an accessory sits: `head`, `face`, `body` or `float`. The wardrobe holds one per slot, and a visitor wears up to two | `accessories.js` `WEAR_SLOTS` |
 | **Way down** | The order regions open in, each by clearing the one before: Public Net, Bazaar, Corp Grid, Ruins, The Deep | `netrun/regions.js` `REGION_ORDER` |
 | **Web Locks** | Browser API used for the one-tab rule | `ui/tabs.js` |

@@ -11,14 +11,14 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
-| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, wearables from different slots that cover each other, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
 | `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITES.md](SPRITES.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/render-music.mjs <out dir> [seconds] [track[:state[:region]] ...]` | Renders the background music to WAV files (every track and state by default) with the real player code, at the game's own level (music slider at `VOLUME`, default 0.4), plus `reference-effects.wav` (sound effects at the default 80%) to compare with; prints each file's loudness. Sleep renders run at least 64 s to cover the wind-down | Playwright |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 363 tests in 36 files. The smoke test has 66 scenarios (Playwright 1.56.1).
+`npm test` runs 367 tests in 36 files. The smoke test has 67 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -47,7 +47,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `sprites.test.js` | 5 | Every form has its own dead and sleep sprite, dead eyes are X's, asleep eyes are slits, the Shell is solid with a void, every color map covers every mark |
 | `colors.test.js` | 2 | Color distance and the contrast swap |
 | `sprite-checks.test.js` | 7 | The sprite review arithmetic: color distance, blending, clipping, lost pixels, overlap, silhouettes |
-| `accessories.test.js` | 18 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, colors (per-palette defaults, the generated table is current, the contrast swap) |
+| `accessories.test.js` | 22 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, wear slots (every accessory has one, draw order, what the wardrobe has on, making room, a visitor's second item from another slot), colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
 | `cosmetics.test.js` | 18 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, the four attention cosmetics, and the music tracks' milestones and wardrobe slot |
@@ -105,7 +105,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Test mode: hidden until 7 logo taps, separate fast netling, real one untouched.
 - Reaction animations, Packet Feast payout, intrusion and DEFEND, overflow and PURGE, reboot.
 - Crashes: a crashing mini-game is closed, a crashing netrun is aborted, a crash in the tutorial still finishes onboarding.
-- Shell change keeps accessory and label; flatline and next generation; hibernate; dev mode.
+- Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.
 
 ## Balance tools
 
