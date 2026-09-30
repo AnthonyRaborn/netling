@@ -19,7 +19,7 @@ function fullLifeStreak(ctx) {
 const streak = (ctx, game) => ctx.progress.streaks?.[game]?.best ?? 0;
 const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[a] ?? 0), 0);
 
-// Attention rewards (docs/ATTENTION_PLAN.md). ctx.flowMin is every life's time in flow, the living one's included.
+// Attention rewards (docs/ATTENTION.md). ctx.flowMin is every life's time in flow, the living one's included.
 export const ATTENTION = {
   requests: 25,
   greetings: 5,

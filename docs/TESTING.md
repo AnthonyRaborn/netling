@@ -11,8 +11,8 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `npm run balance [runs] [archetype]` | Simulates full lifetimes for scripted players | Node only |
 | `node tools/netrun-balance.mjs [runs] [region]` | Monte Carlo netrun outcomes per play style | Node only |
 | `node tools/wearable-colors.mjs [--write]` | Picks each recolorable wearable's default color per palette and rewrites `src/wearable-colors.js` (run it with `--write` after changing sprites, palettes or wearables; a test fails when it is stale) | Node only |
-| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md) | Node only |
-| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
+| `node tools/sprite-audit.mjs [--check=a,b] [--json] [--strict]` | Candidate art problems (clipping, colors that blend into the pet, look-alike wearables and icons, missing poses) from the real renderer; see [SPRITES.md](SPRITES.md) | Node only |
+| `npm run serve`, then open `http://localhost:5174/gallery.html` | The sprite gallery (every sprite in every valid combination; see [SPRITES.md](SPRITES.md)). It must be served: a `file://` page cannot load modules. If it is blank in a browser that has run the game before, an older stored copy of a file (service worker or cache) is the usual cause: use the button in its error box, or a private window | A browser |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
@@ -107,7 +107,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 
 ## Balance tools
 
-The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance plan ([BALANCE_PLAN.md](BALANCE_PLAN.md)) says what each pass is trying to move.
+The simulators are scripted players, not people: use their numbers to compare one version of the rules with another, not as a forecast. The balance notes ([BALANCE.md](BALANCE.md)) say what each pass is trying to move.
 
 ### `tools/balance.mjs`
 
@@ -178,7 +178,7 @@ Regenerate all three in the same pull request as any change to the rules or to t
 
 ### Balance targets
 
-Agreed with the maintainer (see [BALANCE_PLAN.md](BALANCE_PLAN.md#decisions-so-far)). Status is from the baselines above.
+Agreed with the maintainer (see [BALANCE.md](BALANCE.md#design-goals)). Status is from the baselines above.
 
 | Target | Measured by | Status |
 |---|---|---|

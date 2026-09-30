@@ -17,9 +17,9 @@ When code and a doc disagree, the code is right: fix the doc.
 | Add a feature safely | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
-| Plan the next balance passes (forms, netruns, lineage) | [BALANCE_PLAN.md](BALANCE_PLAN.md) |
-| Plan the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION_PLAN.md](ATTENTION_PLAN.md) |
-| Review the art (forms, wearables, props, icons, crests) and see what the first pass found | [SPRITE_REVIEW_PLAN.md](SPRITE_REVIEW_PLAN.md), [SPRITE_FINDINGS.md](SPRITE_FINDINGS.md) |
+| See what the balance passes changed and what is still open | [BALANCE.md](BALANCE.md) |
+| Look up the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION.md](ATTENTION.md) |
+| Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 
 ## The project in one paragraph

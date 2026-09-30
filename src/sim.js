@@ -94,7 +94,7 @@ export const CFG = {
   visitAccessoryChance: 0.01,
   visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
-  // Attention rewards (see docs/ATTENTION_PLAN.md): nothing here costs a fault when missed.
+  // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
   requestChancePerHour: 0.25,
   requestWindowMin: 45,
