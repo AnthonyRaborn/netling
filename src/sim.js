@@ -367,6 +367,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
     contractCheckAge: null, // the netling minute the UI last looked at posting one
+    wokeAt: null, // when it last woke from the night's sleep (not a nap or hibernation)
     flowMin: 0, // minutes in a row in good shape, awake
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
@@ -471,6 +472,7 @@ function step(s, t, rng) {
   } else if (!shouldSleep && s.asleep) {
     s.asleep = false;
     s.lightsOn = true;
+    s.wokeAt = t; // a new day: the daily check-in keys off this (checkin.js)
     log(s, t, '> resuming from low-power mode.');
   }
 
@@ -860,6 +862,7 @@ export function migrate(s) {
   s.request ??= null;
   s.contract ??= null;
   s.contractCheckAge ??= null;
+  s.wokeAt ??= null;
   s.flowMin ??= 0;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;

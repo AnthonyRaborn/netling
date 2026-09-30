@@ -476,6 +476,56 @@ button:active {
   color: var(--yellow);
 }
 
+.inv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inv-head .inv-scrip {
+  margin-left: auto;
+}
+
+.box-btn {
+  padding: 2px 10px;
+  font-size: 14px;
+}
+
+.box-btn.full {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
+.box-ladder {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.box-day {
+  text-align: center;
+  padding: 4px 0;
+  border: 1px solid var(--dim);
+  color: var(--dim);
+}
+
+.box-day.done {
+  color: var(--bg, #0b2226);
+  background: var(--dim);
+}
+
+.box-day.next {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
+.box-note {
+  text-align: left;
+  font-size: 13px;
+}
+
 .inv-scrip.contract {
   color: var(--yellow);
   text-align: left;

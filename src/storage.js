@@ -19,6 +19,8 @@ export const KEYS = {
   progress: 'netling.progress',
   unlocked: 'netling.unlocked',
   accessories: 'netling.accessories',
+  checkin: 'netling.checkin', // { day, claimedAt, claims }: the daily check-in ladder (checkin.js)
+  rewardBox: 'netling.rewardBox', // check-in rewards waiting to be taken
   prefs: 'netling.prefs',
   onboarding: 'netling.onboarding',
   helpSeen: 'netling.helpSeen',

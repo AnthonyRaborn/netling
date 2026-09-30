@@ -18,6 +18,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 | Greet a visitor | One GREET per visit; count is `progress.visitorsGreeted` |
 | Flow | A glow after 3 hours in good shape; time spent counts across lives (`flowMin`) |
 | Chatter | 50 lines; heard lines are kept in the Archive's CHATTER tab (`progress.chatter`) |
+| Daily check-in | A seven-day reward ladder for opening the app once after each morning it wakes; rewards wait in a reward box |
 | Contracts | A netrun job for one region, posted while the uplink is ready and the app is open; every route through that run can meet it. Count is `progress.contractsDone` |
 
 ## Unlocks
@@ -43,6 +44,28 @@ Balance bots, 1000 lives each. They answer a request or greet a visitor only if 
 
 An attentive player earns Purr in about three lives and Aurora in about two; casual players rarely reach flow. Hourly check-ins catch about one visit a life.
 
+## Daily check-in
+
+Rules in `src/checkin.js` (`CHECKIN`), the UI in `src/ui/rewards.js`.
+
+- **When.** The first time the app is open after the netling wakes for a new day (`s.wokeAt`, set when the night's sleep ends; a nap or hibernation does not count). Several mornings away count as one. The very first check-in is due at once (after the tutorial). A new netling has to wake once before the next one. Moving the device clock forward also ages the netling, so it is no free farm.
+- **The ladder never resets.** Each check-in steps one day; a missed day only pauses it; after day 7 it starts over.
+
+  | Day | Reward |
+  |---|---|
+  | 1 | 10 scrip |
+  | 2 | A cheapest-tier item (coolant, antivirus, repair, booster, memory) |
+  | 3 | 25 scrip |
+  | 4 | A middle-tier item (voucher, black ICE; never a Segfault) |
+  | 5 | An unowned common accessory from the general pool (Cap, Scarf, Headphones, Flower, Bow), else 25 scrip |
+  | 6 | An Overclock chip |
+  | 7 | An unowned rare or very rare accessory from the general pool (Shades, Visor, Crown, Halo, Spark), else 40 scrip |
+
+  The general pool is the accessories found anywhere: regional drops and earned items stay the reward for exploring and for events.
+- **The reward box.** Rewards wait in a box kept per device (`netling.rewardBox`, up to 30; a check-in waits while it is full), which moves with a transfer code like the rest of the collection. The BOX button beside the scrip count opens it with the ladder. TAKE moves scrip to the netling up to the cap (the rest stays in the box), an item when the inventory has room, an accessory to the collection at any time. Nothing is taken during a netrun or without a living netling, except accessories.
+- **Where it shows.** A line in the netling's log, the box count in yellow, and a notification with ALERTS on. Never the status line, which carries notices that matter more.
+- **Not measured.** The balance bots do not check in, so the baselines do not include it.
+
 ## Contracts
 
 Rules and numbers are in [NETRUN.md](NETRUN.md#contracts).
@@ -59,4 +82,4 @@ Notifications are local: they fire while the app is open or in a background tab.
 
 ## Open ideas
 
-- **Daily check-in reward.** Needs reward ideas; any version should pay for showing up without taking anything away for a missed day.
+- **Rebalance the check-in accessories** once more general-pool accessories exist (see [Daily check-in](#daily-check-in)): with today's ten, the accessory days fall back to scrip after about ten weeks of check-ins.

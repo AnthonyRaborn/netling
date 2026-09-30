@@ -47,6 +47,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/render.js`, `src/sprites.js` | The 40x28 LCD renderer and the code-drawn pixel art |
 | `src/accessories.js` | Accessory and prop art, anchor detection, rarity rolls |
 | `src/cosmetics.js` | Wardrobe items, hinted unlock conditions, legacy goals (`LEGACY`), mini-game streaks |
+| `src/checkin.js` | The daily check-in ladder and the reward box (pure) |
 | `src/archive.js` | Lineage records and the form dex (pure data helpers) |
 | `src/games/` | Four mini-games plus `session.js` (intro, result card) and `common.js` (drawing helpers) |
 | `src/netrun/` | `run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js` (drawing and input) |
@@ -77,6 +78,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `style.js` | Wardrobe UI, unlock checks, earned items, accessory inbox draining |
 | `onboarding.js` | The field manual, intro terminal, nudge, tutorial run |
 | `system.js` | SYSTEM dialog: transfer out, lock screen, import, hibernate, restart, storage note, effects and music volume, test mode |
+| `rewards.js` | The daily check-in (claimed from the clock) and the reward box panel |
 | `soundtrack.js` | Tells the music player what should play (home track, sleep, alert or flow variant, netrun theme, mini-game duck, silence), synced once a second and on the first tap |
 | `tabs.js` | The one-active-tab rule |
 | `gamepad.js` | Controller input |
@@ -139,7 +141,7 @@ Two independent loops:
 
 `app` in `ui/app.js` is a plain object, deliberately not reactive. It holds:
 
-- Loaded data: `state` (the live netling), `prefs`, `progress`, `wardrobe`, `unlocked`, `codex`, `dex`, `ownedAccessories`, `lineage`, `onboarding`.
+- Loaded data: `state` (the live netling), `prefs`, `progress`, `wardrobe`, `unlocked`, `codex`, `dex`, `ownedAccessories`, `checkin`, `rewardBox`, `lineage`, `onboarding`.
 - Mode flags: `claimed`, `inactive`, `leaving`, `lock`, `writeFailed`, `skew`, `testClock`.
 - The running `session` (mini-game or netrun view), or `null`.
 - Render bookkeeping: last stage, last log key, flash timers, `anim`.

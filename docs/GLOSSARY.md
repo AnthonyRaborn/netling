@@ -34,6 +34,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **CFG** | The exported object of every tunable rule number | `sim.js` |
 | **Charge** | Stat: power. Drains 15.4/hr awake, scaled by the drain curve. Fed by packets | `sim.js` |
 | **Chatter** | A line it mutters while awake and idle; lines seen are kept in the Archive's CHATTER tab | `chatter.js` |
+| **Check-in** | The daily reward for opening the app once after the netling wakes: a seven-day ladder that pauses, never resets | `checkin.js` |
 | **Checkpoint** | A corp scan node: hide, comply, or use a voucher | `netrun/run.js` |
 | **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; corp insurance once a run | `sim.js` |
 | **Clean clear / clean jack-out** | A netrun that ends by jacking out with no ICE lost. Shortens the next cooldown by 1 hour | `netrun/run.js` |
@@ -42,6 +43,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Codex inbox** | `pet.codexInbox`: fragments a run found, waiting for the UI to bank them into the shared codex | `netrun/run.js`, `ui/archive.js` |
 | **Compile / script** | A new generation starts as a `script` that compiles for 3 minutes into a baby | `sim.js` |
 | **Comply** | Trace answer: accept the scan. Integrity -5, Sync -10, allegiance +1 | `sim.js` |
+| **Contract** | A netrun job for one region (reach the exit, get past ICE, crack caches, buy, bring back a fragment), posted while the uplink is ready; every route through that run can meet it | `netrun/run.js` `updateContract` |
 | **Coolant cell** | Item: vents 50 Heat | `sim.js` |
 | **Cooldown (uplink cooldown)** | Time before the next netrun: 240/210/180 minutes by stage, minus bonuses, never under 120 | `sim.js` |
 | **Corp Grid** | Netrun region full of checkpoints. Needs a teen that has cleared the Bazaar | `netrun/regions.js` |
@@ -49,7 +51,6 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Corp trace** | Timed event: HIDE or COMPLY within 2 hours or lose Integrity and lean corp | `sim.js` |
 | **Corp voucher** | Item: full Charge, waves off a trace | `sim.js` |
 | **Crash** | What an ignored memory overflow does: -15 Integrity, cache full, 20 minute reboot | `sim.js` |
-| **Contract** | A netrun job for one region (reach the exit, get past ICE, crack caches, buy, bring back a fragment), posted while the uplink is ready; every route through that run can meet it | `netrun/run.js` `updateContract` |
 | **Crest** | Wardrobe slot: a pixel emblem beside the device label, earned by a legacy goal | `cosmetics.js` |
 | **Daemon** | Adult form leaning orderly. Trait Persistent. Charge drains 20% slower. Sees two steps ahead and repairs as it moves in runs | `sim.js` |
 | **Drain curve** | Charge and Sync drain faster the fuller they are: 0.39x the base rate near empty, 2x when full (`drainCurve`) | `sim.js` |
@@ -126,6 +127,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Relay** | A netrun node: recharge, vent, and an optional safe jack-out | `netrun/run.js` |
 | **Request** | It asks for one game, or a COOL when warm, and waits 45 minutes. Missing one costs nothing | `sim.js` `stepRequest` |
 | **Rescue** | Root Access reversing a flatline. Sets `rootUsed` | `sim.js` |
+| **Reward box** | Where check-in rewards wait until taken (BOX beside the scrip count); per device, moves with a transfer code | `checkin.js`, `ui/rewards.js` |
 | **Root Access** | NL-0's rescue from the first premature death. Earned by completing the codex | `sim.js` |
 | **SAVE_VERSION** | The save format version. Currently 1. A bump needs a step in `STEPS` | `sim.js`, `migrations.js` |
 | **Scavenged data (SCAV DATA)** | Food: +25 Charge, leans indie, 12% infection | `sim.js` |

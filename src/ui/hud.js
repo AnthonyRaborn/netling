@@ -202,6 +202,10 @@ function renderInventory() {
   const inv = app.state.inventory ?? [];
   if (selectedSlot !== null && !inv[selectedSlot]) selectedSlot = null;
   const scrip = app.state.scrip ?? 0;
+  // The reward box: shown once the first check-in is in, with a count of what waits in it.
+  $('open-box').hidden = !app.checkin?.claims && !app.rewardBox?.length;
+  $('open-box').textContent = app.rewardBox?.length ? `BOX ${app.rewardBox.length}` : 'BOX';
+  $('open-box').classList.toggle('full', Boolean(app.rewardBox?.length));
   $('inv-scrip').textContent = `SCRIP ${scrip}/${SCRIP.max}${scrip >= SCRIP.max ? ' FULL' : ''}`;
   $('inv-scrip').classList.toggle('full', scrip >= SCRIP.max);
   const key = `${inv.join(',')}|${selectedSlot}|${atMarket(app.state)}`;

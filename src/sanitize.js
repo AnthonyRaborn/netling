@@ -30,6 +30,7 @@ import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
 import { ANOMALIES } from './netrun/anomalies.js';
 import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
+import { CHECKIN } from './checkin.js';
 import { upgradeSave } from './migrations.js';
 
 export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
@@ -370,6 +371,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     request: cleanRequest(raw.request),
     contract: cleanContract(raw.contract),
     contractCheckAge: numOrNull(raw.contractCheckAge),
+    wokeAt: numOrNull(raw.wokeAt),
     flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
     flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
     chatter: cleanChatter(raw.chatter),
@@ -479,6 +481,26 @@ export function cleanWardrobe(raw) {
   return out;
 }
 
+// The daily check-in: the next ladder day (0 to 6), when the last one was claimed, and how many in all.
+export function cleanCheckin(raw) {
+  const c = isObj(raw) ? raw : {};
+  return { day: int(c.day, 0, 0, CHECKIN.days - 1), claimedAt: numOrNull(c.claimedAt), claims: int(c.claims, 0, 0) };
+}
+
+// The reward box: [{ kind: 'scrip', n, day } | { kind: 'item', id, day } | { kind: 'accessory', id, day }].
+export function cleanRewardBox(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const e of raw) {
+    if (!isObj(e)) continue;
+    const day = int(e.day, 1, 1, CHECKIN.days);
+    if (e.kind === 'scrip' && Number.isFinite(e.n) && e.n >= 1) out.push({ kind: 'scrip', n: int(e.n, 1, 1, 1000), day });
+    else if (e.kind === 'item' && has(ITEMS, e.id)) out.push({ kind: 'item', id: e.id, day });
+    else if (e.kind === 'accessory' && STYLE_IDS.has(e.id)) out.push({ kind: 'accessory', id: e.id, day });
+  }
+  return out.slice(0, CHECKIN.boxMax);
+}
+
 // MOTION: 'auto' follows the system's reduced-motion setting; 'reduce' and 'full' override it.
 export const MOTION_MODES = ['auto', 'reduce', 'full'];
 export function cleanPrefs(raw) {
@@ -516,6 +538,8 @@ export const CLEANERS = {
   progress: cleanProgress,
   unlocked: cleanUnlocked,
   accessories: cleanAccessories,
+  checkin: cleanCheckin,
+  rewardBox: cleanRewardBox,
   prefs: cleanPrefs,
   onboarding: cleanOnboarding,
   helpSeen: (v) => v === true,

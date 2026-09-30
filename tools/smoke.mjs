@@ -126,7 +126,8 @@ function awakeNetling(overrides = {}) {
 
 // Storage writes, once per tab (sessionStorage survives the reloads a scenario triggers).
 function seed(extra = {}) {
-  const data = { 'netling.save': awakeNetling(), 'netling.onboarding': 'done', 'netling.helpSeen': true, ...extra };
+  // Today's check-in is already claimed, so it stays out of scenarios about something else (the check-in one clears it).
+  const data = { 'netling.save': awakeNetling(), 'netling.onboarding': 'done', 'netling.helpSeen': true, 'netling.checkin': { day: 1, claimedAt: Date.now(), claims: 1 }, ...extra };
   const raw = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, JSON.stringify(v)]));
   return seedRaw(raw);
 }
@@ -1264,6 +1265,28 @@ await scenario('attention: a posted contract shows in the bar and the region pic
   await page.waitForTimeout(300);
   const s = await saved(page);
   assert(s.contract === null && s.run?.contract?.kind === 'caches', `not taken along: ${JSON.stringify({ c: s.contract, r: s.run?.contract })}`);
+});
+
+await scenario('attention: the daily check-in fills the reward box once; TAKE moves it to the netling', async ({ open }) => {
+  const save = awakeNetling();
+  save.scrip = 0;
+  const page = await open(BASE, seed({ 'netling.save': save, 'netling.checkin': null }));
+  await page.waitForTimeout(1500);
+  assert(await visible(page, '#open-box'), 'no BOX after the first check-in');
+  assert((await page.textContent('#open-box')) === 'BOX 1', `box: ${await page.textContent('#open-box')}`);
+  const c = await saved(page, 'netling.checkin');
+  assert(c.day === 1 && c.claims === 1 && c.claimedAt > 0, `check-in: ${JSON.stringify(c)}`);
+  await page.click('#open-box');
+  assert(await visible(page, '#box'), 'the box did not open');
+  assert((await page.locator('#box-ladder .box-day.done').count()) === 1, 'day 1 not marked done');
+  await page.locator('#box-list button', { hasText: '10 SCRIP' }).click();
+  assert((await saved(page)).scrip === 10, 'the scrip did not reach the netling');
+  assert((await saved(page, 'netling.rewardBox')).length === 0, 'the box still holds it');
+  // Same morning: a reload claims nothing more.
+  await page.reload();
+  await page.waitForTimeout(1500);
+  assert((await saved(page, 'netling.checkin')).claims === 1, 'claimed twice in one day');
+  assert((await page.textContent('#open-box')) === 'BOX', 'an empty box still shows its button');
 });
 
 await scenario('attention: GREET a visitor, hear its line, find it in the CHATTER tab', async ({ open }) => {

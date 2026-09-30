@@ -14,11 +14,12 @@ import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyl
 import { drainCodexInbox } from './archive.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
-function showPanel(name) {
+export function showPanel(name) {
   $('controls').hidden = name !== 'controls';
   $('picker').hidden = name !== 'picker';
   $('pad').hidden = name !== 'pad';
   $('regions').hidden = name !== 'regions';
+  $('box').hidden = name !== 'box';
   if (name !== 'pad') disarmQuit(); // a confirm never outlives its game
 }
 

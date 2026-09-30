@@ -33,6 +33,8 @@ Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer
 | `netling.progress` | Counters and streaks | yes | See below |
 | `netling.unlocked` | Array of unlocked style ids | yes | `slot:id` strings, plus `label` |
 | `netling.accessories` | Array of owned accessory and prop ids | yes | Ids in `STYLE_ITEMS` |
+| `netling.checkin` | `{ day, claimedAt, claims }`: the next ladder day (0 to 6), when the last check-in was claimed (ms or null), how many in all | yes | `cleanCheckin` |
+| `netling.rewardBox` | Array of `{ kind: 'scrip', n, day }`, `{ kind: 'item', id, day }` or `{ kind: 'accessory', id, day }`, at most 30 | yes | `cleanRewardBox`: unknown ids and junk dropped |
 | `netling.prefs` | `{ sound, alerts, volume, musicVolume, awake, motion }` (`volume` is the effects level, default 0.8; `musicVolume` default 0.4, older prefs get 0.4) (`motion`: `auto`, `reduce` or `full`) | yes | |
 | `netling.onboarding` | `intro`, `readme`, `nudge`, `tutorial` or `done` | yes | |
 | `netling.helpSeen` | `true` | yes | |
@@ -82,6 +84,7 @@ Built by `createScript()` in `sim.js`. Fields:
 | `flowMin`, `flowTotalMin` | int | Minutes in a row in good shape (flow at 180), and minutes in flow this life. Missing: 0 |
 | `chatter` | `{ id, startedAge }` or null | The chatter line on screen. Unknown ids: null. Missing: null |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
+| `wokeAt` | ms or null | When the night's sleep last ended (the daily check-in keys off it). Missing: null |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
 | `traitLevel`, `history` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |

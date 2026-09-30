@@ -18,7 +18,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 380 tests in 37 files. The smoke test has 68 scenarios (Playwright 1.56.1).
+`npm test` runs 388 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -50,6 +50,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `accessories.test.js` | 22 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, wear slots (every accessory has one, draw order, what the wardrobe has on, making room, a visitor's second item from another slot), colors (per-palette defaults, the generated table is current, the contrast swap) |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
+| `checkin.test.js` | 8 | Daily check-in: the morning wake is recorded (not a nap), due once per morning however many passed, the seven-day ladder and its loop, item tiers (never a Segfault), accessory days from the general pool (never owned or waiting, scrip when none are left), a full box holding it back, taking from the box, cleaning, and transfer keys |
 | `contracts.test.js` | 12 | Netrun contracts: the thinnest-route count against every route, the map fix on every route in every region, posting (only with the uplink ready and awake, the hourly chance and its catch-up cap, only kinds that can be met), taking one along, each kind met or missed, slipped ICE counting, void on a disconnect or abort, the cheap market offer and certain fragment, and save round trips |
 | `cosmetics.test.js` | 19 | Unlock conditions, hints, streaks, defaults, label, the four legacy goals and the crest slot, the four attention cosmetics, the music tracks' milestones and wardrobe slot, and the Seal crest |
 | `attention.test.js` | 12 | Attention rewards: requests (game and COOL, expiry without a fault, when none are asked), GREET and the gift chance, flow and that it changes nothing, chatter (pool, fading, content rules), saves |
@@ -106,6 +107,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Test mode: hidden until 7 logo taps, separate fast netling, real one untouched.
 - Reaction animations, Packet Feast payout, intrusion and DEFEND, overflow and PURGE, reboot.
 - Crashes: a crashing mini-game is closed, a crashing netrun is aborted, a crash in the tutorial still finishes onboarding.
+- The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
 - A posted contract in the bar and the region picker, taken along on a jack-in.
 - Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.
 
