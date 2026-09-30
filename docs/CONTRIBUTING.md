@@ -1,6 +1,6 @@
 # Contributing and extending
 
-How to change Netling without breaking saves, plus checklists for the common additions. Written for a maintainer or an AI session. Written against commit `ea87757`.
+How to change Netling without breaking saves, plus checklists for the common additions. Written for a maintainer or an AI session.
 
 Read [ARCHITECTURE.md](ARCHITECTURE.md) first for the layout and [DATA_AND_SAVES.md](DATA_AND_SAVES.md) for what is persisted.
 
@@ -106,4 +106,4 @@ There is no versioned release process. Pushing to `main` with green tests deploy
 
 - Start from `CLAUDE.md` at the repository root, then the doc for the area you are changing.
 - Sessions on a feature branch should not open a pull request unless asked.
-- Say when you have not run something (for example the smoke test). [KNOWN_ISSUES.md](KNOWN_ISSUES.md) uses "Reproduced", "Read" and "Unverified" for that reason.
+- Say when you have not run something (for example the smoke test).

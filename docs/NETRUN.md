@@ -1,6 +1,6 @@
 # Netrun reference
 
-A **netrun** is the game's dungeon crawl: the netling jacks into the net and walks a node map, spending its real Charge, Heat and Integrity. Rules live in `src/netrun/run.js`, map generation in `map.js`, regions in `regions.js`, events in `anomalies.js`, lore in `codex.js`, and the screen and input in `view.js`. Written against commit `ea87757`.
+A **netrun** is the game's dungeon crawl: the netling jacks into the net and walks a node map, spending its real Charge, Heat and Integrity. Rules live in `src/netrun/run.js`, map generation in `map.js`, regions in `regions.js`, events in `anomalies.js`, lore in `codex.js`, and the screen and input in `view.js`.
 
 ## Contents
 

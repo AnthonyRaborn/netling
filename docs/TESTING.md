@@ -1,6 +1,6 @@
 # Testing and tools
 
-What tests exist, how to run them, what each tool does, and where coverage is thin. Written against commit `ea87757`.
+What tests exist, how to run them, what each tool does, and where coverage is thin.
 
 ## Quick reference
 
@@ -13,7 +13,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-On this branch, `npm test` runs 227 tests in 24 files and all pass. The smoke test has 41 scenarios and passed in full when last run here (Playwright 1.56.1 with the preinstalled Chromium).
+`npm test` runs 227 tests in 24 files. The smoke test has 41 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -101,7 +101,7 @@ Options (environment variables and arguments):
 
 It sets `TZ=UTC` itself. `simulate(profile, seed)` is exported.
 
-The README's old balance targets came from this tool; a run on this commit matched them within sampling noise (see [KNOWN_ISSUES.md](KNOWN_ISSUES.md#checked-and-found-consistent)).
+Reference results are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#verified-facts).
 
 ### `tools/netrun-balance.mjs` and `tools/netrun-bot.mjs`
 
@@ -115,12 +115,9 @@ Writes `icons/icon-192.png`, `icon-512.png`, `maskable-512.png` and `apple-touch
 
 ## Coverage gaps
 
-Summarised from [KNOWN_ISSUES.md](KNOWN_ISSUES.md#ki-16):
-
-- `ui/*` (including `advance`, the flatline handling and `dropSession`) and `ui/gamepad.js` still have no unit tests: they need a real DOM, so only the smoke test covers them. Rendering, the run view, mini-game drawing, audio, notifications and the content tables are unit tested (KI-16).
+- `ui/*` (including `advance` and `dropSession`) and `ui/gamepad.js` have no unit tests: they need a real DOM, so only the smoke test covers them.
 - The draw and audio tests prove nothing throws, arguments are finite and every sound exists. They cannot tell whether the art looks right or a sound is pleasant; `gallery.html` and playtesting cover that.
-- A flatline during an open netrun is covered by a unit test and a smoke scenario (KI-01).
-- Upgrade steps are tested through an injected step table and the frozen version 1 fixture. `cleanSave` cannot be pointed at a fake table, so its wiring to real steps only gets exercised once a first real step exists.
+- `cleanSave` cannot be pointed at a fake step table, so its wiring to real upgrade steps is exercised only once a first real step exists. The runner is tested through an injected table and the frozen version 1 fixture.
 - Real-device behaviour (installation, controllers on Steam Deck, iOS storage eviction) is manual.
 
 ## Adding tests

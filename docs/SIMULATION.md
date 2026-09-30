@@ -1,8 +1,8 @@
 # Simulation reference
 
-Everything here comes from `src/sim.js` unless another file is named. Numbers are the values of `CFG` (and friends) at commit `ea87757`. If a number here disagrees with the code, the code wins: fix this file.
+Everything here comes from `src/sim.js` unless another file is named. Numbers are the values of `CFG` (and friends). If a number here disagrees with the code, the code wins: fix this file.
 
-The simulation is pure in the sense that matters: every function takes the state, a time in epoch milliseconds and an `rng` function. There is no hidden clock, no `Math.random` call that cannot be replaced, and no DOM. That is why 176 unit tests can run a whole life in milliseconds.
+The simulation is pure in the sense that matters: every function takes the state, a time in epoch milliseconds and an `rng` function. There is no hidden clock, no `Math.random` call that cannot be replaced, and no DOM. That is why the unit tests can run a whole life in milliseconds.
 
 ## Contents
 

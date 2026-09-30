@@ -1,6 +1,6 @@
 # Content catalog
 
-Every piece of authored content: forms, items, mini-games, cosmetics, accessories, codex text. **Contains spoilers**, including hidden unlock conditions the game only hints at. Written against commit `ea87757`. When content changes, the tables in code are the source of truth; `gallery.html` shows every sprite.
+Every piece of authored content: forms, items, mini-games, cosmetics, accessories, codex text. **Contains spoilers**, including hidden unlock conditions the game only hints at. When content changes, the tables in code are the source of truth; `gallery.html` shows every sprite.
 
 ## Contents
 

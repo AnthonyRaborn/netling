@@ -2,7 +2,7 @@
 
 Reference documentation for maintainers and AI sessions. The [top-level README](../README.md) is the player-facing getting-started guide and is deliberately spoiler-free. These documents are not: they describe every hidden rule and secret.
 
-Written against commit `ea87757` (2026-09-28). Every file names the commit it was checked against. When code changes, the code is right and the doc is stale: fix the doc.
+When code and a doc disagree, the code is right: fix the doc.
 
 ## Start here
 
@@ -33,5 +33,5 @@ Netling is a Tamagotchi-style pet that runs in real time in the browser. A pure 
 
 - Numbers in prose (drain rates, chances, windows) come from `CFG`, `ITEM_CFG` and `RUN_CFG`. If you change one, search these docs for the old number.
 - The in-game field manual is generated from `CFG`, so it cannot drift. These documents can.
-- New findings go in [KNOWN_ISSUES.md](KNOWN_ISSUES.md) with a confidence label (Reproduced, Read, Unverified).
+- New findings and open questions go in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 - Content tables in [CONTENT_CATALOG.md](CONTENT_CATALOG.md) are copied from code and should be regenerated or re-checked after content changes.

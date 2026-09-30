@@ -1,6 +1,6 @@
 # Data, saves and transfer
 
-Everything Netling stores lives in the browser's `localStorage`. There is no server. This file covers the keys, the shape of each value, how loading repairs data, how a transfer code is built, and test mode's separate storage. Written against commit `ea87757`.
+Everything Netling stores lives in the browser's `localStorage`. There is no server. This file covers the keys, the shape of each value, how loading repairs data, how a transfer code is built, and test mode's separate storage.
 
 Files: `src/storage.js` (the store), `src/sanitize.js` (cleaning), `src/transfer.js` (codes), `src/qr.js` (QR), `src/ui/app.js` (loading and the write gate), `src/ui/system.js` (the transfer UI).
 

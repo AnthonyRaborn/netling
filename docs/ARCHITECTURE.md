@@ -1,6 +1,6 @@
 # Architecture
 
-How Netling is put together: what each file owns, how data flows, how the page boots, and the rules that keep it safe. Written against commit `ea87757`.
+How Netling is put together: what each file owns, how data flows, how the page boots, and the rules that keep it safe.
 
 Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering. There is no build step, no bundler and no runtime dependency (the VT323 font is served from `fonts/`). It is served as plain files and installs as a PWA.
 
@@ -23,7 +23,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 
 ## Design principles
 
-These explain most decisions in the code.
+
 
 1. **The simulation is pure.** `sim.js` and `netrun/run.js` take `(state, time, rng)` and return results. They never touch the DOM or storage. Tests and the balance tools drive them directly.
 2. **The netling lives in real time.** State stores timestamps and ages; loading catches the simulation up minute by minute (`tick`).
