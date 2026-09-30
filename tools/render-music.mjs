@@ -1,8 +1,12 @@
 // Renders the background music to WAV files, to listen without running the game, and prints
 // each render's loudness. Uses headless Chromium's OfflineAudioContext, so it runs the real player code.
-// Usage: node tools/render-music.mjs <out dir> [bars=24] [track[:variant[:region]] ...]
+// Usage: node tools/render-music.mjs <out dir> [seconds=45] [track[:variant[:region]] ...]
 //   node tools/render-music.mjs /tmp/music                  every track and state
-//   node tools/render-music.mjs /tmp/music 32 idle:sleep netrun::deep
+//   node tools/render-music.mjs /tmp/music 90 idle:sleep netrun::deep
+// The files are at the game's own level (the music slider at VOLUME, default 0.4), not normalized,
+// so they sound as loud as the game does at the same device volume. reference-effects.wav holds a
+// few sound effects at the default 80% to compare with. Sleep renders run at least 64 s, to hear
+// the whole wind-down.
 // Needs Playwright, like the smoke test.
 import { execSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -11,12 +15,13 @@ import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const [outDir, barsArg, ...specs] = process.argv.slice(2);
+const [outDir, secondsArg, ...specs] = process.argv.slice(2);
 if (!outDir) {
-  console.error('usage: node tools/render-music.mjs <out dir> [bars] [track[:variant[:region]] ...]');
+  console.error('usage: node tools/render-music.mjs <out dir> [seconds] [track[:variant[:region]] ...]');
   process.exit(1);
 }
-const bars = Number(barsArg) || 24;
+const seconds = Number(secondsArg) || 45;
+const volume = process.env.VOLUME === undefined ? 0.4 : Number(process.env.VOLUME);
 const all = ['idle:awake', 'idle:sleep', 'idle:alert', 'idle:flow', 'netrun::public', 'netrun::corp', 'netrun::bazaar', 'netrun::ruins', 'netrun::deep'];
 const jobs = (specs.length ? specs : all).map((s) => {
   const [track, variant = 'awake', region = null] = s.split(':');
@@ -70,50 +75,61 @@ function wav(pcm, rate) {
 
 await mkdir(outDir, { recursive: true });
 const RATE = 44100;
-// The printed numbers are at the game's own level (MUSIC_LEVEL x the default 40%). The WAVs share
-// one gain, set so the loudest peaks near full scale: sleep stays quieter than awake, as in the game.
-const renders = [];
-for (const job of jobs) {
-  const res = await page.evaluate(
-    async ({ job, bars, RATE }) => {
-      const { renderMusic, MUSIC_LEVEL } = await import('/src/music.js');
-      const { musicSettings, STEPS } = await import('/src/tracks.js');
-      const { bpm } = musicSettings(job.track, job.variant, job.region);
-      const len = (bars * STEPS * 60) / bpm / 4 + 1.5;
+// Renders in the page and returns the WAV bytes as base64 (moving raw floats out is slow).
+async function render(job) {
+  return page.evaluate(
+    async ({ job, seconds, volume, RATE }) => {
+      const len = job.effects ? seconds : seconds + 1.5;
       const ctx = new OfflineAudioContext(1, Math.ceil(len * RATE), RATE);
-      renderMusic(ctx, { ...job, bars, seed: 7, level: MUSIC_LEVEL * 0.4 });
+      if (job.effects) {
+        // Copies of audio.js effects (win, feed, alert) at the default effects volume: square, 0.06 x 80%.
+        const pats = [
+          [[1, 0], [1.25, 0.08], [1.5, 0.16], [2, 0.24], [2, 0.36]],
+          [[1, 0], [1.25, 0.08], [1.5, 0.16]],
+          [[2, 0], [2, 0.15], [2, 0.3]],
+        ];
+        for (let at = 0.5, i = 0; at < seconds - 1; at += 2, i++) {
+          for (const [mult, start] of pats[i % 3]) {
+            const t = at + start;
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(660 * mult, t);
+            g.gain.setValueAtTime(0.06 * 0.8, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+            osc.connect(g).connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.09);
+          }
+        }
+      } else {
+        const { renderMusic, MUSIC_LEVEL } = await import('/src/music.js');
+        renderMusic(ctx, { ...job, seconds, seed: 7, level: MUSIC_LEVEL * volume });
+      }
       const data = (await ctx.startRendering()).getChannelData(0);
       let sum = 0;
       let peak = 0;
-      for (const v of data) {
-        sum += v * v;
-        peak = Math.max(peak, Math.abs(v));
-      }
-      (window.renders ??= []).push(data); // kept in the page: moving raw floats out is slow
-      return { rms: Math.sqrt(sum / data.length), peak, len };
-    },
-    { job, bars, RATE },
-  );
-  const name = `${job.track}-${job.variant}${job.region ? `-${job.region}` : ''}.wav`;
-  renders.push({ name, ...res });
-  console.log(`${name.padEnd(28)} ${res.len.toFixed(1)}s  rms ${res.rms.toFixed(4)}  peak ${res.peak.toFixed(4)}`);
-}
-console.log('(at the default 40%; a square sound effect at the default 80% peaks at 0.048)');
-const gain = 0.9 / Math.max(...renders.map((r) => r.peak), 1e-6);
-for (let i = 0; i < renders.length; i++) {
-  const b64 = await page.evaluate(
-    ({ i, gain }) => {
-      const data = window.renders[i];
       const pcm = new Int16Array(data.length);
-      for (let j = 0; j < data.length; j++) pcm[j] = Math.max(-32768, Math.min(32767, Math.round(data[j] * gain * 32767)));
+      for (let j = 0; j < data.length; j++) {
+        sum += data[j] * data[j];
+        peak = Math.max(peak, Math.abs(data[j]));
+        pcm[j] = Math.max(-32768, Math.min(32767, Math.round(data[j] * 32767)));
+      }
       const bytes = new Uint8Array(pcm.buffer);
       let bin = '';
       for (let j = 0; j < bytes.length; j += 0x8000) bin += String.fromCharCode(...bytes.subarray(j, j + 0x8000));
-      return btoa(bin);
+      return { b64: btoa(bin), rms: Math.sqrt(sum / data.length), peak, len };
     },
-    { i, gain },
+    { job, seconds: job.variant === 'sleep' ? Math.max(seconds, 64) : seconds, volume, RATE },
   );
-  await writeFile(join(outDir, renders[i].name), wav(Buffer.from(b64, 'base64'), RATE));
 }
+
+for (const job of [...jobs, { effects: true }]) {
+  const res = await render(job);
+  const name = job.effects ? 'reference-effects.wav' : `${job.track}-${job.variant}${job.region ? `-${job.region}` : ''}.wav`;
+  await writeFile(join(outDir, name), wav(Buffer.from(res.b64, 'base64'), RATE));
+  console.log(`${name.padEnd(28)} ${res.len.toFixed(1)}s  rms ${res.rms.toFixed(4)}  peak ${res.peak.toFixed(4)}`);
+}
+console.log(`(music at ${Math.round(volume * 100)}%; effects at the default 80%)`);
 await browser.close();
 server.close();

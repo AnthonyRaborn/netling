@@ -321,12 +321,12 @@ export function createArranger(trackId, seed = 1) {
 
 // No note goes under E2 (about 82 Hz): lower ones move up an octave, since small speakers drop them.
 export const LOW_MIDI = 40;
-const floored = (m) => (m < LOW_MIDI ? m + 12 * Math.ceil((LOW_MIDI - m) / 12) : m);
+export const floorMidi = (m) => (m < LOW_MIDI ? m + 12 * Math.ceil((LOW_MIDI - m) / 12) : m);
 
 // Applies a state variant to one bar's events (pure): mutes, transposition, extra hats and the
 // flow sparkle. Tempo, volume and filters are the player's job.
 export function applyVariant(events, settings) {
-  let out = events.filter((e) => !settings.mute.has(e.part)).map((e) => (e.midi === undefined ? { ...e } : { ...e, midi: floored(e.midi + settings.transpose) }));
+  let out = events.filter((e) => !settings.mute.has(e.part)).map((e) => (e.midi === undefined ? { ...e } : { ...e, midi: floorMidi(e.midi + settings.transpose) }));
   for (const e of out) if (settings.partVol[e.part] !== undefined) e.vel *= settings.partVol[e.part];
   if (settings.doubleHats) {
     const taken = new Set(out.filter((e) => e.drum).map((e) => e.step));
@@ -342,3 +342,23 @@ export function applyVariant(events, settings) {
 
 // The sparkle's sound (flow): not in any track's parts, so it is defined once here.
 export const SPARKLE = { wave: 'sine', vol: 0.3, env: 'pluck', cutoff: 8000, echo: true };
+
+// --- winding down to sleep ---
+
+// Asleep (or napping), the music plays on for a while, fades, and ends on a chord that dies away,
+// then stays quiet until it wakes (or the page is opened again). Seconds from the first sleep bar.
+export const WIND_DOWN = { fadeFromS: 30, silentAtS: 60, finalMinS: 6, fadeTo: 0.45 };
+
+// How a wind-down plays out for a bar length: whole bars while the final chord still has at least
+// finalMinS to ring, then the chord. { bars, finalAtS }
+export function windDownPlan(barS) {
+  const bars = Math.max(0, Math.floor((WIND_DOWN.silentAtS - WIND_DOWN.finalMinS) / barS));
+  return { bars, finalAtS: bars * barS };
+}
+
+// The closing chord: the last bar's chord as a low root, root, third and fifth (semitones above the key).
+export function finalChord(chord) {
+  const tones = CHORD_TONES[chord?.q] ?? CHORD_TONES.min;
+  const root = chord?.root ?? 0;
+  return [root - 12, root, root + tones[1], root + tones[2]];
+}

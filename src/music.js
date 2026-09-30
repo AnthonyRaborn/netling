@@ -4,7 +4,7 @@
 // with the music volume at 0. See docs/MUSIC_PLAN.md.
 import { audioContext } from './audio.js';
 import { REGIONS } from './netrun/regions.js';
-import { SPARKLE, STEPS, TRACKS, applyVariant, createArranger, musicSettings } from './tracks.js';
+import { SPARKLE, STEPS, TRACKS, WIND_DOWN, applyVariant, createArranger, finalChord, floorMidi, musicSettings, windDownPlan } from './tracks.js';
 
 // Music at 100% peaks around a quiet sound effect, so effects always read over it.
 export const MUSIC_LEVEL = 0.08;
@@ -36,14 +36,16 @@ function noiseBuffer(ctx) {
 }
 
 // A graph for one track: parts feed their own lowpass (and echo), then level (the state's
-// volume) -> out (fades in and out) -> dest.
+// volume) -> wind (the sleep wind-down) -> out (fades in and out) -> dest.
 function createGraph(ctx, dest) {
   const out = ctx.createGain();
   out.gain.setValueAtTime(1, ctx.currentTime);
   out.connect(dest);
+  const wind = ctx.createGain();
+  wind.connect(out);
   const level = ctx.createGain();
-  level.connect(out);
-  return { ctx, out, level, chains: {}, sources: new Set() };
+  level.connect(wind);
+  return { ctx, out, wind, level, chains: {}, sources: new Set() };
 }
 
 function chain(graph, name, def) {
@@ -79,7 +81,10 @@ function tone(graph, dest, wave, freq, t, dur, vol, env) {
   g.gain.setValueAtTime(0, t);
   g.gain.linearRampToValueAtTime(vol, t + 0.005);
   let end;
-  if (env === 'pluck') {
+  if (env === 'fade') {
+    end = t + dur; // dies away over the whole note (the sleep chord), reaching silence at its end
+    g.gain.linearRampToValueAtTime(0, end);
+  } else if (env === 'pluck') {
     end = t + Math.min(Math.max(dur, 0.12), 0.35);
     g.gain.exponentialRampToValueAtTime(0.0001, end);
   } else {
@@ -160,17 +165,67 @@ export function scheduleBar(graph, bar, settings, t0) {
   return STEPS * stepS;
 }
 
-// Renders bars of a track into any context (an OfflineAudioContext in tools/render-music.mjs).
-export function renderMusic(ctx, { track = 'idle', variant = 'awake', region = null, bars = 16, seed = 1, level = MUSIC_LEVEL } = {}) {
+// --- sequencing: bars, and the sleep wind-down ---
+
+// The closing sleep chord's sound.
+const FINAL = { wave: 'triangle', vol: 0.3, env: 'fade', cutoff: 1500 };
+
+const createSequence = (graph, arranger) => ({ graph, arranger, sleepAt: null, finalDone: false, lastChord: null });
+
+// Asleep: full level for fadeFromS, then down to fadeTo by the final chord (see WIND_DOWN).
+function startWindDown(seq, t, barS) {
+  seq.sleepAt = t;
+  seq.finalDone = false;
+  const g = seq.graph.wind.gain;
+  g.cancelScheduledValues(t);
+  g.setValueAtTime(1, t);
+  g.setValueAtTime(1, t + WIND_DOWN.fadeFromS);
+  g.linearRampToValueAtTime(WIND_DOWN.fadeTo, t + Math.max(WIND_DOWN.fadeFromS + 1, windDownPlan(barS).finalAtS));
+}
+function endWindDown(seq, t) {
+  seq.sleepAt = null;
+  seq.finalDone = false;
+  const g = seq.graph.wind.gain;
+  g.cancelScheduledValues(t);
+  g.setTargetAtTime(1, t, 0.5);
+}
+
+// Queues whatever comes next at time t (a bar, the sleep chord, or nothing once it has wound
+// down) and returns how long it lasts.
+function scheduleNext(seq, mode, t) {
+  const settings = musicSettings(mode.track, mode.variant, mode.region, REGIONS[mode.region]?.sound);
+  const barS = (STEPS * 60) / settings.bpm / 4;
+  if (mode.variant === 'sleep') {
+    if (seq.sleepAt === null) startWindDown(seq, t, barS);
+    if (seq.finalDone) return barS;
+    if (t - seq.sleepAt >= windDownPlan(barS).finalAtS - 1e-6) {
+      const key = (TRACKS[settings.track] ?? TRACKS.idle).key;
+      const ring = seq.sleepAt + WIND_DOWN.silentAtS - t;
+      const c = chain(seq.graph, 'final', FINAL);
+      for (const semi of finalChord(seq.lastChord)) tone(seq.graph, c.filter, FINAL.wave, midiHz(floorMidi(key + semi + settings.transpose)), t, ring, FINAL.vol * 1.4, FINAL.env);
+      seq.finalDone = true;
+      return barS;
+    }
+  } else if (seq.sleepAt !== null) endWindDown(seq, t);
+  const bar = seq.arranger.next();
+  seq.lastChord = bar.chord;
+  return scheduleBar(seq.graph, bar, settings, t);
+}
+
+// Renders a track into any context (an OfflineAudioContext in tools/render-music.mjs): about
+// `seconds` of music, then a 1.5 s fade so the file doesn't cut off mid-note.
+export function renderMusic(ctx, { track = 'idle', variant = 'awake', region = null, seconds = 40, seed = 1, level = MUSIC_LEVEL } = {}) {
   const master = ctx.createGain();
   master.gain.value = level;
   master.connect(ctx.destination);
   const graph = createGraph(ctx, master);
-  const arranger = createArranger(track, seed);
-  const settings = musicSettings(track, variant, region, REGIONS[region]?.sound);
+  const seq = createSequence(graph, createArranger(track, seed));
+  const mode = { track, variant, region };
   let t = 0.05;
-  for (let i = 0; i < bars; i++) t += scheduleBar(graph, arranger.next(), settings, t);
-  return t;
+  while (t < seconds) t += scheduleNext(seq, mode, t);
+  graph.out.gain.setValueAtTime(1, seconds);
+  graph.out.gain.linearRampToValueAtTime(0, seconds + 1.5);
+  return seconds + 1.5;
 }
 
 // --- the live player ---
@@ -183,7 +238,7 @@ let seed = 1;
 let master = null; // gain -> destination, one per context
 let masterKey = '';
 let duckUntil = 0;
-let session = null; // { key, graph, arranger, nextAt, timer }
+let session = null; // { key, graph, seq, nextAt, timer }
 const arrangers = new Map(); // key -> arranger, so a return picks up where it left off
 
 const modeKey = (m) => `${m.track}:${m.region ?? ''}`;
@@ -263,10 +318,7 @@ function pump() {
   if (ctx.state !== 'running') return;
   // Fell behind (a suspended context, a throttled timer): start again from now, not in a rush.
   if (session.nextAt < ctx.currentTime) session.nextAt = ctx.currentTime + 0.05;
-  while (session.nextAt < ctx.currentTime + LOOKAHEAD_S) {
-    const settings = musicSettings(want.track, want.variant, want.region, REGIONS[want.region]?.sound);
-    session.nextAt += scheduleBar(session.graph, session.arranger.next(), settings, session.nextAt);
-  }
+  while (session.nextAt < ctx.currentTime + LOOKAHEAD_S) session.nextAt += scheduleNext(session.seq, want, session.nextAt);
 }
 
 // Brings the player in line with what should be playing. Cheap: call it as often as you like.
@@ -287,11 +339,13 @@ export function syncMusic() {
   const startAt = ctx.currentTime + 0.1;
   graph.out.gain.setValueAtTime(0, ctx.currentTime);
   graph.out.gain.linearRampToValueAtTime(1, startAt + 0.4);
-  session = { key, graph, arranger: arrangers.get(key), nextAt: startAt, timer: setInterval(pump, TICK_MS) };
+  // A fresh sequence: coming back to a sleeping netling plays the wind-down once more.
+  session = { key, graph, seq: createSequence(graph, arrangers.get(key)), nextAt: startAt, timer: setInterval(pump, TICK_MS) };
   pump();
 }
 
 // For the smoke test and the DEV panel: what is playing now.
 export function musicStatus() {
-  return { playing: Boolean(session), key: session?.key ?? null, variant: want?.variant ?? null, duck: want?.duck ?? null, voices: session?.graph.sources.size ?? 0, volume, muted, hidden };
+  const seq = session?.seq;
+  return { playing: Boolean(session), key: session?.key ?? null, variant: want?.variant ?? null, duck: want?.duck ?? null, woundDown: Boolean(seq?.finalDone), voices: session?.graph.sources.size ?? 0, volume, muted, hidden };
 }

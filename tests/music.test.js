@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  LOW_MIDI, MUSIC_IDS, STEPS, TRACKS, VARIANTS, applyVariant, createArranger, musicMode, musicSettings, phraseBars,
+  LOW_MIDI, MUSIC_IDS, STEPS, WIND_DOWN, finalChord, windDownPlan, TRACKS, VARIANTS, applyVariant, createArranger, musicMode, musicSettings, phraseBars,
 } from '../src/tracks.js';
 import { REGIONS } from '../src/netrun/regions.js';
 
@@ -18,6 +18,7 @@ const param = () => ({
   cancelScheduledValues() {},
 });
 let started = 0;
+const starts = []; // [time, wave] of every oscillator started
 class FakeAudioContext {
   constructor() {
     this.currentTime = 10;
@@ -43,7 +44,8 @@ class FakeAudioContext {
     return this.node({ delayTime: param() });
   }
   createOscillator() {
-    return this.node({ type: 'square', frequency: param(), start: () => started++, stop() {} });
+    const osc = this.node({ type: 'square', frequency: param(), start: (t) => (started++, starts.push([t, osc.type])), stop() {} });
+    return osc;
   }
   createBuffer(_c, length) {
     return { getChannelData: () => new Float32Array(length) };
@@ -161,11 +163,36 @@ test('what plays when: home, asleep, mini-game (ducked), netrun, flatline, and D
   assert.deepEqual([forced.track, forced.region, forced.variant], ['netrun', 'deep', 'flow']);
 });
 
+test('asleep, it winds down: bars for a while, then one chord that dies away by 60 s, then quiet', () => {
+  const barS = (STEPS * 60) / musicSettings('idle', 'sleep').bpm / 4;
+  const plan = windDownPlan(barS);
+  assert.ok(plan.finalAtS > WIND_DOWN.fadeFromS, 'the fade starts before the chord');
+  assert.ok(WIND_DOWN.silentAtS - plan.finalAtS >= WIND_DOWN.finalMinS && WIND_DOWN.silentAtS - plan.finalAtS < WIND_DOWN.finalMinS + barS, 'the chord gets its ring, and no more than a bar extra');
+  assert.deepEqual(finalChord({ root: -4, q: 'maj' }), [-16, -4, 0, 3], 'low root, root, third, fifth');
+
+  starts.length = 0;
+  const ctx = new FakeAudioContext();
+  ctx.currentTime = 0;
+  music.renderMusic(ctx, { variant: 'sleep', seconds: 90 });
+  const t0 = 0.05;
+  assert.ok(starts.length > 0);
+  assert.ok(starts.every(([t]) => t < t0 + WIND_DOWN.silentAtS), 'nothing starts after 60 s');
+  const chord = starts.filter(([t]) => Math.abs(t - (t0 + plan.finalAtS)) < 1e-6);
+  assert.equal(chord.length, 4, 'the closing chord');
+  assert.ok(chord.every(([, wave]) => wave === 'triangle'));
+  assert.ok(starts.every(([t]) => t <= t0 + plan.finalAtS + 1e-6), 'the chord is the last thing it plays');
+
+  starts.length = 0;
+  music.renderMusic(ctx, { variant: 'awake', seconds: 90 });
+  assert.ok(starts.some(([t]) => t > 70), 'awake, it keeps playing');
+});
+
 // --- the player ---
 
 const idle = { track: 'idle', variant: 'awake', region: null, duck: 1 };
 
 test('the player stays silent before the first gesture, then plays; hidden, muted, 0% or dead stops it', async () => {
+  started = 0;
   music.setMusicVolume(0.4);
   music.setMusicMode(idle);
   assert.equal(audioContext(), null);

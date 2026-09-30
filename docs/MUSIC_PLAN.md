@@ -58,7 +58,7 @@ The seed comes from the netling's quirk, so two netlings on the same track do no
 |---|---|
 | Before the first gesture | Silent (decision 2) |
 | Home, awake | The equipped track |
-| Home, asleep or napping | The same track, sleep variant (below) |
+| Home, asleep or napping | The same track, sleep variant, winding down to silence within 60 s (below) |
 | Menus and dialogs | Keeps playing (decision 4) |
 | Mini-game | The home track keeps playing, 30% quieter while the game runs so its sounds read clearly |
 | Netrun, including ICE fights | The netrun theme (below) |
@@ -75,6 +75,7 @@ A change of state (falling asleep) takes effect at the next bar and settles over
 - Tempo x0.8, transposed down a fourth (5 semitones); the bass floor lifts its lowest notes.
 - Drums drop out; the lead plays at half level through a lowpass at about 1.2 kHz.
 - Volume x0.6.
+- **Winds down** (maintainer, after listening): full level for 30 s, then a fade to 45% while the bars finish, then one closing chord (low root, root, third and fifth of the last bar's chord, triangle) that fades to silence at 60 s. After that it stays quiet until it wakes. Coming back to the page while it still sleeps plays the wind-down once more. `WIND_DOWN` in `tracks.js`; tested in `music.test.js`.
 
 ### Later reactions (decision 6, to audition first)
 
