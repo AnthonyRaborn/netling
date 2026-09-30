@@ -22,6 +22,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
+| See the plan for a stage beyond Adult and the Source region (not built) | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
 
 ## The project in one paragraph
 
