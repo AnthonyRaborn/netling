@@ -16,6 +16,9 @@ export function setMuted(value) {
   muted = value;
 }
 
+// The shared context, for the music player (music.js). null until the first user gesture.
+export const audioContext = () => ctx;
+
 // Safe to call from any click handler: without Web Audio the game just stays silent.
 export function unlockAudio() {
   try {

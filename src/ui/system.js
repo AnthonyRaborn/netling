@@ -4,6 +4,8 @@ import { hibernate, hibernateBlockReason, wake, wakeAvailableAt, CFG, MIN } from
 import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from '../transfer.js';
 import { encodeQR, drawQR } from '../qr.js';
 import { sfx, unlockAudio, setVolume } from '../audio.js';
+import { setMusicVolume } from '../music.js';
+import { syncMusicMode } from './soundtrack.js';
 import { KEYS } from '../storage.js';
 import { $, app, armed, flashStatus, now, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
@@ -84,6 +86,8 @@ export function openSystem() {
   renderOldSave();
   $('volume').value = Math.round(app.prefs.volume * 100);
   $('volume-value').textContent = `${Math.round(app.prefs.volume * 100)}%`;
+  $('music-volume').value = Math.round(app.prefs.musicVolume * 100);
+  $('music-volume-value').textContent = `${Math.round(app.prefs.musicVolume * 100)}%`;
   renderScreenPrefs();
   $('import-preview').hidden = true;
   renderHibernateNote();
@@ -315,6 +319,15 @@ export function initSystem() {
   $('volume').addEventListener('change', () => {
     unlockAudio();
     sfx('select', app.state.quirk.pitch); // preview at the new level
+  });
+
+  $('music-volume').addEventListener('input', () => {
+    app.prefs.musicVolume = Number($('music-volume').value) / 100;
+    unlockAudio();
+    setMusicVolume(app.prefs.musicVolume);
+    syncMusicMode();
+    $('music-volume-value').textContent = `${$('music-volume').value}%`;
+    store.set(KEYS.prefs, app.prefs);
   });
 
   $('transfer-out').addEventListener('click', transferOut);

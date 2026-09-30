@@ -8,6 +8,7 @@ import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, store } from './app.js';
+import { syncMusicMode } from './soundtrack.js';
 
 // Bank accessories a finished run left on the pet into the shared collection.
 // A visitor's gift is picked here, where the collection is known, so it's always something new.
@@ -180,7 +181,7 @@ export function renderWardrobe() {
   const w = resolveWardrobe(app.wardrobe, app.unlocked);
   const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + STYLE_ITEMS.length; // + label + accessories/props
   $('wardrobe-count').textContent = `${app.unlocked.length + app.ownedAccessories.length}/${total}`;
-  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST' };
+  const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST', music: 'MUSIC' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
       const h = document.createElement('h3');
@@ -199,6 +200,7 @@ export function renderWardrobe() {
         sw.style.background = open ? c.swatch ?? 'transparent' : 'transparent';
         if (slot === 'effect') sw.textContent = open ? '~' : '';
         if (slot === 'sound') sw.textContent = open ? '♪' : '';
+        if (slot === 'music') sw.textContent = open ? '♫' : '';
         if (slot === 'crest' && open && c.pixels) {
           const cv = document.createElement('canvas');
           cv.width = cv.height = 9;
@@ -217,7 +219,8 @@ export function renderWardrobe() {
             setWardrobe({ ...app.wardrobe, ...w, [slot]: c.id });
             app.freshUnlocks.delete(key);
             applyWardrobe();
-            sfx(slot === 'sound' ? 'feed' : 'select', app.state.quirk.pitch); // sound packs preview themselves
+            if (slot === 'music') syncMusicMode(); // the new track fades in: its own preview
+            else sfx(slot === 'sound' ? 'feed' : 'select', app.state.quirk.pitch); // sound packs preview themselves
             renderWardrobe();
           });
         } else {

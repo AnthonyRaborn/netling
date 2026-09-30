@@ -176,6 +176,31 @@
         <button type="button" id="dev-overflow">OVERFLOW</button>
         <button type="button" id="dev-reset">RESET</button>
       </div>
+      <div id="dev-music-row" class="dev" hidden>
+        <span>MUSIC</span>
+        <select id="dev-music-track" aria-label="Music track (dev)">
+          <option value="">auto</option>
+          <option value="idle">idle</option>
+          <option value="nightdrive">nightdrive</option>
+          <option value="dialup">dialup</option>
+          <option value="lobby">lobby</option>
+          <option value="tracker">tracker</option>
+          <option value="undertow">undertow</option>
+          <option value="forum">forum</option>
+          <option value="netrun:public">netrun public</option>
+          <option value="netrun:corp">netrun corp</option>
+          <option value="netrun:bazaar">netrun bazaar</option>
+          <option value="netrun:ruins">netrun ruins</option>
+          <option value="netrun:deep">netrun deep</option>
+        </select>
+        <select id="dev-music-state" aria-label="Music state (dev)">
+          <option value="">auto</option>
+          <option value="awake">awake</option>
+          <option value="sleep">sleep</option>
+          <option value="alert">alert</option>
+          <option value="flow">flow</option>
+        </select>
+      </div>
     </main>
 
     <div id="update-bar" class="update-bar" role="status" hidden>
@@ -253,7 +278,8 @@
         </div>
 
         <h3>SOUND</h3>
-        <label class="volume-row">VOLUME <input type="range" id="volume" min="0" max="100" step="5" aria-label="Volume" /> <span id="volume-value"></span></label>
+        <label class="volume-row">EFFECTS <input type="range" id="volume" min="0" max="100" step="5" aria-label="Effects volume" /> <span id="volume-value"></span></label>
+        <label class="volume-row">MUSIC <input type="range" id="music-volume" min="0" max="100" step="5" aria-label="Music volume" /> <span id="music-volume-value"></span></label>
 
         <h3>SCREEN</h3>
         <p class="tx-note" id="motion-note"></p>
