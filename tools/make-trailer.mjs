@@ -427,7 +427,8 @@ async function runTo(page, state, ms, actions) {
 
 async function recordScene(browser, scene, video, frameIndex) {
   const ctx = await browser.newContext({ viewport: VIEW, deviceScaleFactor: SCALE, serviceWorkers: 'block', timezoneId: 'UTC', reducedMotion: 'no-preference' });
-  await ctx.addInitScript(initScript(scene, scene.seed()));
+  // The page's own music is off: it would restart at every cut. The bed below replaces it.
+  await ctx.addInitScript(initScript(scene, { 'netling.prefs': { musicVolume: 0 }, ...scene.seed() }));
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (err) => errors.push(err.message));
@@ -506,6 +507,113 @@ function wav(pcm) {
   return Buffer.concat([head, pcm]);
 }
 
+// --- the music bed ---
+// One continuous take of the game's music (src/music.js renderMusic), following the game's rules
+// (docs/MUSIC.md) on the trailer's timeline: silent until the first tap, the home track (30% quieter
+// in mini-games), the netrun theme on the run, the home track picking up where it left off, a dip
+// under the evolve jingle, a 2 s fade at the flatline, silence while compiling, and the home track
+// again once the next netling is online. Only for a full render: previews stay effects-only.
+
+const MUSIC_VOLUME = 0.4; // the game's default MUSIC slider
+const MUSIC_DB = Number(process.env.MUSIC_DB ?? 4); // over the game's own level, which sits well under effects
+
+function musicPlan() {
+  if (ONLY) return null;
+  const on = sceneStart('intro') + 5.0; // the tap that compiles the first netling
+  const run = sceneStart('netrun');
+  const evolve = sceneStart('evolve');
+  const flat = sceneStart('flatline');
+  const flatlineAt = flat + 0.8;
+  const hatch = flat + 7.2;
+  const first = run - on; // the home track's first stretch
+  // The run is six seconds: skip the netrun theme's sparse first four bars (110 BPM) to its full
+  // section, and lift it to the home track's loudness (it is mixed quieter in the game).
+  const runFrom = (4 * 4 * 60) / 110;
+  return {
+    // render, where in it to start, trailer time, length, and a level change in dB
+    takes: [
+      { render: 'home', from: 0, at: on, len: first },
+      { render: 'run', from: runFrom, at: run, len: evolve - run, db: 4 },
+      { render: 'home', from: first, at: evolve, len: flatlineAt + 2 - evolve },
+      { render: 'next', from: 0, at: hatch, len: TOTAL - hatch },
+    ],
+    renders: {
+      home: { track: 'idle', seed: 7, seconds: first + (flatlineAt + 2 - evolve) + 1 },
+      run: { track: 'netrun', region: 'public', seed: 7, seconds: runFrom + evolve - run + 1 },
+      next: { track: 'idle', seed: 8, seconds: TOTAL - hatch + 1 },
+    },
+    // Gain over trailer time: [from, to, level], eased over 0.3 s at each change.
+    levels: [
+      [sceneStart('breach'), run, 0.7],
+      [evolve + 1.6, evolve + 4.0, 0.3],
+    ],
+    fadeOut: [flatlineAt, flatlineAt + 2],
+    end: TOTAL - 1.5,
+  };
+}
+
+async function renderMusicBed(browser) {
+  const plan = musicPlan();
+  if (!plan) return null;
+  const page = await browser.newPage();
+  await page.goto(url.replace('index.html', 'blank')); // a 404 on this server is enough to import its modules
+  const renders = {};
+  for (const [name, job] of Object.entries(plan.renders)) {
+    const b64 = await page.evaluate(
+      async ({ job, RATE, volume }) => {
+        const { renderMusic, MUSIC_LEVEL } = await import('/src/music.js');
+        const ctx = new OfflineAudioContext(1, Math.ceil((job.seconds + 1.5) * RATE), RATE);
+        renderMusic(ctx, { ...job, level: MUSIC_LEVEL * volume });
+        const data = (await ctx.startRendering()).getChannelData(0);
+        const bytes = new Uint8Array(data.buffer);
+        let s = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+        return btoa(s);
+      },
+      { job, RATE, volume: MUSIC_VOLUME },
+    );
+    const buf = Buffer.from(b64, 'base64');
+    renders[name] = new Float32Array(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length));
+  }
+  await page.close();
+
+  const n = Math.round(TOTAL * RATE);
+  const bed = new Float32Array(n);
+  const XFADE = 0.4; // like the game's crossfade between tracks
+  for (const take of plan.takes) {
+    const src = renders[take.render];
+    const start = Math.round(take.at * RATE);
+    const len = Math.round(take.len * RATE);
+    const fade = Math.round((XFADE / 2) * RATE);
+    const g = 10 ** ((take.db ?? 0) / 20);
+    for (let i = 0; i < len && start + i < n; i++) {
+      const edge = Math.min(1, i / fade, (len - i) / fade);
+      bed[start + i] += (src[Math.round(take.from * RATE) + i] ?? 0) * edge * g;
+    }
+  }
+  const gain = 10 ** (MUSIC_DB / 20);
+  const ease = (x) => Math.min(1, Math.max(0, x / 0.3));
+  for (let i = 0; i < n; i++) {
+    const t = i / RATE;
+    let g = gain;
+    for (const [from, to, level] of plan.levels) g *= 1 - (1 - level) * Math.min(ease(t - from), ease(to - t));
+    const [f0, f1] = plan.fadeOut;
+    if (t > f0 && t < f1) g *= 1 - (t - f0) / (f1 - f0);
+    if (t > plan.end) g *= Math.max(0, 1 - (t - plan.end) / 1.5);
+    bed[i] *= g;
+  }
+  return bed;
+}
+
+// Effects (16-bit, from the scenes) plus the bed, as 16-bit PCM.
+function mixdown(effects, bed) {
+  if (!bed) return effects;
+  const fx = new Int16Array(effects.buffer.slice(effects.byteOffset, effects.byteOffset + effects.length));
+  const out = new Int16Array(fx.length);
+  for (let i = 0; i < fx.length; i++) out[i] = Math.max(-32768, Math.min(32767, Math.round(fx[i] + (bed[i] ?? 0) * 32767)));
+  return Buffer.from(out.buffer);
+}
+
 const { chromium } = await loadPlaywright();
 const server = await startServer();
 const url = `http://localhost:${server.address().port}/index.html`;
@@ -517,7 +625,9 @@ const video = ffmpeg(['-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'pn
 const browser = await chromium.launch();
 const pcm = [];
 let frameIndex = 0;
+let bed = null;
 try {
+  bed = await renderMusicBed(browser);
   for (const scene of SCENES) {
     const started = Date.now();
     const res = await recordScene(browser, scene, video, frameIndex);
@@ -533,7 +643,7 @@ try {
 await video.done;
 
 const audio = `${OUT}.wav`;
-writeFileSync(audio, wav(Buffer.concat(pcm)));
+writeFileSync(audio, wav(mixdown(Buffer.concat(pcm), bed)));
 await ffmpeg(['-i', silent, '-i', audio, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-af', 'loudnorm=I=-16:TP=-1.5', '-ar', String(RATE), '-movflags', '+faststart', '-shortest', OUT]).done;
 rmSync(silent);
 rmSync(audio);
