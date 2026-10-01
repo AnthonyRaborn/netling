@@ -13,7 +13,7 @@ const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
 const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../src/netrun/codex.js');
-// When a mainframe's extended life would end (the planned stage; see docs/SOURCE_PLAN.md).
+// When a mainframe's extended life would end (docs/SIMULATION.md#mainframe).
 const mainframeEnd = (s) => s.life.lifespan + CFG.mainframeBonusMin;
 const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
 
@@ -203,7 +203,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let schedule = [];
   let teenAt = null;
   let adultAt = null;
-  let mainframeStart = null; // only with the stage switched on
+  let mainframeStart = null; // only with the stage switched on (the default)
   let teenForm = null;
   const mistakeKinds = {};
   let prevFlags = { ...s.flagged };
@@ -229,7 +229,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     }
     prevFlags = { ...s.flagged };
     if (featAt === null && mainframeFeat(s)) featAt = s.ageMin;
-    // With the stage switched on (CFG='{"mainframe":true}'), the netling recompiles the minute the gate is met.
+    // With the stage switched on (the default; CFG='{"mainframe":false}' turns it off), the netling recompiles the minute
+    // the gate is met.
     if (gateAt === null && (mainframeDue(s) || s.stage === 'mainframe')) gateAt = s.ageMin;
     if (ctx.firstFlowAt === null && inFlow(s)) ctx.firstFlowAt = s.ageMin;
     if (s.event && !prevEvent) {

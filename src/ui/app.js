@@ -1,7 +1,7 @@
 // Shared state for the UI modules: the live netling, player data loaded from storage,
 // the storage gate, and small DOM helpers. Everything here is plain data or a function;
 // nothing touches the page until main.js boots.
-import { createScript, migrate, CFG, FORMS } from '../sim.js';
+import { createScript, migrate, FORMS } from '../sim.js';
 import { createStore, KEYS, TEST_PREFIX } from '../storage.js';
 import {
   cleanSave,
@@ -27,8 +27,6 @@ import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
 export const DEV_URL = new URLSearchParams(location.search).has('dev');
-// Playtesting the Mainframe stage before it ships (docs/SOURCE_PLAN.md): ?dev&mainframe switches it on for this page only.
-if (DEV_URL && new URLSearchParams(location.search).has('mainframe')) CFG.mainframe = true;
 
 export const app = {
   state: null, // the live netling (sim.js)

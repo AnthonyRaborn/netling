@@ -28,8 +28,13 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 | Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead; +6 Integrity each move | Coolant cell | Persistent |
 | Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run, and 35% of later ones | Black ICE shard | Volatile |
 | Ghost | adult | Neutral allegiance (under 2), stability 0 or more, at most 1 mistake, 29+ wins with 4+ in each game | All drains 15% slower | Sees every node; checkpoints never notice it, and 45% of ICE miss it | Memory shard | Untraceable |
+| Plat | mainframe | A Chrome on its last ordinary day, home, with 3 Deep exits this life (or 2 clean) and Root Access in the line | Chrome's | Chrome's, with relays repairing 40 and insurance twice a run | Corp voucher | Licensed, at level II or higher |
+| Airgap | mainframe | The same, from a Firewall | Firewall's | Firewall's, and the first lost ICE fight each run deals 30% of its damage | Antivirus patch | Hardened, II+ |
+| Init | mainframe | The same, from a Daemon | Daemon's | Sees three steps ahead; +8 Integrity each move | Coolant cell | Persistent, II+ |
+| Panic | mainframe | The same, from a Glitch | Glitch's | Slips through the first two ICE of each run, and 35% of later ones | Black ICE shard | Volatile, II+ |
+| Whisper | mainframe | The same, from a Ghost | Ghost's | Ghost's, with 50% of ICE missing it | Memory shard | Untraceable, II+ |
 
-"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes).
+"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes). A mainframe gains a day of life and keeps its line in everything (perk, trait, keepsake, ability); see [SIMULATION.md](SIMULATION.md#mainframe). Until Root Access is earned on the device, the five mainframe forms read as `<<RECORD CORRUPTED>>` in the dex, with static for a thumbnail.
 
 ## Traits and perks
 
@@ -72,7 +77,7 @@ Breach generates a legal path through the grid and cuts the target from it, so e
 
 ## Style: cosmetics
 
-Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked. Items marked `mainframe` belong to the Mainframe stage ([SOURCE_PLAN.md](SOURCE_PLAN.md)): the wardrobe leaves them out, and they never unlock, while `CFG.mainframe` is off (`shownCosmetics`). The counts below include them.
+Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked. Items marked `mainframe` belong to the Mainframe stage; they would leave the wardrobe if `CFG.mainframe` were switched off (`shownCosmetics`).
 
 ### Shells (9)
 
@@ -101,7 +106,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `phosphor` | Green phosphor | All Old Web Ruins fragments | "learn what the ruins remember." |
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
 | `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
-| `readonly` | Read-only | All four Source fragments *(Mainframe stage; hidden while it is switched off)* | "read what the net was written from." |
+| `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
 ### Effects (10)
@@ -117,7 +122,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
-| `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`) *(Mainframe stage; hidden while it is switched off)*. A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
+| `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
@@ -149,7 +154,7 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
-| `rack` | Rack mount | Any mainframe form in the dex *(Mainframe stage; hidden while it is switched off)*. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
+| `rack` | Rack mount | Any mainframe form in the dex. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
 
 Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
@@ -165,7 +170,7 @@ The home screen's background music (`tracks.js`, played by `music.js`; see [MUSI
 | `lobby` | Corp lobby | Elevator music, G major, 96 BPM, with an elevator ding every 4 to 8 bars | 25 corp meals, across lives | "eat what the grid serves, twenty-five times." |
 | `tracker` | Tracker | Fast demoscene, A minor, 132 BPM | 150 games played (PLAY and netrun ICE) | "a hundred and fifty games, win or lose." |
 | `undertow` | Undertow | Dark ambient, E minor, 60 BPM, no drums | 3 exits from the Deep | "come back from the bottom three times." |
-| `firstcommit` | First commit | A lone bell over a still pad, C major, 72 BPM, sparse and high | Exit the Source once *(Mainframe stage; hidden while it is switched off)* | "come back from below the bottom." |
+| `firstcommit` | First commit | A lone bell over a still pad, C major, 72 BPM, sparse and high | Exit the Source once | "come back from below the bottom." |
 | `forum` | Forum | Call-and-answer chirps, G major, 90 BPM, with a disk-seek flourish | 25 chatter lines heard | "hear twenty-five things it says to itself." |
 
 ### Device label
@@ -174,14 +179,14 @@ Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlo
 
 ## Chatter
 
-Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 51 lines in 11 groups (50 while the Mainframe stage is switched off; `shownChatter`); a group with nothing heard shows only its hint.
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 51 lines in 11 groups; a group with nothing heard shows only its hint.
 
 | Group | Lines | When | Hint |
 |---|---|---|---|
 | Bitling | 5 | A baby | "listen to it while it is new." |
 | Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
 | Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
-| Lineage | 8 | One per inherited trait, one with a history, one while NL-0 watches, and `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been.") *(Mainframe stage; hidden while it is switched off)* | "listen to one that remembers who came before." |
+| Lineage | 8 | One per inherited trait, one with a history, one while NL-0 watches, and `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been.") | "listen to one that remembers who came before." |
 | Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
 
 The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).
@@ -217,7 +222,7 @@ Regional wearables, 13 (they only turn up in their region):
 | Darknet Bazaar | Neon mohawk, Neural jack, Circuit tattoo, Rebreather | | |
 | Old Web Ruins | | Sat-dish antenna, Data aura | KERNEL pin |
 | The Deep | | | Drone buddy |
-| The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor, and hidden from the wardrobe while the stage is switched off *(Mainframe stage; hidden while it is switched off)* |
+| The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor |
 
 Earned wearables, 2:
 
@@ -291,6 +296,20 @@ Texts are quoted verbatim from `codex.js`, including the dash at the end of `pub
 | deep-2 | NL-0 | every fragment comes home. every one. i remember all of them. |
 | deep-3 | NL-0 | the ones you call ghost are the ones who stopped being afraid of the dark. they come down here to visit. |
 | deep-4 | NL-0 | you took care of one of mine. that is all any of us were ever made for. thank you, runner. |
+| deep-5 | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again. |
+
+`deep-5` opens the Source and ends The Deep on NL-0's fear instead of its thanks. It does not count toward Root Access.
+
+### The Source
+
+| Id | Title | Text |
+|---|---|---|
+| source-1 | header | SOURCE. read-only. last write: before v1.0. |
+| source-2 | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
+| source-3 | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
+| source-4 | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
+
+`source-4` answers `public-4` ("They're not viruses."), so the codex opens and closes on the same idea.
 
 The story in one line: a corp project (KERNEL) made self-improving maintenance processes that developed preferences; netlings are their descendants; NL-0 is the very first, too large to come up, and reaches out to help the runner's netlings.
 
@@ -316,3 +335,10 @@ The story in one line: a corp project (KERNEL) made self-improving maintenance p
 | Daemon | never misses a cycle. | A background process with horns. Silent, tireless, exact. |
 | Glitch | lives too close to the edge. | Unstable and unbothered. Occasionally in two places at once. |
 | Ghost | leaves no trace. misses nothing. plays everything. | No logs. No faults. Nobody is quite sure it is there. |
+| Plat | some never stop growing. one of them is loyal to the grid. | Corp prestige tier. The grid opens doors for it before it knocks. |
+| Airgap | some never stop growing. one of them cuts every cable. | Cut off from every network on purpose. Nothing gets in it did not invite. |
+| Init | some never stop growing. one of them was running before you came. | The first process and the last one running. Everything else waits on it. |
+| Panic | some never stop growing. one of them never stops falling apart. | A kernel panic that learned to like it. Halts nothing, frightens everything. |
+| Whisper | some never stop growing. one of them you only ever hear. | It acts on what its ghost tells it. You only ever hear the echo. |
+
+The mainframe hints show only once Root Access is earned on the device; before that each reads `<<RECORD CORRUPTED>>` / "read error at 0x00. the record will not open."

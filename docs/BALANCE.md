@@ -8,9 +8,10 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 - **Attentive players can steer every evolution**, teen and adult.
 - **Attention earns extras; inattention costs faults, not a life.** See [ATTENTION.md](ATTENTION.md).
 - **The codex takes at least 3 lives**, even for a player who runs as often as they can.
-- **The Deep is a wall**, even for a player with every form ability.
+- **The Deep is a wall**, even for a player with every form ability, though not for a mainframe (careful mainframes disconnect 10 to 14% there; the floor is 8%).
+- **The Source is somewhat harder than The Deep**, for the mainframes that may enter it: 22 to 30% disconnects in careful play, the five forms within about 6 points of each other.
+- **The Mainframe stage is earned**: about half of deliberate players who reach it in a life, fewer casual ones, and only once the line has Root Access.
 - **Items are scarce or have a use** beyond DISCARD.
-- **No fourth life stage** for now.
 
 ## Current rules that came from the passes
 
@@ -25,8 +26,11 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 - Segfault adds 2 faults (awake only, two presses). It drops from Public Net loot (weight 2), other regions' loot (1), mini-game win and HIDE tables (1), market stock (Public Net and Bazaar), and with a 10% chance after DEFEND, a contained overflow or a power surge.
 - Stub is steerable but costs a starved teen stage (`steer-stub` takes about 3.4 faults).
 
+**Mainframe.** A fifth stage on the last ordinary day (96 hours): three Deep exits this life, or two clean ones, and Root Access in the line. It adds a day and passes the trait on at level II or higher. The feat was chosen with a gate test before any game code (one Deep exit let every runner in), and needed the Chrome corp-relay fix to be fair to Chrome. Root Access stays on the original 22 fragments, so the stage first appears in a line's fourth life: in `tools/baseline/lineages.json` 2 to 30% of fourth lives become mainframes by play style (attentive 25%, casual 2%), and about a quarter of attentive fourth lives reach the Source's exit.
+
 **Netruns.**
-- Regions open in order: Public Net, Darknet Bazaar, Corp Grid, Old Web Ruins, The Deep. Only reaching the exit node clears a region; clears belong to each netling. Stage gates stay, and The Deep also needs `ruins-4`.
+- Regions open in order: Public Net, Darknet Bazaar, Corp Grid, Old Web Ruins, The Deep, the Source. Only reaching the exit node clears a region; clears belong to each netling. Stage gates stay, The Deep also needs `ruins-4`, and the Source needs a mainframe and `deep-5`.
+- The Source has 13 middle layers and ICE weight 11. Mainframe upgrades: Plat's relays repair 40 and its insurance pays twice; Airgap's first lost ICE fight each run deals 30%; Init sees three steps and repairs 8 a move; Panic phases the first two ICE; Whisper is missed by 50% of ICE.
 - At most 8 codex fragments per life (`RUN_CFG.codexPerLife`).
 - The Deep has 10 middle layers.
 - ICE damage: Bazaar 40, Corp Grid 35, Ruins 48.
@@ -51,7 +55,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 
 - **Passive stability gain**: lowering it was raised and never decided.
 - **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): parked. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
-- **A fourth life stage**: planned, not built. The plan is in [SOURCE_PLAN.md](SOURCE_PLAN.md): a Mainframe stage reached by age plus clearing The Deep, one Mainframe form per adult form, one extra day of life, and a last region, the Source.
+- **Mainframe pacing in real play.** The bots run more than people do, so real players will reach the stage less often than the measurements say, casual ones most of all. The feat counts (3, or 2 clean) and `deep-5`'s place are the levers; leave them until playtesting says otherwise. The history of the decisions is in [SOURCE_PLAN.md](SOURCE_PLAN.md).
 
 ## Working on balance
 

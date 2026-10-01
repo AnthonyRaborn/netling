@@ -25,14 +25,17 @@ function netling(stage, form) {
   Object.assign(s.stats, { charge: 100, sync: 90, integrity: 100, heat: 0 });
   return s;
 }
-function switchedOn(fn) {
-  CFG.mainframe = true;
+function withSwitch(on, fn) {
+  const was = CFG.mainframe;
+  CFG.mainframe = on;
   try {
     return fn();
   } finally {
-    CFG.mainframe = false;
+    CFG.mainframe = was;
   }
 }
+const switchedOn = (fn) => withSwitch(true, fn);
+const switchedOff = (fn) => withSwitch(false, fn);
 // Starts a run in `region` and turns the first step into a node of `type`.
 function into(s, region, type, seed = 4) {
   startRun(s, region, mulberry32(seed));
@@ -96,10 +99,12 @@ test('the Source: last on the way down, for a mainframe, behind The Deep and dee
 test('switched off, the Source and the new fragments are out of play', () => {
   assert.deepEqual(shownRegions(false), ['public', 'bazaar', 'corp', 'ruins', 'deep']);
   assert.deepEqual(shownRegions(true), REGION_ORDER);
-  assert.equal(liveFragments().length, 22);
   const deep = ['deep-1', 'deep-2', 'deep-3', 'deep-4'];
-  assert.equal(nextFragment('deep', deep), null, 'The Deep holds nothing more while off');
-  assert.deepEqual(codexByRegion([], ['deep']).map((g) => g.total), [4]);
+  switchedOff(() => {
+    assert.equal(liveFragments().length, 22);
+    assert.equal(nextFragment('deep', deep), null, 'The Deep holds nothing more while off');
+    assert.deepEqual(codexByRegion([], ['deep']).map((g) => g.total), [4]);
+  });
   switchedOn(() => {
     assert.equal(liveFragments().length, FRAGMENTS.length);
     assert.equal(nextFragment('deep', deep), 'deep-5', 'the hint at the Source is The Deep\'s last word');
@@ -240,7 +245,7 @@ test('the Mainframe unlocks: hidden while switched off, each earned by its own g
     assert.ok(COSMETICS[slot].find((c) => c.id === id).mainframe, `${key} is marked`);
     assert.ok(!shownCosmetics(slot, false).some((c) => c.id === id), `${key} is out of the wardrobe while off`);
   }
-  assert.ok(!MAINFRAME_UNLOCKS.some((k) => unlockedIds(all).includes(k)), 'and never unlocks while off');
+  assert.ok(!MAINFRAME_UNLOCKS.some((k) => switchedOff(() => unlockedIds(all)).includes(k)), 'and never unlocks while off');
   switchedOn(() => {
     const ids = (over) => unlockedIds(progressCtx(over)).filter((k) => MAINFRAME_UNLOCKS.includes(k));
     assert.deepEqual(ids({}), []);

@@ -54,7 +54,7 @@ Created by `createScript()`. The full field list with meanings is in [DATA_AND_S
 
 | Field | Meaning |
 |---|---|
-| `stage` | `script` (compiling), `baby`, `teen`, `adult`, `dead` |
+| `stage` | `script` (compiling), `baby`, `teen`, `adult`, `mainframe`, `dead` |
 | `form` | Current body. `bitling` for babies, `kernel`/`stub`/`shell` for teens, one of five adult forms |
 | `life` | `{ teenAt, adultAt, lifespan }` in minutes, fixed when it compiles (see [Life length](#life-length)) |
 | `newForms` | Adult forms the player had never raised when it compiled; they win ties a little more often |
@@ -202,7 +202,7 @@ Details:
 
 ## Visitors
 
-A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over all eight bodies, its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over every body (the mainframe forms only to a line with Root Access, since until then they are corrupted records), its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
 
 **GREET** (`act(s, 'greet')`): once per visit (`visit.greeted`). It sets a visitor chatter line on screen and raises the accessory chance above; nothing else. Refused with no visitor, or once already greeted.
 
@@ -296,9 +296,18 @@ Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data
 
 **Dying before adulthood.** `flatline()` uses the current form if it is an adult form, else `leaningForm()` at the moment of death. The record marks it `realized: false` and the UI calls it an echo or "(unrealized)".
 
-### Mainframe (switched off)
+### Mainframe
 
-A fourth stage is in the rules but switched off (`CFG.mainframe` is `false`), so no netling reaches it yet. When on, an adult recompiles into its line's mainframe form (Chrome to Plat, Firewall to Airgap, Daemon to Init, Glitch to Panic, Ghost to Whisper) at the first minute it is home from any run, at least `lifespan - 24h` old, with three exits from The Deep this life or two clean ones (`s.deepExits`, counted at jack-out even while the stage is off). It gains a day (`s.lifeBonus`; the life ends at `lifeEnd(s)`), keeps its line's perk, trait, keepsake and netrun ability, and passes its trait on at level II or higher. The plan and measurements are in [SOURCE_PLAN.md](SOURCE_PLAN.md).
+A fourth stage beyond adult (`mainframeDue`). An adult recompiles into its line's mainframe form (`MAINFRAME_OF`: Chrome to Plat, Firewall to Airgap, Daemon to Init, Glitch to Panic, Ghost to Whisper) at the first minute all of this holds:
+
+- it is home (not on a run);
+- it is at least `lifespan - mainframeBeforeEndMin` old (the start of its last ordinary day, 96 hours in a 5-day life);
+- this life it has come back from The Deep `mainframeExits` (3) times, or `mainframeCleanExits` (2) times without losing an ICE fight (`s.deepExits`, `{ all, clean }`, counted at The Deep's exit node; relay jack-outs do not count);
+- its line has Root Access (`rootEarnedIn`: `s.rootAccess`, or `s.rootCooling` for the generation resting after a rescue).
+
+It logs "it has another day in it now.", gains `mainframeBonusMin` (a day) of life (`s.lifeBonus`; the life ends at `lifeEnd(s)`), and keeps its line (`lineOf`): the same perk, trait, keepsake and netrun ability, the last with an upgrade ([NETRUN.md](NETRUN.md#mainframe-upgrades)). It passes its trait on at level II or higher (`mainframeTraitLevel`), and its lineage record keeps the line's adult form with `mainframe` naming the body. Its netrun cooldown is the adult's. Only a mainframe can enter the Source.
+
+`CFG.mainframe` (on) switches the whole stage, the Source and everything that belongs to them; off, none of it appears. Tests and the balance tools use it.
 
 ## Lineage: fragments, traits, quirks
 
@@ -328,12 +337,13 @@ Measured with 400 to 800 simulated lives per case, against the same parent with 
 
 ## Root Access (NL-0)
 
-Unlocked by finding all 22 codex fragments, and then kept for good: the moment the codex completes, `progress.rootEarned` is recorded (`drainCodexInbox`), and `rootUnlocked()` in `netrun/codex.js` is true if that flag is set or every fragment is found. A fragment added to the game later therefore cannot take Root Access back. Saves from before the flag existed get it backfilled at load if the codex is complete or the current netling already has Root Access, is cooling, or a lineage record shows a rescue.
+Unlocked by finding the original 22 codex fragments (`ROOT_FRAGMENTS`; the five the Mainframe stage added, `deep-5` and the Source's, do not count), and then kept for good: the moment the codex completes, `progress.rootEarned` is recorded (`drainCodexInbox`), and `rootUnlocked()` in `netrun/codex.js` is true if that flag is set or every fragment is found. A fragment added to the game later therefore cannot take Root Access back. Saves from before the flag existed get it backfilled at load if the codex is complete or the current netling already has Root Access, is cooling, or a lineage record shows a rescue.
 
 - New scripts compile with `rootAccess = true` once it is unlocked. The current netling also gets it the moment the codex completes (`drainCodexInbox`).
 - `rootRescue()`: the first time a netling would die of integrity collapse or neglect, it does not. Integrity, Charge and Sync are raised to at least 25, the virus is cleared, the zero-integrity counter resets, and care mistakes are capped at 9. Sets `rootUsed`. Old age is never rescued.
 - The next generation after a rescue has `rootCooling = true`: no protection, and NL-0's origin palette can still roll.
 - Dying without spending it carries straight into the next generation.
+- Root Access in the line is also what opens the Mainframe stage (above).
 
 ## Hibernation
 

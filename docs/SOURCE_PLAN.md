@@ -1,13 +1,20 @@
-# Plan: a stage beyond Adult, and the Source
+# Mainframe and the Source: design record
 
-A design plan. None of this is built. Spoiler-heavy, like the rest of `docs/`. When it is built, the rules move into [SIMULATION.md](SIMULATION.md) and [NETRUN.md](NETRUN.md) and this file is retired or cut down to what stays open.
+The plan for the stage beyond Adult and the Source, kept as the record of how it was decided, built and measured. It is built and shipped (`netling-v48`). Spoiler-heavy, like the rest of `docs/`. **The rules as they are now live in [SIMULATION.md](SIMULATION.md#mainframe), [NETRUN.md](NETRUN.md) and [CONTENT_CATALOG.md](CONTENT_CATALOG.md); where this file and those disagree, those win.** Numbers below are as measured at each step.
 
-Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLAUDE.md rule 1), so every name still marked open needs sign-off before any code is written. Lore text marked *(draft)* can still change after shipping, since only ids are stored.
+Ids are permanent now that they have shipped (CLAUDE.md rule 1). Lore text can still change, since only ids are stored.
+
+## What stays open
+
+- **Pacing in real play.** The bots run more than people do. Watch real play before changing the feat counts (3 exits, or 2 clean) or `deep-5`'s place; Root Access stays the gate.
+- **The Chrome corp-relay fix** is what makes the feat fair to Chrome. If corp relays ever go, revisit the feat ([below](#chrome-lags-on-exits-fixed-corp-relays)).
+- **A Source-only anomaly** ("The purge order") and **five mainframe shells**: left out of the first cut ([Optional](#optional-not-in-the-first-cut), [Unlocks](#unlocks-and-cosmetics)).
+- **A human pass** on a phone: the art, the glitching Source name, and a listen to the Source theme and First commit.
 
 ## Contents
 
+- [What stays open](#what-stays-open)
 - [Decisions so far](#decisions-so-far)
-- [Still to decide](#still-to-decide)
 - [The stage](#the-stage)
 - [The five forms](#the-five-forms)
 - [The Source](#the-source)
@@ -39,10 +46,6 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 | Fragment wording | The drafts stand, with NL-0's `deep-5` line ending "i will not go again." |
 | A new region | The Source. It is the last region, below The Deep. It needs the new stage, and it is somewhat harder than The Deep. |
 | New codex entries | Several for the Source, and one new entry in The Deep that hints at the Source and at NL-0 not wanting to go there. |
-
-## Still to decide
-
-Nothing. Every stage, form, region, fragment and unlock id is decided. What remains are numbers the build step measures (the mainframe upgrades, the Source's numbers).
 
 ## The stage
 
@@ -375,7 +378,7 @@ Each step is one commit that passes `npm test` on its own.
 4. **Netrun.** Done, behind the same switch (see [Step 4 as built](#step-4-as-built)). `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 5. **Measure and tune.** Done (see [Step 5 as built](#step-5-as-built)). The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
 6. **UI, art, sound.** Done (see [Step 6 as built](#step-6-as-built)). Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
-7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run. Switching the stage on also means `node tools/wearable-colors.mjs --write`: the automatic wearable colors leave the mainframe forms out while it is off, so players' colors do not shift before then, and will move slightly once they count (Shades, the Visor band and the Rebreather on a few palettes).
+7. **Docs and release.** Done (see [Step 7 as built](#step-7-as-built)). Every doc in the checklist, the version bump, and the smoke run. Switching the stage on also means `node tools/wearable-colors.mjs --write`: the automatic wearable colors leave the mainframe forms out while it is off, so players' colors do not shift before then, and will move slightly once they count (Shades, the Visor band and the Rebreather on a few palettes).
 
 ## Step 3 as built
 
@@ -464,6 +467,14 @@ Still behind the switch. For playtesting before step 7, `?dev&mainframe` switche
 The automatic wearable colors (`tools/wearable-colors.mjs`) leave the mainframe forms out while the stage is off, so nothing a player sees changes before step 7.
 
 Not done here: a human look at the art and the glitching name on a phone; listening to the two new pieces of music beyond the loudness numbers.
+
+## Step 7 as built
+
+- **`CFG.mainframe` is on.** It stays as a switch: off hides the stage, the Source, their fragments, cosmetics, chatter and visitors, and the tests use both settings (`withSwitch` in `tests/mainframe.test.js` and `tests/source.test.js`). The `?dev&mainframe` playtest flag is gone, and the smoke scenarios run on the plain page.
+- **Automatic wearable colors** regenerated with the mainframe forms counted (`tools/wearable-colors.mjs --write`): Shades, the Visor band and the Rebreather change on a few palettes.
+- **Docs**: SIMULATION.md (the stage, Root Access on the 22, visitors), NETRUN.md (the Source's row, loot, locked name, the mainframe upgrades, 27 fragments), CONTENT_CATALOG.md (forms, fragments, dex), GLOSSARY.md, BALANCE.md (goals and the Mainframe rules; "no fourth life stage" is gone), TESTING.md, DATA_AND_SAVES.md, SPRITES.md, MUSIC.md, the index, and the player README (one spoiler-free line).
+- **Baselines** regenerated with the stage on. `lives.json` did not move (a single life has no Root Access). `netruns.json` gains the Source's fragment finds. `lineages.json` moves in the fourth life only, once the codex has given the line Root Access: 2 to 30% of fourth lives become mainframes by play style (attentive 25%, daredevil 20%, casual 2%), adult shares fall by as much, and about a quarter of attentive fourth lives reach the Source's exit. Full lives and faults stay within the thresholds.
+- **Release**: `netling-v48`.
 
 ## Risks
 

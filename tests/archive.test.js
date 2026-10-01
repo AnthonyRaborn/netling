@@ -59,7 +59,13 @@ test('formsSeenIn backfills only forms that were actually reached', () => {
 
 test('dex hides undiscovered forms behind hints', () => {
   const entries = dexEntries(['bitling', 'ghost']);
-  assert.equal(entries.length, DEX_ORDER.filter((id) => SPECIES[id].stage !== 'mainframe').length, 'mainframe forms stay hidden while the stage is off');
+  assert.equal(entries.length, DEX_ORDER.length, 'every form, the mainframes as corrupted records');
+  CFG.mainframe = false;
+  try {
+    assert.equal(dexEntries([]).length, DEX_ORDER.filter((id) => SPECIES[id].stage !== 'mainframe').length, 'switched off, they are left out');
+  } finally {
+    CFG.mainframe = true;
+  }
   const ghost = entries.find((e) => e.id === 'ghost');
   assert.equal(ghost.name, 'Ghost');
   assert.equal(ghost.trait, 'Untraceable');

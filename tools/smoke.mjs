@@ -1476,9 +1476,8 @@ await scenario('music: the DEV row forces a track and a state', async ({ open })
   assert(m.playing && m.key === 'netrun:deep' && m.variant === 'flow', `DEV override not applied: ${JSON.stringify(m)}`);
 });
 
-// --- the Mainframe stage: switched on for a page with ?dev&mainframe until it ships (docs/SOURCE_PLAN.md) ---
+// --- the Mainframe stage and the Source ---
 
-const MAINFRAME_URL = `${BASE}?dev&mainframe`;
 const DEEP_CLEARED = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
 const regionNames = async (page) => {
   await page.click('#btn-netrun');
@@ -1490,14 +1489,9 @@ const dexRows = async (page) => {
   return page.locator('#dex-grid li').allTextContents();
 };
 
-await scenario('mainframe: switched off, no Source and no new forms; on, the Source and the forms read as corrupted', async ({ open }) => {
+await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
   const adult = { 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['deep-1'] };
-  const off = await open(BASE, seed(adult));
-  const offNames = await regionNames(off);
-  assert(offNames.length === 5 && !offNames.some((n) => /SOURCE|CORRUPTED/.test(n)), `the Source shows while off: ${offNames}`);
-  await off.close();
-
-  const page = await open(MAINFRAME_URL, seed(adult));
+  const page = await open(BASE, seed(adult));
   const names = await regionNames(page);
   assert(names.length === 6 && names[5] === '<<SECTOR CORRUPTED>>', `no corrupted sector: ${names}`);
   const source = page.locator('#region-list button').nth(5);
@@ -1516,7 +1510,7 @@ await scenario('mainframe: switched off, no Source and no new forms; on, the Sou
 
 await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ??? and hints, and the Source opens', async ({ open }) => {
   const save = awakeNetling({ stage: 'mainframe', form: 'plat', teenForm: 'kernel', cleared: DEEP_CLEARED, rootAccess: true });
-  const page = await open(MAINFRAME_URL, seed({ 'netling.save': save, 'netling.codex': [...ROOT_FRAGMENTS.map((f) => f.id), 'deep-5'], 'netling.progress': { streaks: {}, acts: {}, rootEarned: true } }));
+  const page = await open(BASE, seed({ 'netling.save': save, 'netling.codex': [...ROOT_FRAGMENTS.map((f) => f.id), 'deep-5'], 'netling.progress': { streaks: {}, acts: {}, rootEarned: true } }));
   await page.evaluate(() => document.getElementById('transmission').open && document.getElementById('transmission').close());
   assert(/Plat/.test(await page.textContent('#readout')), `readout: ${await page.textContent('#readout')}`);
   assert(await animating(page), 'the mainframe does not animate');
@@ -1544,7 +1538,7 @@ await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ?
 await scenario('mainframe: a Source run plays its own theme, and Source light can be worn', async ({ open }) => {
   const s = awakeNetling({ stage: 'mainframe', form: 'whisper', teenForm: 'kernel', rootAccess: true });
   startRun(s, 'source', Math.random);
-  const page = await open(MAINFRAME_URL, seed({ 'netling.save': s }));
+  const page = await open(BASE, seed({ 'netling.save': s }));
   await page.click('#pad-quit'); // a tap starts the audio
   await page.click('#pad-quit'); // KEEP RUNNING
   await page.waitForTimeout(1300);
@@ -1552,7 +1546,7 @@ await scenario('mainframe: a Source run plays its own theme, and Source light ca
   assert(m.playing && m.key === 'netrun:source', `Source theme not playing: ${JSON.stringify(m)}`);
   await page.close();
 
-  const home = await open(MAINFRAME_URL, seed({ 'netling.progress': { streaks: {}, acts: {}, sourceExits: 3 } }));
+  const home = await open(BASE, seed({ 'netling.progress': { streaks: {}, acts: {}, sourceExits: 3 } }));
   await home.click('#open-archive');
   await home.click('#tab-btn-wardrobe');
   const light = home.locator('#wardrobe-list button.cosmetic', { hasText: 'Source light' });

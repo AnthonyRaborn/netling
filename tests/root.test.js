@@ -92,8 +92,10 @@ import { cleanProgress } from '../src/sanitize.js';
 const allIds = [...ROOT_FRAGMENT_IDS]; // the original 22, all Root Access needs
 
 test('finishing the codex unlocks Root Access, and a missing fragment does not', () => {
-  assert.equal(allFragmentsFound(allIds), true);
-  assert.equal(allFragmentsFound(allIds.slice(1)), false);
+  assert.equal(allFragmentsFound(allIds, ROOT_FRAGMENTS), true);
+  assert.equal(allFragmentsFound(allIds.slice(1), ROOT_FRAGMENTS), false);
+  assert.equal(allFragmentsFound(allIds), false, 'the whole codex is bigger now: the Source and deep-5');
+  assert.equal(allFragmentsFound(FRAGMENTS.map((f) => f.id)), true);
   assert.equal(rootUnlocked({}, allIds), true);
   assert.equal(rootUnlocked({}, allIds.slice(1)), false);
   assert.equal(rootUnlocked(null, []), false);
