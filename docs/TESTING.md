@@ -16,9 +16,10 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/render-music.mjs <out dir> [seconds] [track[:state[:region]] ...]` | Renders the background music to WAV files (every track and state by default) with the real player code, at the game's own level (music slider at `VOLUME`, default 0.4), plus `reference-effects.wav` (sound effects at the default 80%) to compare with; prints each file's loudness. Sleep renders run at least 64 s to cover the wind-down | Playwright |
 | `node tools/make-icons.mjs` | Regenerates `icons/*.png` from the Bitling sprite | Node only |
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
+| `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 391 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
+`npm test` runs 391 tests in 38 files. The smoke test has 70 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 

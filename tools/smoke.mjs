@@ -166,6 +166,26 @@ await scenario('fresh launch: intro -> manual -> nudge -> tutorial run', async (
   assert((await saved(page))?.run?.region === 'tutorial', 'tutorial run not saved');
 });
 
+await scenario('intro on a small phone: the newest line and the prompt stay on the screen', async ({ open }) => {
+  const page = await open();
+  // Narrowing after the text is in also checks that a resize (a phone turning) keeps the end in view.
+  for (const width of [390, 360, 320]) {
+    await page.setViewportSize({ width, height: 640 });
+    if (width === 390) await page.click('#intro'); // skip the typing
+    await page.waitForTimeout(100);
+    const fits = await page.evaluate(() => {
+      const screen = document.querySelector('.screen').getBoundingClientRect();
+      const inside = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.top >= screen.top && r.bottom <= screen.bottom;
+      };
+      const prompt = document.getElementById('intro-next');
+      return !prompt.hidden && inside(prompt) && inside(document.getElementById('intro-text').lastElementChild);
+    });
+    assert(fits, `intro cut off at ${width}px`);
+  }
+});
+
 await scenario('home: care actions, games, archive, system dialog', async ({ open }) => {
   const page = await open(BASE, seed());
   assert(!(await visible(page, '#intro')), 'intro shown for settled save');

@@ -100,7 +100,7 @@ Add a key to `KEYS` (`storage.js`), a `clean*` function and, if it should travel
 
 ## Releasing
 
-There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` (and `VERSION` in `src/version.js`) for each release: it drops old caches and shows open pages a NEW VERSION READY bar. If you change the look of the home screen, rerun `node tools/make-screenshots.mjs` for the install dialog's screenshots. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
+There is no versioned release process. Pushing to `main` with green tests deploys to GitHub Pages. The service worker is network-first, so players get new files on their next online launch. Bump `CACHE` in `sw.js` (and `VERSION` in `src/version.js`) for each release: it drops old caches and shows open pages a NEW VERSION READY bar. If you change the look of the home screen, rerun `node tools/make-screenshots.mjs` for the install dialog's screenshots. The trailer (`node tools/make-trailer.mjs`) drives the real UI too, so rerender it after changes to the home screen, the care buttons, the mini-games, netruns or the flatline card, and check its stills (`STILLS=dir`) still show nothing past the player README. Tier 2 native builds ([PLATFORMS.md](PLATFORMS.md)) are not built.
 
 ## Working with AI sessions
 
