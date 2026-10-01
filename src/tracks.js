@@ -150,15 +150,23 @@ export const TRACKS = {
           '. . . . . . . . . . . . . . . . 2 - - - . . . . . . 0 - - - . .',
         ],
       },
+      // The Source only: a high, still pad under the pings.
+      pad: {
+        mode: 'chord', wave: 'sine', vol: 0.08, octave: 12, env: 'hold', cutoff: 3000, detune: 4,
+        phrases: [
+          '1+5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -',
+          '1+3+5 - - - - - - - - - - - - - - - 1+5 - - - - - - - - - - - - - - -',
+        ],
+      },
     },
     form: [
-      { bars: 4, parts: ['bass', 'drums', 'ping'] },
-      { bars: 8, parts: ['bass', 'pulse', 'lead', 'drums', 'ping'] },
-      { bars: 4, parts: ['bass', 'pulse', 'ping'] },
-      { bars: 8, parts: ['bass', 'pulse', 'lead', 'drums', 'ping'] },
+      { bars: 4, parts: ['bass', 'drums', 'ping', 'pad'] },
+      { bars: 8, parts: ['bass', 'pulse', 'lead', 'drums', 'ping', 'pad'] },
+      { bars: 4, parts: ['bass', 'pulse', 'ping', 'pad'] },
+      { bars: 8, parts: ['bass', 'pulse', 'lead', 'drums', 'ping', 'pad'] },
     ],
     flourishEvery: [24, 40],
-    mute: ['ping'], // unmuted in the Deep
+    mute: ['ping', 'pad'], // the pings play in the Deep and the Source, the pad in the Source
   },
 
   // --- unlockable tracks (the wardrobe's music slot; see cosmetics.js) ---
@@ -439,6 +447,60 @@ export const TRACKS = {
     ],
   },
 
+  // The first commit: a lone bell line in C major over a still pad and the odd key click, as if the net were being written
+  // for the first time. Sparse and high, like the Source's netrun theme.
+  firstcommit: {
+    id: 'firstcommit',
+    gain: 0.78,
+    name: 'First commit',
+    bpm: 72,
+    key: 60, // C4
+    scale: MAJOR,
+    progressions: [
+      [{ root: 0, q: 'maj' }, { root: 5, q: 'maj' }, { root: -3, q: 'min' }, { root: 7, q: 'maj' }],
+      [{ root: 0, q: 'maj' }, { root: -3, q: 'min' }, { root: 5, q: 'maj' }, { root: 7, q: 'dom' }],
+      [{ root: 5, q: 'maj' }, { root: 7, q: 'maj' }, { root: 0, q: 'maj' }, { root: 0, q: 'maj' }],
+    ],
+    parts: {
+      pad: {
+        mode: 'chord', wave: 'sine', vol: 0.22, octave: 0, env: 'hold', cutoff: 1800, detune: 4,
+        phrases: [
+          '1+3+5 - - - - - - - - - - - - - - -',
+          '1+5 - - - - - - - 3+8 - - - - - - -',
+        ],
+      },
+      low: {
+        mode: 'chord', wave: 'triangle', vol: 0.28, octave: -12, env: 'hold', cutoff: 700,
+        phrases: [
+          '1 - - - - - - - - - - - - - - -',
+          '1 - - - - - - - 5 - - - - - - -',
+        ],
+      },
+      bell: {
+        mode: 'scale', wave: 'triangle', vol: 0.3, octave: 12, env: 'pluck', cutoff: 6000, echo: true, sparkle: true,
+        phrases: [
+          '0 . . . 2 . . . 4 . . . . . . . 3 . . . 2 . . . 0 . . . . . . .',
+          '4 . . . 5 . 4 . 2 . . . . . . . 0 . . . 1 . . . 2 . . . . . . .',
+          '7 . . . . . 6 . 4 . . . . . . . 5 . . . 4 . 2 . . . . . . . . .',
+          '. . . . 2 . . . 4 . . . 7 . . . . . . . 6 . 4 . 2 . . . . . . .',
+        ],
+      },
+      clicks: {
+        mode: 'drums', vol: 0.25,
+        phrases: [
+          'c . . . . . . . c . . . . . c .',
+          '. . c . . . . . c . . . . . . .',
+        ],
+      },
+    },
+    form: [
+      { bars: 4, parts: ['pad'] },
+      { bars: 8, parts: ['pad', 'low', 'bell'] },
+      { bars: 8, parts: ['pad', 'low', 'bell', 'clicks'] },
+      { bars: 4, parts: ['low', 'bell'] },
+    ],
+  },
+
   // An old message board: short square voices call and answer over a soft bass and key clicks. G major.
   forum: {
     id: 'forum',
@@ -501,7 +563,7 @@ export const TRACKS = {
 };
 
 // Tracks the wardrobe can equip (the netrun theme is not one).
-export const MUSIC_IDS = ['idle', 'nightdrive', 'dialup', 'lobby', 'tracker', 'undertow', 'forum'];
+export const MUSIC_IDS = ['idle', 'nightdrive', 'dialup', 'lobby', 'tracker', 'undertow', 'firstcommit', 'forum'];
 
 // How a state changes the sound. tempo and vol multiply; transpose is in semitones; cutoff caps
 // every part's filter; mute drops parts; partVol scales single parts.
@@ -515,10 +577,12 @@ export const VARIANTS = {
 };
 
 // The netrun theme per region: the region's sound wave and pitch (REGIONS[*].sound) color the
-// upper parts; the Deep slows down to bass and pings.
+// upper parts; the Deep slows down to bass and pings; the Source, the opposite, is slow, high and almost empty: pings and
+// a pad, a fifth up.
 export function regionVariant(region, sound = { mult: 1, wave: 'square' }) {
   const transpose = Math.round(12 * Math.log2(sound.mult || 1));
   if (region === 'deep') return { wave: sound.wave, transpose: -5, tempo: 70 / 110, mute: ['pulse', 'lead', 'drums'], unmute: ['ping'], cutoff: 900 };
+  if (region === 'source') return { wave: sound.wave, transpose: 7, tempo: 60 / 110, mute: ['bass', 'pulse', 'lead', 'drums'], unmute: ['ping', 'pad'] };
   return { wave: sound.wave, transpose };
 }
 

@@ -1,5 +1,5 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, tick, CFG, GAME_IDS } from '../sim.js';
+import { act, blockReason, log, tick, CFG, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
@@ -132,6 +132,7 @@ function bumpProgress(run) {
     if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
     const at = run.map.nodes.find((n) => n.id === run.pos);
     if (run.region === 'deep' && at?.type === 'exit') progress.deepExits = (progress.deepExits ?? 0) + 1;
+    if (run.region === 'source' && at?.type === 'exit') progress.sourceExits = (progress.sourceExits ?? 0) + 1;
     if (run.contract?.settled === 'met') progress.contractsDone = (progress.contractsDone ?? 0) + 1;
   }
   if (run?.result) store.set(KEYS.progress, progress);
@@ -204,6 +205,19 @@ function renderRegions() {
       const name = document.createElement('span');
       name.className = 'rname';
       name.textContent = secret ? r.lockedName ?? '???' : r.name.toUpperCase();
+      if (secret && r.lockedName) name.classList.add('corrupt');
+      // The first time a corrupted sector opens, its entry repairs itself once, with a log line.
+      if (!lock && r.lockedName && !app.progress.sourceSeen) {
+        app.progress.sourceSeen = true;
+        store.set(KEYS.progress, app.progress);
+        log(app.state, now(), '> sector integrity: restored. something down there noticed.');
+        name.textContent = r.lockedName;
+        name.classList.add('corrupt');
+        setTimeout(() => {
+          name.textContent = r.name.toUpperCase();
+          name.classList.remove('corrupt');
+        }, 1600);
+      }
       name.style.color = lock ? '' : r.palette.main;
       const frag = document.createElement('span');
       frag.className = 'rfrag';

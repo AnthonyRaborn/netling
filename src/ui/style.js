@@ -1,6 +1,6 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
-import { PALETTES } from '../sim.js';
-import { COSMETICS, SLOTS, LABEL, cosmeticById, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
+import { PALETTES, CFG } from '../sim.js';
+import { COSMETICS, SLOTS, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
@@ -179,7 +179,9 @@ function drawCrest(canvas, pixels, color) {
 
 export function renderWardrobe() {
   const w = resolveWardrobe(app.wardrobe, app.unlocked);
-  const total = SLOTS.reduce((n, s) => n + COSMETICS[s].length, 0) + 1 + STYLE_ITEMS.length; // + label + accessories/props
+  // The Mainframe stage's cosmetics and the Checksum stay out of the list while it is switched off.
+  const shownItems = (items) => items.filter((x) => CFG.mainframe || !x.mainframe);
+  const total = SLOTS.reduce((n, s) => n + shownCosmetics(s).length, 0) + 1 + shownItems(STYLE_ITEMS).length; // + label + accessories/props
   $('wardrobe-count').textContent = `${app.unlocked.length + app.ownedAccessories.length}/${total}`;
   const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST', music: 'MUSIC' };
   $('wardrobe-list').replaceChildren(
@@ -188,7 +190,7 @@ export function renderWardrobe() {
       h.textContent = labels[slot];
       const grid = document.createElement('div');
       grid.className = 'wardrobe-grid';
-      for (const c of COSMETICS[slot]) {
+      for (const c of shownCosmetics(slot)) {
         const key = `${slot}:${c.id}`;
         const open = app.unlocked.includes(key);
         const b = document.createElement('button');
@@ -231,7 +233,7 @@ export function renderWardrobe() {
       return [h, grid];
     }),
     // One accessory from each wear slot at once, each with its color pickers if it's recolorable.
-    ...WEAR_SLOTS.flatMap((slot) => [...styleItemSection(slot, `ACCESSORY: ${slot.toUpperCase()}`, ACCESSORIES.filter((x) => x.slot === slot)), ...colorSection(slot)]),
+    ...WEAR_SLOTS.flatMap((slot) => [...styleItemSection(slot, `ACCESSORY: ${slot.toUpperCase()}`, shownItems(ACCESSORIES.filter((x) => x.slot === slot))), ...colorSection(slot)]),
     ...styleItemSection('prop', 'PROP', PROPS),
     ...labelSection(),
   );

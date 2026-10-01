@@ -1,6 +1,7 @@
 // The field manual, and onboarding:
 // intro (terminal) -> readme (field manual) -> nudge (go explore) -> tutorial (first run) -> done
 import { createScript, drainCurve, isAlive, CFG, MIN } from '../sim.js';
+import { mainframeManual } from '../archive.js';
 import { startRun, RUN_CFG } from '../netrun/run.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
@@ -53,6 +54,8 @@ function renderHelp() {
         rootUnlocked()
           ? ['root', "NL-0's protection, once you have earned it: ready, spent, or cooling."]
           : ['r\u2593\u2592t', '\u2591\u2592\u2593 [sector corrupted] \u2593\u2592\u2591', 'unrecoverable. for now.'],
+        // The Mainframe stage, behind its switch: corrupted until Root Access, then a hint, then the rule.
+        ...[mainframeManual(app.dex, { rootEarned: rootUnlocked() })].filter(Boolean),
       ],
     ],
     [

@@ -74,6 +74,8 @@ export const CHATTER = [
   { id: 'lin-untraceable', group: 'lineage', text: 'the one before me vanished. it left me its silence.', when: (s) => s.trait === 'untraceable' },
   { id: 'lin-history', group: 'lineage', text: 'there is older code under mine. a grandparent?', when: (s) => Boolean(s.history) },
   { id: 'lin-nl0', group: 'lineage', text: 'NL-0 hums in the background. it is watching.', when: (s) => Boolean(s.rootAccess) },
+  // mainframe: the Mainframe stage's (docs/SOURCE_PLAN.md), left out of the Archive and its counts while that is switched off.
+  { id: 'lin-quiet', group: 'lineage', text: 'NL-0 has gone quiet. it knows where i have been.', when: (s) => s.stage === 'mainframe', mainframe: true },
 
   { id: 'vis-wide', group: 'visitor', text: 'visitor: the net is bigger than your screen, you know.' },
   { id: 'vis-deep', group: 'visitor', text: 'visitor: my friend went to the deep. came back quieter.' },
@@ -84,6 +86,8 @@ export const CHATTER = [
 ];
 
 export const CHATTER_IDS = new Set(CHATTER.map((c) => c.id));
+// The lines the Archive lists and counts: the Mainframe stage's only once it is switched on (sim.js's CFG.mainframe).
+export const shownChatter = (on) => CHATTER.filter((c) => on || !c.mainframe);
 export const chatterById = (id) => CHATTER.find((c) => c.id === id) ?? null;
 
 // Lines this netling could say right now, by form or inheritance (never a visitor's). `group` is the form whose lines
@@ -95,11 +99,11 @@ export function chatterPool(s, group = s.form) {
 export const visitorLines = () => CHATTER.filter((c) => c.group === 'visitor');
 
 // Heard lines by group, for the Archive and the crest: { group: { heard, total } }.
-export function chatterProgress(heard = []) {
+export function chatterProgress(heard = [], lines = CHATTER) {
   const got = new Set(heard);
   const out = {};
   for (const g of CHATTER_GROUPS) out[g.id] = { heard: 0, total: 0 };
-  for (const c of CHATTER) {
+  for (const c of lines) {
     out[c.group].total++;
     if (got.has(c.id)) out[c.group].heard++;
   }

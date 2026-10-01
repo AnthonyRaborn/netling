@@ -55,7 +55,7 @@ test('rolls skip owned accessories and favor common ones', () => {
 test('regional accessories only roll in their region; the originals roll anywhere', () => {
   const rng = mulberry32(9);
   const seen = {};
-  for (const region of ['public', 'corp', 'bazaar', 'ruins', 'deep']) {
+  for (const region of ['public', 'corp', 'bazaar', 'ruins', 'deep', 'source']) {
     seen[region] = new Set();
     for (let i = 0; i < 2000; i++) seen[region].add(rollAccessory([], rng, region));
   }
@@ -68,7 +68,17 @@ test('regional accessories only roll in their region; the originals roll anywher
   assert.ok(seen.deep.has('drone'));
   assert.ok(seen.corp.has('barcode'));
   assert.ok(!seen.public.has('drone'));
-  assert.equal(ACCESSORIES.length, 24);
+  assert.ok(seen.source.has('checksum'));
+  // The Checksum (the Mainframe stage's) never comes from a home reward or on a visitor, unlike the other regional finds.
+  const home = new Set();
+  const worn = new Set();
+  for (let i = 0; i < 4000; i++) {
+    home.add(rollAccessory([], rng));
+    worn.add(rollWornAccessory(rng));
+  }
+  assert.ok(home.has('drone') && !home.has('checksum'));
+  assert.ok(!worn.has('checksum'));
+  assert.equal(ACCESSORIES.length, 25);
 });
 
 test('the drone orbits: its position changes over time', () => {

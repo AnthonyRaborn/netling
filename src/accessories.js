@@ -423,6 +423,23 @@ export const ACCESSORIES = [
       px(x, y + 1, frame % 2 ? '#39ff14' : '#5a5a6a'); // its light blinks
     },
   },
+  {
+    // mainframe: found only in the Source (docs/SOURCE_PLAN.md), never in a home reward or on a visitor.
+    id: 'checksum',
+    name: 'Checksum',
+    slot: 'body',
+    rarity: 'veryrare',
+    regions: ['source'],
+    mainframe: true,
+    hint: 'something small follows the bravest runners up from the source.',
+    draw: (px, a, frame) => {
+      // A little block of parity bits on the chest, one of which flips with the frame.
+      const x = a.bodyRight - 4;
+      const y = a.mid - 1;
+      const bits = ['#.##', '##.#', frame % 2 ? '#.#.' : '#.##'];
+      bits.forEach((row, dy) => [...row].forEach((ch, dx) => px(x + dx, y + dy, ch === '#' ? '#e8f4ff' : '#2a3a4a')));
+    },
+  },
 ];
 
 // --- earned (never sold) ------------------------------------------------------------------
@@ -584,12 +601,15 @@ export const PROPS = [
       if (!extra?.sprite) return;
       const s = extra.sprite;
       const lit = new Set();
+      // A mainframe is 18 wide: its middle 16 columns keep the plush at 8 by 8.
+      const trim = Math.max(0, Math.ceil((s[0].length - 16) / 2));
       for (let y = 0; y < s.length; y += 2) {
-        for (let x = 0; x < s[0].length; x += 2) {
+        for (let x = trim; x < s[0].length - trim; x += 2) {
           const c = extra.colors[s[y][x]];
+          const at = [1 + Math.floor((x - trim) / 2), 1 + Math.floor(y / 2)];
           if (c) {
-            px(1 + Math.floor(x / 2), 1 + Math.floor(y / 2), c);
-            lit.add(`${1 + Math.floor(x / 2)},${1 + Math.floor(y / 2)}`);
+            px(at[0], at[1], c);
+            lit.add(`${at[0]},${at[1]}`);
           }
         }
       }
@@ -621,19 +641,24 @@ export const accessoryRegions = (x) => x.regions ?? null;
 export const accessoryById = (id) => STYLE_ITEMS.find((x) => x.id === id);
 
 // Pick an accessory the player doesn't own yet, weighted by rarity, or null.
-// With a region, only accessories found there (or anywhere) are in the pool.
+// With a region, only accessories found there (or anywhere) are in the pool. A Mainframe-only find (the Checksum) drops
+// only in its own region.
 export function rollAccessory(exclude, rng, region = null) {
   const pool = STYLE_ITEMS.filter(
-    (x) => x.source !== 'earned' && !exclude.includes(x.id) && (!region || !x.regions || x.regions.includes(region)),
+    (x) =>
+      x.source !== 'earned' &&
+      !exclude.includes(x.id) &&
+      (!region || !x.regions || x.regions.includes(region)) &&
+      (!x.mainframe || x.regions.includes(region)),
   );
   return pickByRarity(pool, rng);
 }
 
-// What a visiting netling wears: any accessory that can be found (not props, not earned ones),
+// What a visiting netling wears: any accessory that can be found (not props, not earned ones, not the Source's),
 // from any region, weighted by rarity. A glimpse of what's out there. `taken`: ids already worn, whose slots are full.
 export function rollWornAccessory(rng, taken = []) {
   const full = new Set(taken.map((id) => accessoryById(id)?.slot));
-  return pickByRarity(ACCESSORIES.filter((x) => x.source !== 'earned' && !full.has(x.slot)), rng);
+  return pickByRarity(ACCESSORIES.filter((x) => x.source !== 'earned' && !x.mainframe && !full.has(x.slot)), rng);
 }
 
 function pickByRarity(pool, rng) {
@@ -654,7 +679,7 @@ export const DIM_WEARABLE = '#2f6b73';
 // Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
 // above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
 // pixels covered, the smallest on a tie. Orbiting ones (the drone, the data aura) pass in front instead of jumping.
-const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, halo: -1, spark: -1 };
+const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, halo: -1, spark: -1 };
 const ROOM_MAX = 4;
 export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRow = -Infinity } = {}) {
   const a = anchorsFor(sprite);

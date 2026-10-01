@@ -4,7 +4,7 @@ import { PALETTES, SPECIES, CFG } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, shownRegions } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, liveFragments, ROOT_FRAGMENTS } from '../netrun/codex.js';
-import { CHATTER, CHATTER_GROUPS, chatterProgress } from '../chatter.js';
+import { CHATTER_GROUPS, chatterProgress, shownChatter } from '../chatter.js';
 import { drawSprite, formSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS } from '../sprites.js';
 import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
@@ -46,13 +46,16 @@ export function showTransmission() {
   $('transmission').showModal();
 }
 
-function thumb(form, paletteIdx, { dead = false, locked = false } = {}) {
+// A record that will not open: dim static instead of a silhouette, so its shape gives nothing away.
+const NOISE = Array.from({ length: 12 }, (_, y) => Array.from({ length: 14 }, (_, x) => ((x * 7 + y * 13 + x * y) % 5 < 2 ? '#' : '.')).join(''));
+
+function thumb(form, paletteIdx, { dead = false, locked = false, corrupted = false } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'thumb';
   if (!form) return wrap;
-  const sprite = formSprite(form, 'a');
+  const sprite = corrupted ? NOISE : formSprite(form, 'a');
   const c = document.createElement('canvas');
-  c.width = 16;
+  c.width = 18; // the widest form (a mainframe)
   c.height = 16;
   const pal = PALETTES[paletteIdx] ?? PALETTES[0];
   const colors = locked
@@ -60,7 +63,7 @@ function thumb(form, paletteIdx, { dead = false, locked = false } = {}) {
     : dead
       ? DEAD_COLORS
       : paletteColors(pal);
-  drawSprite(c.getContext('2d'), sprite, Math.floor((16 - sprite[0].length) / 2), 16 - sprite.length, colors);
+  drawSprite(c.getContext('2d'), sprite, Math.floor((18 - sprite[0].length) / 2), 16 - sprite.length, colors);
   wrap.append(c);
   return wrap;
 }
@@ -119,6 +122,7 @@ function renderRecord(lineage) {
     ['runs: jacked out / disconnected', `${runs.jacked ?? 0} / ${runs.disconnected ?? 0}`],
     ['clean jack-outs', progress.cleanJackouts ?? 0],
     ['exits from the deep', progress.deepExits ?? 0],
+    ...(CFG.mainframe && progress.sourceExits ? [['exits from the source', progress.sourceExits]] : []), // named once it has been reached
   ];
   $('record').replaceChildren(
     ...rows.flatMap(([k, v]) => {
@@ -181,6 +185,12 @@ function renderArchive() {
       const secret = r.requires && !app.codex.includes(r.requires) && g.found === 0;
       const h = document.createElement('h3');
       h.textContent = secret ? `${r.lockedName ?? '???'} ` : `${r.name.toUpperCase()} `;
+      if (secret && r.lockedName) {
+        const name = document.createElement('span');
+        name.className = 'corrupt';
+        name.textContent = r.lockedName;
+        h.replaceChildren(name, ' ');
+      }
       const count = document.createElement('span');
       count.textContent = `${g.found}/${g.total}`;
       h.append(count);
@@ -208,8 +218,8 @@ function renderArchive() {
   $('dex-grid').replaceChildren(
     ...entries.map((e) =>
       row(
-        thumb(e.id, 0, { locked: !e.found }),
-        [bold(e.name), ` · ${e.stage}`],
+        thumb(e.id, 0, { locked: !e.found, corrupted: e.corrupted }),
+        [bold(e.name), e.corrupted ? '' : ` · ${e.stage}`],
         [
           e.text,
           e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null,
@@ -225,8 +235,9 @@ function renderArchive() {
 // Lines heard, by group; a group with nothing heard yet shows only its hint.
 function renderChatter() {
   const heard = new Set(app.progress.chatter ?? []);
-  const prog = chatterProgress([...heard]);
-  $('chatter-count').textContent = `${heard.size}/${CHATTER.length}`;
+  const lines = shownChatter(CFG.mainframe);
+  const prog = chatterProgress([...heard], lines);
+  $('chatter-count').textContent = `${lines.filter((c) => heard.has(c.id)).length}/${lines.length}`;
   $('chatter-list').replaceChildren(
     ...CHATTER_GROUPS.flatMap((g) => {
       const { heard: got, total } = prog[g.id];
@@ -241,13 +252,13 @@ function renderChatter() {
         d.textContent = g.hint;
         return [h, d];
       }
-      const lines = CHATTER.filter((c) => c.group === g.id).map((c) => {
+      const groupLines = lines.filter((c) => c.group === g.id).map((c) => {
         const d = document.createElement('div');
         d.className = heard.has(c.id) ? 'frag' : 'frag missing';
         d.textContent = heard.has(c.id) ? `"${c.text}"` : '[ not heard yet ]';
         return d;
       });
-      return [h, ...lines];
+      return [h, ...groupLines];
     }),
   );
 }

@@ -6,11 +6,12 @@ import {
   CFG, FORMS, LEGACY_LIFE, MAINFRAME_OF, MIN, SPECIES, TRAIT_CFG,
 } from '../src/sim.js';
 import { cleanSave, cleanLineage } from '../src/sanitize.js';
-import { chatterPool } from '../src/chatter.js';
+import { chatterPool, chatterProgress, shownChatter } from '../src/chatter.js';
 import { deathRecord, dexEntries, formsSeenIn } from '../src/archive.js';
 import { moveTo, runOptions, startRun, RUN_CFG } from '../src/netrun/run.js';
 import { regionLock } from '../src/netrun/regions.js';
-import { STAND_IN, SPRITES, ANCHOR_ROWS } from '../src/sprites.js';
+import { SPRITES, ANCHOR_ROWS } from '../src/sprites.js';
+import { poseDistance, silhouetteIou } from '../tools/lib/sprite-checks.mjs';
 
 // The Mainframe stage (docs/SOURCE_PLAN.md): the rules, behind CFG.mainframe until its art and UI land.
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
@@ -214,23 +215,38 @@ test('the lineage remembers a mainframe body, and the dex shows mainframe forms 
   });
 });
 
-test('stand-in art: each mainframe form borrows its line\'s sprites and anchors for now', () => {
-  for (const [form, line] of Object.entries(STAND_IN)) {
-    assert.equal(lineOf(form), line);
-    assert.equal(SPRITES[`${form}A`], SPRITES[`${line}A`]);
-    assert.equal(ANCHOR_ROWS[form], ANCHOR_ROWS[line]);
+test('mainframe art: its own sprites, wider than its line\'s and no taller than the tallest adult, in the line\'s shape', () => {
+  const adultRows = Math.max(...Object.keys(SPECIES).filter((f) => SPECIES[f].stage === 'adult').map((f) => SPRITES[`${f}A`].length));
+  for (const form of Object.keys(SPECIES).filter(isMainframeForm)) {
+    const line = lineOf(form);
+    for (const pose of ['A', 'B', 'Sleep', 'Dead']) {
+      const rows = SPRITES[`${form}${pose}`];
+      assert.ok(rows && rows !== SPRITES[`${line}${pose}`], `${form}${pose} is its own`);
+      assert.ok(rows.every((r) => r.length === 18), `${form}${pose}: 18 columns`);
+      assert.ok(rows.length <= adultRows, `${form}${pose}: room for a hat above it`);
+    }
+    assert.ok(ANCHOR_ROWS[form] && ANCHOR_ROWS[form] !== ANCHOR_ROWS[line], `${form} has its own anchors`);
+    // Closer to its own line than to any other adult. The Glitch line is torn on purpose and its rows shift between
+    // frames, so a centred overlap says little about it; Panic is checked by how much it shifts instead.
+    if (line === 'glitch') continue;
+    const own = silhouetteIou(SPRITES[`${form}A`], SPRITES[`${line}A`]);
+    for (const other of Object.keys(SPECIES).filter((f) => SPECIES[f].stage === 'adult' && f !== line)) {
+      assert.ok(own > silhouetteIou(SPRITES[`${form}A`], SPRITES[`${other}A`]), `${form} looks more like ${other} than ${line}`);
+    }
   }
-  assert.deepEqual(Object.keys(STAND_IN).sort(), Object.keys(SPECIES).filter(isMainframeForm).sort());
+  const shift = (form) => poseDistance(SPRITES[`${form}A`], SPRITES[`${form}B`]);
+  for (const form of ['plat', 'airgap', 'init', 'whisper']) assert.ok(shift('panic') > 2 * shift(form), `Panic jumps between frames more than ${form}`);
 });
 
-test('visitors come as mainframe forms only once the stage is switched on', () => {
-  const visitors = () => {
+test('visitors come as mainframe forms only once the stage is switched on, and only to a line with root', () => {
+  const visitors = (root = true) => {
     const seen = new Set();
     const chance = CFG.visitChancePerHour;
     CFG.visitChancePerHour = 60 * 60; // a visit every minute it can
     try {
       for (let seed = 1; seed <= 300; seed++) {
         const s = adult('chrome');
+        Object.assign(s, { rootAccess: root, rootCooling: false });
         s.visit = null;
         tick(s, s.lastTick + 2 * MIN, mulberry32(seed));
         if (s.visit) seen.add(s.visit.form);
@@ -244,12 +260,17 @@ test('visitors come as mainframe forms only once the stage is switched on', () =
   assert.ok(off.length >= 5, `visits happened: ${off}`);
   assert.ok(!off.some(isMainframeForm), `no mainframe visitors while off: ${off}`);
   assert.ok(switchedOn(visitors).some(isMainframeForm), 'some once on');
+  assert.ok(!switchedOn(() => visitors(false)).some(isMainframeForm), 'none before Root Access: they would give away a corrupted record');
 });
 
-test('a mainframe speaks its line\'s chatter', () => {
+test('a mainframe speaks its line\'s chatter, and one line of its own about NL-0', () => {
   const s = adult('daemon');
   const daemonLines = chatterPool(s, 'daemon').map((c) => c.id);
+  assert.ok(daemonLines.length > 0 && !daemonLines.includes('lin-quiet'), 'an adult never says it');
   Object.assign(s, { stage: 'mainframe', form: 'init' });
-  assert.ok(daemonLines.length > 0);
-  assert.deepEqual(chatterPool(s, lineOf(s.form)).map((c) => c.id), daemonLines);
+  assert.deepEqual(chatterPool(s, lineOf(s.form)).map((c) => c.id), [...daemonLines, 'lin-quiet']);
+  // Switched off, the Archive neither lists nor counts it, so the Speech mark never waits on a line nobody can hear.
+  assert.ok(!shownChatter(false).some((c) => c.id === 'lin-quiet') && shownChatter(true).some((c) => c.id === 'lin-quiet'));
+  const lineage = shownChatter(false).filter((c) => c.group === 'lineage').map((c) => c.id);
+  assert.deepEqual(chatterProgress(lineage, shownChatter(false)).lineage, { heard: lineage.length, total: lineage.length });
 });

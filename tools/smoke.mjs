@@ -50,7 +50,10 @@ const browser = await chromium.launch();
 // --- harness ---
 
 const results = [];
+// SMOKE_ONLY=text runs only the scenarios whose name contains it.
+const ONLY = process.env.SMOKE_ONLY;
 async function scenario(name, fn, { allow = [], contextInit } = {}) {
+  if (ONLY && !name.includes(ONLY)) return;
   const ctx = await browser.newContext({ acceptDownloads: true });
     if (contextInit) await ctx.addInitScript(contextInit);
   const errors = [];
@@ -71,7 +74,7 @@ async function scenario(name, fn, { allow = [], contextInit } = {}) {
   try {
     await fn({ open, ctx, errors });
   } catch (e) {
-    failure = e.message.split('\n')[0];
+    failure = ONLY ? e.message.split('\n').slice(0, 12).join('\n') : e.message.split('\n')[0]; // more of it when running one
   }
   if (!failure && errors.length) failure = errors.join(' | ');
   results.push([name, failure]);
@@ -1471,6 +1474,92 @@ await scenario('music: the DEV row forces a track and a state', async ({ open })
   await page.waitForTimeout(300);
   const m = await musicStatus(page);
   assert(m.playing && m.key === 'netrun:deep' && m.variant === 'flow', `DEV override not applied: ${JSON.stringify(m)}`);
+});
+
+// --- the Mainframe stage: switched on for a page with ?dev&mainframe until it ships (docs/SOURCE_PLAN.md) ---
+
+const MAINFRAME_URL = `${BASE}?dev&mainframe`;
+const DEEP_CLEARED = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
+const regionNames = async (page) => {
+  await page.click('#btn-netrun');
+  return page.locator('#region-list .rname').allTextContents();
+};
+const dexRows = async (page) => {
+  await page.click('#open-archive');
+  await page.click('#tab-btn-dex');
+  return page.locator('#dex-grid li').allTextContents();
+};
+
+await scenario('mainframe: switched off, no Source and no new forms; on, the Source and the forms read as corrupted', async ({ open }) => {
+  const adult = { 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['deep-1'] };
+  const off = await open(BASE, seed(adult));
+  const offNames = await regionNames(off);
+  assert(offNames.length === 5 && !offNames.some((n) => /SOURCE|CORRUPTED/.test(n)), `the Source shows while off: ${offNames}`);
+  await off.close();
+
+  const page = await open(MAINFRAME_URL, seed(adult));
+  const names = await regionNames(page);
+  assert(names.length === 6 && names[5] === '<<SECTOR CORRUPTED>>', `no corrupted sector: ${names}`);
+  const source = page.locator('#region-list button').nth(5);
+  assert(await source.isDisabled(), 'the Source is open to an adult');
+  assert(/do not open/.test(await source.textContent()), 'no warning under the corrupted sector');
+  assert(await source.locator('.rname.corrupt').count(), 'the corrupted name does not glitch');
+  await page.keyboard.press('Escape');
+  const rows = await dexRows(page);
+  const corrupted = rows.filter((r) => r.includes('<<RECORD CORRUPTED>>'));
+  assert(corrupted.length === 5, `expected five corrupted records: ${corrupted.length}`);
+  assert(!corrupted.some((r) => /mainframe|hint/.test(r)), `a corrupted record gives something away: ${corrupted[0]}`);
+  await page.keyboard.press('Escape');
+  const terms = await helpTerms(page);
+  assert(terms.includes('0x00') && !terms.includes('mainframe'), `the field manual names the stage: ${terms}`);
+});
+
+await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ??? and hints, and the Source opens', async ({ open }) => {
+  const save = awakeNetling({ stage: 'mainframe', form: 'plat', teenForm: 'kernel', cleared: DEEP_CLEARED, rootAccess: true });
+  const page = await open(MAINFRAME_URL, seed({ 'netling.save': save, 'netling.codex': [...ROOT_FRAGMENTS.map((f) => f.id), 'deep-5'], 'netling.progress': { streaks: {}, acts: {}, rootEarned: true } }));
+  await page.evaluate(() => document.getElementById('transmission').open && document.getElementById('transmission').close());
+  assert(/Plat/.test(await page.textContent('#readout')), `readout: ${await page.textContent('#readout')}`);
+  assert(await animating(page), 'the mainframe does not animate');
+  const names = await regionNames(page);
+  // The first time it opens, the entry repairs itself once.
+  assert(names[5] === '<<SECTOR CORRUPTED>>', `no repair to watch: ${names}`);
+  await page.waitForTimeout(1900);
+  assert((await page.locator('#region-list .rname').nth(5).textContent()) === 'THE SOURCE', 'the Source did not repair itself');
+  assert(!(await page.locator('#region-list button').nth(5).isDisabled()), 'the Source is closed to a mainframe');
+  assert((await saved(page, 'netling.progress'))?.sourceSeen === true, 'the repair is not remembered');
+  assert(/sector integrity: restored/.test(await page.textContent('#log')), 'no log line for the repair');
+  await page.click('#regions-back');
+  const again = await regionNames(page);
+  assert(again[5] === 'THE SOURCE', `it repaired itself twice: ${again}`);
+  await page.click('#regions-back');
+  const rows = await dexRows(page);
+  assert(rows.some((r) => /^Plat/.test(r) && /mainframe/.test(r)), 'Plat is not in the dex');
+  assert(rows.some((r) => /^\?\?\?/.test(r) && /some never stop growing/.test(r)), 'no hint for the others');
+  assert(!rows.some((r) => r.includes('CORRUPTED')), 'records still corrupted after Root Access');
+  await page.keyboard.press('Escape');
+  const terms = await helpTerms(page);
+  assert(terms.includes('mainframe'), `the field manual has no rule: ${terms}`);
+});
+
+await scenario('mainframe: a Source run plays its own theme, and Source light can be worn', async ({ open }) => {
+  const s = awakeNetling({ stage: 'mainframe', form: 'whisper', teenForm: 'kernel', rootAccess: true });
+  startRun(s, 'source', Math.random);
+  const page = await open(MAINFRAME_URL, seed({ 'netling.save': s }));
+  await page.click('#pad-quit'); // a tap starts the audio
+  await page.click('#pad-quit'); // KEEP RUNNING
+  await page.waitForTimeout(1300);
+  const m = await musicStatus(page);
+  assert(m.playing && m.key === 'netrun:source', `Source theme not playing: ${JSON.stringify(m)}`);
+  await page.close();
+
+  const home = await open(MAINFRAME_URL, seed({ 'netling.progress': { streaks: {}, acts: {}, sourceExits: 3 } }));
+  await home.click('#open-archive');
+  await home.click('#tab-btn-wardrobe');
+  const light = home.locator('#wardrobe-list button.cosmetic', { hasText: 'Source light' });
+  assert(await light.isEnabled(), 'Source light not unlocked by three Source exits');
+  await light.click();
+  assert(/fx-sourcelight/.test(await home.getAttribute('.screen', 'class')), 'the effect is not on the screen');
+  assert(await home.locator('#wardrobe-list button.cosmetic', { hasText: 'First commit' }).isEnabled(), 'First commit not unlocked');
 });
 
 await browser.close();

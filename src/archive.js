@@ -15,12 +15,13 @@ export const DEX_HINTS = {
   daemon: 'never misses a cycle.',
   glitch: 'lives too close to the edge.',
   ghost: 'leaves no trace. misses nothing. plays everything.',
-  // Mainframe forms (drafts; the dex shows them only once the stage is switched on).
-  plat: 'some never stop growing.',
-  airgap: 'some never stop growing.',
-  init: 'some never stop growing.',
-  panic: 'some never stop growing.',
-  whisper: 'some never stop growing.',
+  // Mainframe forms: each names its line and nothing of the feat (shown only once the stage is switched on, and as
+  // corrupted data until Root Access).
+  plat: 'some never stop growing. one of them is loyal to the grid.',
+  airgap: 'some never stop growing. one of them cuts every cable.',
+  init: 'some never stop growing. one of them was running before you came.',
+  panic: 'some never stop growing. one of them never stops falling apart.',
+  whisper: 'some never stop growing. one of them you only ever hear.',
 };
 
 export const DEX_LORE = {
@@ -147,6 +148,20 @@ export const dexOrder = () => DEX_ORDER.filter((id) => CFG.mainframe || !isMainf
 // Until Root Access is earned, mainframe forms read as corrupted data, not as ??? with a hint: NL-0 has not opened
 // that far yet. rootEarned: rootUnlocked() for this device.
 export const CORRUPTED = { name: '<<RECORD CORRUPTED>>', text: 'read error at 0x00. the record will not open.' };
+
+// The field manual's row about the Mainframe stage (null while it is switched off): corrupted until Root Access is
+// earned on the device, then a hint, and the rule itself once a mainframe is in the dex. [term, text, note]
+export function mainframeManual(dex, { rootEarned = false, on = CFG.mainframe } = {}) {
+  if (!on) return null;
+  if (!rootEarned) return ['0x00', '\u2591\u2592\u2593 [record corrupted] \u2593\u2592\u2591', 'read error. the record will not open.'];
+  if (!dex.some(isMainframeForm)) return ['???', 'some never stop growing.', 'NL-0 might know where to look.'];
+  const days = CFG.mainframeBonusMin / (24 * 60);
+  return [
+    'mainframe',
+    `On its last ordinary day, a grown netling recompiles once more if it has come back from The Deep ${CFG.mainframeExits} times in this life, or ${CFG.mainframeCleanExits} times without losing to ICE, and NL-0 has given its line root. It gains ${days} more day${days === 1 ? '' : 's'} of life, a stronger netrun ability, and passes its trait on at level ${['', 'I', 'II', 'III'][CFG.mainframeTraitLevel] ?? CFG.mainframeTraitLevel} or higher.`,
+    'It keeps its line: the same perk, trait and keepsake.',
+  ];
+}
 
 export function dexEntries(dex, { rootEarned = false } = {}) {
   return dexOrder().map((id) => {

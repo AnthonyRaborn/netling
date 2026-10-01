@@ -637,8 +637,9 @@ function stepEvents(s, t, rng) {
 
 function startVisit(s, t, rng) {
   const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
-  // Mainframe forms visit only once the stage is switched on.
-  const form = pick(Object.keys(SPECIES).filter((f) => CFG.mainframe || !isMainframeForm(f)), rng);
+  // Mainframe forms visit only once the stage is switched on, and only a line NL-0 has given root: before that they are
+  // corrupted records, and a visitor would give one away.
+  const form = pick(Object.keys(SPECIES).filter((f) => !isMainframeForm(f) || (CFG.mainframe && rootEarnedIn(s))), rng);
   // Never the host's own colors, so the two stay easy to tell apart.
   const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
   let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));

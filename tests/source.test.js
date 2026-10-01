@@ -5,8 +5,12 @@ import { createScript, mainframeAt, mulberry32, tick, CFG, MIN } from '../src/si
 import { FRAGMENTS, ROOT_FRAGMENT_IDS, codexByRegion, liveFragments, nextFragment } from '../src/netrun/codex.js';
 import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/regions.js';
 import { MAINFRAME_ABILITIES, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
-import { dexEntries, CORRUPTED } from '../src/archive.js';
-import { unlockedIds } from '../src/cosmetics.js';
+import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
+import { COSMETICS, LEGACY, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
+import { PROPS } from '../src/accessories.js';
+import { cleanProgress } from '../src/sanitize.js';
+import { SPRITES } from '../src/sprites.js';
+import { musicSettings, MUSIC_IDS } from '../src/tracks.js';
 
 // Build step 4 (docs/SOURCE_PLAN.md): Root Access opens the stage, the Source and its fragments, and the mainframe
 // upgrades. All of it stays out of play while CFG.mainframe is off.
@@ -222,4 +226,75 @@ test('Whisper: ICE misses it more often than it misses a Ghost', () => {
 
 test('every mainframe form names its upgrade', () => {
   assert.deepEqual(Object.keys(MAINFRAME_ABILITIES).sort(), ['airgap', 'init', 'panic', 'plat', 'whisper']);
+});
+
+// --- build step 6: what the player sees ---
+
+const MAINFRAME_UNLOCKS = ['crest:rack', 'tint:readonly', 'music:firstcommit', 'effect:sourcelight'];
+const progressCtx = (over = {}) => ({ dex: [], codex: [], lineage: [], generation: 1, progress: {}, flowMin: 0, ...over });
+
+test('the Mainframe unlocks: hidden while switched off, each earned by its own goal once on', () => {
+  const all = progressCtx({ dex: ['plat'], codex: FRAGMENTS.map((f) => f.id), progress: { sourceExits: 3 } });
+  for (const key of MAINFRAME_UNLOCKS) {
+    const [slot, id] = key.split(':');
+    assert.ok(COSMETICS[slot].find((c) => c.id === id).mainframe, `${key} is marked`);
+    assert.ok(!shownCosmetics(slot, false).some((c) => c.id === id), `${key} is out of the wardrobe while off`);
+  }
+  assert.ok(!MAINFRAME_UNLOCKS.some((k) => unlockedIds(all).includes(k)), 'and never unlocks while off');
+  switchedOn(() => {
+    const ids = (over) => unlockedIds(progressCtx(over)).filter((k) => MAINFRAME_UNLOCKS.includes(k));
+    assert.deepEqual(ids({}), []);
+    assert.deepEqual(ids({ dex: ['init'] }), ['crest:rack'], 'any mainframe form in the dex');
+    assert.deepEqual(ids({ codex: ['source-1', 'source-2', 'source-3', 'source-4'] }), ['tint:readonly'], 'the Source codex');
+    assert.deepEqual(ids({ progress: { sourceExits: 1 } }), ['music:firstcommit'], 'back from the Source once');
+    assert.deepEqual(ids({ progress: { sourceExits: 3 } }).sort(), ['effect:sourcelight', 'music:firstcommit'], 'three times');
+    for (const slot of SLOTS) assert.equal(shownCosmetics(slot).length, COSMETICS[slot].length);
+  });
+});
+
+test('progress keeps the Source exits and the one-time repair of its name, cleaned', () => {
+  assert.equal(cleanProgress({ sourceExits: 4, sourceSeen: true }).sourceExits, 4);
+  assert.equal(cleanProgress({ sourceSeen: true }).sourceSeen, true);
+  assert.equal(cleanProgress({ sourceExits: -3, sourceSeen: 'yes' }).sourceExits, 0);
+  assert.ok(!('sourceSeen' in cleanProgress({ sourceSeen: 'yes' })));
+});
+
+test('a mainframe in the lineage counts as its adult form for Full house', () => {
+  const life = (form) => ({ cause: 'end of life cycle', form, realized: true });
+  assert.equal(LEGACY.adultsRaised(progressCtx({ lineage: [life('chrome'), life('plat'), life('panic')] })), 2, 'Plat is a Chrome; Panic a Glitch');
+});
+
+test('the field manual\'s row: nothing while off, corrupted until Root Access, a hint, then the rule', () => {
+  assert.equal(mainframeManual([], { on: false }), null);
+  assert.match(mainframeManual([], { on: true }).join(' '), /record corrupted/);
+  assert.doesNotMatch(mainframeManual([], { on: true }).join(' '), /mainframe|deep/i, 'says nothing it should not');
+  const hint = mainframeManual(['chrome'], { on: true, rootEarned: true });
+  assert.equal(hint[0], '???');
+  assert.doesNotMatch(hint.join(' '), /mainframe|deep/i);
+  const rule = mainframeManual(['airgap'], { on: true, rootEarned: true }).join(' ');
+  assert.match(rule, new RegExp(`The Deep ${CFG.mainframeExits} times`));
+  assert.match(rule, new RegExp(`${CFG.mainframeCleanExits} times without losing to ICE`));
+  assert.match(rule, /level II or higher/);
+});
+
+test('the Source\'s netrun theme is the Deep\'s opposite: slow, high, pings and a pad; First commit is a wardrobe track', () => {
+  const deep = musicSettings('netrun', 'awake', 'deep', REGIONS.deep.sound);
+  const source = musicSettings('netrun', 'awake', 'source', REGIONS.source.sound);
+  const pub = musicSettings('netrun', 'awake', 'public', REGIONS.public.sound);
+  assert.ok(source.transpose > 0 && deep.transpose < 0, 'up where the Deep goes down');
+  assert.ok(source.bpm < pub.bpm);
+  for (const part of ['bass', 'pulse', 'lead', 'drums']) assert.ok(source.mute.has(part), `${part} is silent`);
+  assert.ok(!source.mute.has('ping') && !source.mute.has('pad'));
+  assert.ok(deep.mute.has('pad') && pub.mute.has('pad') && pub.mute.has('ping'), 'the pad is the Source\'s alone');
+  assert.ok(MUSIC_IDS.includes('firstcommit'));
+});
+
+test('a mainframe\'s plush still fits in the plush\'s box', () => {
+  const plush = PROPS.find((p) => p.id === 'plush');
+  for (const form of ['plat', 'airgap', 'init', 'panic', 'whisper', 'chrome']) {
+    const pts = [];
+    plush.draw((x, y) => pts.push([x, y]), 0, 0, { sprite: SPRITES[`${form}A`], colors: { '#': '#ffffff', o: '#ff0000', '+': '#00ff00', x: '#333333' } });
+    assert.ok(pts.length > 20, form);
+    for (const [x, y] of pts) assert.ok(x >= 0 && y >= 0 && x < plush.size[0] && y < plush.size[1], `${form}: ${x},${y} outside the box`);
+  }
 });

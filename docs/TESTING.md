@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 420 tests in 40 files. The smoke test has 70 scenarios (Playwright 1.56.1).
+`npm test` runs 426 tests in 40 files. The smoke test has 73 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -68,8 +68,8 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `notify.test.js` | 7 | Notification support, permission, service-worker delivery and fallback, the app badge, and quiet failure |
 | `wake.test.js` | 5 | The screen wake lock against a fake API: taken once while wanted, released, re-taken after the browser drops it, a refusal waits, missing support is quiet |
 | `migrations.test.js` | 8 | The upgrade runner, error cases, the frozen version 1 and version 2 fixtures, transfer codes across versions |
-| `source.test.js` | 14 | The Source and the Mainframe stage's netrun side, behind the switch: Root Access opens the stage, corrupted dex entries until then, the Source's place and locks, fragments and regions out of play while off, every Source map connected, NL-0's line, cosmetics on the original 22, and each mainframe upgrade |
-| `mainframe.test.js` | 14 | The Mainframe stage behind its switch: forms and lines, the gate (age, feat, home, once), the switch off, feat first and age first, the extra day, the Deep exit counter, a mainframe keeping its line's ability, the level II trait, save cleaning, the lineage and dex, the stand-in art, visitors and chatter |
+| `source.test.js` | 20 | The Source and the Mainframe stage's netrun side, behind the switch: Root Access opens the stage, corrupted dex entries until then, the Source's place and locks, fragments and regions out of play while off, every Source map connected, NL-0's line, cosmetics on the original 22, each mainframe upgrade; and what the player sees: the four Mainframe unlocks (hidden while off), Full house counting a mainframe as its line, the field manual row (corrupted, hint, rule), the Source's netrun theme, and a mainframe's plush, and the cleaned Source progress |
+| `mainframe.test.js` | 14 | The Mainframe stage behind its switch: forms and lines, the gate (age, feat, home, once), the switch off, feat first and age first, the extra day, the Deep exit counter, a mainframe keeping its line's ability, the level II trait, save cleaning, the lineage and dex, its own art (18 wide, no taller than an adult, shaped like its line), visitors (only to a line with root) and chatter (its line's, plus one line of its own) |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 29 and 4, the Shell's 3 each, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
@@ -84,7 +84,7 @@ Run one file: `TZ=UTC node --test tests/sim.test.js`. Filter by name: add `--tes
 
 ## Browser smoke test
 
-`tools/smoke.mjs` starts a static server on a random port, launches Chromium through Playwright, and runs each scenario in a **fresh browser context** (so localStorage is empty). It aborts requests to Google Fonts (so it also exercises the no-font path). Any uncaught page error or `console.error` fails the scenario, except patterns a scenario explicitly allows. Failures print the first line of the error.
+`tools/smoke.mjs` starts a static server on a random port, launches Chromium through Playwright, and runs each scenario in a **fresh browser context** (so localStorage is empty). It aborts requests to Google Fonts (so it also exercises the no-font path). Any uncaught page error or `console.error` fails the scenario, except patterns a scenario explicitly allows. Failures print the first line of the error. `SMOKE_ONLY=text npm run smoke` runs only the scenarios whose name contains `text`, and prints more of each failure.
 
 Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNetling()` builds one, `padPress()` fakes controller buttons, `saved(page)` reads the stored netling. Scenarios:
 
@@ -113,6 +113,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
 - A posted contract in the bar and the region picker, taken along on a jack-in.
 - Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.
+- The Mainframe stage, switched on for the page with `?dev&mainframe` (it is off in the game until build step 7, see [SOURCE_PLAN.md](SOURCE_PLAN.md)): switched off there is no Source and no new form; on, the Source reads `<<SECTOR CORRUPTED>>` (glitching, closed to an adult) and the five forms `<<RECORD CORRUPTED>>`, with the field manual row corrupted; after Root Access a mainframe draws and animates, the dex shows `???` and hints, the Source opens and the field manual has the rule; a Source run plays its own theme, and Source light and First commit unlock and equip.
 
 ## Balance tools
 

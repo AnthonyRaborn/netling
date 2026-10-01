@@ -463,12 +463,14 @@ export function cleanProgress(raw) {
     gamesPlayed: int(p.gamesPlayed, 0, 0),
     cleanJackouts: int(p.cleanJackouts, 0, 0),
     deepExits: int(p.deepExits, 0, 0),
+    sourceExits: int(p.sourceExits, 0, 0),
     requestsMet: int(p.requestsMet, 0, 0),
     contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
+    ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)
   };
 }
 

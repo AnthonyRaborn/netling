@@ -317,6 +317,176 @@ export const SPRITES = {
     '.##.###..###.##.',
     '..#..#....#..#..',
   ],
+  // The Mainframe forms (docs/SOURCE_PLAN.md): each is its adult line grown wider (18 columns, at most 15 rows, the
+  // tallest an adult is), keeping the line's silhouette. Plat: a broader corp shell with a crest; Airgap: the Firewall
+  // split by a dark seam; Init: the Daemon with longer horns and a mark on its brow; Panic: more broken than a Glitch;
+  // Whisper: a Ghost whose hem trails off into faint wisps.
+  platA: [
+    '.......####.......',
+    '.....########.....',
+    '...#####++#####...',
+    '..##############..',
+    '..#oooooooooooo#..',
+    '.##o++oooooo++o##.',
+    '..##############..',
+    '...############...',
+    '....#+##++##+#....',
+    '.################.',
+    '##################',
+    '#.+############+.#',
+    '#.##############.#',
+    '...####....####...',
+    '..###........###..',
+  ],
+  platB: [
+    '.......####.......',
+    '.....########.....',
+    '...#####++#####...',
+    '..##############..',
+    '..#oooooooooooo#..',
+    '.##oo++oooo++oo##.',
+    '..##############..',
+    '...############...',
+    '....#+##++##+#....',
+    '.################.',
+    '##################',
+    '#.+############+.#',
+    '.#.############.#.',
+    '...####....####...',
+    '..###........###..',
+  ],
+  airgapA: [
+    '..#............#..',
+    '..##.########.##..',
+    '..##############..',
+    '.################.',
+    '.+##+##+xx+##+##+.',
+    '.#######xx#######.',
+    '.##oo###xx###oo##.',
+    '.##oo###xx###oo##.',
+    '.#######xx#######.',
+    '.+##+##+xx+##+##+.',
+    '..######xx######..',
+    '...#####xx#####...',
+    '....####xx####....',
+    '.....###xx###.....',
+    '.......#xx#.......',
+  ],
+  airgapB: [
+    '..................',
+    '..#............#..',
+    '..##.########.##..',
+    '.################.',
+    '.+##+##+xx+##+##+.',
+    '.#######xx#######.',
+    '.##oo###xx###oo##.',
+    '.##oo###xx###oo##.',
+    '.#######xx#######.',
+    '.#+##+##xx##+##+#.',
+    '..######xx######..',
+    '...#####xx#####...',
+    '....####xx####....',
+    '.....###xx###.....',
+    '.......#xx#.......',
+  ],
+  initA: [
+    '#................#',
+    '.#..............#.',
+    '.##............##.',
+    '..##..######..##..',
+    '...#####++#####...',
+    '..##############..',
+    '..###oo####oo###..',
+    '..####oo##oo####..',
+    '..##############..',
+    '...###+#++#+###...',
+    '....##########....',
+    '...############...',
+    '..####.####.####..',
+    '..###..####..###..',
+    '.###...#..#...###.',
+  ],
+  initB: [
+    '.#..............#.',
+    '#................#',
+    '.##............##.',
+    '..##..######..##..',
+    '...#####++#####...',
+    '..##############..',
+    '..###oo####oo###..',
+    '..####oo##oo####..',
+    '..##############..',
+    '...###+####+###...',
+    '....##########....',
+    '...############...',
+    '..####.####.####..',
+    '..###..####..###..',
+    '.###...#..#...###.',
+  ],
+  panicA: [
+    '.....#.....#....#.',
+    '......########....',
+    '....#########.....',
+    '..##########.#....',
+    '......##oo###oo#..',
+    '...#oo####oo##....',
+    '.###########......',
+    '.....##########...',
+    '..##+.++##+##.....',
+    '....#########..#..',
+    '......#.#.#.#.....',
+    '....#...#...#.#...',
+    '.#.........#....#.',
+  ],
+  panicB: [
+    '.......#.....#....',
+    '....########......',
+    '.....#########....',
+    '..#.##########....',
+    '...#oo####oo##....',
+    '......##oo###oo#..',
+    '....###########...',
+    '.##########.......',
+    '.....##+.++##+##..',
+    '.#...#########....',
+    '....#.#.#.#.......',
+    '..#...#...#...#...',
+    '.....#.......#..#.',
+  ],
+  whisperA: [
+    '......######......',
+    '....##########....',
+    '...############...',
+    '..##############..',
+    '.################.',
+    '.####oo####oo####.',
+    '.####oo####oo####.',
+    '.################.',
+    '.######+##+######.',
+    '.################.',
+    '.################.',
+    '.################.',
+    '.#.####.##.####.#.',
+    '.x..##..x..x.##..x',
+    'x...x...x..x...x..',
+  ],
+  whisperB: [
+    '......######......',
+    '....##########....',
+    '...############...',
+    '..##############..',
+    '.################.',
+    '.####oo####oo####.',
+    '.####oo####oo####.',
+    '.################.',
+    '.#######++#######.',
+    '.################.',
+    '.################.',
+    '.################.',
+    '.##.###.##.###.##.',
+    'x..x.##..xx..##.x.',
+    '.x...x..x..x..x..x',
+  ],
   cache: ['###.', '#..#', '#oo#', '#..#', '####'],
   virus: ['.#.#.', '#####', '#o#o#', '#####', '.#.#.'],
   eye: ['..###..', '.#ooo#.', '#oo#oo#', '.#ooo#.', '..###..'],
@@ -406,6 +576,15 @@ export const ANCHOR_ROWS = {
   daemon: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 9 } },
   glitch: { a: { headTop: 1, eyeRow: 4, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
   ghost: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 7, neckRow: 8 } },
+  plat: { a: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 8, shine: true }, sleep: { headTop: 2, eyeRow: 5, mouthRow: 6, neckRow: 8 } },
+  airgap: {
+    a: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 10 },
+    b: { headTop: 3, eyeRow: 6, mouthRow: 8, neckRow: 10 },
+    sleep: { headTop: 2, eyeRow: 7, mouthRow: 8, neckRow: 10 },
+  },
+  init: { a: { headTop: 3, eyeRow: 6, mouthRow: 9, neckRow: 10 }, sleep: { headTop: 3, eyeRow: 7, mouthRow: 9, neckRow: 10 } },
+  panic: { a: { headTop: 1, eyeRow: 4, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
+  whisper: { a: { headTop: 1, eyeRow: 5, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 1, eyeRow: 6, mouthRow: 8, neckRow: 9 } },
 };
 export const anchorRowsFor = (form, pose) => ANCHOR_ROWS[form]?.[pose] ?? ANCHOR_ROWS[form]?.a ?? null;
 
@@ -453,20 +632,30 @@ const centre = (cells, width) => {
 // Where each X goes when the eye groups do not give two clean, symmetric centres (the two eyes of Stub are not alike).
 const DEAD_CENTRES = { stub: [[4, 6], [9, 6]] };
 
+// Chrome's line wears a visor (rows, first and last column, and where the X's go when dead); Glitch's line has double-image
+// eyes (the real eyes' row, and the X's).
+const VISORS = { chrome: { rows: [4, 5], cols: [3, 12], xs: [5, 10] }, plat: { rows: [4, 5], cols: [3, 14], xs: [5, 12] } };
+const DOUBLE_EYES = { glitch: { row: 5, xs: [4, 10] }, panic: { row: 5, xs: [5, 11] } };
+
 function generatedPose(form, pose) {
   const src = SPRITES[`${form}A`];
   const g = src.map((r) => [...r]);
   const fill = form === 'shell' ? 'x' : '#';
   const groups = eyeGroups(src, ANCHOR_ROWS[form].a.eyeRow);
-  if (form === 'chrome') {
+  const visor = VISORS[form];
+  const doubled = DOUBLE_EYES[form];
+  if (visor) {
     // The visor is one wide band. Dead, the band goes dark and the X's sit on the bare face like every other form's; asleep,
     // it dims to a single line.
-    for (let y = 4; y <= 5; y++) for (let x = 3; x <= 12; x++) if (g[y][x] === 'o' || g[y][x] === '+') g[y][x] = pose === 'dead' || y === 4 ? '#' : 'o';
-    if (pose === 'dead') for (const cx of [5, 10]) stampX(g, cx, 5, 'o');
-  } else if (form === 'glitch') {
-    // Two eyes on row 5, each with a shifted double image on row 4.
-    for (const cells of groups) for (const [x, y] of cells) if (pose === 'dead' || y === 4) g[y][x] = fill;
-    if (pose === 'dead') for (const cx of [4, 10]) stampX(g, cx, 5, 'o');
+    const [top, bottom] = visor.rows;
+    for (let y = top; y <= bottom; y++) {
+      for (let x = visor.cols[0]; x <= visor.cols[1]; x++) if (g[y][x] === 'o' || g[y][x] === '+') g[y][x] = pose === 'dead' || y === top ? '#' : 'o';
+    }
+    if (pose === 'dead') for (const cx of visor.xs) stampX(g, cx, bottom, 'o');
+  } else if (doubled) {
+    // Each eye has a shifted double image on the row above it.
+    for (const cells of groups) for (const [x, y] of cells) if (pose === 'dead' || y < doubled.row) g[y][x] = fill;
+    if (pose === 'dead') for (const cx of doubled.xs) stampX(g, cx, doubled.row, 'o');
   } else {
     for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
     if (pose === 'dead') {
@@ -487,12 +676,4 @@ for (const form of Object.keys(ANCHOR_ROWS)) {
   if (form === 'bitling') continue;
   SPRITES[`${form}Dead`] ??= generatedPose(form, 'dead');
   SPRITES[`${form}Sleep`] ??= generatedPose(form, 'sleep');
-}
-
-// Stand-in art for the Mainframe forms (docs/SOURCE_PLAN.md): each borrows its line's adult sprites and anchors until
-// its own are drawn. The stage is switched off (CFG.mainframe), so players never see these.
-export const STAND_IN = { plat: 'chrome', airgap: 'firewall', init: 'daemon', panic: 'glitch', whisper: 'ghost' };
-for (const [form, line] of Object.entries(STAND_IN)) {
-  for (const pose of ['A', 'B', 'Dead', 'Sleep']) if (SPRITES[`${line}${pose}`]) SPRITES[`${form}${pose}`] ??= SPRITES[`${line}${pose}`];
-  ANCHOR_ROWS[form] ??= ANCHOR_ROWS[line];
 }
