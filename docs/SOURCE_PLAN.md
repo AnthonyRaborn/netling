@@ -304,7 +304,23 @@ Exit reached, careful play (scratch prototype, 2000 to 4000 runs a cell, `src/` 
 
 This changes the current game, not only the Mainframe, so it is its own change: the rule in `run.js`, a test, the field manual and ability text (`FORM_ABILITIES`), NETRUN.md, regenerated baselines with a `balance-diff.mjs` report, and a re-run of this gate test. The bots bank at a fixed Integrity, which exaggerates relay exits; real players may push on more, so the true gap is likely smaller, though real.
 
-**Open decision:** which feat to use. The measured front-runner is "three Deep exits, or two clean ones" (evens out the forms). Three exits alone is simpler to explain. A flow feat would need a way around the Glitch problem first, for example counting flow at any point in the life up to adulthood only, or letting a Glitch line skip it.
+**Gate test with the corp-relay fix** (`CODEX=deep`, 1000 lives, `chromeRelayRepair: 20` in a scratch prototype):
+
+| Archetype | Two exits | Three exits | Three exits, or two clean | One clean exit |
+|---|---|---|---|---|
+| attentive | 79 to 84% | 50 to 55% | 55 to 58% | 63 to 61% |
+| casual | 59 to 62% | 24 to 25% | 26 to 27% | 35 to 34% |
+| steer-chrome | 64 to 85% | **28 to 54%** | 37 to 57% | 70 to 62% |
+| steer-firewall | 87% | 58% | 59% | 61% |
+| steer-daemon | 85% | 58% | 60% | 64% |
+| steer-glitch | 72% | 39% | 57% | 90% |
+| steer-mainframe | 81 to 86% | 53 to 58% | 56 to 60% | 63 to 61% |
+
+Forms without the fix do not move. Chrome's clean exits drop a little: with relays mending it, it pushes on past relays it used to bank at, and meets more ICE. With the fix, Glitch becomes the outlier on three exits (39%), so "three exits, or two clean" stays the most even: every deliberate archetype lands between 57 and 65%, casual at 27%.
+
+Ordinary lives (no codex preset, against `tools/baseline/lives.json`): no adult form share moves, full-life rates move by at most 0.5 points (casual, up), and casual disconnects fall from 1.14 to 1.09 a life.
+
+**Open decision:** which feat to use. The measured front-runner is "three Deep exits, or two clean ones" (evens out the forms, with or without the Chrome fix). Three exits alone is simpler to explain. A flow feat would need a way around the Glitch problem first, for example counting flow at any point in the life up to adulthood only, or letting a Glitch line skip it.
 
 ## Everything that assumes three stages
 
