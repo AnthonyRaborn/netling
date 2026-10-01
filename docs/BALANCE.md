@@ -51,7 +51,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 
 - **Passive stability gain**: lowering it was raised and never decided.
 - **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): parked. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
-- **A fourth life stage**: planned, not built. The plan is in [SOURCE_PLAN.md](SOURCE_PLAN.md): an elder stage reached by age plus clearing The Deep, one elder form per adult form, one extra day of life, and a last region, the Source.
+- **A fourth life stage**: planned, not built. The plan is in [SOURCE_PLAN.md](SOURCE_PLAN.md): a Mainframe stage reached by age plus clearing The Deep, one Mainframe form per adult form, one extra day of life, and a last region, the Source.
 
 ## Working on balance
 
