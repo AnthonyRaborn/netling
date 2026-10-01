@@ -129,6 +129,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0.003,
+            "leftMedianHours": 44
+          },
+          "two Deep exits and flow once": {
+            "met": 0.003,
+            "leftMedianHours": 48
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.002,
+            "leftMedianHours": 48
           }
         }
       },
@@ -266,6 +278,18 @@
           "two clean Deep exits": {
             "met": 0.001,
             "leftMedianHours": 48
+          },
+          "three Deep exits or two clean": {
+            "met": 0.002,
+            "leftMedianHours": 48
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -400,6 +424,18 @@
             "leftMedianHours": null
           },
           "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
             "met": 0,
             "leftMedianHours": null
           }
@@ -537,6 +573,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -666,6 +714,18 @@
             "leftMedianHours": null
           },
           "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
             "met": 0,
             "leftMedianHours": null
           }
@@ -800,6 +860,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -932,6 +1004,18 @@
             "leftMedianHours": null
           },
           "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
             "met": 0,
             "leftMedianHours": null
           }
@@ -1071,6 +1155,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -1205,6 +1301,18 @@
             "leftMedianHours": null
           },
           "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
             "met": 0,
             "leftMedianHours": null
           }
@@ -1343,6 +1451,18 @@
           "two clean Deep exits": {
             "met": 0.002,
             "leftMedianHours": 48
+          },
+          "three Deep exits or two clean": {
+            "met": 0.004,
+            "leftMedianHours": 45.8
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -1473,6 +1593,18 @@
           },
           "two clean Deep exits": {
             "met": 0.003,
+            "leftMedianHours": 36.8
+          },
+          "three Deep exits or two clean": {
+            "met": 0.003,
+            "leftMedianHours": 36.8
+          },
+          "two Deep exits and flow once": {
+            "met": 0.003,
+            "leftMedianHours": 36.8
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.001,
             "leftMedianHours": 36.8
           }
         }
@@ -1606,6 +1738,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0.001,
+            "leftMedianHours": 48
+          },
+          "two Deep exits and flow once": {
+            "met": 0.002,
+            "leftMedianHours": 48
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.002,
+            "leftMedianHours": 48
           }
         }
       },
@@ -1742,6 +1886,18 @@
           "two clean Deep exits": {
             "met": 0.003,
             "leftMedianHours": 45.1
+          },
+          "three Deep exits or two clean": {
+            "met": 0.003,
+            "leftMedianHours": 45.1
+          },
+          "two Deep exits and flow once": {
+            "met": 0.005,
+            "leftMedianHours": 48
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.003,
+            "leftMedianHours": 48
           }
         }
       },
@@ -1876,6 +2032,18 @@
           "two clean Deep exits": {
             "met": 0.006,
             "leftMedianHours": 47
+          },
+          "three Deep exits or two clean": {
+            "met": 0.006,
+            "leftMedianHours": 47
+          },
+          "two Deep exits and flow once": {
+            "met": 0.002,
+            "leftMedianHours": 48
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
           }
         }
       },
@@ -2012,6 +2180,18 @@
           "two clean Deep exits": {
             "met": 0.002,
             "leftMedianHours": 48
+          },
+          "three Deep exits or two clean": {
+            "met": 0.006,
+            "leftMedianHours": 41.8
+          },
+          "two Deep exits and flow once": {
+            "met": 0.012,
+            "leftMedianHours": 45.1
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.009,
+            "leftMedianHours": 44.8
           }
         }
       },
@@ -2149,6 +2329,18 @@
           "two clean Deep exits": {
             "met": 0,
             "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0.001,
+            "leftMedianHours": 42.9
+          },
+          "two Deep exits and flow once": {
+            "met": 0.004,
+            "leftMedianHours": 48
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0.001,
+            "leftMedianHours": 35.9
           }
         }
       },

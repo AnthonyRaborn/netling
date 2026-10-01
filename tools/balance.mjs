@@ -8,7 +8,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
@@ -123,6 +123,7 @@ export function checkIn(s, p, now, rng, ctx) {
     const region = frontier && !s.cleared.includes(frontier) ? frontier : open[Math.floor(rng() * open.length)];
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
+      const flowAtJackIn = inFlow(s);
       const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep }, region, rng, ctx.codex);
       ctx.runs = (ctx.runs ?? 0) + 1;
       ctx.regionRuns[region] = (ctx.regionRuns[region] ?? 0) + 1;
@@ -142,7 +143,7 @@ export function checkIn(s, p, now, rng, ctx) {
       }
       // Harder feats the gate could ask for instead (FEATS), by the age each was first met.
       if (region === 'deep' && run.result === 'jacked' && run.map.nodes.find((n) => n.id === run.pos)?.type === 'exit') {
-        ctx.deepExits.push({ age: s.ageMin, clean: (run.tally?.iceLost ?? 0) === 0, faults: s.careMistakes });
+        ctx.deepExits.push({ age: s.ageMin, clean: (run.tally?.iceLost ?? 0) === 0, faults: s.careMistakes, flow: flowAtJackIn });
       }
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
       s.codexInbox = [];
@@ -194,7 +195,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
-  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [] };
+  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
   const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -225,6 +226,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     }
     prevFlags = { ...s.flagged };
     if (gateAt === null && mainframeDue(s)) gateAt = s.ageMin;
+    if (ctx.firstFlowAt === null && inFlow(s)) ctx.firstFlowAt = s.ageMin;
     if (s.event && !prevEvent) {
       events++;
       if (s.event.type === 'trace') traces++;
@@ -298,7 +300,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
       at: gateAt, from: mainframeAt(s), end: mainframeEnd(s), deepClearAt: ctx.deepClearAt, deepRuns: ctx.deepRuns, deepDisconnects: ctx.deepDisconnects,
       // The age each alternative feat would have opened the gate (null: never, or it died first).
       feats: Object.fromEntries(Object.entries(FEATS).map(([k, feat]) => {
-        const age = feat(ctx.deepExits);
+        const age = feat(ctx.deepExits, ctx);
         const opens = age === null ? null : Math.max(age, mainframeAt(s));
         return [k, opens !== null && opens <= s.ageMin ? opens : null];
       })),
@@ -307,7 +309,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
 }
 
 // Alternative feats for the Mainframe gate, measured beside the planned one (one Deep exit). Each takes this
-// life's Deep exits ({ age, clean, faults }) and returns the age the feat was met, or null.
+// life's Deep exits ({ age, clean, faults, flow: in flow at jack-in }) and the life ({ firstFlowAt }), and
+// returns the age the feat was met, or null.
 const nthExit = (n, ok = () => true) => (exits) => exits.filter(ok)[n - 1]?.age ?? null;
 export const FEATS = {
   'two Deep exits': nthExit(2),
@@ -315,6 +318,21 @@ export const FEATS = {
   'a clean Deep exit': nthExit(1, (e) => e.clean),
   'a Deep exit with at most 2 faults': nthExit(1, (e) => e.faults <= 2),
   'two clean Deep exits': nthExit(2, (e) => e.clean),
+  // Whichever comes first: three exits, or two clean ones.
+  'three Deep exits or two clean': (exits) => {
+    const ages = [nthExit(3)(exits), nthExit(2, (e) => e.clean)(exits)].filter((x) => x !== null);
+    return ages.length ? Math.min(...ages) : null;
+  },
+  // Two exits, and it was in flow at some point this life (by then).
+  'two Deep exits and flow once': (exits, life) => {
+    const second = nthExit(2)(exits);
+    return second === null || life.firstFlowAt === null ? null : Math.max(second, life.firstFlowAt);
+  },
+  // Two exits, at least one of them from a run it jacked into while in flow.
+  'two Deep exits, one jacked into in flow': (exits) => {
+    const k = exits.findIndex((e, i) => i >= 1 && exits.slice(0, i + 1).some((x) => x.flow));
+    return k < 0 ? null : exits[k].age;
+  },
 };
 
 // The Mainframe gate across lives. Ages and time left are in hours; null where no life met it.

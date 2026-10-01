@@ -268,7 +268,25 @@ What the table says:
 
 The bots run at every check-in where they are healthy, so these are upper bounds: real players run less often. Casual numbers are the ones to watch, since a real casual player runs much less than the casual bot.
 
-**Open decision:** which feat to use. Candidates: three Deep exits (separates effort, mild form lean), two Deep exits (gentler: 59% casual), or a mix such as "three Deep exits, or two clean ones". The probe can measure any of them; add it to `FEATS`.
+**Combined and flow-based feats** (measured next; `CODEX=deep`, 1000 lives; median hours left as a mainframe was 44 to 48 for every variant). Flow is the glow after 3 hours awake in good shape, which needs Heat under 60 (see [ATTENTION.md](ATTENTION.md)).
+
+| Archetype | Three exits | Three exits, or two clean | Two exits and flow once this life | Two exits, one jacked into in flow |
+|---|---|---|---|---|
+| attentive | 50% | 55% | 79% | 49% |
+| casual | 24% | 26% | 5% | 0% |
+| worker | 0% | 0% | 0% | 0% |
+| daredevil | 44% | 56% | 15% | 1% |
+| steer-chrome | 28% | 37% | 64% | 37% |
+| steer-firewall | 58% | 59% | 87% | 54% |
+| steer-daemon | 58% | 60% | 85% | 53% |
+| steer-glitch | 39% | 57% | 5% | 0% |
+| steer-stub | 51% | 58% | 82% | 50% |
+| steer-mainframe | 53% | 56% | 81% | 52% |
+
+- **"Three exits, or two clean"** evens out the forms: the clean route lifts Glitch (39% to 57%) and Chrome (28% to 37%), and the others barely move. Every deliberate player lands between 37 and 60%, casual at 26%.
+- **Flow-based feats shut out the Glitch line.** The way to Glitch is running hot (Heat 85 and over leans it chaotic), and flow needs Heat under 60, so the Glitch-steering and daredevil bots almost never reach flow (0.03 and 0.1 hours a life, against 15 to 20 for careful players). A real player could cool an adult Glitch down to reach flow; the bot does not try. Flow also mostly shuts out casual players (5%), which fits "earned", but the form lean is the same problem a fault limit had with the Stub line. "Flow once this life" adds almost nothing over two exits for careful players; "jacked into in flow" is about as hard as three exits for them.
+
+**Open decision:** which feat to use. The measured front-runner is "three Deep exits, or two clean ones" (evens out the forms). Three exits alone is simpler to explain. A flow feat would need a way around the Glitch problem first, for example counting flow at any point in the life up to adulthood only, or letting a Glitch line skip it.
 
 ## Everything that assumes three stages
 
