@@ -28,6 +28,9 @@ Working names are marked *(working)*. Stage ids, form ids, region ids and fragme
 | How many forms | One for each adult form: five new forms, each keeping its line's identity and ability. |
 | Life length | The stage adds one day of life, because the feat is hard to reach. |
 | Root Access | It stays tied to the original 22 fragments. The new fragments give their own unlock. |
+| Lineage reward | An elder passes its trait at level II or higher (see [Lineage](#lineage)). |
+| The Source while locked | Not `???`: a corrupted, foreboding entry (see [Access](#access)). |
+| Fragment wording | The drafts stand, with NL-0's `deep-5` line ending "i will not go again." |
 | A new region | The Source. It is the last region, below The Deep. It needs the new stage, and it is somewhat harder than The Deep. |
 | New codex entries | Several for the Source, and one new entry in The Deep that hints at the Source and at NL-0 not wanting to go there. |
 
@@ -35,9 +38,8 @@ Working names are marked *(working)*. Stage ids, form ids, region ids and fragme
 
 1. **The name of the stage and its id.** The working id is `elder` *(working)*. Other ideas: Legacy (fits "legacy code", but `LEGACY` and `LEGACY_LIFE` already mean other things in the code), Mainline, Sysop.
 2. **The five form names and ids** (table below). They are all *(working)*.
-3. **The age half of the gate.** The proposal is the netling's last ordinary day (`lifespan - 24h`: 96 hours for a 5-day life). The balance run below may move it.
-4. **The lore text.** The fragment drafts below are drafts.
-5. **Whether an elder gives its lineage something extra.** The proposal is one trait level (see [Lineage](#lineage)). It is optional and needs measuring.
+3. **When the age half fires.** Two readings: (a) at the start of the last ordinary day (96 hours in a 5-day life; up to two days as an elder, ending at 144 hours), or (b) at the moment it would die of old age, it recompiles instead (at 120 hours; exactly one day as an elder). Either way it must be measured. Legacy 7-day lives do not need their own testing.
+4. **Whether the stage names change too.** Under consideration: rename the displayed stages to a release cycle (Bitling, then Alpha, Beta and Prod or Gold), or keep teen and adult and name only the new stage (Frame, Mainframe or Interpreter). Stored stage ids (`teen`, `adult`) stay either way; only the displayed words change.
 
 ## The stage
 
@@ -73,7 +75,7 @@ At the recompile, the netling gains a day: the life ends at `s.life.lifespan + C
 ### Lineage
 
 - `fragmentOf` passes the line's trait and keepsake (via `lineOf`), so the next generation gets exactly what an adult of that line would give.
-- **Proposal (optional):** an elder's fragment counts as one streak step, so its trait passes one level higher even without a same-form parent. The existing caps still apply. This rewards the feat across generations. It needs a `trait-balance.mjs` run before it is kept, because Persistent at a higher level shifts adult forms (BALANCE.md).
+- **Decided:** an elder passes its trait at level II or higher: `max(the streak level, 2)`. A streak that would already give level III still gives III. The per-trait caps (`TRAIT_CFG.cap`) still apply, so Persistent and Untraceable stay at 1.25. Run `tools/trait-balance.mjs` with a level II parent per trait to confirm nothing moves past the BALANCE.md limits (about 4 points on casual full lives, 8 on any adult form's share).
 - A streak counts lines, not bodies: a Firewall parent followed by a Bastion child is a streak.
 - The lineage record gains `elder: true`. The Archive shows the elder form, with the line in brackets.
 
@@ -102,7 +104,9 @@ The Source is where the net was written from. It holds the original KERNEL code 
 - `REGION_ORDER` becomes `public, bazaar, corp, ruins, deep, source`, and `STAGE_ORDER` becomes `baby, teen, adult, elder`.
 - `minStage: 'elder'`, previous region `deep` (already required by the feat), and `requires: 'deep-5'`, the new Deep fragment (the same pattern as The Deep needing `ruins-4`).
 - `regionLock` needs its article fix for the new stage ("needs an elder netling").
-- Until it is open, it shows as `???` in the picker, like The Deep, and the exit message of The Deep never names it.
+- **While locked, it does not show as `???`** (The Deep keeps `???`). It shows as a damaged entry, for example `<<SECTOR CORRUpTED>>`, with a blurb that reads as a warning, not a hint (draft: `do not open. do not open. do not`). It cannot be selected. Any motion in the label (characters swapping, a slow tear) toggles no faster than `FLASH_TOGGLE_MS` (CLAUDE.md rule 7) and is static under reduced motion.
+- When it opens, the entry repairs itself to `Source` once, with a log line (draft: `> sector integrity: restored. something down there noticed.`).
+- The exit message of The Deep never names it.
 
 ### Proposed numbers (starting point for measurement)
 
@@ -138,7 +142,7 @@ A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Ano
 
 | Id | Region | Title | Text (draft) |
 |---|---|---|---|
-| `deep-5` | The Deep | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i do not go now. please don't ask me to. |
+| `deep-5` | The Deep | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again. |
 | `source-1` | The Source | header | SOURCE. read-only. last write: before v1.0. |
 | `source-2` | The Source | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
 | `source-3` | The Source | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
