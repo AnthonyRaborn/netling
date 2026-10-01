@@ -57,7 +57,7 @@ Built by `createScript()` in `sim.js`. Fields:
 | `generation` | int | 1-based, shown as `v<generation>.0` |
 | `life` | `{ teenAt, adultAt, lifespan }` | Minutes, fixed at compile from `CFG`. Missing (a save from before the 5-day life), out of order or over 7 days: the 7-day `LEGACY_LIFE` |
 | `newForms` | string[] | Adult forms the player had never raised at compile (tie-break weights). Unknown ids dropped |
-| `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached. `stage` may be `mainframe` (the planned stage, switched off by `CFG.mainframe`); `settle()` gives a mainframe in an adult body its line's mainframe form, and an adult in a mainframe body its line |
+| `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached. `stage` may be `mainframe` (the stage after adult); `settle()` gives a mainframe in an adult body its line's mainframe form, and an adult in a mainframe body its line |
 | `evolvedAt`, `bornAt`, `lastTick`, `diedAt` | ms epoch | `lastTick` is clamped to "now" when loading |
 | `ageMin` | int | Simulated minutes. Excludes hibernation |
 | `stats` | `{ charge, sync, integrity, heat }` | 0..100 floats |

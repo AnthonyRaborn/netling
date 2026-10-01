@@ -67,7 +67,7 @@ The tutorial run neither starts nor resets the cooldown (`noCooldown`).
 
 ## Regions
 
-`REGION_ORDER` is public, bazaar, corp, ruins, deep: the way down. `tutorial` is defined too but is not in the picker.
+`REGION_ORDER` is public, bazaar, corp, ruins, deep, source: the way down. `tutorial` is defined too but is not in the picker.
 
 ### The way down
 
@@ -82,10 +82,13 @@ Netlings from before the order existed (no `cleared` field) are given every regi
 | Corp Grid | teen+, Bazaar cleared | 7 | 3 / 6 / 1 / 4 / 0 / 1 | 35 | 1 | triangle, x1.25 |
 | Old Web Ruins | adult, Corp Grid cleared | 7 | 3 / 5 / 1 / 0 / 0 / 4 | 48 | 2 | sine, x0.75 |
 | The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 10 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
+| The Source | mainframe, Deep cleared, and codex fragment `deep-5` | 13 | 2 / 11 / 1 / 0 / 0 / 3 | 52 | 3 | triangle, x0.4 |
 
 ICE damage was tuned in balance pass 2 so careful players disconnect more often at each step down: about 4% in the Public Net, 5% in the Bazaar, 7% in the Corp Grid (whose checkpoints add their own damage), 8% in the Ruins and 35% in The Deep, which stays a wall (`tools/baseline/netruns.json`). The Deep is hard by distance (10 middle layers, from 8 in pass 2) rather than by ICE damage, because more ICE damage pulls the adult abilities apart again; with their abilities, careful adults disconnect 14 to 19% there against 1 to 3% in the Ruins.
 
-While locked, The Deep shows as `???` in the picker, and the exit message of the Ruins never names it. The picker also shows how many new codex fragments this netling has recovered against the per-life cap. Each region has its own palette and its own netrun sound voice. The player's chosen sound pack applies only at home.
+The Source is somewhat harder than The Deep, again by distance (13 middle layers) and more ICE (weight 11). Careful mainframes disconnect 24 to 28% of the time there (10 to 14% in The Deep), and reach its exit 38 to 44% of the time. Without an ability it would be 52%. It has no markets or checkpoints. Jacking into it with Root Access logs `> NL-0: i'll wait up here.`
+
+While locked, The Deep shows as `???` in the picker, and the exit message of the Ruins never names it. The Source does not: while locked it shows as `<<SECTOR CORRUPTED>>` (`lockedName`), its name slipping sideways once every 3.2 seconds, over the warning "do not open. do not open. do not" (`lockedBlurb`). The first time it opens on a device, the entry repairs itself to THE SOURCE with the log line `> sector integrity: restored. something down there noticed.` (`progress.sourceSeen`). The picker also shows how many new codex fragments this netling has recovered against the per-life cap. Each region has its own palette and its own netrun sound voice. The player's chosen sound pack applies only at home.
 
 Loot tables (weights), used for caches, ICE wins, exit bonuses and anomaly loot:
 
@@ -96,6 +99,7 @@ Loot tables (weights), used for caches, ICE wins, exit bonuses and anomaly loot:
 | Darknet Bazaar | blackice 4, memory 2, booster 2, coolant 1, segfault 1 |
 | Old Web Ruins | memory 4, repair 3, coolant 2, antivirus 2, booster 1, segfault 1 |
 | The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1, segfault 1 |
+| The Source | memory 3, overclock 2, booster 2, repair 2, antivirus 2, coolant 2, blackice 1, voucher 1, segfault 1 |
 
 Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1, segfault 1`). Items cost corpo scrip (below) plus Charge: 10 Charge in the Bazaar, 12 elsewhere. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
 
@@ -175,7 +179,7 @@ All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` 
 
 ## Adult form abilities
 
-`FORM_ABILITIES`, applied automatically to adult netlings only:
+`FORM_ABILITIES`, applied automatically to adult and mainframe netlings (a mainframe uses its line's, through `lineOf`):
 
 | Form | Ability |
 |---|---|
@@ -188,6 +192,20 @@ All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` 
 The second effects (insurance, upkeep, the later phases, slipping past ICE) were added in balance pass 2 so no form is far ahead where it matters most. Careful play, 4000 runs each, disconnect rates in The Deep: Firewall 14%, Ghost 14%, Glitch 17%, Daemon 18%, Chrome 20%, against 35% with no ability.
 
 Corp relays came later (the Mainframe gate test, [SOURCE_PLAN.md](SOURCE_PLAN.md#chrome-lags-on-exits-fixed-corp-relays)). Chrome had normal disconnect rates but reached far fewer exits: with nothing to heal it or cut damage, careful play banked at relays early (exits reached: 76% in the Corp Grid and Ruins against 83 to 93% for the other forms, and 31% in The Deep against 48 to 58%). The relay repair brings it to 86 to 89% and 44%, and halves the Integrity it spends outside The Deep. It pushes on further, so its Deep disconnect rate rose from 18% to 20%.
+
+### Mainframe upgrades
+
+A mainframe keeps its line's ability and adds an upgrade (`upgraded(pet)` in `run.js`; the text is `MAINFRAME_ABILITIES`). Tuned in the build's step 5 so the five sit close together in the Source:
+
+| Form | Upgrade |
+|---|---|
+| Plat (Chrome) | Relays repair 40 instead of 20 (`platRelayRepair`); corp insurance pays out twice a run (`platInsurance`, `run.insuredTimes`) |
+| Airgap (Firewall) | The first ICE fight it loses each run deals 30% of its halved damage (`airgapSoftLosses` 1, `airgapSoftMult` 0.3, `run.softLosses`) |
+| Init (Daemon) | Sees node types three steps ahead (`initLookahead`); +8 Integrity with every move (`initMoveRepair`) |
+| Panic (Glitch) | Slips through the first two ICE of each run for certain (`panicFreePhases`, `run.freePhases`), each later one 35% as before |
+| Whisper (Ghost) | 50% of ICE never notice it (`whisperSlipChance`, against the Ghost's 45%) |
+
+Careful play, 4000 runs each, disconnect rates: The Deep 11 / 10 / 14 / 13 / 12% (Plat, Airgap, Init, Panic, Whisper), the Source 26 / 26 / 28 / 28 / 24%. An earlier Airgap upgrade (no Heat from a lost fight) was dropped: Heat drives throttling damage, so it was worth more than it looked and took Airgap's Deep disconnects under the 8% floor.
 
 ## Anomalies
 
@@ -205,7 +223,7 @@ After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Char
 
 ## Codex fragments
 
-22 fragments in `FRAGMENTS`, in story order per region. The order of the array is the drop order: `nextFragment(region, known)` returns the first fragment of that region not yet known, so the story reads in sequence and never repeats.
+27 fragments in `FRAGMENTS`, in story order per region. The order of the array is the drop order: `nextFragment(region, known)` returns the first fragment of that region not yet known, so the story reads in sequence and never repeats.
 
 | Region | Count | Ids |
 |---|---|---|
@@ -213,7 +231,8 @@ After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Char
 | Corp Grid | 5 | corp-1 to corp-5 |
 | Darknet Bazaar | 5 | bazaar-1, 2, 3, 5, 4 (5 sits before 4 on purpose: the graffiti stays the region's last word) |
 | Old Web Ruins | 4 | ruins-1 to ruins-4 |
-| The Deep | 4 | deep-1 to deep-4 |
+| The Deep | 5 | deep-1 to deep-5 (`deep-5` is NL-0's, and opens the Source) |
+| The Source | 4 | source-1 to source-4 |
 
 Fragment ids are permanent: saved codexes store them, and `sanitize.js` drops unknown ids. Never rename or remove a shipped id.
 
@@ -221,9 +240,9 @@ Fragment sources: cache (15%), exit (60%, tutorial 100%), Echo anomaly (50%). `r
 
 ### Per-life cap
 
-A netling's memory holds at most 8 new fragments (`RUN_CFG.codexPerLife`), so the 22 take at least three generations however often a player runs (8 + 8 + 6). `pet.codexFound` counts the fragments banked this life; fragments in the current run hold a place while it lasts (`codexRoom(pet)`). Once it is full, a roll that would have found a fragment logs "a codex fragment, but its memory is full" and the fragment stays for the next generation. The counter starts at 0 for each new netling, and for netlings from before the cap. Measured (`tools/baseline/lineages.json`): attentive-style lineages finish the codex in life 3 or 4 (median 4), never sooner; casual lines rarely finish within 4 lives.
+A netling's memory holds at most 8 new fragments (`RUN_CFG.codexPerLife`), so the 22 that Root Access needs take at least three generations however often a player runs (8 + 8 + 6), and all 27 at least four (8 + 8 + 8 + 3). The Source's four come later still, behind the Mainframe stage. `pet.codexFound` counts the fragments banked this life; fragments in the current run hold a place while it lasts (`codexRoom(pet)`). Once it is full, a roll that would have found a fragment logs "a codex fragment, but its memory is full" and the fragment stays for the next generation. The counter starts at 0 for each new netling, and for netlings from before the cap. Measured (`tools/baseline/lineages.json`): attentive-style lineages finish the codex in life 3 or 4 (median 4), never sooner; casual lines rarely finish within 4 lives.
 
-Completing all 22 grants Root Access (`ROOT_FRAGMENT_IDS`, written out so fragments added later never join them; the Mainframe stage's five, `deep-5` and `source-1` to `source-4`, are in the code but switched off with it, see [SOURCE_PLAN.md](SOURCE_PLAN.md)) (see [SIMULATION.md](SIMULATION.md#root-access-nl-0)). The Deep opens when `ruins-4` is known. Full text is in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#codex-fragments).
+Completing the original 22 grants Root Access (`ROOT_FRAGMENT_IDS`, written out so fragments added later never join them; the Mainframe stage's five, `deep-5` and `source-1` to `source-4`, do not count) (see [SIMULATION.md](SIMULATION.md#root-access-nl-0)). The Deep opens when `ruins-4` is known, the Source when `deep-5` is. Corp gold and every region tint also count only the 22. Full text is in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#codex-fragments).
 
 ## Accessories in runs
 

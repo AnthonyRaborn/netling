@@ -9,11 +9,11 @@ export const AUTO_COLORS = {
   ],
   shades: [
     { ice: '#050508', neon: '#050508', acid: '#050508', toxic: '#050508', ultra: '#050508', origin: '#050508' },
-    { ice: '#5d7a80', neon: '#3a3f49', acid: '#5d7a80', toxic: '#3a3f49', ultra: '#5d7a80', origin: '#5d7a80' },
+    { ice: '#3a3f49', neon: '#3a3f49', acid: '#5d7a80', toxic: '#3a3f49', ultra: '#5d7a80', origin: '#3a3f49' },
   ],
   visor: [
     { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
-    { ice: '#39ff14', neon: '#39ff14', acid: '#ffffff', toxic: '#b967ff', ultra: '#ffffff', origin: '#39ff14' },
+    { ice: '#39ff14', neon: '#39ff14', acid: '#39ff14', toxic: '#b967ff', ultra: '#39ff14', origin: '#39ff14' },
   ],
   mohawk: [
     { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
@@ -22,8 +22,8 @@ export const AUTO_COLORS = {
     { ice: '#39ff14', neon: '#39ff14', acid: '#39ff14', toxic: '#f9f002', ultra: '#39ff14', origin: '#39ff14' },
   ],
   rebreather: [
-    { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', origin: '#b967ff' },
-    { ice: '#7843a6', neon: '#7843a6', acid: '#7843a6', toxic: '#7843a6', ultra: '#a61b47', origin: '#7843a6' },
+    { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', origin: '#ff2a6d' },
+    { ice: '#7843a6', neon: '#7843a6', acid: '#7843a6', toxic: '#7843a6', ultra: '#a61b47', origin: '#a61b47' },
   ],
   partyhat: [
     { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },

@@ -40,10 +40,11 @@ export const CFG = {
   lifespanMin: 5 * 24 * 60,
   teenAtMin: 17 * 60,
   adultAtMin: 51 * 60,
-  // The Mainframe stage (docs/SOURCE_PLAN.md), off until its art and UI land. An adult recompiles into its line's
-  // mainframe form once it is home, has lived into its last ordinary day, and has proved itself in The Deep this life
-  // (three exits, or two clean ones); it gains a day of life and passes its trait on at level II or higher.
-  mainframe: false,
+  // The Mainframe stage (docs/SIMULATION.md). An adult recompiles into its line's mainframe form once it is home, has
+  // lived into its last ordinary day, has proved itself in The Deep this life (three exits, or two clean ones), and its
+  // line has Root Access; it gains a day of life and passes its trait on at level II or higher. false hides the stage,
+  // the Source and everything that belongs to them (tests and the balance tools use it).
+  mainframe: true,
   mainframeBeforeEndMin: 24 * 60,
   mainframeBonusMin: 24 * 60,
   mainframeExits: 3,

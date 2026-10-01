@@ -21,8 +21,8 @@ const STEEL = ['#c8d0dc', '#8a93a3', '#3a3f49', '#2a2f3a']; // greys, for the we
 const AVOID = { visor: ['#ff9f1c', '#f9f002'] }; // an orange or gold band reads as a Star Trek visor, not a futuristic one
 const PIN = {}; // hand-picked exceptions: { wearableId: { slot: { paletteName: '#rrggbb' } } }
 
-// The Mainframe forms count only once the stage is switched on (docs/SOURCE_PLAN.md), so players' automatic colors do not
-// shift before then; switching it on means rerunning this with --write.
+// The Mainframe forms count only while the stage is switched on (CFG.mainframe, on), so switching it either way means
+// rerunning this with --write.
 const forms = Object.keys(SPECIES).filter((f) => CFG.mainframe || !isMainframeForm(f));
 const spritePairs = forms.flatMap((f) => [formSprite(f, 'a'), formSprite(f, 'b')].map((sprite) => ({ f, sprite })));
 

@@ -39,7 +39,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; relays repair it; corp insurance once a run | `sim.js` |
 | **Clean clear / clean jack-out** | A netrun that ends by jacking out with no ICE lost. Shortens the next cooldown by 1 hour | `netrun/run.js` |
 | **Clear (region clear)** | Reaching a region's exit node. Opens the next region down for that netling (`pet.cleared`) | `netrun/run.js` |
-| **Codex** | The 22 lore fragments collected on netruns. Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |
+| **Codex** | The 27 lore fragments collected on netruns (22 count toward Root Access). Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |
 | **Codex inbox** | `pet.codexInbox`: fragments a run found, waiting for the UI to bank them into the shared codex | `netrun/run.js`, `ui/archive.js` |
 | **Compile / script** | A new generation starts as a `script` that compiles for 3 minutes into a baby | `sim.js` |
 | **Comply** | Trace answer: accept the scan. Integrity -5, Sync -10, allegiance +1 | `sim.js` |
@@ -99,8 +99,10 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Lease** | The `localStorage` fallback for the one-tab rule | `lease.js` |
 | **Lights** | The LIGHTS OFF/ON toggle. Affects drain, regeneration and screen | `sim.js` |
 | **Lineage** | The record of every dead netling, plus inheritance from parent to child | `archive.js` |
+| **Line (`lineOf`)** | The adult form a mainframe grew from: Plat's line is Chrome. A mainframe uses its line's perk, trait, keepsake, chatter and netrun ability | `sim.js` |
 | **Lock (transfer lock)** | The screen shown after transferring out. The device stops simulating | `ui/system.js` |
 | **Loot** | Items carried in a netrun, banked on jack-out | `netrun/run.js` |
+| **Mainframe** | Fourth life stage, after adult: Plat, Airgap, Init, Panic or Whisper. Reached on the last ordinary day with 3 Deep exits this life (or 2 clean) and Root Access in the line. Adds a day of life | `sim.js` |
 | **Market** | A netrun node where scrip and Charge buy items and sometimes an accessory, and the inventory sells for half price | `netrun/run.js` |
 | **Memory overflow** | Timed event: PURGE within 45 minutes or it crashes | `sim.js` |
 | **Memory shard** | Item: rewrites one quirk | `sim.js` |
@@ -128,11 +130,12 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Request** | It asks for one game, or a COOL when warm, and waits 45 minutes. Missing one costs nothing | `sim.js` `stepRequest` |
 | **Rescue** | Root Access reversing a flatline. Sets `rootUsed` | `sim.js` |
 | **Reward box** | Where check-in rewards wait until taken (BOX beside the scrip count); per device, moves with a transfer code | `checkin.js`, `ui/rewards.js` |
-| **Root Access** | NL-0's rescue from the first premature death. Earned by completing the codex | `sim.js` |
-| **SAVE_VERSION** | The save format version. Currently 1. A bump needs a step in `STEPS` | `sim.js`, `migrations.js` |
+| **Root Access** | NL-0's rescue from the first premature death. Earned by completing the original 22 fragments of the codex. Also opens the Mainframe stage, and until then mainframe forms read as corrupted records | `sim.js` |
+| **SAVE_VERSION** | The save format version. Currently 2. A bump needs a step in `STEPS` | `sim.js`, `migrations.js` |
 | **Scavenged data (SCAV DATA)** | Food: +25 Charge, leans indie, 12% infection | `sim.js` |
 | **SCRAP** | The inventory button at home: sells an item for a quarter of its price. At an open market it reads SELL and pays half | `ui/hud.js`, `sim.js` |
 | **Scrip (corpo scrip)** | The netling's money, 0 to 100. Earned by selling items and found on runs; spent with Charge at markets. Half passes to the next generation | `sim.js` `SCRIP` |
+| **Source (The Source)** | Last netrun region, below The Deep. Mainframes only, once The Deep is cleared and `deep-5` is known; `<<SECTOR CORRUPTED>>` while locked | `netrun/regions.js` |
 | **Script** | The compiling stage before baby. Also the name of a fresh netling object | `sim.js` |
 | **Session** | The currently running mini-game or netrun view, `app.session` | `ui/app.js` |
 | **Shell** | The device body cosmetic | `cosmetics.js` |

@@ -28,15 +28,18 @@ function adult(form = 'chrome') {
 }
 // Ticks `minutes` netling minutes from where it is.
 const run = (s, minutes) => tick(s, s.lastTick + minutes * MIN, noRng);
-// Runs `fn` with the stage switched on, then switches it back off.
-function switchedOn(fn) {
-  CFG.mainframe = true;
+// Runs `fn` with the stage switched on or off, then puts the switch back.
+function withSwitch(on, fn) {
+  const was = CFG.mainframe;
+  CFG.mainframe = on;
   try {
     return fn();
   } finally {
-    CFG.mainframe = false;
+    CFG.mainframe = was;
   }
 }
+const switchedOn = (fn) => withSwitch(true, fn);
+const switchedOff = (fn) => withSwitch(false, fn);
 
 test('each adult form has one mainframe form, and every mainframe form names its line', () => {
   assert.deepEqual(MAINFRAME_OF, { chrome: 'plat', firewall: 'airgap', daemon: 'init', glitch: 'panic', ghost: 'whisper' });
@@ -47,7 +50,7 @@ test('each adult form has one mainframe form, and every mainframe form names its
   }
   assert.equal(lineOf('chrome'), 'chrome');
   assert.equal(lineOf('kernel'), 'kernel');
-  assert.equal(CFG.mainframe, false, 'switched off until its art and UI land');
+  assert.equal(CFG.mainframe, true, 'switched on: the stage has shipped');
 });
 
 test('the gate: an adult, home, into its last ordinary day, with three Deep exits or two clean', () => {
@@ -66,7 +69,7 @@ test('the gate: an adult, home, into its last ordinary day, with three Deep exit
   assert.equal(mainframeAt({ life: LEGACY_LIFE }), 6 * DAY, 'a seven-day life: its last day too');
 });
 
-test('switched off, an adult that meets the gate stays an adult and dies on time', () => {
+test('switched off, an adult that meets the gate stays an adult and dies on time', () => switchedOff(() => {
   const s = adult();
   s.deepExits = { all: 3, clean: 3 };
   s.ageMin = mainframeAt(s) - 1;
@@ -76,7 +79,7 @@ test('switched off, an adult that meets the gate stays an adult and dies on time
   s.ageMin = s.life.lifespan - 1;
   run(s, 3);
   assert.equal(s.deathCause, 'end of life cycle');
-});
+}));
 
 test('feat first: it recompiles into its line\'s mainframe form at the last ordinary day, and gains a day', () =>
   switchedOn(() => {
@@ -206,7 +209,7 @@ test('the lineage remembers a mainframe body, and the dex shows mainframe forms 
   assert.equal(cleanLineage([rec])[0].mainframe, 'whisper');
   assert.equal(cleanLineage([{ ...rec, mainframe: 'ghost' }])[0].mainframe, null, 'not a mainframe form');
   assert.ok(formsSeenIn({ stage: 'script' }, [rec]).includes('whisper'));
-  assert.ok(!dexEntries([]).some((e) => isMainframeForm(e.id)), 'hidden while off');
+  assert.ok(!switchedOff(() => dexEntries([])).some((e) => isMainframeForm(e.id)), 'hidden while off');
   switchedOn(() => {
     const whisper = dexEntries(['whisper']).find((e) => e.id === 'whisper');
     assert.equal(whisper.name, 'Whisper');
@@ -260,7 +263,7 @@ test('visitors come as mainframe forms only once the stage is switched on, and o
     }
     return [...seen];
   };
-  const off = visitors();
+  const off = switchedOff(visitors);
   assert.ok(off.length >= 5, `visits happened: ${off}`);
   assert.ok(!off.some(isMainframeForm), `no mainframe visitors while off: ${off}`);
   assert.ok(switchedOn(visitors).some(isMainframeForm), 'some once on');
