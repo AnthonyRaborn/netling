@@ -182,7 +182,7 @@ The UI runs the mini-game first, then calls `act('play', { game, won })`. The re
 
 ## Events
 
-At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); in flow they are 0.75x (`flowEventMult`, calm). The visitor's chance goes up in both (1.25x, `overclockVisitMult` and `flowVisitMult`), never down.
+At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); in flow they are 0.75x (`flowEventMult`, calm). The visitor's chance goes up in both (1.25x, `overclockVisitMult` and `flowVisitMult`), never down. In flow a visitor adds no Heat, so it never ends flow.
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
@@ -202,7 +202,7 @@ Details:
 
 ## Visitors
 
-A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over every body (the mainframe forms only to a line with Root Access, since until then they are corrupted records), its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10). It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
+A stray netling appears for 10 to 20 minutes (`visitMinMin`, `visitMaxMin`), at 6% an awake hour (`visitChancePerHour`; it was 3% and 5 to 10 minutes before the attention rewards). Its form is uniformly random over every body (the mainframe forms only to a line with Root Access, since until then they are corrupted records), its palette never matches the host's, and 75% of the time it wears a random findable accessory, half of those with a second from another wear slot (`visitWearsAccessoryChance`, `visitSecondAccessoryChance`). Each minute it adds `visitSync / len` Sync and `visitHeat / len` Heat (total +15 and +10); in flow it adds no Heat, so a visit never ends flow. It leaves early if the netling rests, jacks in or reboots. On leaving it may drop an accessory (1%, or 5% if it was greeted: `visitGreetedAccessoryChance`; chosen by the UI so it is always new) or, failing that, an item (10%, from the visit table).
 
 **GREET** (`act(s, 'greet')`): once per visit (`visit.greeted`). It sets a visitor chatter line on screen and raises the accessory chance above; nothing else. Refused with no visitor, or once already greeted.
 

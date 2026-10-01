@@ -3,7 +3,7 @@ import './helpers/utc.js';
 // and it leans unstable. Flow leans the other way.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, gameSpeed, overclocked, tick, mulberry32, CFG, MIN } from '../src/sim.js';
+import { act, createScript, gameSpeed, inFlow, overclocked, tick, mulberry32, CFG, MIN } from '../src/sim.js';
 import { iceSpeed, startRun, resolveIce } from '../src/netrun/run.js';
 import { REGIONS } from '../src/netrun/regions.js';
 import { GameSession } from '../src/games/session.js';
@@ -188,4 +188,22 @@ test('visitors are likelier while overclocked or in flow, never rarer', () => {
   minutes(f, 1, rolls(0.999, 0.999, 0.999, 0.999, 0.999, (CFG.visitChancePerHour * (1 + CFG.flowVisitMult)) / 2 / 60));
   assert.ok(f.visit, 'in flow');
   assert.ok(CFG.overclockVisitMult >= 1 && CFG.flowVisitMult >= 1);
+});
+
+test('a visitor adds no Heat in flow, so it never ends flow; Sync still rises', () => {
+  const s = booted();
+  Object.assign(s.stats, { charge: 90, sync: 70, integrity: 100, heat: 59 });
+  s.flowMin = CFG.flowAfterMin;
+  s.visit = { startedAge: s.ageMin, len: 10, form: 'glitch', palette: 2, accessories: [] };
+  const { heat, sync } = s.stats;
+  minutes(s, 5);
+  assert.equal(inFlow(s), true, 'still in flow');
+  assert.ok(s.stats.heat <= heat + (CFG.heatDriftPerHour * 5) / 60 + 1e-9, `heat ${s.stats.heat}`);
+  assert.ok(s.stats.sync > sync - 2, 'sync gain offsets the drain');
+
+  const plain = booted();
+  plain.stats.heat = 40;
+  plain.visit = { startedAge: plain.ageMin, len: 10, form: 'glitch', palette: 2, accessories: [] };
+  minutes(plain, 5);
+  assert.ok(plain.stats.heat > 40 + CFG.visitHeat / 2 - 0.01, `heat ${plain.stats.heat}`);
 });

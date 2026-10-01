@@ -679,7 +679,7 @@ function startVisit(s, t, rng) {
   log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
 }
 
-// While a visitor is here, Sync and Heat rise a little each minute. It leaves when time's up,
+// While a visitor is here, Sync and Heat (not in flow) rise a little each minute. It leaves when time's up,
 // or early if the netling rests, crashes or jacks in. Now and then it leaves a gift.
 function stepVisit(s, t, rng) {
   const v = s.visit;
@@ -690,7 +690,8 @@ function stepVisit(s, t, rng) {
     return;
   }
   s.stats.sync = clamp(s.stats.sync + CFG.visitSync / v.len);
-  s.stats.heat = clamp(s.stats.heat + CFG.visitHeat / v.len);
+  // In flow they play quietly: no Heat, so a visit never knocks it out of flow (which needs Heat under 60).
+  if (!inFlow(s)) s.stats.heat = clamp(s.stats.heat + CFG.visitHeat / v.len);
   if (s.ageMin - v.startedAge < v.len) return;
   s.visit = null;
   let gift = '';
