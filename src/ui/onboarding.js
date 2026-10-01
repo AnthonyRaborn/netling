@@ -73,7 +73,7 @@ function renderHelp() {
         ['a request', `Now and then it asks for one game, or for a COOL when it is warm, and waits ${CFG.requestWindowMin} minutes. Answer it from the bar below the inventory.`, 'Nothing bad happens if you miss one.'],
         ['a contract', `While the uplink is ready and the app is open, a job for one region may come in: reach its exit, get past some ICE, crack caches, buy at a market or bring back a fragment. It waits ${RUN_CFG.contractOpenMin / 60} hours, and every route through that run can meet it. Pays scrip, sometimes an item.`, 'Nothing bad happens if you miss one.'],
         ['a speech bubble', `It mutters to itself while it is awake and idle. Lines you see are kept in the Archive under CHATTER.`, 'Lines only count while the app is open.'],
-        ['a glow', `Kept in good shape for ${CFG.flowAfterMin / 60} hours in a row while awake (Charge and Sync ${CFG.flowMinStat}+, Integrity ${CFG.flowMinIntegrity}+, Heat under ${CFG.flowMaxHeat}, nothing wrong), it glows. Time in flow leans it steadier as it grows.`],
+        ['a glow', `Kept in good shape for ${CFG.flowAfterMin / 60} hours in a row while awake (Charge and Sync ${CFG.flowMinStat}+, Integrity ${CFG.flowMinIntegrity}+, Heat under ${CFG.flowMaxHeat}, nothing wrong), it glows. In flow, traces, intrusions, overflows and surges come ${pct(1 - CFG.flowEventMult)} less often, and it leans steadier as it grows.`],
       ],
     ],
   ];

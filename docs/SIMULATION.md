@@ -182,7 +182,7 @@ The UI runs the mini-game first, then calls `act('play', { game, won })`. The re
 
 ## Events
 
-At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); the visitor's is not.
+At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); in flow they are 0.75x (`flowEventMult`, calm). The visitor's chance is never changed.
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
@@ -212,11 +212,11 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 
 **Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
 
-**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat, but it doubles the uptime stability gain (+0.2/hr, `flowStabilityPerHour`, instead of +0.1).
+**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat, but it doubles the uptime stability gain (+0.2/hr, `flowStabilityPerHour`, instead of +0.1) and makes it calm: traces, intrusions, overflows and surges are 0.75x as likely (`flowEventMult`).
 
 ## Overclocked
 
-**Overclocked** (`overclocked()`, `s.hot`): Heat at 65 or more (`overclockHeat`), up to and including the 85+ danger zone, whose harms still apply on top. It is the hot side of a choice whose cool side is flow (Heat under 60), so the two never overlap.
+**Overclocked** (`overclocked()`, `s.hot`): Heat at 65 or more (`overclockHeat`), up to and including the 85+ danger zone, whose harms still apply on top. It is the hot side of a choice whose cool side is flow (Heat under 60, calmer and steadier), so the two never overlap.
 
 | Effect | Value | Where |
 |---|---|---|

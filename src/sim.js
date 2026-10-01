@@ -45,6 +45,7 @@ export const CFG = {
   overclockEventMult: 1.25,
   overclockStabilityPerHour: -0.2,
   flowStabilityPerHour: 0.2,
+  flowEventMult: 0.75, // calm: in flow, trouble comes less often (the mirror of overclockEventMult)
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
   // A five-day life. Each netling keeps the lengths it compiled with (s.life), so a change here
@@ -123,7 +124,8 @@ export const CFG = {
   requestWindowMin: 45,
   requestMinCharge: 20, // it only asks for a game it has the Charge to play
   requestCoolHeat: 30, // and for COOL only when COOL would work
-  // Flow: kept in good shape this long, awake, it glows, and leans stable faster (flowStabilityPerHour).
+  // Flow: kept in good shape this long, awake, it glows, leans stable faster (flowStabilityPerHour) and draws
+  // fewer events (flowEventMult).
   flowAfterMin: 180,
   flowMinStat: 50, // Charge and Sync
   flowMinIntegrity: 80,
@@ -621,7 +623,8 @@ function stepEvents(s, t, rng) {
     return;
   }
   if (resting(s)) return;
-  const hot = overclocked(s) ? CFG.overclockEventMult : 1;
+  // Overclocked draws trouble; flow keeps it away (the two never overlap: flow needs Heat under 60).
+  const hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
   if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;

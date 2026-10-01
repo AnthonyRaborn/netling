@@ -86,7 +86,7 @@ None of these ever costs a fault; they are small rewards for checking in often.
 - **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
 - **Visitors**: say hello with **GREET** while one is here.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
-- **A glow**: keep it in good shape for a few hours and it shows.
+- **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often.
 - **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
 - **Contracts**: while the uplink is ready and the app is open, a job for one netrun region may come in (reach the exit, get past some ICE, crack caches, buy at a market, bring back a fragment). It waits 6 hours; take it by jacking into that region. Every way through that run can meet it, and it pays scrip, sometimes an item.
 

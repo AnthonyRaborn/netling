@@ -127,6 +127,18 @@ test('events are likelier while overclocked', () => {
   assert.equal(s.event?.type, 'trace');
 });
 
+test('events are rarer in flow (calm)', () => {
+  // A trace roll that lands at the usual chance but misses at the calmer one.
+  const roll = (CFG.traceChancePerHour * (1 + CFG.flowEventMult)) / 2 / 60;
+  const plain = booted();
+  minutes(plain, 1, rolls(0.999, roll));
+  assert.equal(plain.event?.type, 'trace');
+  const s = booted();
+  s.flowMin = CFG.flowAfterMin;
+  minutes(s, 1, rolls(0.999, roll));
+  assert.equal(s.event, null);
+});
+
 test('awake time overclocked leans it unstable', () => {
   const s = booted();
   hot(s);
