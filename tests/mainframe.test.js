@@ -215,25 +215,29 @@ test('the lineage remembers a mainframe body, and the dex shows mainframe forms 
   });
 });
 
-test('mainframe art: its own sprites, wider than its line\'s and no taller than the tallest adult, in the line\'s shape', () => {
+test('mainframe art: its own sprites, no taller than the tallest adult; wider than its line, but Whisper smaller and fading', () => {
   const adultRows = Math.max(...Object.keys(SPECIES).filter((f) => SPECIES[f].stage === 'adult').map((f) => SPRITES[`${f}A`].length));
   for (const form of Object.keys(SPECIES).filter(isMainframeForm)) {
     const line = lineOf(form);
     for (const pose of ['A', 'B', 'Sleep', 'Dead']) {
       const rows = SPRITES[`${form}${pose}`];
       assert.ok(rows && rows !== SPRITES[`${line}${pose}`], `${form}${pose} is its own`);
-      assert.ok(rows.every((r) => r.length === 18), `${form}${pose}: 18 columns`);
+      assert.ok(rows.every((r) => r.length === (form === 'whisper' ? 14 : 18)), `${form}${pose}: its width`);
       assert.ok(rows.length <= adultRows, `${form}${pose}: room for a hat above it`);
     }
     assert.ok(ANCHOR_ROWS[form] && ANCHOR_ROWS[form] !== ANCHOR_ROWS[line], `${form} has its own anchors`);
     // Closer to its own line than to any other adult. The Glitch line is torn on purpose and its rows shift between
-    // frames, so a centred overlap says little about it; Panic is checked by how much it shifts instead.
-    if (line === 'glitch') continue;
+    // frames, so a centred overlap says little about it; Panic is checked by how much it shifts instead. Whisper is a
+    // Ghost thinning away, checked by its size and its fading tail below.
+    if (line === 'glitch' || line === 'ghost') continue;
     const own = silhouetteIou(SPRITES[`${form}A`], SPRITES[`${line}A`]);
     for (const other of Object.keys(SPECIES).filter((f) => SPECIES[f].stage === 'adult' && f !== line)) {
       assert.ok(own > silhouetteIou(SPRITES[`${form}A`], SPRITES[`${other}A`]), `${form} looks more like ${other} than ${line}`);
     }
   }
+  const cells = (key) => SPRITES[key].join('').replace(/\./g, '').length;
+  assert.ok(cells('whisperA') < 0.85 * cells('ghostA'), 'Whisper is smaller than a Ghost');
+  assert.ok(SPRITES.whisperA.slice(-4).every((r) => r.includes('x')), 'its tail fades into faint wisp cells');
   const shift = (form) => poseDistance(SPRITES[`${form}A`], SPRITES[`${form}B`]);
   for (const form of ['plat', 'airgap', 'init', 'whisper']) assert.ok(shift('panic') > 2 * shift(form), `Panic jumps between frames more than ${form}`);
 });
