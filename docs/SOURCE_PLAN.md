@@ -375,7 +375,7 @@ Each step is one commit that passes `npm test` on its own.
 4. **Netrun.** Done, behind the same switch (see [Step 4 as built](#step-4-as-built)). `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 5. **Measure and tune.** Done (see [Step 5 as built](#step-5-as-built)). The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
 6. **UI, art, sound.** Done (see [Step 6 as built](#step-6-as-built)). Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
-7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
+7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run. Switching the stage on also means `node tools/wearable-colors.mjs --write`: the automatic wearable colors leave the mainframe forms out while it is off, so players' colors do not shift before then, and will move slightly once they count (Shades, the Visor band and the Rebreather on a few palettes).
 
 ## Step 3 as built
 
@@ -460,6 +460,8 @@ Still behind the switch. For playtesting before step 7, `?dev&mainframe` switche
 - **Music** (`tracks.js`): the netrun theme gains a `pad` part, muted except in the Source; the Source's variant is a fifth up at 60 BPM with only the pings and the pad. `firstcommit` (C major, 72 BPM, a bell over a pad, gain 0.78). Rendered loudness: Source rms 0.0035 (the Deep 0.0033), First commit 0.0097 (Idle loop 0.0097). The DEV music row lists both.
 - **Tests**: `source.test.js` 20 (the unlocks, Full house, the field manual row, the Source theme, the plush, the cleaned progress), `mainframe.test.js` 14 (its own art, visitors and root, the chatter line), and updates to the accessory, content, sanitizer and sprite tests: 426 in all. Smoke: three scenarios (73 in all); `SMOKE_ONLY=text` runs a subset.
 - **Balance**: the three baselines are byte-identical.
+
+The automatic wearable colors (`tools/wearable-colors.mjs`) leave the mainframe forms out while the stage is off, so nothing a player sees changes before step 7.
 
 Not done here: a human look at the art and the glitching name on a phone; listening to the two new pieces of music beyond the loudness numbers.
 
