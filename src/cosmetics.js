@@ -22,12 +22,14 @@ function fullLifeStreak(ctx) {
 const streak = (ctx, game) => ctx.progress.streaks?.[game]?.best ?? 0;
 const acts = (ctx, ...names) => names.reduce((n, a) => n + (ctx.progress.acts?.[a] ?? 0), 0);
 
-// Attention rewards (docs/ATTENTION.md). ctx.flowMin is every life's time in flow, the living one's included.
+// Attention rewards (docs/ATTENTION.md). ctx.flowMin is every life's time in flow, the living one's included;
+// ctx.hotMin the same for awake time overclocked.
 export const ATTENTION = {
   requests: 25,
   chatterHeard: 25, // the Forum track
   greetings: 5,
   flowHours: 24,
+  hotHours: 40, // Heatwave: about as many lives for a player who runs hot as Aurora takes one who keeps it in flow
   contracts: 10, // the Seal crest
   groupHeard: (ctx) => {
     const prog = chatterProgress(ctx.progress.chatter ?? [], shownChatter(CFG.mainframe));
@@ -91,6 +93,7 @@ export const COSMETICS = {
     { id: 'curved', name: 'Deep curve', hint: 'hold the signal and never lose it.', check: (c) => streak(c, 'tune') >= 10 },
     { id: 'packets', name: 'Packet rain', hint: 'ten clean feasts without a bad bite.', check: (c) => streak(c, 'feast') >= 10 },
     { id: 'aurora', name: 'Aurora', hint: 'keep it well for a whole day, a few hours at a time.', check: (c) => (c.flowMin ?? 0) >= ATTENTION.flowHours * 60 },
+    { id: 'heatwave', name: 'Heatwave', hint: 'run it hot for the better part of two days.', check: (c) => (c.hotMin ?? 0) >= ATTENTION.hotHours * 60 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
     { id: 'sourcelight', name: 'Source light', mainframe: true, hint: 'go down into the light three times, and come back.', check: (c) => (c.progress.sourceExits ?? 0) >= 3 },
   ],

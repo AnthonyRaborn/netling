@@ -1,6 +1,6 @@
 import { SPRITES, drawSprite, formSprite, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, WHITE_COLORS } from './sprites.js';
 import { drawWorn, drawProp, visitAccessories } from './accessories.js';
-import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting, lineOf } from './sim.js';
+import { PALETTES, CFG, needsAttention, isAlive, overclocked, rebootMinutesLeft, resting, lineOf } from './sim.js';
 import { FLASH_TOGGLE_MS } from './games/common.js';
 
 export const LCD_W = 40;
@@ -19,6 +19,9 @@ export const GLITCH_STEP_MS = 350; // the glitch picks a new look at most this o
 export const SURGE_MS = 900;
 // The flow glow's slow breath (radians per ms divisor): about a ten-second cycle, far from a flash.
 export const FLOW_BREATH_MS = 1600;
+// Overclocked: heat wisps rise off it, one pixel per this many ms (a still shimmer in calm mode).
+export const HEAT_RISE_MS = 400;
+const HEAT_COLOR = '#ff9f1c';
 
 // A repeatable 0..1 sequence for one glitch step, so the look holds for the whole step.
 function stepRandom(step) {
@@ -165,6 +168,16 @@ export function renderLCD(canvas, s, time, opts = {}) {
       bctx.globalAlpha *= 0.5; // a fainter second ring
       for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-1, -1], [1, -1], [-1, 1], [1, 1]]) drawSprite(bctx, sprite, x + dx, y + dy, glow);
       bctx.globalAlpha = 1;
+    }
+
+    // Overclocked: three wisps of heat rise off its top edge, each a pixel that climbs and starts over.
+    if (overclocked(s) && !rest && !rebooting && !strobe && !dimPet) {
+      const w = sprite[0].length;
+      for (let i = 0; i < 3; i++) {
+        const rise = opts.calm ? i + 1 : (Math.floor(time / HEAT_RISE_MS) + i * 2) % 4;
+        bctx.fillStyle = HEAT_COLOR;
+        bctx.fillRect(x + Math.round(((i + 0.5) * w) / 3), y - 1 - rise, 1, 1);
+      }
     }
 
     bctx.globalAlpha = lineOf(s.form) === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;

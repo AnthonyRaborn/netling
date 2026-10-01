@@ -46,10 +46,14 @@ Four bars and a small icon row sit under the screen. Everything the game asks of
 | **CHG** (Charge) | Its power | Time passes, faster the fuller it is (awake, about 31 an hour when full, 18 at half, 6 near empty) | 0: it becomes a fault, and Integrity starts slipping |
 | **SYN** (Sync) | Its bond with you, and how happy it is | Time passes, the same way (about 26 an hour when full, 16 at half, 5 near empty) | 0: it becomes a fault |
 | **INT** (Integrity) | Its health | A virus, a full cache, overheating or empty Charge wear it down | 0 for two hours in a row: it flatlines |
-| **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 85 and up hurts Integrity; 100 is a fault |
+| **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 65 and up: overclocked (see below). 85 and up hurts Integrity; 100 is a fault |
 | **Cache** (the little file icons) | Corrupted files it writes while digesting a meal, up to four | Each file makes viruses likelier; 3 or more damage Integrity | Clear it with PURGE |
 
 Integrity heals on its own (5 an hour) whenever nothing is wrong, and faster (8 an hour) while it sleeps in the dark or naps.
+
+### Running hot
+
+At 65 Heat and up it is **overclocked**: the HEAT label turns to **OC** and heat wisps rise off it. Overclocked, mini-games run 15% slower and wins turn up items more often, and a netrun you jack into overclocked slows its ICE fights too. The catch: a lost game costs Sync and Integrity instead of cheering it up, lost ICE hits harder, and trouble (traces, intrusions, overflows, surges) comes more often. Visitors like a hot netling, though: they drop by more often. Above 85 the usual overheating damage still applies on top. Running hot or keeping it cool also leans it one way or the other as it grows.
 
 The line under the bars, the **readout**, shows the generation, its form, its age, its bedtime, its **faults** and its inherited **trait**.
 
@@ -82,7 +86,7 @@ None of these ever costs a fault; they are small rewards for checking in often.
 - **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
 - **Visitors**: say hello with **GREET** while one is here.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
-- **A glow**: keep it in good shape for a few hours and it shows.
+- **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often and visitors drop by more.
 - **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
 - **Contracts**: while the uplink is ready and the app is open, a job for one netrun region may come in (reach the exit, get past some ICE, crack caches, buy at a market, bring back a fragment). It waits 6 hours; take it by jacking into that region. Every way through that run can meet it, and it pays scrip, sometimes an item.
 
@@ -107,7 +111,7 @@ Trouble shows up as an icon on the screen, a bar at the top, and a chirp (or a n
 | Crosshair | An **intrusion** attempt | **DEFEND** within an hour by winning a random mini-game, or it installs a virus |
 | Overflowing chip | A **memory overflow** | **PURGE** within 45 minutes, or it crashes: Integrity loss, a full cache, and 20 minutes rebooting where you can only turn the lights on and off. More cache files make overflows likelier |
 | Screen flicker | A **power surge**: instant Heat and a little Charge | Nothing to do, but watch the Heat |
-| A second netling | A **visitor** playing with it for a while: +Sync, +Heat | Enjoy. **GREET** it if you like; it sometimes leaves a gift |
+| A second netling | A **visitor** playing with it for a while: +Sync, +Heat (no Heat while it glows) | Enjoy. **GREET** it if you like; it sometimes leaves a gift |
 
 Only one alert is open at a time. If you leave a game or a netrun open, the clock keeps running behind it.
 
@@ -124,7 +128,7 @@ The inventory holds six items. Tap an item to see what it does, then **USE** it,
 | Signal booster | Your next mini-game win counts double |
 | Memory shard | Rewrites one of its quirks at random |
 | Repair kit | Restores 40 Integrity |
-| Overclock chip | Shortens the wait before the next netrun by an hour |
+| Bypass chip | Shortens the wait before the next netrun by an hour |
 | Segfault | Adds two faults on purpose (it asks you to press twice). Faults shape how it grows up, and ten end its life |
 
 Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation. Anything found while the inventory is full is scrapped for you rather than lost.

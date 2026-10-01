@@ -1,5 +1,5 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
@@ -119,6 +119,9 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   return null;
 }
 
+// How fast ICE fights run: slower for a netling that jacked in overclocked.
+export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
+
 export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
   const map = generateMap(region, rng);
   pet.run = {
@@ -131,6 +134,9 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     pending: null, // ice: { game } | choice: { kind, title, text, options, ... }
     revealed: [],
     phased: false,
+    // Overclocked at jack-in: ICE runs slower all run but bites harder. Fixed here, so the Heat every move adds
+    // never switches it on partway: jacking in hot is the player's choice.
+    hot: overclocked(pet),
     insured: false, // Chrome's corp insurance used this run
     insuredTimes: 0, // how many times it paid out (a Plat's pays out twice)
     freePhases: 0, // ICE a Glitch line has slipped through for certain (a Panic gets two)
@@ -372,10 +378,13 @@ export function resolveIce(pet, won, rng) {
   }
   const soft = ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses;
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
-  const dmg = Math.round(REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1));
+  const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
+  const dmg = Math.round(
+    REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
+  );
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
-  note(run, `ICE bit back. -${dmg} integrity.`);
+  note(run, `ICE bit back${hot ? ' hard: overclocked' : ''}. -${dmg} integrity.`);
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
 }

@@ -4,7 +4,7 @@ import { GameSession } from '../games/session.js';
 import { text, DIM, W, H } from '../games/common.js';
 import { nodeById } from './map.js';
 import { REGIONS } from './regions.js';
-import { moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, contractShort, contractPay, RUN_CFG } from './run.js';
+import { iceSpeed, moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, contractShort, contractPay, RUN_CFG } from './run.js';
 import { ITEMS } from '../sim.js';
 import { fragmentById } from './codex.js';
 import { accessoryById } from '../accessories.js';
@@ -55,6 +55,7 @@ export class RunView {
     this.abortArmed = 0;
     this.game = null;
     this.lastMsgCount = pet.run.messages.length;
+    if (pet.run.hot && pet.run.visited.length === 1) this.toast = { msg: 'overclocked: ICE runs slow, bites hard.', until: performance.now() + 3200 };
     if (pet.run.phase === 'ice') this.startIce(); // resumed mid-encounter
   }
 
@@ -80,6 +81,7 @@ export class RunView {
     this.game = new GameSession(game, {
       rng: this.rng,
       sound: this.sound,
+      speed: iceSpeed(this.pet),
       onFinish: (won) => {
         this.game = null;
         this.onGame(game, won);
@@ -245,7 +247,10 @@ export class RunView {
       text(ctx, TYPE_HINT[sel.type] ?? '', 150, 234, { size: 18, color: DIM });
     }
     this.drawHud(ctx, pal);
-    text(ctx, REGIONS[run.region].name.toUpperCase(), 12, 12, { size: 18, color: DIM });
+    const region = REGIONS[run.region].name.toUpperCase();
+    text(ctx, region, 12, 12, { size: 18, color: DIM });
+    // Jacked in overclocked: ICE runs slower and bites harder all run.
+    if (run.hot) text(ctx, 'OC', 22 + ctx.measureText(region).width, 12, { size: 18, color: '#ff9f1c' });
     const job = contractShort(run);
     if (job) text(ctx, job, W - 12, 12, { size: 18, align: 'right', color: job.startsWith('JOB LOST') ? DIM : '#f9f002' });
     if (tutorial) this.drawTutorialTip(ctx, sel, toast);

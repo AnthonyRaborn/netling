@@ -3,6 +3,12 @@ import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNode
 import { INVENTORY_SLOTS, SCRIP } from '../src/sim.js';
 import { nodeById } from '../src/netrun/map.js';
 
+// An assumption, not a measurement: how much likelier a player is to win a mini-game or ICE fight that runs
+// slower because the netling is overclocked (CFG.overclockGameSpeed). Shared with tools/balance.mjs.
+export const OVERCLOCK_WIN_BONUS = 0.08;
+// hot: whether this game runs slower (overclocked at home; for ICE, jacked in overclocked: run.hot).
+export const winChance = (hot, rate) => Math.min(0.95, rate + (hot ? OVERCLOCK_WIN_BONUS : 0));
+
 // plan: look a few steps ahead, using only the nodes the player can see (so a form's sight helps).
 // Without it the bot judges only the next step, as it always did.
 export const RUN_STYLES = {
@@ -107,7 +113,7 @@ export function playRun(pet, style, region, rng, codex = []) {
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 40) {
     const run = pet.run;
-    if (run.phase === 'ice') resolveIce(pet, rng() < style.winRate, rng);
+    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, style.winRate), rng);
     else if (run.phase === 'choice') {
       if (run.pending.kind === 'market') {
         if (style.sell !== false) run.sold = (run.sold ?? 0) + sellAtMarket(pet, style.keep);

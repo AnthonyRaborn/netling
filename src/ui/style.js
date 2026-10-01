@@ -91,9 +91,11 @@ export function countAttention(res) {
   checkUnlocks();
 }
 
-// A flatlined netling's time in flow joins the running total (the living one adds its own; see unlockContext).
+// A flatlined netling's time in flow and overclocked joins the running totals (the living one adds its own; see
+// unlockContext).
 export function bankFlow(state) {
   app.progress.flowMin = (app.progress.flowMin ?? 0) + (state.flowTotalMin ?? 0);
+  app.progress.hotMin = (app.progress.hotMin ?? 0) + (state.hotTotalMin ?? 0);
   store.set(KEYS.progress, app.progress);
 }
 
@@ -114,8 +116,10 @@ export function countAct(action) {
 }
 
 function unlockContext() {
-  const living = app.state.stage === 'dead' ? 0 : app.state.flowTotalMin ?? 0; // a dead one's is banked already
-  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress, flowMin: (app.progress.flowMin ?? 0) + living };
+  const alive = app.state.stage !== 'dead'; // a dead one's minutes are banked already
+  const flowMin = (app.progress.flowMin ?? 0) + (alive ? app.state.flowTotalMin ?? 0 : 0);
+  const hotMin = (app.progress.hotMin ?? 0) + (alive ? app.state.hotTotalMin ?? 0 : 0);
+  return { dex: app.dex, codex: app.codex, lineage: app.lineage, generation: app.state.generation, progress: app.progress, flowMin, hotMin };
 }
 
 // Announce anything newly earned. First run of a save just records what's already earned.

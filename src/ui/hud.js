@@ -1,5 +1,5 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf } from '../sim.js';
+import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf } from '../sim.js';
 import { atMarket, contractMinutesLeft, contractText, fmtLeft, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -70,6 +70,14 @@ export function updateHUD() {
   setBar('bar-sync', st.sync, st.sync < 20, 'low');
   setBar('bar-integrity', st.integrity, st.integrity < 30, 'low');
   setBar('bar-heat', st.heat, st.heat > 80, 'too hot');
+  const oc = overclocked(state) && isAlive(state);
+  const heatStat = $('bar-heat').closest('.stat');
+  heatStat.classList.toggle('oc', oc);
+  heatStat.querySelector('label').textContent = oc ? 'OC' : 'HEAT';
+  heatStat.title = oc
+    ? 'Overclocked: games and ICE run slower and wins find more, but losses cost Sync and Integrity, ICE bites harder and trouble comes more often.'
+    : 'Heat: running hot hurts it. Cool it down.';
+  if (oc) $('bar-heat').setAttribute('aria-valuetext', `${$('bar-heat').getAttribute('aria-valuetext')}, overclocked`);
   document.querySelectorAll('#cache-pips i').forEach((pip, i) => pip.classList.toggle('on', i < state.cache));
   $('cache-pips').setAttribute('aria-valuenow', state.cache);
   $('cache-pips').setAttribute('aria-valuetext', state.cache >= 3 ? `${state.cache} files, piling up` : `${state.cache} files`);
@@ -91,6 +99,7 @@ export function updateHUD() {
   if (state.nap) $('readout').textContent += ` · napping, ${fmtAge(napMinutesLeft(state))} left`;
   if (rebootMinutesLeft(state) > 0) $('readout').textContent += ` · rebooting, ${rebootMinutesLeft(state)}m left`;
   if (inFlow(state)) $('readout').textContent += ' · in flow';
+  if (oc) $('readout').textContent += ' · overclocked';
   $('btn-lights').textContent = state.lightsOn ? 'LIGHTS OFF' : 'LIGHTS ON';
   $('btn-nap').textContent = state.nap ? 'WAKE UP' : 'NAP';
   $('btn-nap').title = state.nap ? 'End the nap early' : napBlockReason(state) ?? `Rest for up to ${CFG.napMaxMin / 60}h: stats drain far slower`;

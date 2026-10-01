@@ -1,5 +1,5 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, log, tick, CFG, GAME_IDS } from '../sim.js';
+import { act, blockReason, gameSpeed, log, tick, CFG, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
@@ -236,6 +236,7 @@ function renderRegions() {
 function startGame(id) {
   app.session = new GameSession(id, {
     sound: (name) => sfx(name, app.state.quirk.pitch),
+    speed: gameSpeed(app.state),
     onFinish: (won) => {
       app.session = null;
       showPanel('controls');
@@ -277,6 +278,7 @@ function startDefense() {
   app.state.event.defending = true; // the intrusion's timer holds while the defense runs
   app.session = new GameSession(game, {
     sound: (name) => sfx(name, app.state.quirk.pitch),
+    speed: gameSpeed(app.state),
     onFinish: (won) => {
       app.session = null;
       if (app.state.event) delete app.state.event.defending;

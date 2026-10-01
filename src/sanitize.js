@@ -169,6 +169,7 @@ function cleanRun(raw, s, strict) {
     phase,
     pending,
     phased: bool(raw.phased),
+    hot: bool(raw.hot), // jacked in overclocked
     insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     insuredTimes: int(raw.insuredTimes, raw.insured === true ? 1 : 0, 0, 9), // how many times it paid out
     freePhases: int(raw.freePhases, raw.phased === true ? 1 : 0, 0, 9), // ICE a Glitch line slipped for certain
@@ -352,6 +353,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     stats: cleanStats(raw.stats),
     cache: int(raw.cache, 0, 0, CFG.maxCache),
     virus: bool(raw.virus),
+    hot: bool(raw.hot),
     virusMin: num(raw.virusMin, 0, 0),
     sinceFed: num(raw.sinceFed, CFG.digestMinutes, 0),
     asleep: bool(raw.asleep),
@@ -391,6 +393,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     lifeBonus: raw.lifeBonus === CFG.mainframeBonusMin ? CFG.mainframeBonusMin : 0,
     flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
     flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
+    hotTotalMin: int(raw.hotTotalMin, 0, 0, 30 * 24 * 60),
     chatter: cleanChatter(raw.chatter),
     runStats: {
       runs: int(runStats.runs, 0, 0),
@@ -468,6 +471,7 @@ export function cleanProgress(raw) {
     contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
+    hotMin: int(p.hotMin, 0, 0), // awake minutes overclocked over past lives (the same way)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
     ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)

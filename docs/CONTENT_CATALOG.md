@@ -61,7 +61,7 @@ Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`). Pr
 | Signal booster | Your next mini-game win counts double. Awake only | 15 |
 | Memory shard | Rewrites one of its quirks at random | 15 |
 | Repair kit | Restores 40 Integrity. Works while asleep | 15 |
-| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
+| Bypass chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
 | Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press | 25 |
 
 ## Mini-games
@@ -109,7 +109,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (10)
+### Effects (11)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -121,6 +121,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `curved` | Deep curve | Best Tune streak 10 | "hold the signal and never lose it." |
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
+| `heatwave` | Heatwave | 40 hours overclocked while awake, across lives (`progress.hotMin` plus the living `hotTotalMin`). Warm orange and magenta bands rising slowly up the screen; still with motion calmed | "run it hot for the better part of two days." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
 | `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 

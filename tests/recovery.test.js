@@ -167,7 +167,7 @@ test('a disconnect resets the clean-clear bonus', () => {
   assert.equal(runCooldownLeft(s), CFG.runCooldownMin.baby);
 });
 
-test('overclock chips cut the cooldown down to the floor, then refuse', () => {
+test('bypass chips (id overclock) cut the cooldown down to the floor, then refuse', () => {
   const s = booted();
   s.inventory = ['overclock', 'overclock', 'overclock'];
   assert.match(itemBlockReason(s, 0), /already open/);

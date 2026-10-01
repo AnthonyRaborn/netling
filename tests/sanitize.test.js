@@ -149,8 +149,8 @@ test('lineage records are repaired and still render', () => {
 
 test('progress, wardrobe, prefs, onboarding and lock fall back to safe shapes', () => {
   const progress = cleanProgress(JSON.parse('{"acts":{"corp":3,"scav":"x","__proto__":5},"streaks":{"breach":{"cur":2,"best":"x"},"fake":{}},"gamesPlayed":-4,"runs":{"jacked":2,"hacked":9}}'));
-  assert.deepEqual(progress, { runs: { jacked: 2 }, streaks: { breach: { cur: 2, best: 0 } }, acts: { corp: 3 }, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, sourceExits: 0, requestsMet: 0, contractsDone: 0, visitorsGreeted: 0, flowMin: 0, chatter: [] });
-  const empty = { gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, sourceExits: 0, requestsMet: 0, contractsDone: 0, visitorsGreeted: 0, flowMin: 0, chatter: [] };
+  assert.deepEqual(progress, { runs: { jacked: 2 }, streaks: { breach: { cur: 2, best: 0 } }, acts: { corp: 3 }, gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, sourceExits: 0, requestsMet: 0, contractsDone: 0, visitorsGreeted: 0, flowMin: 0, hotMin: 0, chatter: [] });
+  const empty = { gamesPlayed: 0, cleanJackouts: 0, deepExits: 0, sourceExits: 0, requestsMet: 0, contractsDone: 0, visitorsGreeted: 0, flowMin: 0, hotMin: 0, chatter: [] };
   assert.deepEqual(cleanProgress('lots'), { streaks: {}, acts: {}, ...empty });
   // Attention counters: numbers are clamped, and only known chatter ids survive (once each).
   const att = cleanProgress({ requestsMet: 7.6, visitorsGreeted: -1, flowMin: 'x', chatter: ['bit-hello', 'nope', 'bit-hello', 3] });

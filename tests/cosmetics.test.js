@@ -151,9 +151,11 @@ test('Guest pink: five visitors greeted', () => {
   assert.equal(earns({ progress: { visitorsGreeted: 5 } }, 'tint:guest'), true);
 });
 
-test('Aurora: a day in flow, counted across lives', () => {
+test('Aurora: a day in flow; Heatwave: 40 hours overclocked; both counted across lives', () => {
   assert.equal(earns({ progress: {}, flowMin: 24 * 60 - 1 }, 'effect:aurora'), false);
   assert.equal(earns({ progress: {}, flowMin: 24 * 60 }, 'effect:aurora'), true);
+  assert.equal(earns({ progress: {}, hotMin: 40 * 60 - 1 }, 'effect:heatwave'), false);
+  assert.equal(earns({ progress: {}, hotMin: 40 * 60 }, 'effect:heatwave'), true);
 });
 
 test('Speech mark: every line of one group heard', () => {

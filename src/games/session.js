@@ -10,10 +10,12 @@ export const GAMES = { breach: Breach, dodge: Dodge, tune: Tune, feast: Feast };
 const RESULT_SECONDS = 1.8;
 
 export class GameSession {
-  constructor(id, { rng = Math.random, sound = () => {}, onFinish }) {
+  // speed: how fast the game runs (below 1 while overclocked: everything moves and counts down slower).
+  constructor(id, { rng = Math.random, sound = () => {}, speed = 1, onFinish }) {
     this.Game = GAMES[id];
     this.id = id;
     this.sound = sound;
+    this.speed = speed;
     this.game = new this.Game(rng, sound);
     this.phase = 'intro';
     this.resultTime = 0;
@@ -41,7 +43,7 @@ export class GameSession {
 
   update(dt) {
     if (this.phase === 'play') {
-      this.game.update(dt);
+      this.game.update(dt * this.speed);
       if (this.game.done) {
         this.phase = 'result';
         this.sound(this.game.won ? 'win' : 'lose');
