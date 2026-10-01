@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 419 tests in 40 files. The smoke test has 70 scenarios (Playwright 1.56.1).
+`npm test` runs 420 tests in 40 files. The smoke test has 70 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -68,7 +68,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `notify.test.js` | 7 | Notification support, permission, service-worker delivery and fallback, the app badge, and quiet failure |
 | `wake.test.js` | 5 | The screen wake lock against a fake API: taken once while wanted, released, re-taken after the browser drops it, a refusal waits, missing support is quiet |
 | `migrations.test.js` | 8 | The upgrade runner, error cases, the frozen version 1 and version 2 fixtures, transfer codes across versions |
-| `source.test.js` | 13 | The Source and the Mainframe stage's netrun side, behind the switch: Root Access opens the stage, corrupted dex entries until then, the Source's place and locks, fragments and regions out of play while off, every Source map connected, NL-0's line, cosmetics on the original 22, and each mainframe upgrade |
+| `source.test.js` | 14 | The Source and the Mainframe stage's netrun side, behind the switch: Root Access opens the stage, corrupted dex entries until then, the Source's place and locks, fragments and regions out of play while off, every Source map connected, NL-0's line, cosmetics on the original 22, and each mainframe upgrade |
 | `mainframe.test.js` | 14 | The Mainframe stage behind its switch: forms and lines, the gate (age, feat, home, once), the switch off, feat first and age first, the extra day, the Deep exit counter, a mainframe keeping its line's ability, the level II trait, save cleaning, the lineage and dex, the stand-in art, visitors and chatter |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |

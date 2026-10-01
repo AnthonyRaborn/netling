@@ -33,7 +33,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 | Life length | The stage adds one day of life, because the feat is hard to reach. |
 | Root Access | It stays tied to the original 22 fragments. The new fragments give their own unlock. |
 | Root Access opens the stage | No netling can become a mainframe until Root Access has been earned in its line (`s.rootAccess`, or `s.rootCooling` for the generation resting after NL-0's rescue). |
-| Corrupted until Root Access | Every mention of a mainframe form (the dex now; the field manual, Archive and any hint in step 6) reads as corrupted data (`<<DATA CORRUpTED>>`) until Root Access is earned on the device; after that it shows the usual `???` and hint. |
+| Corrupted until Root Access | Every mention of a mainframe form (the dex now; the field manual, Archive and any hint in step 6) reads as corrupted data (`<<RECORD CORRUPTED>>`) until Root Access is earned on the device; after that it shows the usual `???` and hint. |
 | Lineage reward | A mainframe passes its trait at level II or higher (see [Lineage](#lineage)). |
 | The Source while locked | Not `???`: a corrupted, foreboding entry (see [Access](#access)). |
 | Fragment wording | The drafts stand, with NL-0's `deep-5` line ending "i will not go again." |
@@ -90,11 +90,11 @@ Each mainframe keeps its line's adult ability and adds one upgrade. Every upgrad
 
 | Line | Mainframe form | Why the name | Keeps | Mainframe upgrade (proposal, to measure) |
 |---|---|---|---|---|
-| Chrome | Plat (`plat`) | corp prestige tier, short like Stub and Init | credentials, corp insurance | Corp insurance twice a run instead of once |
-| Firewall | Airgap (`airgap`) | a machine cut off from every network: trusts nothing upstream, at the limit | ICE deals half damage | A lost ICE fight adds no Heat |
+| Chrome | Plat (`plat`) | corp prestige tier, short like Stub and Init | credentials, corp relays, corp insurance | Relays repair 40 instead of 20; corp insurance twice a run (step 5) |
+| Firewall | Airgap (`airgap`) | a machine cut off from every network: trusts nothing upstream, at the limit | ICE deals half damage | The first ICE fight it loses each run deals 30% of that (step 5; it replaced "a lost ICE fight adds no Heat") |
 | Daemon | Init (`init`) | PID 1, the first process | lookahead 2, +6 Integrity a move | Lookahead 3; +8 Integrity a move |
 | Glitch | Panic (`panic`) | a kernel panic; echoes the Kernel teen | phases the first ICE, 35% after | Phases the first two ICE |
-| Ghost | Whisper (`whisper`) | in Ghost in the Shell, characters act on what their ghost whispers to them | sees all, checkpoints never notice it, 45% ICE slip | ICE slip 55% |
+| Ghost | Whisper (`whisper`) | in Ghost in the Shell, characters act on what their ghost whispers to them | sees all, checkpoints never notice it, 45% ICE slip | ICE slip 50% (step 5) |
 
 Ghost's form keeps the Ghost in the Shell thread that runs from the Shell teen. Set aside along the way: Spark (an accessory already has the name), Null (`null` is a poor stored id), Vast (too generic), Rootkit, Major.
 
@@ -111,16 +111,16 @@ The Source is where the net was written from. It holds the original KERNEL code 
 - `REGION_ORDER` becomes `public, bazaar, corp, ruins, deep, source`, and `STAGE_ORDER` becomes `baby, teen, adult, mainframe`.
 - `minStage: 'mainframe'`, previous region `deep` (already required by the feat), and `requires: 'deep-5'`, the new Deep fragment (the same pattern as The Deep needing `ruins-4`).
 - `regionLock` needs its article fix for the new stage ("needs a mainframe netling").
-- **While locked, it does not show as `???`** (The Deep keeps `???`). It shows as a damaged entry, for example `<<SECTOR CORRUpTED>>`, with a blurb that reads as a warning, not a hint (draft: `do not open. do not open. do not`). It cannot be selected. Any motion in the label (characters swapping, a slow tear) toggles no faster than `FLASH_TOGGLE_MS` (CLAUDE.md rule 7) and is static under reduced motion.
+- **While locked, it does not show as `???`** (The Deep keeps `???`). It shows as a damaged entry, for example `<<SECTOR CORRUPTED>>`, with a blurb that reads as a warning, not a hint (draft: `do not open. do not open. do not`). It cannot be selected. Any motion in the label (characters swapping, a slow tear) toggles no faster than `FLASH_TOGGLE_MS` (CLAUDE.md rule 7) and is static under reduced motion.
 - When it opens, the entry repairs itself to `Source` once, with a log line (draft: `> sector integrity: restored. something down there noticed.`).
 - The exit message of The Deep never names it.
 
-### Proposed numbers (starting point for measurement)
+### Numbers (tuned in step 5)
 
 | | The Deep (now) | The Source (proposal) |
 |---|---|---|
-| Middle layers | 10 | 11 |
-| Node weights (cache / ICE / relay / anomaly) | 2 / 8 / 1 / 2 | 2 / 9 / 1 / 3 |
+| Middle layers | 10 | 13 |
+| Node weights (cache / ICE / relay / anomaly) | 2 / 8 / 1 / 2 | 2 / 11 / 1 / 3 |
 | Checkpoints, markets | none | none |
 | ICE damage | 50 | 52 |
 | Exit bonus items | 2 | 3 |
@@ -213,7 +213,7 @@ The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lin
 
 | What | Target (proposal) | Tool |
 |---|---|---|
-| Careful mainframes, disconnects in the Source | 22 to 30% (The Deep with adult abilities is 15 to 19%) | `tools/netrun-balance.mjs`, new `source.*` rows, 4000 runs each |
+| Careful mainframes, disconnects in the Source | 22 to 30% (The Deep with adult abilities is 15 to 19%). Met in step 5: 24 to 28% | `tools/netrun-balance.mjs`, new `source.*` rows, 4000 runs each |
 | Spread between mainframe forms in the Source | at most about 6 points | same |
 | Careful, no ability, in the Source | clearly worse than The Deep's 35%. This is a check, not a target. | same |
 | Mainframe upgrades in The Deep | must not make The Deep trivial: careful mainframes at 8% or more | same |
@@ -373,7 +373,7 @@ Each step is one commit that passes `npm test` on its own.
 2. **Names and text signed off.** Done: every id is decided, including the unlocks.
 3. **Sim and the exit counter.** Done, behind a switch (`CFG.mainframe`, off on main; see [Step 3 as built](#step-3-as-built)). The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 4. **Netrun.** Done, behind the same switch (see [Step 4 as built](#step-4-as-built)). `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
-5. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
+5. **Measure and tune.** Done (see [Step 5 as built](#step-5-as-built)). The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
 6. **UI, art, sound.** Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
 7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
 
@@ -400,8 +400,8 @@ Behind the same switch: while `CFG.mainframe` is off, the Source is not in the p
 
 - **Root Access opens the stage**: `rootEarnedIn(s)` (`s.rootAccess || s.rootCooling`) is part of `mainframeDue`.
 - **`codex.js`**: `deep-5` (last in The Deep) and `source-1` to `source-4`, each marked `mainframe`; `ROOT_FRAGMENT_IDS` and `ROOT_FRAGMENTS`, the 22 written out; `liveFragments()`; `rootUnlocked` on the 22. Corp gold and every region tint count only the 22 (`cosmetics.js`), so Abyss stays on `deep-1` to `deep-4`. The Archive and `app.js` check Root Access against the 22.
-- **`regions.js`**: `REGIONS.source` with the plan's starting numbers, `lockedName` `<<SECTOR CORRUpTED>>` and `lockedBlurb` "do not open. do not open. do not" (shown, static for now, instead of `???`), `shownRegions(on)`. The picker and the Archive codex use them.
-- **`run.js`**: the five upgrades as `RUN_CFG` numbers (`platInsurance` 2, `airgapIceHeat` 0, `initLookahead` 3, `initMoveRepair` 8, `panicFreePhases` 2, `whisperSlipChance` 0.55), with run counters `insuredTimes` and `freePhases` (cleaned in `sanitize.js`, falling back on the old flags for runs saved before them); `MAINFRAME_ABILITIES` for the dex; NL-0's line "i'll wait up here." when a run with Root Access goes down to the Source.
+- **`regions.js`**: `REGIONS.source` with the plan's starting numbers, `lockedName` `<<SECTOR CORRUPTED>>` and `lockedBlurb` "do not open. do not open. do not" (shown, static for now, instead of `???`), `shownRegions(on)`. The picker and the Archive codex use them.
+- **`run.js`**: the five upgrades as `RUN_CFG` numbers (`platInsurance` 2, `airgapIceHeat` 0, `initLookahead` 3, `initMoveRepair` 8, `panicFreePhases` 2, `whisperSlipChance` 0.55; step 5 changed several, see below), with run counters `insuredTimes` and `freePhases` (cleaned in `sanitize.js`, falling back on the old flags for runs saved before them); `MAINFRAME_ABILITIES` for the dex; NL-0's line "i'll wait up here." when a run with Root Access goes down to the Source.
 - **`archive.js`**: corrupted mainframe dex entries until Root Access (`dexEntries(dex, { rootEarned })`).
 - **Tools**: `netrun-balance.mjs` runs the five mainframe forms in The Deep and the Source and reports the share of runs that reach the exit (`exit`), beside disconnects. The balance tool's codex preset and lineage codex check use the 22.
 - **Tests**: `tests/source.test.js` (13), plus updates to the region-order, Root Access and smoke fixtures.
@@ -417,6 +417,35 @@ Behind the same switch: while `CFG.mainframe` is off, the Source is not in the p
 Against the targets: mainframes keep The Deep above 8% (met, 9 to 14%), but **the Source is too easy** for them: 14 to 19% disconnects against the 22 to 30% target. Their spread is fine on disconnects (5 points) but wide on exits (Plat 43%, Panic 65%). That is step 5's work.
 
 **Root Access in real lineages.** Lineage runs (`LIVES=4`) show what the Root Access requirement does: Root Access comes with the 22nd fragment, so attentive lineages reach the stage in their fourth life (25%) and never sooner, where without it they reached it from the second life (13%, then 51%, then 60%). The balance tool grants Root Access from the life after the codex completes; the game also grants it mid-life, so a fourth life can start earlier in practice.
+
+## Step 5 as built
+
+Tuned with a scratch script that set the Source's numbers and the upgrades in-process and ran each mainframe form 2000 to 4000 times, careful play; then confirmed with `tools/netrun-balance.mjs 4000`.
+
+**What changed from the starting numbers:**
+
+| | Starting point | Tuned |
+|---|---|---|
+| Source middle layers | 11 | 13 |
+| Source ICE weight | 9 | 11 |
+| Plat | insurance twice | insurance twice, and relays repair 40 (`platRelayRepair`) |
+| Airgap | a lost ICE fight adds no Heat | the first ICE fight it loses each run deals 30% of its halved damage (`airgapSoftLosses` 1, `airgapSoftMult` 0.3); Heat as anyone |
+| Whisper | ICE slip 55% | 50% |
+| Init, Panic | | unchanged (sight 3 and +8 a move; two certain phases) |
+
+What the tuning found: the Source was too easy at 11 layers (14 to 19% disconnects); length moves disconnects and exits together; Plat and Airgap reached far fewer exits than the others (26 to 27% against 41 to 45% at 13 layers), the same early banking Chrome had, and Airgap's no-Heat perk was worth more than it looked (Heat drives throttling), which pushed its Deep disconnects to 7%, under the floor. A softened first loss lifted Airgap's exits without that.
+
+**Result** (careful play, 4000 runs a row):
+
+| | Deep disconnects | Deep exit | Source disconnects | Source exit |
+|---|---|---|---|---|
+| No ability | 35% | 26% | 52% | 11% |
+| Adult forms (for comparison; they cannot enter) | 14 to 20% | 44 to 58% | 26 to 37% | 22 to 34% |
+| Plat / Airgap / Init / Panic / Whisper | 11 / 10 / 14 / 13 / 12% | 58 to 73% | 26 / 26 / 28 / 28 / 24% | 38 to 44% |
+
+Against the targets: Source disconnects 24 to 28% (target 22 to 30%, spread 4 points against about 6); mainframes in The Deep 10 to 14% (floor 8%); exits within 6 points of each other in the Source.
+
+**Whole lives with the stage on** (`CODEX=deep CFG='{"mainframe":true}'`, 500 lives each): 58 to 65% of steer and `steer-mainframe` lives become mainframes, and nearly all of those also reach the Source's exit before the end (55 to 64% of lives): `deep-5` drops at Deep exits during the same life, and a mainframe has about two days of runs. Adult form shares, full lives and every other baseline number are unchanged with the stage off.
 
 ## Risks
 

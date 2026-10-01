@@ -161,7 +161,7 @@ test('a mainframe keeps its line\'s netrun ability and can enter every region an
   const next = runOptions(s.run)[0];
   next.type = 'relay';
   moveTo(s, next.id, noRng);
-  assert.equal(s.stats.integrity, 40 + RUN_CFG.chromeRelayRepair, 'corp relays still patch it');
+  assert.equal(s.stats.integrity, 40 + RUN_CFG.platRelayRepair, 'corp relays still patch it, more than a Chrome');
   assert.equal(regionLock('ruins', 'mainframe', [], ['public', 'bazaar', 'corp']), null);
 });
 

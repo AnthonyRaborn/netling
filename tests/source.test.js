@@ -84,7 +84,7 @@ test('the Source: last on the way down, for a mainframe, behind The Deep and dee
   assert.match(regionLock('source', 'mainframe', ['deep-5'], REGION_ORDER.slice(0, 4)), /The Deep/);
   assert.equal(regionLock('source', 'mainframe', [], REGION_ORDER.slice(0, 5)), 'the way down is still hidden.');
   assert.equal(regionLock('source', 'mainframe', ['deep-5'], REGION_ORDER.slice(0, 5)), null);
-  assert.equal(REGIONS.source.lockedName, '<<SECTOR CORRUpTED>>', 'never shown as ???');
+  assert.equal(REGIONS.source.lockedName, '<<SECTOR CORRUPTED>>', 'never shown as ???');
   assert.ok(REGIONS.source.lockedBlurb);
   assert.ok(REGIONS.source.layers > REGIONS.deep.layers && REGIONS.source.iceDamage >= REGIONS.deep.iceDamage);
 });
@@ -158,16 +158,29 @@ test('Plat: corp insurance pays out twice a run (Chrome once)', () => {
   assert.equal(loseIce(c).result, 'disconnected', 'an adult Chrome: once');
 });
 
-test('Airgap: a lost ICE fight adds no Heat, and still deals half damage', () => {
+test('Airgap: the first ICE fight it loses each run barely scratches it; the next ones deal half damage', () => {
+  const half = Math.round(REGIONS.source.iceDamage * RUN_CFG.firewallIceMult);
   const s = netling('mainframe', 'airgap');
-  into(s, 'deep', 'cache');
+  into(s, 'source', 'cache');
   loseIce(s);
-  assert.equal(s.stats.heat, RUN_CFG.airgapIceHeat);
-  assert.equal(s.stats.integrity, 100 - Math.round(REGIONS.deep.iceDamage * RUN_CFG.firewallIceMult));
+  assert.equal(s.stats.integrity, 100 - Math.round(half * RUN_CFG.airgapSoftMult), 'softened');
+  loseIce(s);
+  assert.equal(s.stats.integrity, 100 - Math.round(half * RUN_CFG.airgapSoftMult) - half, 'then half damage, as a Firewall');
+  assert.equal(s.stats.heat, 2 * RUN_CFG.iceLossHeat, 'Heat as anyone');
   const f = netling('adult', 'firewall');
-  into(f, 'deep', 'cache');
+  into(f, 'source', 'cache');
   loseIce(f);
-  assert.equal(f.stats.heat, RUN_CFG.iceLossHeat);
+  assert.equal(f.stats.integrity, 100 - half, 'an adult Firewall is not softened');
+});
+
+test('Plat: relays patch it more than an adult Chrome', () => {
+  for (const [stage, form, repair] of [['mainframe', 'plat', RUN_CFG.platRelayRepair], ['adult', 'chrome', RUN_CFG.chromeRelayRepair]]) {
+    const s = netling(stage, form);
+    s.stats.integrity = 40;
+    moveTo(s, into(s, 'deep', 'relay').id, noRng);
+    assert.equal(s.stats.integrity, 40 + repair, form);
+  }
+  assert.ok(RUN_CFG.platRelayRepair > RUN_CFG.chromeRelayRepair);
 });
 
 test('Init: sees three steps ahead and repairs more with every move', () => {

@@ -146,7 +146,7 @@ export const dexOrder = () => DEX_ORDER.filter((id) => CFG.mainframe || !isMainf
 
 // Until Root Access is earned, mainframe forms read as corrupted data, not as ??? with a hint: NL-0 has not opened
 // that far yet. rootEarned: rootUnlocked() for this device.
-export const CORRUPTED = { name: '<<DATA CORRUpTED>>', text: 'read error at 0x00. the record will not open.' };
+export const CORRUPTED = { name: '<<RECORD CORRUPTED>>', text: 'read error at 0x00. the record will not open.' };
 
 export function dexEntries(dex, { rootEarned = false } = {}) {
   return dexOrder().map((id) => {

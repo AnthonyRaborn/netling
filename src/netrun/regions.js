@@ -72,18 +72,18 @@ export const REGIONS = {
     sound: { mult: 0.5, wave: 'sine' }, // low and far away
   },
   // The Mainframe stage's region (docs/SOURCE_PLAN.md): shown only while the stage is switched on. Harder than The Deep
-  // by distance and ICE count more than by ICE damage. Numbers are starting points for measurement.
+  // by distance and ICE count more than by ICE damage (tuned in build step 5: careful mainframes lose 24 to 28% of runs).
   source: {
     name: 'The Source',
     blurb: 'where the net was written from. read-only. quiet.',
-    lockedName: '<<SECTOR CORRUpTED>>', // shown instead of ??? while closed
+    lockedName: '<<SECTOR CORRUPTED>>', // shown instead of ??? while closed
     lockedBlurb: 'do not open. do not open. do not',
     minStage: 'mainframe',
     requires: 'deep-5',
     mainframe: true,
-    layers: 11,
+    layers: 13,
     width: [2, 3],
-    nodes: { cache: 2, ice: 9, relay: 1, anomaly: 3 },
+    nodes: { cache: 2, ice: 11, relay: 1, anomaly: 3 },
     loot: { overclock: 2, memory: 3, booster: 2, repair: 2, antivirus: 2, coolant: 2, blackice: 1, voucher: 1, segfault: 1 },
     iceDamage: 52,
     exitBonus: 3,
