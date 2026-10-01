@@ -109,7 +109,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (10)
+### Effects (11)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -121,6 +121,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `curved` | Deep curve | Best Tune streak 10 | "hold the signal and never lose it." |
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
+| `heatwave` | Heatwave | 40 hours overclocked while awake, across lives (`progress.hotMin` plus the living `hotTotalMin`). Warm orange and magenta bands rising slowly up the screen; still with motion calmed | "run it hot for the better part of two days." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
 | `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 

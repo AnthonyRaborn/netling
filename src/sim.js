@@ -46,6 +46,10 @@ export const CFG = {
   overclockStabilityPerHour: -0.2,
   flowStabilityPerHour: 0.2,
   flowEventMult: 0.75, // calm: in flow, trouble comes less often (the mirror of overclockEventMult)
+  // Either state draws visitors: a hot netling is fun to play with, a calm one is good company. This also
+  // makes up for the visit rolls an open event blocks.
+  overclockVisitMult: 1.25,
+  flowVisitMult: 1.25,
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
   // A five-day life. Each netling keeps the lengths it compiled with (s.life), so a change here
@@ -420,6 +424,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     lifeBonus: 0, // minutes of life gained (a mainframe's extra day)
     flowMin: 0, // minutes in a row in good shape, awake
     hot: false, // overclocked as of the last step, so crossing the line is logged once
+    hotTotalMin: 0, // awake minutes overclocked this life (the Heatwave effect counts these across lives)
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
@@ -648,7 +653,7 @@ function stepEvents(s, t, rng) {
     st.charge = clamp(st.charge + 10);
     s.lastSurgeAt = t;
     log(s, t, `> !! power surge. running hot.${segfaultDrop(s, rng)}`);
-  } else if (!s.visit && !s.run && rebootMinutesLeft(s) === 0 && rng() < CFG.visitChancePerHour / 60) {
+  } else if (!s.visit && !s.run && rebootMinutesLeft(s) === 0 && rng() < (visitMult(s) * CFG.visitChancePerHour) / 60) {
     startVisit(s, t, rng);
   }
 }
@@ -744,6 +749,7 @@ function answerRequest(s, action, game) {
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
 export const overclocked = (s) => s.stats.heat >= CFG.overclockHeat;
+const visitMult = (s) => (overclocked(s) ? CFG.overclockVisitMult : inFlow(s) ? CFG.flowVisitMult : 1);
 // How fast mini-games and ICE run: slower while overclocked.
 export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 
@@ -756,6 +762,7 @@ function stepFlow(s) {
 }
 
 function stepOverclock(s, t) {
+  if (overclocked(s) && !resting(s)) s.hotTotalMin++;
   if (overclocked(s) === s.hot) return;
   s.hot = !s.hot;
   log(s, t, s.hot ? '> !! overclocked. everything feels slower. mistakes cost more.' : '> clock speed back to spec.');
@@ -937,6 +944,7 @@ export function migrate(s) {
   s.lifeBonus ??= 0;
   s.flowMin ??= 0;
   s.hot ??= false;
+  s.hotTotalMin ??= 0;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;
   return s;

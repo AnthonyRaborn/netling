@@ -182,7 +182,7 @@ The UI runs the mini-game first, then calls `act('play', { game, won })`. The re
 
 ## Events
 
-At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); in flow they are 0.75x (`flowEventMult`, calm). The visitor's chance is never changed.
+At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); in flow they are 0.75x (`flowEventMult`, calm). The visitor's chance goes up in both (1.25x, `overclockVisitMult` and `flowVisitMult`), never down.
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
@@ -190,7 +190,7 @@ At most one timed event is open at a time (`state.event`). While one is open, no
 | **Intrusion** | 4% (not while infected) | 60 min | Virus, Integrity -10 | DEFEND (random mini-game) |
 | **Memory overflow** | 2% + 2% per cache file | 45 min | Integrity -15, cache set to 4, reboot for 20 min | PURGE |
 | **Power surge** | 3% | instant | Heat +25, Charge +10 | none |
-| **Visitor** | 6% (no event, no netrun, not rebooting) | 10 to 20 min | none | GREET (optional) |
+| **Visitor** | 6%, 7.5% while overclocked or in flow (no event, no netrun, not rebooting) | 10 to 20 min | none | GREET (optional) |
 
 Details:
 
@@ -225,6 +225,8 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 | A lost game costs | -6 Sync (`overclockLoseSync`) instead of +8, and -4 Integrity (`overclockLoseIntegrity`) | `act('play')` |
 | Events are likelier | 1.25x (`overclockEventMult`) | `stepEvents` |
 | It leans unstable | -0.2 stability per awake hour (`overclockStabilityPerHour`), in place of the uptime gain; 85+ keeps its own -1/hr instead | `step` |
+| Visitors are likelier | 1.25x (`overclockVisitMult`; flow has the same, `flowVisitMult`) | `stepEvents` |
+| Awake minutes overclocked are counted | `hotTotalMin`, banked across lives for the Heatwave effect (40 hours) | `stepOverclock`, `ui/style.js` |
 | A netrun jacked into overclocked | ICE runs at 0.85x and lost ICE deals 1.5x damage (`overclockIceDamageMult`) all run. Fixed at jack-in (`run.hot`): Heat gained on the way never switches it on | `startRun`, `resolveIce`, `iceSpeed()` |
 
 Crossing the line either way is logged once (`> !! overclocked. ...` and `> clock speed back to spec.`). The HUD's HEAT label reads OC, heat wisps rise off the sprite, and the netrun map shows OC by the region name.

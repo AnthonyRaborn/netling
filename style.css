@@ -1654,6 +1654,18 @@ body:has(#pad:not([hidden])) .update-bar {
     background-position: 100% 0;
   }
 }
+/* Heatwave: warm air rising off the board in slow bands. A drift, never a flash; calm mode holds it still. */
+.screen.fx-heatwave .fx-layer {
+  /* Two bands per screen; the tile ends on the color it starts with, so the loop has no seam. */
+  background: linear-gradient(to top, rgba(255, 159, 28, 0.12), rgba(255, 42, 109, 0.07) 18%, transparent 38%, transparent 62%, rgba(255, 42, 109, 0.07) 82%, rgba(255, 159, 28, 0.12)) 0 100% / 100% 50%;
+  animation: heatwave 9s linear infinite;
+}
+@keyframes heatwave {
+  /* From 100% to 0% moves exactly one tile (half the layer) up. */
+  to {
+    background-position: 0 0;
+  }
+}
 .fx-layer {
   position: absolute;
   inset: 0;

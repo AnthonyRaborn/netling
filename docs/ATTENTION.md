@@ -27,6 +27,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 |---|---|---|
 | sound | Purr | 25 requests answered |
 | effect | Aurora | 24 hours in flow, across lives |
+| effect | Heatwave | 40 hours overclocked while awake, across lives (its hot-side twin) |
 | tint | Guest pink | 5 visitors greeted |
 | crest | Speech mark | every chatter line of one group heard |
 | crest | Seal | 10 contracts completed, across lives |
@@ -42,7 +43,7 @@ Balance bots, 1000 lives each. They answer a request or greet a visitor only if 
 | worker | 0.6 | 0.2 | 0.0 | 0.8 |
 | neglectful | 0.0 | 0.0 | 0.0 | 0.1 |
 
-An attentive player earns Purr in about three lives and Aurora in about two; casual players rarely reach flow. Hourly check-ins catch about one visit a life.
+An attentive player earns Purr in about three lives and Aurora in about two (median 1.15 lives); casual players rarely reach flow. Heatwave asks 40 hours, not 24, because a player who runs hot spends more of each life overclocked than a cool one spends in flow (flow needs three good hours first): an attentive player who runs hot (`daredevil`) earns it at a median of 1.1 lives, `steer-glitch` (who stays at 65 to 72 Heat) at 2. Casual and worker players overclock 2 to 4 hours a life by accident, so it comes from choosing to run hot. Both overclocked and in flow, visitors are 1.25x likelier. Hourly check-ins catch about one visit a life.
 
 ## Daily check-in
 

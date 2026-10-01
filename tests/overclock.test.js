@@ -160,3 +160,32 @@ test('crossing the line is logged once each way, and the flag survives a save', 
   assert.match(s.log.at(-1).msg, /back to spec/);
   assert.equal(s.hot, false);
 });
+
+test('awake minutes overclocked are counted for the life (Heatwave); resting ones are not', () => {
+  const s = booted();
+  hot(s);
+  minutes(s, 10);
+  assert.equal(s.hotTotalMin, 10);
+  act(s, 'nap', s.lastTick);
+  minutes(s, 5);
+  assert.equal(s.hotTotalMin, 10);
+  assert.equal(cleanSave(JSON.parse(JSON.stringify(s)), s.lastTick).hotTotalMin, 10);
+});
+
+test('visitors are likelier while overclocked or in flow, never rarer', () => {
+  // No trace, intrusion, overflow or surge; then a visit roll between the usual chance and the raised one.
+  const visitRoll = (CFG.visitChancePerHour * (1 + CFG.overclockVisitMult)) / 2 / 60;
+  const seq = () => rolls(0.999, 0.999, 0.999, 0.999, 0.999, visitRoll);
+  const plain = booted();
+  minutes(plain, 1, seq());
+  assert.equal(plain.visit, null);
+  const h = booted();
+  hot(h);
+  minutes(h, 1, seq());
+  assert.ok(h.visit, 'overclocked');
+  const f = booted();
+  f.flowMin = CFG.flowAfterMin;
+  minutes(f, 1, rolls(0.999, 0.999, 0.999, 0.999, 0.999, (CFG.visitChancePerHour * (1 + CFG.flowVisitMult)) / 2 / 60));
+  assert.ok(f.visit, 'in flow');
+  assert.ok(CFG.overclockVisitMult >= 1 && CFG.flowVisitMult >= 1);
+});

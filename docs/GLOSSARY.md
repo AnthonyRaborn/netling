@@ -73,7 +73,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Field manual** | The in-game help dialog, built from live `CFG` values | `ui/onboarding.js` |
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
 | **Firewall Dodge** | Mini-game: slide between five lanes to avoid falling blocks for 15 seconds | `games/dodge.js` |
-| **Flow** | Three good hours in a row, awake: it glows, events are 25% rarer (calm), and stability builds twice as fast | `sim.js` `inFlow` |
+| **Flow** | Three good hours in a row, awake: it glows, events are 25% rarer (calm), visitors 25% likelier, and stability builds twice as fast | `sim.js` `inFlow` |
 | **Form** | A netling's body. Eight exist: Bitling, Kernel, Stub, Chrome, Firewall, Daemon, Glitch, Ghost | `sim.js` `SPECIES` |
 | **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait and its level, history, quirk, keepsake, scrip). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
 | **Gate (write gate)** | `canWrite` in `ui/app.js`: decides whether storage may be written | `ui/app.js` |
@@ -83,6 +83,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
 | **GREET** | Optional hello to a visitor, once per visit | `sim.js` |
 | **Heat** | Stat: rises when active. 65+ is overclocked, 85+ hurts Integrity, 100 is a fault | `sim.js` |
+| **Heatwave** | Screen effect: 40 hours overclocked while awake, across lives. The hot-side twin of Aurora | `cosmetics.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |
 | **HIDE** | Trace answer: reroute. Charge -10, Heat +10, leans indie | `sim.js` |
 | **History (trait history)** | The grandparent's trait, carried on at half strength beside the parent's (`history`). Adds to the trait when they match, under its cap | `sim.js` `traitStrength` |
@@ -116,7 +117,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Node** | A point on a netrun map: entry, cache, ICE, relay, checkpoint, market, anomaly, exit | `netrun/map.js` |
 | **Onboarding** | First-run flow: intro, readme (field manual), nudge, tutorial, done | `ui/onboarding.js` |
 | **Origin palette** | NL-0's color scheme. Only rolls for netlings compiled with Root Access | `sim.js` |
-| **Overclocked (OC)** | Heat 65+: mini-games and ICE (if jacked in overclocked) run 15% slower and wins drop items 1.5x as often, but a lost game costs Sync and Integrity, lost ICE bites 1.5x, events are 25% likelier, and awake time leans stability down | `sim.js` `overclocked`, `netrun/run.js` `run.hot` |
+| **Overclocked (OC)** | Heat 65+: mini-games and ICE (if jacked in overclocked) run 15% slower and wins drop items 1.5x as often, but a lost game costs Sync and Integrity, lost ICE bites 1.5x, events are 25% likelier, visitors too, and awake time leans stability down | `sim.js` `overclocked`, `netrun/run.js` `run.hot` |
 | **Packet Feast** | Mini-game: eat 15 clean packets in 20 seconds, two bad bites lose | `games/feast.js` |
 | **Palette** | The netling's colors, a quirk | `sim.js` |
 | **Persistent storage** | The browser's promise not to evict our data. Requested at boot | `ui/system.js` |

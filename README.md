@@ -53,7 +53,7 @@ Integrity heals on its own (5 an hour) whenever nothing is wrong, and faster (8 
 
 ### Running hot
 
-At 65 Heat and up it is **overclocked**: the HEAT label turns to **OC** and heat wisps rise off it. Overclocked, mini-games run 15% slower and wins turn up items more often, and a netrun you jack into overclocked slows its ICE fights too. The catch: a lost game costs Sync and Integrity instead of cheering it up, lost ICE hits harder, and trouble (traces, intrusions, overflows, surges) comes more often. Above 85 the usual overheating damage still applies on top. Running hot or keeping it cool also leans it one way or the other as it grows.
+At 65 Heat and up it is **overclocked**: the HEAT label turns to **OC** and heat wisps rise off it. Overclocked, mini-games run 15% slower and wins turn up items more often, and a netrun you jack into overclocked slows its ICE fights too. The catch: a lost game costs Sync and Integrity instead of cheering it up, lost ICE hits harder, and trouble (traces, intrusions, overflows, surges) comes more often. Visitors like a hot netling, though: they drop by more often. Above 85 the usual overheating damage still applies on top. Running hot or keeping it cool also leans it one way or the other as it grows.
 
 The line under the bars, the **readout**, shows the generation, its form, its age, its bedtime, its **faults** and its inherited **trait**.
 
@@ -86,7 +86,7 @@ None of these ever costs a fault; they are small rewards for checking in often.
 - **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
 - **Visitors**: say hello with **GREET** while one is here.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
-- **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often.
+- **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often and visitors drop by more.
 - **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
 - **Contracts**: while the uplink is ready and the app is open, a job for one netrun region may come in (reach the exit, get past some ICE, crack caches, buy at a market, bring back a fragment). It waits 6 hours; take it by jacking into that region. Every way through that run can meet it, and it pays scrip, sometimes an item.
 

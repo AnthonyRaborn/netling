@@ -303,6 +303,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     requestsMet: ctx.requestsMet ?? 0,
     greeted: ctx.greeted ?? 0,
     flowHours: (s.flowTotalMin ?? 0) / 60,
+    hotHours: (s.hotTotalMin ?? 0) / 60,
     chatterSeen: ctx.chatterSeen.size,
     // The planned Mainframe gate: when it would have been met (null: never), and the feat's history.
     gate: {
@@ -453,6 +454,7 @@ export function stats(results) {
       requestsMet: round(avg(results.map((r) => r.requestsMet)), 2),
       greeted: round(avg(results.map((r) => r.greeted)), 2),
       flowHours: round(avg(results.map((r) => r.flowHours)), 2),
+      hotHours: round(avg(results.map((r) => r.hotHours)), 2),
       chatterSeen: round(avg(results.map((r) => r.chatterSeen)), 2),
     },
     itemsHeld: round(avg(results.map((r) => r.itemsHeld)), 2),
@@ -539,7 +541,7 @@ function printLife(st, detail) {
   if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
   const at = st.attention;
-  console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
+  console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.hotHours.toFixed(1)}h overclocked, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
   console.log(`  netrun: ${st.netruns.runs.toFixed(1)} runs (${st.netruns.disconnects.toFixed(1)} disconnects), ${st.netruns.fragments.toFixed(1)} fragments, codex cap reached ${pct(st.netruns.codexCapped)}`);
   console.log(`  cleared: ${list(st.netruns.cleared)} · runs by region: ${Object.entries(st.netruns.byRegion).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
