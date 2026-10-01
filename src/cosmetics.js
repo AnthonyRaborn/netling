@@ -1,11 +1,12 @@
 // Wardrobe cosmetics: shell, screen tint, screen effect, sound pack, crest and music. Purely visual, shared across generations.
 // Each locked item shows only its hint; unlock checks read a progress context:
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits } }
-import { FRAGMENTS } from './netrun/codex.js';
+import { ROOT_FRAGMENTS } from './netrun/codex.js';
 import { FORMS, TRAITS, TRAIT_CFG } from './sim.js';
 import { CHATTER_GROUPS, chatterProgress } from './chatter.js';
 
-const regionDone = (ctx, region) => FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
+// A region's codex, counting only the original fragments (ROOT_FRAGMENTS), so the Mainframe stage's never move these goals.
+const regionDone = (ctx, region) => ROOT_FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
 const fullLives = (ctx) => ctx.lineage.filter((e) => e.cause === 'end of life cycle').length;
 function fullLifeStreak(ctx) {
   let best = 0;
@@ -64,7 +65,7 @@ export const COSMETICS = {
     { id: 'crimson', name: 'Daemon red', swatch: '#3a0a12', hint: 'raise one that never misses a cycle.', check: (c) => c.dex.includes('daemon') },
     { id: 'shifted', name: 'Glitch shift', swatch: '#1a3a4a', hint: 'raise one that lives on the edge.', check: (c) => c.dex.includes('glitch') },
     { id: 'clear', name: 'Ghost clear', swatch: 'rgba(200,200,255,0.25)', hint: 'raise the one nobody sees.', check: (c) => c.dex.includes('ghost') },
-    { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => FRAGMENTS.every((f) => c.codex.includes(f.id)) },
+    { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => ROOT_FRAGMENTS.every((f) => c.codex.includes(f.id)) },
     { id: 'holo', name: 'Holographic', swatch: 'linear-gradient(135deg,#ff2a6d,#05d9e8,#f9f002)', hint: 'see five lives through to the end.', check: (c) => fullLives(c) >= 5 },
   ],
   tint: [

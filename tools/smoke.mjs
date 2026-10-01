@@ -8,7 +8,7 @@ import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
-import { FRAGMENTS } from '../src/netrun/codex.js';
+import { FRAGMENTS, ROOT_FRAGMENTS } from '../src/netrun/codex.js';
 import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -970,7 +970,7 @@ await scenario('field manual shows root once the codex is complete', async ({ op
 });
 
 // As if a fragment had been added to the game since the codex was finished.
-const codexMissingOne = FRAGMENTS.slice(0, -1).map((f) => f.id);
+const codexMissingOne = ROOT_FRAGMENTS.slice(0, -1).map((f) => f.id); // one short of the 22 Root Access needs
 const helpTerms = async (page) => {
   await page.click('#open-help');
   return page.evaluate(() => [...document.querySelectorAll('#help-body dt')].map((d) => d.textContent));

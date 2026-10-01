@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 405 tests in 39 files. The smoke test has 70 scenarios (Playwright 1.56.1).
+`npm test` runs 419 tests in 40 files. The smoke test has 70 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -58,7 +58,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `archive.test.js` | 9 | Dex, death records, lineage rows, the family tree chain (links, gaps, the running netling's stats), back-compat |
 | `nap.test.js` | 7 | Naps: drain, duration, cooldown, blocking, bedtime override, persistence |
 | `transfer.test.js` | 7 | Round trip, whitespace tolerance, rejection messages, summary, rounding, per-key repair, size caps |
-| `root.test.js` | 6 | Root Access rescue rules, cooling, origin palette |
+| `root.test.js` | 11 | Root Access rescue rules, cooling, origin palette, Root Access on the original 22 only |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
 | `content.test.js` | 14 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game and the manifest load, install screenshots match their stated sizes |
@@ -68,6 +68,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `notify.test.js` | 7 | Notification support, permission, service-worker delivery and fallback, the app badge, and quiet failure |
 | `wake.test.js` | 5 | The screen wake lock against a fake API: taken once while wanted, released, re-taken after the browser drops it, a refusal waits, missing support is quiet |
 | `migrations.test.js` | 8 | The upgrade runner, error cases, the frozen version 1 and version 2 fixtures, transfer codes across versions |
+| `source.test.js` | 13 | The Source and the Mainframe stage's netrun side, behind the switch: Root Access opens the stage, corrupted dex entries until then, the Source's place and locks, fragments and regions out of play while off, every Source map connected, NL-0's line, cosmetics on the original 22, and each mainframe upgrade |
 | `mainframe.test.js` | 14 | The Mainframe stage behind its switch: forms and lines, the gate (age, feat, home, once), the switch off, feat first and age first, the extra day, the Deep exit counter, a mainframe keeping its line's ability, the level II trait, save cleaning, the lineage and dex, the stand-in art, visitors and chatter |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
@@ -163,7 +164,7 @@ Reference results are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#verified-facts).
 
 The bot answers checkpoints by lean (`corp`, `indie`, `mix`, `balance`; an indie player won't spend a voucher), buys the first market offer when Charge is over 50 unless the style says `shop: false`, and picks anomaly options from an `ANOMALY_PREFS` list (`random`, `risky`, `orderly`, `corp`, `indie`).
 
-`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. Styles include a weak baby and each adult form with its ability. `region` may be `all`, which prints the disconnect rate, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region. `JSON=1` prints JSON.
+`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. It also reports `exit`, the share of runs that reach the exit node (a relay jack-out is not one): disconnect rates alone hid that Chrome banked early. Styles include a weak baby, each adult form with its ability, and each mainframe form (`plat`, `airgap`, `init`, `panic`, `whisper`) with its line's ability and its upgrade. `region` may be `all`, which prints the disconnect and exit rates, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region, and the mainframe forms in The Deep and the Source. `JSON=1` prints JSON.
 
 ### `tools/balance-diff.mjs`
 

@@ -22,7 +22,7 @@ import {
   num,
   TEST_SPEEDS,
 } from '../sanitize.js';
-import { allFragmentsFound, rootUnlocked as rootUnlockedFor } from '../netrun/codex.js';
+import { allFragmentsFound, rootUnlocked as rootUnlockedFor, ROOT_FRAGMENTS } from '../netrun/codex.js';
 import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
@@ -168,7 +168,7 @@ export function loadAll() {
   migrate(state);
   // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
   // already covered, before it was recorded (boot writes it back to storage).
-  if (allFragmentsFound(app.codex) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
+  if (allFragmentsFound(app.codex, ROOT_FRAGMENTS) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
   app.state = state;
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;

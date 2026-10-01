@@ -1,9 +1,9 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
-import { PALETTES, SPECIES } from '../sim.js';
+import { PALETTES, SPECIES, CFG } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
-import { REGIONS, REGION_ORDER } from '../netrun/regions.js';
-import { allFragmentsFound, codexByRegion, fragmentById, FRAGMENTS } from '../netrun/codex.js';
+import { REGIONS, shownRegions } from '../netrun/regions.js';
+import { allFragmentsFound, codexByRegion, fragmentById, liveFragments, ROOT_FRAGMENTS } from '../netrun/codex.js';
 import { CHATTER, CHATTER_GROUPS, chatterProgress } from '../chatter.js';
 import { drawSprite, formSprite, paletteColors, DEAD_COLORS, LOCKED_COLORS } from '../sprites.js';
 import { sfx } from '../audio.js';
@@ -23,7 +23,7 @@ export function drainCodexInbox() {
   store.set(KEYS.codex, app.codex);
   if (fresh.length) flashStatus(`codex updated: ${fresh.map((id) => `"${fragmentById(id).title}"`).join(', ')}.`);
   checkUnlocks();
-  if (!wasEarned && allFragmentsFound(app.codex)) {
+  if (!wasEarned && allFragmentsFound(app.codex, ROOT_FRAGMENTS)) {
     app.progress.rootEarned = true; // earned for good: later fragments can't take it back
     store.set(KEYS.progress, app.progress);
     app.state.rootAccess = true; // the current netling is covered from this moment
@@ -172,14 +172,15 @@ function renderArchive() {
 
   renderWardrobe();
   $('codex-gift').hidden = !rootUnlocked();
-  const groups = codexByRegion(app.codex, REGION_ORDER);
-  $('codex-count').textContent = `${app.codex.length}/${FRAGMENTS.length}`;
+  const groups = codexByRegion(app.codex, shownRegions(CFG.mainframe));
+  const live = liveFragments();
+  $('codex-count').textContent = `${live.filter((f) => app.codex.includes(f.id)).length}/${live.length}`;
   $('codex-list').replaceChildren(
     ...groups.flatMap((g) => {
       const r = REGIONS[g.region];
       const secret = r.requires && !app.codex.includes(r.requires) && g.found === 0;
       const h = document.createElement('h3');
-      h.textContent = secret ? '??? ' : `${r.name.toUpperCase()} `;
+      h.textContent = secret ? `${r.lockedName ?? '???'} ` : `${r.name.toUpperCase()} `;
       const count = document.createElement('span');
       count.textContent = `${g.found}/${g.total}`;
       h.append(count);
@@ -202,7 +203,7 @@ function renderArchive() {
 
   renderChatter();
 
-  const entries = dexEntries(app.dex);
+  const entries = dexEntries(app.dex, { rootEarned: rootUnlocked() });
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
   $('dex-grid').replaceChildren(
     ...entries.map((e) =>

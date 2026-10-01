@@ -21,7 +21,7 @@ function adult(form = 'chrome') {
   const s = createScript({ now: T0, rng: mulberry32(1) });
   s.quirk.sleepOffset = 0;
   tick(s, T0 + CFG.bootMinutes * MIN, noRng);
-  Object.assign(s, { stage: 'adult', form, teenForm: 'kernel' });
+  Object.assign(s, { stage: 'adult', form, teenForm: 'kernel', rootAccess: true }); // the stage needs Root Access
   Object.assign(s.stats, { charge: 90, sync: 90, integrity: 100, heat: 10 });
   return s;
 }

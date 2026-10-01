@@ -34,8 +34,8 @@ function into(s, region, type, seed = 4) {
 
 // --- regions open in order ---
 
-test('the way down: Public Net, Darknet Bazaar, Corp Grid, Old Web Ruins, The Deep', () => {
-  assert.deepEqual(REGION_ORDER, ['public', 'bazaar', 'corp', 'ruins', 'deep']);
+test('the way down: Public Net, Darknet Bazaar, Corp Grid, Old Web Ruins, The Deep, then the Source', () => {
+  assert.deepEqual(REGION_ORDER, ['public', 'bazaar', 'corp', 'ruins', 'deep', 'source']);
 });
 
 test('a new netling can only enter the Public Net', () => {
@@ -94,7 +94,7 @@ test('only the exit clears a region: not a relay, a disconnect, or the tutorial'
 test('netlings from before the unlock order keep every region their stage allows', () => {
   assert.deepEqual(clearedForStage('baby'), ['public']);
   assert.deepEqual(clearedForStage('teen'), ['public', 'bazaar', 'corp']);
-  assert.deepEqual(clearedForStage('adult'), REGION_ORDER);
+  assert.deepEqual(clearedForStage('adult'), ['public', 'bazaar', 'corp', 'ruins', 'deep'], 'everything but the Source');
   assert.deepEqual(clearedForStage('script'), []);
   const s = pet('teen');
   delete s.cleared;
@@ -285,7 +285,7 @@ test('scrip, clears and the codex count survive a transfer code', async () => {
 test('every region still names a real next region, and none opens itself', () => {
   for (const [i, id] of REGION_ORDER.entries()) {
     assert.ok(REGIONS[id]);
-    if (i) assert.match(regionLock(id, 'adult', ['ruins-4'], REGION_ORDER.slice(0, i - 1)) ?? '', /first/);
+    if (i) assert.match(regionLock(id, 'mainframe', ['ruins-4', 'deep-5'], REGION_ORDER.slice(0, i - 1)) ?? '', /first/);
   }
 });
 

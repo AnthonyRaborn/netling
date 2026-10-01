@@ -12,7 +12,7 @@ const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, l
 const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
-const { FRAGMENTS } = await import('../src/netrun/codex.js');
+const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../src/netrun/codex.js');
 // When a mainframe's extended life would end (the planned stage; see docs/SOURCE_PLAN.md).
 const mainframeEnd = (s) => s.life.lifespan + CFG.mainframeBonusMin;
 const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
@@ -62,7 +62,7 @@ export const ARCHETYPES = {
 
 // Codex presets for CODEX=<name>: what every single life starts knowing.
 export const CODEX_PRESETS = {
-  deep: FRAGMENTS.map((f) => f.id),
+  deep: [...ROOT_FRAGMENT_IDS], // the original 22: everything Root Access needs, through The Deep
   ruins: FRAGMENTS.slice(0, FRAGMENTS.findIndex((f) => f.id === 'ruins-4') + 1).map((f) => f.id),
 };
 
@@ -514,7 +514,7 @@ export function simulateLine(p, seed, lives, { fragment = null } = {}) {
     const r = simulate(p, seed * 1000 + gen, { fragment, generation: gen, codex, rootAccess: codexLife !== null || Boolean(process.env.ROOT) });
     out.push(r);
     codex = r.codex;
-    if (codexLife === null && codex.length >= FRAGMENTS.length) codexLife = gen;
+    if (codexLife === null && ROOT_FRAGMENT_IDS.every((id) => codex.includes(id))) codexLife = gen;
     fragment = r.fragment;
   }
   return { lives: out, codexLife };
@@ -565,7 +565,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.env.CODEX && !preset) throw new Error(`CODEX must be one of: ${Object.keys(CODEX_PRESETS).join(', ')}`);
   if (preset && process.env.LIVES) throw new Error('CODEX is for single lives; LIVES carries the codex itself');
   // A complete codex means Root Access in the game, so the preset brings it along.
-  const presetRoot = preset ? preset.length >= FRAGMENTS.length || Boolean(process.env.ROOT) : undefined;
+  const presetRoot = preset ? ROOT_FRAGMENT_IDS.every((id) => preset.includes(id)) || Boolean(process.env.ROOT) : undefined;
   const parent = process.env.TRAIT ? parentOf(process.env.TRAIT, { level: Number(process.env.TRAIT_LEVEL ?? 1), history: process.env.HISTORY ?? null }) : null;
   const lives = Number(process.env.LIVES ?? 0);
   const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, codex: process.env.CODEX ?? null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };

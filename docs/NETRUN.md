@@ -223,7 +223,7 @@ Fragment sources: cache (15%), exit (60%, tutorial 100%), Echo anomaly (50%). `r
 
 A netling's memory holds at most 8 new fragments (`RUN_CFG.codexPerLife`), so the 22 take at least three generations however often a player runs (8 + 8 + 6). `pet.codexFound` counts the fragments banked this life; fragments in the current run hold a place while it lasts (`codexRoom(pet)`). Once it is full, a roll that would have found a fragment logs "a codex fragment, but its memory is full" and the fragment stays for the next generation. The counter starts at 0 for each new netling, and for netlings from before the cap. Measured (`tools/baseline/lineages.json`): attentive-style lineages finish the codex in life 3 or 4 (median 4), never sooner; casual lines rarely finish within 4 lives.
 
-Completing all 22 grants Root Access (see [SIMULATION.md](SIMULATION.md#root-access-nl-0)). The Deep opens when `ruins-4` is known. Full text is in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#codex-fragments).
+Completing all 22 grants Root Access (`ROOT_FRAGMENT_IDS`, written out so fragments added later never join them; the Mainframe stage's five, `deep-5` and `source-1` to `source-4`, are in the code but switched off with it, see [SOURCE_PLAN.md](SOURCE_PLAN.md)) (see [SIMULATION.md](SIMULATION.md#root-access-nl-0)). The Deep opens when `ruins-4` is known. Full text is in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#codex-fragments).
 
 ## Accessories in runs
 

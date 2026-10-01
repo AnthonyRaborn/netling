@@ -15,18 +15,27 @@ const STYLES = {
   daemon: { ...RUN_STYLES.careful, form: 'daemon' },
   glitch: { ...RUN_STYLES.careful, form: 'glitch' },
   ghost: { ...RUN_STYLES.careful, form: 'ghost' },
+  // Mainframe forms: their line's ability plus their upgrade (docs/SOURCE_PLAN.md). Measured in The Deep and the Source.
+  plat: { ...RUN_STYLES.careful, form: 'plat', stage: 'mainframe', lean: 'corp' },
+  airgap: { ...RUN_STYLES.careful, form: 'airgap', stage: 'mainframe', lean: 'indie' },
+  init: { ...RUN_STYLES.careful, form: 'init', stage: 'mainframe' },
+  panic: { ...RUN_STYLES.careful, form: 'panic', stage: 'mainframe' },
+  whisper: { ...RUN_STYLES.careful, form: 'whisper', stage: 'mainframe' },
 };
+const MAINFRAMES = ['plat', 'airgap', 'init', 'panic', 'whisper'];
 
 function play(style, seed, region = 'public') {
   const rng = mulberry32(seed);
   const pet = createScript({ now: 0, rng });
-  pet.stage = style.form || style.stage === 'adult' ? 'adult' : style.stage ?? 'baby';
+  pet.stage = style.stage === 'mainframe' ? 'mainframe' : style.form || style.stage === 'adult' ? 'adult' : style.stage ?? 'baby';
   if (style.form) pet.form = style.form;
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 }, style.start);
   const start = { ...pet.stats };
   playRun(pet, style, region, rng);
   return {
     result: pet.run.result,
+    // Reached the exit node (not a relay jack-out): disconnect rates alone once hid that Chrome banked early.
+    exit: pet.run.result === 'jacked' && pet.run.map.nodes.find((n) => n.id === pet.run.pos)?.type === 'exit',
     banked: pet.inventory.length,
     intSpent: start.integrity - pet.stats.integrity,
     chargeSpent: start.charge - pet.stats.charge,
@@ -46,6 +55,7 @@ function summary(rs) {
   return {
     jacked: share((r) => r.result === 'jacked'),
     disconnected: share((r) => r.result === 'disconnected'),
+    exit: share((r) => r.exit),
     items: avg('banked'),
     fragments: avg('fragments'),
     intSpent: avg('intSpent'),
@@ -61,12 +71,14 @@ if (region === 'all') {
   const { REGION_ORDER, REGIONS } = await import('../src/netrun/regions.js');
   const who = [['careful', STYLES.careful], ['skilled', STYLES.skilled], ...['chrome', 'firewall', 'daemon', 'glitch', 'ghost'].map((f) => [f, STYLES[f]])];
   for (const r of REGION_ORDER) {
-    for (const [name, style] of who) {
-      const st = { ...style, stage: REGIONS[r].minStage === 'teen' && !style.form ? 'teen' : 'adult' };
+    // Mainframe forms run where they matter: The Deep (they must not make it trivial) and the Source.
+    const here = r === 'deep' || r === 'source' ? [...who, ...MAINFRAMES.map((f) => [f, STYLES[f]])] : who;
+    for (const [name, style] of here) {
+      const st = { ...style, stage: style.stage === 'mainframe' ? 'mainframe' : REGIONS[r].minStage === 'teen' && !style.form ? 'teen' : 'adult' };
       const sum = summary(Array.from({ length: n }, (_, i) => play(st, i + 1, r)));
       report.archetypes[`${r}.${name}`] = sum;
       if (!process.env.JSON) {
-        console.log(`${r.padEnd(7)} ${name.padEnd(8)} disconnected ${pct(sum.disconnected).padStart(4)} · items ${sum.items.toFixed(2)} · fragments/run ${sum.fragments.toFixed(2)} · int spent ${sum.intSpent.toFixed(2)}`);
+        console.log(`${r.padEnd(7)} ${name.padEnd(8)} disconnected ${pct(sum.disconnected).padStart(4)} · exit ${pct(sum.exit).padStart(4)} · items ${sum.items.toFixed(2)} · fragments/run ${sum.fragments.toFixed(2)} · int spent ${sum.intSpent.toFixed(2)}`);
       }
     }
   }
@@ -76,7 +88,7 @@ if (region === 'all') {
     report.archetypes[name] = sum;
     if (!process.env.JSON) {
       console.log(
-        `${name.padEnd(8)} jacked ${pct(sum.jacked)} · disconnected ${pct(sum.disconnected)}` +
+        `${name.padEnd(8)} jacked ${pct(sum.jacked)} · disconnected ${pct(sum.disconnected)} · exit ${pct(sum.exit)}` +
           ` · items ${sum.items.toFixed(1)} · int spent ${sum.intSpent.toFixed(1)} · chg spent ${sum.chargeSpent.toFixed(1)}` +
           ` · lean a${sum.allegiance.toFixed(1)} s${sum.stability.toFixed(1)}`,
       );

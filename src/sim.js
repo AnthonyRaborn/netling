@@ -338,8 +338,11 @@ export const lifeEnd = (s) => s.life.lifespan + (s.lifeBonus ?? 0);
 // (s.deepExits, counted by run.js at jack-out), three of them or two clean ones.
 export const mainframeAt = (s) => s.life.lifespan - CFG.mainframeBeforeEndMin;
 export const mainframeFeat = (s) => (s.deepExits?.all ?? 0) >= CFG.mainframeExits || (s.deepExits?.clean ?? 0) >= CFG.mainframeCleanExits;
-// Whether it would recompile now (whether or not the stage is switched on): an adult, home, old enough, feat met.
-export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= mainframeAt(s) && mainframeFeat(s);
+// Whether it would recompile now (whether or not the stage is switched on): an adult, home, old enough, feat met,
+// with Root Access earned.
+// Root Access must have been earned in this line (NL-0 watches it, or rests after a rescue): the stage is NL-0's to open.
+export const rootEarnedIn = (s) => Boolean(s.rootAccess || s.rootCooling);
+export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= mainframeAt(s) && mainframeFeat(s) && rootEarnedIn(s);
 
 // A new generation: fresh quirk, with one quirk key copied from the fragment.
 // newForms: adult forms the player has never raised; they win ties a little more often.

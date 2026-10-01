@@ -1,6 +1,6 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
 import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, CFG, traitLabel, lineOf, isMainframeForm } from './sim.js';
-import { FORM_ABILITIES } from './netrun/run.js';
+import { FORM_ABILITIES, MAINFRAME_ABILITIES } from './netrun/run.js';
 
 export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost', 'plat', 'airgap', 'init', 'panic', 'whisper'];
 
@@ -144,10 +144,17 @@ export function lineageChain(lineage, current) {
 // Mainframe forms stay out of the dex until the stage is switched on (CFG.mainframe).
 export const dexOrder = () => DEX_ORDER.filter((id) => CFG.mainframe || !isMainframeForm(id));
 
-export function dexEntries(dex) {
+// Until Root Access is earned, mainframe forms read as corrupted data, not as ??? with a hint: NL-0 has not opened
+// that far yet. rootEarned: rootUnlocked() for this device.
+export const CORRUPTED = { name: '<<DATA CORRUpTED>>', text: 'read error at 0x00. the record will not open.' };
+
+export function dexEntries(dex, { rootEarned = false } = {}) {
   return dexOrder().map((id) => {
     const line = lineOf(id);
     const found = dex.includes(id);
+    if (isMainframeForm(id) && !found && !rootEarned) {
+      return { id, found, corrupted: true, name: CORRUPTED.name, stage: SPECIES[id].stage, text: CORRUPTED.text, perk: null, trait: null, keepsake: null, runAbility: null };
+    }
     return {
       id,
       found,
@@ -157,7 +164,7 @@ export function dexEntries(dex) {
       perk: found ? FORM_MODS[line]?.desc ?? null : null,
       trait: found && FORMS[line] ? TRAITS[FORMS[line].trait].name : null,
       keepsake: found && KEEPSAKES[line] ? ITEMS[KEEPSAKES[line]].name : null,
-      runAbility: found ? FORM_ABILITIES[line] ?? null : null,
+      runAbility: found ? [FORM_ABILITIES[line], MAINFRAME_ABILITIES[id]].filter(Boolean).join(' ') || null : null,
     };
   });
 }

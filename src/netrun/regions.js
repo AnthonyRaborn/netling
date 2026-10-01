@@ -71,6 +71,25 @@ export const REGIONS = {
     palette: { main: '#e8e8ff', accent: '#ff2a6d', bg: '#08081a' },
     sound: { mult: 0.5, wave: 'sine' }, // low and far away
   },
+  // The Mainframe stage's region (docs/SOURCE_PLAN.md): shown only while the stage is switched on. Harder than The Deep
+  // by distance and ICE count more than by ICE damage. Numbers are starting points for measurement.
+  source: {
+    name: 'The Source',
+    blurb: 'where the net was written from. read-only. quiet.',
+    lockedName: '<<SECTOR CORRUpTED>>', // shown instead of ??? while closed
+    lockedBlurb: 'do not open. do not open. do not',
+    minStage: 'mainframe',
+    requires: 'deep-5',
+    mainframe: true,
+    layers: 11,
+    width: [2, 3],
+    nodes: { cache: 2, ice: 9, relay: 1, anomaly: 3 },
+    loot: { overclock: 2, memory: 3, booster: 2, repair: 2, antivirus: 2, coolant: 2, blackice: 1, voucher: 1, segfault: 1 },
+    iceDamage: 52,
+    exitBonus: 3,
+    palette: { main: '#f4f4f4', accent: '#ff2a6d', bg: '#000000' },
+    sound: { mult: 0.4, wave: 'triangle' }, // clean and very low
+  },
 };
 
 // The first-run tutorial: a fixed, gentle map inside the Public Net. Not in the region picker.
@@ -88,7 +107,10 @@ REGIONS.tutorial = {
 };
 
 // The way down: each region opens once this netling has reached the exit of the one before it.
-export const REGION_ORDER = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
+export const REGION_ORDER = ['public', 'bazaar', 'corp', 'ruins', 'deep', 'source'];
+// The regions in play: every one, or all but the Mainframe stage's while it is switched off (pass CFG.mainframe;
+// this file imports nothing).
+export const shownRegions = (mainframeOn) => REGION_ORDER.filter((id) => mainframeOn || !REGIONS[id].mainframe);
 export const STAGE_ORDER = ['baby', 'teen', 'adult', 'mainframe'];
 
 export const previousRegion = (region) => REGION_ORDER[REGION_ORDER.indexOf(region) - 1] ?? null;

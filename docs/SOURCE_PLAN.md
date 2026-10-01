@@ -32,6 +32,8 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 | How many forms | One for each adult form: five new forms, each keeping its line's identity and ability. |
 | Life length | The stage adds one day of life, because the feat is hard to reach. |
 | Root Access | It stays tied to the original 22 fragments. The new fragments give their own unlock. |
+| Root Access opens the stage | No netling can become a mainframe until Root Access has been earned in its line (`s.rootAccess`, or `s.rootCooling` for the generation resting after NL-0's rescue). |
+| Corrupted until Root Access | Every mention of a mainframe form (the dex now; the field manual, Archive and any hint in step 6) reads as corrupted data (`<<DATA CORRUpTED>>`) until Root Access is earned on the device; after that it shows the usual `???` and hint. |
 | Lineage reward | A mainframe passes its trait at level II or higher (see [Lineage](#lineage)). |
 | The Source while locked | Not `???`: a corrupted, foreboding entry (see [Access](#access)). |
 | Fragment wording | The drafts stand, with NL-0's `deep-5` line ending "i will not go again." |
@@ -370,7 +372,7 @@ Each step is one commit that passes `npm test` on its own.
 1. **The Chrome corp-relay fix.** Done, as its own change to the current game. The gate test re-run with the real rule matches the prototype.
 2. **Names and text signed off.** Done: every id is decided, including the unlocks.
 3. **Sim and the exit counter.** Done, behind a switch (`CFG.mainframe`, off on main; see [Step 3 as built](#step-3-as-built)). The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
-4. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
+4. **Netrun.** Done, behind the same switch (see [Step 4 as built](#step-4-as-built)). `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 5. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
 6. **UI, art, sound.** Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
 7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
@@ -391,6 +393,30 @@ The stage is in the rules and switched off: `CFG.mainframe` is `false`, so no ne
 Measured: with the switch off, all three baselines are byte-identical. With it on (`CODEX=deep`, `steer-mainframe`, 300 lives): 61% recompile, median life 6.0 days, 1.1 days a life as a mainframe on average.
 
 The mainframe upgrades (the second column of [The five forms](#the-five-forms)) are not built: a mainframe has exactly its line's ability until step 4.
+
+## Step 4 as built
+
+Behind the same switch: while `CFG.mainframe` is off, the Source is not in the picker or the codex (`shownRegions(false)`), the five new fragments never drop or count (`liveFragments()`), and the dex leaves the mainframe forms out.
+
+- **Root Access opens the stage**: `rootEarnedIn(s)` (`s.rootAccess || s.rootCooling`) is part of `mainframeDue`.
+- **`codex.js`**: `deep-5` (last in The Deep) and `source-1` to `source-4`, each marked `mainframe`; `ROOT_FRAGMENT_IDS` and `ROOT_FRAGMENTS`, the 22 written out; `liveFragments()`; `rootUnlocked` on the 22. Corp gold and every region tint count only the 22 (`cosmetics.js`), so Abyss stays on `deep-1` to `deep-4`. The Archive and `app.js` check Root Access against the 22.
+- **`regions.js`**: `REGIONS.source` with the plan's starting numbers, `lockedName` `<<SECTOR CORRUpTED>>` and `lockedBlurb` "do not open. do not open. do not" (shown, static for now, instead of `???`), `shownRegions(on)`. The picker and the Archive codex use them.
+- **`run.js`**: the five upgrades as `RUN_CFG` numbers (`platInsurance` 2, `airgapIceHeat` 0, `initLookahead` 3, `initMoveRepair` 8, `panicFreePhases` 2, `whisperSlipChance` 0.55), with run counters `insuredTimes` and `freePhases` (cleaned in `sanitize.js`, falling back on the old flags for runs saved before them); `MAINFRAME_ABILITIES` for the dex; NL-0's line "i'll wait up here." when a run with Root Access goes down to the Source.
+- **`archive.js`**: corrupted mainframe dex entries until Root Access (`dexEntries(dex, { rootEarned })`).
+- **Tools**: `netrun-balance.mjs` runs the five mainframe forms in The Deep and the Source and reports the share of runs that reach the exit (`exit`), beside disconnects. The balance tool's codex preset and lineage codex check use the 22.
+- **Tests**: `tests/source.test.js` (13), plus updates to the region-order, Root Access and smoke fixtures.
+
+**First measurement** (careful play, 4000 runs a row, the plan's starting numbers):
+
+| | Disconnects in The Deep | Exit in The Deep | Disconnects in the Source | Exit in the Source |
+|---|---|---|---|---|
+| No ability | 35% | 26% | 40% | 21% |
+| Adult forms | 14 to 20% | 44 to 58% | 18 to 26% | 37 to 50% |
+| Mainframe forms | 9 to 14% | 50 to 73% | 14 to 19% | 43 to 65% |
+
+Against the targets: mainframes keep The Deep above 8% (met, 9 to 14%), but **the Source is too easy** for them: 14 to 19% disconnects against the 22 to 30% target. Their spread is fine on disconnects (5 points) but wide on exits (Plat 43%, Panic 65%). That is step 5's work.
+
+**Root Access in real lineages.** Lineage runs (`LIVES=4`) show what the Root Access requirement does: Root Access comes with the 22nd fragment, so attentive lineages reach the stage in their fourth life (25%) and never sooner, where without it they reached it from the second life (13%, then 51%, then 60%). The balance tool grants Root Access from the life after the codex completes; the game also grants it mid-life, so a fourth life can start earlier in practice.
 
 ## Risks
 
