@@ -26,7 +26,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 |---|---|
 | The stage's name | **Mainframe**, id `mainframe`. Baby, teen and adult keep their names. |
 | How the stage is reached | Time plus a feat. It must reach an age and also meet a condition in this life; otherwise it stays an adult. The age half is the start of the last ordinary day (96 hours in a 5-day life), so a mainframe can have up to two days. |
-| Form names | Plat (Chrome), Airgap (Firewall), Init (Daemon), Panic (Glitch). Ghost's is open. |
+| Form names | Plat (Chrome), Airgap (Firewall), Init (Daemon), Panic (Glitch), Whisper (Ghost). |
 | Testing the gate | A measurement in the balance tools comes first, before any game code (see [The gate test](#the-gate-test)). |
 | How many forms | One for each adult form: five new forms, each keeping its line's identity and ability. |
 | Life length | The stage adds one day of life, because the feat is hard to reach. |
@@ -39,8 +39,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 
 ## Still to decide
 
-1. **Ghost's mainframe form.** The name and id are still open (see [The five forms](#the-five-forms)).
-2. **Whether the gate holds up.** The [gate test](#the-gate-test) runs before anything is built. Its numbers may move the age half or the feat.
+1. **Whether the gate holds up.** The [gate test](#the-gate-test) runs before anything is built. Its numbers may move the age half or the feat.
 
 ## The stage
 
@@ -92,9 +91,9 @@ Each mainframe keeps its line's adult ability and adds one upgrade. Every upgrad
 | Firewall | Airgap (`airgap`) | a machine cut off from every network: trusts nothing upstream, at the limit | ICE deals half damage | A lost ICE fight adds no Heat |
 | Daemon | Init (`init`) | PID 1, the first process | lookahead 2, +6 Integrity a move | Lookahead 3; +8 Integrity a move |
 | Glitch | Panic (`panic`) | a kernel panic; echoes the Kernel teen | phases the first ICE, 35% after | Phases the first two ICE |
-| Ghost | *open* | candidates below | sees all, checkpoints never notice it, 45% ICE slip | ICE slip 55% |
+| Ghost | Whisper (`whisper`) | in Ghost in the Shell, characters act on what their ghost whispers to them | sees all, checkpoints never notice it, 45% ICE slip | ICE slip 55% |
 
-Ghost's form needs a name that keeps the Ghost in the Shell thread. Set aside: Spark (an accessory already has the name), Null (fine as a name, but `null` is a poor stored id), Vast (too generic and too deep a reference). Candidates, none of which clash with a player-facing name (Major appears only as a music scale constant): Rootkit (software that runs unseen, below everything), Major (the Ghost in the Shell lead; reads as a rank to anyone who misses it), Wraith, Phantom, Specter.
+Ghost's form keeps the Ghost in the Shell thread that runs from the Shell teen. Set aside along the way: Spark (an accessory already has the name), Null (`null` is a poor stored id), Vast (too generic), Rootkit, Major.
 
 What the upgrades should do: bring careful mainframes in the Source into the target band below, with no form more than about 6 points from the others. The balance run decides the numbers. The Deep's pass 2 showed that raising ICE damage pulls abilities apart, so the Source should be harder mainly by distance and ICE count (below), with the upgrades tuned to match.
 
@@ -263,7 +262,7 @@ A starting checklist. Before building, grep for `'adult'`, `STAGE_ORDER`, `FORMS
 Each step is one commit that passes `npm test` on its own.
 
 0. **The gate test.** Tools only, as above. Report the numbers before any game code.
-1. **Names and text signed off.** Ghost's form name and id, and the unlock ids. Nothing is built before this, because ids are permanent.
+1. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
 2. **Sim.** The stage, the gate, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. Tests: the gate in each order (feat first or age first), not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 3. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 4. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
