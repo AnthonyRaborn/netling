@@ -1479,14 +1479,23 @@ await scenario('music: the DEV row forces a track and a state', async ({ open })
 // --- the Mainframe stage and the Source ---
 
 const DEEP_CLEARED = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
+// Text as stored, not as a blink has garbled it for the moment (ui/corrupt.js keeps the real text in data-text).
+const unblinked = (page, sel) =>
+  page.$$eval(sel, (els) =>
+    els.map((el) => {
+      const c = el.cloneNode(true);
+      for (const e of [c, ...c.querySelectorAll('.corrupt')]) if (e.dataset?.text && e.classList.contains('corrupt')) e.textContent = e.dataset.text;
+      return c.textContent;
+    }),
+  );
 const regionNames = async (page) => {
   await page.click('#btn-netrun');
-  return page.locator('#region-list .rname').allTextContents();
+  return unblinked(page, '#region-list .rname');
 };
 const dexRows = async (page) => {
   await page.click('#open-archive');
   await page.click('#tab-btn-dex');
-  return page.locator('#dex-grid li').allTextContents();
+  return unblinked(page, '#dex-grid li');
 };
 
 await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
@@ -1503,6 +1512,21 @@ await scenario('mainframe: before Root Access, the Source and the new forms read
   const corrupted = rows.filter((r) => r.includes('<<RECORD CORRUPTED>>'));
   assert(corrupted.length === 5, `expected five corrupted records: ${corrupted.length}`);
   assert(!corrupted.some((r) => /mainframe|hint/.test(r)), `a corrupted record gives something away: ${corrupted[0]}`);
+  // They blink: the name garbles for a moment and the static re-rolls; with motion calmed, nothing moves.
+  const staticNow = () => page.evaluate(() => [...document.querySelectorAll('#dex-grid canvas.static')].map((c) => c.toDataURL()).join());
+  const before = await staticNow();
+  const garbled = await (
+    await page.waitForFunction(() => document.querySelector('#dex-grid .corrupt.glitching')?.textContent, null, { timeout: 7000, polling: 50 })
+  ).jsonValue();
+  assert(garbled !== '<<RECORD CORRUPTED>>' && /[░▒▓█0-9]/.test(garbled), `the blink did not garble the name: ${garbled}`);
+  await page.waitForTimeout(600);
+  assert((await page.textContent('#dex-grid .corrupt')) === '<<RECORD CORRUPTED>>', 'the name did not come back after the blink');
+  assert((await staticNow()) !== before, 'the static did not re-roll');
+  await page.evaluate(() => document.body.classList.add('calm'));
+  const calmBefore = await staticNow();
+  await page.waitForTimeout(3600);
+  assert(!(await page.locator('#dex-grid .corrupt.glitching').count()) && (await staticNow()) === calmBefore, 'it blinks with motion calmed');
+  await page.evaluate(() => document.body.classList.remove('calm'));
   await page.keyboard.press('Escape');
   const terms = await helpTerms(page);
   assert(terms.includes('0x00') && !terms.includes('mainframe'), `the field manual names the stage: ${terms}`);
@@ -1518,7 +1542,7 @@ await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ?
   // The first time it opens, the entry repairs itself once.
   assert(names[5] === '<<SECTOR CORRUPTED>>', `no repair to watch: ${names}`);
   await page.waitForTimeout(1900);
-  assert((await page.locator('#region-list .rname').nth(5).textContent()) === 'THE SOURCE', 'the Source did not repair itself');
+  assert((await unblinked(page, '#region-list .rname'))[5] === 'THE SOURCE', 'the Source did not repair itself');
   assert(!(await page.locator('#region-list button').nth(5).isDisabled()), 'the Source is closed to a mainframe');
   assert((await saved(page, 'netling.progress'))?.sourceSeen === true, 'the repair is not remembered');
   assert(/sector integrity: restored/.test(await page.textContent('#log')), 'no log line for the repair');

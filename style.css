@@ -899,25 +899,15 @@ button:active {
   font-size: 20px;
 }
 
-/* A sector that should not be opened (the Source while it is hidden): its name slips sideways and back once every 3.2
-   seconds. Two changes 0.4 s apart, well under the three-a-second limit (CLAUDE.md rule 7); still under calm motion. */
+/* Corrupted records and sectors (the Source while locked, mainframe forms until Root Access). ui/corrupt.js adds
+   .glitching for 0.4 s every 3.2 s: the text slips sideways in pink while some letters turn to block glyphs. Two changes
+   0.4 s apart, well under the three-a-second limit (CLAUDE.md rule 7); with motion calmed it never blinks. */
 .corrupt {
   display: inline-block;
-  animation: corrupt 3.2s steps(1) infinite;
 }
-@keyframes corrupt {
-  0% {
-    transform: none;
-    color: inherit;
-  }
-  84% {
-    transform: translateX(2px) skewX(-8deg);
-    color: var(--magenta);
-  }
-  96% {
-    transform: none;
-    color: inherit;
-  }
+.corrupt.glitching {
+  transform: translateX(2px) skewX(-8deg);
+  color: var(--magenta);
 }
 
 .region .rmeta {
