@@ -25,10 +25,10 @@
     "public.chrome": {
       "jacked": 0.989,
       "disconnected": 0.011,
-      "items": 1.94,
-      "fragments": 0.8,
-      "intSpent": 10.82,
-      "chargeSpent": 12.96,
+      "items": 2.08,
+      "fragments": 0.86,
+      "intSpent": 2.35,
+      "chargeSpent": 13.96,
       "allegiance": 0.02,
       "stability": -0.09
     },
@@ -93,14 +93,14 @@
       "stability": -0.13
     },
     "bazaar.chrome": {
-      "jacked": 0.987,
-      "disconnected": 0.013,
-      "items": 1.8,
-      "fragments": 0.79,
-      "intSpent": 11.21,
-      "chargeSpent": 15.29,
-      "allegiance": 0.01,
-      "stability": -0.13
+      "jacked": 0.986,
+      "disconnected": 0.014,
+      "items": 1.95,
+      "fragments": 0.85,
+      "intSpent": 2.01,
+      "chargeSpent": 16.45,
+      "allegiance": 0,
+      "stability": -0.14
     },
     "bazaar.firewall": {
       "jacked": 0.994,
@@ -163,12 +163,12 @@
       "stability": -0.07
     },
     "corp.chrome": {
-      "jacked": 0.977,
-      "disconnected": 0.023,
-      "items": 1.81,
-      "fragments": 0.74,
-      "intSpent": 13.57,
-      "chargeSpent": 14.29,
+      "jacked": 0.976,
+      "disconnected": 0.024,
+      "items": 2.02,
+      "fragments": 0.85,
+      "intSpent": 4.73,
+      "chargeSpent": 15.92,
       "allegiance": 0.01,
       "stability": -0.09
     },
@@ -233,14 +233,14 @@
       "stability": -0.22
     },
     "ruins.chrome": {
-      "jacked": 0.972,
-      "disconnected": 0.028,
-      "items": 3,
-      "fragments": 0.86,
-      "intSpent": 14.98,
-      "chargeSpent": 14.44,
+      "jacked": 0.973,
+      "disconnected": 0.027,
+      "items": 3.28,
+      "fragments": 0.94,
+      "intSpent": 6.76,
+      "chargeSpent": 15.61,
       "allegiance": -0.03,
-      "stability": -0.21
+      "stability": -0.22
     },
     "ruins.firewall": {
       "jacked": 0.988,
@@ -303,14 +303,14 @@
       "stability": -0.37
     },
     "deep.chrome": {
-      "jacked": 0.815,
-      "disconnected": 0.185,
-      "items": 1.7,
-      "fragments": 0.43,
-      "intSpent": 28.92,
-      "chargeSpent": 12.8,
-      "allegiance": 0.01,
-      "stability": -0.33
+      "jacked": 0.793,
+      "disconnected": 0.207,
+      "items": 2.07,
+      "fragments": 0.54,
+      "intSpent": 22.95,
+      "chargeSpent": 15.15,
+      "allegiance": 0,
+      "stability": -0.37
     },
     "deep.firewall": {
       "jacked": 0.854,

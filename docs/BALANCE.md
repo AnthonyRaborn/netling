@@ -30,7 +30,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 - At most 8 codex fragments per life (`RUN_CFG.codexPerLife`).
 - The Deep has 10 middle layers.
 - ICE damage: Bazaar 40, Corp Grid 35, Ruins 48.
-- Second abilities: Chrome's corp insurance (once a run, a blow that would disconnect it leaves it at 12 Integrity), Daemon repairs 6 Integrity per move, Glitch phases each later ICE 35% of the time, Ghost goes unnoticed by 45% of ICE. Firewall is unchanged.
+- Second abilities: Chrome's corp insurance (once a run, a blow that would disconnect it leaves it at 12 Integrity) and corp relays (every relay repairs it 20 Integrity, added after it was found to bank at relays far more than other forms), Daemon repairs 6 Integrity per move, Glitch phases each later ICE 35% of the time, Ghost goes unnoticed by 45% of ICE. Firewall is unchanged.
 - Chrome's credentials only matter where there are checkpoints (Public Net and Corp Grid).
 
 **Corpo scrip.** Each netling holds up to 100. Item prices are 15, 25 and 50 by rarity; selling pays half at a market and a quarter anywhere else. A market purchase costs scrip plus the old Charge price (12, or 10 in the Bazaar); accessories cost 25 or 50 scrip plus 20 Charge. Half the scrip (rounded down) passes to the next generation. A find that meets a full inventory is scrapped for a quarter of its price. Loose scrip: 3 at every exit and 3 in 30% of empty caches.
@@ -51,7 +51,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 
 - **Passive stability gain**: lowering it was raised and never decided.
 - **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): parked. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
-- **A fourth life stage**: parked for a possible expansion.
+- **A fourth life stage**: planned, not built. The plan is in [SOURCE_PLAN.md](SOURCE_PLAN.md): a Mainframe stage reached by age plus clearing The Deep, one Mainframe form per adult form, one extra day of life, and a last region, the Source.
 
 ## Working on balance
 

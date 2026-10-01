@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 388 tests in 38 files. The smoke test has 70 scenarios (Playwright 1.56.1).
+`npm test` runs 391 tests in 38 files. The smoke test has 70 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -71,10 +71,10 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 29 and 4, the Shell's 3 each, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
-| `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
+| `progression.test.js` | 28 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Chrome's corp relays, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
 | `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
 | `zone.test.js` | 5 | the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
-| `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
+| `tools.test.js` | 10 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff, the planned Mainframe gate's rule, and the gate probe (codex presets, and a reported gate that agrees with the rule) |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
 
@@ -130,10 +130,13 @@ Simulates `runs` lifetimes (default 300) for each **archetype**: scripted player
 | `daredevil` | Attentive, but takes every risk that costs no fault: plays hot, Overclock rigs, SALVAGE, RAID |
 | `steer-chrome`, `steer-firewall`, `steer-daemon`, `steer-glitch` | Attentive players choosing everything (diet, traces, checkpoints, anomalies, markets) for one adult form. Ghost's is `ghosthunter` |
 | `steer-stub` | Attentive, but lets Charge and Sync run out as a baby until 3 faults have landed, for a Stub teen |
+| `steer-mainframe` | Attentive and careful in runs, but jacks in at every chance (`eager`), to reach The Deep's exit as an adult: the best case for the planned Mainframe gate |
 
 Every player that runs follows the way down: it heads for the deepest open region until it has cleared it, then picks any open region. Items: each player keeps what it has a use for (Coolant, Antivirus, Repair kits, Overclock chips, Black ICE; vouchers unless it always hides; boosters if it chases Ghost; a Segfault while it wants faults), sells the rest at markets down to one free slot, scraps surplus at home when the inventory is full, and buys only items it keeps. The report adds, per archetype: `netruns.cleared` (share of lives that reached each exit), `netruns.byRegion` (runs a life), `netruns.codexCapped`, `scrip` (at the end, peak, bought, sold, `affordable` and `marketsPerRun`) and `fullAtCheckIn`.
 
-Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop` and `babyFaults`.
+Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop`, `babyFaults` and `eager` (a careful runner that jacks in whenever it is fairly healthy, not only when it will be back soon).
+
+**The Mainframe gate probe** (for the plan in [SOURCE_PLAN.md](SOURCE_PLAN.md); the stage is not built). Every life records the minute the planned gate would have been met (`mainframeDue` in `tools/lib/mainframe-gate.mjs`: an adult, home from any run, at least `lifespan - 24h` old, with three Deep exits or two clean ones this life; the tool keeps that exit count on the netling itself, as `s.deepExits`, until the game does), its Deep runs and disconnects up to the first clear, and each Deep exit. `stats()` reports them as `mainframe`: the share that cleared The Deep, met the feat and met the gate, the median and earliest-tenth age, the hours it would leave as a mainframe, the share that waited on the feat, and `feats`, harder alternatives (`FEATS`: one, two or three Deep exits, a clean one, one with at most 2 faults, two clean ones, three exits or two clean, and two exits with flow once in the life or with one run jacked into in flow). The text report prints it for any archetype that cleared The Deep. A single life starts with an empty codex, so The Deep stays locked unless `CODEX` is set.
 
 Settings (environment variables and arguments):
 
@@ -147,6 +150,7 @@ Settings (environment variables and arguments):
 | `LIVES=4` | Simulates lineages of that many lives instead of single lives. Each child inherits its parent's fragment (trait, quirk, keepsake), the codex found so far, and Root Access from the life after the codex completes. Reports the share of lineages that finished the codex by each life, the fastest and median, new fragments per life, and every life's results. `runs` is then the number of lineages |
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
+| `CODEX=deep` / `CODEX=ruins` | Every single life starts knowing every fragment (and so has Root Access, as the game would grant it) or the fragments through `ruins-4` (the earliest a lineage can open The Deep). For the Mainframe gate probe. Not with `LIVES` |
 
 It sets `TZ=UTC` itself. Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
 

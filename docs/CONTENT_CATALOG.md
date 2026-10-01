@@ -23,7 +23,7 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 | Kernel | teen | 2 or fewer mistakes at the teen stage (17 hours; 24 for netlings compiled before the 5-day life), and not a Shell | none | none | n/a | n/a |
 | Stub | teen | 3 or more mistakes at the teen stage | none | none | n/a | n/a |
 | Shell | teen | On Ghost's path at the teen stage: allegiance under 2 either way, stability 0 or more, at most 1 mistake, every game won at least 3 times | none | none | n/a | n/a |
-| Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through; corp insurance saves it from one disconnect a run | Corp voucher | Licensed |
+| Chrome | adult | Allegiance dominant and positive | Loves corp packets, sulks at scavenged data (+5 or -5 Sync) | Checkpoints wave it through; relays patch it up (+20 Integrity); corp insurance saves it from one disconnect a run | Corp voucher | Licensed |
 | Firewall | adult | Allegiance dominant and negative | -30% virus chance | ICE deals half damage | Antivirus patch | Hardened |
 | Daemon | adult | Stability dominant and non-negative | Charge drains 20% slower | Sees node types two steps ahead; +6 Integrity each move | Coolant cell | Persistent |
 | Glitch | adult | Stability dominant and negative | Play gives +10 to +40 Sync | Slips through the first ICE of each run, and 35% of later ones | Black ICE shard | Volatile |

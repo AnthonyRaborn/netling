@@ -136,7 +136,7 @@ Every move first costs Charge and Heat (see below), then the node triggers.
 | `entry` | Start only |
 | `cache` | 40% chance of a loot item (`cacheFindChance`); an empty cache holds 3 loose scrip 30% of the time. Independent 15% chance of a codex fragment, 3% chance of an accessory |
 | `ice` | A random mini-game (any of the four). Win: 20% chance of loot, 5% of an accessory. Loss: Integrity minus the region's ICE damage (halved for Firewall), Heat +12. Integrity 0 disconnects |
-| `relay` | Charge +15, Heat -20. Then a choice: CONTINUE or JACK OUT (banks loot, ends the run) |
+| `relay` | Charge +15, Heat -20, and +20 Integrity for an adult Chrome (corp relays). Then a choice: CONTINUE or JACK OUT (banks loot, ends the run) |
 | `checkpoint` | Chrome and Ghost pass automatically. Others choose: **HIDE** (Charge -8, Heat +8, allegiance -1, 25% chance of -15 Integrity), **COMPLY** (allegiance +1, a random carried item is confiscated, or -5 Integrity if carrying nothing), **VOUCHER** (spend a voucher from the inventory, pass clean, allegiance +1) |
 | `market` | Two different offered items for their scrip price plus the region's Charge price, and a 50% chance of an accessory offer (25 or 50 scrip plus 20 Charge). While it is open the inventory sells for half price. Each item bought leans allegiance by -0.5 |
 | `anomaly` | A random anomaly from the list below |
@@ -179,13 +179,15 @@ All three call `endRun`, which stamps `lastRunEndAge`, updates `runCooldownCut` 
 
 | Form | Ability |
 |---|---|
-| Chrome | Corp credentials: checkpoints wave it through. Corp insurance: once a run, a blow that would disconnect it leaves it at 12 Integrity instead (`chromeInsurance`, `run.insured`) |
+| Chrome | Corp credentials: checkpoints wave it through. Corp relays: every relay also repairs 20 Integrity (`chromeRelayRepair`). Corp insurance: once a run, a blow that would disconnect it leaves it at 12 Integrity instead (`chromeInsurance`, `run.insured`) |
 | Firewall | ICE deals half damage |
 | Daemon | Sees node types two steps ahead. Upkeep: +6 Integrity with every move (`daemonMoveRepair`) |
 | Glitch | Slips through the first ICE of each run, and each later one 35% of the time (`glitchPhaseChance`) |
 | Ghost | Sees every node; checkpoints never notice it; 45% of ICE never notice it either (`ghostSlipChance`) |
 
-The second effects (insurance, upkeep, the later phases, slipping past ICE) were added in balance pass 2 so no form is far ahead where it matters most. Careful play, 4000 runs each, disconnect rates in The Deep: Firewall 14%, Ghost 14%, Glitch 17%, Chrome 18%, Daemon 18%, against 35% with no ability.
+The second effects (insurance, upkeep, the later phases, slipping past ICE) were added in balance pass 2 so no form is far ahead where it matters most. Careful play, 4000 runs each, disconnect rates in The Deep: Firewall 14%, Ghost 14%, Glitch 17%, Daemon 18%, Chrome 20%, against 35% with no ability.
+
+Corp relays came later (the Mainframe gate test, [SOURCE_PLAN.md](SOURCE_PLAN.md#chrome-lags-on-exits-fixed-corp-relays)). Chrome had normal disconnect rates but reached far fewer exits: with nothing to heal it or cut damage, careful play banked at relays early (exits reached: 76% in the Corp Grid and Ruins against 83 to 93% for the other forms, and 31% in The Deep against 48 to 58%). The relay repair brings it to 86 to 89% and 44%, and halves the Integrity it spends outside The Deep. It pushes on further, so its Deep disconnect rate rose from 18% to 20%.
 
 ## Anomalies
 
