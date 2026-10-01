@@ -52,7 +52,7 @@ An adult recompiles into its mainframe form at the first step where all of these
 
 - `s.stage === 'adult'`
 - `s.ageMin >= mainframeAt`, where `mainframeAt = s.life.lifespan - 24h`: 96 hours for a 5-day life (144 for a legacy 7-day life, which needs no separate testing). Deriving it from `lifespan` means `s.life` and `cleanLife` need no new field.
-- **The feat:** this life, it has reached The Deep's exit three times, or twice without losing an ICE fight on the way (`s.deepExits.all >= 3 || s.deepExits.clean >= 2`). A new per-life counter, `s.deepExits = { all, clean }`, is raised by `jackOut` when the run ends on The Deep's exit node; "clean" is the same test as a clean jack-out (`tally.iceLost === 0`). Relay jack-outs, disconnects and aborts never count. The rule is `mainframeFeat` and `mainframeDue` in `tools/lib/mainframe-gate.mjs`, which move into `sim.js` when the stage is built.
+- **The feat:** this life, it has reached The Deep's exit three times, or twice without losing an ICE fight on the way (`s.deepExits.all >= 3 || s.deepExits.clean >= 2`). A new per-life counter, `s.deepExits = { all, clean }`, is raised by `jackOut` when the run ends on The Deep's exit node; "clean" is the same test as a clean jack-out (`tally.iceLost === 0`). Relay jack-outs, disconnects and aborts never count. The rule is `mainframeFeat` and `mainframeDue` in `sim.js` (built in step 3, behind `CFG.mainframe`).
 - It is not on a netrun (`!s.run`). A recompile mid-run would swap its ability under the player. It recompiles on the first step after the run ends instead.
 
 Order matters. Meeting the feat before 96 hours means it waits until 96 hours. Meeting it after 96 hours means it recompiles as soon as it is home. The check sits with the teen and adult checks in `step()`, before the end-of-life check, so a netling that meets the gate on its last minute recompiles and gets its extra day.
@@ -230,7 +230,7 @@ Run this first, in the tools only, before any game code. It answers whether the 
 **What was built** (tools only; `src/` untouched; how to run it is in [TESTING.md](TESTING.md#toolsbalancemjs)):
 
 1. **Codex presets** for `tools/balance.mjs`: `CODEX=deep` starts every single life knowing every fragment (and with Root Access, as the game would grant it). `CODEX=ruins` starts it knowing the fragments through `ruins-4`, the earliest a lineage can open The Deep.
-2. **A gate probe.** Every simulated minute, the tool checks `mainframeDue(s)` (`tools/lib/mainframe-gate.mjs`): an adult, home from any run, The Deep cleared this life, and at least `lifespan - 24h` old. The first minute it holds is when the netling would recompile. Nothing in the life changes, so this measures the gate alone, not the mainframe's effects.
+2. **A gate probe.** Every simulated minute, the tool checks `mainframeDue(s)` (first in `tools/lib/mainframe-gate.mjs`, now in `sim.js`): an adult, home from any run, the feat met this life, and at least `lifespan - 24h` old. The first minute it holds is when the netling would recompile. Nothing in the life changes, so this measures the gate alone, not the mainframe's effects.
 3. **The report** (`mainframe` in `stats()`): the share that cleared The Deep and met the gate, the median and earliest-tenth age at the gate, the hours it would have as a mainframe, the share that waited on the feat, and Deep runs and disconnects up to the first clear. It also measures harder feats beside the planned one (`FEATS`).
 4. **`steer-mainframe`**: attentive care and careful runs, but it jacks in at every chance.
 5. **Unit tests** in `tests/tools.test.js` for the rule and the probe. When the stage is built, `mainframeDue` moves into `sim.js` and the tool imports it from there.
@@ -369,11 +369,28 @@ Each step is one commit that passes `npm test` on its own.
 0. **The gate test.** Done (tools only). The feat is decided: three Deep exits, or two clean.
 1. **The Chrome corp-relay fix.** Done, as its own change to the current game. The gate test re-run with the real rule matches the prototype.
 2. **Names and text signed off.** Done: every id is decided, including the unlocks.
-3. **Sim and the exit counter.** The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
+3. **Sim and the exit counter.** Done, behind a switch (`CFG.mainframe`, off on main; see [Step 3 as built](#step-3-as-built)). The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 4. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 5. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
 6. **UI, art, sound.** Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
 7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
+
+## Step 3 as built
+
+The stage is in the rules and switched off: `CFG.mainframe` is `false`, so no netling recompiles and players see nothing new. Tests and the balance tools switch it on (`CFG='{"mainframe":true}'` for `tools/balance.mjs`). Step 7 flips it.
+
+- **`sim.js`**: `CFG.mainframe` and the gate numbers (`mainframeBeforeEndMin`, `mainframeBonusMin`, `mainframeExits`, `mainframeCleanExits`, `mainframeTraitLevel`); five `SPECIES` entries with `stage: 'mainframe'` and `line`; `lineOf`, `MAINFRAME_OF`, `isMainframeForm`, `lifeEnd`, `mainframeAt`, `mainframeFeat`, `mainframeDue`; the recompile in `step()` (with the log line "it has another day in it now."); the end of life at `lifeEnd`; `fragmentOf` at level II or higher for a mainframe; the line's perk through `lineOf`; `s.deepExits` and `s.lifeBonus`; `SAVE_VERSION` 2.
+- **`netrun/run.js`**: a mainframe uses its line's ability; the exit node of The Deep raises `s.deepExits`. **`regions.js`**: `STAGE_ORDER` includes `mainframe`.
+- **`sanitize.js`**: the stage, `settle()` for mismatched bodies, `deepExits`, `lifeBonus`, the lineage `mainframe`. **`migrations.js`**: step 1 to 2 (no change; the version marks the new stage). Frozen fixture `tests/fixtures/save-v2.json`.
+- **`archive.js`**: dex entries for the five forms (draft hints and lore), hidden while the switch is off; the death record's `mainframe`; dex backfill from it. **UI**: the evolution flash and alert for the new stage, the HUD perk and the flatline screen through `lineOf`, Ghost's and Glitch's draw effects through `lineOf`.
+- **`sprites.js`**: stand-in art: each mainframe form borrows its line's sprites and anchors (`STAND_IN`) until step 6.
+- **Tools**: `tools/lib/mainframe-gate.mjs` is gone; the probe uses the game's rule and counter. Stage days report `mainframe`.
+- **Visitors and chatter**: visitors never come as mainframe forms while the switch is off; a mainframe speaks its line's chatter (`chatterPool(s, group)`).
+- **Tests**: `tests/mainframe.test.js` (14) and the version 2 fixture test.
+
+Measured: with the switch off, all three baselines are byte-identical. With it on (`CODEX=deep`, `steer-mainframe`, 300 lives): 61% recompile, median life 6.0 days, 1.1 days a life as a mainframe on average.
+
+The mainframe upgrades (the second column of [The five forms](#the-five-forms)) are not built: a mainframe has exactly its line's ability until step 4.
 
 ## Risks
 

@@ -35,7 +35,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -2.85,
@@ -189,7 +190,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.41,
-        "adult": 2.8
+        "adult": 2.8,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -1.97,
@@ -342,7 +344,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.39,
-        "adult": 2.7
+        "adult": 2.7,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 0.95,
@@ -494,7 +497,8 @@
       "stageDays": {
         "baby": 0.62,
         "teen": 0.43,
-        "adult": 0.07
+        "adult": 0.07,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 0.92,
@@ -642,7 +646,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.88
+        "adult": 2.88,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 81.98,
@@ -791,7 +796,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.41,
-        "adult": 2.84
+        "adult": 2.84,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -98.32,
@@ -942,7 +948,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.41,
-        "adult": 2.82
+        "adult": 2.82,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -1.13,
@@ -1096,7 +1103,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -1.72,
@@ -1249,7 +1257,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 0.52,
@@ -1402,7 +1411,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -12.66,
@@ -1550,7 +1560,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.88
+        "adult": 2.88,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 114.32,
@@ -1699,7 +1710,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -159.69,
@@ -1852,7 +1864,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.88
+        "adult": 2.88,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 0.3,
@@ -2003,7 +2016,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.86
+        "adult": 2.86,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": 0.29,
@@ -2156,7 +2170,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -3.27,
@@ -2310,7 +2325,8 @@
       "stageDays": {
         "baby": 0.71,
         "teen": 1.42,
-        "adult": 2.87
+        "adult": 2.87,
+        "mainframe": 0
       },
       "axes": {
         "allegiance": -3.38,

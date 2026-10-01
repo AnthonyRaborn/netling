@@ -1,6 +1,6 @@
 import { SPRITES, drawSprite, formSprite, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, WHITE_COLORS } from './sprites.js';
 import { drawWorn, drawProp, visitAccessories } from './accessories.js';
-import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting } from './sim.js';
+import { PALETTES, CFG, needsAttention, isAlive, rebootMinutesLeft, resting, lineOf } from './sim.js';
 import { FLASH_TOGGLE_MS } from './games/common.js';
 
 export const LCD_W = 40;
@@ -167,7 +167,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
       bctx.globalAlpha = 1;
     }
 
-    bctx.globalAlpha = s.form === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
+    bctx.globalAlpha = lineOf(s.form) === 'ghost' ? 0.55 + 0.25 * Math.sin(time / 900) : 1;
     drawSprite(bctx, sprite, x, y, spriteColors);
     bctx.globalAlpha = 1; // a Ghost fades, what it wears does not
     // opts.accessories: [{ id, colors }], one per wear slot; opts.accessory (one id) is the short form.
@@ -225,7 +225,7 @@ export function renderLCD(canvas, s, time, opts = {}) {
 
   // Glitch intensity grows as Integrity falls or when infected; the Glitch form always flickers a little.
   const g = isAlive(s) && !opts.calm
-    ? Math.max(0, (60 - s.stats.integrity) / 60) + (s.virus ? 0.35 : 0) + (s.form === 'glitch' ? 0.2 : 0)
+    ? Math.max(0, (60 - s.stats.integrity) / 60) + (s.virus ? 0.35 : 0) + (lineOf(s.form) === 'glitch' ? 0.2 : 0)
     : 0;
   const rnd = stepRandom(Math.floor(time / GLITCH_STEP_MS));
   if (g > 0 && rnd() < g * 0.5) {

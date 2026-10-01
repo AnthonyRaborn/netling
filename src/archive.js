@@ -1,8 +1,8 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
-import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, traitLabel } from './sim.js';
+import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, CFG, traitLabel, lineOf, isMainframeForm } from './sim.js';
 import { FORM_ABILITIES } from './netrun/run.js';
 
-export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
+export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost', 'plat', 'airgap', 'init', 'panic', 'whisper'];
 
 // Shown for undiscovered forms. Vague on purpose.
 export const DEX_HINTS = {
@@ -15,6 +15,12 @@ export const DEX_HINTS = {
   daemon: 'never misses a cycle.',
   glitch: 'lives too close to the edge.',
   ghost: 'leaves no trace. misses nothing. plays everything.',
+  // Mainframe forms (drafts; the dex shows them only once the stage is switched on).
+  plat: 'some never stop growing.',
+  airgap: 'some never stop growing.',
+  init: 'some never stop growing.',
+  panic: 'some never stop growing.',
+  whisper: 'some never stop growing.',
 };
 
 export const DEX_LORE = {
@@ -27,6 +33,11 @@ export const DEX_LORE = {
   daemon: 'A background process with horns. Silent, tireless, exact.',
   glitch: 'Unstable and unbothered. Occasionally in two places at once.',
   ghost: 'No logs. No faults. Nobody is quite sure it is there.',
+  plat: 'Corp prestige tier. The grid opens doors for it before it knocks.',
+  airgap: 'Cut off from every network on purpose. Nothing gets in it did not invite.',
+  init: 'The first process and the last one running. Everything else waits on it.',
+  panic: 'A kernel panic that learned to like it. Halts nothing, frightens everything.',
+  whisper: 'It acts on what its ghost tells it. You only ever hear the echo.',
 };
 
 export function discover(dex, form) {
@@ -43,6 +54,7 @@ export function formsSeenIn(state, lineage) {
   for (const e of lineage) {
     if (e.ageMin > 0) seen.add('bitling');
     if (e.realized && e.form) seen.add(e.form);
+    if (e.mainframe) seen.add(e.mainframe);
     if (e.teenForm) seen.add(e.teenForm);
   }
   return [...seen];
@@ -53,7 +65,8 @@ export function deathRecord(state) {
   return {
     generation: state.generation,
     form: f?.form ?? null,
-    realized: Boolean(FORMS[state.form]),
+    realized: Boolean(FORMS[lineOf(state.form)]),
+    mainframe: isMainframeForm(state.form) ? state.form : null, // the body it ended in, when that was a mainframe
     teenForm: state.teenForm ?? null,
     cause: state.deathCause,
     ageMin: state.ageMin,
@@ -128,8 +141,12 @@ export function lineageChain(lineage, current) {
   return out;
 }
 
+// Mainframe forms stay out of the dex until the stage is switched on (CFG.mainframe).
+export const dexOrder = () => DEX_ORDER.filter((id) => CFG.mainframe || !isMainframeForm(id));
+
 export function dexEntries(dex) {
-  return DEX_ORDER.map((id) => {
+  return dexOrder().map((id) => {
+    const line = lineOf(id);
     const found = dex.includes(id);
     return {
       id,
@@ -137,10 +154,10 @@ export function dexEntries(dex) {
       name: found ? SPECIES[id].name : '???',
       stage: SPECIES[id].stage,
       text: found ? DEX_LORE[id] : `hint: ${DEX_HINTS[id]}`,
-      perk: found ? FORM_MODS[id]?.desc ?? null : null,
-      trait: found && FORMS[id] ? TRAITS[FORMS[id].trait].name : null,
-      keepsake: found && KEEPSAKES[id] ? ITEMS[KEEPSAKES[id]].name : null,
-      runAbility: found ? FORM_ABILITIES[id] ?? null : null,
+      perk: found ? FORM_MODS[line]?.desc ?? null : null,
+      trait: found && FORMS[line] ? TRAITS[FORMS[line].trait].name : null,
+      keepsake: found && KEEPSAKES[line] ? ITEMS[KEEPSAKES[line]].name : null,
+      runAbility: found ? FORM_ABILITIES[line] ?? null : null,
     };
   });
 }

@@ -86,9 +86,10 @@ export const CHATTER = [
 export const CHATTER_IDS = new Set(CHATTER.map((c) => c.id));
 export const chatterById = (id) => CHATTER.find((c) => c.id === id) ?? null;
 
-// Lines this netling could say right now, by form or inheritance (never a visitor's).
-export function chatterPool(s) {
-  return CHATTER.filter((c) => (c.group === 'lineage' ? c.when(s) : c.group === s.form));
+// Lines this netling could say right now, by form or inheritance (never a visitor's). `group` is the form whose lines
+// it speaks: its own, or for a mainframe its line's (sim.js passes it, since this file imports nothing).
+export function chatterPool(s, group = s.form) {
+  return CHATTER.filter((c) => (c.group === 'lineage' ? c.when(s) : c.group === group));
 }
 
 export const visitorLines = () => CHATTER.filter((c) => c.group === 'visitor');

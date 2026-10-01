@@ -14,7 +14,10 @@
 import { SAVE_VERSION } from './sim.js';
 
 export const STEPS = {
-  // 1: (save) => { ...; return save; },  // example: the step that would take version 1 to version 2
+  // 1 to 2: the Mainframe stage. Nothing to convert: its fields are additive and get defaults from migrate() and
+  // cleanSave. The version moves so a build from before it sets a save holding the new stage aside as "newer"
+  // (reload to update) instead of refusing an unknown stage as damaged.
+  1: (save) => save,
 };
 
 // Upgrades `raw` to `target`. Returns { save, from, upgraded } on success, or { error } where error is:

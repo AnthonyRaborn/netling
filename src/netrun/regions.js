@@ -89,7 +89,7 @@ REGIONS.tutorial = {
 
 // The way down: each region opens once this netling has reached the exit of the one before it.
 export const REGION_ORDER = ['public', 'bazaar', 'corp', 'ruins', 'deep'];
-export const STAGE_ORDER = ['baby', 'teen', 'adult'];
+export const STAGE_ORDER = ['baby', 'teen', 'adult', 'mainframe'];
 
 export const previousRegion = (region) => REGION_ORDER[REGION_ORDER.indexOf(region) - 1] ?? null;
 

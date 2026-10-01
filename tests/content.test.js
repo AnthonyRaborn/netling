@@ -61,7 +61,7 @@ test('forms, traits, perks, keepsakes and run abilities line up', () => {
   }
   assert.ok(unique(Object.values(FORMS).map((f) => f.trait)), 'two forms share a trait');
   for (const [id, t] of Object.entries(TRAITS)) assert.ok(t.name && t.desc, `trait ${id}`);
-  for (const stage of Object.values(SPECIES).map((s) => s.stage)) assert.ok(['baby', 'teen', 'adult'].includes(stage));
+  for (const stage of Object.values(SPECIES).map((s) => s.stage)) assert.ok(['baby', 'teen', 'adult', 'mainframe'].includes(stage));
 });
 
 test('the dex covers every body, with a hint and a line of lore for each', () => {

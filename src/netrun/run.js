@@ -1,5 +1,5 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
@@ -74,7 +74,8 @@ export const FORM_ABILITIES = {
   glitch: 'Phase: slips through the first ICE of each run, and often the ones after.',
   ghost: 'Unseen: sees every node; checkpoints never notice it, and ICE often misses it.',
 };
-const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
+// A mainframe keeps its line's ability.
+const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? lineOf(pet.form) : null);
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
@@ -306,6 +307,11 @@ export function moveTo(pet, nodeId, rng) {
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
       const opened = !region.tutorial && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
+      // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
+      if (run.region === 'deep') {
+        const d = pet.deepExits ?? { all: 0, clean: 0 };
+        pet.deepExits = { all: d.all + 1, clean: d.clean + ((run.tally?.iceLost ?? 0) === 0 ? 1 : 0) };
+      }
       const next = opened && REGION_ORDER[REGION_ORDER.indexOf(run.region) + 1];
       const young = next && STAGE_ORDER.indexOf(pet.stage) < STAGE_ORDER.indexOf(REGIONS[next].minStage);
       // The Deep stays unnamed: its way in is a secret.

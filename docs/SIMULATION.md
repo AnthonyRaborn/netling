@@ -296,6 +296,10 @@ Adult perks (`FORM_MODS`): Chrome loves corp packets and sulks at scavenged data
 
 **Dying before adulthood.** `flatline()` uses the current form if it is an adult form, else `leaningForm()` at the moment of death. The record marks it `realized: false` and the UI calls it an echo or "(unrealized)".
 
+### Mainframe (switched off)
+
+A fourth stage is in the rules but switched off (`CFG.mainframe` is `false`), so no netling reaches it yet. When on, an adult recompiles into its line's mainframe form (Chrome to Plat, Firewall to Airgap, Daemon to Init, Glitch to Panic, Ghost to Whisper) at the first minute it is home from any run, at least `lifespan - 24h` old, with three exits from The Deep this life or two clean ones (`s.deepExits`, counted at jack-out even while the stage is off). It gains a day (`s.lifeBonus`; the life ends at `lifeEnd(s)`), keeps its line's perk, trait, keepsake and netrun ability, and passes its trait on at level II or higher. The plan and measurements are in [SOURCE_PLAN.md](SOURCE_PLAN.md).
+
 ## Lineage: fragments, traits, quirks
 
 On death a `fragment` is stored: `{ form, trait, quirk, keepsake, rootUsed, scrip, level, history }` (`fragmentOf`).

@@ -22,6 +22,9 @@ import {
   deviceZone,
   fragmentOf,
   leaningForm,
+  lineOf,
+  isMainframeForm,
+  MAINFRAME_OF,
 } from './sim.js';
 import { COSMETICS, SLOTS, LABEL } from './cosmetics.js';
 import { CHATTER_IDS } from './chatter.js';
@@ -33,7 +36,7 @@ import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
 import { CHECKIN } from './checkin.js';
 import { upgradeSave } from './migrations.js';
 
-export const STAGES = ['script', 'baby', 'teen', 'adult', 'dead'];
+export const STAGES = ['script', 'baby', 'teen', 'adult', 'mainframe', 'dead'];
 export const ONBOARDING_STEPS = ['intro', 'readme', 'nudge', 'tutorial', 'done'];
 const RUN_PHASES = ['map', 'ice', 'choice', 'done'];
 const RUN_RESULTS = ['jacked', 'disconnected', 'aborted'];
@@ -276,7 +279,13 @@ function cleanFragment(raw, s) {
     };
   }
   if (s.stage !== 'dead') return null;
-  return fragmentOf(s, FORMS[s.form] ? s.form : leaningForm(s));
+  return fragmentOf(s, FORMS[lineOf(s.form)] ? lineOf(s.form) : leaningForm(s));
+}
+
+// This life's exits from The Deep, and how many were clean (never more than all of them).
+function cleanDeepExits(raw) {
+  const all = int(raw?.all, 0, 0, 999);
+  return { all, clean: int(raw?.clean, 0, 0, all) };
 }
 
 // Makes the parts of a cleaned save agree with each other, which the field-by-field cleaning can't:
@@ -286,7 +295,10 @@ function settle(s, now) {
   const bodyStage = SPECIES[s.form].stage;
   if (s.stage === 'script' || s.stage === 'baby') s.form = 'bitling';
   else if (s.stage === 'teen' && bodyStage !== 'teen') s.form = SPECIES[s.teenForm]?.stage === 'teen' ? s.teenForm : 'kernel';
-  else if (s.stage === 'adult' && bodyStage !== 'adult') s.form = leaningForm(s);
+  else if (s.stage === 'adult' && bodyStage !== 'adult') s.form = bodyStage === 'mainframe' ? lineOf(s.form) : leaningForm(s);
+  else if (s.stage === 'mainframe' && bodyStage !== 'mainframe') s.form = MAINFRAME_OF[bodyStage === 'adult' ? s.form : leaningForm(s)];
+  // Only a mainframe (living, or flatlined in that body) has the extra day.
+  if (!isMainframeForm(s.form)) s.lifeBonus = 0;
   const past = (v) => (v === null ? null : Math.min(v, s.ageMin));
   s.lastNapEndAge = past(s.lastNapEndAge);
   s.lastRunEndAge = past(s.lastRunEndAge);
@@ -372,6 +384,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     contract: cleanContract(raw.contract),
     contractCheckAge: numOrNull(raw.contractCheckAge),
     wokeAt: numOrNull(raw.wokeAt),
+    deepExits: cleanDeepExits(raw.deepExits),
+    lifeBonus: raw.lifeBonus === CFG.mainframeBonusMin ? CFG.mainframeBonusMin : 0,
     flowMin: int(raw.flowMin, 0, 0, 30 * 24 * 60),
     flowTotalMin: int(raw.flowTotalMin, 0, 0, 30 * 24 * 60),
     chatter: cleanChatter(raw.chatter),
@@ -412,6 +426,7 @@ export function cleanLineage(raw) {
     generation: int(e.generation, 1, 1, 1e6),
     form: keyOf(e.form, SPECIES),
     realized: typeof e.realized === 'boolean' ? e.realized && has(SPECIES, e.form) : undefined, // older records lack it
+    mainframe: isMainframeForm(e.mainframe) ? e.mainframe : null, // the mainframe body it ended in, if any
     teenForm: keyOf(e.teenForm, SPECIES),
     cause: str(e.cause, 'flatlined'),
     ageMin: int(e.ageMin, 0, 0),

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ACCESSORIES, STYLE_ITEMS, WEAR_SLOTS, anchorsFor, anchorRowsFor, rollAccessory, rollWornAccessory, accessoryById, drawAccessory, placeWorn, wearOrder, wornFrom, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
-import { SPECIES, PALETTES, mulberry32 } from '../src/sim.js';
+import { SPECIES, PALETTES, mulberry32, lineOf } from '../src/sim.js';
 import { readFileSync } from 'node:fs';
 import { computeAutoColors, renderModule, slotClearance, CLEAR } from '../tools/wearable-colors.mjs';
 import { deltaE } from '../src/colors.js';
@@ -265,7 +265,7 @@ test('a wearable\'s body and neck are the solid run through the middle, so side 
   assert.equal(b.neckLeft, a.neckLeft);
   assert.equal(b.neckRight, a.neckRight);
   for (const form of Object.keys(SPECIES)) {
-    if (form === 'glitch') continue; // its body is torn differently in each frame on purpose
+    if (lineOf(form) === 'glitch') continue; // its body is torn differently in each frame on purpose (Panic borrows it for now)
     const A = anchorsFor(SPRITES[`${form}A`]);
     const B = anchorsFor(SPRITES[`${form}B`]);
     assert.ok(Math.abs(A.neckLeft - B.neckLeft) <= 1 && Math.abs(A.neckRight - B.neckRight) <= 1, `${form}: the neck changes width between frames`);

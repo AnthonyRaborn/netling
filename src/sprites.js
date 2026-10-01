@@ -488,3 +488,11 @@ for (const form of Object.keys(ANCHOR_ROWS)) {
   SPRITES[`${form}Dead`] ??= generatedPose(form, 'dead');
   SPRITES[`${form}Sleep`] ??= generatedPose(form, 'sleep');
 }
+
+// Stand-in art for the Mainframe forms (docs/SOURCE_PLAN.md): each borrows its line's adult sprites and anchors until
+// its own are drawn. The stage is switched off (CFG.mainframe), so players never see these.
+export const STAND_IN = { plat: 'chrome', airgap: 'firewall', init: 'daemon', panic: 'glitch', whisper: 'ghost' };
+for (const [form, line] of Object.entries(STAND_IN)) {
+  for (const pose of ['A', 'B', 'Dead', 'Sleep']) if (SPRITES[`${line}${pose}`]) SPRITES[`${form}${pose}`] ??= SPRITES[`${line}${pose}`];
+  ANCHOR_ROWS[form] ??= ANCHOR_ROWS[line];
+}
