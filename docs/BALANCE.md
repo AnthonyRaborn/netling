@@ -50,6 +50,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 ## Open questions
 
 - **Passive stability gain**: lowering it was raised and never decided.
+- **Chrome reaches fewer exits** (76% in the Corp Grid and Ruins against 83 to 93% for other forms; 31% in The Deep against 48 to 58%). It banks at relays early, since nothing heals it or cuts damage. Proposed fix: relays repair 20 Integrity for Chrome. Measurements in [SOURCE_PLAN.md](SOURCE_PLAN.md#chrome-lags-on-exits-recorded-for-later).
 - **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): parked. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
 - **A fourth life stage**: planned, not built. The plan is in [SOURCE_PLAN.md](SOURCE_PLAN.md): a Mainframe stage reached by age plus clearing The Deep, one Mainframe form per adult form, one extra day of life, and a last region, the Source.
 

@@ -286,6 +286,24 @@ The bots run at every check-in where they are healthy, so these are upper bounds
 - **"Three exits, or two clean"** evens out the forms: the clean route lifts Glitch (39% to 57%) and Chrome (28% to 37%), and the others barely move. Every deliberate player lands between 37 and 60%, casual at 26%.
 - **Flow-based feats shut out the Glitch line.** The way to Glitch is running hot (Heat 85 and over leans it chaotic), and flow needs Heat under 60, so the Glitch-steering and daredevil bots almost never reach flow (0.03 and 0.1 hours a life, against 15 to 20 for careful players). A real player could cool an adult Glitch down to reach flow; the bot does not try. Flow also mostly shuts out casual players (5%), which fits "earned", but the form lean is the same problem a fault limit had with the Stub line. "Flow once this life" adds almost nothing over two exits for careful players; "jacked into in flow" is about as hard as three exits for them.
 
+### Chrome lags on exits (recorded for later)
+
+Chrome trails every exit-count feat (28% on three exits against 58% for Firewall and Daemon). The cause is not disconnects: careful Chrome disconnects in The Deep as often as Daemon (18%). It leaves early instead. With no healing and no damage cut, its Integrity drops under the careful bot's bank-out point (55) and it jacks out at a relay. Its credentials do nothing in regions without checkpoints, and its insurance only stops disconnects. The gap is in every region, not only The Deep. Pass 2 compared disconnect rates, so it did not show.
+
+Exit reached, careful play (scratch prototype, 2000 to 4000 runs a cell, `src/` untouched):
+
+| Change | Corp Grid | Old Web Ruins | The Deep | steer-chrome meets "three exits" |
+|---|---|---|---|---|
+| None (Chrome now) | 76% | 76% | 31% | 28% |
+| Other forms, for comparison | 83 to 91% | 85 to 93% | 48 to 58% | 39 to 58% |
+| **Corp relays:** relays also repair 20 Integrity for Chrome | 89% | 86% | 44% | 54% |
+| Corp clearance: the first lost ICE fight each run does half damage | 87% | 87% | 45% | 59% |
+| Bigger insurance payout (12 to 50) | not measured | not measured | 37% | not measured |
+
+**Recommended, not yet decided: corp relays** (a new `RUN_CFG.chromeRelayRepair`, 20). It fits Chrome (the grid services its own) and gives its credentials a use where there are no checkpoints. It raises exits without lowering The Deep's disconnect rate (about 20%), so The Deep stays a wall. Corp clearance works about as well, but halving ICE damage is Firewall's identity.
+
+This changes the current game, not only the Mainframe, so it is its own change: the rule in `run.js`, a test, the field manual and ability text (`FORM_ABILITIES`), NETRUN.md, regenerated baselines with a `balance-diff.mjs` report, and a re-run of this gate test. The bots bank at a fixed Integrity, which exaggerates relay exits; real players may push on more, so the true gap is likely smaller, though real.
+
 **Open decision:** which feat to use. The measured front-runner is "three Deep exits, or two clean ones" (evens out the forms). Three exits alone is simpler to explain. A flow feat would need a way around the Glitch problem first, for example counting flow at any point in the life up to adulthood only, or letting a Glitch line skip it.
 
 ## Everything that assumes three stages
