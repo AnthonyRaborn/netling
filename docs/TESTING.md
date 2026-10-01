@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 426 tests in 40 files. The smoke test has 73 scenarios (Playwright 1.56.1).
+`npm test` runs 429 tests in 41 files. The smoke test has 73 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -61,6 +61,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `root.test.js` | 11 | Root Access rescue rules, cooling, origin palette, Root Access on the original 22 only |
 | `hibernate.test.js` | 4 | Freeze, wake rules, cooldown, blocking |
 | `random.test.js` | 2 | The weighted pick |
+| `corrupt.test.js` | 3 | The blink of corrupted records and sectors: garbled letters (block glyphs or look-alike digits, brackets and spaces kept, at least two changed), the static re-rolling with a band shifted, and the timing against the flash limit |
 | `content.test.js` | 14 | Cross-checks of the content tables: every form and item has art, traits and keepsakes exist, region tables only name real items and fragments, cosmetics unlock from something and have hints, style items are valid, every service worker file exists, the Pages deploy copies everything the game and the manifest load, install screenshots match their stated sizes |
 | `draw.test.js` | 10 | Rendering under a fake canvas: every form, stage, state, accessory, prop and reaction on the home screen; every mini-game through intro, play and result; a whole netrun in every region through the run view's own input. Fails on any NaN or infinite draw argument. Flash safety: the evolution strobe and the glitch change at most three times a second, and a surge is one fading flash |
 | `audio.test.js` | 7 | Sound playback against a fake `AudioContext`: notes and pitch, sound packs, the low-frequency floor, mute and volume, and a scan that every sound name used in the source really exists |
@@ -113,7 +114,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
 - A posted contract in the bar and the region picker, taken along on a jack-in.
 - Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.
-- The Mainframe stage and the Source: before Root Access the Source reads `<<SECTOR CORRUPTED>>` (glitching, closed to an adult) and the five forms `<<RECORD CORRUPTED>>`, with the field manual row corrupted; after it a mainframe draws and animates, the dex shows `???` and hints, the Source repairs its name once, opens and logs it, and the field manual has the rule; a Source run plays its own theme, and Source light and First commit unlock and equip.
+- The Mainframe stage and the Source: before Root Access the Source reads `<<SECTOR CORRUPTED>>` (glitching, closed to an adult) and the five forms `<<RECORD CORRUPTED>>`, with the field manual row corrupted; the records blink (the name garbles and comes back, the static re-rolls) and stay still with motion calmed; after it a mainframe draws and animates, the dex shows `???` and hints, the Source repairs its name once, opens and logs it, and the field manual has the rule; a Source run plays its own theme, and Source light and First commit unlock and equip.
 
 ## Balance tools
 

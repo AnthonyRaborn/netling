@@ -476,6 +476,10 @@ Not done here: a human look at the art and the glitching name on a phone; listen
 - **Baselines** regenerated with the stage on. `lives.json` did not move (a single life has no Root Access). `netruns.json` gains the Source's fragment finds. `lineages.json` moves in the fourth life only, once the codex has given the line Root Access: 2 to 30% of fourth lives become mainframes by play style (attentive 25%, daredevil 20%, casual 2%), adult shares fall by as much, and about a quarter of attentive fourth lives reach the Source's exit. Full lives and faults stay within the thresholds.
 - **Release**: `netling-v48`.
 
+## After shipping: the blink
+
+The corrupted dex records blink like the Source's name, and the blink now changes the text too (asked for after step 7: color and slant alone were too slight for a 0.4 s blink). `ui/corrupt.js` drives every `.corrupt` element and every static thumbnail from one timer: every 3.2 s, for 0.4 s, about 30% of the letters become block glyphs (`░▒▓█`) or look-alike digits (O to 0, E to 3), different each time, and the static re-rolls with a three-row band shifted sideways. A Zalgo look (stacked combining marks) was considered and left out: it spills into neighbouring lines and renders unevenly across fonts. The CSS animation is gone; with motion calmed nothing blinks. Tests: `tests/corrupt.test.js`, and the smoke scenario checks a blink, its return and the calm setting.
+
 ## Risks
 
 - **Everybody reaches it, or nobody does.** One Deep exit let every runner in; the chosen feat lets in about half of deliberate players and a quarter of casual bots. The bots run more than real players, so real numbers will be lower, casual ones most of all. Re-measure after the Chrome fix, and watch real play before tuning the counts.

@@ -10,6 +10,7 @@ import { sfx } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, rootUnlocked, flashStatus, save, store } from './app.js';
 import { checkUnlocks, renderWardrobe } from './style.js';
+import { drawStatic, staticRows } from './corrupt.js';
 import { fmtAge } from './hud.js';
 
 // Bank fragments a finished run left on the pet into the shared codex.
@@ -46,17 +47,22 @@ export function showTransmission() {
   $('transmission').showModal();
 }
 
-// A record that will not open: dim static instead of a silhouette, so its shape gives nothing away.
-const NOISE = Array.from({ length: 12 }, (_, y) => Array.from({ length: 14 }, (_, x) => ((x * 7 + y * 13 + x * y) % 5 < 2 ? '#' : '.')).join(''));
-
 function thumb(form, paletteIdx, { dead = false, locked = false, corrupted = false } = {}) {
   const wrap = document.createElement('div');
   wrap.className = 'thumb';
   if (!form) return wrap;
-  const sprite = corrupted ? NOISE : formSprite(form, 'a');
   const c = document.createElement('canvas');
   c.width = 18; // the widest form (a mainframe)
   c.height = 16;
+  if (corrupted) {
+    // A record that will not open: dim static instead of a silhouette, so its shape gives nothing away. It re-rolls on
+    // every blink (ui/corrupt.js).
+    c.className = 'static';
+    drawStatic(c, staticRows());
+    wrap.append(c);
+    return wrap;
+  }
+  const sprite = formSprite(form, 'a');
   const pal = PALETTES[paletteIdx] ?? PALETTES[0];
   const colors = locked
     ? LOCKED_COLORS
@@ -89,6 +95,13 @@ function row(thumbEl, title, lines, className = '') {
 function bold(text) {
   const b = document.createElement('b');
   b.textContent = text;
+  return b;
+}
+
+// A corrupted record's name: it blinks like the Source's (ui/corrupt.js).
+function corruptName(text) {
+  const b = bold(text);
+  b.className = 'corrupt';
   return b;
 }
 
@@ -219,7 +232,7 @@ function renderArchive() {
     ...entries.map((e) =>
       row(
         thumb(e.id, 0, { locked: !e.found, corrupted: e.corrupted }),
-        [bold(e.name), e.corrupted ? '' : ` · ${e.stage}`],
+        [e.corrupted ? corruptName(e.name) : bold(e.name), e.corrupted ? '' : ` · ${e.stage}`],
         [
           e.text,
           e.perk ? { cls: 'perk', text: `perk: ${e.perk}` } : null,

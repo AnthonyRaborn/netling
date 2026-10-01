@@ -34,7 +34,7 @@ Every piece of authored content: forms, items, mini-games, cosmetics, accessorie
 | Panic | mainframe | The same, from a Glitch | Glitch's | Slips through the first two ICE of each run, and 35% of later ones | Black ICE shard | Volatile, II+ |
 | Whisper | mainframe | The same, from a Ghost | Ghost's | Ghost's, with 50% of ICE missing it | Memory shard | Untraceable, II+ |
 
-"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes). A mainframe gains a day of life and keeps its line in everything (perk, trait, keepsake, ability); see [SIMULATION.md](SIMULATION.md#mainframe). Until Root Access is earned on the device, the five mainframe forms read as `<<RECORD CORRUPTED>>` in the dex, with static for a thumbnail.
+"Dominant" means larger in absolute value. Within 0.5 it is a tie, broken at random with forms the player has never raised weighted 1.2. Full rules in [SIMULATION.md](SIMULATION.md#evolution-and-the-hidden-axes). A mainframe gains a day of life and keeps its line in everything (perk, trait, keepsake, ability); see [SIMULATION.md](SIMULATION.md#mainframe). Until Root Access is earned on the device, the five mainframe forms read as `<<RECORD CORRUPTED>>` in the dex, with static for a thumbnail. Like the locked Source, they blink every 3.2 seconds: the name garbles into block glyphs for 0.4 s and the static re-rolls, a band of it shifted sideways and a step brighter (`ui/corrupt.js`; still with motion calmed).
 
 ## Traits and perks
 

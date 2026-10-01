@@ -23,6 +23,7 @@ import { watchForUpdates } from './update.js';
 import { initDevice, syncDevice } from './ui/device.js';
 import { syncMusicMode } from './ui/soundtrack.js';
 import { initRewards } from './ui/rewards.js';
+import { startCorruptBlink } from './ui/corrupt.js';
 
 loadAll();
 setVolume(app.prefs.volume);
@@ -34,6 +35,7 @@ initLife();
 initInventory();
 initPlay();
 initArchive();
+startCorruptBlink();
 initRewards();
 initOnboarding();
 initSystem();
