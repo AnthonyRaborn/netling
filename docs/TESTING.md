@@ -18,7 +18,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 390 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
+`npm test` runs 391 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -70,7 +70,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
 | `lifecycle.test.js` | 15 | Balance pass 1: life lengths (new, legacy and cleaned), Ghost's 29 and 4, the Shell's 3 each, tie bands and weights, Segfault (use, the fault limit, awake only, event drops) |
-| `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
+| `progression.test.js` | 28 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Chrome's corp relays, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
 | `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
 | `zone.test.js` | 5 | the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
 | `tools.test.js` | 10 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff, the planned Mainframe gate's rule, and the gate probe (codex presets, and a reported gate that agrees with the rule) |

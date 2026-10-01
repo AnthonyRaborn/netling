@@ -50,6 +50,7 @@ export const RUN_CFG = {
   firewallIceMult: 0.5,
   // Second abilities (balance pass 2), so no form is far ahead in The Deep. 0 turns one off.
   chromeInsurance: 12, // once a run, a blow that would disconnect leaves it at this Integrity
+  chromeRelayRepair: 20, // corp relays: every relay also repairs Chrome this much Integrity
   daemonMoveRepair: 6, // Integrity restored per move
   ghostSlipChance: 0.45, // chance an ICE never notices it
   glitchPhaseChance: 0.35, // after the first, the chance each later ICE is phased through too
@@ -67,7 +68,7 @@ export const RUN_CFG = {
 
 // Adult form abilities, applied automatically.
 export const FORM_ABILITIES = {
-  chrome: 'Corp credentials: checkpoints wave it through, and corp insurance saves it from one disconnect a run.',
+  chrome: 'Corp credentials: checkpoints wave it through, relays patch it up, and corp insurance saves it from one disconnect a run.',
   firewall: 'Hardened: ICE deals half damage.',
   daemon: 'Lookahead and upkeep: sees node types two steps ahead, and repairs a little Integrity with every move.',
   glitch: 'Phase: slips through the first ICE of each run, and often the ones after.',
@@ -224,11 +225,14 @@ export function moveTo(pet, nodeId, rng) {
     case 'relay': {
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
-      note(run, 'relay found. recharged and vented.');
+      // Corp relays: the grid services its own.
+      const patched = ability(pet) === 'chrome' && RUN_CFG.chromeRelayRepair > 0;
+      if (patched) st.integrity = clamp(st.integrity + RUN_CFG.chromeRelayRepair);
+      note(run, patched ? `relay found. recharged, vented, and patched: +${RUN_CFG.chromeRelayRepair} integrity (corp credentials).` : 'relay found. recharged and vented.');
       openChoice(run, {
         kind: 'relay',
         title: 'RELAY',
-        text: 'recharged and vented. safe place to bank your loot.',
+        text: `recharged${patched ? ', vented and patched' : ' and vented'}. safe place to bank your loot.`,
         options: [
           { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
           { id: 'out', label: `JACK OUT (${run.loot.length})`, hint: 'bank loot, end run' },

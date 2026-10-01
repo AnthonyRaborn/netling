@@ -36,7 +36,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Chatter** | A line it mutters while awake and idle; lines seen are kept in the Archive's CHATTER tab | `chatter.js` |
 | **Check-in** | The daily reward for opening the app once after the netling wakes: a seven-day ladder that pauses, never resets | `checkin.js` |
 | **Checkpoint** | A corp scan node: hide, comply, or use a voucher | `netrun/run.js` |
-| **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; corp insurance once a run | `sim.js` |
+| **Chrome** | Adult form leaning corp. Trait Licensed. Checkpoints wave it through; relays repair it; corp insurance once a run | `sim.js` |
 | **Clean clear / clean jack-out** | A netrun that ends by jacking out with no ICE lost. Shortens the next cooldown by 1 hour | `netrun/run.js` |
 | **Clear (region clear)** | Reaching a region's exit node. Opens the next region down for that netling (`pet.cleared`) | `netrun/run.js` |
 | **Codex** | The 22 lore fragments collected on netruns. Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |

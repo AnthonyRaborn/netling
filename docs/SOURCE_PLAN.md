@@ -26,7 +26,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 |---|---|
 | The stage's name | **Mainframe**, id `mainframe`. Baby, teen and adult keep their names. |
 | How the stage is reached | Time plus a feat. The age half is the start of the last ordinary day (96 hours in a 5-day life), so a mainframe can have up to two days. The feat: **three exits from The Deep in this life, or two clean ones** (no ICE fight lost). Otherwise it stays an adult. |
-| A prerequisite | **The Chrome corp-relay fix** ([below](#chrome-lags-on-exits-recorded-for-later)) ships first, as its own change. Without it Chrome meets the feat far less often than the other forms. |
+| A prerequisite | **The Chrome corp-relay fix** ([below](#chrome-lags-on-exits-fixed-corp-relays)), shipped first as its own change. Without it Chrome met the feat far less often than the other forms. |
 | Form names | Plat (Chrome), Airgap (Firewall), Init (Daemon), Panic (Glitch), Whisper (Ghost). |
 | Testing the gate | A measurement in the balance tools comes first, before any game code (see [The gate test](#the-gate-test)). |
 | How many forms | One for each adult form: five new forms, each keeping its line's identity and ability. |
@@ -287,7 +287,7 @@ The bots run at every check-in where they are healthy, so these are upper bounds
 - **"Three exits, or two clean"** evens out the forms: the clean route lifts Glitch (39% to 57%) and Chrome (28% to 37%), and the others barely move. Every deliberate player lands between 37 and 60%, casual at 26%.
 - **Flow-based feats shut out the Glitch line.** The way to Glitch is running hot (Heat 85 and over leans it chaotic), and flow needs Heat under 60, so the Glitch-steering and daredevil bots almost never reach flow (0.03 and 0.1 hours a life, against 15 to 20 for careful players). A real player could cool an adult Glitch down to reach flow; the bot does not try. Flow also mostly shuts out casual players (5%), which fits "earned", but the form lean is the same problem a fault limit had with the Stub line. "Flow once this life" adds almost nothing over two exits for careful players; "jacked into in flow" is about as hard as three exits for them.
 
-### Chrome lags on exits (recorded for later)
+### Chrome lags on exits (fixed: corp relays)
 
 Chrome trails every exit-count feat (28% on three exits against 58% for Firewall and Daemon). The cause is not disconnects: careful Chrome disconnects in The Deep as often as Daemon (18%). It leaves early instead. With no healing and no damage cut, its Integrity drops under the careful bot's bank-out point (55) and it jacks out at a relay. Its credentials do nothing in regions without checkpoints, and its insurance only stops disconnects. The gap is in every region, not only The Deep. Pass 2 compared disconnect rates, so it did not show.
 
@@ -301,9 +301,9 @@ Exit reached, careful play (scratch prototype, 2000 to 4000 runs a cell, `src/` 
 | Corp clearance: the first lost ICE fight each run does half damage | 87% | 87% | 45% | 59% |
 | Bigger insurance payout (12 to 50) | not measured | not measured | 37% | not measured |
 
-**Recommended, not yet decided: corp relays** (a new `RUN_CFG.chromeRelayRepair`, 20). It fits Chrome (the grid services its own) and gives its credentials a use where there are no checkpoints. It raises exits without lowering The Deep's disconnect rate (about 20%), so The Deep stays a wall. Corp clearance works about as well, but halving ICE damage is Firewall's identity.
+**Shipped: corp relays** (`RUN_CFG.chromeRelayRepair`, 20; build step 1). Measured with the real rule: exactly the prototype's gate numbers (steer-chrome 57% on the chosen feat), Chrome's Deep disconnects 18% to 20%, and no adult form share or full-life rate moving by more than noise. Why it was chosen over the alternatives: It fits Chrome (the grid services its own) and gives its credentials a use where there are no checkpoints. It raises exits without lowering The Deep's disconnect rate (about 20%), so The Deep stays a wall. Corp clearance works about as well, but halving ICE damage is Firewall's identity.
 
-This changes the current game, not only the Mainframe, so it is its own change: the rule in `run.js`, a test, the field manual and ability text (`FORM_ABILITIES`), NETRUN.md, regenerated baselines with a `balance-diff.mjs` report, and a re-run of this gate test. The bots bank at a fixed Integrity, which exaggerates relay exits; real players may push on more, so the true gap is likely smaller, though real.
+It shipped as its own change to the current game: the rule in `run.js` (Chrome's relay note says it was patched), a test, the ability text (`FORM_ABILITIES`, shown in the dex), NETRUN.md and the other docs, and regenerated baselines. The bots bank at a fixed Integrity, which exaggerates relay exits; real players may push on more, so the gap it closed was probably smaller in real play, though real.
 
 **Gate test with the corp-relay fix** (`CODEX=deep`, 1000 lives, `chromeRelayRepair: 20` in a scratch prototype):
 
@@ -321,7 +321,7 @@ Forms without the fix do not move. Chrome's clean exits drop a little: with rela
 
 Ordinary lives (no codex preset, against `tools/baseline/lives.json`): no adult form share moves, full-life rates move by at most 0.5 points (casual, up), and casual disconnects fall from 1.14 to 1.09 a life.
 
-**Decided: three Deep exits, or two clean ones,** with the Chrome corp-relay fix shipped first. The probe's main gate (`mainframeDue`) now uses it. Without the fix (`CODEX=deep node tools/balance.mjs 1000`, what the baselines hold now):
+**Decided: three Deep exits, or two clean ones,** with the Chrome corp-relay fix shipped first. The probe's main gate (`mainframeDue`) now uses it. Before the fix (`CODEX=deep node tools/balance.mjs 1000`):
 
 | Archetype | Met | Met at (median) | Time as a mainframe (median, shortest tenth) | Met the feat after 96 hours |
 |---|---|---|---|---|
@@ -334,7 +334,7 @@ Ordinary lives (no codex preset, against `tools/baseline/lives.json`): no adult 
 | steer-glitch | 57% | 96h | 48h, 38h | |
 | steer-mainframe | 56% | 96h | 48h, 37h | |
 
-About half the lives that make it meet the feat after 96 hours, so the feat, not the age, is now the real test. Even so, the shortest tenth still has 33 to 38 hours as a mainframe, so the age half stays where it is. With the Chrome fix, steer-chrome rises to 57% (table above).
+About half the lives that make it meet the feat after 96 hours, so the feat, not the age, is now the real test. Even so, the shortest tenth still has 33 to 38 hours as a mainframe, so the age half stays where it is. With the fix in the game, the same command gives attentive 58%, casual 27%, steer-chrome 57%, steer-firewall 59%, steer-daemon 60%, steer-glitch 57%, steer-stub 65% and steer-mainframe 60%, matching the prototype. Casual's shortest tenth has 25 hours as a mainframe; everyone else's about 37.
 
 A flow feat was set aside for the Glitch problem. If it comes back, it needs a way around that first, for example counting flow before adulthood only.
 
@@ -360,7 +360,7 @@ A starting checklist. Before building, grep for `'adult'`, `STAGE_ORDER`, `FORMS
 Each step is one commit that passes `npm test` on its own.
 
 0. **The gate test.** Done (tools only). The feat is decided: three Deep exits, or two clean.
-1. **The Chrome corp-relay fix.** Its own change to the current game, before anything below ([what it needs](#chrome-lags-on-exits-recorded-for-later)). Re-run the gate test after it, with the real rule instead of the scratch prototype.
+1. **The Chrome corp-relay fix.** Done, as its own change to the current game. The gate test re-run with the real rule matches the prototype.
 2. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
 3. **Sim and the exit counter.** The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 4. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
@@ -371,7 +371,7 @@ Each step is one commit that passes `npm test` on its own.
 ## Risks
 
 - **Everybody reaches it, or nobody does.** One Deep exit let every runner in; the chosen feat lets in about half of deliberate players and a quarter of casual bots. The bots run more than real players, so real numbers will be lower, casual ones most of all. Re-measure after the Chrome fix, and watch real play before tuning the counts.
-- **The Chrome fix slips.** The feat leans against Chrome without it (37% against 57 to 60%). If the fix is dropped, revisit the feat.
+- **The Chrome fix is reverted.** The feat leaned against Chrome without it (37% against 57 to 60%). If corp relays ever go, revisit the feat.
 - **The upgrades leak into The Deep.** A mainframe is stronger everywhere, not only in the Source. That is fine as a reward, but The Deep should stay a wall for adults. Mainframes are past it by definition.
 - **"All fragments" checks.** Any check missed in the `FRAGMENTS` audit would quietly move a goal. The tests should assert that Root Access and Corp gold do not change when fragments are added (`allFragmentsFound` already takes a `fragments` parameter for this).
 - **Stale tabs.** Without the save version bump, an older build refuses a mainframe save as damaged. See [Saves and data](#saves-and-data).

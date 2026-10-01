@@ -321,6 +321,30 @@ test('Chrome: corp insurance saves it from one disconnect a run', () => {
   assert.equal(resolveIce(k, false, noRng).result, 'disconnected', 'nobody else is insured');
 });
 
+test('Chrome: corp relays patch it up; nobody else is patched', () => {
+  const s = adult('chrome');
+  s.stats.integrity = 40;
+  moveTo(s, into(s, 'deep', 'relay').id, noRng);
+  assert.ok(RUN_CFG.chromeRelayRepair > 0);
+  assert.equal(s.stats.integrity, 40 + RUN_CFG.chromeRelayRepair);
+  assert.equal(s.run.pending.kind, 'relay', 'still offers the jack-out');
+  assert.match(s.run.messages.at(-1), /patched/);
+  const f = adult('firewall');
+  f.stats.integrity = 40;
+  moveTo(f, into(f, 'deep', 'relay').id, noRng);
+  assert.equal(f.stats.integrity, 40);
+  const c = adult('chrome');
+  c.stats.integrity = 95;
+  moveTo(c, into(c, 'deep', 'relay').id, noRng);
+  assert.equal(c.stats.integrity, 100, 'never above full');
+  const t = pet('teen');
+  t.form = 'kernel';
+  t.stats.integrity = 40;
+  t.stats.charge = 100;
+  moveTo(t, into(t, 'corp', 'relay').id, noRng);
+  assert.equal(t.stats.integrity, 40, 'only an adult Chrome');
+});
+
 test('Daemon: repairs a little Integrity with every move', () => {
   const s = adult('daemon');
   s.stats.integrity = 50;
