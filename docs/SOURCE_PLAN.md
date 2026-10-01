@@ -25,7 +25,8 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 | Question | Decision |
 |---|---|
 | The stage's name | **Mainframe**, id `mainframe`. Baby, teen and adult keep their names. |
-| How the stage is reached | Time plus a feat. It must reach an age and also meet a condition in this life; otherwise it stays an adult. The age half is the start of the last ordinary day (96 hours in a 5-day life), so a mainframe can have up to two days. |
+| How the stage is reached | Time plus a feat. The age half is the start of the last ordinary day (96 hours in a 5-day life), so a mainframe can have up to two days. The feat: **three exits from The Deep in this life, or two clean ones** (no ICE fight lost). Otherwise it stays an adult. |
+| A prerequisite | **The Chrome corp-relay fix** ([below](#chrome-lags-on-exits-recorded-for-later)) ships first, as its own change. Without it Chrome meets the feat far less often than the other forms. |
 | Form names | Plat (Chrome), Airgap (Firewall), Init (Daemon), Panic (Glitch), Whisper (Ghost). |
 | Testing the gate | A measurement in the balance tools comes first, before any game code (see [The gate test](#the-gate-test)). |
 | How many forms | One for each adult form: five new forms, each keeping its line's identity and ability. |
@@ -39,7 +40,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 
 ## Still to decide
 
-1. **The feat.** The [gate test](#gate-test-results) shows that one Deep exit is met by nearly every player who runs, casual included. A harder feat is needed; the measured candidates are in the results.
+1. **The unlock ids** (see [Unlocks and cosmetics](#unlocks-and-cosmetics)). Every stage, form, region and fragment id is decided.
 
 ## The stage
 
@@ -51,14 +52,14 @@ An adult recompiles into its mainframe form at the first step where all of these
 
 - `s.stage === 'adult'`
 - `s.ageMin >= mainframeAt`, where `mainframeAt = s.life.lifespan - 24h`: 96 hours for a 5-day life (144 for a legacy 7-day life, which needs no separate testing). Deriving it from `lifespan` means `s.life` and `cleanLife` need no new field.
-- **The feat:** this netling has reached the exit of The Deep (`s.cleared.includes('deep')`). Clears already belong to each netling and are never inherited, so "cleared The Deep" already means "in this life".
+- **The feat:** this life, it has reached The Deep's exit three times, or twice without losing an ICE fight on the way (`s.deepExits.all >= 3 || s.deepExits.clean >= 2`). A new per-life counter, `s.deepExits = { all, clean }`, is raised by `jackOut` when the run ends on The Deep's exit node; "clean" is the same test as a clean jack-out (`tally.iceLost === 0`). Relay jack-outs, disconnects and aborts never count. The rule is `mainframeFeat` and `mainframeDue` in `tools/lib/mainframe-gate.mjs`, which move into `sim.js` when the stage is built.
 - It is not on a netrun (`!s.run`). A recompile mid-run would swap its ability under the player. It recompiles on the first step after the run ends instead.
 
-Order matters. Clearing The Deep before 96 hours means it waits until 96 hours. Clearing it after 96 hours means it recompiles as soon as it is home. The check sits with the teen and adult checks in `step()`, before the end-of-life check, so a netling that meets the gate on its last minute recompiles and gets its extra day.
+Order matters. Meeting the feat before 96 hours means it waits until 96 hours. Meeting it after 96 hours means it recompiles as soon as it is home. The check sits with the teen and adult checks in `step()`, before the end-of-life check, so a netling that meets the gate on its last minute recompiles and gets its extra day.
 
-Why this feat: The Deep is already the wall (35% careful disconnects without abilities, 15 to 19% with them), reaching it needs the whole way down in one life, and it points the player straight at the Source.
+Why this feat: The Deep is already the wall, reaching it needs the whole way down in one life, and it points the player straight at the Source. One exit turned out to be no test at all (every runner made it); three, or two clean, asks for mastery. The two routes suit different forms: forms that endure (Firewall, Daemon, a fixed Chrome) get there by count, and Glitch, which slips past ICE, by clean runs. In the field manual: "prove yourself in The Deep: three times, or twice without a scratch." (draft)
 
-Alternatives that were weighed and set aside: the codex entry `deep-5` as the feat (that is lineage progress, not this netling's), and low faults (that is already Ghost's lever).
+Alternatives that were weighed and set aside (measurements in the [gate test results](#gate-test-results)): one Deep exit (far too easy), the codex entry `deep-5` (lineage progress, not this netling's), a fault limit (does not test netrunning, and shuts out the Stub line), and flow (shuts out the Glitch line, whose way is running hot).
 
 ### The extra day
 
@@ -186,7 +187,7 @@ The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lin
 
 ## Saves and data
 
-- **New values:** stage `mainframe`, five `SPECIES` ids, region `source`, fragments `deep-5` and `source-1` to `source-4`, `progress.sourceExits`, `s.lifeBonus`, and the lineage record's `mainframe` flag.
+- **New values:** `s.deepExits` (`{ all, clean }`, per life; default `{ all: 0, clean: 0 }`; the sanitizer keeps both as whole numbers from 0 to 99 with `clean <= all`), stage `mainframe`, five `SPECIES` ids, region `source`, fragments `deep-5` and `source-1` to `source-4`, `progress.sourceExits`, `s.lifeBonus`, and the lineage record's `mainframe` flag.
 - **Defaults** (CLAUDE.md rule 2) in `createScript`, `migrate` and `cleanSave`: `lifeBonus: 0`. The sanitizer keeps it at `0` or `CFG.mainframeBonusMin`, and forces it to `0` unless the stage is `mainframe` (or `dead` with a mainframe form).
 - **`sanitize.js`:** add `mainframe` to `STAGES`. `settle()` gains a branch: an `mainframe` whose body is not a mainframe form becomes the mainframe of `leaningForm(s)`'s line. The fragment cleaner maps mainframe forms through `lineOf`.
 - **Bump `SAVE_VERSION`, with a step that changes nothing.** The new fields are additive, but an older build refuses a save with an unknown stage and treats it as damaged. With the version bumped, an older build sets it aside as `newer` ("reload to update") instead. That is the right message for a mainframe save opened on a stale tab, and it is the reason to bump. Rules for adding the step are in [DATA_AND_SAVES.md](DATA_AND_SAVES.md). Never edit an old step or `tests/fixtures/save-v1.json`.
@@ -207,7 +208,7 @@ The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lin
 | Spread between mainframe forms in the Source | at most about 6 points | same |
 | Careful, no ability, in the Source | clearly worse than The Deep's 35%. This is a check, not a target. | same |
 | Mainframe upgrades in The Deep | must not make The Deep trivial: careful mainframes at 8% or more | same |
-| Lives that reach the mainframe stage | Deliberate runners: about half. Casual: a quarter or less. Workers and players who never run: rare. With one Deep exit as the feat, every runner meets it ([results](#gate-test-results)). | `CODEX=deep node tools/balance.mjs 1000` |
+| Lives that reach the mainframe stage | Deliberate runners: about half, every form within about 10 points. Casual: a quarter or less. Workers and players who never run: rare. Measured with the chosen feat and the Chrome fix: deliberate 57 to 65%, casual 27%, worker 0% ([results](#gate-test-results)). | `CODEX=deep node tools/balance.mjs 1000` |
 | Adult form shares | not moved by more than noise | `tools/balance.mjs`, `tools/balance-diff.mjs` |
 | Codex pacing to Root Access | unchanged (median life 4 for attentive lines) | `tools/baseline/lineages.json` |
 
@@ -320,14 +321,29 @@ Forms without the fix do not move. Chrome's clean exits drop a little: with rela
 
 Ordinary lives (no codex preset, against `tools/baseline/lives.json`): no adult form share moves, full-life rates move by at most 0.5 points (casual, up), and casual disconnects fall from 1.14 to 1.09 a life.
 
-**Open decision:** which feat to use. The measured front-runner is "three Deep exits, or two clean ones" (evens out the forms, with or without the Chrome fix). Three exits alone is simpler to explain. A flow feat would need a way around the Glitch problem first, for example counting flow at any point in the life up to adulthood only, or letting a Glitch line skip it.
+**Decided: three Deep exits, or two clean ones,** with the Chrome corp-relay fix shipped first. The probe's main gate (`mainframeDue`) now uses it. Without the fix (`CODEX=deep node tools/balance.mjs 1000`, what the baselines hold now):
+
+| Archetype | Met | Met at (median) | Time as a mainframe (median, shortest tenth) | Met the feat after 96 hours |
+|---|---|---|---|---|
+| attentive | 55% | 96h | 48h, 36h | about half |
+| casual | 26% | 98h | 46h, 33h | about half |
+| worker | 0% | | | |
+| steer-chrome | 37% | 98h | 47h, 35h | 54% |
+| steer-firewall | 59% | 96h | 48h, 37h | |
+| steer-daemon | 60% | 96h | 48h, 37h | |
+| steer-glitch | 57% | 96h | 48h, 38h | |
+| steer-mainframe | 56% | 96h | 48h, 37h | |
+
+About half the lives that make it meet the feat after 96 hours, so the feat, not the age, is now the real test. Even so, the shortest tenth still has 33 to 38 hours as a mainframe, so the age half stays where it is. With the Chrome fix, steer-chrome rises to 57% (table above).
+
+A flow feat was set aside for the Glitch problem. If it comes back, it needs a way around that first, for example counting flow before adulthood only.
 
 ## Everything that assumes three stages
 
 A starting checklist. Before building, grep for `'adult'`, `STAGE_ORDER`, `FORMS[` and `FRAGMENTS` to catch more.
 
 - `sim.js`: `step()` (the new check), `evolve()`, `CFG.runCooldownMin` (add `mainframe`, probably the adult value), `SPECIES`, `lineOf`, `lifeEnd`, `fragmentOf`, `flatline()` (a mainframe dying keeps its form, realized).
-- `netrun/run.js`: `ability(pet)` is `pet.stage === 'adult' ? pet.form : null`. It becomes "adult or mainframe, through `lineOf`", plus the mainframe upgrades.
+- `netrun/run.js`: `ability(pet)` is `pet.stage === 'adult' ? pet.form : null`. It becomes "adult or mainframe, through `lineOf`", plus the mainframe upgrades. `jackOut` raises `s.deepExits` on a Deep exit.
 - `netrun/regions.js`: `REGIONS.source`, `REGION_ORDER`, `STAGE_ORDER`, the article in `regionLock`, `clearedForStage`.
 - `netrun/codex.js`: fragments, `ROOT_FRAGMENTS`, `rootUnlocked`.
 - `sanitize.js`: `STAGES`, `settle()`, `cleanFragment`, `lifeBonus`, the lineage record's `mainframe`.
@@ -343,17 +359,19 @@ A starting checklist. Before building, grep for `'adult'`, `STAGE_ORDER`, `FORMS
 
 Each step is one commit that passes `npm test` on its own.
 
-0. **The gate test.** Done (tools only). It showed the planned feat is too easy; pick a harder one before step 2.
-1. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
-2. **Sim.** The stage, the gate, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. Tests: the gate in each order (feat first or age first), not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
-3. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
-4. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
-5. **UI, art, sound.** Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
-6. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
+0. **The gate test.** Done (tools only). The feat is decided: three Deep exits, or two clean.
+1. **The Chrome corp-relay fix.** Its own change to the current game, before anything below ([what it needs](#chrome-lags-on-exits-recorded-for-later)). Re-run the gate test after it, with the real rule instead of the scratch prototype.
+2. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
+3. **Sim and the exit counter.** The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
+4. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
+5. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
+6. **UI, art, sound.** Sprites through the audit, the dex, the Archive, the picker, the field manual, cosmetics, music, smoke scenarios.
+7. **Docs and release.** Every doc in the checklist, the version bump, and the smoke run.
 
 ## Risks
 
-- **Everybody reaches it.** Measured: with one Deep exit as the feat, every archetype that runs meets the gate once the codex opens The Deep. The feat must be harder (see [results](#gate-test-results)). The bots run more than real players, so check casual numbers with care.
+- **Everybody reaches it, or nobody does.** One Deep exit let every runner in; the chosen feat lets in about half of deliberate players and a quarter of casual bots. The bots run more than real players, so real numbers will be lower, casual ones most of all. Re-measure after the Chrome fix, and watch real play before tuning the counts.
+- **The Chrome fix slips.** The feat leans against Chrome without it (37% against 57 to 60%). If the fix is dropped, revisit the feat.
 - **The upgrades leak into The Deep.** A mainframe is stronger everywhere, not only in the Source. That is fine as a reward, but The Deep should stay a wall for adults. Mainframes are past it by definition.
 - **"All fragments" checks.** Any check missed in the `FRAGMENTS` audit would quietly move a goal. The tests should assert that Root Access and Corp gold do not change when fragments are added (`allFragmentsFound` already takes a `fragments` parameter for this).
 - **Stale tabs.** Without the save version bump, an older build refuses a mainframe save as damaged. See [Saves and data](#saves-and-data).

@@ -13,7 +13,7 @@ const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
 const { FRAGMENTS } = await import('../src/netrun/codex.js');
-const { mainframeAt, mainframeDue, mainframeEnd } = await import('./lib/mainframe-gate.mjs');
+const { mainframeAt, mainframeDue, mainframeEnd, mainframeFeat } = await import('./lib/mainframe-gate.mjs');
 const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
@@ -135,7 +135,7 @@ export function checkIn(s, p, now, rng, ctx) {
       ctx.scripPeak = Math.max(ctx.scripPeak ?? 0, s.scrip);
       if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
       finishRun(s, now);
-      // The Mainframe gate's feat: Deep runs up to and including the first that reaches its exit.
+      // Deep runs up to and including the first that reaches its exit.
       if (region === 'deep' && ctx.deepClearAt === null) {
         ctx.deepRuns++;
         if (run.result === 'disconnected') ctx.deepDisconnects++;
@@ -143,7 +143,10 @@ export function checkIn(s, p, now, rng, ctx) {
       }
       // Harder feats the gate could ask for instead (FEATS), by the age each was first met.
       if (region === 'deep' && run.result === 'jacked' && run.map.nodes.find((n) => n.id === run.pos)?.type === 'exit') {
-        ctx.deepExits.push({ age: s.ageMin, clean: (run.tally?.iceLost ?? 0) === 0, faults: s.careMistakes, flow: flowAtJackIn });
+        const clean = (run.tally?.iceLost ?? 0) === 0;
+        ctx.deepExits.push({ age: s.ageMin, clean, faults: s.careMistakes, flow: flowAtJackIn });
+        // The counter the game would keep for the gate (the sim ignores it until the stage is built).
+        s.deepExits = { all: (s.deepExits?.all ?? 0) + 1, clean: (s.deepExits?.clean ?? 0) + (clean ? 1 : 0) };
       }
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
       s.codexInbox = [];
@@ -211,6 +214,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let tracesIgnored = 0;
   let prevEvent = null;
   let gateAt = null; // the age at which it would have become a Mainframe (docs/SOURCE_PLAN.md)
+  let featAt = null; // the age it met the gate's feat
   while (s.stage !== 'dead' && minute < s.life.lifespan + 60) {
     const dayMin = (at(8) + minute) % DAY;
     if (dayMin === 0 || minute === 0) {
@@ -225,6 +229,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
       }
     }
     prevFlags = { ...s.flagged };
+    if (featAt === null && mainframeFeat(s)) featAt = s.ageMin;
     if (gateAt === null && mainframeDue(s)) gateAt = s.ageMin;
     if (ctx.firstFlowAt === null && inFlow(s)) ctx.firstFlowAt = s.ageMin;
     if (s.event && !prevEvent) {
@@ -297,7 +302,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     chatterSeen: ctx.chatterSeen.size,
     // The planned Mainframe gate: when it would have been met (null: never), and the feat's history.
     gate: {
-      at: gateAt, from: mainframeAt(s), end: mainframeEnd(s), deepClearAt: ctx.deepClearAt, deepRuns: ctx.deepRuns, deepDisconnects: ctx.deepDisconnects,
+      at: gateAt, featAt, from: mainframeAt(s), end: mainframeEnd(s), deepClearAt: ctx.deepClearAt, deepRuns: ctx.deepRuns, deepDisconnects: ctx.deepDisconnects,
       // The age each alternative feat would have opened the gate (null: never, or it died first).
       feats: Object.fromEntries(Object.entries(FEATS).map(([k, feat]) => {
         const age = feat(ctx.deepExits, ctx);
@@ -308,11 +313,12 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   };
 }
 
-// Alternative feats for the Mainframe gate, measured beside the planned one (one Deep exit). Each takes this
+// Alternative feats for the Mainframe gate, measured beside the chosen one (three Deep exits, or two clean). Each takes this
 // life's Deep exits ({ age, clean, faults, flow: in flow at jack-in }) and the life ({ firstFlowAt }), and
 // returns the age the feat was met, or null.
 const nthExit = (n, ok = () => true) => (exits) => exits.filter(ok)[n - 1]?.age ?? null;
 export const FEATS = {
+  'one Deep exit': nthExit(1), // the first plan, found far too easy
   'two Deep exits': nthExit(2),
   'three Deep exits': nthExit(3),
   'a clean Deep exit': nthExit(1, (e) => e.clean),
@@ -340,21 +346,23 @@ function gateStats(results) {
   const n = results.length;
   const met = results.filter((r) => r.gate.at !== null);
   const cleared = results.filter((r) => r.gate.deepClearAt !== null);
+  const feat = results.filter((r) => r.gate.featAt !== null);
   const at = met.map((r) => r.gate.at).sort((a, b) => a - b);
   const left = met.map((r) => r.gate.end - r.gate.at).sort((a, b) => a - b);
   const pick = (xs, q) => (xs.length ? round(xs[Math.min(xs.length - 1, Math.floor(xs.length * q))] / 60, 1) : null);
   return {
     deepCleared: round(cleared.length / n),
     met: round(met.length / n),
-    // Cleared The Deep but died before the age half came.
-    clearedThenDied: round((cleared.length - met.length) / n),
+    // Met the feat (three Deep exits, or two clean), and died before the age half came.
+    feat: round(feat.length / n),
+    featThenDied: round((feat.length - met.length) / n),
     medianHours: pick(at, 0.5),
     p10Hours: pick(at, 0.1),
     // Hours it would have as a Mainframe (to the end of its extended life): the median, and the shortest tenth.
     leftMedianHours: pick(left, 0.5),
     leftP10Hours: pick(left, 0.1),
     // Of the lives that met it, the share that waited on the feat (cleared The Deep after the age half).
-    lateFeat: met.length ? round(met.filter((r) => r.gate.deepClearAt > r.gate.from).length / met.length) : null,
+    lateFeat: met.length ? round(met.filter((r) => r.gate.featAt > r.gate.from).length / met.length) : null,
     // Deep runs up to the first clear, and the disconnects among them, for the lives that cleared it.
     deepRunsToClear: cleared.length ? round(avg(cleared.map((r) => r.gate.deepRuns)), 2) : null,
     deepDisconnectsToClear: cleared.length ? round(avg(cleared.map((r) => r.gate.deepDisconnects)), 2) : null,
@@ -537,7 +545,7 @@ function printLife(st, detail) {
 const hours = (h) => (h === null ? '-' : `${h}h`);
 function printGate(g) {
   if (!g.deepCleared) return;
-  console.log(`  mainframe gate: met ${pct(g.met)} (cleared The Deep ${pct(g.deepCleared)}, ${pct(g.clearedThenDied)} died before the age half) · met at ${hours(g.medianHours)} (earliest tenth ${hours(g.p10Hours)}) · time as a mainframe ${hours(g.leftMedianHours)} (shortest tenth ${hours(g.leftP10Hours)}) · waited on the feat ${g.lateFeat === null ? '-' : pct(g.lateFeat)} · Deep runs to the first clear ${g.deepRunsToClear} (${g.deepDisconnectsToClear} disconnects)`);
+  console.log(`  mainframe gate: met ${pct(g.met)} (cleared The Deep ${pct(g.deepCleared)}, met the feat ${pct(g.feat)}, ${pct(g.featThenDied)} of them died before the age half) · met at ${hours(g.medianHours)} (earliest tenth ${hours(g.p10Hours)}) · time as a mainframe ${hours(g.leftMedianHours)} (shortest tenth ${hours(g.leftP10Hours)}) · waited on the feat ${g.lateFeat === null ? '-' : pct(g.lateFeat)} · Deep runs to the first clear ${g.deepRunsToClear} (${g.deepDisconnectsToClear} disconnects)`);
   console.log(`  harder feats: ${Object.entries(g.feats).map(([k, f]) => `${k} ${pct(f.met)} (${hours(f.leftMedianHours)} left)`).join(', ')}`);
 }
 

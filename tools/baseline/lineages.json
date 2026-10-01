@@ -113,7 +113,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -122,6 +123,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -257,16 +262,21 @@
           },
           "mainframe": {
             "deepCleared": 0.33,
-            "met": 0.33,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.125,
+            "feat": 0.125,
+            "featThenDied": 0,
+            "medianHours": 99.1,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 43.2,
-            "lateFeat": 0.197,
+            "leftMedianHours": 44.9,
+            "leftP10Hours": 25.2,
+            "lateFeat": 0.52,
             "deepRunsToClear": 1.55,
             "deepDisconnectsToClear": 0.2,
             "feats": {
+              "one Deep exit": {
+                "met": 0.33,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.21,
                 "leftMedianHours": 48
@@ -401,16 +411,21 @@
           },
           "mainframe": {
             "deepCleared": 0.955,
-            "met": 0.955,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.485,
+            "feat": 0.485,
+            "featThenDied": 0,
+            "medianHours": 97,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.058,
+            "leftMedianHours": 47,
+            "leftP10Hours": 35,
+            "lateFeat": 0.505,
             "deepRunsToClear": 1.38,
             "deepDisconnectsToClear": 0.1,
             "feats": {
+              "one Deep exit": {
+                "met": 0.955,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.74,
                 "leftMedianHours": 48
@@ -545,16 +560,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.565,
+            "feat": 0.565,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.01,
+            "leftP10Hours": 35.2,
+            "lateFeat": 0.46,
             "deepRunsToClear": 1.48,
             "deepDisconnectsToClear": 0.16,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.835,
                 "leftMedianHours": 48
@@ -708,16 +728,21 @@
           },
           "mainframe": {
             "deepCleared": 0.03,
-            "met": 0.025,
-            "clearedThenDied": 0.005,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 46.3,
-            "lateFeat": 0.2,
+            "met": 0,
+            "feat": 0,
+            "featThenDied": 0,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.67,
             "deepDisconnectsToClear": 0.67,
             "feats": {
+              "one Deep exit": {
+                "met": 0.025,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.005,
                 "leftMedianHours": 48
@@ -856,16 +881,21 @@
           },
           "mainframe": {
             "deepCleared": 0.465,
-            "met": 0.46,
-            "clearedThenDied": 0.005,
-            "medianHours": 96,
+            "met": 0.09,
+            "feat": 0.09,
+            "featThenDied": 0,
+            "medianHours": 101,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 42.5,
-            "lateFeat": 0.174,
+            "leftMedianHours": 43.1,
+            "leftP10Hours": 24.4,
+            "lateFeat": 0.667,
             "deepRunsToClear": 1.6,
             "deepDisconnectsToClear": 0.6,
             "feats": {
+              "one Deep exit": {
+                "met": 0.46,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.23,
                 "leftMedianHours": 46
@@ -1004,16 +1034,21 @@
           },
           "mainframe": {
             "deepCleared": 0.89,
-            "met": 0.88,
-            "clearedThenDied": 0.01,
-            "medianHours": 96,
+            "met": 0.215,
+            "feat": 0.215,
+            "featThenDied": 0,
+            "medianHours": 101.5,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.091,
+            "leftMedianHours": 42.5,
+            "leftP10Hours": 33.8,
+            "lateFeat": 0.721,
             "deepRunsToClear": 1.67,
             "deepDisconnectsToClear": 0.67,
             "feats": {
+              "one Deep exit": {
+                "met": 0.88,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.485,
                 "leftMedianHours": 48
@@ -1153,16 +1188,21 @@
           },
           "mainframe": {
             "deepCleared": 0.945,
-            "met": 0.93,
-            "clearedThenDied": 0.015,
-            "medianHours": 96,
+            "met": 0.25,
+            "feat": 0.26,
+            "featThenDied": 0.01,
+            "medianHours": 98.5,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.027,
+            "leftMedianHours": 45.6,
+            "leftP10Hours": 33.1,
+            "lateFeat": 0.54,
             "deepRunsToClear": 1.69,
             "deepDisconnectsToClear": 0.69,
             "feats": {
+              "one Deep exit": {
+                "met": 0.93,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.54,
                 "leftMedianHours": 48
@@ -1317,7 +1357,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -1326,6 +1367,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -1465,7 +1510,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -1474,6 +1520,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -1613,7 +1663,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -1622,6 +1673,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -1761,16 +1816,21 @@
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.01,
-            "clearedThenDied": 0,
-            "medianHours": 109.3,
-            "p10Hours": 108.9,
-            "leftMedianHours": 35.1,
-            "leftP10Hours": 34.8,
-            "lateFeat": 1,
+            "met": 0,
+            "feat": 0,
+            "featThenDied": 0,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1,
             "deepDisconnectsToClear": 0,
             "feats": {
+              "one Deep exit": {
+                "met": 0.01,
+                "leftMedianHours": 35.1
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -1923,7 +1983,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -1932,6 +1993,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2068,7 +2133,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2077,6 +2143,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2213,7 +2283,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2222,6 +2293,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2358,7 +2433,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2367,6 +2443,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2517,7 +2597,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2526,6 +2607,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2660,7 +2745,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2669,6 +2755,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2804,7 +2894,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2813,6 +2904,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -2948,7 +3043,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -2957,6 +3053,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3107,7 +3207,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3116,6 +3217,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3251,7 +3356,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3260,6 +3366,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3394,7 +3504,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3403,6 +3514,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3537,7 +3652,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3546,6 +3662,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3698,7 +3818,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3707,6 +3828,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3845,7 +3970,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -3854,6 +3980,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -3991,7 +4121,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4000,6 +4131,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4137,7 +4272,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4146,6 +4282,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4298,7 +4438,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4307,6 +4448,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4443,7 +4588,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4452,6 +4598,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4586,7 +4736,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4595,6 +4746,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4728,7 +4883,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4737,6 +4893,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -4888,7 +5048,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -4897,6 +5058,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -5032,7 +5197,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -5041,6 +5207,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -5176,7 +5346,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -5185,6 +5356,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -5320,7 +5495,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -5329,6 +5505,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -5481,7 +5661,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -5490,6 +5671,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -5626,16 +5811,21 @@
           },
           "mainframe": {
             "deepCleared": 0.395,
-            "met": 0.395,
-            "clearedThenDied": 0,
+            "met": 0.175,
+            "feat": 0.175,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 43,
-            "lateFeat": 0.139,
+            "leftP10Hours": 38.1,
+            "lateFeat": 0.457,
             "deepRunsToClear": 1.39,
             "deepDisconnectsToClear": 0.14,
             "feats": {
+              "one Deep exit": {
+                "met": 0.395,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.28,
                 "leftMedianHours": 48
@@ -5772,16 +5962,21 @@
           },
           "mainframe": {
             "deepCleared": 0.965,
-            "met": 0.96,
-            "clearedThenDied": 0.005,
-            "medianHours": 96,
+            "met": 0.485,
+            "feat": 0.485,
+            "featThenDied": 0,
+            "medianHours": 96.2,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.052,
+            "leftMedianHours": 47.8,
+            "leftP10Hours": 36,
+            "lateFeat": 0.515,
             "deepRunsToClear": 1.51,
             "deepDisconnectsToClear": 0.2,
             "feats": {
+              "one Deep exit": {
+                "met": 0.96,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.685,
                 "leftMedianHours": 48
@@ -5919,16 +6114,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.515,
+            "feat": 0.515,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.01,
+            "leftP10Hours": 36.1,
+            "lateFeat": 0.437,
             "deepRunsToClear": 1.68,
             "deepDisconnectsToClear": 0.24,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.76,
                 "leftMedianHours": 48
@@ -6077,7 +6277,8 @@
           "mainframe": {
             "deepCleared": 0,
             "met": 0,
-            "clearedThenDied": 0,
+            "feat": 0,
+            "featThenDied": 0,
             "medianHours": null,
             "p10Hours": null,
             "leftMedianHours": null,
@@ -6086,6 +6287,10 @@
             "deepRunsToClear": null,
             "deepDisconnectsToClear": null,
             "feats": {
+              "one Deep exit": {
+                "met": 0,
+                "leftMedianHours": null
+              },
               "two Deep exits": {
                 "met": 0,
                 "leftMedianHours": null
@@ -6219,16 +6424,21 @@
           },
           "mainframe": {
             "deepCleared": 0.355,
-            "met": 0.355,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.09,
+            "feat": 0.09,
+            "featThenDied": 0,
+            "medianHours": 102.9,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 38.9,
-            "lateFeat": 0.254,
+            "leftMedianHours": 42,
+            "leftP10Hours": 25.2,
+            "lateFeat": 0.778,
             "deepRunsToClear": 1.9,
             "deepDisconnectsToClear": 0.25,
             "feats": {
+              "one Deep exit": {
+                "met": 0.355,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.185,
                 "leftMedianHours": 47.1
@@ -6362,16 +6572,21 @@
           },
           "mainframe": {
             "deepCleared": 0.895,
-            "met": 0.895,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.305,
+            "feat": 0.305,
+            "featThenDied": 0,
+            "medianHours": 99.3,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.089,
+            "leftMedianHours": 44.7,
+            "leftP10Hours": 35.8,
+            "lateFeat": 0.574,
             "deepRunsToClear": 2.11,
             "deepDisconnectsToClear": 0.28,
             "feats": {
+              "one Deep exit": {
+                "met": 0.895,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.57,
                 "leftMedianHours": 48
@@ -6506,16 +6721,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.335,
+            "feat": 0.335,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.02,
+            "leftP10Hours": 34.1,
+            "lateFeat": 0.433,
             "deepRunsToClear": 2.06,
             "deepDisconnectsToClear": 0.28,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.645,
                 "leftMedianHours": 48
@@ -6664,16 +6884,21 @@
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.01,
-            "clearedThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "met": 0,
+            "feat": 0,
+            "featThenDied": 0,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.5,
             "deepDisconnectsToClear": 0.5,
             "feats": {
+              "one Deep exit": {
+                "met": 0.01,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.005,
                 "leftMedianHours": 48
@@ -6805,16 +7030,21 @@
           },
           "mainframe": {
             "deepCleared": 0.4,
-            "met": 0.4,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.155,
+            "feat": 0.155,
+            "featThenDied": 0,
+            "medianHours": 101,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.1,
+            "leftMedianHours": 43,
+            "leftP10Hours": 34,
+            "lateFeat": 0.613,
             "deepRunsToClear": 1.35,
             "deepDisconnectsToClear": 0.11,
             "feats": {
+              "one Deep exit": {
+                "met": 0.4,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.295,
                 "leftMedianHours": 48
@@ -6946,16 +7176,21 @@
           },
           "mainframe": {
             "deepCleared": 0.965,
-            "met": 0.965,
-            "clearedThenDied": 0,
+            "met": 0.525,
+            "feat": 0.525,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.031,
+            "leftP10Hours": 35.9,
+            "lateFeat": 0.486,
             "deepRunsToClear": 1.24,
             "deepDisconnectsToClear": 0.07,
             "feats": {
+              "one Deep exit": {
+                "met": 0.965,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.845,
                 "leftMedianHours": 48
@@ -7089,16 +7324,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.645,
+            "feat": 0.645,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "leftP10Hours": 37,
+            "lateFeat": 0.434,
             "deepRunsToClear": 1.24,
             "deepDisconnectsToClear": 0.07,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.895,
                 "leftMedianHours": 48
@@ -7248,16 +7488,21 @@
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.01,
-            "clearedThenDied": 0,
-            "medianHours": 101.1,
+            "met": 0.005,
+            "feat": 0.005,
+            "featThenDied": 0,
+            "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 42.9,
-            "lateFeat": 0.5,
+            "leftP10Hours": 48,
+            "lateFeat": 0,
             "deepRunsToClear": 1.5,
             "deepDisconnectsToClear": 0.5,
             "feats": {
+              "one Deep exit": {
+                "met": 0.01,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.005,
                 "leftMedianHours": 48
@@ -7391,16 +7636,21 @@
           },
           "mainframe": {
             "deepCleared": 0.34,
-            "met": 0.34,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.165,
+            "feat": 0.165,
+            "featThenDied": 0,
+            "medianHours": 96.8,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 39.2,
-            "lateFeat": 0.25,
+            "leftMedianHours": 47.2,
+            "leftP10Hours": 36.9,
+            "lateFeat": 0.576,
             "deepRunsToClear": 1.31,
             "deepDisconnectsToClear": 0.12,
             "feats": {
+              "one Deep exit": {
+                "met": 0.34,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.255,
                 "leftMedianHours": 48
@@ -7534,16 +7784,21 @@
           },
           "mainframe": {
             "deepCleared": 0.94,
-            "met": 0.94,
-            "clearedThenDied": 0,
+            "met": 0.49,
+            "feat": 0.49,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.069,
+            "leftP10Hours": 36,
+            "lateFeat": 0.429,
             "deepRunsToClear": 1.27,
             "deepDisconnectsToClear": 0.11,
             "feats": {
+              "one Deep exit": {
+                "met": 0.94,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.775,
                 "leftMedianHours": 48
@@ -7675,16 +7930,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.58,
+            "feat": 0.58,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.005,
+            "leftP10Hours": 35.7,
+            "lateFeat": 0.422,
             "deepRunsToClear": 1.42,
             "deepDisconnectsToClear": 0.16,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.815,
                 "leftMedianHours": 48
@@ -7836,15 +8096,20 @@
           "mainframe": {
             "deepCleared": 0.01,
             "met": 0.01,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "feat": 0.01,
+            "featThenDied": 0,
+            "medianHours": 98,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "leftP10Hours": 46,
+            "lateFeat": 0.5,
             "deepRunsToClear": 2,
             "deepDisconnectsToClear": 1,
             "feats": {
+              "one Deep exit": {
+                "met": 0.01,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.01,
                 "leftMedianHours": 48
@@ -7979,16 +8244,21 @@
           },
           "mainframe": {
             "deepCleared": 0.405,
-            "met": 0.405,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.175,
+            "feat": 0.175,
+            "featThenDied": 0,
+            "medianHours": 97,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 45.8,
-            "lateFeat": 0.173,
+            "leftMedianHours": 47,
+            "leftP10Hours": 35.2,
+            "lateFeat": 0.514,
             "deepRunsToClear": 1.57,
             "deepDisconnectsToClear": 0.3,
             "feats": {
+              "one Deep exit": {
+                "met": 0.405,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.24,
                 "leftMedianHours": 48
@@ -8125,16 +8395,21 @@
           },
           "mainframe": {
             "deepCleared": 0.935,
-            "met": 0.935,
-            "clearedThenDied": 0,
+            "met": 0.455,
+            "feat": 0.455,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.064,
+            "leftP10Hours": 39.9,
+            "lateFeat": 0.275,
             "deepRunsToClear": 1.55,
             "deepDisconnectsToClear": 0.24,
             "feats": {
+              "one Deep exit": {
+                "met": 0.935,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.605,
                 "leftMedianHours": 48
@@ -8270,16 +8545,21 @@
           },
           "mainframe": {
             "deepCleared": 0.98,
-            "met": 0.98,
-            "clearedThenDied": 0,
+            "met": 0.55,
+            "feat": 0.55,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.01,
+            "leftP10Hours": 37.8,
+            "lateFeat": 0.318,
             "deepRunsToClear": 1.87,
             "deepDisconnectsToClear": 0.38,
             "feats": {
+              "one Deep exit": {
+                "met": 0.98,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.695,
                 "leftMedianHours": 48
@@ -8432,16 +8712,21 @@
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.01,
-            "clearedThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "met": 0.005,
+            "feat": 0.005,
+            "featThenDied": 0,
+            "medianHours": 105.9,
+            "p10Hours": 105.9,
+            "leftMedianHours": 38.1,
+            "leftP10Hours": 38.1,
+            "lateFeat": 1,
             "deepRunsToClear": 1.5,
             "deepDisconnectsToClear": 0.5,
             "feats": {
+              "one Deep exit": {
+                "met": 0.01,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.005,
                 "leftMedianHours": 48
@@ -8579,16 +8864,21 @@
           },
           "mainframe": {
             "deepCleared": 0.38,
-            "met": 0.38,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.14,
+            "feat": 0.14,
+            "featThenDied": 0,
+            "medianHours": 98.2,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 43.8,
-            "lateFeat": 0.158,
+            "leftMedianHours": 46,
+            "leftP10Hours": 35.2,
+            "lateFeat": 0.571,
             "deepRunsToClear": 1.45,
             "deepDisconnectsToClear": 0.09,
             "feats": {
+              "one Deep exit": {
+                "met": 0.38,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.245,
                 "leftMedianHours": 48
@@ -8726,16 +9016,21 @@
           },
           "mainframe": {
             "deepCleared": 0.97,
-            "met": 0.97,
-            "clearedThenDied": 0,
+            "met": 0.435,
+            "feat": 0.435,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 47.1,
-            "lateFeat": 0.108,
+            "leftP10Hours": 36.7,
+            "lateFeat": 0.483,
             "deepRunsToClear": 1.54,
             "deepDisconnectsToClear": 0.16,
             "feats": {
+              "one Deep exit": {
+                "met": 0.97,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.685,
                 "leftMedianHours": 48
@@ -8872,16 +9167,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
+            "met": 0.605,
+            "feat": 0.605,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.01,
+            "leftP10Hours": 37,
+            "lateFeat": 0.438,
             "deepRunsToClear": 1.36,
             "deepDisconnectsToClear": 0.1,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.83,
                 "leftMedianHours": 48
@@ -9033,7 +9333,8 @@
           "mainframe": {
             "deepCleared": 0.005,
             "met": 0.005,
-            "clearedThenDied": 0,
+            "feat": 0.005,
+            "featThenDied": 0,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
@@ -9042,6 +9343,10 @@
             "deepRunsToClear": 1,
             "deepDisconnectsToClear": 0,
             "feats": {
+              "one Deep exit": {
+                "met": 0.005,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.005,
                 "leftMedianHours": 48
@@ -9177,16 +9482,21 @@
           },
           "mainframe": {
             "deepCleared": 0.335,
-            "met": 0.335,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.13,
+            "feat": 0.13,
+            "featThenDied": 0,
+            "medianHours": 96.2,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 42.8,
-            "lateFeat": 0.194,
+            "leftP10Hours": 33,
+            "lateFeat": 0.5,
             "deepRunsToClear": 1.39,
             "deepDisconnectsToClear": 0.12,
             "feats": {
+              "one Deep exit": {
+                "met": 0.335,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.175,
                 "leftMedianHours": 48
@@ -9320,16 +9630,21 @@
           },
           "mainframe": {
             "deepCleared": 0.95,
-            "met": 0.95,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.465,
+            "feat": 0.465,
+            "featThenDied": 0,
+            "medianHours": 97.1,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0.058,
+            "leftMedianHours": 46.9,
+            "leftP10Hours": 32.8,
+            "lateFeat": 0.57,
             "deepRunsToClear": 1.43,
             "deepDisconnectsToClear": 0.11,
             "feats": {
+              "one Deep exit": {
+                "met": 0.95,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.765,
                 "leftMedianHours": 48
@@ -9465,16 +9780,21 @@
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 1,
-            "clearedThenDied": 0,
-            "medianHours": 96,
+            "met": 0.61,
+            "feat": 0.61,
+            "featThenDied": 0,
+            "medianHours": 96.9,
             "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "leftMedianHours": 47.8,
+            "leftP10Hours": 36.8,
+            "lateFeat": 0.508,
             "deepRunsToClear": 1.41,
             "deepDisconnectsToClear": 0.14,
             "feats": {
+              "one Deep exit": {
+                "met": 1,
+                "leftMedianHours": 48
+              },
               "two Deep exits": {
                 "met": 0.85,
                 "leftMedianHours": 48

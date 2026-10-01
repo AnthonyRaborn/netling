@@ -5,7 +5,7 @@ import './helpers/utc.js';
 // The balance tools are how rule changes get judged, so their own logic is tested here.
 const { planMove, surplusSlot } = await import('../tools/netrun-bot.mjs');
 const { simulate, simulateLine, stats, parentOf, ARCHETYPES, CODEX_PRESETS, FEATS } = await import('../tools/balance.mjs');
-const { mainframeDue, mainframeAt, mainframeEnd, MAINFRAME_GATE } = await import('../tools/lib/mainframe-gate.mjs');
+const { mainframeDue, mainframeAt, mainframeEnd, mainframeFeat, MAINFRAME_GATE } = await import('../tools/lib/mainframe-gate.mjs');
 const { diff, flatten } = await import('../tools/balance-diff.mjs');
 const { FORMS, createScript, mulberry32 } = await import('../src/sim.js');
 const { FRAGMENTS } = await import('../src/netrun/codex.js');
@@ -95,15 +95,18 @@ test('the report diff finds what moved, by path', () => {
   assert.equal(rows[1].before, 0, 'a form that appears counts as 0 before');
 });
 
-test('the planned Mainframe gate: an adult, home, into its last ordinary day, with The Deep cleared', () => {
+test('the planned Mainframe gate: an adult, home, into its last ordinary day, with three Deep exits or two clean', () => {
   const s = createScript({ now: 0, rng: mulberry32(1) });
-  Object.assign(s, { stage: 'adult', cleared: ['public', 'bazaar', 'corp', 'ruins', 'deep'], run: null });
+  Object.assign(s, { stage: 'adult', deepExits: { all: 3, clean: 0 }, run: null });
   s.ageMin = mainframeAt(s);
   assert.equal(mainframeAt(s), s.life.lifespan - MAINFRAME_GATE.beforeEndMin);
   assert.equal(mainframeEnd(s), s.life.lifespan + MAINFRAME_GATE.bonusMin);
   assert.equal(mainframeDue(s), true);
   assert.equal(mainframeDue({ ...s, ageMin: s.ageMin - 1 }), false, 'too young');
-  assert.equal(mainframeDue({ ...s, cleared: ['public', 'bazaar', 'corp', 'ruins'] }), false, 'no Deep clear');
+  assert.equal(mainframeFeat({ deepExits: { all: 2, clean: 1 } }), false, 'two exits, one clean: not yet');
+  assert.equal(mainframeFeat({ deepExits: { all: 2, clean: 2 } }), true, 'two clean exits');
+  assert.equal(mainframeFeat({}), false, 'no Deep exits');
+  assert.equal(mainframeDue({ ...s, deepExits: { all: 2, clean: 1 } }), false);
   assert.equal(mainframeDue({ ...s, run: { region: 'deep' } }), false, 'not mid-run');
   assert.equal(mainframeDue({ ...s, stage: 'teen' }), false, 'adults only');
 });
@@ -114,11 +117,14 @@ test('the gate probe: codex presets open the way down, and the reported gate agr
   const r = simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins });
   assert.ok(r.cleared.includes('deep'), 'a single life with the preset reaches The Deep');
   assert.ok(r.gate.deepClearAt !== null && r.gate.deepRuns >= 1);
-  assert.equal(r.gate.at, Math.max(r.gate.deepClearAt, r.gate.from), 'met at the later of the feat and the age half');
+  assert.ok(r.gate.at !== null, 'this seed meets the gate');
+  // Met at the later of the feat and the age half; a feat met on a check-in counts from the next minute, as a step would.
+  const due = Math.max(r.gate.feats['three Deep exits or two clean'], r.gate.from);
+  assert.ok(r.gate.at === due || r.gate.at === due + 1, `met at ${r.gate.at}, due ${due}`);
   assert.equal(simulate(ARCHETYPES['steer-mainframe'], 1).gate.at, null, 'no codex: The Deep stays locked');
-  // Each harder feat opens no earlier than the planned one.
-  for (const k of Object.keys(FEATS)) assert.ok(r.gate.feats[k] === null || r.gate.feats[k] >= r.gate.at, k);
+  // Each harder feat opens no earlier than the first plan's one exit.
+  for (const k of Object.keys(FEATS)) assert.ok(r.gate.feats[k] === null || r.gate.feats[k] >= r.gate.feats['one Deep exit'], k);
   const st = stats([r]).mainframe;
   assert.equal(st.met, 1);
-  assert.equal(st.leftMedianHours, (r.gate.end - r.gate.at) / 60);
+  assert.equal(st.leftMedianHours, Math.round(((r.gate.end - r.gate.at) / 60) * 10) / 10, 'hours left, to a tenth');
 });
