@@ -155,7 +155,8 @@ test('every form has authored anchor rows, and they point at the right pixels in
       const rows = anchorRowsFor(form, pose);
       assert.ok(rows, `${form} has no authored anchor rows`);
       const name = `${form}${key}`;
-      assert.ok(sprite[rows.eyeRow].includes('o'), `${name}: eyeRow ${rows.eyeRow} has no eye pixels`);
+      // Eyes are accent cells; a form with bright eyes (shine: Chrome's visor, Panic's '!' marks) may use '+' instead.
+      assert.ok(sprite[rows.eyeRow].includes('o') || (anchorRowsFor(form, 'a').shine && sprite[rows.eyeRow].includes('+')), `${name}: eyeRow ${rows.eyeRow} has no eye pixels`);
       assert.ok(rows.headTop < rows.eyeRow && rows.eyeRow < rows.mouthRow && rows.mouthRow < rows.neckRow, `${name}: rows out of order`);
       assert.ok(sprite[rows.headTop].replace(/\./g, '').length >= 3, `${name}: headTop row is nearly empty`);
       assert.ok(sprite[rows.neckRow].replace(/\./g, '').length >= 3, `${name}: neckRow row is nearly empty`);

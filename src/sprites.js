@@ -319,7 +319,8 @@ export const SPRITES = {
   ],
   // The Mainframe forms (docs/SOURCE_PLAN.md): four are their adult line grown wider (18 columns, at most 15 rows, the
   // tallest an adult is), keeping the line's silhouette. Plat: a broader corp shell with a crest; Airgap: the Firewall
-  // split by a dark seam; Init: the Daemon with longer horns and a mark on its brow; Panic: more broken than a Glitch.
+  // split by a dark seam; Init: the Daemon with longer horns and a mark on its brow; Panic: a Glitch torn clean in two, the halves swapping
+  // sides every frame, with '!' marks for eyes.
   // Whisper goes the other way: smaller than a Ghost (14 columns), its body thinning into one faint wisp that sways.
   platA: [
     '.......####.......',
@@ -424,34 +425,73 @@ export const SPRITES = {
     '.###...#..#...###.',
   ],
   panicA: [
-    '.....#.....#....#.',
-    '......########....',
-    '....#########.....',
-    '..##########.#....',
-    '......##oo###oo#..',
-    '...#oo####oo##....',
+    '..#.....#.........',
     '.###########......',
-    '.....##########...',
-    '..##+.++##+##.....',
-    '....#########..#..',
-    '......#.#.#.#.....',
-    '....#...#...#.#...',
-    '.#.........#....#.',
+    '.###+###+###......',
+    '.###+###+####.....',
+    '.###########......',
+    '.###+###+###.#....',
+    '.#o#o#o#o##.......',
+    '.##########.......',
+    '...#........#.....',
+    '.....###########..',
+    '....############..',
+    '......###########.',
+    '.......#.#.#.#....',
+    '.....#...#...#..#.',
+    '...#.......#......',
   ],
   panicB: [
-    '.......#.....#....',
-    '....########......',
-    '.....#########....',
-    '..#.##########....',
-    '...#oo####oo##....',
-    '......##oo###oo#..',
-    '....###########...',
+    '.........#.....#..',
+    '......###########.',
+    '......###+###+###.',
+    '.....####+###+###.',
+    '......###########.',
+    '....#.###+###+###.',
+    '.......##o#o#o#o#.',
+    '.......##########.',
+    '.....#........#...',
+    '..###########.....',
+    '..############....',
+    '.###########......',
+    '....#.#.#.#.#.....',
+    '.#..#...#...#.....',
+    '......#.......#...',
+  ],
+  // Panic's eyes are '!' marks (a kernel panic message), so its asleep and dead poses are drawn here, not generated.
+  panicSleep: [
+    '..#.....#.........',
+    '.###########......',
+    '.###########......',
+    '.############.....',
+    '.##ooo#ooo##......',
+    '.###########.#....',
+    '.#o#o#o#o##.......',
     '.##########.......',
-    '.....##+.++##+##..',
-    '.#...#########....',
-    '....#.#.#.#.......',
-    '..#...#...#...#...',
-    '.....#.......#..#.',
+    '...#........#.....',
+    '.....###########..',
+    '....############..',
+    '......###########.',
+    '.......#.#.#.#....',
+    '.....#...#...#..#.',
+    '...#.......#......',
+  ],
+  panicDead: [
+    '..#.....#.........',
+    '.###########......',
+    '.##o#o#o#o##......',
+    '.###o###o####.....',
+    '.##o#o#o#o##......',
+    '.###########.#....',
+    '.#o#o#o#o##.......',
+    '.##########.......',
+    '...#........#.....',
+    '.....###########..',
+    '....############..',
+    '......###########.',
+    '.......#.#.#.#....',
+    '.....#...#...#..#.',
+    '...#.......#......',
   ],
   whisperA: [
     '....######....',
@@ -583,7 +623,8 @@ export const ANCHOR_ROWS = {
     sleep: { headTop: 2, eyeRow: 7, mouthRow: 8, neckRow: 10 },
   },
   init: { a: { headTop: 3, eyeRow: 6, mouthRow: 9, neckRow: 10 }, sleep: { headTop: 3, eyeRow: 7, mouthRow: 9, neckRow: 10 } },
-  panic: { a: { headTop: 1, eyeRow: 4, mouthRow: 8, neckRow: 9 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
+  // Panic: its '!' eyes are bright cells, like Chrome's, and show through eyewear (shine).
+  panic: { a: { headTop: 1, eyeRow: 3, mouthRow: 6, neckRow: 7, shine: true }, sleep: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 7 } },
   whisper: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 7, neckRow: 8 } },
 };
 export const anchorRowsFor = (form, pose) => ANCHOR_ROWS[form]?.[pose] ?? ANCHOR_ROWS[form]?.a ?? null;
@@ -635,7 +676,7 @@ const DEAD_CENTRES = { stub: [[4, 6], [9, 6]] };
 // Chrome's line wears a visor (rows, first and last column, and where the X's go when dead); Glitch's line has double-image
 // eyes (the real eyes' row, and the X's).
 const VISORS = { chrome: { rows: [4, 5], cols: [3, 12], xs: [5, 10] }, plat: { rows: [4, 5], cols: [3, 14], xs: [5, 12] } };
-const DOUBLE_EYES = { glitch: { row: 5, xs: [4, 10] }, panic: { row: 5, xs: [5, 11] } };
+const DOUBLE_EYES = { glitch: { row: 5, xs: [4, 10] } };
 
 function generatedPose(form, pose) {
   const src = SPRITES[`${form}A`];
