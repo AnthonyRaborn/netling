@@ -4,13 +4,16 @@
 // tools/balance-diff.mjs); CFG='{...}' override CFG; NO_ITEMS=1, NO_RUNS=1; ROOT=1 Root Access;
 // TRAIT=<adult form> start as the child of that form (TRAIT_LEVEL=<1-3> its level, HISTORY=<adult form>
 // the grandparent, whose trait is its history at half strength); LIVES=<n> simulate lineages of n lives,
-// carrying the fragment, codex and Root Access from each life to the next.
+// carrying the fragment, codex and Root Access from each life to the next; CODEX=deep (every fragment, so the
+// way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
+// the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
 const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
 const { FRAGMENTS } = await import('../src/netrun/codex.js');
+const { mainframeAt, mainframeDue, mainframeEnd } = await import('./lib/mainframe-gate.mjs');
 const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
@@ -51,6 +54,15 @@ export const ARCHETYPES = {
   // Attentive, but takes three faults as a baby for a Stub teen: a Segfault (2) if it finds one,
 // then lets Charge or Sync run out for the rest.
   'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
+  // Attentive, playing careful runs, but jacking in at every chance (eager: any time it is fairly healthy, not
+  // only when it will be back soon) to reach The Deep's exit as an adult: the Mainframe gate's best case.
+  'steer-mainframe': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', eager: true },
+};
+
+// Codex presets for CODEX=<name>: what every single life starts knowing.
+export const CODEX_PRESETS = {
+  deep: FRAGMENTS.map((f) => f.id),
+  ruins: FRAGMENTS.slice(0, FRAGMENTS.findIndex((f) => f.id === 'ruins-4') + 1).map((f) => f.id),
 };
 
 export function checkIn(s, p, now, rng, ctx) {
@@ -102,7 +114,7 @@ export function checkIn(s, p, now, rng, ctx) {
   // Netrun when healthy. Until the deepest open region is cleared it heads there (the way down);
   // after that, any open region.
   // Careful runners only jack in healthy, and only when they'll be back soon to patch things up.
-  const careful = p.runs === 'careful';
+  const careful = p.runs === 'careful' && !p.eager;
   const healthy = s.stats.integrity > (careful ? 80 : 60) && s.stats.charge > 60;
   const aroundAfter = !careful || ctx.gapToNext <= 120;
   if (p.runs && !p.noRuns && healthy && aroundAfter) {
@@ -122,6 +134,16 @@ export function checkIn(s, p, now, rng, ctx) {
       ctx.scripPeak = Math.max(ctx.scripPeak ?? 0, s.scrip);
       if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
       finishRun(s, now);
+      // The Mainframe gate's feat: Deep runs up to and including the first that reaches its exit.
+      if (region === 'deep' && ctx.deepClearAt === null) {
+        ctx.deepRuns++;
+        if (run.result === 'disconnected') ctx.deepDisconnects++;
+        if (s.cleared.includes('deep')) ctx.deepClearAt = s.ageMin;
+      }
+      // Harder feats the gate could ask for instead (FEATS), by the age each was first met.
+      if (region === 'deep' && run.result === 'jacked' && run.map.nodes.find((n) => n.id === run.pos)?.type === 'exit') {
+        ctx.deepExits.push({ age: s.ageMin, clean: (run.tally?.iceLost ?? 0) === 0, faults: s.careMistakes });
+      }
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
       s.codexInbox = [];
     }
@@ -172,7 +194,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
-  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set() };
+  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [] };
   const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -187,6 +209,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let traces = 0;
   let tracesIgnored = 0;
   let prevEvent = null;
+  let gateAt = null; // the age at which it would have become a Mainframe (docs/SOURCE_PLAN.md)
   while (s.stage !== 'dead' && minute < s.life.lifespan + 60) {
     const dayMin = (at(8) + minute) % DAY;
     if (dayMin === 0 || minute === 0) {
@@ -201,6 +224,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
       }
     }
     prevFlags = { ...s.flagged };
+    if (gateAt === null && mainframeDue(s)) gateAt = s.ageMin;
     if (s.event && !prevEvent) {
       events++;
       if (s.event.type === 'trace') traces++;
@@ -269,6 +293,58 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     greeted: ctx.greeted ?? 0,
     flowHours: (s.flowTotalMin ?? 0) / 60,
     chatterSeen: ctx.chatterSeen.size,
+    // The planned Mainframe gate: when it would have been met (null: never), and the feat's history.
+    gate: {
+      at: gateAt, from: mainframeAt(s), end: mainframeEnd(s), deepClearAt: ctx.deepClearAt, deepRuns: ctx.deepRuns, deepDisconnects: ctx.deepDisconnects,
+      // The age each alternative feat would have opened the gate (null: never, or it died first).
+      feats: Object.fromEntries(Object.entries(FEATS).map(([k, feat]) => {
+        const age = feat(ctx.deepExits);
+        const opens = age === null ? null : Math.max(age, mainframeAt(s));
+        return [k, opens !== null && opens <= s.ageMin ? opens : null];
+      })),
+    },
+  };
+}
+
+// Alternative feats for the Mainframe gate, measured beside the planned one (one Deep exit). Each takes this
+// life's Deep exits ({ age, clean, faults }) and returns the age the feat was met, or null.
+const nthExit = (n, ok = () => true) => (exits) => exits.filter(ok)[n - 1]?.age ?? null;
+export const FEATS = {
+  'two Deep exits': nthExit(2),
+  'three Deep exits': nthExit(3),
+  'a clean Deep exit': nthExit(1, (e) => e.clean),
+  'a Deep exit with at most 2 faults': nthExit(1, (e) => e.faults <= 2),
+  'two clean Deep exits': nthExit(2, (e) => e.clean),
+};
+
+// The Mainframe gate across lives. Ages and time left are in hours; null where no life met it.
+function gateStats(results) {
+  const n = results.length;
+  const met = results.filter((r) => r.gate.at !== null);
+  const cleared = results.filter((r) => r.gate.deepClearAt !== null);
+  const at = met.map((r) => r.gate.at).sort((a, b) => a - b);
+  const left = met.map((r) => r.gate.end - r.gate.at).sort((a, b) => a - b);
+  const pick = (xs, q) => (xs.length ? round(xs[Math.min(xs.length - 1, Math.floor(xs.length * q))] / 60, 1) : null);
+  return {
+    deepCleared: round(cleared.length / n),
+    met: round(met.length / n),
+    // Cleared The Deep but died before the age half came.
+    clearedThenDied: round((cleared.length - met.length) / n),
+    medianHours: pick(at, 0.5),
+    p10Hours: pick(at, 0.1),
+    // Hours it would have as a Mainframe (to the end of its extended life): the median, and the shortest tenth.
+    leftMedianHours: pick(left, 0.5),
+    leftP10Hours: pick(left, 0.1),
+    // Of the lives that met it, the share that waited on the feat (cleared The Deep after the age half).
+    lateFeat: met.length ? round(met.filter((r) => r.gate.deepClearAt > r.gate.from).length / met.length) : null,
+    // Deep runs up to the first clear, and the disconnects among them, for the lives that cleared it.
+    deepRunsToClear: cleared.length ? round(avg(cleared.map((r) => r.gate.deepRuns)), 2) : null,
+    deepDisconnectsToClear: cleared.length ? round(avg(cleared.map((r) => r.gate.deepDisconnects)), 2) : null,
+    // The alternatives: the share of lives that would meet each, and the median hours it would leave.
+    feats: Object.fromEntries(Object.keys(FEATS).map((k) => {
+      const ok = results.filter((r) => r.gate.feats[k] !== null);
+      return [k, { met: round(ok.length / n), leftMedianHours: pick(ok.map((r) => r.gate.end - r.gate.feats[k]).sort((a, b) => a - b), 0.5) }];
+    })),
   };
 }
 
@@ -361,6 +437,7 @@ export function stats(results) {
       cleared: Object.fromEntries(REGION_ORDER.map((id) => [id, rate((r) => r.cleared.includes(id))])),
       byRegion: Object.fromEntries(REGION_ORDER.map((id) => [id, round(avg(results.map((r) => r.regionRuns[id] ?? 0)), 2)])),
     },
+    mainframe: gateStats(results),
     scrip: {
       end: round(avg(results.map((r) => r.scrip.end)), 1),
       peak: round(avg(results.map((r) => r.scrip.peak)), 1),
@@ -423,6 +500,7 @@ function printLife(st, detail) {
   console.log(`  deaths: ${list(st.deaths)}`);
   console.log(`  teens:  ${list(st.teens)}`);
   console.log(`  adults: ${list(st.adults)}`);
+  printGate(st.mainframe);
   if (!detail) return;
   const a = st.atAdult;
   console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
@@ -438,6 +516,13 @@ function printLife(st, detail) {
   console.log(`  scrip: ${st.scrip.end.toFixed(0)} at the end (peak ${st.scrip.peak.toFixed(0)}), ${st.scrip.bought.toFixed(1)} bought, ${st.scrip.sold.toFixed(1)} sold, could afford an item at ${pct(st.scrip.affordable)} of markets (${st.scrip.marketsPerRun.toFixed(2)} a run) · inventory full at ${pct(st.fullAtCheckIn)} of check-ins`);
 }
 
+const hours = (h) => (h === null ? '-' : `${h}h`);
+function printGate(g) {
+  if (!g.deepCleared) return;
+  console.log(`  mainframe gate: met ${pct(g.met)} (cleared The Deep ${pct(g.deepCleared)}, ${pct(g.clearedThenDied)} died before the age half) · met at ${hours(g.medianHours)} (earliest tenth ${hours(g.p10Hours)}) · time as a mainframe ${hours(g.leftMedianHours)} (shortest tenth ${hours(g.leftP10Hours)}) · waited on the feat ${g.lateFeat === null ? '-' : pct(g.lateFeat)} · Deep runs to the first clear ${g.deepRunsToClear} (${g.deepDisconnectsToClear} disconnects)`);
+  console.log(`  harder feats: ${Object.entries(g.feats).map(([k, f]) => `${k} ${pct(f.met)} (${hours(f.leftMedianHours)} left)`).join(', ')}`);
+}
+
 // Try settings without editing sim.js: CFG='{"drainPerHour":{"charge":14},"teenAtMin":1200}' npm run balance
 if (process.env.CFG) {
   const over = JSON.parse(process.env.CFG);
@@ -448,9 +533,14 @@ if (process.env.NO_ITEMS) for (const p of Object.values(ARCHETYPES)) p.noItems =
 if (process.env.NO_RUNS) for (const p of Object.values(ARCHETYPES)) p.noRuns = true;
 const filter = process.argv[3];
 if (import.meta.url === `file://${process.argv[1]}`) {
+  const preset = process.env.CODEX ? CODEX_PRESETS[process.env.CODEX] : null;
+  if (process.env.CODEX && !preset) throw new Error(`CODEX must be one of: ${Object.keys(CODEX_PRESETS).join(', ')}`);
+  if (preset && process.env.LIVES) throw new Error('CODEX is for single lives; LIVES carries the codex itself');
+  // A complete codex means Root Access in the game, so the preset brings it along.
+  const presetRoot = preset ? preset.length >= FRAGMENTS.length || Boolean(process.env.ROOT) : undefined;
   const parent = process.env.TRAIT ? parentOf(process.env.TRAIT, { level: Number(process.env.TRAIT_LEVEL ?? 1), history: process.env.HISTORY ?? null }) : null;
   const lives = Number(process.env.LIVES ?? 0);
-  const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };
+  const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, codex: process.env.CODEX ?? null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };
   for (const [name, p] of Object.entries(ARCHETYPES)) {
     if (filter && !name.includes(filter)) continue;
     if (lives) {
@@ -466,10 +556,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       });
       continue;
     }
-    const st = stats(Array.from({ length: runs }, (_, i) => simulate(p, i + 1, { fragment: parent, generation: parent ? 2 : 1 })));
+    const st = stats(Array.from({ length: runs }, (_, i) => simulate(p, i + 1, { fragment: parent, generation: parent ? 2 : 1, ...(preset && { codex: preset, rootAccess: presetRoot }) })));
     report.archetypes[name] = st;
     if (process.env.JSON) continue;
-    console.log(`\n== ${name} (${runs} runs${parent ? `, child of a ${process.env.TRAIT}` : ''})`);
+    console.log(`\n== ${name} (${runs} runs${parent ? `, child of a ${process.env.TRAIT}` : ''}${preset ? `, codex ${process.env.CODEX}` : ''})`);
     printLife(st, process.env.DETAIL);
   }
   if (process.env.JSON) console.log(JSON.stringify(report, null, 2));

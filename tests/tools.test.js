@@ -4,9 +4,11 @@ import './helpers/utc.js';
 
 // The balance tools are how rule changes get judged, so their own logic is tested here.
 const { planMove, surplusSlot } = await import('../tools/netrun-bot.mjs');
-const { simulate, simulateLine, stats, parentOf, ARCHETYPES } = await import('../tools/balance.mjs');
+const { simulate, simulateLine, stats, parentOf, ARCHETYPES, CODEX_PRESETS, FEATS } = await import('../tools/balance.mjs');
+const { mainframeDue, mainframeAt, mainframeEnd, MAINFRAME_GATE } = await import('../tools/lib/mainframe-gate.mjs');
 const { diff, flatten } = await import('../tools/balance-diff.mjs');
-const { FORMS } = await import('../src/sim.js');
+const { FORMS, createScript, mulberry32 } = await import('../src/sim.js');
+const { FRAGMENTS } = await import('../src/netrun/codex.js');
 
 // Start at 0; two ways on (1 and 2) that look alike; behind 1 is ICE, behind 2 a cache.
 const MAP = {
@@ -91,4 +93,32 @@ test('the report diff finds what moved, by path', () => {
   assert.deepEqual(rows.map((r) => r.path), ['archetypes.a.adults.daemon', 'archetypes.a.adults.glitch']);
   assert.ok(Math.abs(rows[0].delta + 0.2) < 1e-9);
   assert.equal(rows[1].before, 0, 'a form that appears counts as 0 before');
+});
+
+test('the planned Mainframe gate: an adult, home, into its last ordinary day, with The Deep cleared', () => {
+  const s = createScript({ now: 0, rng: mulberry32(1) });
+  Object.assign(s, { stage: 'adult', cleared: ['public', 'bazaar', 'corp', 'ruins', 'deep'], run: null });
+  s.ageMin = mainframeAt(s);
+  assert.equal(mainframeAt(s), s.life.lifespan - MAINFRAME_GATE.beforeEndMin);
+  assert.equal(mainframeEnd(s), s.life.lifespan + MAINFRAME_GATE.bonusMin);
+  assert.equal(mainframeDue(s), true);
+  assert.equal(mainframeDue({ ...s, ageMin: s.ageMin - 1 }), false, 'too young');
+  assert.equal(mainframeDue({ ...s, cleared: ['public', 'bazaar', 'corp', 'ruins'] }), false, 'no Deep clear');
+  assert.equal(mainframeDue({ ...s, run: { region: 'deep' } }), false, 'not mid-run');
+  assert.equal(mainframeDue({ ...s, stage: 'teen' }), false, 'adults only');
+});
+
+test('the gate probe: codex presets open the way down, and the reported gate agrees with the rule', () => {
+  assert.equal(CODEX_PRESETS.deep.length, FRAGMENTS.length);
+  assert.equal(CODEX_PRESETS.ruins.at(-1), 'ruins-4', 'the fragment that opens The Deep');
+  const r = simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins });
+  assert.ok(r.cleared.includes('deep'), 'a single life with the preset reaches The Deep');
+  assert.ok(r.gate.deepClearAt !== null && r.gate.deepRuns >= 1);
+  assert.equal(r.gate.at, Math.max(r.gate.deepClearAt, r.gate.from), 'met at the later of the feat and the age half');
+  assert.equal(simulate(ARCHETYPES['steer-mainframe'], 1).gate.at, null, 'no codex: The Deep stays locked');
+  // Each harder feat opens no earlier than the planned one.
+  for (const k of Object.keys(FEATS)) assert.ok(r.gate.feats[k] === null || r.gate.feats[k] >= r.gate.at, k);
+  const st = stats([r]).mainframe;
+  assert.equal(st.met, 1);
+  assert.equal(st.leftMedianHours, (r.gate.end - r.gate.at) / 60);
 });

@@ -39,7 +39,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 
 ## Still to decide
 
-1. **Whether the gate holds up.** The [gate test](#the-gate-test) runs before anything is built. Its numbers may move the age half or the feat.
+1. **The feat.** The [gate test](#gate-test-results) shows that one Deep exit is met by nearly every player who runs, casual included. A harder feat is needed; the measured candidates are in the results.
 
 ## The stage
 
@@ -207,7 +207,7 @@ The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lin
 | Spread between mainframe forms in the Source | at most about 6 points | same |
 | Careful, no ability, in the Source | clearly worse than The Deep's 35%. This is a check, not a target. | same |
 | Mainframe upgrades in The Deep | must not make The Deep trivial: careful mainframes at 8% or more | same |
-| Lives that reach the mainframe stage | steer archetypes that run: some. Casual: rare. Report the numbers; no fixed target until they are seen. | `tools/balance.mjs` |
+| Lives that reach the mainframe stage | Deliberate runners: about half. Casual: a quarter or less. Workers and players who never run: rare. With one Deep exit as the feat, every runner meets it ([results](#gate-test-results)). | `CODEX=deep node tools/balance.mjs 1000` |
 | Adult form shares | not moved by more than noise | `tools/balance.mjs`, `tools/balance-diff.mjs` |
 | Codex pacing to Root Access | unchanged (median life 4 for attentive lines) | `tools/baseline/lineages.json` |
 
@@ -219,26 +219,56 @@ Run this first, in the tools only, before any game code. It answers whether the 
 
 **Why the current tools can't answer it.** The bots in `tools/balance.mjs` already head for the deepest open region until they clear it (the way down). But a single life starts with an empty codex, and The Deep needs `ruins-4`, so a single-life bot never sees The Deep. Only `LIVES=n` lineages carry the codex forward, and by then the lineage numbers are mixed with the codex pace.
 
-**What to add** (tools only; `src/` untouched):
+**What was built** (tools only; `src/` untouched; how to run it is in [TESTING.md](TESTING.md#toolsbalancemjs)):
 
-1. **A codex preset** for `tools/balance.mjs`: `CODEX=deep` starts every life knowing the 22 shipped fragments, so the way down is open as far as The Deep from the first life. `CODEX=ruins` (up to `ruins-4`) is a second setting, the earliest a real lineage meets the gate.
-2. **A gate probe.** After every check-in, the tool records the first minute at which an adult is not on a run, has reached The Deep's exit, and is at least `lifespan - 24h` old. That is when it would recompile. Nothing in the life changes, so this measures the gate alone, not the mainframe's effects.
-3. **Per archetype, report:** the share of lives that meet the gate, the median and 10th-percentile age at which they meet it, the hours left as a mainframe (`lifespan + 24h` minus that age), the share whose Deep clear came after 96 hours (it waited on the feat, not the age), and the number of Deep attempts and disconnects before the first clear.
-4. **A deliberate archetype**, `steer-mainframe`: attentive care, careful runs, and it heads down at every chance. It shows the best case a player who wants the stage can reach. The existing archetypes show how often it happens without trying.
-5. **A unit test** for the probe's condition, so the tool and the later `sim.js` rule cannot drift apart. When the stage is built, the probe calls the same exported helper (`mainframeDue(s)`) the sim uses.
+1. **Codex presets** for `tools/balance.mjs`: `CODEX=deep` starts every single life knowing every fragment (and with Root Access, as the game would grant it). `CODEX=ruins` starts it knowing the fragments through `ruins-4`, the earliest a lineage can open The Deep.
+2. **A gate probe.** Every simulated minute, the tool checks `mainframeDue(s)` (`tools/lib/mainframe-gate.mjs`): an adult, home from any run, The Deep cleared this life, and at least `lifespan - 24h` old. The first minute it holds is when the netling would recompile. Nothing in the life changes, so this measures the gate alone, not the mainframe's effects.
+3. **The report** (`mainframe` in `stats()`): the share that cleared The Deep and met the gate, the median and earliest-tenth age at the gate, the hours it would have as a mainframe, the share that waited on the feat, and Deep runs and disconnects up to the first clear. It also measures harder feats beside the planned one (`FEATS`).
+4. **`steer-mainframe`**: attentive care and careful runs, but it jacks in at every chance.
+5. **Unit tests** in `tests/tools.test.js` for the rule and the probe. When the stage is built, `mainframeDue` moves into `sim.js` and the tool imports it from there.
 
-**What would change the plan:**
+**What would have changed the plan** (written before the run):
 
 | Result | Response |
 |---|---|
 | `steer-mainframe` meets the gate in under about half its lives | Move the age half earlier (84 hours) before touching The Deep. |
 | Casual or worker archetypes meet it often | The feat is too easy: consider also requiring a clean Deep clear, or a maximum number of faults. |
 | Most gates are met on the age half, with time to spare | Fine: the feat is the real test, as intended. |
-| Most gates are met late, from a Deep clear after 96 hours, leaving under a day | The age half is not the issue: The Deep's disconnect rate is. Consider whether The Deep should count its clear from any jack-out at its exit, a relay included (it does not today). |
+| Most gates are met late, from a Deep clear after 96 hours, leaving under a day | The age half is not the issue: The Deep's disconnect rate is. |
 
-Report it with 1000 lives per archetype and the fixed seeds, like any other balance number.
+### Gate test results
 
-If the bots show that almost no one can meet the gate before the end of life, the first lever is the age half (`mainframeAt` earlier, for example 84 hours), not The Deep's difficulty.
+`CODEX=deep node tools/balance.mjs 1000` and `CODEX=ruins node tools/balance.mjs 1000`. The two presets give the same numbers except for casual players, who meet the gate 92% of the time without Root Access (4% die before the age half) against 99% with it. Archetypes that never run (`neglectful`, `corpo`, `runner`, `overclocker`, `sysadmin`, `ghosthunter`) never reach The Deep and are left out.
+
+**The planned feat is far too easy.** Every archetype that runs netruns, casual included, meets it in 92 to 100% of lives. They clear The Deep in 1.3 to 2.1 tries, long before 96 hours, so the age half decides the timing for almost everyone: the gate opens at 96 hours, and 48 hours as a mainframe is the norm. Workers are the exception (4%): their careful runs only start when they will be back within two hours, which their schedule rarely allows.
+
+The "Deep is a wall" goal is about single runs (15 to 35% disconnects). Over two adult days of runs, a wall that stops a third of tries still falls.
+
+**The harder feats** (share of lives that would meet them, `CODEX=deep`):
+
+| Archetype | One Deep exit (planned) | Two exits | Three exits | One clean exit | Two clean exits | Exit with at most 2 faults |
+|---|---|---|---|---|---|---|
+| attentive | 100% | 79% | 50% | 63% | 23% | 99% |
+| casual | 99% | 59% | 24% | 35% | 7% | 41% |
+| worker | 4% | 0% | 0% | 2% | 0% | 0% |
+| daredevil | 100% | 77% | 44% | 79% | 44% | 96% |
+| steer-chrome | 100% | 64% | 28% | 70% | 24% | 99% |
+| steer-firewall | 100% | 87% | 58% | 61% | 19% | 100% |
+| steer-daemon | 100% | 85% | 58% | 64% | 24% | 99% |
+| steer-glitch | 100% | 72% | 39% | 90% | 54% | 91% |
+| steer-stub | 100% | 82% | 51% | 73% | 32% | 1% |
+| steer-mainframe | 100% | 81% | 53% | 63% | 22% | 99% |
+
+What the table says:
+
+- **Counting exits** separates effort best. Three Deep exits: about half of deliberate players, a quarter of casual ones. It leans toward the forms that are strongest in The Deep (Firewall and Daemon 58%, Chrome 28%).
+- **Clean exits** lean hard toward Glitch, whose phasing skips ICE (90% against 61 to 70% for the others; 54% against about 20% for two). This is the pull-apart effect pass 2 found with ICE damage.
+- **A fault limit** does not test netrunning at all. Careful players almost never fault, and it would quietly shut out the Stub line (1%).
+- **Time left is never the problem.** Every variant leaves a median of 44 to 48 hours. Moving the age half earlier is not needed.
+
+The bots run at every check-in where they are healthy, so these are upper bounds: real players run less often. Casual numbers are the ones to watch, since a real casual player runs much less than the casual bot.
+
+**Open decision:** which feat to use. Candidates: three Deep exits (separates effort, mild form lean), two Deep exits (gentler: 59% casual), or a mix such as "three Deep exits, or two clean ones". The probe can measure any of them; add it to `FEATS`.
 
 ## Everything that assumes three stages
 
@@ -261,7 +291,7 @@ A starting checklist. Before building, grep for `'adult'`, `STAGE_ORDER`, `FORMS
 
 Each step is one commit that passes `npm test` on its own.
 
-0. **The gate test.** Tools only, as above. Report the numbers before any game code.
+0. **The gate test.** Done (tools only). It showed the planned feat is too easy; pick a harder one before step 2.
 1. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
 2. **Sim.** The stage, the gate, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. Tests: the gate in each order (feat first or age first), not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 3. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
@@ -271,7 +301,7 @@ Each step is one commit that passes `npm test` on its own.
 
 ## Risks
 
-- **Nobody reaches it.** The gate chains the whole way down in one life with The Deep's disconnect rate. Measure before tuning anything else, and move the age half first.
+- **Everybody reaches it.** Measured: with one Deep exit as the feat, every archetype that runs meets the gate once the codex opens The Deep. The feat must be harder (see [results](#gate-test-results)). The bots run more than real players, so check casual numbers with care.
 - **The upgrades leak into The Deep.** A mainframe is stronger everywhere, not only in the Source. That is fine as a reward, but The Deep should stay a wall for adults. Mainframes are past it by definition.
 - **"All fragments" checks.** Any check missed in the `FRAGMENTS` audit would quietly move a goal. The tests should assert that Root Access and Corp gold do not change when fragments are added (`allFragmentsFound` already takes a `fragments` parameter for this).
 - **Stale tabs.** Without the save version bump, an older build refuses a mainframe save as damaged. See [Saves and data](#saves-and-data).

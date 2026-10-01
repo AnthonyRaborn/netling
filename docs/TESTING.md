@@ -18,7 +18,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-screenshots.mjs` | Regenerates `screenshots/*.png` (the install dialog's screenshots) from the real app, and checks their sizes against the manifest | Playwright |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 388 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
+`npm test` runs 390 tests in 38 files. The smoke test has 69 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -73,7 +73,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `progression.test.js` | 27 | Balance pass 2: the way down (order, exits only, stage gates, old saves, cleaning), the per-life codex cap, corpo scrip (prices, SCRAP, full-inventory pickups, the cap, market selling and buying, loose scrip, inheritance, cleaning, a transfer round trip), and the second abilities (Chrome's insurance and its saved flag, Daemon's upkeep, Ghost slipping past ICE, Glitch's later phases) |
 | `traits.test.js` | 9 | Balance pass 3: level strengths, history and caps, the streak through fragments and a real flatline, each trait's effect scaling (Persistent, Licensed, Volatile, Hardened), old saves and cleaning |
 | `zone.test.js` | 5 | the sleep zone is taken at compile, kept through the day and night, refreshed on waking (staying asleep if it is still night there), the readout's bedtime on the device clock, old saves and cleaning |
-| `tools.test.js` | 8 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff |
+| `tools.test.js` | 10 | The balance tools: the netrun bot plans only with visible nodes and sells surplus first, simulated lives are repeatable and follow the way down, a child starts from its parent, a lineage carries the codex, stats and the report diff, the planned Mainframe gate's rule, and the gate probe (codex presets, and a reported gate that agrees with the rule) |
 | `shell.test.js` | 2 | Every module reachable from `main.js` is in the service worker's `SHELL`; the worker's `CACHE` equals the page's `VERSION` |
 | `update.test.js` | 6 | The update prompt against a fake service worker: another release offers a reload, the same one stays quiet, malformed messages are ignored, checks are throttled, failures are quiet |
 
@@ -129,10 +129,13 @@ Simulates `runs` lifetimes (default 300) for each **archetype**: scripted player
 | `daredevil` | Attentive, but takes every risk that costs no fault: plays hot, Overclock rigs, SALVAGE, RAID |
 | `steer-chrome`, `steer-firewall`, `steer-daemon`, `steer-glitch` | Attentive players choosing everything (diet, traces, checkpoints, anomalies, markets) for one adult form. Ghost's is `ghosthunter` |
 | `steer-stub` | Attentive, but lets Charge and Sync run out as a baby until 3 faults have landed, for a Stub teen |
+| `steer-mainframe` | Attentive and careful in runs, but jacks in at every chance (`eager`), to reach The Deep's exit as an adult: the best case for the planned Mainframe gate |
 
 Every player that runs follows the way down: it heads for the deepest open region until it has cleared it, then picks any open region. Items: each player keeps what it has a use for (Coolant, Antivirus, Repair kits, Overclock chips, Black ICE; vouchers unless it always hides; boosters if it chases Ghost; a Segfault while it wants faults), sells the rest at markets down to one free slot, scraps surplus at home when the inventory is full, and buys only items it keeps. The report adds, per archetype: `netruns.cleared` (share of lives that reached each exit), `netruns.byRegion` (runs a life), `netruns.codexCapped`, `scrip` (at the end, peak, bought, sold, `affordable` and `marketsPerRun`) and `fullAtCheckIn`.
 
-Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop` and `babyFaults`.
+Archetype fields (see the comment above `ARCHETYPES`): `checks`, `jitter`, `diet`, `trace`, `winRate`, `runs` (a `RUN_STYLES` name), `hot` or `coolAt`, `sloppy`, `gamer`, `anomaly` (an `ANOMALY_PREFS` name), `shop`, `babyFaults` and `eager` (a careful runner that jacks in whenever it is fairly healthy, not only when it will be back soon).
+
+**The Mainframe gate probe** (for the plan in [SOURCE_PLAN.md](SOURCE_PLAN.md); the stage is not built). Every life records the minute the planned gate would have been met (`mainframeDue` in `tools/lib/mainframe-gate.mjs`: an adult, home from any run, The Deep cleared this life, and at least `lifespan - 24h` old), its Deep runs and disconnects up to the first clear, and each Deep exit. `stats()` reports them as `mainframe`: the share that cleared The Deep and met the gate, the median and earliest-tenth age, the hours it would leave as a mainframe, the share that waited on the feat, and `feats`, harder alternatives (`FEATS`: two or three Deep exits, a clean one, one with at most 2 faults, two clean ones). The text report prints it for any archetype that cleared The Deep. A single life starts with an empty codex, so The Deep stays locked unless `CODEX` is set.
 
 Settings (environment variables and arguments):
 
@@ -146,6 +149,7 @@ Settings (environment variables and arguments):
 | `LIVES=4` | Simulates lineages of that many lives instead of single lives. Each child inherits its parent's fragment (trait, quirk, keepsake), the codex found so far, and Root Access from the life after the codex completes. Reports the share of lineages that finished the codex by each life, the fastest and median, new fragments per life, and every life's results. `runs` is then the number of lineages |
 | `NO_ITEMS=1` / `NO_RUNS=1` | Disable item use / netruns to isolate their effect |
 | `ROOT=1` | Give every netling Root Access, to measure it |
+| `CODEX=deep` / `CODEX=ruins` | Every single life starts knowing every fragment (and so has Root Access, as the game would grant it) or the fragments through `ruins-4` (the earliest a lineage can open The Deep). For the Mainframe gate probe. Not with `LIVES` |
 
 It sets `TZ=UTC` itself. Exported for tests and scripts: `simulate(profile, seed, { fragment, generation, codex, rootAccess })`, `simulateLine(profile, seed, lives)`, `stats(results)`, `lineStats(lines)` and `parentOf(form)`.
 

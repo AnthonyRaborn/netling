@@ -22,7 +22,7 @@ Things that work as coded but are easy to misunderstand, and things not yet veri
 
 ## Verified facts
 
-- `npm test`: 388 tests pass.
+- `npm test`: 390 tests pass.
 - Every module reachable from `main.js` is in the service worker's `SHELL` (`tests/shell.test.js`).
 - The codex has 22 fragments.
 - Every Breach puzzle is generated from a legal path, so it is solvable.
