@@ -40,7 +40,7 @@ Stage ids, form ids, region ids and fragment ids are permanent once shipped (CLA
 
 ## Still to decide
 
-1. **The unlock ids** (see [Unlocks and cosmetics](#unlocks-and-cosmetics)). Every stage, form, region and fragment id is decided.
+Nothing. Every stage, form, region, fragment and unlock id is decided. What remains are numbers the build step measures (the mainframe upgrades, the Source's numbers).
 
 ## The stage
 
@@ -174,20 +174,27 @@ A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Ano
 
 ## Unlocks and cosmetics
 
-Proposals. Each needs a permanent id and a hint.
+Decided ids (none is used anywhere today). Cosmetic ids are stored per slot (`slot:id`); accessory ids are global.
 
-| Unlock | Condition | Slot |
-|---|---|---|
-| A crest for the first mainframe | raise any mainframe | crest |
-| A shell for the Source | find all four Source fragments (`regionDone(c, 'source')`) | tint or shell |
-| A Source music variant | reach the Source's exit once (`progress.sourceExits`, like `deepExits`) | music (see [Art and sound](#art-and-sound)) |
-| Optional: a Source accessory | found only in the Source (`regions: ['source']`), like the Deep's | accessory, one of the four wear slots |
+| Unlock | Slot | Id | Name | Hint (shown while locked) | Condition |
+|---|---|---|---|---|---|
+| First mainframe | crest | `rack` | Rack mount | grow one past what it was built for. | any mainframe form is in the dex (like the form shells, so no new saved field) |
+| Source codex complete | tint | `readonly` | Read-only | read what the net was written from. | all four Source fragments found (`regionDone(c, 'source')`), as every region's codex unlocks a tint; a neutral near-black LCD to match the Source's palette |
+| Back from the Source | music | `firstcommit` | First commit | come back from below the bottom. | reach the Source's exit once (`progress.sourceExits`, counted like `deepExits`) |
+| Back from the Source, three times | effect | `sourcelight` | Source light | go down into the light three times, and come back. | `progress.sourceExits >= 3` |
+| Source-only find | accessory, body slot | `checksum` | Checksum | something small follows the bravest runners up from the source. | found only in the Source (`regions: ['source']`), very rare, like the Deep's drone buddy |
+
+**Source light** is a soft white glow: a CSS layer like the other effects (`style.css`, `.screen.fx-sourcelight .fx-layer`), a faint white inner glow from the screen edges (a radial gradient, around 6 to 12% white) that breathes very slowly (about 8 seconds a cycle, `ease-in-out`). It must read apart from Bloom (a cyan drop shadow on the LCD) and Aurora (drifting colours). A slow fade is not a flash, but it still follows CLAUDE.md rule 7, and under the Calm motion setting or `prefers-reduced-motion` it holds still at its middle brightness, as Aurora does. The exact look is settled when it is built, against the LCD and every tint.
+
+The Source's own netrun theme (a region variant in `tracks.js`, [Art and sound](#art-and-sound)) plays on its own and needs no unlock; `firstcommit` is a separate track for home.
+
+Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed.
 
 The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lineOf`), so a mainframe still counts as its adult form.
 
 ## Saves and data
 
-- **New values:** `s.deepExits` (`{ all, clean }`, per life; default `{ all: 0, clean: 0 }`; the sanitizer keeps both as whole numbers from 0 to 99 with `clean <= all`), stage `mainframe`, five `SPECIES` ids, region `source`, fragments `deep-5` and `source-1` to `source-4`, `progress.sourceExits`, `s.lifeBonus`, and the lineage record's `mainframe` flag.
+- **New values:** `progress.sourceExits` (a whole number, cleaned like `deepExits`), the unlock ids above, `s.deepExits` (`{ all, clean }`, per life; default `{ all: 0, clean: 0 }`; the sanitizer keeps both as whole numbers from 0 to 99 with `clean <= all`), stage `mainframe`, five `SPECIES` ids, region `source`, fragments `deep-5` and `source-1` to `source-4`, `progress.sourceExits`, `s.lifeBonus`, and the lineage record's `mainframe` flag.
 - **Defaults** (CLAUDE.md rule 2) in `createScript`, `migrate` and `cleanSave`: `lifeBonus: 0`. The sanitizer keeps it at `0` or `CFG.mainframeBonusMin`, and forces it to `0` unless the stage is `mainframe` (or `dead` with a mainframe form).
 - **`sanitize.js`:** add `mainframe` to `STAGES`. `settle()` gains a branch: an `mainframe` whose body is not a mainframe form becomes the mainframe of `leaningForm(s)`'s line. The fragment cleaner maps mainframe forms through `lineOf`.
 - **Bump `SAVE_VERSION`, with a step that changes nothing.** The new fields are additive, but an older build refuses a save with an unknown stage and treats it as damaged. With the version bumped, an older build sets it aside as `newer` ("reload to update") instead. That is the right message for a mainframe save opened on a stale tab, and it is the reason to bump. Rules for adding the step are in [DATA_AND_SAVES.md](DATA_AND_SAVES.md). Never edit an old step or `tests/fixtures/save-v1.json`.
@@ -361,7 +368,7 @@ Each step is one commit that passes `npm test` on its own.
 
 0. **The gate test.** Done (tools only). The feat is decided: three Deep exits, or two clean.
 1. **The Chrome corp-relay fix.** Done, as its own change to the current game. The gate test re-run with the real rule matches the prototype.
-2. **Names and text signed off.** The unlock ids (every stage and form id is decided). Nothing is built before this, because ids are permanent.
+2. **Names and text signed off.** Done: every id is decided, including the unlocks.
 3. **Sim and the exit counter.** The stage, the gate (`mainframeFeat` and `mainframeDue` move from `tools/lib/mainframe-gate.mjs` into `sim.js`), `s.deepExits` and its count in `jackOut`, `lifeBonus` and `lifeEnd`, `lineOf`, lineage, sanitizer, the save version step. The balance tool stops keeping its own copy of the counter. Tests: the gate in each order (feat first or age first), three exits, two clean, relay jack-outs not counting, not mid-run, the extra day, legacy lives, sanitizer repairs, and a v-previous save loading unchanged.
 4. **Netrun.** `REGIONS.source`, access, mainframe abilities, the codex, `ROOT_FRAGMENTS`. Tests: access locks, map generation for the Source over many seeds (the existing reachability test covers it once it is in `REGION_ORDER`), Root Access on the 22 only, and contracts in the Source.
 5. **Measure and tune.** The netrun and life balance runs above. Set the numbers, regenerate the baselines, and report with `balance-diff.mjs`.
