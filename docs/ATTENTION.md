@@ -58,7 +58,7 @@ Rules in `src/checkin.js` (`CHECKIN`), the UI in `src/ui/rewards.js`.
   | 3 | 25 scrip |
   | 4 | A middle-tier item (voucher, black ICE; never a Segfault) |
   | 5 | An unowned common accessory from the general pool (Cap, Scarf, Headphones, Flower, Bow), else 25 scrip |
-  | 6 | An Overclock chip |
+  | 6 | An Bypass chip |
   | 7 | An unowned rare or very rare accessory from the general pool (Shades, Visor, Crown, Halo, Spark), else 40 scrip |
 
   The general pool is the accessories found anywhere: regional drops and earned items stay the reward for exploring and for events.

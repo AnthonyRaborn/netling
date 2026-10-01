@@ -169,6 +169,7 @@ function cleanRun(raw, s, strict) {
     phase,
     pending,
     phased: bool(raw.phased),
+    hot: bool(raw.hot), // jacked in overclocked
     insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     insuredTimes: int(raw.insuredTimes, raw.insured === true ? 1 : 0, 0, 9), // how many times it paid out
     freePhases: int(raw.freePhases, raw.phased === true ? 1 : 0, 0, 9), // ICE a Glitch line slipped for certain
@@ -352,6 +353,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     stats: cleanStats(raw.stats),
     cache: int(raw.cache, 0, 0, CFG.maxCache),
     virus: bool(raw.virus),
+    hot: bool(raw.hot),
     virusMin: num(raw.virusMin, 0, 0),
     sinceFed: num(raw.sinceFed, CFG.digestMinutes, 0),
     asleep: bool(raw.asleep),

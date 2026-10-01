@@ -46,9 +46,11 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 
 ## Facts worth knowing
 
-- **Adult forms can be steered.** Each `steer-*` player reaches its form 99% or more of the time. Glitch costs about one heat fault a life.
+- **Adult forms can be steered.** Each `steer-*` player reaches its form 94% or more of the time. Glitch is steered by keeping it overclocked (Heat 65 to 72) without reaching 85: 94% Glitch at about half a fault a life (it was one heat fault a life before overclocking).
+- **Running hot or cool is the stability choice.** Overclocked awake time leans it unstable (-0.2/hr) and flow leans it stable (+0.2/hr). Attentive players who keep it in the band (`daredevil`) end up Glitch 80% of the time (59% before); cool attentive players lean Daemon a little more (54%, from 49%). Casual and worker bots never choose to run hot, so their split barely moved: the choice is there for players who take it.
 - **A caring player who takes risks becomes Firewall more often than Glitch** unless they also play hot: RAID and market buys lean indie faster than risks lean chaotic.
 - **More play moves the axes.** Playing hot costs stability, so fewer attentive players drift into Daemon.
+- **The bots' overclock skill is assumed.** They win a slowed (overclocked) game or ICE fight 8 points more often (`OVERCLOCK_WIN_BONUS` in `tools/netrun-bot.mjs`). Real players may gain more or less from the 15% slowdown; playtesting should check it.
 - **Casual codex lines can take many lives.** Later fragments sit in regions casual players rarely reach (0.5% finish within 4 lives).
 
 ## Open questions

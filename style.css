@@ -326,6 +326,11 @@ body {
   content: ' !';
 }
 
+/* Overclocked: the HEAT label reads OC (set in hud.js), so it doesn't rely on color alone. */
+.stat.oc label {
+  color: var(--yellow);
+}
+
 .pips {
   display: flex;
   gap: 4px;

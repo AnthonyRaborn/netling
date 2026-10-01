@@ -8,14 +8,14 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
 const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../src/netrun/codex.js');
 // When a mainframe's extended life would end (docs/SIMULATION.md#mainframe).
 const mainframeEnd = (s) => s.life.lifespan + CFG.mainframeBonusMin;
-const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
+const { playRun, finishRun, surplusSlot, winChance, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
 const at = (h, m = 0) => h * 60 + m;
@@ -51,7 +51,8 @@ export const ARCHETYPES = {
   'steer-chrome': { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', shop: false },
   'steer-firewall': { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie' },
   'steer-daemon': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', anomaly: 'orderly' },
-  'steer-glitch': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', coolAt: 88, anomaly: 'risky' },
+  // Glitch: keeps it overclocked (Heat 65 to 72) without letting it reach the 85+ danger zone.
+  'steer-glitch': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', coolAt: 72, anomaly: 'risky' },
   // Attentive, but takes three faults as a baby for a Stub teen: a Segfault (2) if it finds one,
 // then lets Charge or Sync run out for the rest.
   'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
@@ -156,7 +157,7 @@ export function checkIn(s, p, now, rng, ctx) {
     if (choice === 'balance') choice = s.axes.allegiance > 0 ? 'hide' : 'comply';
     doAct(choice);
   }
-  if (s.event?.type === 'attack') doAct('defend', { won: rng() < p.winRate });
+  if (s.event?.type === 'attack') doAct('defend', { won: rng() < winChance(overclocked(s), p.winRate) });
   if (s.event?.type === 'overflow') doAct('purge');
   if (s.virus) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3)) doAct('purge');
@@ -171,12 +172,12 @@ export function checkIn(s, p, now, rng, ctx) {
   }
   if (s.request?.kind === 'cool' && doAct('cool').requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play')) {
-    if (doAct('play', { game: s.request.game, won: rng() < p.winRate }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
+    if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), p.winRate) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     const game = GAME_IDS[ctx.games++ % GAME_IDS.length];
-    doAct('play', { game, won: rng() < p.winRate });
+    doAct('play', { game, won: rng() < winChance(overclocked(s), p.winRate) });
     if (s.stats.heat > coolAt + 10) doAct('cool');
   }
   if (s.stats.heat > coolAt) doAct('cool');

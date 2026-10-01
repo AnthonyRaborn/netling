@@ -13,7 +13,7 @@ The simulation is pure in the sense that matters: every function takes the state
 5. [Care mistakes and death](#care-mistakes-and-death)
 6. [Care actions](#care-actions)
 7. [Events](#events)
-8. [Visitors](#visitors), and [Attention rewards](#attention-rewards)
+8. [Visitors](#visitors), [Attention rewards](#attention-rewards) and [Overclocked](#overclocked)
 9. [Items](#items)
 10. [Evolution and the hidden axes](#evolution-and-the-hidden-axes)
 11. [Lineage: fragments, traits, quirks](#lineage-fragments-traits-quirks)
@@ -43,8 +43,8 @@ The simulation is pure in the sense that matters: every function takes the state
 5. Cache file roll (awake and digesting only).
 6. Virus roll, or `virusMin++` if already infected.
 7. Integrity change from all current damage sources or regeneration.
-8. Stability drift.
-9. `stepVisit`, then `stepEvents`, then the attention rewards: `stepRequest`, `stepFlow`, `stepChatter` (see [Attention rewards](#attention-rewards)).
+8. Stability drift (overclocked, flow or plain uptime; see [the axes](#evolution-and-the-hidden-axes)).
+9. `stepVisit`, then `stepEvents`, then the attention rewards: `stepRequest`, `stepFlow`, `stepOverclock` (logs crossing the overclock line), `stepChatter` (see [Attention rewards](#attention-rewards)).
 10. Care mistake checks (Charge, Sync, Heat, Lights).
 11. Death checks, in this priority: integrity collapse, neglect, end of life.
 
@@ -79,7 +79,7 @@ Four stats, all clamped to 0..100.
 | Charge | -15.4/hr, scaled by the drain curve | At 0: 15 minutes makes a care mistake; also -6 Integrity/hr |
 | Sync | -13.2/hr, scaled by the drain curve | At 0: 15 minutes makes a care mistake |
 | Integrity | see below | At 0 for 120 minutes: death |
-| Heat | +3/hr | At 85+: -8 Integrity/hr and -1 stability/hr; at 100: 15 minutes makes a care mistake |
+| Heat | +3/hr | At 65+: overclocked (see [Overclocked](#overclocked)). At 85+ also: -8 Integrity/hr and -1 stability/hr; at 100: 15 minutes makes a care mistake |
 
 **Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, so a long gap still costs faults without being fatal. Casual players take about 4.5 faults a life and workers about 5.4; attentive players act about 54 times a day (see [BALANCE.md](BALANCE.md)).
 
@@ -164,7 +164,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 |---|---|---|
 | `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed at strength 1), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
 | `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -1, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
-| `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss. Charge -6, Heat +12. Records win/loss. Wins can drop items (25%) |
+| `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss (overclocked: -6 Sync and -4 Integrity instead). Charge -6, Heat +12. Records win/loss. Wins can drop items (25%, 37.5% overclocked) |
 | `hide` | Open trace | Ends it. Charge -10, Heat +10, allegiance -1. 30% drop from the hide table |
 | `comply` | Open trace | Ends it. Integrity -5, Sync -10, allegiance +1. 30% drop from the comply table |
 | `defend` | Open intrusion | Result of the DEFEND mini-game. Win: stability +1. Loss: virus and -10 Integrity |
@@ -176,13 +176,13 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 | `nap` | Not asleep, no netrun, cooldown over | Starts a nap; pressing again wakes it |
 | `lights` | always allowed except dead/hibernating | Toggles `lightsOn` |
 
-Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5 at strength 1. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability.
+Play modifiers: Glitch form replaces the Sync gain with a random 10 to 40. Volatile trait multiplies gain by 1.5 at strength 1. A Signal booster doubles a win and is consumed. Packet Feast also adds Charge (+10 on a win, +3 on a loss, before the -6). Heat above 70 after a play costs 0.5 stability. Whether it was overclocked is read before the play's own +12 Heat; an overclocked loss replaces every other Sync modifier with -6.
 
 The UI runs the mini-game first, then calls `act('play', { game, won })`. The result can be refused if the netling fell asleep or hit 0 charge while the game ran.
 
 ## Events
 
-At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success.
+At most one timed event is open at a time (`state.event`). While one is open, no new event starts. Rolls only happen while awake and not napping. Each minute the chain below is tried in order and stops at the first success. While overclocked, the trace, intrusion, overflow and surge chances are 1.25x (`overclockEventMult`); the visitor's is not.
 
 | Event | Chance per hour | Window | If ignored | Answer |
 |---|---|---|---|---|
@@ -212,7 +212,22 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 
 **Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
 
-**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat or axis.
+**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat, but it doubles the uptime stability gain (+0.2/hr, `flowStabilityPerHour`, instead of +0.1).
+
+## Overclocked
+
+**Overclocked** (`overclocked()`, `s.hot`): Heat at 65 or more (`overclockHeat`), up to and including the 85+ danger zone, whose harms still apply on top. It is the hot side of a choice whose cool side is flow (Heat under 60), so the two never overlap.
+
+| Effect | Value | Where |
+|---|---|---|
+| Mini-games run slower (DEFEND too) | 0.85x speed (`overclockGameSpeed`): the whole game clock, so falling things, sweeps and timers | `gameSpeed()`, `GameSession` `speed` |
+| A won game drops items more often | 1.5x `winDropChance` (`overclockDropMult`) | `act('play')` |
+| A lost game costs | -6 Sync (`overclockLoseSync`) instead of +8, and -4 Integrity (`overclockLoseIntegrity`) | `act('play')` |
+| Events are likelier | 1.25x (`overclockEventMult`) | `stepEvents` |
+| It leans unstable | -0.2 stability per awake hour (`overclockStabilityPerHour`), in place of the uptime gain; 85+ keeps its own -1/hr instead | `step` |
+| A netrun jacked into overclocked | ICE runs at 0.85x and lost ICE deals 1.5x damage (`overclockIceDamageMult`) all run. Fixed at jack-in (`run.hot`): Heat gained on the way never switches it on | `startRun`, `resolveIce`, `iceSpeed()` |
+
+Crossing the line either way is logged once (`> !! overclocked. ...` and `> clock speed back to spec.`). The HUD's HEAT label reads OC, heat wisps rise off the sprite, and the netrun map shows OC by the region name.
 
 **Morning** (`s.wokeAt`): set to the minute the night's sleep ends (not a nap). The daily check-in (`checkin.js`, run by the UI) keys off it.
 
@@ -233,7 +248,7 @@ Six slots (`INVENTORY_SLOTS`). A find that meets a full inventory is scrapped fo
 | `booster` | Signal booster | Next mini-game win counts double (wins recorded as 2) | yes |
 | `memory` | Memory shard | Rerolls one of palette, pitch, idle, favorite packet | no |
 | `repair` | Repair kit | Integrity +40 (refused at 100) | no |
-| `overclock` | Overclock chip | Cuts 60 min off the netrun cooldown (refused if none left or at the 2 hour floor) | no |
+| `overclock` | Bypass chip | Cuts 60 min off the netrun cooldown (refused if none left or at the 2 hour floor) | no |
 | `segfault` | Segfault | 2 care mistakes on purpose (`ITEM_CFG.segfaultFaults`), stability -4. Can end its life at the limit. The UI asks for a second press | yes |
 
 Drop tables (weights):
@@ -268,7 +283,9 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 
 | Effect | Source |
 |---|---|
-| +0.1/hr | Awake, no alert active |
+| +0.1/hr | Awake, no alert active, not overclocked |
+| +0.2/hr | The same, in flow (instead of +0.1) |
+| -0.2/hr | Awake and overclocked (Heat 65 to 84) |
 | +1 | Fast PATCH (within 30 min), repelled intrusion |
 | +0.5 | PURGE |
 | -1/hr | Heat at 85+ |

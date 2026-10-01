@@ -46,10 +46,14 @@ Four bars and a small icon row sit under the screen. Everything the game asks of
 | **CHG** (Charge) | Its power | Time passes, faster the fuller it is (awake, about 31 an hour when full, 18 at half, 6 near empty) | 0: it becomes a fault, and Integrity starts slipping |
 | **SYN** (Sync) | Its bond with you, and how happy it is | Time passes, the same way (about 26 an hour when full, 16 at half, 5 near empty) | 0: it becomes a fault |
 | **INT** (Integrity) | Its health | A virus, a full cache, overheating or empty Charge wear it down | 0 for two hours in a row: it flatlines |
-| **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 85 and up hurts Integrity; 100 is a fault |
+| **HEAT** | How hot it is running | Rises when it's awake, plays, netruns, or gets a power surge | 65 and up: overclocked (see below). 85 and up hurts Integrity; 100 is a fault |
 | **Cache** (the little file icons) | Corrupted files it writes while digesting a meal, up to four | Each file makes viruses likelier; 3 or more damage Integrity | Clear it with PURGE |
 
 Integrity heals on its own (5 an hour) whenever nothing is wrong, and faster (8 an hour) while it sleeps in the dark or naps.
+
+### Running hot
+
+At 65 Heat and up it is **overclocked**: the HEAT label turns to **OC** and heat wisps rise off it. Overclocked, mini-games run 15% slower and wins turn up items more often, and a netrun you jack into overclocked slows its ICE fights too. The catch: a lost game costs Sync and Integrity instead of cheering it up, lost ICE hits harder, and trouble (traces, intrusions, overflows, surges) comes more often. Above 85 the usual overheating damage still applies on top. Running hot or keeping it cool also leans it one way or the other as it grows.
 
 The line under the bars, the **readout**, shows the generation, its form, its age, its bedtime, its **faults** and its inherited **trait**.
 
@@ -124,7 +128,7 @@ The inventory holds six items. Tap an item to see what it does, then **USE** it,
 | Signal booster | Your next mini-game win counts double |
 | Memory shard | Rewrites one of its quirks at random |
 | Repair kit | Restores 40 Integrity |
-| Overclock chip | Shortens the wait before the next netrun by an hour |
+| Bypass chip | Shortens the wait before the next netrun by an hour |
 | Segfault | Adds two faults on purpose (it asks you to press twice). Faults shape how it grows up, and ten end its life |
 
 Items drop from mini-game wins, from handling traces and alerts, from visitors, and from netruns. Each adult form also leaves a keepsake item for the next generation. Anything found while the inventory is full is scrapped for you rather than lost.

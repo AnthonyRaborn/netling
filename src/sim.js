@@ -33,6 +33,18 @@ export const CFG = {
   lightsGraceMin: 60, // it's asleep with the lights on for this long before it counts
   darkAwakeSyncMult: 2, // lights off while it's awake: bored in the dark
   uptimeStabilityPerHour: 0.1, // awake hours with nothing wrong build stability
+  // Overclocked: Heat at or above this. Mini-games and ICE run slower, wins drop items more often, but a lost
+  // game costs Sync and Integrity, lost ICE bites harder and events come more often. Awake time overclocked
+  // leans it unstable (Glitch); time in flow leans it stable (Daemon). 85+ keeps its own harms on top.
+  overclockHeat: 65,
+  overclockGameSpeed: 0.85,
+  overclockDropMult: 1.5,
+  overclockLoseSync: -6, // replaces the usual +8 for a lost game
+  overclockLoseIntegrity: 4,
+  overclockIceDamageMult: 1.5,
+  overclockEventMult: 1.25,
+  overclockStabilityPerHour: -0.2,
+  flowStabilityPerHour: 0.2,
   maxMistakes: 10,
   flatlineIntegrityMin: 120,
   // A five-day life. Each netling keeps the lengths it compiled with (s.life), so a change here
@@ -111,7 +123,7 @@ export const CFG = {
   requestWindowMin: 45,
   requestMinCharge: 20, // it only asks for a game it has the Charge to play
   requestCoolHeat: 30, // and for COOL only when COOL would work
-  // Flow: kept in good shape this long, awake, it glows (a look only).
+  // Flow: kept in good shape this long, awake, it glows, and leans stable faster (flowStabilityPerHour).
   flowAfterMin: 180,
   flowMinStat: 50, // Charge and Sync
   flowMinIntegrity: 80,
@@ -119,7 +131,7 @@ export const CFG = {
   // Chatter: a line it mutters, shown this long.
   chatterChancePerHour: 0.15,
   chatterShowMin: 20,
-  // Netrun uplink cooldown by stage, cut by clean jack-outs and overclock chips, never below the floor:
+  // Netrun uplink cooldown by stage, cut by clean jack-outs and Bypass chips (id `overclock`), never below the floor:
   // any sooner and corp sweeps pick up the trail.
   runCooldownMin: { baby: 240, teen: 210, adult: 180, mainframe: 180 },
   runCooldownFloorMin: 120,
@@ -158,7 +170,7 @@ export const ITEMS = {
   booster: { name: 'Signal booster', desc: 'Your next mini-game win counts double.', awake: true },
   memory: { name: 'Memory shard', desc: 'Rewrites one of its quirks at random.' },
   repair: { name: 'Repair kit', desc: 'Restores 40 Integrity. Works while asleep.' },
-  overclock: { name: 'Overclock chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
+  overclock: { name: 'Bypass chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
   segfault: { name: 'Segfault', desc: 'Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life.', awake: true },
 };
 
@@ -405,6 +417,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     deepExits: { all: 0, clean: 0 }, // exits from The Deep this life, and the clean ones (the Mainframe gate)
     lifeBonus: 0, // minutes of life gained (a mainframe's extra day)
     flowMin: 0, // minutes in a row in good shape, awake
+    hot: false, // overclocked as of the last step, so crossing the line is logged once
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
     runStats: { runs: 0, jacked: 0, disconnected: 0, aborted: 0 },
@@ -559,12 +572,14 @@ function step(s, t, rng) {
   st.integrity = clamp(st.integrity + dInt / 60);
 
   if (st.heat >= 85) s.axes.stability -= 1 / 60;
-  else if (!rest && !alertReason(s)) s.axes.stability += CFG.uptimeStabilityPerHour / 60;
+  else if (!rest && overclocked(s)) s.axes.stability += CFG.overclockStabilityPerHour / 60;
+  else if (!rest && !alertReason(s)) s.axes.stability += (inFlow(s) ? CFG.flowStabilityPerHour : CFG.uptimeStabilityPerHour) / 60;
 
   stepVisit(s, t, rng);
   stepEvents(s, t, rng);
   stepRequest(s, t, rng);
   stepFlow(s);
+  stepOverclock(s, t);
   stepChatter(s, rng);
 
   checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
@@ -606,7 +621,8 @@ function stepEvents(s, t, rng) {
     return;
   }
   if (resting(s)) return;
-  if (rng() < (CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
+  const hot = overclocked(s) ? CFG.overclockEventMult : 1;
+  if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
       log(s, t, '> corp trace waved off by voucher.');
@@ -614,17 +630,17 @@ function stepEvents(s, t, rng) {
     }
     s.event = { type: 'trace', startedAge: s.ageMin };
     log(s, t, `> !! corp trace incoming. ${CFG.traceWindowMin}m to respond.`);
-  } else if (!s.virus && rng() < CFG.attackChancePerHour / 60) {
+  } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour) / 60) {
     if (shielded(s)) {
       log(s, t, '> intrusion attempt bounced off the antivirus shield.');
       return;
     }
     s.event = { type: 'attack', startedAge: s.ageMin };
     log(s, t, `> !! intrusion attempt. DEFEND within ${CFG.attackWindowMin}m.`);
-  } else if (rng() < (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache) / 60) {
+  } else if (rng() < (hot * (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache)) / 60) {
     s.event = { type: 'overflow', startedAge: s.ageMin };
     log(s, t, `> !! memory overflow. PURGE within ${CFG.overflowWindowMin}m.`);
-  } else if (rng() < CFG.surgeChancePerHour / 60) {
+  } else if (rng() < (hot * CFG.surgeChancePerHour) / 60) {
     st.heat = clamp(st.heat + 25);
     st.charge = clamp(st.charge + 10);
     s.lastSurgeAt = t;
@@ -724,6 +740,9 @@ function answerRequest(s, action, game) {
 }
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
+export const overclocked = (s) => s.stats.heat >= CFG.overclockHeat;
+// How fast mini-games and ICE run: slower while overclocked.
+export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 
 function stepFlow(s) {
   const st = s.stats;
@@ -731,6 +750,12 @@ function stepFlow(s) {
     st.charge >= CFG.flowMinStat && st.sync >= CFG.flowMinStat && st.integrity >= CFG.flowMinIntegrity && st.heat < CFG.flowMaxHeat;
   s.flowMin = good ? s.flowMin + 1 : 0;
   if (inFlow(s)) s.flowTotalMin++;
+}
+
+function stepOverclock(s, t) {
+  if (overclocked(s) === s.hot) return;
+  s.hot = !s.hot;
+  log(s, t, s.hot ? '> !! overclocked. everything feels slower. mistakes cost more.' : '> clock speed back to spec.');
 }
 
 function stepChatter(s, rng) {
@@ -908,6 +933,7 @@ export function migrate(s) {
   s.deepExits ??= { all: 0, clean: 0 };
   s.lifeBonus ??= 0;
   s.flowMin ??= 0;
+  s.hot ??= false;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;
   return s;
@@ -1085,9 +1111,15 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'play': {
       const { game, won = false } = opts;
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
+      const hot = overclocked(s); // it played at this Heat, before this game's own
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       if (lineOf(s.form) === 'glitch') gain = 10 + Math.floor(rng() * 31);
       gain *= 1 + traitEffect(s, 'volatile');
+      // A lost game while overclocked costs instead of consoling.
+      if (hot && !won) {
+        gain = CFG.overclockLoseSync;
+        st.integrity = clamp(st.integrity - CFG.overclockLoseIntegrity);
+      }
       const boosted = won && s.buffs.boost;
       if (boosted) {
         gain *= 2;
@@ -1099,8 +1131,12 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (st.heat > 70) s.axes.stability -= 0.5;
       s.games[game].played++;
       if (won) s.games[game].won += boosted ? 2 : 1;
-      let msg = won ? `${game}: won${boosted ? ' (boosted x2)' : ''}. sync up.` : `${game}: lost. it had fun anyway.`;
-      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance, rng);
+      let msg = won
+        ? `${game}: won${boosted ? ' (boosted x2)' : ''}. sync up.`
+        : hot
+          ? `${game}: lost, overclocked. it took that hard.`
+          : `${game}: lost. it had fun anyway.`;
+      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance * (hot ? CFG.overclockDropMult : 1), rng);
       const asked = answerRequest(s, 'play', game);
       if (asked) msg += ' just what it asked for.';
       res = { ...ok(msg, won ? 'win' : 'lose'), requestMet: asked };

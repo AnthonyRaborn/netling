@@ -61,7 +61,7 @@ The cooldown is measured from the end of the last run, in netling minutes (`last
 Two things shorten it, and it never goes under 120 minutes (`runCooldownFloorMin`):
 
 - A **clean clear** (jacked out with no ICE lost) sets `runCooldownCut = 60` for the next cooldown. Any other result resets the cut to 0.
-- Each **Overclock chip** adds 60 to `runCooldownCut`.
+- Each **Bypass chip** adds 60 to `runCooldownCut`.
 
 The tutorial run neither starts nor resets the cooldown (`noCooldown`).
 
@@ -111,7 +111,7 @@ Scrip is the netling's money (`pet.scrip`, 0 to `SCRIP.max` = 100; anything over
 |---|---|---|---|---|
 | Common | Coolant cell, Antivirus patch, Repair kit, Signal booster, Memory shard | 15 | 7 | 3 |
 | Uncommon | Black ICE shard, Corp voucher, Segfault | 25 | 12 | 6 |
-| Rarest | Overclock chip | 50 | 25 | 12 |
+| Rarest | Bypass chip | 50 | 25 | 12 |
 
 - **Earning**: selling an inventory item while a market is open (the inventory's button reads SELL +n; `sellItem`), SCRAP at home (a quarter), any pickup that meets a full inventory (scrapped for a quarter automatically, at home or on jack-out), and loose scrip on runs: 3 at every exit (`exitScrip`) and 3 in 30% of empty caches (`cacheScripChance`, `cacheScrip`). Loose scrip is carried in `run.scrip` and banked on jack-out like loot; a disconnect or abort loses it. Selling is neutral for allegiance.
 - **Spending**: a market item costs its price plus the region's Charge price; an accessory costs 25 scrip (common) or 50 (rare or very rare) plus 20 Charge (`accScrip`, `accPrice`). A button is enabled only while the netling has the scrip and more than Charge price + 5; `refreshMarket` recomputes this whenever the inventory sells mid-choice. Each item bought still leans allegiance by -0.5.
@@ -139,7 +139,7 @@ Every move first costs Charge and Heat (see below), then the node triggers.
 |---|---|
 | `entry` | Start only |
 | `cache` | 40% chance of a loot item (`cacheFindChance`); an empty cache holds 3 loose scrip 30% of the time. Independent 15% chance of a codex fragment, 3% chance of an accessory |
-| `ice` | A random mini-game (any of the four). Win: 20% chance of loot, 5% of an accessory. Loss: Integrity minus the region's ICE damage (halved for Firewall), Heat +12. Integrity 0 disconnects |
+| `ice` | A random mini-game (any of the four). Win: 20% chance of loot, 5% of an accessory. Loss: Integrity minus the region's ICE damage (halved for Firewall; 1.5x for a run jacked into overclocked), Heat +12. Integrity 0 disconnects. A run jacked into overclocked also plays its ICE at 0.85x speed |
 | `relay` | Charge +15, Heat -20, and +20 Integrity for an adult Chrome (corp relays). Then a choice: CONTINUE or JACK OUT (banks loot, ends the run) |
 | `checkpoint` | Chrome and Ghost pass automatically. Others choose: **HIDE** (Charge -8, Heat +8, allegiance -1, 25% chance of -15 Integrity), **COMPLY** (allegiance +1, a random carried item is confiscated, or -5 Integrity if carrying nothing), **VOUCHER** (spend a voucher from the inventory, pass clean, allegiance +1) |
 | `market` | Two different offered items for their scrip price plus the region's Charge price, and a 50% chance of an accessory offer (25 or 50 scrip plus 20 Charge). While it is open the inventory sells for half price. Each item bought leans allegiance by -0.5 |
@@ -154,6 +154,7 @@ Per move: Charge -4 (`moveCharge`), Heat +5 (`moveHeat`).
 
 - Charge reaches 0: **disconnect**.
 - Heat at 90 or more: Integrity -6 per move (`throttleDamage`). Integrity reaching 0 this way disconnects.
+- **Overclocked at jack-in** (Heat 65+, `run.hot`): every ICE fight this run runs at 0.85x speed (`iceSpeed()`) and a lost one deals 1.5x damage. It is fixed when the run starts, so the Heat each move adds never switches it on partway; see [SIMULATION.md](SIMULATION.md#overclocked). The map shows OC by the region name.
 
 ## Ending a run
 

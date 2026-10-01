@@ -61,7 +61,7 @@ Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`). Pr
 | Signal booster | Your next mini-game win counts double. Awake only | 15 |
 | Memory shard | Rewrites one of its quirks at random | 15 |
 | Repair kit | Restores 40 Integrity. Works while asleep | 15 |
-| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
+| Bypass chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
 | Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press | 25 |
 
 ## Mini-games

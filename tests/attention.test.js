@@ -134,7 +134,7 @@ test('flow comes after three good hours awake, and any lapse starts the count ag
   assert.equal(s.flowMin, 0);
 });
 
-test('flow is a look only: it changes no stat or axis', () => {
+test('flow changes no stat, but leans it stable faster than plain uptime', () => {
   const a = booted();
   const b = booted();
   healthy(a);
@@ -144,7 +144,9 @@ test('flow is a look only: it changes no stat or axis', () => {
   minutes(b, 60);
   assert.equal(inFlow(a), true);
   assert.deepEqual(a.stats, b.stats);
-  assert.deepEqual(a.axes, b.axes);
+  assert.equal(a.axes.allegiance, b.axes.allegiance);
+  const extra = CFG.flowStabilityPerHour - CFG.uptimeStabilityPerHour;
+  assert.ok(Math.abs(a.axes.stability - b.axes.stability - extra) < 1e-9, `${a.axes.stability} vs ${b.axes.stability}`);
 });
 
 // --- chatter ---

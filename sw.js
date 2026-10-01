@@ -3,7 +3,7 @@
 // they match): a changed sw.js is how an open page learns a release is out and offers a reload, and
 // the old cache is dropped. Add every new module or asset to SHELL (the test checks the modules),
 // or the app won't install for offline use.
-const CACHE = 'netling-v49';
+const CACHE = 'netling-v50';
 const SHELL = [
   './',
   'index.html',

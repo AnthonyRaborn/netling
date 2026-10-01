@@ -199,7 +199,7 @@ Agreed with the maintainer (see [BALANCE.md](BALANCE.md#design-goals)). Status i
 |---|---|---|
 | Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 97% and at most 2.3% (`sysadmin`) |
 | The Shell hints at Ghost: most Ghost chasers pass through it, almost nobody else | `lives.json`, `teens` | Met: 47% of `ghosthunter` teens (63% before the drain pass), at most 2.6% of anyone else |
-| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 99 to 100%. Glitch costs about one fault a life (`steer-glitch`, 1.2 faults) |
+| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 94 to 100%. Glitch by staying overclocked costs about half a fault a life (`steer-glitch`, 0.45 faults, 94%) |
 | Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Met: 95% Stub at 3.4 faults. A Segfault turns up before the teen stage in 59% of its lives; without one it still starves the netling for the faults |
 | The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Met: fastest is life 3 for every archetype (the per-life cap of 8); attentive-style lines finish in life 3 (23 to 47%) or 4 (median 4); casual lines now finish in life 3 or 4 about half the time |
 | Players who run have a free slot at least half the time at check-ins | `lives.json`, `fullAtCheckIn` | Met: the inventory is full at 23 to 32% of check-ins for attentive-style players and 47% for casual ones |
