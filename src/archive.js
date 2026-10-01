@@ -1,8 +1,8 @@
 // Lineage records and the form dex. Pure data helpers; main.js handles storage.
-import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, traitLabel } from './sim.js';
-import { FORM_ABILITIES } from './netrun/run.js';
+import { SPECIES, FORMS, FORM_MODS, TRAITS, ITEMS, KEEPSAKES, CFG, traitLabel, lineOf, isMainframeForm } from './sim.js';
+import { FORM_ABILITIES, MAINFRAME_ABILITIES } from './netrun/run.js';
 
-export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost'];
+export const DEX_ORDER = ['bitling', 'kernel', 'stub', 'shell', 'chrome', 'firewall', 'daemon', 'glitch', 'ghost', 'plat', 'airgap', 'init', 'panic', 'whisper'];
 
 // Shown for undiscovered forms. Vague on purpose.
 export const DEX_HINTS = {
@@ -15,6 +15,13 @@ export const DEX_HINTS = {
   daemon: 'never misses a cycle.',
   glitch: 'lives too close to the edge.',
   ghost: 'leaves no trace. misses nothing. plays everything.',
+  // Mainframe forms: each names its line and nothing of the feat (shown only once the stage is switched on, and as
+  // corrupted data until Root Access).
+  plat: 'some never stop growing. one of them is loyal to the grid.',
+  airgap: 'some never stop growing. one of them cuts every cable.',
+  init: 'some never stop growing. one of them was running before you came.',
+  panic: 'some never stop growing. one of them never stops falling apart.',
+  whisper: 'some never stop growing. one of them you only ever hear.',
 };
 
 export const DEX_LORE = {
@@ -27,6 +34,11 @@ export const DEX_LORE = {
   daemon: 'A background process with horns. Silent, tireless, exact.',
   glitch: 'Unstable and unbothered. Occasionally in two places at once.',
   ghost: 'No logs. No faults. Nobody is quite sure it is there.',
+  plat: 'Corp prestige tier. The grid opens doors for it before it knocks.',
+  airgap: 'Cut off from every network on purpose. Nothing gets in it did not invite.',
+  init: 'The first process and the last one running. Everything else waits on it.',
+  panic: 'A kernel panic that learned to like it. Halts nothing, frightens everything.',
+  whisper: 'It acts on what its ghost tells it. You only ever hear the echo.',
 };
 
 export function discover(dex, form) {
@@ -43,6 +55,7 @@ export function formsSeenIn(state, lineage) {
   for (const e of lineage) {
     if (e.ageMin > 0) seen.add('bitling');
     if (e.realized && e.form) seen.add(e.form);
+    if (e.mainframe) seen.add(e.mainframe);
     if (e.teenForm) seen.add(e.teenForm);
   }
   return [...seen];
@@ -53,7 +66,8 @@ export function deathRecord(state) {
   return {
     generation: state.generation,
     form: f?.form ?? null,
-    realized: Boolean(FORMS[state.form]),
+    realized: Boolean(FORMS[lineOf(state.form)]),
+    mainframe: isMainframeForm(state.form) ? state.form : null, // the body it ended in, when that was a mainframe
     teenForm: state.teenForm ?? null,
     cause: state.deathCause,
     ageMin: state.ageMin,
@@ -128,19 +142,44 @@ export function lineageChain(lineage, current) {
   return out;
 }
 
-export function dexEntries(dex) {
-  return DEX_ORDER.map((id) => {
+// Mainframe forms stay out of the dex until the stage is switched on (CFG.mainframe).
+export const dexOrder = () => DEX_ORDER.filter((id) => CFG.mainframe || !isMainframeForm(id));
+
+// Until Root Access is earned, mainframe forms read as corrupted data, not as ??? with a hint: NL-0 has not opened
+// that far yet. rootEarned: rootUnlocked() for this device.
+export const CORRUPTED = { name: '<<RECORD CORRUPTED>>', text: 'read error at 0x00. the record will not open.' };
+
+// The field manual's row about the Mainframe stage (null while it is switched off): corrupted until Root Access is
+// earned on the device, then a hint, and the rule itself once a mainframe is in the dex. [term, text, note]
+export function mainframeManual(dex, { rootEarned = false, on = CFG.mainframe } = {}) {
+  if (!on) return null;
+  if (!rootEarned) return ['0x00', '\u2591\u2592\u2593 [record corrupted] \u2593\u2592\u2591', 'read error. the record will not open.'];
+  if (!dex.some(isMainframeForm)) return ['???', 'some never stop growing.', 'NL-0 might know where to look.'];
+  const days = CFG.mainframeBonusMin / (24 * 60);
+  return [
+    'mainframe',
+    `On its last ordinary day, a grown netling recompiles once more if it has come back from The Deep ${CFG.mainframeExits} times in this life, or ${CFG.mainframeCleanExits} times without losing to ICE, and NL-0 has given its line root. It gains ${days} more day${days === 1 ? '' : 's'} of life, a stronger netrun ability, and passes its trait on at level ${['', 'I', 'II', 'III'][CFG.mainframeTraitLevel] ?? CFG.mainframeTraitLevel} or higher.`,
+    'It keeps its line: the same perk, trait and keepsake.',
+  ];
+}
+
+export function dexEntries(dex, { rootEarned = false } = {}) {
+  return dexOrder().map((id) => {
+    const line = lineOf(id);
     const found = dex.includes(id);
+    if (isMainframeForm(id) && !found && !rootEarned) {
+      return { id, found, corrupted: true, name: CORRUPTED.name, stage: SPECIES[id].stage, text: CORRUPTED.text, perk: null, trait: null, keepsake: null, runAbility: null };
+    }
     return {
       id,
       found,
       name: found ? SPECIES[id].name : '???',
       stage: SPECIES[id].stage,
       text: found ? DEX_LORE[id] : `hint: ${DEX_HINTS[id]}`,
-      perk: found ? FORM_MODS[id]?.desc ?? null : null,
-      trait: found && FORMS[id] ? TRAITS[FORMS[id].trait].name : null,
-      keepsake: found && KEEPSAKES[id] ? ITEMS[KEEPSAKES[id]].name : null,
-      runAbility: found ? FORM_ABILITIES[id] ?? null : null,
+      perk: found ? FORM_MODS[line]?.desc ?? null : null,
+      trait: found && FORMS[line] ? TRAITS[FORMS[line].trait].name : null,
+      keepsake: found && KEEPSAKES[line] ? ITEMS[KEEPSAKES[line]].name : null,
+      runAbility: found ? [FORM_ABILITIES[line], MAINFRAME_ABILITIES[id]].filter(Boolean).join(' ') || null : null,
     };
   });
 }

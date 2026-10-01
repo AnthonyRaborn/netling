@@ -61,7 +61,7 @@ test('forms, traits, perks, keepsakes and run abilities line up', () => {
   }
   assert.ok(unique(Object.values(FORMS).map((f) => f.trait)), 'two forms share a trait');
   for (const [id, t] of Object.entries(TRAITS)) assert.ok(t.name && t.desc, `trait ${id}`);
-  for (const stage of Object.values(SPECIES).map((s) => s.stage)) assert.ok(['baby', 'teen', 'adult'].includes(stage));
+  for (const stage of Object.values(SPECIES).map((s) => s.stage)) assert.ok(['baby', 'teen', 'adult', 'mainframe'].includes(stage));
 });
 
 test('the dex covers every body, with a hint and a line of lore for each', () => {
@@ -141,7 +141,7 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
       fragmentLevel: i === all.length - 1 ? 3 : 1,
     })),
     generation: 9,
-    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 150, cleanJackouts: 20, deepExits: 3, requestsMet: 30, contractsDone: 10, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
+    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 150, cleanJackouts: 20, deepExits: 3, sourceExits: 3, requestsMet: 30, contractsDone: 10, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
     flowMin: 25 * 60,
   };
   for (const slot of SLOTS) {

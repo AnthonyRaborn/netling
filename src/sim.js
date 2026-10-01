@@ -6,7 +6,7 @@ import { clearedForStage } from './netrun/regions.js';
 import { chatterPool, visitorLines } from './chatter.js';
 
 export const MIN = 60_000;
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export const CFG = {
   bootMinutes: 3,
@@ -40,6 +40,15 @@ export const CFG = {
   lifespanMin: 5 * 24 * 60,
   teenAtMin: 17 * 60,
   adultAtMin: 51 * 60,
+  // The Mainframe stage (docs/SOURCE_PLAN.md), off until its art and UI land. An adult recompiles into its line's
+  // mainframe form once it is home, has lived into its last ordinary day, and has proved itself in The Deep this life
+  // (three exits, or two clean ones); it gains a day of life and passes its trait on at level II or higher.
+  mainframe: false,
+  mainframeBeforeEndMin: 24 * 60,
+  mainframeBonusMin: 24 * 60,
+  mainframeExits: 3,
+  mainframeCleanExits: 2,
+  mainframeTraitLevel: 2,
   teenGoodCareMaxMistakes: 2,
   // The Shell: a teen on Ghost's path (Ghost's allegiance band, no chaos, few faults, and every
   // game won at least this often).
@@ -111,7 +120,7 @@ export const CFG = {
   chatterShowMin: 20,
   // Netrun uplink cooldown by stage, cut by clean jack-outs and overclock chips, never below the floor:
   // any sooner and corp sweeps pick up the trail.
-  runCooldownMin: { baby: 240, teen: 210, adult: 180 },
+  runCooldownMin: { baby: 240, teen: 210, adult: 180, mainframe: 180 },
   runCooldownFloorMin: 120,
   runCleanCutMin: 60,
   overclockCutMin: 60,
@@ -206,7 +215,19 @@ export const SPECIES = {
   daemon: { name: 'Daemon', stage: 'adult' },
   glitch: { name: 'Glitch', stage: 'adult' },
   ghost: { name: 'Ghost', stage: 'adult' },
+  // Mainframe forms: each grows from one adult form (its line) and keeps that line's trait, keepsake, perk and ability.
+  plat: { name: 'Plat', stage: 'mainframe', line: 'chrome' },
+  airgap: { name: 'Airgap', stage: 'mainframe', line: 'firewall' },
+  init: { name: 'Init', stage: 'mainframe', line: 'daemon' },
+  panic: { name: 'Panic', stage: 'mainframe', line: 'glitch' },
+  whisper: { name: 'Whisper', stage: 'mainframe', line: 'ghost' },
 };
+
+// The adult form a body belongs to: itself for an adult, its line for a mainframe (and itself for anything else).
+export const lineOf = (form) => SPECIES[form]?.line ?? form;
+// Each adult form's mainframe form.
+export const MAINFRAME_OF = Object.fromEntries(Object.entries(SPECIES).filter(([, x]) => x.line).map(([id, x]) => [x.line, id]));
+export const isMainframeForm = (form) => SPECIES[form]?.stage === 'mainframe';
 
 // In-life perks of each adult form (separate from inherited traits).
 export const FORM_MODS = {
@@ -217,7 +238,7 @@ export const FORM_MODS = {
   ghost: { desc: 'All drains 15% slower', chargeDrainMult: 0.85, syncDrainMult: 0.85 },
 };
 
-const mod = (s, key, fallback = 1) => FORM_MODS[s.form]?.[key] ?? fallback;
+const mod = (s, key, fallback = 1) => FORM_MODS[lineOf(s.form)]?.[key] ?? fallback;
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
 // Asleep for the night, or napping: either way it rests and can't eat, play or run.
@@ -311,6 +332,18 @@ export function rollQuirk(rng, { origin = false } = {}) {
 export const LEGACY_LIFE = { teenAt: 24 * 60, adultAt: 72 * 60, lifespan: 7 * 24 * 60 };
 const lifeFromCfg = () => ({ teenAt: CFG.teenAtMin, adultAt: CFG.adultAtMin, lifespan: CFG.lifespanMin });
 
+// When a life ends: its own lifespan, plus the day a mainframe gains (s.lifeBonus).
+export const lifeEnd = (s) => s.life.lifespan + (s.lifeBonus ?? 0);
+// The Mainframe gate. The age half: the start of the last ordinary day. The feat: this life's exits from The Deep
+// (s.deepExits, counted by run.js at jack-out), three of them or two clean ones.
+export const mainframeAt = (s) => s.life.lifespan - CFG.mainframeBeforeEndMin;
+export const mainframeFeat = (s) => (s.deepExits?.all ?? 0) >= CFG.mainframeExits || (s.deepExits?.clean ?? 0) >= CFG.mainframeCleanExits;
+// Whether it would recompile now (whether or not the stage is switched on): an adult, home, old enough, feat met,
+// with Root Access earned.
+// Root Access must have been earned in this line (NL-0 watches it, or rests after a rescue): the stage is NL-0's to open.
+export const rootEarnedIn = (s) => Boolean(s.rootAccess || s.rootCooling);
+export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= mainframeAt(s) && mainframeFeat(s) && rootEarnedIn(s);
+
 // A new generation: fresh quirk, with one quirk key copied from the fragment.
 // newForms: adult forms the player has never raised; they win ties a little more often.
 // rootAccess: the codex is complete, so NL-0 watches over this generation,
@@ -368,6 +401,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
     contractCheckAge: null, // the netling minute the UI last looked at posting one
     wokeAt: null, // when it last woke from the night's sleep (not a nap or hibernation)
+    deepExits: { all: 0, clean: 0 }, // exits from The Deep this life, and the clean ones (the Mainframe gate)
+    lifeBonus: 0, // minutes of life gained (a mainframe's extra day)
     flowMin: 0, // minutes in a row in good shape, awake
     flowTotalMin: 0, // minutes spent in flow this life
     chatter: null, // { id, startedAge }: the line on screen
@@ -455,6 +490,10 @@ function step(s, t, rng) {
     evolve(s, t, 'teen', teenForm(s));
   } else if (s.stage === 'teen' && s.ageMin >= s.life.adultAt) {
     evolve(s, t, 'adult', leaningForm(s, rng));
+  } else if (CFG.mainframe && mainframeDue(s)) {
+    evolve(s, t, 'mainframe', MAINFRAME_OF[s.form]);
+    s.lifeBonus = CFG.mainframeBonusMin;
+    log(s, t, '> it has another day in it now.');
   }
 
   let shouldSleep = isSleepHour(localHour(t, s.zone), s.quirk.sleepOffset);
@@ -536,7 +575,7 @@ function step(s, t, rng) {
 
   if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse', rng);
   else if (s.careMistakes >= CFG.maxMistakes) flatline(s, t, 'neglect', rng);
-  else if (s.ageMin >= s.life.lifespan) flatline(s, t, 'end of life cycle', rng);
+  else if (s.ageMin >= lifeEnd(s)) flatline(s, t, 'end of life cycle', rng);
 }
 
 function stepEvents(s, t, rng) {
@@ -598,7 +637,9 @@ function stepEvents(s, t, rng) {
 
 function startVisit(s, t, rng) {
   const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
-  const form = pick(Object.keys(SPECIES), rng);
+  // Mainframe forms visit only once the stage is switched on, and only a line NL-0 has given root: before that they are
+  // corrupted records, and a visitor would give one away.
+  const form = pick(Object.keys(SPECIES).filter((f) => !isMainframeForm(f) || (CFG.mainframe && rootEarnedIn(s))), rng);
   // Never the host's own colors, so the two stay easy to tell apart.
   const own = s.quirk.palette < BASE_PALETTES ? s.quirk.palette : -1;
   let palette = Math.floor(rng() * (own < 0 ? BASE_PALETTES : BASE_PALETTES - 1));
@@ -694,7 +735,7 @@ function stepFlow(s) {
 function stepChatter(s, rng) {
   if (s.chatter && (resting(s) || s.ageMin - s.chatter.startedAge >= CFG.chatterShowMin)) s.chatter = null;
   if (s.chatter || !idle(s) || rng() >= CFG.chatterChancePerHour / 60) return;
-  const pool = chatterPool(s);
+  const pool = chatterPool(s, lineOf(s.form));
   if (pool.length) s.chatter = { id: pick(pool, rng).id, startedAge: s.ageMin };
 }
 
@@ -863,6 +904,8 @@ export function migrate(s) {
   s.contract ??= null;
   s.contractCheckAge ??= null;
   s.wokeAt ??= null;
+  s.deepExits ??= { all: 0, clean: 0 };
+  s.lifeBonus ??= 0;
   s.flowMin ??= 0;
   s.flowTotalMin ??= 0;
   s.chatter ??= null;
@@ -873,9 +916,11 @@ export const inheritedScrip = (s) => Math.floor((s.scrip ?? 0) * SCRIP.inherit);
 
 // What a netling that ends as `form` leaves the next generation. Its own inherited trait becomes the
 // child's history; if it ended as the same form as its parent, the trait's level goes up (a streak).
+// A mainframe passes its trait on at level II or higher (CFG.mainframeTraitLevel).
 export function fragmentOf(s, form) {
   const trait = FORMS[form].trait;
-  const level = s.trait === trait ? Math.min((s.traitLevel ?? 1) + 1, TRAIT_CFG.maxLevel) : 1;
+  const streak = s.trait === trait ? Math.min((s.traitLevel ?? 1) + 1, TRAIT_CFG.maxLevel) : 1;
+  const level = isMainframeForm(s.form) ? Math.max(streak, Math.min(CFG.mainframeTraitLevel, TRAIT_CFG.maxLevel)) : streak;
   return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, history: s.trait ?? null };
 }
 
@@ -902,7 +947,7 @@ function flatline(s, t, cause, rng = null) {
   // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
-  const form = FORMS[s.form] ? s.form : leaningForm(s, rng);
+  const form = FORMS[lineOf(s.form)] ? lineOf(s.form) : leaningForm(s, rng);
   s.fragment = fragmentOf(s, form);
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
 }
@@ -1021,7 +1066,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         st.sync = clamp(st.sync + 8);
         msg += ' it loves these.';
       }
-      if (s.form === 'chrome') {
+      if (lineOf(s.form) === 'chrome') {
         st.sync = clamp(st.sync + (action === 'corp' ? 5 : -5));
         if (action === 'scav') msg += ' it looks disgusted.';
       }
@@ -1040,7 +1085,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       const { game, won = false } = opts;
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
-      if (s.form === 'glitch') gain = 10 + Math.floor(rng() * 31);
+      if (lineOf(s.form) === 'glitch') gain = 10 + Math.floor(rng() * 31);
       gain *= 1 + traitEffect(s, 'volatile');
       const boosted = won && s.buffs.boost;
       if (boosted) {

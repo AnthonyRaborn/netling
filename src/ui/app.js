@@ -1,7 +1,7 @@
 // Shared state for the UI modules: the live netling, player data loaded from storage,
 // the storage gate, and small DOM helpers. Everything here is plain data or a function;
 // nothing touches the page until main.js boots.
-import { createScript, migrate, FORMS } from '../sim.js';
+import { createScript, migrate, CFG, FORMS } from '../sim.js';
 import { createStore, KEYS, TEST_PREFIX } from '../storage.js';
 import {
   cleanSave,
@@ -22,11 +22,13 @@ import {
   num,
   TEST_SPEEDS,
 } from '../sanitize.js';
-import { allFragmentsFound, rootUnlocked as rootUnlockedFor } from '../netrun/codex.js';
+import { allFragmentsFound, rootUnlocked as rootUnlockedFor, ROOT_FRAGMENTS } from '../netrun/codex.js';
 import { isNewerSave, upgradeSave } from '../migrations.js';
 
 export const $ = (id) => document.getElementById(id);
 export const DEV_URL = new URLSearchParams(location.search).has('dev');
+// Playtesting the Mainframe stage before it ships (docs/SOURCE_PLAN.md): ?dev&mainframe switches it on for this page only.
+if (DEV_URL && new URLSearchParams(location.search).has('mainframe')) CFG.mainframe = true;
 
 export const app = {
   state: null, // the live netling (sim.js)
@@ -168,7 +170,7 @@ export function loadAll() {
   migrate(state);
   // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
   // already covered, before it was recorded (boot writes it back to storage).
-  if (allFragmentsFound(app.codex) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
+  if (allFragmentsFound(app.codex, ROOT_FRAGMENTS) || state.rootAccess || state.rootUsed || state.rootCooling || app.lineage.some((e) => e.rescued)) app.progress.rootEarned = true;
   app.state = state;
   app.onboarding = cleanOnboarding(store.get(KEYS.onboarding)) ?? (app.firstLaunch ? 'intro' : 'done');
   app.lastStage = state.stage;

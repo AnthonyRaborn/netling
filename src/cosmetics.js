@@ -1,11 +1,14 @@
 // Wardrobe cosmetics: shell, screen tint, screen effect, sound pack, crest and music. Purely visual, shared across generations.
 // Each locked item shows only its hint; unlock checks read a progress context:
-// { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits } }
-import { FRAGMENTS } from './netrun/codex.js';
-import { FORMS, TRAITS, TRAIT_CFG } from './sim.js';
-import { CHATTER_GROUPS, chatterProgress } from './chatter.js';
+// { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits, sourceExits } }
+// Items marked `mainframe` belong to the Mainframe stage (docs/SOURCE_PLAN.md) and are hidden while CFG.mainframe is off.
+import { FRAGMENTS, ROOT_FRAGMENTS } from './netrun/codex.js';
+import { CFG, FORMS, TRAITS, TRAIT_CFG, SPECIES, isMainframeForm, lineOf } from './sim.js';
+import { CHATTER_GROUPS, chatterProgress, shownChatter } from './chatter.js';
 
-const regionDone = (ctx, region) => FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
+// A region's codex, counting only the original fragments (ROOT_FRAGMENTS), so the Mainframe stage's never move these goals.
+const regionDone = (ctx, region) => ROOT_FRAGMENTS.filter((f) => f.region === region).every((f) => ctx.codex.includes(f.id));
+const sourceDone = (ctx) => FRAGMENTS.filter((f) => f.region === 'source').every((f) => ctx.codex.includes(f.id));
 const fullLives = (ctx) => ctx.lineage.filter((e) => e.cause === 'end of life cycle').length;
 function fullLifeStreak(ctx) {
   let best = 0;
@@ -27,7 +30,7 @@ export const ATTENTION = {
   flowHours: 24,
   contracts: 10, // the Seal crest
   groupHeard: (ctx) => {
-    const prog = chatterProgress(ctx.progress.chatter ?? []);
+    const prog = chatterProgress(ctx.progress.chatter ?? [], shownChatter(CFG.mainframe));
     return CHATTER_GROUPS.some((g) => prog[g.id].total > 0 && prog[g.id].heard === prog[g.id].total);
   },
 };
@@ -48,8 +51,9 @@ export const LEGACY = {
   traitsHeld: (ctx) => new Set(ctx.lineage.map((e) => e.trait).filter((t) => TRAITS[t])).size,
   // A level III trait was held, or passed on: the same form three generations running.
   levelThree: (ctx) => ctx.lineage.some((e) => (e.traitLevel ?? 1) >= TRAIT_CFG.maxLevel || (e.fragmentLevel ?? 1) >= TRAIT_CFG.maxLevel),
-  // Adult forms raised to adulthood in this line (not the dex, which counts any line on this device).
-  adultsRaised: (ctx) => new Set(ctx.lineage.filter((e) => e.realized && FORMS[e.form]).map((e) => e.form)).size,
+  // Adult forms raised to adulthood in this line (not the dex, which counts any line on this device). A mainframe counts
+  // as its adult form.
+  adultsRaised: (ctx) => new Set(ctx.lineage.filter((e) => e.realized && FORMS[lineOf(e.form)]).map((e) => lineOf(e.form))).size,
   unbrokenStreak,
 };
 
@@ -64,7 +68,7 @@ export const COSMETICS = {
     { id: 'crimson', name: 'Daemon red', swatch: '#3a0a12', hint: 'raise one that never misses a cycle.', check: (c) => c.dex.includes('daemon') },
     { id: 'shifted', name: 'Glitch shift', swatch: '#1a3a4a', hint: 'raise one that lives on the edge.', check: (c) => c.dex.includes('glitch') },
     { id: 'clear', name: 'Ghost clear', swatch: 'rgba(200,200,255,0.25)', hint: 'raise the one nobody sees.', check: (c) => c.dex.includes('ghost') },
-    { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => FRAGMENTS.every((f) => c.codex.includes(f.id)) },
+    { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => ROOT_FRAGMENTS.every((f) => c.codex.includes(f.id)) },
     { id: 'holo', name: 'Holographic', swatch: 'linear-gradient(135deg,#ff2a6d,#05d9e8,#f9f002)', hint: 'see five lives through to the end.', check: (c) => fullLives(c) >= 5 },
   ],
   tint: [
@@ -75,6 +79,7 @@ export const COSMETICS = {
     { id: 'phosphor', name: 'Green phosphor', swatch: '#0a1f0d', lcd: '#0a1f0d', dark: '#030a04', hint: 'learn what the ruins remember.', check: (c) => regionDone(c, 'ruins') },
     { id: 'abyss', name: 'Abyss', swatch: '#08081a', lcd: '#08081a', dark: '#020206', hint: 'listen to the bottom of the net.', check: (c) => regionDone(c, 'deep') },
     { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, five times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
+    { id: 'readonly', name: 'Read-only', swatch: '#0c0c0e', lcd: '#0c0c0e', dark: '#030304', mainframe: true, hint: 'read what the net was written from.', check: (c) => sourceDone(c) },
     { id: 'amber', name: 'Amber', swatch: '#261a08', lcd: '#261a08', dark: '#0c0803', hint: 'three in a row, start to finish.', check: (c) => fullLifeStreak(c) >= 3 },
   ],
   effect: [
@@ -87,6 +92,7 @@ export const COSMETICS = {
     { id: 'packets', name: 'Packet rain', hint: 'ten clean feasts without a bad bite.', check: (c) => streak(c, 'feast') >= 10 },
     { id: 'aurora', name: 'Aurora', hint: 'keep it well for a whole day, a few hours at a time.', check: (c) => (c.flowMin ?? 0) >= ATTENTION.flowHours * 60 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
+    { id: 'sourcelight', name: 'Source light', mainframe: true, hint: 'go down into the light three times, and come back.', check: (c) => (c.progress.sourceExits ?? 0) >= 3 },
   ],
   // Home sounds only; netruns keep each region's own voice.
   sound: [
@@ -146,6 +152,15 @@ export const COSMETICS = {
       // A stamped seal with a tick, and two ribbon tails.
       pixels: ['..#####..', '.#.....#.', '#.....#.#', '#....#..#', '#.#.#...#', '.#.#...#.', '..#####..', '..#...#..', '.#.....#.'],
     },
+    {
+      id: 'rack',
+      name: 'Rack mount',
+      mainframe: true,
+      hint: 'grow one past what it was built for.',
+      check: (c) => c.dex.some((f) => SPECIES[f] && isMainframeForm(f)),
+      // A server rack: a frame, three units with their lights, and its feet.
+      pixels: ['#########', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#########', '.#.....#.'],
+    },
   ],
   // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.
   music: [
@@ -155,6 +170,7 @@ export const COSMETICS = {
     { id: 'lobby', name: 'Corp lobby', hint: 'eat what the grid serves, twenty-five times.', check: (c) => acts(c, 'corp') >= 25 },
     { id: 'tracker', name: 'Tracker', hint: 'a hundred and fifty games, win or lose.', check: (c) => (c.progress.gamesPlayed ?? 0) >= 150 },
     { id: 'undertow', name: 'Undertow', hint: 'come back from the bottom three times.', check: (c) => (c.progress.deepExits ?? 0) >= 3 },
+    { id: 'firstcommit', name: 'First commit', mainframe: true, hint: 'come back from below the bottom.', check: (c) => (c.progress.sourceExits ?? 0) >= 1 },
     { id: 'forum', name: 'Forum', hint: 'hear twenty-five things it says to itself.', check: (c) => (c.progress.chatter?.length ?? 0) >= ATTENTION.chatterHeard },
   ],
 };
@@ -181,10 +197,13 @@ export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scan
 
 export const cosmeticById = (slot, id) => COSMETICS[slot].find((c) => c.id === id);
 
+// The items of a slot the wardrobe shows: the Mainframe stage's only once it is switched on.
+export const shownCosmetics = (slot, on = CFG.mainframe) => COSMETICS[slot].filter((c) => on || !c.mainframe);
+
 export function unlockedIds(ctx) {
   const out = [];
   for (const slot of SLOTS) {
-    for (const c of COSMETICS[slot]) if (c.free || c.check(ctx)) out.push(`${slot}:${c.id}`);
+    for (const c of shownCosmetics(slot)) if (c.free || c.check(ctx)) out.push(`${slot}:${c.id}`);
   }
   return out;
 }

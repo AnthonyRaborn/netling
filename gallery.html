@@ -238,7 +238,7 @@
 
         silhouettes() {
           const s = section('silhouettes', 'SILHOUETTES', 'One flat color, no eyes: the differentiation test. Each stage on its own row, drawn to the same scale on a shared baseline.');
-          for (const stage of ['baby', 'teen', 'adult']) {
+          for (const stage of ['baby', 'teen', 'adult', 'mainframe']) {
             s.append(el('h3', { textContent: stage }));
             const row = el('div', { className: 'row' });
             for (const form of FORMS.filter((f) => SPECIES[f].stage === stage)) row.append(fig(raw(formSprite(form, 'a'), flat, 12), SPECIES[form].name));

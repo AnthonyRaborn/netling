@@ -71,9 +71,10 @@ Keys, tempos and unlocks are also in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#mus
 | `lobby` | Corp lobby | Elevator music: seventh chords, walking bass, woodblock | An elevator ding every 4 to 8 bars | 25 corp meals | "eat what the grid serves, twenty-five times." |
 | `tracker` | Tracker | Demoscene: fluttering chip arpeggios, pulse bass, busy lead | none | 150 games | "a hundred and fifty games, win or lose." |
 | `undertow` | Undertow | Dark ambient: detuned sine drones, echoing pings, no drums | none | 3 exits from the Deep | "come back from the bottom three times." |
+| `firstcommit` | First commit | C major, 72 BPM: a lone triangle bell line through the echo over a still sine pad and a low triangle, the odd key click; sparse and high like the Source. Gain 0.78 (rms 0.0097 rendered, level with Idle loop and Undertow). The Mainframe stage's: hidden while it is switched off | none | 1 exit from the Source | "come back from below the bottom." |
 | `forum` | Forum | A message board: two square voices post and reply, key clicks | A disk seek every 12 to 20 bars | 25 chatter lines heard | "hear twenty-five things it says to itself." |
 
-**Netrun theme** (`netrun`, not a wardrobe item): E minor, 110 BPM, pulse bass, a tense two-note lead, drums. Each region colors the upper parts with the wave and pitch of its sound effects (`REGIONS[*].sound`): Corp Grid rings in triangle, the Bazaar buzzes in sawtooth. The Deep slows to 70 BPM with only bass and far-off pings.
+**Netrun theme** (`netrun`, not a wardrobe item): E minor, 110 BPM, pulse bass, a tense two-note lead, drums. Each region colors the upper parts with the wave and pitch of its sound effects (`REGIONS[*].sound`): Corp Grid rings in triangle, the Bazaar buzzes in sawtooth. The Deep slows to 70 BPM with only bass and far-off pings. The Source is its opposite: a fifth up at 60 BPM with only the pings and a still, high sine pad (`pad`, a part only the Source unmutes), rendered at rms 0.0035 against the Deep's 0.0033.
 
 ## Saves
 

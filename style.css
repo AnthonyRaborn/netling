@@ -846,7 +846,7 @@ button:active {
 }
 
 .thumb canvas {
-  width: 48px;
+  width: 54px; /* 18 pixels at 3x: room for a mainframe */
   image-rendering: pixelated;
 }
 
@@ -897,6 +897,27 @@ button:active {
 
 .region .rname {
   font-size: 20px;
+}
+
+/* A sector that should not be opened (the Source while it is hidden): its name slips sideways and back once every 3.2
+   seconds. Two changes 0.4 s apart, well under the three-a-second limit (CLAUDE.md rule 7); still under calm motion. */
+.corrupt {
+  display: inline-block;
+  animation: corrupt 3.2s steps(1) infinite;
+}
+@keyframes corrupt {
+  0% {
+    transform: none;
+    color: inherit;
+  }
+  84% {
+    transform: translateX(2px) skewX(-8deg);
+    color: var(--magenta);
+  }
+  96% {
+    transform: none;
+    color: inherit;
+  }
 }
 
 .region .rmeta {
@@ -1688,6 +1709,22 @@ body:has(#pad:not([hidden])) .update-bar {
 @keyframes packets {
   to {
     background-position-y: 110%, 140%, 170%, 125%;
+  }
+}
+/* Source light: a soft white glow from the screen edges that breathes once every 8 seconds. A slow fade, not a flash; with
+   motion calmed it holds still at its middle brightness (the base opacity), as Aurora holds still. */
+.screen.fx-sourcelight .fx-layer {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  box-shadow: inset 0 0 36px 6px rgba(255, 255, 255, 0.08);
+  opacity: 0.75;
+  animation: sourcelight 4s ease-in-out infinite alternate;
+}
+@keyframes sourcelight {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
   }
 }
 #picker {

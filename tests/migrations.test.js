@@ -26,6 +26,24 @@ test('the frozen version 1 fixture still loads and keeps what a player would car
   assert.doesNotThrow(() => tick(s, s.lastTick + 30 * MIN, () => 0.999), 'and it still runs');
 });
 
+// tests/fixtures/save-v2.json is a version 2 save (the Mainframe stage, made with the stage switched on), frozen the
+// same way: never regenerate it.
+const v2 = JSON.parse(readFileSync(new URL('./fixtures/save-v2.json', import.meta.url), 'utf8'));
+
+test('the frozen version 2 fixture loads as a mainframe with its extra day and Deep exits', () => {
+  assert.equal(v2.saveVersion, 2);
+  const s = migrate(cleanSave(clone(v2), v2.lastTick));
+  assert.ok(s, 'the fixture must always load');
+  assert.equal(s.saveVersion, SAVE_VERSION);
+  assert.equal(s.stage, 'mainframe');
+  assert.equal(s.form, 'init');
+  assert.equal(s.lifeBonus, v2.lifeBonus);
+  assert.deepEqual(s.deepExits, { all: 3, clean: 1 });
+  assert.deepEqual(s.inventory, ['coolant', 'overclock']);
+  assert.doesNotThrow(() => tick(s, s.lastTick + 30 * MIN, () => 0.999), 'and it still runs');
+  assert.equal(s.stage, 'mainframe', 'even with the stage switched off, a mainframe stays one');
+});
+
 test('a save already at the current version is passed through untouched', () => {
   const res = upgradeSave(v1, { target: 1 });
   assert.equal(res.upgraded, false);

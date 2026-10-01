@@ -8,12 +8,13 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
 const { runBlockReason } = await import('../src/netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
-const { FRAGMENTS } = await import('../src/netrun/codex.js');
-const { mainframeAt, mainframeDue, mainframeEnd, mainframeFeat } = await import('./lib/mainframe-gate.mjs');
+const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../src/netrun/codex.js');
+// When a mainframe's extended life would end (the planned stage; see docs/SOURCE_PLAN.md).
+const mainframeEnd = (s) => s.life.lifespan + CFG.mainframeBonusMin;
 const { playRun, finishRun, surplusSlot, RUN_STYLES } = await import('./netrun-bot.mjs');
 
 const DAY = 24 * 60;
@@ -61,7 +62,7 @@ export const ARCHETYPES = {
 
 // Codex presets for CODEX=<name>: what every single life starts knowing.
 export const CODEX_PRESETS = {
-  deep: FRAGMENTS.map((f) => f.id),
+  deep: [...ROOT_FRAGMENT_IDS], // the original 22: everything Root Access needs, through The Deep
   ruins: FRAGMENTS.slice(0, FRAGMENTS.findIndex((f) => f.id === 'ruins-4') + 1).map((f) => f.id),
 };
 
@@ -143,10 +144,7 @@ export function checkIn(s, p, now, rng, ctx) {
       }
       // Harder feats the gate could ask for instead (FEATS), by the age each was first met.
       if (region === 'deep' && run.result === 'jacked' && run.map.nodes.find((n) => n.id === run.pos)?.type === 'exit') {
-        const clean = (run.tally?.iceLost ?? 0) === 0;
-        ctx.deepExits.push({ age: s.ageMin, clean, faults: s.careMistakes, flow: flowAtJackIn });
-        // The counter the game would keep for the gate (the sim ignores it until the stage is built).
-        s.deepExits = { all: (s.deepExits?.all ?? 0) + 1, clean: (s.deepExits?.clean ?? 0) + (clean ? 1 : 0) };
+        ctx.deepExits.push({ age: s.ageMin, clean: (run.tally?.iceLost ?? 0) === 0, faults: s.careMistakes, flow: flowAtJackIn });
       }
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
       s.codexInbox = [];
@@ -205,6 +203,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let schedule = [];
   let teenAt = null;
   let adultAt = null;
+  let mainframeStart = null; // only with the stage switched on
   let teenForm = null;
   const mistakeKinds = {};
   let prevFlags = { ...s.flagged };
@@ -215,7 +214,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   let prevEvent = null;
   let gateAt = null; // the age at which it would have become a Mainframe (docs/SOURCE_PLAN.md)
   let featAt = null; // the age it met the gate's feat
-  while (s.stage !== 'dead' && minute < s.life.lifespan + 60) {
+  while (s.stage !== 'dead' && minute < lifeEnd(s) + 60) {
     const dayMin = (at(8) + minute) % DAY;
     if (dayMin === 0 || minute === 0) {
       schedule = p.checks.map((c) => ({ c, t: c + Math.round((rng() * 2 - 1) * p.jitter) }));
@@ -230,7 +229,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     }
     prevFlags = { ...s.flagged };
     if (featAt === null && mainframeFeat(s)) featAt = s.ageMin;
-    if (gateAt === null && mainframeDue(s)) gateAt = s.ageMin;
+    // With the stage switched on (CFG='{"mainframe":true}'), the netling recompiles the minute the gate is met.
+    if (gateAt === null && (mainframeDue(s) || s.stage === 'mainframe')) gateAt = s.ageMin;
     if (ctx.firstFlowAt === null && inFlow(s)) ctx.firstFlowAt = s.ageMin;
     if (s.event && !prevEvent) {
       events++;
@@ -245,6 +245,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
       teenForm = s.form;
       ctx.atTeen = { axes: { ...s.axes }, mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
     }
+    if (s.stage === 'mainframe' && mainframeStart === null) mainframeStart = minute;
     if (s.stage === 'adult' && adultAt === null) {
       adultAt = minute;
       ctx.atAdult = { axes: { ...s.axes }, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), mistakes: s.careMistakes };
@@ -281,7 +282,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     stageDays: {
       baby: (teenAt ?? s.ageMin) / DAY,
       teen: teenAt === null ? 0 : ((adultAt ?? s.ageMin) - teenAt) / DAY,
-      adult: adultAt === null ? 0 : (s.ageMin - adultAt) / DAY,
+      adult: adultAt === null ? 0 : ((mainframeStart ?? s.ageMin) - adultAt) / DAY,
+      mainframe: mainframeStart === null ? 0 : (s.ageMin - mainframeStart) / DAY,
     },
     itemsHeld: ctx.itemsHeld ?? 0,
     runs: ctx.runs ?? 0,
@@ -408,7 +410,7 @@ export function stats(results) {
     teens: shares(results, 'teenForm'),
     adults: shares(results, 'adultForm'),
     mistakeKinds: Object.fromEntries(Object.entries(kinds).map(([k, v]) => [k, round(v / n, 2)])),
-    stageDays: Object.fromEntries(['baby', 'teen', 'adult'].map((k) => [k, round(avg(results.map((r) => r.stageDays[k])), 2)])),
+    stageDays: Object.fromEntries(['baby', 'teen', 'adult', 'mainframe'].map((k) => [k, round(avg(results.map((r) => r.stageDays[k])), 2)])),
     axes: { allegiance: round(avg(results.map((r) => r.axes.allegiance)), 2), stability: round(avg(results.map((r) => r.axes.stability)), 2) },
     atAdult: adults.length
       ? {
@@ -512,7 +514,7 @@ export function simulateLine(p, seed, lives, { fragment = null } = {}) {
     const r = simulate(p, seed * 1000 + gen, { fragment, generation: gen, codex, rootAccess: codexLife !== null || Boolean(process.env.ROOT) });
     out.push(r);
     codex = r.codex;
-    if (codexLife === null && codex.length >= FRAGMENTS.length) codexLife = gen;
+    if (codexLife === null && ROOT_FRAGMENT_IDS.every((id) => codex.includes(id))) codexLife = gen;
     fragment = r.fragment;
   }
   return { lives: out, codexLife };
@@ -530,7 +532,7 @@ function printLife(st, detail) {
   if (!detail) return;
   const a = st.atAdult;
   console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
-  console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}`);
+  console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}${st.stageDays.mainframe ? `, mainframe ${st.stageDays.mainframe.toFixed(1)}` : ''}`);
   const t = st.atTeen;
   if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
   if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
@@ -563,7 +565,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (process.env.CODEX && !preset) throw new Error(`CODEX must be one of: ${Object.keys(CODEX_PRESETS).join(', ')}`);
   if (preset && process.env.LIVES) throw new Error('CODEX is for single lives; LIVES carries the codex itself');
   // A complete codex means Root Access in the game, so the preset brings it along.
-  const presetRoot = preset ? preset.length >= FRAGMENTS.length || Boolean(process.env.ROOT) : undefined;
+  const presetRoot = preset ? ROOT_FRAGMENT_IDS.every((id) => preset.includes(id)) || Boolean(process.env.ROOT) : undefined;
   const parent = process.env.TRAIT ? parentOf(process.env.TRAIT, { level: Number(process.env.TRAIT_LEVEL ?? 1), history: process.env.HISTORY ?? null }) : null;
   const lives = Number(process.env.LIVES ?? 0);
   const report = { runs, trait: process.env.TRAIT ?? null, lives: lives || null, codex: process.env.CODEX ?? null, cfg: process.env.CFG ? JSON.parse(process.env.CFG) : null, archetypes: {} };

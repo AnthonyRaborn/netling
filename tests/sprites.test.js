@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SPRITES, ANCHOR_ROWS, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, LOCKED_COLORS, WHITE_COLORS } from '../src/sprites.js';
-import { SPECIES, PALETTES } from '../src/sim.js';
+import { SPECIES, PALETTES, lineOf } from '../src/sim.js';
 import { spriteCells, poseDistance, silhouetteIou } from '../tools/lib/sprite-checks.mjs';
 
 const forms = Object.keys(SPECIES);
@@ -22,7 +22,7 @@ test('dead eyes are X\'s: two X shapes of accent pixels, and no open eye left', 
     const rows = SPRITES[`${form}Dead`];
     const { eyeRow } = ANCHOR_ROWS[form].a;
     // An X is a 3x3 block with its four corners and centre set: find each one in the dead sprite (the tall visor's are '#' on 'o').
-    const mark = form === 'chrome' ? '#' : 'o';
+    const mark = lineOf(form) === 'chrome' ? '#' : 'o';
     let x3 = 0;
     for (let y = 0; y + 2 < rows.length; y++) {
       for (let x = 0; x + 2 < rows[0].length; x++) {

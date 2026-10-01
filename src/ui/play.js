@@ -1,11 +1,11 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, tick, GAME_IDS } from '../sim.js';
+import { act, blockReason, log, tick, CFG, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
 import { abortRun, closeRun, codexRoom, contractMinutesLeft, contractPay, contractText, fmtLeft, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
-import { REGIONS, REGION_ORDER, regionLock } from '../netrun/regions.js';
-import { FRAGMENTS, allFragmentsFound } from '../netrun/codex.js';
+import { REGIONS, regionLock, shownRegions } from '../netrun/regions.js';
+import { liveFragments, allFragmentsFound } from '../netrun/codex.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
@@ -132,6 +132,7 @@ function bumpProgress(run) {
     if ((run.tally?.iceLost ?? 0) === 0) progress.cleanJackouts = (progress.cleanJackouts ?? 0) + 1;
     const at = run.map.nodes.find((n) => n.id === run.pos);
     if (run.region === 'deep' && at?.type === 'exit') progress.deepExits = (progress.deepExits ?? 0) + 1;
+    if (run.region === 'source' && at?.type === 'exit') progress.sourceExits = (progress.sourceExits ?? 0) + 1;
     if (run.contract?.settled === 'met') progress.contractsDone = (progress.contractsDone ?? 0) + 1;
   }
   if (run?.result) store.set(KEYS.progress, progress);
@@ -190,11 +191,11 @@ function renderRegions() {
   $('region-contract').hidden = !c;
   if (c) $('region-contract').textContent = `CONTRACT: ${contractText(c).toUpperCase()}. PAYS ${contractPay(c).toUpperCase()}. ${fmtLeft(contractMinutesLeft(app.state)).toUpperCase()} LEFT`;
   $('region-list').replaceChildren(
-    ...REGION_ORDER.map((id) => {
+    ...shownRegions(CFG.mainframe).map((id) => {
       const r = REGIONS[id];
       const lock = regionLock(id, app.state.stage, app.codex, app.state.cleared);
       const secret = lock && r.requires;
-      const regionFrags = FRAGMENTS.filter((f) => f.region === id);
+      const regionFrags = liveFragments().filter((f) => f.region === id);
       const found = regionFrags.filter((f) => app.codex.includes(f.id)).length;
       const b = document.createElement('button');
       b.type = 'button';
@@ -203,14 +204,27 @@ function renderRegions() {
       b.style.borderLeftColor = r.palette.main;
       const name = document.createElement('span');
       name.className = 'rname';
-      name.textContent = secret ? '???' : r.name.toUpperCase();
+      name.textContent = secret ? r.lockedName ?? '???' : r.name.toUpperCase();
+      if (secret && r.lockedName) name.classList.add('corrupt');
+      // The first time a corrupted sector opens, its entry repairs itself once, with a log line.
+      if (!lock && r.lockedName && !app.progress.sourceSeen) {
+        app.progress.sourceSeen = true;
+        store.set(KEYS.progress, app.progress);
+        log(app.state, now(), '> sector integrity: restored. something down there noticed.');
+        name.textContent = r.lockedName;
+        name.classList.add('corrupt');
+        setTimeout(() => {
+          name.textContent = r.name.toUpperCase();
+          name.classList.remove('corrupt');
+        }, 1600);
+      }
       name.style.color = lock ? '' : r.palette.main;
       const frag = document.createElement('span');
       frag.className = 'rfrag';
       frag.textContent = secret ? '' : `codex ${found}/${regionFrags.length}`;
       const meta = document.createElement('span');
       meta.className = 'rmeta';
-      meta.textContent = lock ?? (c?.region === id ? `contract: ${contractText(c)}.` : r.blurb);
+      meta.textContent = (secret && r.lockedBlurb) || (lock ?? (c?.region === id ? `contract: ${contractText(c)}.` : r.blurb));
       if (c?.region === id && !lock) meta.classList.add('contract');
       b.append(name, frag, meta);
       b.addEventListener('click', () => jackIn(id));

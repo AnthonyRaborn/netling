@@ -86,10 +86,10 @@ test('an unused rescue carries straight into the next generation', () => {
 
 // --- Root Access is earned once and kept ---
 
-import { FRAGMENTS, allFragmentsFound, rootUnlocked } from '../src/netrun/codex.js';
+import { FRAGMENTS, ROOT_FRAGMENTS, ROOT_FRAGMENT_IDS, allFragmentsFound, rootUnlocked } from '../src/netrun/codex.js';
 import { cleanProgress } from '../src/sanitize.js';
 
-const allIds = FRAGMENTS.map((f) => f.id);
+const allIds = [...ROOT_FRAGMENT_IDS]; // the original 22, all Root Access needs
 
 test('finishing the codex unlocks Root Access, and a missing fragment does not', () => {
   assert.equal(allFragmentsFound(allIds), true);
@@ -100,7 +100,7 @@ test('finishing the codex unlocks Root Access, and a missing fragment does not',
 });
 
 test('a fragment added later does not take Root Access back from someone who earned it', () => {
-  const grown = [...FRAGMENTS, { id: 'deep-5', region: 'deep', title: 'new', text: 'new' }];
+  const grown = [...ROOT_FRAGMENTS, { id: 'deep-9', region: 'deep', title: 'new', text: 'new' }];
   assert.equal(rootUnlocked({}, allIds, grown), false, 'without the record, the bigger codex is incomplete');
   assert.equal(rootUnlocked({ rootEarned: true }, allIds, grown), true, 'with the record it is kept');
   assert.equal(rootUnlocked({ rootEarned: 'yes' }, allIds, grown), false, 'only a real true counts');
@@ -114,7 +114,16 @@ test('the Root Access record survives cleaning, is boolean only, and is absent b
 });
 
 test('new netlings compile with Root Access when it is unlocked, even after the codex grew', () => {
-  const grown = [...FRAGMENTS, { id: 'deep-5', region: 'deep', title: 'new', text: 'new' }];
+  const grown = [...ROOT_FRAGMENTS, { id: 'deep-9', region: 'deep', title: 'new', text: 'new' }];
   const s = createScript({ now: T0, rng: mulberry32(1), rootAccess: rootUnlocked({ rootEarned: true }, allIds, grown) });
   assert.equal(s.rootAccess, true);
+});
+
+test('Root Access needs the original 22 only: the Mainframe stage\'s fragments never count toward it', () => {
+  assert.equal(ROOT_FRAGMENTS.length, 22);
+  assert.ok(ROOT_FRAGMENTS.every((f) => !f.mainframe));
+  const later = FRAGMENTS.filter((f) => f.mainframe).map((f) => f.id);
+  assert.deepEqual(later, ['deep-5', 'source-1', 'source-2', 'source-3', 'source-4']);
+  assert.equal(rootUnlocked({}, allIds), true, 'the 22 are enough, without the newer ones');
+  assert.equal(rootUnlocked({}, [...allIds.slice(1), ...later]), false, 'and the newer ones cannot stand in for one of them');
 });

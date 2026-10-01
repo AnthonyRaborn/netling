@@ -47,7 +47,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.88,
@@ -100,14 +101,16 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 8.43,
               "bazaar": 5.78,
               "corp": 5.59,
               "ruins": 4.52,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -197,7 +200,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.03,
@@ -250,26 +254,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.335
+              "deep": 0.335,
+              "source": 0
             },
             "byRegion": {
               "public": 8.28,
               "bazaar": 5.69,
               "corp": 5.47,
               "ruins": 4.18,
-              "deep": 0.92
+              "deep": 0.92,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.335,
-            "met": 0.125,
+            "met": 0,
             "feat": 0.125,
-            "featThenDied": 0,
-            "medianHours": 101.1,
-            "p10Hours": 96,
-            "leftMedianHours": 42.9,
-            "leftP10Hours": 25.2,
-            "lateFeat": 0.6,
+            "featThenDied": 0.125,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.37,
             "deepDisconnectsToClear": 0.16,
             "feats": {
@@ -346,7 +352,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.94,
@@ -399,26 +406,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 0.995,
-              "deep": 0.95
+              "deep": 0.95,
+              "source": 0
             },
             "byRegion": {
               "public": 7.57,
               "bazaar": 4.75,
               "corp": 4.78,
               "ruins": 3.6,
-              "deep": 3.23
+              "deep": 3.23,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.95,
-            "met": 0.505,
+            "met": 0,
             "feat": 0.505,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 35.8,
-            "lateFeat": 0.475,
+            "featThenDied": 0.505,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.35,
             "deepDisconnectsToClear": 0.11,
             "feats": {
@@ -495,7 +504,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.92,
@@ -548,26 +558,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 7.39,
               "bazaar": 4.63,
               "corp": 4.75,
               "ruins": 3.52,
-              "deep": 3.84
+              "deep": 3.84,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.6,
+            "met": 0.25,
             "feat": 0.6,
-            "featThenDied": 0,
-            "medianHours": 96,
+            "featThenDied": 0.35,
+            "medianHours": 96.1,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 35.2,
-            "lateFeat": 0.475,
+            "leftP10Hours": 35.8,
+            "lateFeat": 0.5,
             "deepRunsToClear": 1.39,
             "deepDisconnectsToClear": 0.18,
             "feats": {
@@ -663,7 +675,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.4,
-            "adult": 2.81
+            "adult": 2.81,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.8,
@@ -716,14 +729,16 @@
               "bazaar": 0.985,
               "corp": 0.985,
               "ruins": 0.98,
-              "deep": 0.035
+              "deep": 0.035,
+              "source": 0
             },
             "byRegion": {
               "public": 5.8,
               "bazaar": 4.33,
               "corp": 4.32,
               "ruins": 3.61,
-              "deep": 0.11
+              "deep": 0.11,
+              "source": 0
             }
           },
           "mainframe": {
@@ -816,7 +831,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.82
+            "adult": 2.82,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.22,
@@ -869,26 +885,28 @@
               "bazaar": 0.995,
               "corp": 0.995,
               "ruins": 0.99,
-              "deep": 0.47
+              "deep": 0.47,
+              "source": 0
             },
             "byRegion": {
               "public": 5.6,
               "bazaar": 3.78,
               "corp": 4.06,
               "ruins": 3.2,
-              "deep": 1.39
+              "deep": 1.39,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.47,
-            "met": 0.1,
+            "met": 0,
             "feat": 0.1,
-            "featThenDied": 0,
-            "medianHours": 101.4,
-            "p10Hours": 96,
-            "leftMedianHours": 43,
-            "leftP10Hours": 24.7,
-            "lateFeat": 0.7,
+            "featThenDied": 0.1,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.55,
             "deepDisconnectsToClear": 0.55,
             "feats": {
@@ -969,7 +987,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.4,
-            "adult": 2.79
+            "adult": 2.79,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.28,
@@ -1022,26 +1041,28 @@
               "bazaar": 0.99,
               "corp": 0.99,
               "ruins": 0.985,
-              "deep": 0.905
+              "deep": 0.905,
+              "source": 0
             },
             "byRegion": {
               "public": 5.02,
               "bazaar": 3.38,
               "corp": 3.63,
               "ruins": 2.87,
-              "deep": 2.86
+              "deep": 2.86,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.905,
-            "met": 0.205,
+            "met": 0,
             "feat": 0.205,
-            "featThenDied": 0,
-            "medianHours": 101.5,
-            "p10Hours": 96,
-            "leftMedianHours": 42.5,
-            "leftP10Hours": 33.8,
-            "lateFeat": 0.707,
+            "featThenDied": 0.205,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.59,
             "deepDisconnectsToClear": 0.59,
             "feats": {
@@ -1123,7 +1144,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.8
+            "adult": 2.8,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.47,
@@ -1176,26 +1198,28 @@
               "bazaar": 1,
               "corp": 0.995,
               "ruins": 0.985,
-              "deep": 0.97
+              "deep": 0.97,
+              "source": 0
             },
             "byRegion": {
               "public": 5.06,
               "bazaar": 3.36,
               "corp": 3.46,
               "ruins": 2.8,
-              "deep": 3.1
+              "deep": 3.1,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.97,
-            "met": 0.265,
+            "met": 0.025,
             "feat": 0.27,
-            "featThenDied": 0.005,
-            "medianHours": 98.4,
+            "featThenDied": 0.245,
+            "medianHours": 100.6,
             "p10Hours": 96,
-            "leftMedianHours": 45.6,
-            "leftP10Hours": 33.1,
-            "lateFeat": 0.566,
+            "leftMedianHours": 43.4,
+            "leftP10Hours": 33.7,
+            "lateFeat": 0.8,
             "deepRunsToClear": 1.63,
             "deepDisconnectsToClear": 0.63,
             "feats": {
@@ -1291,7 +1315,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.76
+            "adult": 2.76,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.66,
@@ -1344,14 +1369,16 @@
               "bazaar": 0.695,
               "corp": 0.535,
               "ruins": 0.275,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0.9,
               "bazaar": 0.79,
               "corp": 0.57,
               "ruins": 0.28,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -1444,7 +1471,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.77
+            "adult": 2.77,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -0.1,
@@ -1497,14 +1525,16 @@
               "bazaar": 0.635,
               "corp": 0.45,
               "ruins": 0.285,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0.84,
               "bazaar": 0.71,
               "corp": 0.5,
               "ruins": 0.33,
-              "deep": 0.01
+              "deep": 0.01,
+              "source": 0
             }
           },
           "mainframe": {
@@ -1597,7 +1627,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.4,
-            "adult": 2.75
+            "adult": 2.75,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.59,
@@ -1650,14 +1681,16 @@
               "bazaar": 0.64,
               "corp": 0.495,
               "ruins": 0.255,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0.85,
               "bazaar": 0.71,
               "corp": 0.55,
               "ruins": 0.3,
-              "deep": 0.01
+              "deep": 0.01,
+              "source": 0
             }
           },
           "mainframe": {
@@ -1751,7 +1784,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.39,
-            "adult": 2.71
+            "adult": 2.71,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.39,
@@ -1804,14 +1838,16 @@
               "bazaar": 0.75,
               "corp": 0.555,
               "ruins": 0.335,
-              "deep": 0.015
+              "deep": 0.015,
+              "source": 0
             },
             "byRegion": {
               "public": 0.9,
               "bazaar": 0.81,
               "corp": 0.61,
               "ruins": 0.38,
-              "deep": 0.03
+              "deep": 0.03,
+              "source": 0
             }
           },
           "mainframe": {
@@ -1917,7 +1953,8 @@
           "stageDays": {
             "baby": 0.62,
             "teen": 0.39,
-            "adult": 0.06
+            "adult": 0.06,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.57,
@@ -1970,14 +2007,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2067,7 +2106,8 @@
           "stageDays": {
             "baby": 0.61,
             "teen": 0.38,
-            "adult": 0.04
+            "adult": 0.04,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.46,
@@ -2120,14 +2160,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2217,7 +2259,8 @@
           "stageDays": {
             "baby": 0.61,
             "teen": 0.4,
-            "adult": 0.08
+            "adult": 0.08,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.33,
@@ -2270,14 +2313,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2367,7 +2412,8 @@
           "stageDays": {
             "baby": 0.6,
             "teen": 0.38,
-            "adult": 0.06
+            "adult": 0.06,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.25,
@@ -2420,14 +2466,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2531,7 +2579,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 82.17,
@@ -2584,14 +2633,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2679,7 +2730,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 70.39,
@@ -2732,14 +2784,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2828,7 +2882,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 64.94,
@@ -2881,14 +2936,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -2977,7 +3034,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 65.44,
@@ -3030,14 +3088,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3141,7 +3201,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -98.96,
@@ -3194,14 +3255,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3290,7 +3353,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -99.33,
@@ -3343,14 +3407,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3438,7 +3504,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -99.38,
@@ -3491,14 +3558,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3586,7 +3655,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -99.26,
@@ -3639,14 +3709,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3752,7 +3824,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.8
+            "adult": 2.8,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -0.73,
@@ -3805,14 +3878,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -3904,7 +3979,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.84
+            "adult": 2.84,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.13,
@@ -3957,14 +4033,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4055,7 +4133,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.4,
-            "adult": 2.75
+            "adult": 2.75,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.52,
@@ -4108,14 +4187,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4206,7 +4287,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.41,
-            "adult": 2.79
+            "adult": 2.79,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.42,
@@ -4259,14 +4341,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4372,7 +4456,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.56,
@@ -4425,14 +4510,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4522,7 +4609,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -1.34,
@@ -4575,14 +4663,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4670,7 +4760,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -0.7,
@@ -4723,14 +4814,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4817,7 +4910,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.12,
@@ -4870,14 +4964,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -4982,7 +5078,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.51,
@@ -5035,14 +5132,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -5131,7 +5230,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.53,
@@ -5184,14 +5284,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -5280,7 +5382,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.55,
@@ -5333,14 +5436,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -5429,7 +5534,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.54,
@@ -5482,14 +5588,16 @@
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 0,
               "bazaar": 0,
               "corp": 0,
               "ruins": 0,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -5595,7 +5703,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -12.87,
@@ -5648,14 +5757,16 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 8.24,
               "bazaar": 5.82,
               "corp": 5.83,
               "ruins": 4.63,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -5746,7 +5857,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -13.74,
@@ -5799,26 +5911,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.4
+              "deep": 0.4,
+              "source": 0
             },
             "byRegion": {
               "public": 7.98,
               "bazaar": 5.47,
               "corp": 5.51,
               "ruins": 4.11,
-              "deep": 1.33
+              "deep": 1.33,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.4,
-            "met": 0.17,
+            "met": 0,
             "feat": 0.17,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 38.1,
-            "lateFeat": 0.471,
+            "featThenDied": 0.17,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.41,
             "deepDisconnectsToClear": 0.14,
             "feats": {
@@ -5897,7 +6011,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -11.5,
@@ -5950,26 +6065,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.965
+              "deep": 0.965,
+              "source": 0
             },
             "byRegion": {
               "public": 7.66,
               "bazaar": 4.62,
               "corp": 4.91,
               "ruins": 3.59,
-              "deep": 3.34
+              "deep": 3.34,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.965,
-            "met": 0.505,
+            "met": 0,
             "feat": 0.505,
-            "featThenDied": 0,
-            "medianHours": 96.2,
-            "p10Hours": 96,
-            "leftMedianHours": 47.8,
-            "leftP10Hours": 36.1,
-            "lateFeat": 0.515,
+            "featThenDied": 0.505,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.44,
             "deepDisconnectsToClear": 0.2,
             "feats": {
@@ -6048,7 +6165,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -12.45,
@@ -6101,26 +6219,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 7.38,
               "bazaar": 4.56,
               "corp": 4.8,
               "ruins": 3.5,
-              "deep": 3.89
+              "deep": 3.89,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.5,
+            "met": 0.2,
             "feat": 0.5,
-            "featThenDied": 0,
+            "featThenDied": 0.3,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 36.9,
-            "lateFeat": 0.4,
+            "leftP10Hours": 37.8,
+            "lateFeat": 0.35,
             "deepRunsToClear": 1.62,
             "deepDisconnectsToClear": 0.24,
             "feats": {
@@ -6210,7 +6330,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 114.27,
@@ -6263,14 +6384,16 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             },
             "byRegion": {
               "public": 8.18,
               "bazaar": 5.73,
               "corp": 5.65,
               "ruins": 4.36,
-              "deep": 0
+              "deep": 0,
+              "source": 0
             }
           },
           "mainframe": {
@@ -6358,7 +6481,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 102.5,
@@ -6411,26 +6535,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.375
+              "deep": 0.375,
+              "source": 0
             },
             "byRegion": {
               "public": 8.04,
               "bazaar": 5.42,
               "corp": 5.52,
               "ruins": 3.99,
-              "deep": 0.97
+              "deep": 0.97,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.375,
-            "met": 0.11,
+            "met": 0,
             "feat": 0.11,
-            "featThenDied": 0,
-            "medianHours": 100.8,
-            "p10Hours": 96,
-            "leftMedianHours": 44.8,
-            "leftP10Hours": 34,
-            "lateFeat": 0.591,
+            "featThenDied": 0.11,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.23,
             "deepDisconnectsToClear": 0.15,
             "feats": {
@@ -6506,7 +6632,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 98.01,
@@ -6559,26 +6686,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.965
+              "deep": 0.965,
+              "source": 0
             },
             "byRegion": {
               "public": 7.75,
               "bazaar": 4.55,
               "corp": 4.81,
               "ruins": 3.35,
-              "deep": 3.08
+              "deep": 3.08,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.965,
-            "met": 0.395,
+            "met": 0,
             "feat": 0.395,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 25.2,
-            "lateFeat": 0.468,
+            "featThenDied": 0.395,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.3,
             "deepDisconnectsToClear": 0.19,
             "feats": {
@@ -6654,7 +6783,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 100.05,
@@ -6707,26 +6837,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 7.32,
               "bazaar": 4.84,
               "corp": 4.73,
               "ruins": 3.27,
-              "deep": 3.83
+              "deep": 3.83,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.575,
+            "met": 0.14,
             "feat": 0.575,
-            "featThenDied": 0,
+            "featThenDied": 0.435,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
             "leftP10Hours": 35.1,
-            "lateFeat": 0.452,
+            "lateFeat": 0.393,
             "deepRunsToClear": 1.39,
             "deepDisconnectsToClear": 0.21,
             "feats": {
@@ -6817,7 +6949,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -159.36,
@@ -6870,14 +7003,16 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.01
+              "deep": 0.01,
+              "source": 0
             },
             "byRegion": {
               "public": 8.6,
               "bazaar": 5.66,
               "corp": 5.79,
               "ruins": 4.22,
-              "deep": 0.02
+              "deep": 0.02,
+              "source": 0
             }
           },
           "mainframe": {
@@ -6963,7 +7098,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -161.23,
@@ -7016,26 +7152,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.4
+              "deep": 0.4,
+              "source": 0
             },
             "byRegion": {
               "public": 8.21,
               "bazaar": 5.35,
               "corp": 5.48,
               "ruins": 4.2,
-              "deep": 1.18
+              "deep": 1.18,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.4,
-            "met": 0.155,
+            "met": 0,
             "feat": 0.155,
-            "featThenDied": 0,
-            "medianHours": 101,
-            "p10Hours": 96,
-            "leftMedianHours": 43,
-            "leftP10Hours": 34,
-            "lateFeat": 0.613,
+            "featThenDied": 0.155,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.35,
             "deepDisconnectsToClear": 0.11,
             "feats": {
@@ -7109,7 +7247,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -157.43,
@@ -7162,26 +7301,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.965
+              "deep": 0.965,
+              "source": 0
             },
             "byRegion": {
               "public": 7.61,
               "bazaar": 4.87,
               "corp": 4.91,
               "ruins": 3.24,
-              "deep": 3.35
+              "deep": 3.35,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.965,
-            "met": 0.525,
+            "met": 0,
             "feat": 0.525,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 35.9,
-            "lateFeat": 0.486,
+            "featThenDied": 0.525,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.24,
             "deepDisconnectsToClear": 0.07,
             "feats": {
@@ -7257,7 +7398,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -159.22,
@@ -7310,26 +7452,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 7.7,
               "bazaar": 4.83,
               "corp": 4.68,
               "ruins": 3.46,
-              "deep": 3.72
+              "deep": 3.72,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.645,
+            "met": 0.295,
             "feat": 0.645,
-            "featThenDied": 0,
+            "featThenDied": 0.35,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 37,
-            "lateFeat": 0.434,
+            "leftP10Hours": 38,
+            "lateFeat": 0.424,
             "deepRunsToClear": 1.24,
             "deepDisconnectsToClear": 0.07,
             "feats": {
@@ -7421,7 +7565,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.23,
@@ -7474,26 +7619,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.01
+              "deep": 0.01,
+              "source": 0
             },
             "byRegion": {
               "public": 8.24,
               "bazaar": 5.52,
               "corp": 5.66,
               "ruins": 4.77,
-              "deep": 0.03
+              "deep": 0.03,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.005,
+            "met": 0,
             "feat": 0.005,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "featThenDied": 0.005,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.5,
             "deepDisconnectsToClear": 0.5,
             "feats": {
@@ -7569,7 +7716,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.27,
@@ -7622,26 +7770,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.34
+              "deep": 0.34,
+              "source": 0
             },
             "byRegion": {
               "public": 8.23,
               "bazaar": 5.5,
               "corp": 5.46,
               "ruins": 4.12,
-              "deep": 1.08
+              "deep": 1.08,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.34,
-            "met": 0.165,
+            "met": 0,
             "feat": 0.165,
-            "featThenDied": 0,
-            "medianHours": 96.8,
-            "p10Hours": 96,
-            "leftMedianHours": 47.2,
-            "leftP10Hours": 36.9,
-            "lateFeat": 0.576,
+            "featThenDied": 0.165,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.31,
             "deepDisconnectsToClear": 0.12,
             "feats": {
@@ -7717,7 +7867,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.27,
@@ -7770,26 +7921,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.94
+              "deep": 0.94,
+              "source": 0
             },
             "byRegion": {
               "public": 7.59,
               "bazaar": 4.83,
               "corp": 4.83,
               "ruins": 3.51,
-              "deep": 3.24
+              "deep": 3.24,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.94,
-            "met": 0.495,
+            "met": 0,
             "feat": 0.495,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 35.9,
-            "lateFeat": 0.434,
+            "featThenDied": 0.495,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.27,
             "deepDisconnectsToClear": 0.11,
             "feats": {
@@ -7863,7 +8016,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.32,
@@ -7916,26 +8070,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 7.72,
               "bazaar": 4.7,
               "corp": 4.77,
               "ruins": 3.26,
-              "deep": 3.81
+              "deep": 3.81,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.58,
+            "met": 0.25,
             "feat": 0.58,
-            "featThenDied": 0,
+            "featThenDied": 0.33,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 35.7,
-            "lateFeat": 0.422,
+            "leftP10Hours": 37.9,
+            "lateFeat": 0.38,
             "deepRunsToClear": 1.42,
             "deepDisconnectsToClear": 0.16,
             "feats": {
@@ -8028,7 +8184,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.24,
@@ -8081,26 +8238,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.01
+              "deep": 0.01,
+              "source": 0
             },
             "byRegion": {
               "public": 8.14,
               "bazaar": 5.66,
               "corp": 5.62,
               "ruins": 4.68,
-              "deep": 0.05
+              "deep": 0.05,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.01,
-            "met": 0.01,
+            "met": 0,
             "feat": 0.01,
-            "featThenDied": 0,
-            "medianHours": 98,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 46,
-            "lateFeat": 0.5,
+            "featThenDied": 0.01,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 2,
             "deepDisconnectsToClear": 1,
             "feats": {
@@ -8177,7 +8336,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.29,
@@ -8230,26 +8390,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 0.995,
-              "deep": 0.405
+              "deep": 0.405,
+              "source": 0
             },
             "byRegion": {
               "public": 7.61,
               "bazaar": 4.99,
               "corp": 5.24,
               "ruins": 3.96,
-              "deep": 1.36
+              "deep": 1.36,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.405,
-            "met": 0.175,
+            "met": 0,
             "feat": 0.175,
-            "featThenDied": 0,
-            "medianHours": 97,
-            "p10Hours": 96,
-            "leftMedianHours": 47,
-            "leftP10Hours": 35.2,
-            "lateFeat": 0.514,
+            "featThenDied": 0.175,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.57,
             "deepDisconnectsToClear": 0.3,
             "feats": {
@@ -8328,7 +8490,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.4,
-            "adult": 2.82
+            "adult": 2.82,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.33,
@@ -8381,26 +8544,28 @@
               "bazaar": 0.99,
               "corp": 0.99,
               "ruins": 0.98,
-              "deep": 0.935
+              "deep": 0.935,
+              "source": 0
             },
             "byRegion": {
               "public": 6.84,
               "bazaar": 4.21,
               "corp": 4.75,
               "ruins": 3.4,
-              "deep": 3.29
+              "deep": 3.29,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.935,
-            "met": 0.455,
+            "met": 0,
             "feat": 0.455,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 39.9,
-            "lateFeat": 0.275,
+            "featThenDied": 0.455,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.55,
             "deepDisconnectsToClear": 0.24,
             "feats": {
@@ -8478,7 +8643,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": 0.24,
@@ -8531,26 +8697,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 0.995,
-              "deep": 0.98
+              "deep": 0.98,
+              "source": 0
             },
             "byRegion": {
               "public": 6.76,
               "bazaar": 4.38,
               "corp": 4.68,
               "ruins": 3.2,
-              "deep": 3.91
+              "deep": 3.91,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.98,
-            "met": 0.55,
+            "met": 0.135,
             "feat": 0.55,
-            "featThenDied": 0,
+            "featThenDied": 0.415,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
-            "leftP10Hours": 37.8,
-            "lateFeat": 0.318,
+            "leftP10Hours": 40.9,
+            "lateFeat": 0.222,
             "deepRunsToClear": 1.87,
             "deepDisconnectsToClear": 0.38,
             "feats": {
@@ -8645,7 +8813,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -4.81,
@@ -8698,26 +8867,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.005
+              "deep": 0.005,
+              "source": 0
             },
             "byRegion": {
               "public": 7.07,
               "bazaar": 5.77,
               "corp": 5.71,
               "ruins": 4.36,
-              "deep": 0.03
+              "deep": 0.03,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.005,
-            "met": 0.005,
+            "met": 0,
             "feat": 0.005,
-            "featThenDied": 0,
-            "medianHours": 101.9,
-            "p10Hours": 101.9,
-            "leftMedianHours": 42.1,
-            "leftP10Hours": 42.1,
-            "lateFeat": 1,
+            "featThenDied": 0.005,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1,
             "deepDisconnectsToClear": 0,
             "feats": {
@@ -8797,7 +8968,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.86
+            "adult": 2.86,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.22,
@@ -8850,26 +9022,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 0.995,
-              "deep": 0.375
+              "deep": 0.375,
+              "source": 0
             },
             "byRegion": {
               "public": 6.83,
               "bazaar": 5.38,
               "corp": 5.36,
               "ruins": 4.04,
-              "deep": 1.12
+              "deep": 1.12,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.375,
-            "met": 0.17,
+            "met": 0,
             "feat": 0.17,
-            "featThenDied": 0,
-            "medianHours": 98.2,
-            "p10Hours": 96,
-            "leftMedianHours": 45.9,
-            "leftP10Hours": 35.2,
-            "lateFeat": 0.647,
+            "featThenDied": 0.17,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.23,
             "deepDisconnectsToClear": 0.05,
             "feats": {
@@ -8949,7 +9123,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.24,
@@ -9002,26 +9177,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.97
+              "deep": 0.97,
+              "source": 0
             },
             "byRegion": {
               "public": 5.89,
               "bazaar": 4.8,
               "corp": 4.76,
               "ruins": 3.7,
-              "deep": 3.17
+              "deep": 3.17,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.97,
-            "met": 0.42,
+            "met": 0,
             "feat": 0.42,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 36.8,
-            "lateFeat": 0.476,
+            "featThenDied": 0.42,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.3,
             "deepDisconnectsToClear": 0.16,
             "feats": {
@@ -9100,7 +9277,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3,
@@ -9153,26 +9331,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 6.02,
               "bazaar": 4.75,
               "corp": 4.72,
               "ruins": 3.45,
-              "deep": 3.77
+              "deep": 3.77,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.645,
+            "met": 0.21,
             "feat": 0.645,
-            "featThenDied": 0,
-            "medianHours": 96.1,
+            "featThenDied": 0.435,
+            "medianHours": 96,
             "p10Hours": 96,
-            "leftMedianHours": 47.9,
-            "leftP10Hours": 35.9,
-            "lateFeat": 0.504,
+            "leftMedianHours": 48,
+            "leftP10Hours": 38.9,
+            "lateFeat": 0.429,
             "deepRunsToClear": 1.33,
             "deepDisconnectsToClear": 0.13,
             "feats": {
@@ -9265,7 +9445,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.57,
@@ -9318,26 +9499,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.005
+              "deep": 0.005,
+              "source": 0
             },
             "byRegion": {
               "public": 8.65,
               "bazaar": 5.9,
               "corp": 5.88,
               "ruins": 4.51,
-              "deep": 0.02
+              "deep": 0.02,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.005,
-            "met": 0.005,
+            "met": 0,
             "feat": 0.005,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 48,
-            "lateFeat": 0,
+            "featThenDied": 0.005,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1,
             "deepDisconnectsToClear": 0,
             "feats": {
@@ -9415,7 +9598,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.87,
@@ -9468,26 +9652,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.35
+              "deep": 0.35,
+              "source": 0
             },
             "byRegion": {
               "public": 8.4,
               "bazaar": 5.61,
               "corp": 5.65,
               "ruins": 4.29,
-              "deep": 0.97
+              "deep": 0.97,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.35,
-            "met": 0.135,
+            "met": 0,
             "feat": 0.135,
-            "featThenDied": 0,
-            "medianHours": 97.2,
-            "p10Hours": 96,
-            "leftMedianHours": 46.8,
-            "leftP10Hours": 33,
-            "lateFeat": 0.556,
+            "featThenDied": 0.135,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.3,
             "deepDisconnectsToClear": 0.1,
             "feats": {
@@ -9563,7 +9749,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.88
+            "adult": 2.88,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -3.21,
@@ -9616,26 +9803,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 0.945
+              "deep": 0.945,
+              "source": 0
             },
             "byRegion": {
               "public": 7.61,
               "bazaar": 4.89,
               "corp": 5,
               "ruins": 3.5,
-              "deep": 3.57
+              "deep": 3.57,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 0.945,
-            "met": 0.51,
+            "met": 0,
             "feat": 0.51,
-            "featThenDied": 0,
-            "medianHours": 96,
-            "p10Hours": 96,
-            "leftMedianHours": 48,
-            "leftP10Hours": 33.1,
-            "lateFeat": 0.5,
+            "featThenDied": 0.51,
+            "medianHours": null,
+            "p10Hours": null,
+            "leftMedianHours": null,
+            "leftP10Hours": null,
+            "lateFeat": null,
             "deepRunsToClear": 1.37,
             "deepDisconnectsToClear": 0.12,
             "feats": {
@@ -9715,7 +9904,8 @@
           "stageDays": {
             "baby": 0.71,
             "teen": 1.42,
-            "adult": 2.87
+            "adult": 2.87,
+            "mainframe": 0
           },
           "axes": {
             "allegiance": -2.79,
@@ -9768,26 +9958,28 @@
               "bazaar": 1,
               "corp": 1,
               "ruins": 1,
-              "deep": 1
+              "deep": 1,
+              "source": 0
             },
             "byRegion": {
               "public": 8.02,
               "bazaar": 4.72,
               "corp": 4.69,
               "ruins": 3.49,
-              "deep": 3.76
+              "deep": 3.76,
+              "source": 0
             }
           },
           "mainframe": {
             "deepCleared": 1,
-            "met": 0.6,
+            "met": 0.17,
             "feat": 0.6,
-            "featThenDied": 0,
+            "featThenDied": 0.43,
             "medianHours": 96,
             "p10Hours": 96,
             "leftMedianHours": 48,
             "leftP10Hours": 36.8,
-            "lateFeat": 0.492,
+            "lateFeat": 0.471,
             "deepRunsToClear": 1.26,
             "deepDisconnectsToClear": 0.14,
             "feats": {

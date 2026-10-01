@@ -72,7 +72,7 @@ Breach generates a legal path through the grid and cuts the target from it, so e
 
 ## Style: cosmetics
 
-Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked.
+Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked. Items marked `mainframe` belong to the Mainframe stage ([SOURCE_PLAN.md](SOURCE_PLAN.md)): the wardrobe leaves them out, and they never unlock, while `CFG.mainframe` is off (`shownCosmetics`). The counts below include them.
 
 ### Shells (9)
 
@@ -90,7 +90,7 @@ Slots: shell, tint, effect, sound. `free: true` items are available from the sta
 
 Owning all nine shells grants the secret **Mini device** prop.
 
-### Tints (8)
+### Tints (9)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -101,9 +101,10 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `phosphor` | Green phosphor | All Old Web Ruins fragments | "learn what the ruins remember." |
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
 | `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
+| `readonly` | Read-only | All four Source fragments *(Mainframe stage; hidden while it is switched off)* | "read what the net was written from." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (9)
+### Effects (10)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -116,6 +117,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
+| `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`) *(Mainframe stage; hidden while it is switched off)*. A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
@@ -134,7 +136,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (7)
+### Crests (8)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -147,10 +149,11 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `star` | Full house | Every adult form raised to adulthood in the line (unrealized echoes and the dex do not count) | "raise every grown shape in one line." |
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
+| `rack` | Rack mount | Any mainframe form in the dex *(Mainframe stage; hidden while it is switched off)*. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
 
-Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
+Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
-### Music (7)
+### Music (8)
 
 The home screen's background music (`tracks.js`, played by `music.js`; see [MUSIC.md](MUSIC.md)). Netruns always play their own theme, whatever is equipped. Equipping a track crossfades to it at once.
 
@@ -162,6 +165,7 @@ The home screen's background music (`tracks.js`, played by `music.js`; see [MUSI
 | `lobby` | Corp lobby | Elevator music, G major, 96 BPM, with an elevator ding every 4 to 8 bars | 25 corp meals, across lives | "eat what the grid serves, twenty-five times." |
 | `tracker` | Tracker | Fast demoscene, A minor, 132 BPM | 150 games played (PLAY and netrun ICE) | "a hundred and fifty games, win or lose." |
 | `undertow` | Undertow | Dark ambient, E minor, 60 BPM, no drums | 3 exits from the Deep | "come back from the bottom three times." |
+| `firstcommit` | First commit | A lone bell over a still pad, C major, 72 BPM, sparse and high | Exit the Source once *(Mainframe stage; hidden while it is switched off)* | "come back from below the bottom." |
 | `forum` | Forum | Call-and-answer chirps, G major, 90 BPM, with a disk-seek flourish | 25 chatter lines heard | "hear twenty-five things it says to itself." |
 
 ### Device label
@@ -170,32 +174,32 @@ Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlo
 
 ## Chatter
 
-Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 50 lines in 11 groups; a group with nothing heard shows only its hint.
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 51 lines in 11 groups (50 while the Mainframe stage is switched off; `shownChatter`); a group with nothing heard shows only its hint.
 
 | Group | Lines | When | Hint |
 |---|---|---|---|
 | Bitling | 5 | A baby | "listen to it while it is new." |
 | Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
 | Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
-| Lineage | 7 | One per inherited trait, one with a history, one while NL-0 watches | "listen to one that remembers who came before." |
+| Lineage | 8 | One per inherited trait, one with a history, one while NL-0 watches, and `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been.") *(Mainframe stage; hidden while it is switched off)* | "listen to one that remembers who came before." |
 | Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
 
 The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).
 
 ## Accessories and props
 
-24 wearable accessories (two are earned-only) and 4 props, 28 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
+25 wearable accessories (two are earned-only) and 4 props, 29 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
 
 Each wearable has a wear slot (`slot`), and one from each slot can be worn at once (`WEAR_SLOTS`, drawn in this order):
 
 | Slot | Wearables |
 |---|---|
-| `body` | Scarf, Corp barcode, KERNEL pin |
+| `body` | Scarf, Corp barcode, KERNEL pin, Checksum |
 | `face` | Shades, Visor, Cyber eye, Chrome jaw, Rebreather, Circuit tattoo, Earpiece, Neural jack |
 | `head` | Cap, Flower, Bow, Crown, Neon mohawk, Sat-dish antenna, Party hat, Headphones, Bandage |
 | `float` | Halo, Spark, Drone buddy, Data aura |
 
-Worn together, some make room (`placeWorn`): the Scarf, Corp barcode and KERNEL pin slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo and Spark rise above a hat (up to 4 rows, never above the screen). The Drone buddy and Data aura orbit in front of everything.
+Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin and Checksum slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo and Spark rise above a hat (up to 4 rows, never above the screen). The Drone buddy and Data aura orbit in front of everything.
 
 Wearables that can be found anywhere (`regions` unset), 10:
 
@@ -205,7 +209,7 @@ Wearables that can be found anywhere (`regions` unset), 10:
 | Rare | Shades, Visor, Crown |
 | Very rare | Halo, Spark |
 
-Regional wearables, 12 (they only turn up in their region):
+Regional wearables, 13 (they only turn up in their region):
 
 | Region | Common | Rare | Very rare |
 |---|---|---|---|
@@ -213,6 +217,7 @@ Regional wearables, 12 (they only turn up in their region):
 | Darknet Bazaar | Neon mohawk, Neural jack, Circuit tattoo, Rebreather | | |
 | Old Web Ruins | | Sat-dish antenna, Data aura | KERNEL pin |
 | The Deep | | | Drone buddy |
+| The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor, and hidden from the wardrobe while the stage is switched off *(Mainframe stage; hidden while it is switched off)* |
 
 Earned wearables, 2:
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deathRecord, dexEntries, discover, formsSeenIn, lineageChain, lineageRows, DEX_ORDER } from '../src/archive.js';
-import { createScript, tick, CFG, MIN } from '../src/sim.js';
+import { createScript, tick, CFG, MIN, SPECIES } from '../src/sim.js';
 
 const T0 = Date.UTC(2026, 8, 26, 12, 0);
 
@@ -59,7 +59,7 @@ test('formsSeenIn backfills only forms that were actually reached', () => {
 
 test('dex hides undiscovered forms behind hints', () => {
   const entries = dexEntries(['bitling', 'ghost']);
-  assert.equal(entries.length, DEX_ORDER.length);
+  assert.equal(entries.length, DEX_ORDER.filter((id) => SPECIES[id].stage !== 'mainframe').length, 'mainframe forms stay hidden while the stage is off');
   const ghost = entries.find((e) => e.id === 'ghost');
   assert.equal(ghost.name, 'Ghost');
   assert.equal(ghost.trait, 'Untraceable');

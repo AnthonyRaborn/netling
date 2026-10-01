@@ -1,5 +1,5 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
@@ -54,6 +54,16 @@ export const RUN_CFG = {
   daemonMoveRepair: 6, // Integrity restored per move
   ghostSlipChance: 0.45, // chance an ICE never notices it
   glitchPhaseChance: 0.35, // after the first, the chance each later ICE is phased through too
+  // Mainframe upgrades (docs/SOURCE_PLAN.md): each mainframe form keeps its line's ability and adds one. Tuned in
+  // build step 5 so careful mainframes lose 22 to 30% of Source runs and at least 8% of Deep runs.
+  platInsurance: 2, // Plat: corp insurance pays out this many times a run
+  platRelayRepair: 40, // Plat: Integrity each relay repairs (Chrome: chromeRelayRepair)
+  airgapSoftLosses: 1, // Airgap: this many lost ICE fights a run barely scratch it...
+  airgapSoftMult: 0.3, // ...taking this share of its (already halved) damage
+  initLookahead: 3, // Init: sees node types this many steps ahead (Daemon: 2)
+  initMoveRepair: 8, // Init: Integrity restored per move (Daemon: daemonMoveRepair)
+  panicFreePhases: 2, // Panic: slips through this many ICE a run for certain (Glitch: 1)
+  whisperSlipChance: 0.5, // Whisper: chance an ICE never notices it (Ghost: ghostSlipChance)
   // Contracts (docs/ATTENTION.md): a job posted while the uplink is ready and the app is open.
   contractChancePerHour: 0.5,
   contractOpenMin: 360, // open until the next jack-in into its region, or 6 hours
@@ -74,7 +84,17 @@ export const FORM_ABILITIES = {
   glitch: 'Phase: slips through the first ICE of each run, and often the ones after.',
   ghost: 'Unseen: sees every node; checkpoints never notice it, and ICE often misses it.',
 };
-const ability = (pet) => (pet.stage === 'adult' ? pet.form : null);
+// A mainframe keeps its line's ability, and adds its upgrade (upgraded).
+// What each mainframe form adds to its line's ability (shown in the dex).
+export const MAINFRAME_ABILITIES = {
+  plat: 'Relays patch it twice as much, and corp insurance pays out twice a run.',
+  airgap: 'The first ICE fight it loses each run barely scratches it.',
+  init: 'Sees node types three steps ahead, and repairs more with every move.',
+  panic: 'Slips through the first two ICE of each run for certain.',
+  whisper: 'ICE misses it more often still.',
+};
+const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? lineOf(pet.form) : null);
+const upgraded = (pet) => pet.stage === 'mainframe';
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
@@ -112,6 +132,9 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     revealed: [],
     phased: false,
     insured: false, // Chrome's corp insurance used this run
+    insuredTimes: 0, // how many times it paid out (a Plat's pays out twice)
+    freePhases: 0, // ICE a Glitch line has slipped through for certain (a Panic gets two)
+    softLosses: 0, // lost ICE fights that barely scratched an Airgap
     known: [...codex], // codex at jack-in, so fragments never repeat
     startStats: { ...pet.stats },
     tally: { nodes: 0, iceWon: 0, iceLost: 0, icePhased: 0, caches: 0, bought: 0 },
@@ -131,6 +154,8 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     const need = CONTRACT_ROUTES[c.kind]?.(c, map);
     if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
   }
+  // NL-0 will not go down to the Source. It says so, if it is watching.
+  if (region === 'source' && pet.rootAccess) note(pet.run, "NL-0: i'll wait up here.");
   return pet.run;
 }
 
@@ -173,7 +198,8 @@ export function moveTo(pet, nodeId, rng) {
   run.visited.push(nodeId);
   if (run.tally) run.tally.nodes++;
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
-  if (ability(pet) === 'daemon' && RUN_CFG.daemonMoveRepair) st.integrity = clamp(st.integrity + RUN_CFG.daemonMoveRepair);
+  const repair = upgraded(pet) ? RUN_CFG.initMoveRepair : RUN_CFG.daemonMoveRepair;
+  if (ability(pet) === 'daemon' && repair) st.integrity = clamp(st.integrity + repair);
   if (st.heat >= RUN_CFG.throttleHeat) {
     st.integrity = clamp(st.integrity - RUN_CFG.throttleDamage);
     note(run, `thermal throttling. -${RUN_CFG.throttleDamage} integrity.`);
@@ -201,18 +227,21 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
     }
     case 'ice': {
-      if (ability(pet) === 'ghost' && rng() < RUN_CFG.ghostSlipChance) {
+      if (ability(pet) === 'ghost' && rng() < (upgraded(pet) ? RUN_CFG.whisperSlipChance : RUN_CFG.ghostSlipChance)) {
         run.tally.icePhased++;
         note(run, 'the ICE looked straight through it.');
         return { ok: true, kind: 'ice', phased: true };
       }
-      if (ability(pet) === 'glitch' && run.phased && rng() < RUN_CFG.glitchPhaseChance) {
+      const free = upgraded(pet) ? RUN_CFG.panicFreePhases : 1;
+      const freeUsed = Math.max(run.freePhases ?? 0, run.phased ? 1 : 0);
+      if (ability(pet) === 'glitch' && freeUsed >= free && rng() < RUN_CFG.glitchPhaseChance) {
         run.tally.icePhased++;
         note(run, 'glitched through the ICE again.');
         return { ok: true, kind: 'ice', phased: true };
       }
-      if (ability(pet) === 'glitch' && !run.phased) {
+      if (ability(pet) === 'glitch' && freeUsed < free) {
         run.phased = true;
+        run.freePhases = freeUsed + 1;
         run.tally.icePhased++;
         note(run, 'glitched straight through the ICE.');
         return { ok: true, kind: 'ice', phased: true };
@@ -226,9 +255,10 @@ export function moveTo(pet, nodeId, rng) {
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
       // Corp relays: the grid services its own.
-      const patched = ability(pet) === 'chrome' && RUN_CFG.chromeRelayRepair > 0;
-      if (patched) st.integrity = clamp(st.integrity + RUN_CFG.chromeRelayRepair);
-      note(run, patched ? `relay found. recharged, vented, and patched: +${RUN_CFG.chromeRelayRepair} integrity (corp credentials).` : 'relay found. recharged and vented.');
+      const patch = ability(pet) === 'chrome' ? (upgraded(pet) ? RUN_CFG.platRelayRepair : RUN_CFG.chromeRelayRepair) : 0;
+      const patched = patch > 0;
+      if (patched) st.integrity = clamp(st.integrity + patch);
+      note(run, patched ? `relay found. recharged, vented, and patched: +${patch} integrity (corp credentials).` : 'relay found. recharged and vented.');
       openChoice(run, {
         kind: 'relay',
         title: 'RELAY',
@@ -306,6 +336,11 @@ export function moveTo(pet, nodeId, rng) {
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
       const opened = !region.tutorial && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
+      // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
+      if (run.region === 'deep') {
+        const d = pet.deepExits ?? { all: 0, clean: 0 };
+        pet.deepExits = { all: d.all + 1, clean: d.clean + ((run.tally?.iceLost ?? 0) === 0 ? 1 : 0) };
+      }
       const next = opened && REGION_ORDER[REGION_ORDER.indexOf(run.region) + 1];
       const young = next && STAGE_ORDER.indexOf(pet.stage) < STAGE_ORDER.indexOf(REGIONS[next].minStage);
       // The Deep stays unnamed: its way in is a secret.
@@ -335,7 +370,9 @@ export function resolveIce(pet, won, rng) {
     }
     return { ok: true, won };
   }
-  const dmg = Math.round(REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1));
+  const soft = ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses;
+  if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
+  const dmg = Math.round(REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1));
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
   note(run, `ICE bit back. -${dmg} integrity.`);
@@ -343,11 +380,13 @@ export function resolveIce(pet, won, rng) {
   return { ok: true, won };
 }
 
-// Chrome's corp insurance: once a run, a blow that would disconnect it is paid off instead.
+// Chrome's corp insurance: once a run (a Plat's twice), a blow that would disconnect it is paid off instead.
 function insured(pet) {
   const run = pet.run;
-  if (ability(pet) !== 'chrome' || !RUN_CFG.chromeInsurance || run.insured) return false;
+  const used = Math.max(run.insuredTimes ?? 0, run.insured ? 1 : 0);
+  if (ability(pet) !== 'chrome' || !RUN_CFG.chromeInsurance || used >= (upgraded(pet) ? RUN_CFG.platInsurance : 1)) return false;
   run.insured = true;
+  run.insuredTimes = used + 1;
   pet.stats.integrity = RUN_CFG.chromeInsurance;
   note(run, `corp insurance paid out. integrity restored to ${RUN_CFG.chromeInsurance}.`);
   return true;
@@ -505,7 +544,7 @@ export function visibleNodeIds(pet) {
   const ids = new Set([...run.visited, ...run.revealed, ...nodeById(run.map, run.pos).edges]);
   const form = ability(pet);
   if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
-  if (form === 'daemon') nodesWithin(run, run.pos, 2).forEach((id) => ids.add(id));
+  if (form === 'daemon') nodesWithin(run, run.pos, upgraded(pet) ? RUN_CFG.initLookahead : 2).forEach((id) => ids.add(id));
   return ids;
 }
 

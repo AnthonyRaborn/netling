@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ACCESSORIES, STYLE_ITEMS, WEAR_SLOTS, anchorsFor, anchorRowsFor, rollAccessory, rollWornAccessory, accessoryById, drawAccessory, placeWorn, wearOrder, wornFrom, RARITY } from '../src/accessories.js';
 import { SPRITES } from '../src/sprites.js';
-import { SPECIES, PALETTES, mulberry32 } from '../src/sim.js';
+import { SPECIES, PALETTES, mulberry32, lineOf } from '../src/sim.js';
 import { readFileSync } from 'node:fs';
 import { computeAutoColors, renderModule, slotClearance, CLEAR } from '../tools/wearable-colors.mjs';
 import { deltaE } from '../src/colors.js';
@@ -55,7 +55,7 @@ test('rolls skip owned accessories and favor common ones', () => {
 test('regional accessories only roll in their region; the originals roll anywhere', () => {
   const rng = mulberry32(9);
   const seen = {};
-  for (const region of ['public', 'corp', 'bazaar', 'ruins', 'deep']) {
+  for (const region of ['public', 'corp', 'bazaar', 'ruins', 'deep', 'source']) {
     seen[region] = new Set();
     for (let i = 0; i < 2000; i++) seen[region].add(rollAccessory([], rng, region));
   }
@@ -68,7 +68,17 @@ test('regional accessories only roll in their region; the originals roll anywher
   assert.ok(seen.deep.has('drone'));
   assert.ok(seen.corp.has('barcode'));
   assert.ok(!seen.public.has('drone'));
-  assert.equal(ACCESSORIES.length, 24);
+  assert.ok(seen.source.has('checksum'));
+  // The Checksum (the Mainframe stage's) never comes from a home reward or on a visitor, unlike the other regional finds.
+  const home = new Set();
+  const worn = new Set();
+  for (let i = 0; i < 4000; i++) {
+    home.add(rollAccessory([], rng));
+    worn.add(rollWornAccessory(rng));
+  }
+  assert.ok(home.has('drone') && !home.has('checksum'));
+  assert.ok(!worn.has('checksum'));
+  assert.equal(ACCESSORIES.length, 25);
 });
 
 test('the drone orbits: its position changes over time', () => {
@@ -145,7 +155,8 @@ test('every form has authored anchor rows, and they point at the right pixels in
       const rows = anchorRowsFor(form, pose);
       assert.ok(rows, `${form} has no authored anchor rows`);
       const name = `${form}${key}`;
-      assert.ok(sprite[rows.eyeRow].includes('o'), `${name}: eyeRow ${rows.eyeRow} has no eye pixels`);
+      // Eyes are accent cells; a form with bright eyes (shine: Chrome's visor, Panic's '!' marks) may use '+' instead.
+      assert.ok(sprite[rows.eyeRow].includes('o') || (anchorRowsFor(form, 'a').shine && sprite[rows.eyeRow].includes('+')), `${name}: eyeRow ${rows.eyeRow} has no eye pixels`);
       assert.ok(rows.headTop < rows.eyeRow && rows.eyeRow < rows.mouthRow && rows.mouthRow < rows.neckRow, `${name}: rows out of order`);
       assert.ok(sprite[rows.headTop].replace(/\./g, '').length >= 3, `${name}: headTop row is nearly empty`);
       assert.ok(sprite[rows.neckRow].replace(/\./g, '').length >= 3, `${name}: neckRow row is nearly empty`);
@@ -265,7 +276,7 @@ test('a wearable\'s body and neck are the solid run through the middle, so side 
   assert.equal(b.neckLeft, a.neckLeft);
   assert.equal(b.neckRight, a.neckRight);
   for (const form of Object.keys(SPECIES)) {
-    if (form === 'glitch') continue; // its body is torn differently in each frame on purpose
+    if (lineOf(form) === 'glitch') continue; // its body is torn differently in each frame on purpose (Panic borrows it for now)
     const A = anchorsFor(SPRITES[`${form}A`]);
     const B = anchorsFor(SPRITES[`${form}B`]);
     assert.ok(Math.abs(A.neckLeft - B.neckLeft) <= 1 && Math.abs(A.neckRight - B.neckRight) <= 1, `${form}: the neck changes width between frames`);

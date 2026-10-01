@@ -1,5 +1,5 @@
 // The netling's life: the clock tick, evolution, flatline and the next generation, and the care buttons.
-import { act, createScript, isAlive, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS, traitLabel } from '../sim.js';
+import { act, createScript, isAlive, tick, CFG, FORMS, ITEMS, SPECIES, TRAITS, traitLabel, lineOf } from '../sim.js';
 import { deathRecord } from '../archive.js';
 import { SURGE_MS } from '../render.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -37,7 +37,7 @@ export function advance() {
   const stageChanged = state.stage !== app.lastStage;
   if (stageChanged) {
     if (state.stage === 'baby') sfx('boot', state.quirk.pitch);
-    if (state.stage === 'teen' || state.stage === 'adult') {
+    if (state.stage === 'teen' || state.stage === 'adult' || state.stage === 'mainframe') {
       app.flashUntil = performance.now() + 2400;
       sfx('evolve', state.quirk.pitch);
       duckMusic(2.4); // under the evolve jingle
@@ -102,7 +102,7 @@ export function showFlatline() {
   // What the next generation gets: this trait (levelled up by a streak of one form), and this netling's own trait as its history.
   const history = f.history && f.history !== f.trait ? ` · history: ${TRAITS[f.history].name}` : f.history ? ' · and its history' : '';
   $('fl-trait').textContent = `${traitLabel(f.trait, f.level)} — ${TRAITS[f.trait].desc}${history}${f.keepsake ? ` · keepsake: ${ITEMS[f.keepsake].name}` : ''}`;
-  $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[state.form] ? '' : ' (unrealized)'}`;
+  $('fl-echo').textContent = `${FORMS[f.form].name} signature${FORMS[lineOf(state.form)] ? '' : ' (unrealized)'}`;
   $('fl-next').textContent = `COMPILE v${state.generation + 1}.0`;
   $('flatline').hidden = false;
 }

@@ -5,7 +5,6 @@ import './helpers/utc.js';
 // The balance tools are how rule changes get judged, so their own logic is tested here.
 const { planMove, surplusSlot } = await import('../tools/netrun-bot.mjs');
 const { simulate, simulateLine, stats, parentOf, ARCHETYPES, CODEX_PRESETS, FEATS } = await import('../tools/balance.mjs');
-const { mainframeDue, mainframeAt, mainframeEnd, mainframeFeat, MAINFRAME_GATE } = await import('../tools/lib/mainframe-gate.mjs');
 const { diff, flatten } = await import('../tools/balance-diff.mjs');
 const { FORMS, createScript, mulberry32 } = await import('../src/sim.js');
 const { FRAGMENTS } = await import('../src/netrun/codex.js');
@@ -95,26 +94,11 @@ test('the report diff finds what moved, by path', () => {
   assert.equal(rows[1].before, 0, 'a form that appears counts as 0 before');
 });
 
-test('the planned Mainframe gate: an adult, home, into its last ordinary day, with three Deep exits or two clean', () => {
-  const s = createScript({ now: 0, rng: mulberry32(1) });
-  Object.assign(s, { stage: 'adult', deepExits: { all: 3, clean: 0 }, run: null });
-  s.ageMin = mainframeAt(s);
-  assert.equal(mainframeAt(s), s.life.lifespan - MAINFRAME_GATE.beforeEndMin);
-  assert.equal(mainframeEnd(s), s.life.lifespan + MAINFRAME_GATE.bonusMin);
-  assert.equal(mainframeDue(s), true);
-  assert.equal(mainframeDue({ ...s, ageMin: s.ageMin - 1 }), false, 'too young');
-  assert.equal(mainframeFeat({ deepExits: { all: 2, clean: 1 } }), false, 'two exits, one clean: not yet');
-  assert.equal(mainframeFeat({ deepExits: { all: 2, clean: 2 } }), true, 'two clean exits');
-  assert.equal(mainframeFeat({}), false, 'no Deep exits');
-  assert.equal(mainframeDue({ ...s, deepExits: { all: 2, clean: 1 } }), false);
-  assert.equal(mainframeDue({ ...s, run: { region: 'deep' } }), false, 'not mid-run');
-  assert.equal(mainframeDue({ ...s, stage: 'teen' }), false, 'adults only');
-});
-
 test('the gate probe: codex presets open the way down, and the reported gate agrees with the rule', () => {
-  assert.equal(CODEX_PRESETS.deep.length, FRAGMENTS.length);
+  assert.equal(CODEX_PRESETS.deep.length, 22, 'the original 22 (Root Access)');
   assert.equal(CODEX_PRESETS.ruins.at(-1), 'ruins-4', 'the fragment that opens The Deep');
-  const r = simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins });
+  const r = simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.deep, rootAccess: true }); // the gate needs Root Access
+  assert.equal(simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins }).gate.at, null, 'no Root Access: no gate');
   assert.ok(r.cleared.includes('deep'), 'a single life with the preset reaches The Deep');
   assert.ok(r.gate.deepClearAt !== null && r.gate.deepRuns >= 1);
   assert.ok(r.gate.at !== null, 'this seed meets the gate');

@@ -1,0 +1,147 @@
+{
+  "saveVersion": 2,
+  "generation": 4,
+  "life": {
+    "teenAt": 1020,
+    "adultAt": 3060,
+    "lifespan": 7200
+  },
+  "newForms": [],
+  "stage": "mainframe",
+  "form": "init",
+  "teenForm": "kernel",
+  "evolvedAt": 1790856300000,
+  "bornAt": 1790856000000,
+  "lastTick": 1790856480000,
+  "ageMin": 5763,
+  "stats": {
+    "charge": 78.2886060821437,
+    "sync": 73.25515434494419,
+    "integrity": 95.41666666666664,
+    "heat": 20.250000000000004
+  },
+  "cache": 0,
+  "virus": false,
+  "virusMin": 0,
+  "sinceFed": 245,
+  "asleep": false,
+  "nap": null,
+  "lastNapEndAge": null,
+  "rebootUntilAge": null,
+  "lightsOn": true,
+  "careMistakes": 0,
+  "zeroMin": {
+    "charge": 0,
+    "sync": 0,
+    "heat": 0,
+    "lights": 0
+  },
+  "flagged": {
+    "charge": false,
+    "sync": false,
+    "heat": false,
+    "lights": false
+  },
+  "integrityZeroMin": 0,
+  "axes": {
+    "allegiance": 0,
+    "stability": 0.008333333333333333
+  },
+  "games": {
+    "breach": {
+      "played": 0,
+      "won": 0
+    },
+    "dodge": {
+      "played": 0,
+      "won": 0
+    },
+    "tune": {
+      "played": 0,
+      "won": 0
+    },
+    "feast": {
+      "played": 0,
+      "won": 0
+    }
+  },
+  "event": null,
+  "lastSurgeAt": null,
+  "inventory": [
+    "coolant",
+    "overclock"
+  ],
+  "buffs": {
+    "shieldUntilAge": 0,
+    "traceSkip": false,
+    "boost": false
+  },
+  "run": null,
+  "rootAccess": false,
+  "rootUsed": false,
+  "rootCooling": false,
+  "lastRunEndAge": null,
+  "runCooldownCut": 0,
+  "visit": null,
+  "visitAccGifts": 0,
+  "request": null,
+  "contract": null,
+  "contractCheckAge": null,
+  "wokeAt": null,
+  "deepExits": {
+    "all": 3,
+    "clean": 1
+  },
+  "lifeBonus": 1440,
+  "flowMin": 5,
+  "flowTotalMin": 0,
+  "chatter": null,
+  "runStats": {
+    "runs": 0,
+    "jacked": 0,
+    "disconnected": 0,
+    "aborted": 0
+  },
+  "cleared": [
+    "public",
+    "bazaar",
+    "corp",
+    "ruins",
+    "deep"
+  ],
+  "codexFound": 0,
+  "scrip": 42,
+  "zone": 0,
+  "trait": "persistent",
+  "traitLevel": 2,
+  "history": null,
+  "inheritedQuirk": null,
+  "quirk": {
+    "palette": 0,
+    "pitch": 467,
+    "idle": "hover",
+    "favPacket": "scav",
+    "sleepOffset": 0
+  },
+  "log": [
+    {
+      "t": 1790856000000,
+      "msg": "> compiling netling.v4.0 ..."
+    },
+    {
+      "t": 1790856180000,
+      "msg": "> netling.v4.0 online. hello, runner."
+    },
+    {
+      "t": 1790856300000,
+      "msg": "> recompiling... netling is now INIT."
+    },
+    {
+      "t": 1790856300000,
+      "msg": "> it has another day in it now."
+    }
+  ],
+  "deathCause": null,
+  "diedAt": null,
+  "fragment": null
+}

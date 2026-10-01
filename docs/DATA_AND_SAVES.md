@@ -53,11 +53,11 @@ Built by `createScript()` in `sim.js`. Fields:
 
 | Field | Type | Notes |
 |---|---|---|
-| `saveVersion` | number | Always `1` today (`SAVE_VERSION`) |
+| `saveVersion` | number | `2` today (`SAVE_VERSION`); see [Versioning](#versioning-and-migration) |
 | `generation` | int | 1-based, shown as `v<generation>.0` |
 | `life` | `{ teenAt, adultAt, lifespan }` | Minutes, fixed at compile from `CFG`. Missing (a save from before the 5-day life), out of order or over 7 days: the 7-day `LEGACY_LIFE` |
 | `newForms` | string[] | Adult forms the player had never raised at compile (tie-break weights). Unknown ids dropped |
-| `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached |
+| `stage`, `form`, `teenForm` | strings | `teenForm` is `kernel` or `stub` once reached. `stage` may be `mainframe` (the planned stage, switched off by `CFG.mainframe`); `settle()` gives a mainframe in an adult body its line's mainframe form, and an adult in a mainframe body its line |
 | `evolvedAt`, `bornAt`, `lastTick`, `diedAt` | ms epoch | `lastTick` is clamped to "now" when loading |
 | `ageMin` | int | Simulated minutes. Excludes hibernation |
 | `stats` | `{ charge, sync, integrity, heat }` | 0..100 floats |
@@ -85,6 +85,8 @@ Built by `createScript()` in `sim.js`. Fields:
 | `chatter` | `{ id, startedAge }` or null | The chatter line on screen. Unknown ids: null. Missing: null |
 | `hibernation`, `lastWakeAt` | `{ since }` ms, ms | Wall-clock values |
 | `wokeAt` | ms or null | When the night's sleep last ended (the daily check-in keys off it). Missing: null |
+| `deepExits` | `{ all, clean }` | This life's exits from The Deep and the clean ones (the Mainframe gate). Whole numbers, `all` 0 to 999, `clean` at most `all`. Missing or broken: zeros |
+| `lifeBonus` | int | Minutes of life gained: `CFG.mainframeBonusMin` for a mainframe, else 0 (any other value, or any value on a non-mainframe body, becomes 0). `lifeEnd(s)` is `life.lifespan + lifeBonus` |
 | `trait`, `inheritedQuirk`, `quirk` | | `quirk` has palette, pitch, idle, favPacket, sleepOffset |
 | `traitLevel`, `history` | int 1..3, trait id or null | The trait's level (a streak of that form) and the grandparent's trait at half strength. Missing (older saves): 1 and null |
 | `log` | `[{ t, msg }]` | Capped at 50 lines |
@@ -95,11 +97,11 @@ The netling belongs to one generation. Everything shared across generations (lin
 
 ## Other stored values
 
-**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
+**Lineage record** (`deathRecord` in `archive.js`): `generation, form, realized, mainframe, teenForm, cause, ageMin, mistakes, trait, traitLevel, history, fragmentTrait, fragmentLevel, keepsake, rescued, palette, bornAt, diedAt`. `form` is the adult form (the fragment's); `mainframe` is the mainframe body it ended in, or null. Older records may lack fields; the sanitizer, `lineageRows` and `lineageChain` tolerate that.
 
 **Wardrobe**: `shell`, `tint`, `effect`, `sound`, `crest`, `music` (ids from `COSMETICS`; a missing slot uses its default, so `crest` and `music` needed no migration), `head`, `face`, `body` and `float` (an accessory of that wear slot, or `none`) and `prop` (a prop id or `none`), `label` (up to 10 characters from `A-Z 0-9 space . -`), and `colors` (per-accessory arrays with one entry per color slot: a `#rrggbb` the player picked, or `null` for automatic, meaning the wearable's color for the netling's palette, see `accessoryColors`). Old saves hold concrete hex values, which stay as the player's picks; the cleaner turns anything that is not a `#rrggbb` into `null`. No version bump: the value domain widened, the shape did not. Wardrobes from before the wear slots held a single `accessory`; the cleaner moves it to its own slot (a slot already set wins) and drops the old field. The wardrobe is not versioned (below), so this needed no migration step.
 
-**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, `requestsMet`, `contractsDone`, `visitorsGreeted`, `flowMin` (minutes in flow of lives that have ended; the living netling's `flowTotalMin` is added for the Aurora check), `chatter` (heard line ids, unknown ones dropped), and `rootEarned` (true once Root Access has been earned; absent otherwise).
+**Progress**: `runs` (counts by result), `streaks` (per game `{ cur, best }`, PLAY games only), `acts` (counts of care actions: corp, scav, patch, purge, hide, comply and others), `gamesPlayed` (PLAY games plus netrun ICE fights), `cleanJackouts`, `deepExits`, `sourceExits` (exits from the Source, for First commit and Source light), `sourceSeen` (true once the Source's name has repaired itself; absent otherwise), `requestsMet`, `contractsDone`, `visitorsGreeted`, `flowMin` (minutes in flow of lives that have ended; the living netling's `flowTotalMin` is added for the Aurora check), `chatter` (heard line ids, unknown ones dropped), and `rootEarned` (true once Root Access has been earned; absent otherwise).
 
 ## The write gate
 
@@ -141,18 +143,24 @@ Failures never throw. `set` returns `false` and calls `onError`, which flashes a
 - `lastTick` is clamped to `[0, now]`; a future value (clock set back) would otherwise freeze the netling.
 - **Non-strict** (local storage): unknown fields are kept (`...raw`), so a newer build's data survives a downgrade.
 - **Strict** (imported codes): only known fields survive.
-- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free"). Loose scrip carried in a run (`run.scrip`) is cleaned to 0..1000, and `run.insured` (Chrome's corp insurance, spent) to a boolean.
+- `cleanRun` validates the map graph, drops a broken pending choice or ICE, refuses a run stuck at a dead end, and checks market choices ("rejected, not clamped: a price of 0 would mean free"). Loose scrip carried in a run (`run.scrip`) is cleaned to 0..1000, `run.insured` (Chrome's corp insurance, spent) to a boolean, and `run.insuredTimes`, `run.freePhases` and `run.softLosses` (how often insurance paid out, how many ICE a Glitch line slipped for certain, and how many lost fights barely scratched an Airgap; a Plat's insurance pays twice, a Panic slips two, an Airgap's first loss is softened) to 0..9, the first two defaulting from the old flags.
 - Fragments are rebuilt from the dead netling if the stored one is unusable.
 - `settle()` then makes the parts agree: the form is set to fit the stage (a baby is a Bitling, a teen Kernel, Stub or Shell, an adult an adult form chosen by `leaningForm`; a dead netling keeps whatever body it had), and timers that start in the future (run and nap cooldowns, an open event, hibernation) are clamped to the netling's own past or to now. Other cross-field consistency is not checked.
 
 ## Versioning and migration
 
-The netling save carries `saveVersion` (`SAVE_VERSION` in `sim.js`, currently 1). Two mechanisms keep old saves working, for two kinds of change:
+The netling save carries `saveVersion` (`SAVE_VERSION` in `sim.js`, currently 2). Two mechanisms keep old saves working, for two kinds of change:
 
 | Kind of change | Mechanism | Version bump |
 |---|---|---|
 | **Additive**: a new field with a default (nap, visitors, hibernation, Packet Feast were all like this) | `migrate()` in `sim.js` fills it with `??=`, and `cleanSave` defaults it | No |
 | **Structural**: rename, retype, split, merge or reinterpret a field | A step in `STEPS` in `src/migrations.js` | Yes: bump `SAVE_VERSION` |
+
+### Steps so far
+
+| Step | Why | What it changes |
+|---|---|---|
+| 1 to 2 | The Mainframe stage | Nothing: its fields (`deepExits`, `lifeBonus`, the lineage `mainframe`) are additive. The version moved so a build from before it sets a save holding the new stage aside as `newer` (reload to update) instead of refusing an unknown stage as damaged. Frozen fixture: `tests/fixtures/save-v2.json` |
 
 ### How upgrading works
 

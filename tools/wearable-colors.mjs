@@ -11,7 +11,7 @@ import { writeFileSync } from 'node:fs';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { ACCESSORIES, anchorsFor } from '../src/accessories.js';
 import { SPRITES, paletteColors, formSprite } from '../src/sprites.js';
-import { PALETTES, SPECIES } from '../src/sim.js';
+import { CFG, PALETTES, SPECIES, isMainframeForm } from '../src/sim.js';
 import { deltaE, blend, SWAP_COLORS } from '../src/colors.js';
 
 export const ROOM = '#0b2226'; // the default screen tint; every tint is similarly dark
@@ -21,7 +21,9 @@ const STEEL = ['#c8d0dc', '#8a93a3', '#3a3f49', '#2a2f3a']; // greys, for the we
 const AVOID = { visor: ['#ff9f1c', '#f9f002'] }; // an orange or gold band reads as a Star Trek visor, not a futuristic one
 const PIN = {}; // hand-picked exceptions: { wearableId: { slot: { paletteName: '#rrggbb' } } }
 
-const forms = Object.keys(SPECIES);
+// The Mainframe forms count only once the stage is switched on (docs/SOURCE_PLAN.md), so players' automatic colors do not
+// shift before then; switching it on means rerunning this with --write.
+const forms = Object.keys(SPECIES).filter((f) => CFG.mainframe || !isMainframeForm(f));
 const spritePairs = forms.flatMap((f) => [formSprite(f, 'a'), formSprite(f, 'b')].map((sprite) => ({ f, sprite })));
 
 // How far a candidate color for one slot of a wearable stands from its surroundings, worst form first: the 25th percentile
