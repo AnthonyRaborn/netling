@@ -20,6 +20,7 @@ No build step, no dependencies: vanilla JavaScript modules and canvas.
 - [Growing up, and what comes after](#growing-up-and-what-comes-after)
 - [Style](#style)
 - [Saving, moving and pausing](#saving-moving-and-pausing)
+- [Privacy](#privacy)
 - [Install, offline and controllers](#install-offline-and-controllers)
 - [For developers](#for-developers)
 
@@ -192,6 +193,10 @@ ARCHIVE > **SYSTEM** has:
 If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
 
 Only one browser tab looks after the netling at a time. Other tabs show a guard screen, take over when the first closes, or take over on request.
+
+## Privacy
+
+Nothing you do in the game leaves your device. There are no accounts, no analytics, no ads and no tracking, and the game loads nothing from other sites (even its fonts are bundled). Your netling lives only in your browser's storage, and the only way it goes anywhere else is a transfer code you make and move yourself. The game is hosted on GitHub Pages, so GitHub sees a visit when the page loads, as any web host would.
 
 ## Install, offline and controllers
 
