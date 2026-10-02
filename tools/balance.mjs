@@ -42,7 +42,7 @@ export const ARCHETYPES = {
   sysadmin: { checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)), jitter: 10, diet: 0.5, trace: 'mix', winRate: 0.7 },
   ghosthunter: {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
-    jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true,
+    jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, // keeps it cool: Ghost needs stability at 0 or above, and only choices move it
   },
   // Attentive care, but takes every risk that doesn't cost a fault: plays hot, uses Overclock rigs,
   // SALVAGE and RAID. Shows whether a caring player can lean chaotic.

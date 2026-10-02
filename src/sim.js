@@ -32,7 +32,11 @@ export const CFG = {
   mistakeGraceMin: 15,
   lightsGraceMin: 60, // it's asleep with the lights on for this long before it counts
   darkAwakeSyncMult: 2, // lights off while it's awake: bored in the dark
-  uptimeStabilityPerHour: 0.1, // awake hours with nothing wrong build stability
+  // Stability moves on choices, not the clock: plain awake time adds nothing (it once added 0.1/hr, which handed
+  // careful players Daemon by default). Flow, overclocking, quick fixes and faults move it.
+  uptimeStabilityPerHour: 0,
+  faultStability: 1, // each care mistake leans it unstable this much (was 2: Glitch came mostly from neglect)
+  feedAllegiance: 0.75, // CORP PKT and SCAV DATA lean it this much each (was 1: allegiance outweighed stability)
   // Overclocked: Heat at or above this. Mini-games and ICE run slower, wins drop items more often, but a lost
   // game costs Sync and Integrity, lost ICE bites harder and events come more often. Awake time overclocked
   // leans it unstable (Glitch); time in flow leans it stable (Daemon). 85+ keeps its own harms on top.
@@ -848,7 +852,7 @@ function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   if (s.zeroMin[key] >= grace && !s.flagged[key]) {
     s.flagged[key] = true;
     s.careMistakes++;
-    s.axes.stability -= 2;
+    s.axes.stability -= CFG.faultStability;
     log(s, t, `> care mistake: ${label}. [${s.careMistakes}/${CFG.maxMistakes}]`);
   }
 }
@@ -1098,7 +1102,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
-      s.axes.allegiance += action === 'corp' ? 1 : -1;
+      s.axes.allegiance += action === 'corp' ? CFG.feedAllegiance : -CFG.feedAllegiance;
       s.sinceFed = 0;
       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
       if (s.quirk.favPacket === action) {
@@ -1310,7 +1314,7 @@ function useItem(s, id, rng) {
     case 'segfault': {
       // Deliberate faults count like any other: the same stability cost, the same limit.
       s.careMistakes += ITEM_CFG.segfaultFaults;
-      s.axes.stability -= 2 * ITEM_CFG.segfaultFaults;
+      s.axes.stability -= CFG.faultStability * ITEM_CFG.segfaultFaults;
       return `${name} triggered. care mistakes on purpose. [${s.careMistakes}/${CFG.maxMistakes}]`;
     }
     case 'overclock': {

@@ -98,8 +98,11 @@ test('the report diff finds what moved, by path', () => {
 test('the gate probe: codex presets open the way down, and the reported gate agrees with the rule', () => {
   assert.equal(CODEX_PRESETS.deep.length, 22, 'the original 22 (Root Access)');
   assert.equal(CODEX_PRESETS.ruins.at(-1), 'ruins-4', 'the fragment that opens The Deep');
-  // A seed whose life meets the gate (about 4 in 10 do); the gate needs Root Access.
-  const r = simulate(ARCHETYPES['steer-mainframe'], 5, { codex: CODEX_PRESETS.deep, rootAccess: true });
+  // The first of a few seeds whose life meets the gate (about half do), so a rule change that shifts the rng stream
+  // doesn't break the probe; the gate needs Root Access.
+  const lives = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((seed) => () => simulate(ARCHETYPES['steer-mainframe'], seed, { codex: CODEX_PRESETS.deep, rootAccess: true }));
+  let r = null;
+  for (const life of lives) if ((r = life()).gate.at !== null) break;
   assert.equal(simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins }).gate.at, null, 'no Root Access: no gate');
   assert.ok(r.cleared.includes('deep'), 'a single life with the preset reaches The Deep');
   assert.ok(r.gate.deepClearAt !== null && r.gate.deepRuns >= 1);

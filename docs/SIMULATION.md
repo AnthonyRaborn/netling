@@ -43,7 +43,7 @@ The simulation is pure in the sense that matters: every function takes the state
 5. Cache file roll (awake and digesting only).
 6. Virus roll, or `virusMin++` if already infected.
 7. Integrity change from all current damage sources or regeneration.
-8. Stability drift (overclocked, flow or plain uptime; see [the axes](#evolution-and-the-hidden-axes)).
+8. Stability drift (overclocked or in flow; plain uptime adds nothing; see [the axes](#evolution-and-the-hidden-axes)).
 9. `stepVisit`, then `stepEvents`, then the attention rewards: `stepRequest`, `stepFlow`, `stepOverclock` (logs crossing the overclock line), `stepChatter` (see [Attention rewards](#attention-rewards)).
 10. Care mistake checks (Charge, Sync, Heat, Lights).
 11. Death checks, in this priority: integrity collapse, neglect, end of life.
@@ -148,7 +148,7 @@ A **care mistake** is a need left unmet for a grace period. It is counted once p
 | heat | Heat at 100 | 15 min |
 | lights | Asleep with lights on | 60 min |
 
-Each mistake adds 1 to `careMistakes` and removes 2 stability. A Segfault (see [Items](#items)) adds 2 of them at once, with the same stability cost. A netling dies when any of these fires, checked in this order:
+Each mistake adds 1 to `careMistakes` and removes 1 stability (`faultStability`). A Segfault (see [Items](#items)) adds 2 of them at once, with the same stability cost. A netling dies when any of these fires, checked in this order:
 
 1. **integrity collapse**: Integrity at 0 for 120 consecutive minutes.
 2. **neglect**: 10 care mistakes (`maxMistakes`).
@@ -162,8 +162,8 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 
 | Action | Requires | Effect |
 |---|---|---|
-| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed at strength 1), +2 Heat, allegiance +1, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
-| `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -1, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
+| `corp` (CORP PKT) | Charge under 95 | +30 Charge (x1.25 with Licensed at strength 1), +2 Heat, allegiance +0.75, starts digestion. Favorite packet +8 Sync. Chrome form: +5 Sync |
+| `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -0.75, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
 | `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss (overclocked: -6 Sync and -4 Integrity instead). Charge -6, Heat +12. Records win/loss. Wins can drop items (25%, 37.5% overclocked) |
 | `hide` | Open trace | Ends it. Charge -10, Heat +10, allegiance -1. 30% drop from the hide table |
 | `comply` | Open trace | Ends it. Integrity -5, Sync -10, allegiance +1. 30% drop from the comply table |
@@ -212,7 +212,7 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 
 **Requests** (`s.request`, `stepRequest`). Only while idle: awake, not napping, no netrun, not rebooting, no open event, and Charge at least 20 (`requestMinCharge`). Chance 0.25 an hour (`requestChancePerHour`). When Heat is 30 or more (`requestCoolHeat`), a quarter of requests ask for COOL; the rest name one game at random. The request waits 45 minutes (`requestWindowMin`) and then ends with `> it stopped asking.`; sleep, a nap, a netrun or a crash end it quietly. PLAY of the named game (win or lose) or COOL for a COOL request answers it: the action's result carries `requestMet: true` and the log adds "just what it asked for.". DEFEND and netrun ICE never answer a request. There are no food requests, so answering never moves allegiance.
 
-**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat, but it doubles the uptime stability gain (+0.2/hr, `flowStabilityPerHour`, instead of +0.1) and makes it calm: traces, intrusions, overflows and surges are 0.75x as likely (`flowEventMult`).
+**Flow** (`s.flowMin`, `stepFlow`, `inFlow`). Each minute awake, not napping, with no netrun, event, virus, 3+ cache files or reboot, and Charge and Sync 50 or more (`flowMinStat`), Integrity 80 or more (`flowMinIntegrity`) and Heat under 60 (`flowMaxHeat`), `flowMin` goes up by 1; anything else resets it to 0. At 180 minutes (`flowAfterMin`) the netling is in flow: the renderer draws a slow glow and the readout says so. Each minute in flow adds to `flowTotalMin` for the life (the Aurora effect counts these across lives). Flow changes no stat, but it builds stability (+0.2/hr, `flowStabilityPerHour`; plain awake time builds none) and makes it calm: traces, intrusions, overflows and surges are 0.75x as likely (`flowEventMult`).
 
 ## Overclocked
 
@@ -224,7 +224,7 @@ Opt-in extras for a player who is around (principles and unlocks in [ATTENTION.m
 | A won game drops items more often | 1.5x `winDropChance` (`overclockDropMult`) | `act('play')` |
 | A lost game costs | -6 Sync (`overclockLoseSync`) instead of +8, and -4 Integrity (`overclockLoseIntegrity`) | `act('play')` |
 | Events are likelier | 1.25x (`overclockEventMult`) | `stepEvents` |
-| It leans unstable | -0.2 stability per awake hour (`overclockStabilityPerHour`), in place of the uptime gain; 85+ keeps its own -1/hr instead | `step` |
+| It leans unstable | -0.2 stability per awake hour (`overclockStabilityPerHour`), 85+ keeps its own -1/hr instead | `step` |
 | Visitors are likelier | 1.25x (`overclockVisitMult`; flow has the same, `flowVisitMult`) | `stepEvents` |
 | Awake minutes overclocked are counted | `hotTotalMin`, banked across lives for the Heatwave effect (40 hours) | `stepOverclock`, `ui/style.js` |
 | A netrun jacked into overclocked | ICE runs at 0.85x and lost ICE deals 1.5x damage (`overclockIceDamageMult`) all run. Fixed at jack-in (`run.hot`): Heat gained on the way never switches it on | `startRun`, `resolveIce`, `iceSpeed()` |
@@ -251,7 +251,7 @@ Six slots (`INVENTORY_SLOTS`). A find that meets a full inventory is scrapped fo
 | `memory` | Memory shard | Rerolls one of palette, pitch, idle, favorite packet | no |
 | `repair` | Repair kit | Integrity +40 (refused at 100) | no |
 | `overclock` | Bypass chip | Cuts 60 min off the netrun cooldown (refused if none left or at the 2 hour floor) | no |
-| `segfault` | Segfault | 2 care mistakes on purpose (`ITEM_CFG.segfaultFaults`), stability -4. Can end its life at the limit. The UI asks for a second press | yes |
+| `segfault` | Segfault | 2 care mistakes on purpose (`ITEM_CFG.segfaultFaults`), stability -2 (1 per fault). Can end its life at the limit. The UI asks for a second press | yes |
 
 Drop tables (weights):
 
@@ -276,8 +276,10 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 
 | Effect | Source |
 |---|---|
-| +1 | Corp packet, COMPLY, ignored trace, Corp voucher, netrun checkpoint comply or voucher |
-| -1 | Scavenged packet, HIDE, Black ICE shard, netrun checkpoint hide |
+| +0.75 | Corp packet (`feedAllegiance`) |
+| -0.75 | Scavenged packet |
+| +1 | COMPLY, ignored trace, Corp voucher, netrun checkpoint comply or voucher |
+| -1 | HIDE, Black ICE shard, netrun checkpoint hide |
 | -0.5 | Each item bought at a netrun market |
 | varies | Netrun anomalies (see [NETRUN.md](NETRUN.md)) |
 
@@ -285,13 +287,13 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 
 | Effect | Source |
 |---|---|
-| +0.1/hr | Awake, no alert active, not overclocked |
-| +0.2/hr | The same, in flow (instead of +0.1) |
+| 0 | Plain awake time (`uptimeStabilityPerHour`; it was +0.1/hr, which made careful players Daemon by default) |
+| +0.2/hr | Awake in flow, no alert active |
 | -0.2/hr | Awake and overclocked (Heat 65 to 84) |
 | +1 | Fast PATCH (within 30 min), repelled intrusion |
 | +0.5 | PURGE |
 | -1/hr | Heat at 85+ |
-| -2 | Each care mistake |
+| -1 | Each care mistake (`faultStability`; it was -2, so Glitch came mostly from neglect) |
 | -0.5 | A mini-game that leaves Heat above 70 |
 | -1 | Slow PATCH, Black ICE shard, a netrun disconnect |
 
