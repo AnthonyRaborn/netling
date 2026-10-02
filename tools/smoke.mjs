@@ -289,7 +289,8 @@ await scenario('visitor card: make one, open a link, invite', async ({ open }) =
   await page.close(); // one tab at a time: a waiting tab keeps the link
   const other = await open(`${BASE}#visit=${code}`, seed());
   const preview = await other.textContent('#import-preview');
-  assert(/<<corrupted record>>/.test(preview) && /gen 5, <<corrupted>>/.test(preview), `preview gives it away: ${preview}`);
+  const from = await other.evaluate(() => document.querySelector('#import-preview dl.mail dd.corrupt')?.dataset.text ?? document.querySelector('#import-preview dl.mail dd.corrupt')?.textContent);
+  assert(from === '???_g5@???' && /Subject:can i come over\?/.test(preview) && /gen 5, <<corrupted>>/.test(preview), `preview gives it away: ${from} ${preview}`);
   assert(!/plat|checksum|root|below/i.test(preview.replace(/corrupted/g, '')), `preview leaks: ${preview}`);
   assert((await other.evaluate(() => location.hash)) === '', 'the card stays in the address bar');
   await other.click('#import-preview button');
@@ -315,13 +316,13 @@ await scenario('visitor card: a friend drops by, is greeted, and signs the guest
   assert(s.visit?.friend?.gen === 5 && s.friends.length === 0, `the friend did not arrive: ${JSON.stringify(s.visit)}`);
   assert(await visible(page, '#wish-greet'), 'no GREET for the friend');
   const bar = await page.textContent('#wish-text');
-  assert(bar.includes("a friend's corrupted record dropped by"), `the bar gives it away: ${bar}`);
+  assert(bar.includes('???_g5 is in #netling'), `the bar gives it away: ${bar}`);
   await page.click('#wish-greet');
   await page.click('#open-archive');
   await page.click('#tab-btn-chatter');
-  const row = page.locator('#guestbook .frag').first();
+  const row = page.locator('#guestbook .channel-log > div').first();
   const text = await row.evaluate((d) => [...d.childNodes].map((n) => n.dataset?.text ?? n.textContent).join(''));
-  assert(/a friend's <<corrupted record>> \(gen 5, <<corrupted>>\)/.test(text), `guestbook row: ${text}`);
+  assert(/^\[\d\d\/\d\d \d\d:\d\d\] --> \?\?\?_g5 has joined \(gen 5, <<corrupted>>\)$/.test(text), `guestbook row: ${text}`);
   assert(await row.locator('.corrupt').count(), 'the corrupted name does not glitch');
 });
 

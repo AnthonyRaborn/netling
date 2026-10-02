@@ -84,7 +84,8 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE, and often later ones | `sim.js` |
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
 | **GREET** | Optional hello to a visitor, once per visit | `sim.js` |
-| **Guestbook** | Friends' netlings greeted from visitor cards, the last 20, under CHATTER | `progress.guestbook` |
+| **Guestbook** | Friends' netlings greeted from visitor cards, the last 20, under CHATTER as a channel log | `progress.guestbook` |
+| **Handle** | A friend's name, built from its card: form and generation (`daemon_g3`), or `???_g5` for a corrupted record | `sim.js` `friendHandle` |
 | **Heat** | Stat: rises when active. 65+ is overclocked, 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Heatwave** | Screen effect: 40 hours overclocked while awake, across lives. The hot-side twin of Aurora | `cosmetics.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |

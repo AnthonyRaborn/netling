@@ -2,7 +2,7 @@ import './helpers/utc.js';
 // Visitor cards: a friend's netling as a code or link, queued on this device, dropping by within the hour.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, friendFeat, migrate, tick, visitHidden, visitorName, mulberry32, CFG, MIN } from '../src/sim.js';
+import { act, createScript, friendFeat, friendHandle, migrate, tick, visitHidden, visitorName, mulberry32, CFG, MIN, SPECIES } from '../src/sim.js';
 import { cardCodeFrom, cardFor, decodeCard, encodeCard, isCardText, queueCard, CardError, CARD_HASH, MAX_CARD_CHARS } from '../src/visitcard.js';
 import { cleanCard, cleanProgress, cleanSave, GUESTBOOK_MAX } from '../src/sanitize.js';
 
@@ -104,12 +104,32 @@ test('a queued friend drops by within the hour, then plays like any visitor', ()
   assert.deepEqual(s.visit.friend, { gen: 3, deep: 2, root: false, below: 0 });
   assert.deepEqual(s.visit.accessories, ['bowtie']);
   assert.deepEqual(s.friends, []);
-  assert.match(s.log.at(-1).msg, /a friend's daemon in a bow tie pinged in \(gen 3, 2 deep exits\)/i);
+  // It reads like a chat channel: a join with its feat, a line from it, and a quit.
+  assert.deepEqual(s.log.slice(-2).map((e) => e.msg), ['--> daemon_g3 has joined #netling (gen 3, 2 deep exits)', '<daemon_g3> wearing a bow tie today']);
   const res = act(s, 'greet', s.lastTick, noRng);
   assert.equal(res.ok, true);
+  assert.equal(res.msg, 'said hello to daemon_g3.');
   assert.deepEqual(res.friend, { form: 'daemon', gen: 3, deep: 2, root: false, below: 0 });
   minutes(s, CFG.visitMaxMin);
   assert.equal(s.visit, null, 'and logs off like any visitor');
+  assert.match(s.log.at(-1).msg, /^<-- daemon_g3 has quit \((see you around|left .+)\)$/);
+
+  // Sent away early (here by a nap), it drops its connection.
+  const early = booted();
+  early.friends = [{ ...card({ accessories: [] }), at: early.lastTick - 2 * 60 * MIN }];
+  minutes(early, 1);
+  assert.equal(early.log.at(-1).msg, '<daemon_g3> hi! want to play?');
+  early.nap = { startedAge: early.ageMin, len: 30 };
+  minutes(early, 1);
+  assert.equal(early.visit, null);
+  assert.equal(early.log.at(-1).msg, '<-- daemon_g3 has quit (connection reset)');
+});
+
+test("a friend's handle comes from its card, never typed", () => {
+  assert.equal(friendHandle('daemon', 3, false), 'daemon_g3');
+  assert.equal(friendHandle('plat', 12, false), 'plat_g12');
+  assert.equal(friendHandle('plat', 5, true), '???_g5');
+  for (const form of Object.keys(SPECIES)) assert.match(friendHandle(form, 1, false), /^[a-z0-9]+_g1$/, form);
 });
 
 test('a lucky roll brings a friend sooner; it never arrives while the netling is busy', () => {
@@ -156,17 +176,18 @@ test('before Root Access a Mainframe friend is a corrupted record, and its Mainf
   assert.ok(visitHidden(s, s.visit));
   assert.deepEqual(s.visit.accessories, [], 'nothing drawn on static');
   assert.equal(visitorName(s, s.visit), 'corrupted record');
-  const msg = s.log.at(-1).msg;
-  assert.match(msg, /record is corrupted \(gen 3, <<corrupted>>\)/);
-  assert.ok(!/plat|checksum|root|below/i.test(msg.replace('corrupted', '')), msg);
-  assert.match(act(s, 'greet', s.lastTick, noRng).msg, /said hello to the corrupted record/);
+  const lines = s.log.slice(-2).map((e) => e.msg);
+  assert.equal(lines[0], '--> ???_g3 has joined #netling (gen 3, <<corrupted>>)');
+  assert.match(lines[1], /^<\?\?\?_g3> r3c0rd c0rrupt3d/);
+  for (const msg of lines) assert.ok(!/plat|checksum|root|below/i.test(msg.replace(/corrupted/g, '')), msg);
+  assert.equal(act(s, 'greet', s.lastTick, noRng).msg, 'said hello to ???_g3.');
 
   const r = booted({ rootAccess: true });
   r.friends = [{ ...card({ form: 'plat', accessories: ['checksum', 'mustache'], root: true, below: 2 }), at: r.lastTick }];
   lucky(() => minutes(r, 1));
   assert.ok(!visitHidden(r, r.visit));
   assert.deepEqual(r.visit.accessories, ['checksum', 'mustache']);
-  assert.match(r.log.at(-1).msg, /a friend's plat in a checksum and mustache pinged in \(gen 3, 2 trips below the bottom\)/i);
+  assert.deepEqual(r.log.slice(-2).map((e) => e.msg), ['--> plat_g3 has joined #netling (gen 3, 2 trips below the bottom)', '<plat_g3> wearing a checksum and mustache today']);
 
   // A base-form friend in a Mainframe item shows up, without the item.
   const b = booted();

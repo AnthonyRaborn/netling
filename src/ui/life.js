@@ -58,7 +58,7 @@ export function advance() {
   const visiting = Boolean(state.visit);
   if (visiting && !app.lastVisit) {
     sfx('visit', state.quirk.pitch);
-    if (isAlive(state)) pushAlert(state.visit.friend ? "A friend's netling pinged in" : 'A visitor pinged in', 'Say hello before it logs off.');
+    if (isAlive(state)) pushAlert(state.visit.friend ? "A friend's netling joined #netling" : 'A visitor pinged in', 'Say hello before it logs off.');
   }
   app.lastVisit = visiting;
   // A new request: a soft chirp (never the alert sound), or a notification when the page is hidden.

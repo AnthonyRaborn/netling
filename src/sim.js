@@ -701,6 +701,11 @@ export const visitHidden = (s, visit) => Boolean(visit) && isMainframeForm(visit
 // What the visitor is called in the log: a friend's form, or a corrupted record.
 export const visitorName = (s, visit) => (visitHidden(s, visit) ? 'corrupted record' : SPECIES[visit.form].name.toLowerCase());
 
+// A friend's handle, the way an IRC nick reads: its form and generation (daemon_g3), or ???_g5 for a corrupted record.
+// Built from the card, so no player types it.
+export const friendHandle = (form, gen, hidden) => `${hidden ? '???' : SPECIES[form].name.toLowerCase().replace(/[^a-z0-9]+/g, '')}_g${gen}`;
+const visitHandle = (s, v) => friendHandle(v.form, v.friend.gen, visitHidden(s, v));
+
 // The rarest thing a friend's line has done, after its generation. What only Root Access would explain stays corrupted.
 export function friendFeat(f, rootKnown) {
   const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -724,13 +729,12 @@ function stepFriends(s, t, rng) {
   const hidden = visitHidden(s, visit);
   visit.accessories = hidden ? [] : card.accessories.filter((id) => !accessoryById(id)?.mainframe || rootEarnedIn(s));
   s.visit = visit;
-  const feat = friendFeat(visit.friend, rootEarnedIn(s));
-  if (hidden) {
-    log(s, t, `> a friend's netling pinged in. its record is corrupted (${feat}). they're playing.`);
-    return;
-  }
-  const wearing = visit.accessories.length ? ` in a ${visit.accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')}` : '';
-  log(s, t, `> a friend's ${visitorName(s, visit)}${wearing} pinged in (${feat}). they're playing.`);
+  // A friend's visit reads like a chat channel: it joins, says something, and quits (stepVisit).
+  const nick = visitHandle(s, visit);
+  log(s, t, `--> ${nick} has joined #netling (${friendFeat(visit.friend, rootEarnedIn(s))})`);
+  if (hidden) log(s, t, `<${nick}> r3c0rd c0rrupt3d. pl4y1ng anyw4y.`);
+  else if (visit.accessories.length) log(s, t, `<${nick}> wearing a ${visit.accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')} today`);
+  else log(s, t, `<${nick}> hi! want to play?`);
 }
 
 // While a visitor is here, Sync and Heat (not in flow) rise a little each minute. It leaves when time's up,
@@ -740,7 +744,7 @@ function stepVisit(s, t, rng) {
   if (!v) return;
   if (resting(s) || s.run || rebootMinutesLeft(s) > 0) {
     s.visit = null;
-    log(s, t, '> the visitor logged off.');
+    log(s, t, v.friend ? `<-- ${visitHandle(s, v)} has quit (connection reset)` : '> the visitor logged off.');
     return;
   }
   s.stats.sync = clamp(s.stats.sync + CFG.visitSync / v.len);
@@ -748,17 +752,18 @@ function stepVisit(s, t, rng) {
   if (!inFlow(s)) s.stats.heat = clamp(s.stats.heat + CFG.visitHeat / v.len);
   if (s.ageMin - v.startedAge < v.len) return;
   s.visit = null;
-  let gift = '';
+  let gift = ''; // what it left behind, as the end of a sentence: 'something stylish behind'
   if (rng() < (v.greeted ? CFG.visitGreetedAccessoryChance : CFG.visitAccessoryChance)) {
     // The UI picks which accessory (it knows what's already owned): see drainAccessoryInbox.
     s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
-    gift = ' it left something stylish behind.';
+    gift = 'something stylish behind';
   } else if (rng() < CFG.visitItemChance) {
     const id = weighted(DROPS.visit, rng);
     const name = ITEMS[id].name;
-    gift = grantItem(s, id).includes('full') ? ` it left a ${name}, but inventory is full.` : ` it left a gift: ${name}.`;
+    gift = grantItem(s, id).includes('full') ? `a ${name}, but inventory is full` : `a gift: ${name}`;
   }
-  log(s, t, `> the visitor logged off.${gift}`);
+  if (v.friend) log(s, t, `<-- ${visitHandle(s, v)} has quit (${gift ? `left ${gift}` : 'see you around'})`);
+  else log(s, t, `> the visitor logged off.${gift ? ` it left ${gift}.` : ''}`);
 }
 
 // --- attention rewards ---------------------------------------------------------------------
@@ -1258,7 +1263,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       const line = pick(visitorLines(), rng);
       s.chatter = { id: line.id, startedAge: s.ageMin };
       const v = s.visit;
-      res = { ...ok(`said hello to the ${visitorName(s, v)}.`, 'visit'), greeted: true };
+      res = { ...ok(v.friend ? `said hello to ${visitHandle(s, v)}.` : `said hello to the ${visitorName(s, v)}.`, 'visit'), greeted: true };
       if (v.friend) res.friend = { form: v.form, ...v.friend };
       break;
     }

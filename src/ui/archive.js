@@ -1,6 +1,6 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
-import { PALETTES, SPECIES, CFG, friendFeat, isMainframeForm } from '../sim.js';
+import { PALETTES, SPECIES, CFG, friendFeat, friendHandle, isMainframeForm } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, shownRegions } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, liveFragments, ROOT_FRAGMENTS } from '../netrun/codex.js';
@@ -277,7 +277,13 @@ function renderChatter() {
   );
 }
 
-// Friends' netlings greeted, newest first. A Mainframe friend stays a corrupted record until Root Access.
+// Friends' netlings greeted, newest first, as a channel log: [10/02 12:04] --> daemon_g3 has joined (gen 3, 2 deep exits).
+// A Mainframe friend stays ???_g5 until Root Access.
+const two = (n) => String(n).padStart(2, '0');
+const stamp = (at) => {
+  const d = new Date(at);
+  return `[${two(d.getMonth() + 1)}/${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}]`;
+};
 function renderGuestbook() {
   const book = app.progress.guestbook ?? [];
   const rootKnown = rootUnlocked();
@@ -292,17 +298,20 @@ function renderGuestbook() {
     d.textContent = "say hello when a friend's netling drops by. visitor cards are in SYSTEM.";
     return $('guestbook').replaceChildren(h, d);
   }
-  const rows = [...book].reverse().map((e) => {
-    const d = document.createElement('div');
-    d.className = 'frag';
-    const who = document.createElement('span');
-    const hidden = isMainframeForm(e.form) && !rootKnown;
-    who.textContent = hidden ? '<<corrupted record>>' : SPECIES[e.form].name.toLowerCase();
-    if (hidden) who.className = 'corrupt';
-    d.append(`${new Date(e.at).toLocaleDateString()}: a friend's `, who, ` (${friendFeat(e, rootKnown)})`);
-    return d;
-  });
-  $('guestbook').replaceChildren(h, ...rows);
+  const log = document.createElement('div');
+  log.className = 'channel-log';
+  log.append(
+    ...[...book].reverse().map((e) => {
+      const d = document.createElement('div');
+      const hidden = isMainframeForm(e.form) && !rootKnown;
+      const nick = document.createElement('span');
+      nick.textContent = friendHandle(e.form, e.gen, hidden);
+      if (hidden) nick.className = 'corrupt';
+      d.append(`${stamp(e.at)} --> `, nick, ` has joined (${friendFeat(e, rootKnown)})`);
+      return d;
+    }),
+  );
+  $('guestbook').replaceChildren(h, log);
 }
 
 function selectTab(name) {

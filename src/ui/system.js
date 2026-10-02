@@ -1,6 +1,6 @@
 // Archive > SYSTEM: transfer out (and the lock screen), bring one here, visitor cards, hibernate,
 // restart, volume, and storage safety.
-import { hibernate, hibernateBlockReason, wake, wakeAvailableAt, CFG, MIN, SPECIES, isMainframeForm, friendFeat } from '../sim.js';
+import { hibernate, hibernateBlockReason, wake, wakeAvailableAt, CFG, MIN, isMainframeForm, friendFeat, friendHandle } from '../sim.js';
 import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from '../transfer.js';
 import { cardFor, encodeCard, decodeCard, cardCodeFrom, isCardText, queueCard, CARD_HASH } from '../visitcard.js';
 import { encodeQR, drawQR } from '../qr.js';
@@ -253,10 +253,6 @@ function applyImport() {
 
 const cardUrl = (code) => `${location.origin}${location.pathname}${CARD_HASH}${code}`;
 
-// Who is on the card, as this player may see it: a Mainframe form before Root Access is a corrupted record.
-export function friendName(form, rootKnown = rootUnlocked()) {
-  return isMainframeForm(form) && !rootKnown ? '<<corrupted record>>' : SPECIES[form].name.toLowerCase();
-}
 
 function makeCard() {
   const card = cardFor(app.state, app.wardrobe, app.progress);
@@ -272,7 +268,8 @@ function makeCard() {
   sfx('select', app.state.quirk.pitch);
 }
 
-// A card in the paste box: who it is, and INVITE to queue the visit.
+// A card in the paste box reads like a message: who sent it and what its line has done, and ACCEPT INVITE to queue the
+// visit. A Mainframe form before Root Access is a corrupted record (???_g5@???).
 function checkCard(box) {
   let card;
   try {
@@ -283,15 +280,20 @@ function checkCard(box) {
     sfx('error', 660);
     return;
   }
+  const hidden = isMainframeForm(card.form) && !rootUnlocked();
   const dl = document.createElement('dl');
-  for (const [k, v] of [
-    ['visitor', `a friend's ${friendName(card.form)}`],
-    ['line', friendFeat(card, rootUnlocked())],
+  dl.className = 'mail';
+  for (const [k, v, cls] of [
+    ['From:', `${friendHandle(card.form, card.gen, hidden)}@${hidden ? '???' : 'wider.net'}`, hidden ? 'corrupt' : ''],
+    ['To:', 'you@netling'],
+    ['Subject:', 'can i come over?'],
+    ['X-Line:', friendFeat(card, rootUnlocked())],
   ]) {
     const dt = document.createElement('dt');
     dt.textContent = k;
     const dd = document.createElement('dd');
     dd.textContent = v;
+    if (cls) dd.className = cls;
     dl.append(dt, dd);
   }
   const note = document.createElement('p');
@@ -299,7 +301,7 @@ function checkCard(box) {
   note.textContent = 'It drops by within the hour, once your netling is awake and free. Nothing on this device is replaced.';
   const go = document.createElement('button');
   go.type = 'button';
-  go.textContent = 'INVITE';
+  go.textContent = 'ACCEPT INVITE';
   go.addEventListener('click', () => inviteCard(card, box));
   box.replaceChildren(dl, note, go);
 }
