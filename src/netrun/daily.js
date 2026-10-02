@@ -54,7 +54,7 @@ export function laneRng(run, nodeId, lane) {
 // --- nothing at stake ----------------------------------------------------------------------------------------------
 // What a daily run changes on the netling is written to run.stake as it happens (each run.js rules call measures before
 // and after), and given back when the run ends. Time keeps passing as usual: only what the run itself did is undone.
-// An item used from the inventory mid-run is not a rules call: it is spent, and does what it does, as at home.
+// Items can't be used from the inventory during one (sim.js itemBlockReason): their effects reach past the run.
 const STATS = ['charge', 'sync', 'integrity', 'heat'];
 const AXES = ['allegiance', 'stability'];
 

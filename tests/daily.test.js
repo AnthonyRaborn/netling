@@ -2,9 +2,9 @@ import './helpers/utc.js';
 // The daily trace: one seeded map a day, every roll seeded by node, nothing at stake, and a share line.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { act, createScript, tick, mulberry32, runCooldownLeft, CFG, MIN } from '../src/sim.js';
+import { act, createScript, itemBlockReason, tick, mulberry32, runCooldownLeft, CFG, MIN } from '../src/sim.js';
 import { DAILY, dailySeed, dayKey, dayNumber, isDayKey, shareText } from '../src/netrun/daily.js';
-import { abortRun, choose, moveTo, resolveIce, runBlockReason, runOptions, startRun } from '../src/netrun/run.js';
+import { abortRun, choose, closeRun, moveTo, resolveIce, runBlockReason, runOptions, startRun } from '../src/netrun/run.js';
 import { generateMap, nodeById } from '../src/netrun/map.js';
 import { REGIONS } from '../src/netrun/regions.js';
 import { unlockedIds } from '../src/cosmetics.js';
@@ -137,15 +137,25 @@ test('a disconnect logs no care mistake, and the exit opens nothing', () => {
   assert.equal(w.run.trail.length, w.run.visited.length);
 });
 
-test('an item used mid-run is spent, as at home', () => {
+test('items cannot be used from the inventory during a daily trace', () => {
   const s = adult();
   s.stats.integrity = 50;
   startRun(s, 'daily', noRng, [], [], { day: DAY });
+  assert.equal(itemBlockReason(s, 1), 'no items on the daily trace.');
   const res = act(s, 'use', s.lastTick, noRng, { slot: 1 });
-  assert.ok(res.ok, res.msg);
+  assert.ok(!res.ok);
+  assert.equal(res.msg, 'no items on the daily trace.');
+  assert.deepEqual(s.inventory, ['voucher', 'repair']);
+  assert.equal(s.stats.integrity, 50);
   abortRun(s);
-  assert.deepEqual(s.inventory, ['voucher']);
-  assert.equal(s.stats.integrity, 90);
+  assert.equal(itemBlockReason(s, 1), 'no items on the daily trace.', 'still open until the summary closes');
+  closeRun(s, s.lastTick);
+  assert.equal(itemBlockReason(s, 1), null, 'usable again afterwards');
+  // Other runs keep them.
+  const o = adult();
+  o.stats.integrity = 50;
+  startRun(o, 'public', mulberry32(1));
+  assert.ok(act(o, 'use', o.lastTick, noRng, { slot: 1 }).ok);
 });
 
 test('it opens during the cooldown, but not asleep, and has no challenges or contracts', () => {

@@ -1646,7 +1646,7 @@ await scenario('challenges: hidden before a Deep exit, then picked and carried i
 });
 
 await scenario('daily trace: open during the cooldown, once a day, nothing kept, and a share line', async ({ open }) => {
-  const pet = awakeNetling({ stage: 'teen', form: 'kernel' });
+  const pet = awakeNetling({ stage: 'teen', form: 'kernel', inventory: ['coolant'] });
   pet.lastRunEndAge = pet.ageMin; // the uplink is cooling down
   const page = await open(BASE, seed({ 'netling.save': pet, 'netling.progress': {} }));
   const before = (await saved(page)).stats;
@@ -1660,6 +1660,11 @@ await scenario('daily trace: open during the cooldown, once a day, nothing kept,
   assert(s.run?.region === 'daily' && s.run.daily === true && /^\d{4}-\d{2}-\d{2}$/.test(s.run.day), `run: ${JSON.stringify({ region: s.run?.region, day: s.run?.day })}`);
   const p = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
   assert(p.daily?.day === s.run.day && !p.daily.share, 'the attempt was not marked at jack-in');
+  // No items from the inventory on the daily trace.
+  await page.locator('#inv-slots button').first().click();
+  assert(await page.isDisabled('#inv-use'), 'USE is open on the daily trace');
+  assert(/no items on the daily trace/.test(await page.textContent('#inv-desc')), 'the inventory does not say why');
+  await page.click('#inv-cancel');
   // Abort at once (a first move could start an ICE fight): the summary closes into the share dialog.
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
@@ -1672,6 +1677,7 @@ await scenario('daily trace: open during the cooldown, once a day, nothing kept,
   await page.click('#daily-close');
   const after = await saved(page);
   assert(!after.run, 'the run is still open');
+  assert(after.inventory.includes('coolant'), 'the item is gone');
   for (const k of ['charge', 'integrity', 'heat']) assert(Math.abs(after.stats[k] - before[k]) < 2, `${k} not given back: ${before[k]} -> ${after.stats[k]}`);
   // Once a day: the row now offers the line again instead of a second attempt.
   await page.click('#btn-netrun');

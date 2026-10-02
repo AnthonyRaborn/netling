@@ -1138,6 +1138,8 @@ export function itemBlockReason(s, slot) {
   if (base) return base;
   const id = s.inventory?.[slot];
   if (!id) return 'empty slot.';
+  // The daily trace keeps nothing at stake (netrun/daily.js), and an item's effects reach past the run.
+  if (s.run?.daily) return 'no items on the daily trace.';
   if (ITEMS[id].awake && resting(s)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (id === 'repair' && s.stats.integrity >= 100) return 'integrity already at 100.';
   if (id === 'overclock') {

@@ -12,7 +12,6 @@ Things that work as coded but are easy to misunderstand, and things not yet veri
 - **`pickByRarity` (`accessories.js`) is separate from `weighted()` (`random.js`).** It weights an array by a rarity table, not an object of weights.
 - **Adding a codex fragment does not revoke Root Access.** It is recorded as `progress.rootEarned`; the NL-0 transmission does not replay.
 - **The daily trace is honour-system.** Its day is the device's local date, so changing the clock opens another day's map, and clearing site data or using a second device gives another attempt. It is compared socially, not ranked, so this is accepted. A player who knows the map from a friend who played earlier also has an edge; same.
-- **Items used during a daily trace are spent.** Everything the run itself did is given back at the end, but an item used from the inventory is not part of the run's ledger, so it is gone and its effect stays (as at home).
 - **`cleanSave` cannot be pointed at a fake step table**, so its wiring to real upgrade steps is first exercised when a real step exists. The runner itself is tested with an injected table and the frozen version 1 fixture.
 
 ## Open questions

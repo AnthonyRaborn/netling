@@ -253,6 +253,7 @@ function renderInventory() {
     $('inv-name').textContent = ITEMS[id].name;
     $('inv-desc').textContent = ITEMS[id].desc;
     const blocked = itemBlockReason(app.state, selectedSlot);
+    if (blocked && app.state.run?.daily) $('inv-desc').textContent = `${ITEMS[id].desc} ${blocked}`; // say why USE is off
     $('inv-use').disabled = Boolean(blocked);
     $('inv-use').title = blocked ?? '';
   }
