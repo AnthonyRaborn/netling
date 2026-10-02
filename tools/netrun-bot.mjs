@@ -32,7 +32,8 @@ export const ANOMALY_PREFS = {
 function decide(pet, style, rng) {
   const p = pet.run.pending;
   const has = (id) => p.options.some((o) => o.id === id && !o.disabled);
-  if (p.kind === 'relay') return pet.stats.integrity < style.bankAt ? 'out' : 'continue';
+  // Under a challenge it still holds, it pushes for the exit: a relay jack-out would not count.
+  if (p.kind === 'relay') return pet.run.challenge && !pet.run.challengeVoid ? 'continue' : pet.stats.integrity < style.bankAt ? 'out' : 'continue';
   if (p.kind === 'checkpoint') {
     if (has('voucher') && style.lean !== 'indie') return 'voucher';
     if (style.lean === 'corp') return 'comply';
@@ -47,7 +48,8 @@ function decide(pet, style, rng) {
     // Each kind of market leans its own way: a player steering one way only shops on that side.
     const side = p.flavor === 'corp' ? 'corp' : 'indie';
     const fits = style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (pet.axes.allegiance > 0) === (side === 'indie') : true;
-    return style.shop !== false && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
+    const bare = pet.run.challenge === 'baremetal' && !pet.run.challengeVoid; // keeps Bare metal: no items bought
+    return style.shop !== false && !bare && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
   }
   const prefs = ANOMALY_PREFS[style.anomaly ?? 'random'];
   const preferred = prefs.find((id) => has(id));
@@ -111,8 +113,9 @@ export function sellAtMarket(pet, keep = null) {
 }
 
 // Plays one full run on the pet. Returns the finished run (before it's cleared).
+// style.challenge: a challenge id (netrun/challenges.js) for the run, in the Deep or the Source.
 export function playRun(pet, style, region, rng, codex = []) {
-  startRun(pet, region, rng, codex);
+  startRun(pet, region, rng, codex, [], { challenge: style.challenge ?? null });
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 40) {
     const run = pet.run;

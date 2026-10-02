@@ -885,6 +885,19 @@ button:active {
   gap: 8px;
 }
 
+.challenge-pick {
+  width: 100%;
+  margin: 0 0 6px;
+  text-align: left;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.challenge-pick.on {
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+
 .region-list {
   display: flex;
   flex-direction: column;
@@ -1719,6 +1732,16 @@ body:has(#pad:not([hidden])) .update-bar {
     linear-gradient(160deg, #6a2530, #4a1820 60%, #2a0d12);
   border: 2px dashed #b03a48;
 }
+/* Cut cable (Unplugged): gunmetal with a thick cable down the left edge, cut in the middle, its ends still glowing. */
+.device.shell-unplugged {
+  background:
+    linear-gradient(transparent 44%, #ff9f1c 44% 45.5%, transparent 45.5% 54.5%, #ff9f1c 54.5% 56%, transparent 56%) 4px 0 / 9px 100% no-repeat,
+    linear-gradient(#4b525d 0 44%, transparent 44% 56%, #4b525d 56%) 4px 0 / 9px 100% no-repeat,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 0 2px, transparent 2px) 5px 0 / 9px 100% no-repeat,
+    linear-gradient(160deg, #1d2026, #131519 60%, #0a0b0d);
+  border-color: #3a3f48;
+  box-shadow: 0 0 0 1px #000, -6px 0 22px -10px rgba(255, 159, 28, 0.45);
+}
 /* PID 1: Daemon red with the traces of a process tree running through it. */
 .device.shell-pidone {
   background:
@@ -1847,6 +1870,24 @@ body:has(#pad:not([hidden])) .update-bar {
   }
   66% {
     background-position: -2px 2px;
+  }
+}
+
+/* Bare metal: fine brushed hairlines, and a cold glint that sweeps across now and then (about every 7 s). With motion
+   calmed the glint stays off-screen and only the hairlines show. */
+.screen.fx-baremetal .fx-layer {
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(220, 232, 245, 0.12) 50%, transparent 60%) -150% 0 / 200% 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgba(200, 212, 225, 0.04) 0 1px, transparent 1px 3px);
+  animation: baremetal 7s ease-in-out infinite;
+}
+@keyframes baremetal {
+  0%,
+  60% {
+    background-position: -150% 0, 0 0;
+  }
+  100% {
+    background-position: 250% 0, 0 0;
   }
 }
 

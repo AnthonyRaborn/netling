@@ -79,7 +79,7 @@ Breach generates a legal path through the grid and cuts the target from it, so e
 
 Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked. Items marked `mainframe` belong to the Mainframe stage; they would leave the wardrobe if `CFG.mainframe` were switched off (`shownCosmetics`).
 
-### Shells (14)
+### Shells (15)
 
 | Id | Name | Unlock | Hint shown |
 |---|---|---|---|
@@ -97,12 +97,13 @@ Slots: shell, tint, effect, sound. `free: true` items are available from the sta
 | `pidone` | PID 1 | Discover Init (Mainframe) | "one that never misses a cycle, that never stops growing." |
 | `torn` | Panic tear | Discover Panic (Mainframe) | "one that lives on the edge, that never stops growing." |
 | `faint` | Whisper | Discover Whisper (Mainframe) | "the one nobody sees, that never stops growing." |
+| `unplugged` | Cut cable | Complete the Unplugged challenge ([NETRUN.md](NETRUN.md#challenges)). Gunmetal with a cable down the left edge, cut in the middle, its ends glowing orange. Not one of the Mini device's nine | "reach the bottom with every relay dark." |
 
 The five Mainframe shells (`mainframe: true`) are each a step beyond their adult form's shell: Platinum is a brighter, whiter Brushed chrome with a soft glow (a light shell, so its labels darken); Air gap is the Firewall brick cut across the middle by a band of black, with a dashed edge; PID 1 is Daemon red with faint red traces of a grid running through it and a stronger glow; Panic tear is Glitch shift torn down the right side by a black seam, its halves blue and wine, with a wider pink and cyan split around the edge; Whisper is fainter than Ghost clear, with a dotted edge. None of them animates. Until Root Access, every locked Mainframe item in STYLE (these five shells, Read-only, Source light, Rack mount, First commit and the Checksum) shows as corrupted data named for its slot (`<<SHELL CORRUPTED>>`, `<<TINT CORRUPTED>>`, `<<EFFECT CORRUPTED>>`, `<<CREST CORRUPTED>>`, `<<TRACK CORRUPTED>>`, `<<ITEM CORRUPTED>>`) with "read error at 0x00. it will not load." instead of ??? and its hint, and the name blinks like the dex's corrupted records (`corruptedCosmetic`, `corruptedText`); after Root Access each shows ??? and its hint like any locked item.
 
 Owning all nine original shells (`ORIGINAL_SHELLS`, the ones above the Mainframe five) grants the secret **Mini device** prop; the Mainframe shells do not count toward it, so that goal did not move.
 
-### Tints (9)
+### Tints (10)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -114,9 +115,10 @@ Owning all nine original shells (`ORIGINAL_SHELLS`, the ones above the Mainframe
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
 | `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
 | `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
+| `blackout` | Blackout | Complete the Blackout challenge. Near-black with a red cast, like emergency lighting | "reach the bottom seeing one step ahead." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (11)
+### Effects (12)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -130,6 +132,7 @@ Owning all nine original shells (`ORIGINAL_SHELLS`, the ones above the Mainframe
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `heatwave` | Heatwave | 40 hours overclocked while awake, across lives (`progress.hotMin` plus the living `hotTotalMin`). Warm orange and magenta bands rising slowly up the screen; still with motion calmed | "run it hot for the better part of two days." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
+| `baremetal` | Bare metal | Complete the Bare metal challenge. Fine brushed hairlines, and a cold glint that sweeps across about every 7 seconds (the glint stays off-screen with motion calmed) | "reach the bottom without buying or using a thing." |
 | `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
@@ -149,7 +152,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (9)
+### Crests (10)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -163,11 +166,12 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
 | `rack` | Rack mount | Any mainframe form in the dex. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
+| `cracked` | Cracked pane | Complete the Glass challenge. A pane with one crack running down it | "reach the bottom without losing a single fight." |
 | `rootprompt` | Root prompt | The ending has played (`progress.ended`; [SOURCE_PLAN.md](SOURCE_PLAN.md#after-shipping-the-ending)). The `#` of a root shell; corrupted until Root Access | "let the oldest one rest." |
 
 Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
-### Music (8)
+### Music (9)
 
 The home screen's background music (`tracks.js`, played by `music.js`; see [MUSIC.md](MUSIC.md)). Netruns always play their own theme, whatever is equipped. Equipping a track crossfades to it at once.
 
@@ -181,6 +185,7 @@ The home screen's background music (`tracks.js`, played by `music.js`; see [MUSI
 | `undertow` | Undertow | Dark ambient, E minor, 60 BPM, no drums | 3 exits from the Deep | "come back from the bottom three times." |
 | `firstcommit` | First commit | A lone bell over a still pad, C major, 72 BPM, sparse and high | Exit the Source once | "come back from below the bottom." |
 | `forum` | Forum | Call-and-answer chirps, G major, 90 BPM, with a disk-seek flourish | 25 chatter lines heard | "hear twenty-five things it says to itself." |
+| `exitzero` | Exit code 0 | A minor, 112 BPM: a square pulse bass and arpeggio, a triangle lead with echo, drums once it gets going; its last progression lands on A major | All four challenges completed | "keep every rule there is, once each." |
 
 ### Device label
 

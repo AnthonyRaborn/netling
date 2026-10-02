@@ -3,6 +3,7 @@
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits, sourceExits } }
 // Items marked `mainframe` belong to the Mainframe stage (docs/SOURCE_PLAN.md) and are hidden while CFG.mainframe is off.
 import { FRAGMENTS, ROOT_FRAGMENTS } from './netrun/codex.js';
+import { CHALLENGE_IDS } from './netrun/challenges.js';
 import { CFG, FORMS, TRAITS, TRAIT_CFG, SPECIES, isMainframeForm, lineOf } from './sim.js';
 import { CHATTER_GROUPS, chatterProgress, shownChatter } from './chatter.js';
 
@@ -61,6 +62,9 @@ export const LEGACY = {
 
 export const SLOTS = ['shell', 'tint', 'effect', 'sound', 'crest', 'music'];
 
+// A challenge run kept to the exit of the Deep or the Source (netrun/challenges.js).
+const challengeDone = (c, id) => (c.progress.challenges ?? []).includes(id);
+
 export const COSMETICS = {
   shell: [
     { id: 'standard', name: 'Standard issue', swatch: '#14121f', free: true },
@@ -78,6 +82,7 @@ export const COSMETICS = {
     { id: 'airgap', name: 'Air gap', swatch: 'linear-gradient(180deg,#5a1f2a 45%,#050506 45% 55%,#5a1f2a 55%)', mainframe: true, hint: 'one that trusts nothing, that never stops growing.', check: (c) => c.dex.includes('airgap') },
     { id: 'pidone', name: 'PID 1', swatch: '#1a0306', mainframe: true, hint: 'one that never misses a cycle, that never stops growing.', check: (c) => c.dex.includes('init') },
     { id: 'torn', name: 'Panic tear', swatch: 'linear-gradient(100deg,#1d3040 48%,#000 48% 52%,#3a1020 52%)', mainframe: true, hint: 'one that lives on the edge, that never stops growing.', check: (c) => c.dex.includes('panic') },
+    { id: 'unplugged', name: 'Cut cable', swatch: 'linear-gradient(90deg,#121418 30%,#4b525d 30% 45%,#ff9f1c 45% 55%,#4b525d 55% 70%,#121418 70%)', hint: 'reach the bottom with every relay dark.', check: (c) => challengeDone(c, 'unplugged') },
     { id: 'faint', name: 'Whisper', swatch: 'rgba(200,200,255,0.1)', mainframe: true, hint: 'the one nobody sees, that never stops growing.', check: (c) => c.dex.includes('whisper') },
   ],
   tint: [
@@ -89,6 +94,7 @@ export const COSMETICS = {
     { id: 'abyss', name: 'Abyss', swatch: '#08081a', lcd: '#08081a', dark: '#020206', hint: 'listen to the bottom of the net.', check: (c) => regionDone(c, 'deep') },
     { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, five times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
     { id: 'readonly', name: 'Read-only', swatch: '#0c0c0e', lcd: '#0c0c0e', dark: '#030304', mainframe: true, hint: 'read what the net was written from.', check: (c) => sourceDone(c) },
+    { id: 'blackout', name: 'Blackout', swatch: '#140405', lcd: '#140405', dark: '#050101', hint: 'reach the bottom seeing one step ahead.', check: (c) => challengeDone(c, 'blackout') },
     { id: 'amber', name: 'Amber', swatch: '#261a08', lcd: '#261a08', dark: '#0c0803', hint: 'three in a row, start to finish.', check: (c) => fullLifeStreak(c) >= 3 },
   ],
   effect: [
@@ -102,6 +108,7 @@ export const COSMETICS = {
     { id: 'aurora', name: 'Aurora', hint: 'keep it well for a whole day, a few hours at a time.', check: (c) => (c.flowMin ?? 0) >= ATTENTION.flowHours * 60 },
     { id: 'heatwave', name: 'Heatwave', hint: 'run it hot for the better part of two days.', check: (c) => (c.hotMin ?? 0) >= ATTENTION.hotHours * 60 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
+    { id: 'baremetal', name: 'Bare metal', hint: 'reach the bottom without buying or using a thing.', check: (c) => challengeDone(c, 'baremetal') },
     { id: 'sourcelight', name: 'Source light', mainframe: true, hint: 'go down into the light three times, and come back.', check: (c) => (c.progress.sourceExits ?? 0) >= 3 },
   ],
   // Home sounds only; netruns keep each region's own voice.
@@ -172,6 +179,14 @@ export const COSMETICS = {
       pixels: ['#########', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#########', '.#.....#.'],
     },
     {
+      id: 'cracked',
+      name: 'Cracked pane',
+      hint: 'reach the bottom without losing a single fight.',
+      check: (c) => challengeDone(c, 'glass'),
+      // A pane of glass with one crack running down it.
+      pixels: ['#########', '#....#..#', '#...#...#', '#..##...#', '#....#..#', '#.....#.#', '#....#..#', '#...#...#', '#########'],
+    },
+    {
       id: 'rootprompt',
       name: 'Root prompt',
       mainframe: true,
@@ -191,6 +206,7 @@ export const COSMETICS = {
     { id: 'undertow', name: 'Undertow', hint: 'come back from the bottom three times.', check: (c) => (c.progress.deepExits ?? 0) >= 3 },
     { id: 'firstcommit', name: 'First commit', mainframe: true, hint: 'come back from below the bottom.', check: (c) => (c.progress.sourceExits ?? 0) >= 1 },
     { id: 'forum', name: 'Forum', hint: 'hear twenty-five things it says to itself.', check: (c) => (c.progress.chatter?.length ?? 0) >= ATTENTION.chatterHeard },
+    { id: 'exitzero', name: 'Exit code 0', hint: 'keep every rule there is, once each.', check: (c) => CHALLENGE_IDS.every((id) => challengeDone(c, id)) },
   ],
 };
 

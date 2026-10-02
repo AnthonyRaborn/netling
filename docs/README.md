@@ -30,8 +30,8 @@ Netling is a Tamagotchi-style pet that runs in real time in the browser. A pure 
 
 ## Numbers at a glance
 
-- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 46 unit test files (479 tests) and a 78-scenario browser smoke test.
-- 14 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost, and the Mainframe forms Plat, Airgap, Init, Panic, Whisper), 9 items, 4 mini-games, 6 netrun regions plus a tutorial, 27 codex fragments, 49 style items (41 accessories, 8 props), 59 cosmetics (14 shells, 9 tints, 11 effects, 8 sounds, 9 crests, 8 music tracks) plus a device label, 52 chatter lines, and an ending.
+- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 47 unit test files (488 tests) and a 79-scenario browser smoke test.
+- 14 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost, and the Mainframe forms Plat, Airgap, Init, Panic, Whisper), 9 items, 4 mini-games, 6 netrun regions plus a tutorial, 27 codex fragments, 49 style items (41 accessories, 8 props), 64 cosmetics (15 shells, 10 tints, 12 effects, 8 sounds, 10 crests, 9 music tracks) plus a device label, 52 chatter lines, 4 challenge runs, and an ending.
 - Life: up to 5 days; teen at 17 hours; adult at 51 hours (netlings compiled before this keep 7 days, 24 and 72); 10 care mistakes end it.
 
 ## Keeping these docs true

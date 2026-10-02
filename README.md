@@ -169,6 +169,8 @@ Loot is only safe once you **jack out**, at a relay or the exit. If Integrity or
 
 Every netling starts with only the Public Net. Reaching a region's exit **clears** it and opens the next one down, and some regions also wait for the netling to grow up. Each new netling finds its own way down. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. A netling's memory only holds eight new fragments in its life (the region list shows how many it has); the rest wait for the next generation. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
 
+Once one of your netlings has made it all the way down, the region list also offers **challenges**: a rule for a single run in the deepest regions, such as losing no ICE fight. Break the rule and the run simply goes on without it. Each challenge kept to the exit earns something to wear.
+
 ## Growing up, and what comes after
 
 - **Baby**: the first 17 hours. How it is raised through them decides which teen it becomes; good care (two faults or fewer) grows a healthier one.

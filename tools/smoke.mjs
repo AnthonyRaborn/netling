@@ -1623,6 +1623,28 @@ async function wardrobeItems(page) {
   );
 }
 
+await scenario('challenges: hidden before a Deep exit, then picked and carried into a Deep run', async ({ open }) => {
+  const adult = (extra) => ({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['ruins-4'], ...extra });
+  const fresh = await open(BASE, seed(adult({ 'netling.progress': {} })));
+  await fresh.click('#btn-netrun');
+  assert(!(await visible(fresh, '#region-challenge')), 'challenges open before any Deep exit');
+  await fresh.close();
+
+  const page = await open(BASE, seed(adult({ 'netling.progress': { deepExits: 1 } })));
+  await page.click('#btn-netrun');
+  assert(/CHALLENGE: NONE\. 0\/4 DONE/.test(await page.textContent('#region-challenge')), 'no challenge row');
+  await page.click('#region-challenge');
+  assert(/CHALLENGE: GLASS\..*DEEP AND SOURCE ONLY/.test(await page.textContent('#region-challenge')), 'Glass not picked');
+  const deepMeta = await page.locator('#region-list button').nth(4).locator('.rmeta').textContent();
+  assert(/^challenge: glass\./.test(deepMeta), `the Deep does not show it: ${deepMeta}`);
+  const publicMeta = await page.locator('#region-list button').nth(0).locator('.rmeta').textContent();
+  assert(!/challenge/.test(publicMeta), 'the Public Net claims a challenge');
+  await page.locator('#region-list button').nth(4).click();
+  await page.waitForTimeout(500);
+  const s = await saved(page);
+  assert(s.run?.region === 'deep' && s.run.challenge === 'glass' && s.run.challengeVoid === false, `run: ${JSON.stringify({ region: s.run?.region, c: s.run?.challenge })}`);
+});
+
 await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
   const adult = { 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['deep-1'] };
   const page = await open(BASE, seed(adult));

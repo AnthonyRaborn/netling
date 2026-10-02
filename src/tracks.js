@@ -560,10 +560,63 @@ export const TRACKS = {
     flourishEvery: [12, 20],
     flourish: 'seek', // a disk seeking
   },
+
+  // Exit code 0: every challenge kept. A steady pulse in A minor that climbs and lands on the major, square arpeggios over
+  // it, and drums that only arrive once the run is going. A clean finish, not a fanfare.
+  exitzero: {
+    id: 'exitzero',
+    gain: 1.65,
+    name: 'Exit code 0',
+    bpm: 112,
+    key: 57, // A3
+    scale: NATURAL_MINOR,
+    progressions: [
+      [{ root: 0, q: 'min' }, { root: 8, q: 'maj' }, { root: 3, q: 'maj' }, { root: 10, q: 'maj' }],
+      [{ root: 0, q: 'min' }, { root: 5, q: 'min' }, { root: 8, q: 'maj' }, { root: 7, q: 'maj' }],
+      [{ root: 8, q: 'maj' }, { root: 10, q: 'maj' }, { root: 0, q: 'maj' }, { root: 0, q: 'maj' }],
+    ],
+    parts: {
+      bass: {
+        mode: 'chord', wave: 'square', vol: 0.22, octave: -12, env: 'pluck', cutoff: 900,
+        phrases: [
+          '1 . 1 . 1 . 1 . 1 . 1 . 5 . 1 .',
+          '1 . . 1 . . 1 . 1 . . 1 . . 5 .',
+        ],
+      },
+      arp: {
+        mode: 'chord', wave: 'square', vol: 0.14, octave: 12, env: 'pluck', cutoff: 2600, sparkle: true,
+        phrases: [
+          '1 3 5 3 1 3 5 3 1 3 5 3 1 3 5 8',
+          '1 5 3 5 1 5 3 5 8 5 3 5 1 5 3 5',
+        ],
+      },
+      lead: {
+        mode: 'scale', wave: 'triangle', vol: 0.24, octave: 12, env: 'hold', cutoff: 4000, echo: true,
+        phrases: [
+          '0 - - - 2 - - - 4 - - - - - - - 3 - - - 2 - - - 0 - - - - - - -',
+          '4 - - - 5 - 4 - 7 - - - - - - - 6 - - - 4 - - - 2 - - - - - - -',
+          '7 - - - - - 9 - 7 - - - 4 - - - 5 - - - 4 - 2 - 0 - - - - - - -',
+        ],
+      },
+      drums: {
+        mode: 'drums', vol: 0.4,
+        phrases: [
+          'k . h . s . h . k . h . s . h h',
+          'k . h k s . h . k . h . s h s .',
+        ],
+      },
+    },
+    form: [
+      { bars: 4, parts: ['bass', 'arp'] },
+      { bars: 8, parts: ['bass', 'arp', 'lead'] },
+      { bars: 8, parts: ['bass', 'arp', 'lead', 'drums'] },
+      { bars: 4, parts: ['arp', 'lead'] },
+    ],
+  },
 };
 
 // Tracks the wardrobe can equip (the netrun theme is not one).
-export const MUSIC_IDS = ['idle', 'nightdrive', 'dialup', 'lobby', 'tracker', 'undertow', 'firstcommit', 'forum'];
+export const MUSIC_IDS = ['idle', 'nightdrive', 'dialup', 'lobby', 'tracker', 'undertow', 'firstcommit', 'forum', 'exitzero'];
 
 // How a state changes the sound. tempo and vol multiply; transpose is in semitones; cutoff caps
 // every part's filter; mute drops parts; partVol scales single parts.

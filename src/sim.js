@@ -3,6 +3,7 @@
 import { accessoryById, rollWornAccessory } from './accessories.js';
 import { weighted } from './random.js';
 import { clearedForStage } from './netrun/regions.js';
+import { challengeOn, voidChallenge } from './netrun/challenges.js';
 import { chatterPool, visitorLines } from './chatter.js';
 
 export const MIN = 60_000;
@@ -1249,7 +1250,9 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       const id = s.inventory[slot];
       const msg = useItem(s, id, rng);
       s.inventory.splice(slot, 1);
-      res = ok(msg, 'patch');
+      // Bare metal (netrun/challenges.js): using an item mid-run ends the challenge (the UI asks first).
+      const broke = challengeOn(s.run, 'baremetal') && voidChallenge(s.run, 'an item was used.');
+      res = ok(`${msg}${broke ? ' bare metal broken.' : ''}`, 'patch');
       break;
     }
     case 'patch': {

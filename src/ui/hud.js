@@ -1,5 +1,6 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
 import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf, visitorName, friendHandle, visitHidden } from '../sim.js';
+import { challengeOn } from '../netrun/challenges.js';
 import { atMarket, contractMinutesLeft, contractText, fmtLeft, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -265,6 +266,8 @@ export function initInventory() {
     const id = app.state.inventory[selectedSlot];
     // A Segfault adds faults, and faults can end a life: it takes a second press.
     if (id === 'segfault' && !armed($('inv-use'), '+2 FAULTS?', 'USE', 3000)) return;
+    // Bare metal: using an item mid-run ends the challenge.
+    if (challengeOn(app.state.run, 'baremetal') && !armed($('inv-use'), 'ENDS BARE METAL?', 'USE', 3000)) return;
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
     playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');

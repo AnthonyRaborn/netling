@@ -2,6 +2,7 @@
 // Stored data can be damaged, edited by hand, or arrive in a hostile code, so nothing is trusted:
 // each value is rebuilt from known fields, and anything unusable falls back to a safe default.
 // Pure functions; no DOM.
+import { CHALLENGE_IDS, CHALLENGE_REGIONS } from './netrun/challenges.js';
 import {
   SAVE_VERSION,
   SPECIES,
@@ -171,6 +172,9 @@ function cleanRun(raw, s, strict) {
     pending,
     phased: bool(raw.phased),
     hot: bool(raw.hot), // jacked in overclocked
+    challenge: CHALLENGE_REGIONS.includes(raw.region) && CHALLENGE_IDS.includes(raw.challenge) ? raw.challenge : null, // netrun/challenges.js
+    challengeVoid: bool(raw.challengeVoid),
+    challengeWon: bool(raw.challengeWon),
     insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     insuredTimes: int(raw.insuredTimes, raw.insured === true ? 1 : 0, 0, 9), // how many times it paid out
     freePhases: int(raw.freePhases, raw.phased === true ? 1 : 0, 0, 9), // ICE a Glitch line slipped for certain
@@ -517,6 +521,7 @@ export function cleanProgress(raw) {
     hotMin: int(p.hotMin, 0, 0), // awake minutes overclocked over past lives (the same way)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
+    ...(Array.isArray(p.challenges) ? { challenges: idList(p.challenges, (id) => CHALLENGE_IDS.includes(id)) } : {}), // challenges completed
     ...(p.ended === true ? { ended: true } : {}), // the ending has played (ending.js)
     ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)
   };

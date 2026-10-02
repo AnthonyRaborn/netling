@@ -16,8 +16,9 @@ A **netrun** is the game's dungeon crawl: the netling jacks into the net and wal
 10. [Codex fragments](#codex-fragments)
 11. [Accessories in runs](#accessories-in-runs)
 12. [Contracts](#contracts)
-13. [The tutorial run](#the-tutorial-run)
-14. [Where the run lives](#where-the-run-lives)
+13. [Challenges](#challenges)
+14. [The tutorial run](#the-tutorial-run)
+15. [Where the run lives](#where-the-run-lives)
 
 ## Run lifecycle
 
@@ -289,6 +290,32 @@ Accessories found or bought are held in `run.accessories` and are lost on a disc
 - `run.tally` counts `icePhased` (ICE a Ghost or Glitch slipped past), `caches` and `bought` alongside `nodes`, `iceWon` and `iceLost`. The run screen shows the job and its progress at the top right (`contractShort`).
 - `settleContract` runs first in `jackOut`, `disconnect` and `abortRun`: `run.contract.settled` becomes `met` (the pay joins `run.scrip` and `run.loot`, so it is banked with them), `missed` or `void`. `jackOut` returns `contract: 'met' | 'missed' | null`; the UI counts a met one in `progress.contractsDone` (the Seal crest at 10).
 - The balance bots never take contracts, so the baselines do not include them.
+
+## Challenges
+
+A rule for one run, picked in the region list (`src/netrun/challenges.js`). The row appears once any netling has reached the Deep's exit (`progress.deepExits`, no Root Access needed) and cycles NONE, GLASS, UNPLUGGED, BLACKOUT, BARE METAL. The rule rides along only into the Deep or the Source (`CHALLENGE_REGIONS`); other regions run without it. Ids are permanent.
+
+| Id | Name | Rule | Broken by |
+|---|---|---|---|
+| `glass` | Glass | Lose no ICE fight (an Airgap's soft loss counts) | A lost fight: the challenge is off, the run goes on |
+| `unplugged` | Unplugged | Relays are dark: no Charge, no venting, no Chrome or Plat patch. JACK OUT still works there, but only the exit counts | Nothing on its own; it is lost the usual way (Charge or Integrity) |
+| `blackout` | Blackout | Only visited nodes and one step ahead are seen and drawn: no reveals, no Ghost or Daemon sight (`visibleNodeIds`) | Nothing on its own |
+| `baremetal` | Bare metal | Buy no item and use no item. Accessories and selling are fine | Buying an item (the market option asks twice: `confirm`) or using one mid-run (USE asks twice): the challenge is off |
+
+`run.challenge`, `run.challengeVoid` (broken) and `run.challengeWon` (set at the exit node if it still held) are saved with the run. A disconnect or abort never completes one. On jack-out the UI adds the id to `progress.challenges`. The map header shows the name (dimmed with OFF once broken) and the summary says "challenge complete" or "challenge not met".
+
+**Rewards** (CONTENT_CATALOG): Glass the crest Cracked pane, Unplugged the shell Cut cable, Blackout the tint Blackout, Bare metal the effect Bare metal, and all four the track Exit code 0.
+
+**Measured** (`CHALLENGE=<id> node tools/netrun-balance.mjs 1000 all`; under a challenge the bot never banks at a relay and, for Bare metal, never buys an item). Share of runs that complete it:
+
+| Challenge | Deep, careful | Deep, skilled | Deep, adult forms | Source, careful | Source, skilled | Source, mainframes |
+|---|---|---|---|---|---|---|
+| Glass | 16% | 41% | 15 to 43% | 6% | 27% | 6 to 30% |
+| Unplugged | 37% | 68% | 51 to 72% | 10% | 33% | 28 to 52% |
+| Blackout | 45% | 73% | 70 to 75% | 19% | 48% | 48 to 56% |
+| Bare metal | 45% | 73% | 71 to 76% | 19% | 48% | 51 to 61% |
+
+Glass is the hardest and favours the forms that skip ICE (Glitch, Ghost, Panic, Whisper). Blackout and Bare metal read as easy for the bots only because the bots plan three steps ahead at most and never use items mid-run; people lean on both, so they should play harder than these numbers. The default baselines do not move: no bot takes a challenge unless `CHALLENGE` is set.
 
 ## The tutorial run
 

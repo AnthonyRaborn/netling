@@ -269,7 +269,8 @@ test('a shell for each mainframe form: raised once, hidden while off, and not ne
     assert.deepEqual(got, [`shell:${id}`], `${form} unlocks only its own shell`);
   }
   // The Mini device asks for the nine shells from before the stage, so that goal did not move.
-  assert.deepEqual(ORIGINAL_SHELLS, COSMETICS.shell.filter((c) => !c.mainframe).map((c) => c.id));
+  // The original nine: every shell but the Mainframe's five and the challenge reward (Cut cable).
+  assert.deepEqual(ORIGINAL_SHELLS, COSMETICS.shell.filter((c) => !c.mainframe && c.id !== 'unplugged').map((c) => c.id));
   assert.equal(ORIGINAL_SHELLS.length, 9);
   // Locked, they read as corrupted until Root Access, like the dex's records; earned, or after Root Access, they do not.
   const platinum = COSMETICS.shell.find((c) => c.id === 'platinum');

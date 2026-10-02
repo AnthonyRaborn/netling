@@ -6,6 +6,7 @@ import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
 import { ANOMALIES, anomaliesFor } from './anomalies.js';
 import { weighted } from '../random.js';
+import { CHALLENGE_IDS, CHALLENGE_REGIONS, challengeById, challengeOn, voidChallenge } from './challenges.js';
 
 // The uplink cooldown lives in sim.js (CFG.runCooldownMin and friends), where items can shorten it.
 export { runCooldownLeft };
@@ -132,7 +133,8 @@ export function runBlockReason(pet, region = 'public', codex = []) {
 // How fast ICE fights run: slower for a netling that jacked in overclocked.
 export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
 
-export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
+// opts.challenge: a challenge id (challenges.js), kept only for a region that has challenges.
+export function startRun(pet, region, rng, codex = [], ownedAccessories = [], opts = {}) {
   const map = generateMap(region, rng);
   pet.run = {
     region,
@@ -161,7 +163,11 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
+    challenge: CHALLENGE_REGIONS.includes(region) && CHALLENGE_IDS.includes(opts.challenge) ? opts.challenge : null,
+    challengeVoid: false, // the rule was broken: the run goes on without it
+    challengeWon: false, // reached the exit with the rule kept
   };
+  if (pet.run.challenge) note(pet.run, `challenge: ${challengeById(pet.run.challenge).name.toUpperCase()}. ${challengeById(pet.run.challenge).rule}`);
   // An open contract for this region comes along, and the map is fixed so every route can meet it.
   const c = pet.contract;
   if (c && c.region === region && !REGIONS[region].tutorial) {
@@ -272,6 +278,20 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'ice', game };
     }
     case 'relay': {
+      // Unplugged: the relay is dark. It still lets the runner out, but only the exit counts for the challenge.
+      if (run.challenge === 'unplugged') {
+        note(run, 'relay found. dark: unplugged.');
+        openChoice(run, {
+          kind: 'relay',
+          title: 'DARK RELAY',
+          text: 'no power, no venting. it can still get you out.',
+          options: [
+            { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
+            { id: 'out', label: `JACK OUT (${run.loot.length})`, hint: 'bank loot, end run. the challenge only counts at the exit' },
+          ],
+        });
+        return { ok: true, kind: 'relay', dark: true };
+      }
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
       // Corp relays: the grid services its own.
@@ -370,6 +390,10 @@ export function moveTo(pet, nodeId, rng) {
       // The Deep stays unnamed: its way in is a secret.
       const opens = next && !REGIONS[next].requires ? `: the ${REGIONS[next].name} ${young ? 'opens once it grows up' : 'is open to it'}.` : '.';
       note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}, ${RUN_CFG.exitScrip} scrip.${frag}${opened ? ` region cleared${opens}` : ''}`);
+      if (run.challenge && !run.challengeVoid) {
+        run.challengeWon = true;
+        note(run, `challenge complete: ${challengeById(run.challenge).name.toUpperCase()}.`);
+      }
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
   }
@@ -403,6 +427,7 @@ export function resolveIce(pet, won, rng) {
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
   note(run, `ICE bit back${hot ? ' hard: overclocked' : ''}. -${dmg} integrity.`);
+  if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
 }
@@ -440,6 +465,11 @@ export function refreshMarket(pet) {
     const short = scrip < cost ? `needs ${cost} scrip, has ${scrip}` : charge <= chg + 5 ? `needs ${chg + 5}+ charge` : null;
     o.disabled = Boolean(short);
     o.hint = short ?? `-${cost} scrip, -${chg} chg${acc ? ` · ${accessoryById(p.accOffer).rarity === 'common' ? 'accessory' : 'rare accessory'}` : ''}`;
+    // Bare metal: an item (not an accessory) ends the challenge, so the view asks twice (confirm).
+    if (!acc && challengeOn(pet.run, 'baremetal')) {
+      o.confirm = 'ENDS BARE METAL. AGAIN TO BUY';
+      if (!short) o.hint += ' · ends bare metal';
+    } else delete o.confirm;
   }
 }
 
@@ -493,6 +523,7 @@ export function choose(pet, optionId, rng) {
     return `${why} -${n} integrity.`;
   };
   let msg = '';
+  let boughtItem = false;
 
   if (p.kind === 'relay') {
     if (optionId === 'out') return jackOut(pet);
@@ -537,6 +568,7 @@ export function choose(pet, optionId, rng) {
       run.tally.bought++;
       lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
+      boughtItem = true;
     }
   } else if (p.kind === 'anomaly') {
     const ev = ANOMALIES.find((e) => e.id === p.event);
@@ -550,6 +582,7 @@ export function choose(pet, optionId, rng) {
     st.sync = clamp(st.sync);
   }
   note(run, msg);
+  if (boughtItem && challengeOn(run, 'baremetal')) voidChallenge(run, 'an item was bought.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity collapsed mid-run.');
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   return { ok: true, msg };
@@ -571,6 +604,8 @@ function nodesWithin(run, fromId, depth) {
 // Which node types the player can see: visited, adjacent, revealed, plus form sight.
 export function visibleNodeIds(pet) {
   const run = pet.run;
+  // Blackout: only where it has been and one step ahead; no reveals, no form sight.
+  if (run.challenge === 'blackout') return new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
   const ids = new Set([...run.visited, ...run.revealed, ...nodeById(run.map, run.pos).edges]);
   const form = ability(pet);
   if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
