@@ -115,7 +115,8 @@ export const CFG = {
   overflowCrashIntegrity: 15,
   rebootMin: 20,
   // Integrity recovers whenever nothing is wrong, faster while it rests in the dark or naps.
-  // Tuned so an attentive player can bring it from 0 to 100 in about 16 hours with care actions.
+  // From 0 to 100 with nothing wrong: 20 hours awake, 12.5 in dark sleep or naps. Across a day with the lights off at
+  // night that measured 14.6 to 17.8 hours before any care action (COOL, PURGE and PATCH add more).
   integrityRegenPerHour: 5,
   integrityRestRegenPerHour: 8,
   careIntegrity: 4, // COOL, and PURGE with something to purge (PATCH already restores 10)

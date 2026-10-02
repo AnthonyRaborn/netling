@@ -56,5 +56,4 @@ For regressions (rerun the audit):
 - **Crests on the real shells.** The gallery uses the picker swatch colors, so crests still need checking on the shell art in the app. The pink logo color on the Firewall brick and Holographic shell swatches is low contrast.
 - **Not looked at closely:** the palette-`all` matrices (the audit covers their numbers) and the wearable-plus-prop matrix. The COMBINATIONS section was looked at on Daemon only, plus the audit's worst pairs rendered on their worst forms.
 - **Mouthwear and a Scarf on Glitch.** The Chrome jaw or Rebreather still hides most of a Scarf on Glitch; only its tail shows. The Bandage sits over a Kernel's visor rim and cyber eye.
-- **The Visor has no description text**, only the rarity hint.
 - **The smoke test was not run against the sprite changes.** The only game-code change from the review's tooling is `export` on `drawNode` in `src/netrun/view.js`.

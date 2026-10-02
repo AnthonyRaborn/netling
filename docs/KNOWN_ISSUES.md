@@ -16,15 +16,15 @@ Things that work as coded but are easy to misunderstand, and things not yet veri
 
 ## Open questions
 
-- **Integrity regeneration: 14 or 16 hours for a full recovery?** The comment on `integrityRegenPerHour` in `sim.js` says about 16. Never measured.
 - **Real-device behaviour is untested** beyond what the maintainer confirmed: Pages is live, pushes to `main` update it, the installed PWA updates, and a manual install works on macOS. Android, Windows, Steam Deck (controller behaviour included) and iOS storage eviction are untested. Native wrappers are unbuilt stretch goals ([PLATFORMS.md](PLATFORMS.md)).
 - **`ui/*` and `ui/gamepad.js` have no unit tests.** They need a real DOM, so only the smoke test covers them.
 - **The draw and audio tests cannot judge appearance or sound.** They prove nothing throws, arguments are finite and every sound name exists.
 
 ## Verified facts
 
-- `npm test`: 488 tests pass.
+- `npm test`: 500 tests pass.
+- Integrity recovers from 0 to 100 in 20 hours awake or 12.5 hours of dark sleep or naps; across a real day with the lights off at night, 14.6 to 17.8 hours depending on the start time, before care actions (measured with the sim, Charge and Heat held fine).
 - Every module reachable from `main.js` is in the service worker's `SHELL` (`tests/shell.test.js`).
-- The codex has 22 fragments.
+- The codex has 27 fragments.
 - Every Breach puzzle is generated from a legal path, so it is solvable.
 - Balance reference results are in `tools/baseline/`; regenerate them when a rule or number changes ([TESTING.md](TESTING.md)).

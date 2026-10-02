@@ -2,6 +2,13 @@
 
 A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no build step, no runtime dependencies. Read `docs/README.md` for the documentation index; the docs describe hidden mechanics and are spoiler-heavy on purpose. The top-level `README.md` is the player-facing guide and must stay spoiler-free (keep the AI disclosure near its top).
 
+## Status: soft freeze
+
+The game is complete. Do not add new features, content or rules (forms, items, regions, cosmetics, mechanics) unless
+the maintainer explicitly asks for that feature in the conversation; if a request would add one, say the game is in a
+soft freeze and ask first. In scope: bug fixes, balance fixes, accessibility fixes, fixes for current browsers, and
+doc corrections. A full freeze (v1.0) follows the maintainer's device testing. Every rule below still applies.
+
 ## Commands
 
 ```bash
