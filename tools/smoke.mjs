@@ -1645,6 +1645,39 @@ await scenario('challenges: hidden before a Deep exit, then picked and carried i
   assert(s.run?.region === 'deep' && s.run.challenge === 'glass' && s.run.challengeVoid === false, `run: ${JSON.stringify({ region: s.run?.region, c: s.run?.challenge })}`);
 });
 
+// Issue #15: on a touchscreen, BOX then BACK from a run's summary card left the controls up with the run still open,
+// so there was no A button to close the card.
+await scenario('reward box: back from it returns to the pad while a run is open, and it waits for a mini-game', async ({ open }) => {
+  const page = await open(BASE, seed());
+  const shown = (id) => page.evaluate((i) => !document.getElementById(i).hidden, id);
+  await page.click('#btn-netrun');
+  await page.locator('#region-list button').first().click();
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  assert((await saved(page)).run?.phase === 'done', 'no summary card');
+  await page.click('#open-box');
+  assert(await shown('box'), 'the box did not open');
+  await page.click('#box-back');
+  assert((await shown('pad')) && !(await shown('controls')), 'BACK left the pad hidden under an open run');
+  await page.locator('[data-key="a"]').dispatchEvent('pointerdown'); // the pad's A, as a tap sends it
+  await page.waitForTimeout(300);
+  assert(!(await saved(page)).run && (await shown('controls')), 'A did not close the summary card');
+  // During a mini-game the box stays shut, so the game is never left running out of sight.
+  await page.click('#btn-play');
+  await page.click('[data-game="breach"]');
+  await page.click('#open-box');
+  assert(!(await shown('box')) && (await shown('pad')), 'the box opened over a mini-game');
+  assert(/finish the game first/.test(await page.textContent('#status')), 'no reason given');
+  // With nothing open, BACK still returns to the controls.
+  await page.keyboard.press('Escape'); // a forfeit: the result shows for a moment, then the controls return
+  await page.waitForFunction(() => !document.getElementById('controls').hidden, null, { timeout: 10000 });
+  await page.click('#open-box');
+  await page.click('#box-back');
+  assert(await shown('controls'), 'BACK did not return to the controls');
+});
+
 await scenario('daily trace: open during the cooldown, once a day, nothing kept, and a share line', async ({ open }) => {
   const pet = awakeNetling({ stage: 'teen', form: 'kernel', inventory: ['coolant'] });
   pet.lastRunEndAge = pet.ageMin; // the uplink is cooling down

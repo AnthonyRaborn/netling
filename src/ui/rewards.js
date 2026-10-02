@@ -30,6 +30,11 @@ export function checkIn() {
 }
 
 export function openBox() {
+  // A mini-game (or a run's ICE fight) keeps its clock running, so it is not hidden behind the box.
+  if (app.session?.game) {
+    sfx('error', app.state.quirk.pitch);
+    return flashStatus('finish the game first.');
+  }
   sfx('select', app.state.quirk.pitch);
   renderBox();
   showPanel('box');
@@ -97,5 +102,6 @@ function take(index) {
 
 export function initRewards() {
   $('open-box').addEventListener('click', openBox);
-  $('box-back').addEventListener('click', () => showPanel('controls'));
+  // Back to whatever it came from: the pad while a run is open (its map or summary card needs A), else the controls.
+  $('box-back').addEventListener('click', () => showPanel(app.session ? 'pad' : 'controls'));
 }
