@@ -30,6 +30,9 @@ export const RUN_CFG = {
   hideCaughtChance: 0.25,
   caughtDamage: 15,
   complyDamage: 5,
+  // Checkpoint COMPLY: a small scan fee in scrip. Only a netling that can't pay has loot confiscated (or, carrying
+  // nothing, an invasive probe), so complying no longer costs loot whenever the netling has scrip.
+  complyScrip: 5,
   marketPrice: 12, // Charge per purchase, on top of the item's scrip price (SCRIP.price)
   // Two kinds of market: black markets (indie, cheaper, risky stock) and corp exchanges (corp, pricier, safe stock).
   exchangePrice: 16,
@@ -297,7 +300,7 @@ export function moveTo(pet, nodeId, rng) {
         text: 'a scanner sweeps the node. identify yourself.',
         options: [
           { id: 'hide', label: 'HIDE', hint: `-${RUN_CFG.hideCharge} chg, may get scorched` },
-          { id: 'comply', label: 'COMPLY', hint: 'they may confiscate loot' },
+          { id: 'comply', label: 'COMPLY', hint: (pet.scrip ?? 0) >= RUN_CFG.complyScrip ? `-${RUN_CFG.complyScrip} scrip scan fee` : 'no scrip: they may confiscate loot' },
           { id: 'voucher', label: 'VOUCHER', hint: hasVoucher ? 'spend one, pass clean' : 'none in inventory', disabled: !hasVoucher },
         ],
       });
@@ -498,7 +501,10 @@ export function choose(pet, optionId, rng) {
       msg = rng() < RUN_CFG.hideCaughtChance ? hurt(RUN_CFG.caughtDamage, 'slipped past, but got scorched.') : 'slipped past the scanner.';
     } else if (optionId === 'comply') {
       lean(1, 0);
-      if (run.loot.length) {
+      if ((pet.scrip ?? 0) >= RUN_CFG.complyScrip) {
+        pet.scrip -= RUN_CFG.complyScrip;
+        msg = `scanned. paid the ${RUN_CFG.complyScrip} scrip fee.`;
+      } else if (run.loot.length) {
         const taken = run.loot.splice(Math.floor(rng() * run.loot.length), 1)[0];
         msg = `scanned. confiscated: ${ITEMS[taken].name}.`;
       } else {

@@ -44,6 +44,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `recovery.test.js` | 14 | Integrity regeneration, care restores, quiet nights, event timers overnight, visitors, uplink cooldown, overclock, repair kit |
 | `overclock.test.js` | 13 | Overclocked: game and ICE speed, costlier losses, better drops, likelier events and visitors, the stability lean, the jack-in latch, Heatwave minutes; flow is calm, and visitors add no Heat in flow |
 | `markets.test.js` | 5 | Black markets and corp exchanges: each region's share, the Source has none, leans and Charge prices (and the Chrome discount), exclusive accessories, saves |
+| `comply.test.js` | 2 | Corp choices cost about what indie ones do: trace COMPLY costs Sync only, a checkpoint takes a scrip fee and confiscates only when the netling can't pay |
 | `sanitize.test.js` | 14 | Repairing every kind of stored data, hostile input, run validation, strict cleaning, stage and form agreement, future timers |
 | `items.test.js` | 10 | Inventory limits, each item, drops, keepsakes, discard |
 | `games.test.js` | 10 | Breach solvability, Dodge, Tune, Feast, session result and forfeit |

@@ -44,7 +44,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Codex** | The 27 lore fragments collected on netruns (22 count toward Root Access). Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |
 | **Codex inbox** | `pet.codexInbox`: fragments a run found, waiting for the UI to bank them into the shared codex | `netrun/run.js`, `ui/archive.js` |
 | **Compile / script** | A new generation starts as a `script` that compiles for 3 minutes into a baby | `sim.js` |
-| **Comply** | Trace answer: accept the scan. Integrity -5, Sync -10, allegiance +1 | `sim.js` |
+| **Comply** | Trace answer: accept the scan. Sync -10, allegiance +1 (no Integrity cost since the corp-choice pass). At a netrun checkpoint: a 5 scrip fee | `sim.js`, `netrun/run.js` |
 | **Contract** | A netrun job for one region (reach the exit, get past ICE, crack caches, buy, bring back a fragment), posted while the uplink is ready; every route through that run can meet it | `netrun/run.js` `updateContract` |
 | **Coolant cell** | Item: vents 50 Heat | `sim.js` |
 | **Cooldown (uplink cooldown)** | Time before the next netrun: 240/210/180 minutes by stage, minus bonuses, never under 120 | `sim.js` |

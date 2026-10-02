@@ -166,7 +166,7 @@ Death creates the `fragment` (see [Lineage](#lineage-fragments-traits-quirks)) a
 | `scav` (SCAV DATA) | Charge under 95 | +25 Charge, +2 Heat, allegiance -0.75, starts digestion. Favorite +8 Sync. Chrome form: -5 Sync. 12% infection chance |
 | `play` | Charge 10+ (checked before the mini-game) | Sync +25 on win, +8 on loss (overclocked: -6 Sync and -4 Integrity instead). Charge -6, Heat +12. Records win/loss. Wins can drop items (25%, 37.5% overclocked) |
 | `hide` | Open trace | Ends it. Charge -10, Heat +10, allegiance -1. 30% drop from the hide table |
-| `comply` | Open trace | Ends it. Integrity -5, Sync -10, allegiance +1. 30% drop from the comply table |
+| `comply` | Open trace | Ends it. Sync -10 (`complySync`), allegiance +1. 30% drop from the comply table. It used to cost 5 Integrity too, so a player protecting Integrity always hid and leaned indie; now each answer costs about as much in a different stat |
 | `defend` | Open intrusion | Result of the DEFEND mini-game. Win: stability +1. Loss: virus and -10 Integrity |
 | `patch` | Virus present | Cures it. Integrity +10. Stability +1 if within 30 minutes of infection, else -1 |
 | `cool` | Heat 30+ | Heat -35, Integrity +4 |

@@ -98,6 +98,9 @@ export const CFG = {
   traceWindowMin: 120,
   traceIgnoredIntegrity: 15,
   traceIgnoredAllegiance: 1,
+  // COMPLY costs Sync only: it used to cost Integrity too, so a player protecting Integrity always hid and leaned indie.
+  // HIDE costs Charge and Heat, so each answer costs about as much, in a different stat.
+  complySync: 10,
   surgeChancePerHour: 0.03,
   // Virus attack: an intrusion to DEFEND against (a mini-game) before it lands.
   attackChancePerHour: 0.04,
@@ -1168,8 +1171,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'comply': {
       s.event = null;
-      st.integrity = clamp(st.integrity - 5);
-      st.sync = clamp(st.sync - 10);
+      st.sync = clamp(st.sync - CFG.complySync);
       s.axes.allegiance += 1;
       res = ok(`handshake accepted. corp scan complete.${maybeDrop(s, 'comply', ITEM_CFG.complyDropChance, rng)}`, 'feed');
       break;
