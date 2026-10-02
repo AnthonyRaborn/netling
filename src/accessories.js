@@ -592,7 +592,8 @@ ACCESSORIES.push(
     draw: (px, a) => {
       // A plaster across the cheek: a strip with a pad in the middle.
       const x = a.headRight - 3;
-      const y = a.headTop + 1;
+      // Below the head top, but never down over the eyes (Kernel's sit close under it, and its head top drops in frame B).
+      const y = Math.min(a.headTop + 1, a.eyeRow - 2);
       for (let dx = -2; dx <= 2; dx++) for (const dy of [0, 1]) px(x + dx, y + dy, '#f0e6d8');
       px(x, y, '#ff8fa8');
       px(x, y + 1, '#ff8fa8');
