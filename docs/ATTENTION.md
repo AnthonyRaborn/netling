@@ -95,6 +95,6 @@ The first multiplayer feature, with no server (`visitcard.js`, `stepFriends` in 
 
 Notifications are local: they fire while the app is open or in a background tab. A closed or suspended app gets nothing, because a static site has no push server. Reliable notifications with the app closed need a native wrapper ([PLATFORMS.md](PLATFORMS.md)).
 
-## Open ideas
+## Notes for later (reference, if the freeze is lifted)
 
 - **The check-in accessory pools** (see [Daily check-in](#daily-check-in)) were deepened from 7 common and 9 rare or better to 13 each by ten found-anywhere wearables. If more are added, keep the two pools about level so neither accessory day runs dry first.

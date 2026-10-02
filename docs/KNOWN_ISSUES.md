@@ -16,7 +16,10 @@ Things that work as coded but are easy to misunderstand, and things not yet veri
 
 ## Open questions
 
-- **Real-device behaviour is untested** beyond what the maintainer confirmed: Pages is live, pushes to `main` update it, the installed PWA updates, and a manual install works on macOS. Android, Windows, Steam Deck (controller behaviour included) and iOS storage eviction are untested. Native wrappers are unbuilt stretch goals ([PLATFORMS.md](PLATFORMS.md)).
+- **Real-device behaviour is untested** (the maintainer's device pass comes before the full freeze) beyond what the maintainer confirmed: Pages is live, pushes to `main` update it, the installed PWA updates, and a manual install works on macOS. Android, Windows, Steam Deck (controller behaviour included) and iOS storage eviction are untested. Native wrappers are unbuilt stretch goals ([PLATFORMS.md](PLATFORMS.md)).
+
+## Accepted limitations
+
 - **`ui/*` and `ui/gamepad.js` have no unit tests.** They need a real DOM, so only the smoke test covers them.
 - **The draw and audio tests cannot judge appearance or sound.** They prove nothing throws, arguments are finite and every sound name exists.
 

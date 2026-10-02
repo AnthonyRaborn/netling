@@ -91,7 +91,7 @@ Keys, tempos and unlocks are also in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#mus
 - The trailer (`tools/make-trailer.mjs`) mutes the music in its scenes, since each is a fresh page and the music would restart at every cut, and lays one continuous take from `renderMusic` under the whole trailer instead, following the table above. After the next generation hatches it plays Night drive, the track that generation unlocks.
 - By ear: `node tools/render-music.mjs <dir>` renders every track and variant at the game's own level, with `reference-effects.wav` to compare.
 
-## Open
+## Device pass (the maintainer's, before the full freeze)
 
 - **iOS**: Web Audio follows the ringer switch on some iOS versions, so music (like the effects) can be silent on a silenced phone. Not checked on a device; the README mentions it.
 - **Battery**: music keeps the audio clock running while the page is open. Not measured on a phone; MUSIC at 0 stops it.

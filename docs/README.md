@@ -17,6 +17,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Add a feature safely | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
+| Run the device checks that come before the full freeze | [DEVICE_PASS.md](DEVICE_PASS.md) |
 | See what the balance passes changed and what is still open | [BALANCE.md](BALANCE.md) |
 | Look up the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION.md](ATTENTION.md) |
 | Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
