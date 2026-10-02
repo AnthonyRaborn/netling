@@ -7,7 +7,7 @@ import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/r
 import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
 import { ANOMALIES, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
-import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
+import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, corruptedText, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
 import { cleanProgress } from '../src/sanitize.js';
 import { SPRITES } from '../src/sprites.js';
@@ -277,6 +277,12 @@ test('a shell for each mainframe form: raised once, hidden while off, and not ne
   assert.equal(corruptedCosmetic('shell', platinum, { open: false, rootEarned: true }), false);
   assert.equal(corruptedCosmetic('shell', platinum, { open: true, rootEarned: false }), false);
   assert.equal(corruptedCosmetic('shell', COSMETICS.shell.find((c) => c.id === 'chrome'), { open: false, rootEarned: false }), false);
+  // The other Mainframe unlocks read the same way, each named for its slot.
+  for (const key of MAINFRAME_UNLOCKS) {
+    const [slot, id] = key.split(':');
+    assert.equal(corruptedCosmetic(slot, COSMETICS[slot].find((c) => c.id === id), { open: false, rootEarned: false }), true, key);
+  }
+  assert.equal(corruptedText('music').name, '<<TRACK CORRUPTED>>');
 });
 
 test('progress keeps the Source exits and the one-time repair of its name, cleaned', () => {

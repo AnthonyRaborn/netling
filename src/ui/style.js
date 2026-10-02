@@ -1,6 +1,6 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
 import { PALETTES, CFG } from '../sim.js';
-import { COSMETICS, CORRUPTED_SHELL, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
+import { COSMETICS, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, corruptedText, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
@@ -217,11 +217,11 @@ export function renderWardrobe() {
         }
         const corrupted = corruptedCosmetic(slot, c, { open, rootEarned });
         const name = document.createElement('span');
-        name.textContent = open ? c.name : corrupted ? CORRUPTED_SHELL.name : '???';
+        name.textContent = open ? c.name : corrupted ? corruptedText(slot).name : '???';
         if (corrupted) name.className = 'corrupt'; // it blinks like the dex's corrupted records (ui/corrupt.js)
         const hint = document.createElement('span');
         hint.className = 'ch';
-        hint.textContent = open ? (w[slot] === c.id ? 'equipped' : 'tap to equip') : corrupted ? CORRUPTED_SHELL.hint : c.hint;
+        hint.textContent = open ? (w[slot] === c.id ? 'equipped' : 'tap to equip') : corrupted ? corruptedText(slot).hint : c.hint;
         b.append(sw, name, hint);
         if (open) {
           b.addEventListener('click', () => {
@@ -299,11 +299,13 @@ function styleItemSection(key, title, items) {
     const sw = document.createElement('span');
     sw.className = 'sw';
     sw.textContent = owned && x.id !== 'none' ? (key === 'prop' ? '▣' : '✦') : '';
+    const corrupted = corruptedCosmetic('item', x, { open: owned, rootEarned: rootUnlocked() });
     const name = document.createElement('span');
-    name.textContent = owned ? x.name : '???';
+    name.textContent = owned ? x.name : corrupted ? corruptedText('item').name : '???';
+    if (corrupted) name.className = 'corrupt';
     const hint = document.createElement('span');
     hint.className = 'ch';
-    hint.textContent = owned ? (current === x.id ? 'equipped' : 'tap to equip') : accessoryHint(x);
+    hint.textContent = owned ? (current === x.id ? 'equipped' : 'tap to equip') : corrupted ? corruptedText('item').hint : accessoryHint(x);
     b.append(sw, name, hint);
     if (owned) {
       b.addEventListener('click', () => {

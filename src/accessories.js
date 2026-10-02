@@ -544,7 +544,7 @@ export const ACCESSORIES = [
     rarity: 'veryrare',
     regions: ['source'],
     mainframe: true,
-    hint: 'something small follows the bravest runners up from the source.',
+    hint: 'something small follows the bravest runners up from below the bottom.',
     draw: (px, a, frame) => {
       // A little block of parity bits on the chest, one of which flips with the frame.
       const x = a.bodyRight - 4;

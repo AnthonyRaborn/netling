@@ -1498,17 +1498,21 @@ const dexRows = async (page) => {
   return unblinked(page, '#dex-grid li');
 };
 
-// The SHELL section of STYLE: [{ name, hint, corrupt }] for each shell, read through a blink (data-text).
-async function wardrobeShells(page) {
+// STYLE's cosmetics, section by section: { SHELL: [{ name, hint, corrupt }], ... }, names read through a blink (data-text).
+async function wardrobeItems(page) {
   await page.click('#open-archive');
   await page.click('#tab-btn-wardrobe');
-  return page.evaluate(() => {
-    const h = [...document.querySelectorAll('#wardrobe-list h3')].find((x) => x.textContent === 'SHELL');
-    return [...h.nextElementSibling.querySelectorAll('button.cosmetic')].map((b) => {
-      const [, name, hint] = b.children;
-      return { name: name.dataset.text ?? name.textContent, hint: hint.textContent, corrupt: name.classList.contains('corrupt') };
-    });
-  });
+  return page.evaluate(() =>
+    Object.fromEntries(
+      [...document.querySelectorAll('#wardrobe-list h3')].map((h) => [
+        h.textContent,
+        [...(h.nextElementSibling?.querySelectorAll('button.cosmetic') ?? [])].map((b) => {
+          const [, name, hint] = b.children;
+          return { name: name?.dataset.text ?? name?.textContent ?? '', hint: hint?.textContent ?? '', corrupt: Boolean(name?.classList.contains('corrupt')) };
+        }),
+      ]),
+    ),
+  );
 }
 
 await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
@@ -1544,11 +1548,18 @@ await scenario('mainframe: before Root Access, the Source and the new forms read
   const terms = await helpTerms(page);
   assert(terms.includes('0x00') && !terms.includes('mainframe'), `the field manual names the stage: ${terms}`);
   await page.keyboard.press('Escape');
-  // In STYLE, the five Mainframe shells are corrupted too: no ??? and no hint until Root Access.
-  const shells = await wardrobeShells(page);
+  // In STYLE, the Mainframe unlocks are corrupted too: no ??? and no hint until Root Access.
+  const items = await wardrobeItems(page);
+  const shells = items.SHELL;
   const bad = shells.filter((x) => x.name === '<<SHELL CORRUPTED>>');
   assert(bad.length === 5 && bad.every((x) => x.corrupt && /read error/.test(x.hint)), `corrupted shells: ${JSON.stringify(shells)}`);
   assert(!shells.some((x) => /never stops growing/.test(x.hint)), 'a corrupted shell shows its hint');
+  for (const [section, word] of [['SCREEN TINT', 'TINT'], ['SCREEN EFFECT', 'EFFECT'], ['CREST', 'CREST'], ['MUSIC', 'TRACK'], ['ACCESSORY: BODY', 'ITEM']]) {
+    const hit = items[section].filter((x) => x.name === `<<${word} CORRUPTED>>`);
+    assert(hit.length === 1 && hit[0].corrupt, `${section}: ${JSON.stringify(items[section])}`);
+  }
+  const all = Object.values(items).flat();
+  assert(!all.some((x) => /written from|into the light|below the bottom|bravest/.test(x.hint)), 'a corrupted item shows its hint');
 });
 
 await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ??? and hints, and the Source opens', async ({ open }) => {
@@ -1578,8 +1589,9 @@ await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ?
   assert(terms.includes('mainframe'), `the field manual has no rule: ${terms}`);
   await page.keyboard.press('Escape');
   // After Root Access the Mainframe shells are ordinary: Plat's is earned, the other four are ??? with a hint.
-  const shells = await wardrobeShells(page);
-  assert(!shells.some((x) => x.corrupt || x.name.includes('CORRUPTED')), `a shell is still corrupted: ${JSON.stringify(shells)}`);
+  const items = await wardrobeItems(page);
+  const shells = items.SHELL;
+  assert(!Object.values(items).flat().some((x) => x.corrupt || x.name.includes('CORRUPTED')), `an item is still corrupted: ${JSON.stringify(items)}`);
   assert(shells.some((x) => x.name === 'Platinum'), 'Platinum not earned by Plat');
   assert(shells.filter((x) => x.name === '???' && /never stops growing/.test(x.hint)).length === 4, `no hints: ${JSON.stringify(shells)}`);
 });
