@@ -61,7 +61,7 @@ Nine items, art in `ITEM_SPRITES` and colors in `ITEM_COLORS` (`sprites.js`). Pr
 | Signal booster | Your next mini-game win counts double. Awake only | 15 |
 | Memory shard | Rewrites one of its quirks at random | 15 |
 | Repair kit | Restores 40 Integrity. Works while asleep | 15 |
-| Overclock chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
+| Bypass chip | Cuts 1 hour off the netrun uplink cooldown (never below 2 hours) | 50 |
 | Segfault | Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life. Awake only; asks for a second press | 25 |
 
 ## Mini-games
@@ -109,7 +109,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (10)
+### Effects (11)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -121,6 +121,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `curved` | Deep curve | Best Tune streak 10 | "hold the signal and never lose it." |
 | `packets` | Packet rain | Best Feast streak 10 | "ten clean feasts without a bad bite." |
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
+| `heatwave` | Heatwave | 40 hours overclocked while awake, across lives (`progress.hotMin` plus the living `hotTotalMin`). Warm orange and magenta bands rising slowly up the screen; still with motion calmed | "run it hot for the better part of two days." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
 | `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 
@@ -193,20 +194,20 @@ The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60
 
 ## Accessories and props
 
-25 wearable accessories (two are earned-only) and 4 props, 29 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
+31 wearable accessories (two are earned-only) and 8 props, 39 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
 
 Each wearable has a wear slot (`slot`), and one from each slot can be worn at once (`WEAR_SLOTS`, drawn in this order):
 
 | Slot | Wearables |
 |---|---|
-| `body` | Scarf, Corp barcode, KERNEL pin, Checksum |
+| `body` | Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar, Chip bandolier |
 | `face` | Shades, Visor, Cyber eye, Chrome jaw, Rebreather, Circuit tattoo, Earpiece, Neural jack |
 | `head` | Cap, Flower, Bow, Crown, Neon mohawk, Sat-dish antenna, Party hat, Headphones, Bandage |
-| `float` | Halo, Spark, Drone buddy, Data aura |
+| `float` | Halo, Spark, Drone buddy, Data aura, Holo logo, Glitch moth |
 
-Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin and Checksum slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo and Spark rise above a hat (up to 4 rows, never above the screen). The Drone buddy and Data aura orbit in front of everything.
+Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar and Chip bandolier slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo, Spark and Holo logo rise above a hat (up to 4 rows, never above the screen). The orbiting floaters (the Drone buddy, Data aura and Glitch moth, marked `orbits: true`) draw last, in front of everything, and never make anything else move.
 
-Wearables that can be found anywhere (`regions` unset), 10:
+Wearables that can be found anywhere (`regions` unset), 16: the 10 below, and the 6 new shop exclusives (above), which each kind of market sells in any region:
 
 | Rarity | Items |
 |---|---|
@@ -224,6 +225,15 @@ Regional wearables, 13 (they only turn up in their region):
 | The Deep | | | Drone buddy |
 | The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor |
 
+**Shop exclusives** (`shop`): netrun markets come in two kinds (see [NETRUN.md](NETRUN.md#markets-and-exchanges)), and an accessory with `shop` set is offered only by that kind; one without it is offered by both. Region limits still apply on top, and drops and home rewards ignore `shop`. Accessory prices are the same at both.
+
+| Shop | Existing (region) | New, sold in any region |
+|---|---|---|
+| Corp exchange (`exchange`) | Corp barcode, Earpiece, Chrome jaw, Cyber eye (Corp Grid) | Lanyard (body, common), Necktie (body, rare), Holo logo (float, rare), Coffee mug (prop, common), Briefcase (prop, rare) |
+| Black market (`black`) | Neon mohawk, Neural jack, Circuit tattoo, Rebreather, Cyberdeck, Boom box (Bazaar) | Spiked collar (body, common), Chip bandolier (body, rare), Glitch moth (float, rare), Burner phone (prop, common), Spray can (prop, rare) |
+
+The new ones: the Lanyard is a strap to an ID badge with a corp stripe; the Necktie a gray knot and a thin navy tie; the Spiked collar a dark band with studs; the Chip bandolier a strap across the chest with green chips on every other link; the Holo logo a corp-yellow diamond that turns edge-on every other frame; the Glitch moth a pink moth that flits about the head on an uneven path, wings up and down with the frame. The Coffee mug is white with a corp stripe and swaying steam; the Briefcase dark with a yellow clasp; the Burner phone a gray handset whose screen pulses slowly; the Spray can a can with a pink band beside a pink tag on the floor. None of them flashes.
+
 Earned wearables, 2:
 
 | Item | Rarity | How it is earned |
@@ -231,16 +241,20 @@ Earned wearables, 2:
 | Party hat | common | Finish the tutorial netrun ("a gift for a first birthday"). Also backfilled for older saves |
 | Bandage | rare | Survive a netrun disconnect, or an NL-0 rescue ("you have to survive something first") |
 
-Props, 4 (drawn on the ground, own slot):
+Props, 8 (drawn on the ground, own slot):
 
 | Prop | Rarity | Source |
 |---|---|---|
 | Cyberdeck | rare | Bazaar only |
 | Boom box | common | Bazaar only |
+| Coffee mug | common | Corp exchanges |
+| Briefcase | rare | Corp exchanges |
+| Burner phone | common | Black markets |
+| Spray can | rare | Black markets |
 | Mini device | very rare | Earned: own every shell ("collect every shell. then look closer.") |
 | Plush | rare | Earned: after the first netling dies. Drawn as a half-scale copy of the previous netling in its colors |
 
-Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat. A slot the player has not picked is automatic: `src/wearable-colors.js` (generated by `tools/wearable-colors.mjs`, kept current by a test) holds the color for each palette, chosen to stand clear of that palette's body and eye colors, so the same wearable is a different color on different netlings when its signature color would blend in. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe (`null` = automatic). The other wearables keep their own colors, but any pixel that sits on the body (or right beside it) and would blend into it is swapped for a color that does not (`contrastColor`, `src/colors.js`); a pixel floating clear of the body keeps its own color. The Visor is two tinted lenses with a bridge, a scan light and a readout blip, and its automatic band color is never orange or gold. A Ghost's wearable is drawn solid while the Ghost fades. In the dark, a resting pet's wearable is drawn one step lighter than the dimmed body.
+Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat. A slot the player has not picked is automatic: `src/wearable-colors.js` (generated by `tools/wearable-colors.mjs`, kept current by a test) holds the color for each palette, chosen to stand clear of that palette's body and eye colors, so the same wearable is a different color on different netlings when its signature color would blend in. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe (`null` = automatic). The other wearables keep their own colors, but any pixel that sits on the body (or right beside it) and would blend into it is swapped for a color that does not (`contrastColor`, `src/colors.js`); a pixel floating clear of the body keeps its own color. The Visor is three unbroken lines (a dark line above and below a colored band) with a scan light at each end of the band sweeping in and back out, and its automatic band color is never orange or gold. A Ghost's wearable is drawn solid while the Ghost fades. In the dark, a resting pet's wearable is drawn one step lighter than the dimmed body.
 
 The tutorial run never drops accessories (`noStyleDrops`), so the party hat is the first one a player owns. Visitors wear random findable wearables (no props, no earned items) from any region: one on 75% of visitors, and half of those add a second from another slot.
 

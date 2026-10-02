@@ -70,3 +70,24 @@ test('every color map covers every mark a sprite can use', () => {
   for (const rows of Object.values(SPRITES)) for (const r of rows) for (const ch of r) used.add(ch);
   for (const ch of used) assert.ok(ch === '.' || marks.includes(ch), `sprites use an unknown mark ${ch}`);
 });
+
+test('Ghost and Whisper keep a three pixel mouth that slides, never splits', () => {
+  for (const form of ['ghost', 'whisper']) {
+    const rows = ['A', 'B'].map((k) => SPRITES[`${form}${k}`].find((r) => r.includes('+')));
+    const runs = rows.map((r) => r.match(/\++/g));
+    for (const r of runs) assert.deepEqual(r.map((m) => m.length), [3], `${form}: one run of three`);
+    assert.notEqual(rows[0].indexOf('+'), rows[1].indexOf('+'), `${form}: the mouth moves between frames`);
+  }
+});
+
+test('Plat steadies its body between frames: only the forearms change', () => {
+  const [a, b] = [SPRITES.platA, SPRITES.platB];
+  for (let y = 0; y < a.length; y++) {
+    if (y === 12) continue;
+    assert.equal(a[y].replace(/[o+]/g, '#'), b[y].replace(/[o+]/g, '#'), `row ${y} body`);
+  }
+  // On the arm row nothing is painted that is not on the body or at the arm's own column.
+  assert.equal(b[12].slice(2, 16), a[12].slice(2, 16));
+  assert.equal(b[12][1], '.');
+  assert.equal(b[12][16], '.');
+});

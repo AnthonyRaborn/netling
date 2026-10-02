@@ -143,6 +143,7 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
     generation: 9,
     progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 150, cleanJackouts: 20, deepExits: 3, sourceExits: 3, requestsMet: 30, contractsDone: 10, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
     flowMin: 25 * 60,
+    hotMin: 41 * 60,
   };
   for (const slot of SLOTS) {
     const list = COSMETICS[slot];

@@ -55,7 +55,16 @@ export function generateMap(regionId, rng) {
     });
   }
 
-  return { region: regionId, nodes: layers.flat(), layerCount: layers.length };
+  const map = { region: regionId, nodes: layers.flat(), layerCount: layers.length };
+  marketKinds(map, rng);
+  return map;
+}
+
+// Each market is a black market or a corp exchange, by the region's exchangeShare (half and half by default). Fixed
+// when the map is made, so the map can show it; a market a contract adds later gets one the same way.
+export function marketKinds(map, rng) {
+  const share = REGIONS[map.region]?.exchangeShare ?? 0.5;
+  for (const n of map.nodes) if (n.type === 'market' && !n.flavor) n.flavor = rng() < share ? 'corp' : 'black';
 }
 
 export const nodeById = (map, id) => map.nodes.find((n) => n.id === id);

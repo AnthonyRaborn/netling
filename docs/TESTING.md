@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 429 tests in 41 files. The smoke test has 73 scenarios (Playwright 1.56.1).
+`npm test` runs 453 tests in 41 files. The smoke test has 73 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -42,6 +42,9 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `sim.test.js` | 28 | Compile and boot, drain and the drain curve, care mistakes, lights, neglect death, feeding, patch, leaning, inheritance, sleep window, evolution, form perks, migrate, Ghost rule, play, traces, alerts, clock rollback, Packet Feast |
 | `netrun.test.js` | 28 | Map connectivity for all regions, run gating, movement, jack out, disconnect, relay, abort, checkpoints, markets (scrip and Charge), anomalies, form abilities, fog, region locks, fragment order, codex grouping, accessories, the tutorial run, a flatline mid-run |
 | `recovery.test.js` | 14 | Integrity regeneration, care restores, quiet nights, event timers overnight, visitors, uplink cooldown, overclock, repair kit |
+| `overclock.test.js` | 13 | Overclocked: game and ICE speed, costlier losses, better drops, likelier events and visitors, the stability lean, the jack-in latch, Heatwave minutes; flow is calm, and visitors add no Heat in flow |
+| `markets.test.js` | 5 | Black markets and corp exchanges: each region's share, the Source has none, leans and Charge prices (and the Chrome discount), exclusive accessories, saves |
+| `comply.test.js` | 2 | Corp choices cost about what indie ones do: trace COMPLY costs Sync only, a checkpoint takes a scrip fee and confiscates only when the netling can't pay |
 | `sanitize.test.js` | 14 | Repairing every kind of stored data, hostile input, run validation, strict cleaning, stage and form agreement, future timers |
 | `items.test.js` | 10 | Inventory limits, each item, drops, keepsakes, discard |
 | `games.test.js` | 10 | Breach solvability, Dodge, Tune, Feast, session result and forfeit |
@@ -197,15 +200,15 @@ Agreed with the maintainer (see [BALANCE.md](BALANCE.md#design-goals)). Status i
 
 | Target | Measured by | Status |
 |---|---|---|
-| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 97% and at most 2.3% (`sysadmin`) |
+| Ghost stays a deliberate chase: `ghosthunter` at least 95% Ghost, other attentive players under 5% | `lives.json` | Met: 95.6% (the bot cools at 45: with no uptime gain, Ghost chasers keep stability at 0 or above by staying cool) and at most 2.5% (`sysadmin`) |
 | The Shell hints at Ghost: most Ghost chasers pass through it, almost nobody else | `lives.json`, `teens` | Met: 47% of `ghosthunter` teens (63% before the drain pass), at most 2.6% of anyone else |
-| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 99 to 100%. Glitch costs about one fault a life (`steer-glitch`, 1.2 faults) |
+| Attentive players can steer every adult form: each `steer-*` at least 80% for its form | `lives.json` | Met: 97 to 100%. Glitch by staying overclocked (`steer-glitch`, 99%) |
 | Attentive players can steer the teen form: `steer-stub` at least 80% Stub, at a low cost | `lives.json` | Met: 95% Stub at 3.4 faults. A Segfault turns up before the teen stage in 59% of its lives; without one it still starves the netling for the faults |
 | The codex takes at least 3 lives: no lineage finishes in fewer | `lineages.json`, `fastest` | Met: fastest is life 3 for every archetype (the per-life cap of 8); attentive-style lines finish in life 3 (23 to 47%) or 4 (median 4); casual lines now finish in life 3 or 4 about half the time |
 | Players who run have a free slot at least half the time at check-ins | `lives.json`, `fullAtCheckIn` | Met: the inventory is full at 23 to 32% of check-ins for attentive-style players and 47% for casual ones |
-| A market purchase is affordable about every second run | `lives.json`, `scrip.affordable`, `scrip.marketsPerRun` | Met for attentive players (0.66 markets a run, affordable at 82 to 92%). Casual players: 74% of markets |
-| Careful disconnects rise down the way: Public < Bazaar < Corp < Ruins < Deep | `netruns.json` | Met: 4%, 5%, 7%, 8%, 35% |
-| The Deep stays a wall: careful disconnects well above the Ruins' | `netruns.json` | Met: 35% against 8%; adults with their abilities 15 to 19% against 1 to 3% |
+| A market purchase is affordable about every second run | `lives.json`, `scrip.affordable`, `scrip.marketsPerRun` | Met for attentive players (about 1 market a run since every region but the Source has them, affordable at 84 to 93%). Casual players: 76% of markets |
+| Careful disconnects rise down the way: Public < Bazaar < Corp < Ruins < Deep | `netruns.json` | Met: 3%, 4%, 6%, 10%, 34% |
+| The Deep stays a wall: careful disconnects well above the Ruins' | `netruns.json` | Met: 34% against 10%; adults with their abilities 10 to 19% against 2 to 3% |
 | No adult ability is more than about 4 points better than another at avoiding disconnects | `netruns.json` | Met: in the Deep, 14.3 to 18.1% at 4000 runs each (the 1000-run baseline shows 14.6 to 19.2%, within its noise) |
 | Traits stay bounded: no trait at its cap moves the casual full-life rate by more than about 5 points, or any adult form's share by more than about 10 | `node tools/trait-balance.mjs 800` | Met, at the edge: at most 3.2 points (Persistent) and 10.5 points (Persistent at its cap; it was 8 before the drain pass) |
 | Steering survives inheritance: every `steer-*`, `corpo`, `runner` and `ghosthunter` reaches its form in every generation of a lineage | `lineages.json` | Met: 89 to 100% in lives 1 to 4 (lowest: `steer-stub`'s Stub teen, 89 to 95%; `ghosthunter` 96 to 98%) |

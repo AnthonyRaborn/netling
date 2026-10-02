@@ -57,7 +57,8 @@ test('a simulated life is repeatable and reports its stages', () => {
 test('a child starts from its parent: trait, keepsake and generation', () => {
   const r = simulate(ARCHETYPES.attentive, 3, { fragment: parentOf('ghost'), generation: 2 });
   assert.equal(r.trait, FORMS.ghost.trait);
-  const traces = (fragment) => [1, 2, 3, 4, 5, 6, 7, 8].reduce((n, seed) => n + simulate(ARCHETYPES.attentive, seed, { fragment, generation: 2 }).traces, 0);
+  // 16 lives a side: 8 was close enough to the line that an unrelated change to the rng stream could cross it.
+  const traces = (fragment) => Array.from({ length: 16 }, (_, i) => i + 1).reduce((n, seed) => n + simulate(ARCHETYPES.attentive, seed, { fragment, generation: 2 }).traces, 0);
   assert.ok(traces(parentOf('ghost')) < 0.7 * traces(parentOf('daemon')), 'Untraceable: far fewer corp traces');
   assert.throws(() => parentOf('kernel'), /adult form/);
 });
@@ -97,7 +98,11 @@ test('the report diff finds what moved, by path', () => {
 test('the gate probe: codex presets open the way down, and the reported gate agrees with the rule', () => {
   assert.equal(CODEX_PRESETS.deep.length, 22, 'the original 22 (Root Access)');
   assert.equal(CODEX_PRESETS.ruins.at(-1), 'ruins-4', 'the fragment that opens The Deep');
-  const r = simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.deep, rootAccess: true }); // the gate needs Root Access
+  // The first of a few seeds whose life meets the gate (about half do), so a rule change that shifts the rng stream
+  // doesn't break the probe; the gate needs Root Access.
+  const lives = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((seed) => () => simulate(ARCHETYPES['steer-mainframe'], seed, { codex: CODEX_PRESETS.deep, rootAccess: true }));
+  let r = null;
+  for (const life of lives) if ((r = life()).gate.at !== null) break;
   assert.equal(simulate(ARCHETYPES['steer-mainframe'], 1, { codex: CODEX_PRESETS.ruins }).gate.at, null, 'no Root Access: no gate');
   assert.ok(r.cleared.includes('deep'), 'a single life with the preset reaches The Deep');
   assert.ok(r.gate.deepClearAt !== null && r.gate.deepRuns >= 1);

@@ -39,7 +39,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 
 1. `ITEMS` in `sim.js` (name, description, `awake: true` if it needs the netling awake).
 2. A `case` in `useItem`, and any block rule in `itemBlockReason`.
-3. Add it to the `DROPS` tables it should appear in, and to region `loot` or `market` tables in `netrun/regions.js`.
+3. Add it to the `DROPS` tables it should appear in, and to region `loot` or `market` tables in `netrun/regions.js`, or to `blackStock` / `exchangeStock` in `netrun/run.js`.
 4. Art: `ITEM_SPRITES` (7x7 rows) and `ITEM_COLORS` in `sprites.js`.
 5. Optional reaction animation in `ITEM_ANIMS` (`ui/hud.js`).
 6. A test in `tests/items.test.js`. The sanitizer picks the item up automatically because it validates against `ITEMS`.
@@ -65,7 +65,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 
 ### Add an accessory or prop
 
-Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, a wear `slot` (`head`, `face`, `body` or `float`; not for props), `rarity` (`common`, `rare`, `veryrare`), optional `regions`, optional `source: 'earned'`, optional `hint`, optional `colors: [[label, default]]`, and `draw(px, anchors, frame, time, colors)`. Draw relative to the anchors (`headTop`, `eyeRow`, `cx`, ...), never fixed coordinates, so it fits every form. `tests/accessories.test.js` renders every accessory on every form and checks a sane margin. Earned items need a grant in the UI (`grantStyle`). Check it next to the other slots in the gallery's COMBINATIONS section and with `node tools/sprite-audit.mjs --check=combos`; a new body item or halo-like float that should make room goes in `ROOM` (`accessories.js`).
+Add an entry to `ACCESSORIES` (or `PROPS`) in `accessories.js`: `id`, `name`, a wear `slot` (`head`, `face`, `body` or `float`; not for props), `rarity` (`common`, `rare`, `veryrare`), optional `regions`, optional `source: 'earned'`, optional `hint`, optional `colors: [[label, default]]`, and `draw(px, anchors, frame, time, colors)`. Draw relative to the anchors (`headTop`, `eyeRow`, `cx`, ...), never fixed coordinates, so it fits every form. `tests/accessories.test.js` renders every accessory on every form and checks a sane margin. Earned items need a grant in the UI (`grantStyle`). Check it next to the other slots in the gallery's COMBINATIONS section and with `node tools/sprite-audit.mjs --check=combos`; a new body item or halo-like float that should make room goes in `ROOM` (`accessories.js`); a float that moves about the pet (an orbit) sets `orbits: true` instead, so it draws on top of everything and nothing shifts for it.
 
 ### Add a netrun region
 

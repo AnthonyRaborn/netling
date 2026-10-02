@@ -295,7 +295,7 @@ export const SPRITES = {
     '.###oo####oo###.',
     '.###oo####oo###.',
     '.##############.',
-    '.#####+##+#####.',
+    '.#####+++######.',
     '.##############.',
     '.##############.',
     '.##############.',
@@ -310,7 +310,7 @@ export const SPRITES = {
     '.###oo####oo###.',
     '.###oo####oo###.',
     '.##############.',
-    '.######++######.',
+    '.######+++#####.',
     '.##############.',
     '.##############.',
     '.##############.',
@@ -352,7 +352,7 @@ export const SPRITES = {
     '.################.',
     '##################',
     '#.+############+.#',
-    '.#.############.#.',
+    '..##############..',
     '...####....####...',
     '..###........###..',
   ],
@@ -501,7 +501,7 @@ export const SPRITES = {
     '.###oo##oo###.',
     '.###oo##oo###.',
     '.############.',
-    '.####+##+####.',
+    '.####+++#####.',
     '..##########..',
     '..#########...',
     '...#######....',
@@ -518,7 +518,7 @@ export const SPRITES = {
     '.###oo##oo###.',
     '.###oo##oo###.',
     '.############.',
-    '.#####++#####.',
+    '.#####+++####.',
     '..##########..',
     '...#########..',
     '....#######...',
@@ -595,14 +595,22 @@ export const WHITE_COLORS = { '#': '#ffffff', o: '#ffffff', '+': '#ffffff', x: '
 // pixel" failed on the small forms, whose B frames put an accent pixel in the top of the head, so eye wearables jumped
 // up to four rows between frames.
 export const ANCHOR_ROWS = {
+  // Bitling, Kernel and Stub squash their antennae down a row in the B frame, so the head top moves with them and a hat
+  // rides down instead of the antennae poking up through it (like Firewall and Airgap).
   bitling: {
     a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 },
+    b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 },
     sleep: { headTop: 3, eyeRow: 6, mouthRow: 8, neckRow: 9 },
   },
-  kernel: { a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 }, sleep: { headTop: 2, eyeRow: 5, mouthRow: 7, neckRow: 8 } },
+  kernel: {
+    a: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+    b: { headTop: 3, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+    sleep: { headTop: 2, eyeRow: 5, mouthRow: 7, neckRow: 8 },
+  },
   // Stub's body has holes that differ between frames, so its body and neck columns are authored (bodySpan, neckSpan).
   stub: {
     a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9, bodySpan: [2, 11], neckSpan: [3, 10] },
+    b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9, bodySpan: [2, 11], neckSpan: [3, 10] },
     sleep: { headTop: 2, eyeRow: 6, mouthRow: 8, neckRow: 9, bodySpan: [2, 11], neckSpan: [3, 10] },
   },
   shell: { a: { headTop: 1, eyeRow: 4, mouthRow: 6, neckRow: 8 }, sleep: { headTop: 1, eyeRow: 5, mouthRow: 6, neckRow: 8 } },

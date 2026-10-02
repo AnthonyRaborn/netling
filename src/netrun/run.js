@@ -1,6 +1,6 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
-import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
+import { addScrip, grantItem, isAlive, lineOf, log, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
@@ -30,7 +30,17 @@ export const RUN_CFG = {
   hideCaughtChance: 0.25,
   caughtDamage: 15,
   complyDamage: 5,
+  // Checkpoint COMPLY: a small scan fee in scrip. Only a netling that can't pay has loot confiscated (or, carrying
+  // nothing, an invasive probe), so complying no longer costs loot whenever the netling has scrip.
+  complyScrip: 5,
   marketPrice: 12, // Charge per purchase, on top of the item's scrip price (SCRIP.price)
+  // Two kinds of market: black markets (indie, cheaper, risky stock) and corp exchanges (corp, pricier, safe stock).
+  exchangePrice: 16,
+  exchangeChromePrice: 11, // corp credentials
+  blackLean: -0.5,
+  exchangeLean: 0.5,
+  blackStock: { blackice: 3, booster: 2, overclock: 2, memory: 2, segfault: 1, coolant: 1 },
+  exchangeStock: { voucher: 3, coolant: 2, repair: 2, antivirus: 2, memory: 1 },
   cacheFragmentChance: 0.15,
   // A netling's memory holds this many new codex fragments; the rest wait for the next generation.
   codexPerLife: 8,
@@ -119,6 +129,9 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   return null;
 }
 
+// How fast ICE fights run: slower for a netling that jacked in overclocked.
+export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
+
 export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
   const map = generateMap(region, rng);
   pet.run = {
@@ -131,6 +144,9 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     pending: null, // ice: { game } | choice: { kind, title, text, options, ... }
     revealed: [],
     phased: false,
+    // Overclocked at jack-in: ICE runs slower all run but bites harder. Fixed here, so the Heat every move adds
+    // never switches it on partway: jacking in hot is the player's choice.
+    hot: overclocked(pet),
     insured: false, // Chrome's corp insurance used this run
     insuredTimes: 0, // how many times it paid out (a Plat's pays out twice)
     freePhases: 0, // ICE a Glitch line has slipped through for certain (a Panic gets two)
@@ -153,6 +169,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     pet.run.contract = { ...c };
     const need = CONTRACT_ROUTES[c.kind]?.(c, map);
     if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
+    marketKinds(map, rng);
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, "NL-0: i'll wait up here.");
@@ -283,14 +300,15 @@ export function moveTo(pet, nodeId, rng) {
         text: 'a scanner sweeps the node. identify yourself.',
         options: [
           { id: 'hide', label: 'HIDE', hint: `-${RUN_CFG.hideCharge} chg, may get scorched` },
-          { id: 'comply', label: 'COMPLY', hint: 'they may confiscate loot' },
+          { id: 'comply', label: 'COMPLY', hint: (pet.scrip ?? 0) >= RUN_CFG.complyScrip ? `-${RUN_CFG.complyScrip} scrip scan fee` : 'no scrip: they may confiscate loot' },
           { id: 'voucher', label: 'VOUCHER', hint: hasVoucher ? 'spend one, pass clean' : 'none in inventory', disabled: !hasVoucher },
         ],
       });
       return { ok: true, kind: 'checkpoint' };
     }
     case 'market': {
-      const table = region.market ?? region.loot;
+      const corp = node.flavor === 'corp';
+      const table = corp ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
       // Under a market contract, the first offer is always one of the cheapest items.
       const cheap = run.contract?.kind === 'market' ? cheapestOf(table) : null;
       const offers = [weighted(cheap ?? table, rng)];
@@ -298,11 +316,12 @@ export function moveTo(pet, nodeId, rng) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
       }
-      const price = region.marketPrice ?? RUN_CFG.marketPrice;
-      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region) : null;
+      const price = corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
+      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
       openChoice(run, {
         kind: 'market',
-        title: 'BLACK MARKET',
+        flavor: corp ? 'corp' : 'black',
+        title: corp ? 'CORP EXCHANGE' : 'BLACK MARKET',
         text: `a vendor process. scrip, plus ${price} charge.`,
         offers,
         price,
@@ -372,10 +391,13 @@ export function resolveIce(pet, won, rng) {
   }
   const soft = ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses;
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
-  const dmg = Math.round(REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1));
+  const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
+  const dmg = Math.round(
+    REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
+  );
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
-  note(run, `ICE bit back. -${dmg} integrity.`);
+  note(run, `ICE bit back${hot ? ' hard: overclocked' : ''}. -${dmg} integrity.`);
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
 }
@@ -479,7 +501,10 @@ export function choose(pet, optionId, rng) {
       msg = rng() < RUN_CFG.hideCaughtChance ? hurt(RUN_CFG.caughtDamage, 'slipped past, but got scorched.') : 'slipped past the scanner.';
     } else if (optionId === 'comply') {
       lean(1, 0);
-      if (run.loot.length) {
+      if ((pet.scrip ?? 0) >= RUN_CFG.complyScrip) {
+        pet.scrip -= RUN_CFG.complyScrip;
+        msg = `scanned. paid the ${RUN_CFG.complyScrip} scrip fee.`;
+      } else if (run.loot.length) {
         const taken = run.loot.splice(Math.floor(rng() * run.loot.length), 1)[0];
         msg = `scanned. confiscated: ${ITEMS[taken].name}.`;
       } else {
@@ -505,7 +530,7 @@ export function choose(pet, optionId, rng) {
       pet.scrip -= SCRIP.price[item];
       run.loot.push(item);
       run.tally.bought++;
-      lean(-0.5, 0);
+      lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
     }
   } else if (p.kind === 'anomaly') {

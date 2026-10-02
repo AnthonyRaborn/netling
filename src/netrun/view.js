@@ -4,7 +4,7 @@ import { GameSession } from '../games/session.js';
 import { text, DIM, W, H } from '../games/common.js';
 import { nodeById } from './map.js';
 import { REGIONS } from './regions.js';
-import { moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, contractShort, contractPay, RUN_CFG } from './run.js';
+import { iceSpeed, moveTo, resolveIce, choose, abortRun, closeRun, runOptions, visibleNodeIds, contractShort, contractPay, RUN_CFG } from './run.js';
 import { ITEMS } from '../sim.js';
 import { fragmentById } from './codex.js';
 import { accessoryById } from '../accessories.js';
@@ -18,7 +18,8 @@ const TYPE_LABEL = {
   relay: 'RELAY',
   exit: 'EXIT NODE',
   checkpoint: 'CHECKPOINT',
-  market: 'MARKET',
+  market: 'BLACK MARKET',
+  exchange: 'CORP EXCHANGE',
   anomaly: 'ANOMALY',
 };
 // First-run captions, keyed by the node the cursor is on (or the open choice).
@@ -36,7 +37,8 @@ const TYPE_HINT = {
   relay: 'recharge, vent heat, safe jack-out.',
   exit: 'bank everything + a bonus.',
   checkpoint: 'corp scan. hide, comply, or pay.',
-  market: 'spend charge on items.',
+  market: 'cheap, risky. leans indie.',
+  exchange: 'safe, pricier. leans corp.',
   anomaly: 'something strange. choose wisely.',
 };
 
@@ -55,6 +57,7 @@ export class RunView {
     this.abortArmed = 0;
     this.game = null;
     this.lastMsgCount = pet.run.messages.length;
+    if (pet.run.hot && pet.run.visited.length === 1) this.toast = { msg: 'overclocked: ICE runs slow, bites hard.', until: performance.now() + 3200 };
     if (pet.run.phase === 'ice') this.startIce(); // resumed mid-encounter
   }
 
@@ -80,6 +83,7 @@ export class RunView {
     this.game = new GameSession(game, {
       rng: this.rng,
       sound: this.sound,
+      speed: iceSpeed(this.pet),
       onFinish: (won) => {
         this.game = null;
         this.onGame(game, won);
@@ -215,7 +219,7 @@ export class RunView {
         ctx.fillRect(x - 2, y - 2, 4, 4);
         continue;
       }
-      drawNode(ctx, n.type, x, y, nodePal, run.visited.includes(n.id) && n.id !== run.pos);
+      drawNode(ctx, nodeKind(n), x, y, nodePal, run.visited.includes(n.id) && n.id !== run.pos);
     }
     // current position + cursor
     const cur = this.nodePos(nodeById(map, run.pos));
@@ -241,11 +245,16 @@ export class RunView {
     else if (toast) {
       text(ctx, toast.length > 46 ? `${toast.slice(0, 45)}…` : toast, 12, 234, { size: 20, color: '#f9f002' });
     } else if (sel) {
-      text(ctx, `> ${TYPE_LABEL[sel.type]}`, 12, 234, { size: 22, color: '#c7f9ff' });
-      text(ctx, TYPE_HINT[sel.type] ?? '', 150, 234, { size: 18, color: DIM });
+      const label = `> ${TYPE_LABEL[nodeKind(sel)]}`;
+      text(ctx, label, 12, 234, { size: 22, color: '#c7f9ff' });
+      // The hint follows the label (the market labels are long), but never starts left of where it always did.
+      text(ctx, TYPE_HINT[nodeKind(sel)] ?? '', Math.max(150, 26 + ctx.measureText(label).width), 234, { size: 18, color: DIM });
     }
     this.drawHud(ctx, pal);
-    text(ctx, REGIONS[run.region].name.toUpperCase(), 12, 12, { size: 18, color: DIM });
+    const region = REGIONS[run.region].name.toUpperCase();
+    text(ctx, region, 12, 12, { size: 18, color: DIM });
+    // Jacked in overclocked: ICE runs slower and bites harder all run.
+    if (run.hot) text(ctx, 'OC', 22 + ctx.measureText(region).width, 12, { size: 18, color: '#ff9f1c' });
     const job = contractShort(run);
     if (job) text(ctx, job, W - 12, 12, { size: 18, align: 'right', color: job.startsWith('JOB LOST') ? DIM : '#f9f002' });
     if (tutorial) this.drawTutorialTip(ctx, sel, toast);
@@ -342,6 +351,9 @@ function bracket(ctx, x, y, r) {
   }
 }
 
+// The marker a node draws as: a market shows which kind it is.
+export const nodeKind = (n) => (n.type === 'market' && n.flavor === 'corp' ? 'exchange' : n.type);
+
 export function drawNode(ctx, type, x, y, pal, spent) {
   ctx.globalAlpha = spent ? 0.45 : 1;
   switch (type) {
@@ -383,6 +395,15 @@ export function drawNode(ctx, type, x, y, pal, spent) {
       ctx.fillRect(x - 8, y - 8, 16, 3);
       ctx.fillRect(x - 8, y + 5, 16, 3);
       ctx.fillRect(x - 2, y - 3, 4, 6);
+      break;
+    case 'exchange':
+      // A corp storefront: the market's box in corp yellow, with a counter across it instead of a tab on top.
+      ctx.strokeStyle = '#f9f002';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x - 8, y - 6, 16, 12);
+      ctx.fillStyle = '#f9f002';
+      ctx.fillRect(x - 8, y - 1, 16, 2);
+      ctx.fillRect(x - 1, y - 10, 2, 4);
       break;
     case 'market':
       ctx.strokeStyle = '#b967ff';

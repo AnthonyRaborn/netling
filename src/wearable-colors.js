@@ -13,7 +13,7 @@ export const AUTO_COLORS = {
   ],
   visor: [
     { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
-    { ice: '#39ff14', neon: '#39ff14', acid: '#39ff14', toxic: '#b967ff', ultra: '#39ff14', origin: '#39ff14' },
+    { ice: '#39ff14', neon: '#39ff14', acid: '#ffffff', toxic: '#b967ff', ultra: '#ffffff', origin: '#39ff14' },
   ],
   mohawk: [
     { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
