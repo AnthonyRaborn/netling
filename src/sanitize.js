@@ -157,7 +157,7 @@ function cleanRun(raw, s, strict) {
   if ((phase === 'ice' || phase === 'choice') && !pending) phase = 'map';
   if (phase === 'map' && !at.edges.length) return null; // a dead end the runner could never leave
   const map = strict
-    ? { region: str(raw.map.region, raw.region), nodes: nodes.map(({ id, layer, type, edges }) => ({ id, layer, type, edges: [...edges] })), layerCount: raw.map.layerCount }
+    ? { region: str(raw.map.region, raw.region), nodes: nodes.map(({ id, layer, type, edges, flavor }) => ({ id, layer, type, edges: [...edges], ...(type === 'market' ? { flavor: flavor === 'corp' ? 'corp' : 'black' } : {}) })), layerCount: raw.map.layerCount }
     : raw.map;
   return {
     ...(strict ? {} : raw),

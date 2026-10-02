@@ -305,7 +305,7 @@ test('Daemon and Firewall each have a fragment; the Bazaar still ends on the gra
   assert.equal(nextFragment('bazaar', ['bazaar-1', 'bazaar-2', 'bazaar-3', 'bazaar-5']), 'bazaar-4');
 });
 
-import { ACCESSORIES } from '../src/accessories.js';
+import { ACCESSORIES, STYLE_ITEMS } from '../src/accessories.js';
 
 test('markets can offer an unowned accessory, bought for charge and banked on jack-out', () => {
   let found = false;
@@ -339,7 +339,7 @@ test('accessories are lost on disconnect, and nothing is offered once all are ow
   assert.equal(s.accessoryInbox, undefined);
 
   const { s: t, next } = runInto('baby', 'market', 7);
-  t.run.knownAcc = ACCESSORIES.map((x) => x.id);
+  t.run.knownAcc = STYLE_ITEMS.map((x) => x.id); // wearables and props
   moveTo(t, next.id, () => 0); // every chance fires
   assert.equal(t.run.pending.accOffer, null);
 });

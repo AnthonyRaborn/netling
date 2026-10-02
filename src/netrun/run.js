@@ -1,6 +1,6 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
 import { addScrip, grantItem, isAlive, lineOf, log, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
-import { generateMap, nodeById, ensureOnEveryRoute } from './map.js';
+import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
@@ -166,6 +166,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     pet.run.contract = { ...c };
     const need = CONTRACT_ROUTES[c.kind]?.(c, map);
     if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
+    marketKinds(map, rng);
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, "NL-0: i'll wait up here.");
@@ -303,7 +304,7 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'checkpoint' };
     }
     case 'market': {
-      const corp = rng() < (region.exchangeShare ?? 0.5);
+      const corp = node.flavor === 'corp';
       const table = corp ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
       // Under a market contract, the first offer is always one of the cheapest items.
       const cheap = run.contract?.kind === 'market' ? cheapestOf(table) : null;
@@ -313,7 +314,7 @@ export function moveTo(pet, nodeId, rng) {
         if (next !== offers[0]) offers.push(next);
       }
       const price = corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
-      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region) : null;
+      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
       openChoice(run, {
         kind: 'market',
         flavor: corp ? 'corp' : 'black',

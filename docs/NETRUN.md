@@ -77,11 +77,11 @@ Netlings from before the order existed (no `cleared` field) are given every regi
 
 | Region | Unlock | Middle layers | Node weights (cache / ICE / relay / checkpoint / market / anomaly) | ICE damage | Exit bonus items | Home sound |
 |---|---|---|---|---|---|---|
-| Public Net | any stage | 6 | 3 / 6 / 1 / 1 / 1 / 2 | 35 | 1 | square, x1 |
-| Darknet Bazaar | teen+, Public Net cleared | 7 | 2 / 5 / 1 / 0 / 4 / 2 | 40 | 1 | sawtooth, x0.9 |
-| Corp Grid | teen+, Bazaar cleared | 7 | 3 / 6 / 1 / 4 / 0 / 1 | 35 | 1 | triangle, x1.25 |
-| Old Web Ruins | adult, Corp Grid cleared | 7 | 3 / 5 / 1 / 0 / 0 / 4 | 48 | 2 | sine, x0.75 |
-| The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 10 | 2 / 8 / 1 / 0 / 0 / 2 | 50 | 2 | sine, x0.5 |
+| Public Net | any stage | 6 | 3 / 6 / 1 / 1 / 1 / 2 (exchanges 50%) | 35 | 1 | square, x1 |
+| Darknet Bazaar | teen+, Public Net cleared | 7 | 2 / 5 / 1 / 0 / 4 / 2 (exchanges 15%) | 40 | 1 | sawtooth, x0.9 |
+| Corp Grid | teen+, Bazaar cleared | 7 | 3 / 7 / 1 / 4 / 2 / 1 (exchanges 80%) | 35 | 1 | triangle, x1.25 |
+| Old Web Ruins | adult, Corp Grid cleared | 7 | 3 / 6 / 1 / 0 / 1 / 4 (exchanges 50%) | 48 | 2 | sine, x0.75 |
+| The Deep | adult, Ruins cleared, and codex fragment `ruins-4` | 10 | 2 / 9 / 1 / 0 / 1 / 2 (exchanges 50%) | 50 | 2 | sine, x0.5 |
 | The Source | mainframe, Deep cleared, and codex fragment `deep-5` | 13 | 2 / 11 / 1 / 0 / 0 / 3 | 52 | 3 | triangle, x0.4 |
 
 ICE damage was tuned in balance pass 2 so careful players disconnect more often at each step down: about 4% in the Public Net, 5% in the Bazaar, 7% in the Corp Grid (whose checkpoints add their own damage), 8% in the Ruins and 35% in The Deep, which stays a wall (`tools/baseline/netruns.json`). The Deep is hard by distance (10 middle layers, from 8 in pass 2) rather than by ICE damage, because more ICE damage pulls the adult abilities apart again; with their abilities, careful adults disconnect 14 to 19% there against 1 to 3% in the Ruins.
@@ -101,7 +101,18 @@ Loot tables (weights), used for caches, ICE wins, exit bonuses and anomaly loot:
 | The Deep | memory 3, booster 2, antivirus 2, coolant 2, repair 2, voucher 1, blackice 1, overclock 1, segfault 1 |
 | The Source | memory 3, overclock 2, booster 2, repair 2, antivirus 2, coolant 2, blackice 1, voucher 1, segfault 1 |
 
-Market stock (weights) differs from loot in the Public Net (`coolant 2, antivirus 2, booster 2, blackice 2, repair 2, memory 1, overclock 1, segfault 1`) and the Bazaar (`blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1, segfault 1`). Items cost corpo scrip (below) plus Charge: 10 Charge in the Bazaar, 12 elsewhere. Only regions whose `nodes` include `market` (Public Net, Bazaar) generate market nodes.
+### Markets and exchanges
+
+Every region but the Source has market nodes, and each is one of two kinds, fixed when the map is made (`marketKinds` in `map.js`, by the region's `exchangeShare`, half and half unless set; a market a contract adds later gets one the same way). The map shows which: a purple storefront for a black market, a yellow one with a counter for a corp exchange.
+
+| | Black market | Corp exchange |
+|---|---|---|
+| Allegiance per item bought | -0.5 (`blackLean`) | +0.5 (`exchangeLean`) |
+| Charge per item | 12 (10 in the Bazaar, `marketPrice`) | 16 (`exchangePrice`); 11 for an adult Chrome line (`exchangeChromePrice`, corp credentials) |
+| Stock (weights) | `blackStock`: blackice 3, booster 2, overclock 2, memory 2, segfault 1, coolant 1 (the Bazaar keeps its own: blackice 3, memory 2, booster 2, overclock 2, antivirus 1, coolant 1, repair 1, segfault 1) | `exchangeStock`: voucher 3, coolant 2, repair 2, antivirus 2, memory 1 |
+| Accessories | its own exclusives and the shared ones ([CONTENT_CATALOG.md](CONTENT_CATALOG.md#accessories-and-props)) | the same |
+
+Scrip prices, accessory prices and selling are the same at both. Exchanges are the only place to buy a Corp voucher. The Corp Grid, the Ruins and the Deep gained markets with this change, and one ICE weight each so that the disconnect order holds. With the split, an attentive player who buys at both comes out even (Chrome 24%, Firewall 23%), where a buy used to always lean indie.
 
 ### Corpo scrip
 
@@ -142,7 +153,7 @@ Every move first costs Charge and Heat (see below), then the node triggers.
 | `ice` | A random mini-game (any of the four). Win: 20% chance of loot, 5% of an accessory. Loss: Integrity minus the region's ICE damage (halved for Firewall; 1.5x for a run jacked into overclocked), Heat +12. Integrity 0 disconnects. A run jacked into overclocked also plays its ICE at 0.85x speed |
 | `relay` | Charge +15, Heat -20, and +20 Integrity for an adult Chrome (corp relays). Then a choice: CONTINUE or JACK OUT (banks loot, ends the run) |
 | `checkpoint` | Chrome and Ghost pass automatically. Others choose: **HIDE** (Charge -8, Heat +8, allegiance -1, 25% chance of -15 Integrity), **COMPLY** (allegiance +1, a random carried item is confiscated, or -5 Integrity if carrying nothing), **VOUCHER** (spend a voucher from the inventory, pass clean, allegiance +1) |
-| `market` | Two different offered items for their scrip price plus the region's Charge price, and a 50% chance of an accessory offer (25 or 50 scrip plus 20 Charge). While it is open the inventory sells for half price. Each item bought leans allegiance by -0.5 |
+| `market` | Two different offered items for their scrip price plus the region's Charge price, and a 50% chance of an accessory offer (25 or 50 scrip plus 20 Charge). While it is open the inventory sells for half price. Each item bought leans allegiance -0.5 at a black market, +0.5 at a corp exchange (see [Markets and exchanges](#markets-and-exchanges)) |
 | `anomaly` | A random anomaly from the list below |
 | `exit` | Adds the region's exit bonus item(s) and 3 loose scrip, rolls 60% for a fragment (100% in the tutorial) and 8% for an accessory, marks the region cleared for this netling (not the tutorial), then jacks out |
 

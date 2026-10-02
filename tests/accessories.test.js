@@ -78,7 +78,7 @@ test('regional accessories only roll in their region; the originals roll anywher
   }
   assert.ok(home.has('drone') && !home.has('checksum'));
   assert.ok(!worn.has('checksum'));
-  assert.equal(ACCESSORIES.length, 25);
+  assert.equal(ACCESSORIES.length, 31);
 });
 
 test('the drone orbits: its position changes over time', () => {

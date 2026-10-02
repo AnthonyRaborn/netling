@@ -280,7 +280,7 @@ Two hidden numbers, `axes.allegiance` and `axes.stability`, are nudged by almost
 | -0.75 | Scavenged packet |
 | +1 | COMPLY, ignored trace, Corp voucher, netrun checkpoint comply or voucher |
 | -1 | HIDE, Black ICE shard, netrun checkpoint hide |
-| -0.5 | Each item bought at a netrun market |
+| -0.5 / +0.5 | Each item bought at a netrun black market / corp exchange |
 | varies | Netrun anomalies (see [NETRUN.md](NETRUN.md)) |
 
 **Stability** (positive = orderly, negative = chaotic):

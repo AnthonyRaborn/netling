@@ -158,7 +158,8 @@ A netrun is an expedition. **Jack in** with at least 30 Charge while it is awake
 | **ICE** | A mini-game. Win to pass; lose and it bites into Integrity |
 | **Relay** | Recharges and cools it, and lets you bank your loot and jack out safely |
 | **Checkpoint** | A corp scan: hide, comply or pay with a voucher |
-| **Market** | Buy items with scrip plus some Charge, and sometimes something stylish. While a market is open, the inventory's button sells for half price |
+| **Black market** (purple) | Buy items with scrip plus some Charge, and sometimes something stylish. Cheaper, with riskier stock, and buying leans your netling toward the indie side. While a market is open, the inventory's button sells for half price |
+| **Corp exchange** (yellow) | The same, but with safe, official stock (Corp vouchers among it) at a higher Charge price, and buying leans it toward the corps. Each kind also sells a few accessories the other doesn't |
 | **Anomaly** | A strange event with a risky choice |
 | **Exit** | Banks everything you carry, plus a bonus, and clears the region |
 

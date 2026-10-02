@@ -194,20 +194,20 @@ The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60
 
 ## Accessories and props
 
-25 wearable accessories (two are earned-only) and 4 props, 29 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
+31 wearable accessories (two are earned-only) and 8 props, 39 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
 
 Each wearable has a wear slot (`slot`), and one from each slot can be worn at once (`WEAR_SLOTS`, drawn in this order):
 
 | Slot | Wearables |
 |---|---|
-| `body` | Scarf, Corp barcode, KERNEL pin, Checksum |
+| `body` | Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar, Chip bandolier |
 | `face` | Shades, Visor, Cyber eye, Chrome jaw, Rebreather, Circuit tattoo, Earpiece, Neural jack |
 | `head` | Cap, Flower, Bow, Crown, Neon mohawk, Sat-dish antenna, Party hat, Headphones, Bandage |
-| `float` | Halo, Spark, Drone buddy, Data aura |
+| `float` | Halo, Spark, Drone buddy, Data aura, Holo logo, Glitch moth |
 
-Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin and Checksum slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo and Spark rise above a hat (up to 4 rows, never above the screen). The Drone buddy and Data aura orbit in front of everything.
+Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar and Chip bandolier slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo, Spark and Holo logo rise above a hat (up to 4 rows, never above the screen). The Drone buddy, Data aura and Glitch moth move in front of everything.
 
-Wearables that can be found anywhere (`regions` unset), 10:
+Wearables that can be found anywhere (`regions` unset), 16: the 10 below, and the 6 new shop exclusives (above), which each kind of market sells in any region:
 
 | Rarity | Items |
 |---|---|
@@ -225,6 +225,15 @@ Regional wearables, 13 (they only turn up in their region):
 | The Deep | | | Drone buddy |
 | The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor |
 
+**Shop exclusives** (`shop`): netrun markets come in two kinds (see [NETRUN.md](NETRUN.md#markets-and-exchanges)), and an accessory with `shop` set is offered only by that kind; one without it is offered by both. Region limits still apply on top, and drops and home rewards ignore `shop`. Accessory prices are the same at both.
+
+| Shop | Existing (region) | New, sold in any region |
+|---|---|---|
+| Corp exchange (`exchange`) | Corp barcode, Earpiece, Chrome jaw, Cyber eye (Corp Grid) | Lanyard (body, common), Necktie (body, rare), Holo logo (float, rare), Coffee mug (prop, common), Briefcase (prop, rare) |
+| Black market (`black`) | Neon mohawk, Neural jack, Circuit tattoo, Rebreather, Cyberdeck, Boom box (Bazaar) | Spiked collar (body, common), Chip bandolier (body, rare), Glitch moth (float, rare), Burner phone (prop, common), Spray can (prop, rare) |
+
+The new ones: the Lanyard is a strap to an ID badge with a corp stripe; the Necktie a gray knot and a thin navy tie; the Spiked collar a dark band with studs; the Chip bandolier a strap across the chest with green chips on every other link; the Holo logo a corp-yellow diamond that turns edge-on every other frame; the Glitch moth a pink moth that flits about the head on an uneven path, wings up and down with the frame. The Coffee mug is white with a corp stripe and swaying steam; the Briefcase dark with a yellow clasp; the Burner phone a gray handset whose screen pulses slowly; the Spray can a can with a pink band beside a pink tag on the floor. None of them flashes.
+
 Earned wearables, 2:
 
 | Item | Rarity | How it is earned |
@@ -232,12 +241,16 @@ Earned wearables, 2:
 | Party hat | common | Finish the tutorial netrun ("a gift for a first birthday"). Also backfilled for older saves |
 | Bandage | rare | Survive a netrun disconnect, or an NL-0 rescue ("you have to survive something first") |
 
-Props, 4 (drawn on the ground, own slot):
+Props, 8 (drawn on the ground, own slot):
 
 | Prop | Rarity | Source |
 |---|---|---|
 | Cyberdeck | rare | Bazaar only |
 | Boom box | common | Bazaar only |
+| Coffee mug | common | Corp exchanges |
+| Briefcase | rare | Corp exchanges |
+| Burner phone | common | Black markets |
+| Spray can | rare | Black markets |
 | Mini device | very rare | Earned: own every shell ("collect every shell. then look closer.") |
 | Plush | rare | Earned: after the first netling dies. Drawn as a half-scale copy of the previous netling in its colors |
 

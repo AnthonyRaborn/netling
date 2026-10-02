@@ -39,7 +39,7 @@ Edit `CFG` (or `ITEM_CFG`, `RUN_CFG`). The field manual updates itself. Run the 
 
 1. `ITEMS` in `sim.js` (name, description, `awake: true` if it needs the netling awake).
 2. A `case` in `useItem`, and any block rule in `itemBlockReason`.
-3. Add it to the `DROPS` tables it should appear in, and to region `loot` or `market` tables in `netrun/regions.js`.
+3. Add it to the `DROPS` tables it should appear in, and to region `loot` or `market` tables in `netrun/regions.js`, or to `blackStock` / `exchangeStock` in `netrun/run.js`.
 4. Art: `ITEM_SPRITES` (7x7 rows) and `ITEM_COLORS` in `sprites.js`.
 5. Optional reaction animation in `ITEM_ANIMS` (`ui/hud.js`).
 6. A test in `tests/items.test.js`. The sanitizer picks the item up automatically because it validates against `ITEMS`.

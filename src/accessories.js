@@ -104,7 +104,8 @@ export function anchorsFor(sprite) {
 }
 
 // Each draw(px, a, frame, time) paints with px(x, y, color) in sprite-local coordinates.
-// regions: where it can be found (markets and drops); omitted means anywhere. hint overrides the rarity hint.
+// regions: where it can be found (markets and drops); omitted means anywhere. shop: the one kind of netrun market that
+// sells it, 'exchange' (corp) or 'black'; omitted means both (drops ignore it). hint overrides the rarity hint.
 export const ACCESSORIES = [
   {
     id: 'cap',
@@ -272,6 +273,7 @@ export const ACCESSORIES = [
     name: 'Corp barcode',
     slot: 'body',
     rarity: 'common',
+    shop: 'exchange',
     regions: ['corp'],
     hint: 'stamped on assets in the Corp Grid.',
     draw: (px, a) => {
@@ -288,6 +290,7 @@ export const ACCESSORIES = [
     name: 'Chrome jaw',
     slot: 'face',
     rarity: 'rare',
+    shop: 'exchange',
     regions: ['corp'],
     hint: 'rarely sold in the Corp Grid.',
     draw: (px, a) => {
@@ -303,6 +306,7 @@ export const ACCESSORIES = [
     name: 'Cyber eye',
     slot: 'face',
     rarity: 'rare',
+    shop: 'exchange',
     regions: ['corp'],
     hint: 'rarely sold in the Corp Grid.',
     draw: (px, a, frame) => {
@@ -321,6 +325,7 @@ export const ACCESSORIES = [
     name: 'Neon mohawk',
     slot: 'head',
     rarity: 'common',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
     colors: [['mohawk', '#ff2a6d']],
@@ -335,6 +340,7 @@ export const ACCESSORIES = [
     name: 'Neural jack',
     slot: 'face',
     rarity: 'common',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
     draw: (px, a) => {
@@ -348,6 +354,7 @@ export const ACCESSORIES = [
     name: 'Circuit tattoo',
     slot: 'face',
     rarity: 'common',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'inked in the Darknet Bazaar.',
     colors: [['glow', '#39ff14']],
@@ -361,6 +368,7 @@ export const ACCESSORIES = [
     name: 'Rebreather',
     slot: 'face',
     rarity: 'common',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'sold in the Darknet Bazaar.',
     colors: [
@@ -421,6 +429,114 @@ export const ACCESSORIES = [
       px(x - 2, y - 1, '#c8d0dc'); // rotors
       px(x + 2, y - 1, '#c8d0dc');
       px(x, y + 1, frame % 2 ? '#39ff14' : '#5a5a6a'); // its light blinks
+    },
+  },
+  // --- shop exclusives: one kind of netrun market sells each (shop) ------------------------
+  {
+    id: 'lanyard',
+    name: 'Lanyard',
+    slot: 'body',
+    rarity: 'common',
+    shop: 'exchange',
+    hint: 'sold at corp exchanges.',
+    draw: (px, a) => {
+      // A strap from both sides of the neck to an ID badge with a corp stripe, short enough for the smallest body.
+      px(a.cx - 2, a.neckRow, '#c8d0dc');
+      px(a.cx + 1, a.neckRow, '#c8d0dc');
+      px(a.cx - 1, a.neckRow + 1, '#f9f002');
+      px(a.cx, a.neckRow + 1, '#f9f002');
+      px(a.cx - 1, a.neckRow + 2, '#ffffff');
+      px(a.cx, a.neckRow + 2, '#ffffff');
+    },
+  },
+  {
+    id: 'necktie',
+    name: 'Necktie',
+    slot: 'body',
+    rarity: 'rare',
+    shop: 'exchange',
+    hint: 'rarely sold at corp exchanges.',
+    draw: (px, a) => {
+      // A knot at the neck, then a thin corp-navy tie that narrows to a point.
+      px(a.cx - 1, a.neckRow, '#8a93a3');
+      px(a.cx, a.neckRow, '#8a93a3');
+      px(a.cx - 1, a.neckRow + 1, '#2a3a5a');
+      px(a.cx, a.neckRow + 1, '#2a3a5a');
+      px(a.cx, a.neckRow + 2, '#2a3a5a');
+    },
+  },
+  {
+    id: 'spikedcollar',
+    name: 'Spiked collar',
+    slot: 'body',
+    rarity: 'common',
+    shop: 'black',
+    hint: 'sold at black markets.',
+    draw: (px, a) => {
+      // A dark band round the neck with bright studs hanging under every other pixel.
+      for (let x = a.neckLeft; x <= a.neckRight; x++) {
+        px(x, a.neckRow, '#3a3f49');
+        if ((x - a.neckLeft) % 2 === 1) px(x, a.neckRow + 1, '#e8e8f0');
+      }
+    },
+  },
+  {
+    id: 'bandolier',
+    name: 'Chip bandolier',
+    slot: 'body',
+    rarity: 'rare',
+    shop: 'black',
+    hint: 'rarely sold at black markets.',
+    draw: (px, a) => {
+      // A strap across the chest from the left shoulder down to the right, with data chips on every other link.
+      // At least five links wide, even on a narrow body (a sleeping Panic).
+      const x0 = Math.min(a.bodyLeft + 1, a.cx - 2);
+      const x1 = Math.max(a.bodyRight - 1, a.cx + 2);
+      const rows = Math.max(2, a.mid + 2 - a.neckRow);
+      for (let i = 0; i <= x1 - x0; i++) {
+        const y = a.neckRow + Math.round((i * rows) / Math.max(1, x1 - x0));
+        px(x0 + i, y, i % 2 ? '#39ff14' : '#5a3a1a');
+      }
+    },
+  },
+  {
+    id: 'holologo',
+    name: 'Holo logo',
+    slot: 'float',
+    rarity: 'rare',
+    shop: 'exchange',
+    hint: 'rarely sold at corp exchanges.',
+    draw: (px, a, frame) => {
+      // A corp mark hovering above, turning slowly: face-on, a diamond outline with a bright core (not the Spark's
+      // plus); edge-on, a thin bar.
+      const y = a.top - 4;
+      px(a.cx, y - 2, '#f9f002');
+      px(a.cx, y + 2, '#f9f002');
+      if (frame % 2) {
+        for (const dy of [-1, 0, 1]) px(a.cx, y + dy, '#f9f002');
+      } else {
+        for (const [dx, dy] of [[-1, -1], [1, -1], [-2, 0], [2, 0], [-1, 1], [1, 1]]) px(a.cx + dx, y + dy, '#f9f002');
+        px(a.cx, y, '#ffffff');
+      }
+    },
+  },
+  {
+    id: 'glitchmoth',
+    name: 'Glitch moth',
+    slot: 'float',
+    rarity: 'rare',
+    shop: 'black',
+    hint: 'rarely sold at black markets. or it just found you.',
+    draw: (px, a, frame, time = 0) => {
+      // A pixel moth that flits about the head on an uneven path, wings up on one frame and down on the other.
+      const rx = Math.floor((a.headRight - a.headLeft) / 2) + 1;
+      const t = time / 450;
+      const x = a.cx + Math.round(Math.cos(t * 1.3) * rx);
+      const y = a.headTop - 3 + Math.round(Math.sin(t * 2.1) * 2);
+      px(x, y, '#ff2a6d');
+      const wy = frame % 2 ? y : y - 1;
+      px(x - 1, wy, '#b967ff');
+      px(x + 1, wy, '#b967ff');
     },
   },
   {
@@ -488,6 +604,7 @@ ACCESSORIES.push(
     name: 'Earpiece',
     slot: 'face',
     rarity: 'common',
+    shop: 'exchange',
     regions: ['corp'],
     hint: 'standard issue in the Corp Grid.',
     draw: (px, a) => {
@@ -539,6 +656,7 @@ export const PROPS = [
     id: 'deck',
     name: 'Cyberdeck',
     rarity: 'rare',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'every runner in the Bazaar wants one.',
     size: [7, 5],
@@ -557,6 +675,7 @@ export const PROPS = [
     id: 'boombox',
     name: 'Boom box',
     rarity: 'common',
+    shop: 'black',
     regions: ['bazaar'],
     hint: 'turned up loud in the Darknet Bazaar.',
     size: [7, 5],
@@ -567,6 +686,81 @@ export const PROPS = [
           if (ch === '#') px(x, y, '#b967ff');
           if (ch === '+') px(x, y, '#f9f002');
           if (ch === 'o') px(x, y, frame % 2 ? '#ff2a6d' : '#1a0d26'); // speakers pulse
+        }),
+      );
+    },
+  },
+  {
+    id: 'mug',
+    name: 'Coffee mug',
+    rarity: 'common',
+    shop: 'exchange',
+    hint: 'sold at corp exchanges. the coffee is free.',
+    size: [5, 6],
+    draw: (px, frame) => {
+      // A white mug with a corp stripe and a handle; a wisp of steam sways above it with the frame.
+      const steam = frame % 2 ? ['..+..', '.+...'] : ['.+...', '..+..'];
+      const rows = [...steam, '####.', 'yyyy+', '####+', '####.'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#e8e8f0');
+          if (ch === 'y') px(x, y, '#f9f002');
+          if (ch === '+') px(x, y, y < 2 ? '#8a93a3' : '#e8e8f0');
+        }),
+      );
+    },
+  },
+  {
+    id: 'briefcase',
+    name: 'Briefcase',
+    rarity: 'rare',
+    shop: 'exchange',
+    hint: 'rarely sold at corp exchanges.',
+    size: [7, 5],
+    draw: (px) => {
+      const rows = ['..+++..', '#######', '###y###', '#######', '#######'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#3a3f49');
+          if (ch === 'y') px(x, y, '#f9f002'); // the clasp
+          if (ch === '+') px(x, y, '#8a93a3'); // the handle
+        }),
+      );
+    },
+  },
+  {
+    id: 'burner',
+    name: 'Burner phone',
+    rarity: 'common',
+    shop: 'black',
+    hint: 'sold at black markets. no questions.',
+    size: [3, 6],
+    draw: (px, frame) => {
+      const rows = ['###', '#o#', '#o#', '###', '#+#', '###'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#5a5a6a');
+          if (ch === 'o') px(x, y, frame % 2 ? '#39ff14' : '#155a0a'); // the screen pulses slowly
+          if (ch === '+') px(x, y, '#8a93a3');
+        }),
+      );
+    },
+  },
+  {
+    id: 'spraycan',
+    name: 'Spray can',
+    rarity: 'rare',
+    shop: 'black',
+    hint: 'rarely sold at black markets.',
+    size: [6, 6],
+    draw: (px) => {
+      // A can with a pink band, and its tag splashed on the floor beside it.
+      const rows = ['+.....', '##....', 'cc....', '##....', '##..t.', '##.ttt'];
+      rows.forEach((r, y) =>
+        [...r].forEach((ch, x) => {
+          if (ch === '#') px(x, y, '#c8d0dc');
+          if (ch === 'c' || ch === 't') px(x, y, '#ff2a6d');
+          if (ch === '+') px(x, y, '#3a3f49'); // the nozzle
         }),
       );
     },
@@ -641,13 +835,15 @@ export const accessoryRegions = (x) => x.regions ?? null;
 export const accessoryById = (id) => STYLE_ITEMS.find((x) => x.id === id);
 
 // Pick an accessory the player doesn't own yet, weighted by rarity, or null.
-// With a region, only accessories found there (or anywhere) are in the pool. A Mainframe-only find (the Checksum) drops
+// With a region, only accessories found there (or anywhere) are in the pool; with a shop ('exchange' or 'black'), only
+// what that kind of market sells. A Mainframe-only find (the Checksum) drops
 // only in its own region.
-export function rollAccessory(exclude, rng, region = null) {
+export function rollAccessory(exclude, rng, region = null, shop = null) {
   const pool = STYLE_ITEMS.filter(
     (x) =>
       x.source !== 'earned' &&
       !exclude.includes(x.id) &&
+      (!shop || !x.shop || x.shop === shop) &&
       (!region || !x.regions || x.regions.includes(region)) &&
       (!x.mainframe || x.regions.includes(region)),
   );
@@ -679,7 +875,7 @@ export const DIM_WEARABLE = '#2f6b73';
 // Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
 // above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
 // pixels covered, the smallest on a tie. Orbiting ones (the drone, the data aura) pass in front instead of jumping.
-const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, halo: -1, spark: -1 };
+const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, lanyard: 1, necktie: 1, spikedcollar: 1, bandolier: 1, halo: -1, spark: -1, holologo: -1 };
 const ROOM_MAX = 4;
 export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRow = -Infinity } = {}) {
   const a = anchorsFor(sprite);
