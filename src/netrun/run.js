@@ -194,6 +194,9 @@ function takeAccessory(run, rng) {
 export const codexRoom = (pet) => Math.max(0, RUN_CFG.codexPerLife - (pet.codexFound ?? 0) - (pet.run?.fragments.length ?? 0));
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
+// Whether this region's codex still has a fragment the line has not found (this run's finds included).
+const fragmentsLeft = (run) => nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]) !== null;
+
 function takeFragment(pet) {
   const run = pet.run;
   const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
@@ -343,7 +346,8 @@ export function moveTo(pet, nodeId, rng) {
         event: ev.id,
         title: ev.title,
         text: ev.text,
-        options: ev.options.map(({ id, label, hint }) => ({ id, label, hint })),
+        // An option may say something else once the region's codex is complete (codexDoneHint).
+        options: ev.options.map(({ id, label, hint, codexDoneHint }) => ({ id, label, hint: codexDoneHint && !fragmentsLeft(run) ? codexDoneHint : hint })),
       });
       return { ok: true, kind: 'anomaly', event: ev.id };
     }
@@ -540,7 +544,7 @@ export function choose(pet, optionId, rng) {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
     const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
-    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment });
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run) });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
     st.sync = clamp(st.sync);

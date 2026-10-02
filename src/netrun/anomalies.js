@@ -1,5 +1,6 @@
 // Anomaly events. Each option's apply(ctx) mutates the pet/run through helpers and returns a log line.
-// ctx: { pet, run, rng, loot(item?), hurt(n, why), lean(allegiance, stability), reveal(depth), fragment(chance) }
+// ctx: { pet, run, rng, loot(item?), hurt(n, why), lean(allegiance, stability), reveal(depth), fragment(chance), codexDone }
+// codexDone: the region's codex has nothing left to find; an option's codexDoneHint replaces its hint then.
 // regions: the regions it can turn up in; omitted means anywhere.
 
 // What READ IT shows: NL-0 first on the list, your netling near the end, or the fault that kept it from ever running.
@@ -128,8 +129,15 @@ export const ANOMALIES = [
         id: 'read',
         label: 'READ IT',
         hint: '-15 int, it may remember something',
+        codexDoneHint: '-15 int, reveal ahead',
         // One of three readings at random; codex source-3 holds the first and the last, so none is lost by missing it.
-        apply: (c) => `${c.hurt(15, PURGE_READINGS[Math.floor(c.rng() * PURGE_READINGS.length)])}${c.fragment(0.6)}`,
+        // With the Source's codex complete there is nothing left to remember, so the order's margin shows the way on.
+        apply: (c) => {
+          const reading = c.hurt(15, PURGE_READINGS[Math.floor(c.rng() * PURGE_READINGS.length)]);
+          if (!c.codexDone) return `${reading}${c.fragment(0.6)}`;
+          c.reveal(3);
+          return `${reading} you know this list by heart now. the sector map in its margin is new.`;
+        },
       },
       {
         id: 'leave',

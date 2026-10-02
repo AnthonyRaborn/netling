@@ -350,11 +350,14 @@ test('the purge order turns up only in the Source, as one anomaly among the othe
     assert.ok(!seen.public.has('purge'));
   }));
 
-// A Source run standing on the purge order.
-function atPurge(seed = 1) {
+// A Source run standing on the purge order (knowing `codex` at jack-in).
+function atPurge(seed = 1, codex = []) {
   for (let n = seed; n < seed + 500; n++) {
     const s = netling('mainframe', 'plat');
-    moveTo(s, into(s, 'source', 'anomaly', n).id, mulberry32(n));
+    startRun(s, 'source', mulberry32(n), codex);
+    const next = runOptions(s.run)[0];
+    next.type = 'anomaly';
+    moveTo(s, next.id, mulberry32(n));
     if (s.run.pending?.event === 'purge') return s;
   }
   throw new Error('no purge order found');
@@ -392,4 +395,24 @@ test('READ IT costs 15 Integrity and may give the next Source fragment; LEAVE IT
     assert.equal(left.stats.sync, 65);
     assert.equal(left.stats.integrity, integrity);
     assert.match(r.msg, /pending/);
+  }));
+
+test('with the Source codex complete, READ IT shows the way on instead of a fragment', () =>
+  switchedOn(() => {
+    const all = FRAGMENTS.map((f) => f.id);
+    const s = atPurge(1, all);
+    const read = s.run.pending.options.find((o) => o.id === 'read');
+    assert.equal(read.hint, '-15 int, reveal ahead');
+    const seen = s.run.revealed.length;
+    const before = s.stats.integrity;
+    const res = choose(s, 'read', () => 0.1);
+    assert.equal(s.stats.integrity, before - 15);
+    assert.deepEqual(s.run.fragments, []);
+    assert.ok(s.run.revealed.length > seen, 'nothing revealed');
+    assert.match(res.msg, /by heart/);
+    // While a Source fragment is still missing, the hint and the reward stay as they were.
+    const partial = atPurge(1, all.filter((id) => id !== 'source-4'));
+    assert.equal(partial.run.pending.options.find((o) => o.id === 'read').hint, '-15 int, it may remember something');
+    choose(partial, 'read', () => 0.1);
+    assert.deepEqual(partial.run.fragments, ['source-4']);
   }));

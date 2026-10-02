@@ -230,7 +230,7 @@ Six events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (`
 | Stray signal | FOLLOW: Heat +5, reveals the next 2 layers | TUNE OUT: nothing |
 | Overclock rig | PLUG IN: Charge +25, Heat +25, stability -1 | LEAVE IT: nothing |
 | Echo | LISTEN: Sync +15, 50% a codex fragment | MOVE ON: nothing |
-| The purge order (the Source only) | READ IT: -15 Integrity, 60% the next codex fragment; shows one of three readings at random (`PURGE_READINGS`: NL-0 first on the list, every netling with yours near the end, or `./purge: permission denied. owner: nobody.`) | LEAVE IT: Sync +15, stability +1 ("left pending. pending. pending. something down here stops holding its breath.") |
+| The purge order (the Source only) | READ IT: -15 Integrity, 60% the next codex fragment (once the Source's codex is complete: reveals the next 3 layers instead, and its hint says so, `codexDoneHint`); shows one of three readings at random (`PURGE_READINGS`: NL-0 first on the list, every netling with yours near the end, or `./purge: permission denied. owner: nobody.`) | LEAVE IT: Sync +15, stability +1 ("left pending. pending. pending. something down here stops holding its breath.") |
 
 After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Charge at 0 afterwards disconnects.
 

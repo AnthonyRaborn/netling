@@ -6218,8 +6218,8 @@
             "mainframe": 0.46
           },
           "axes": {
-            "allegiance": -9.99,
-            "stability": -32.95
+            "allegiance": -10.05,
+            "stability": -32.91
           },
           "atAdult": {
             "allegiance": -4.06,
@@ -6246,22 +6246,22 @@
             "ghostPathPlayOnce": 0.005,
             "ghostPath": 0.005
           },
-          "wins": 48.25,
-          "events": 10.85,
-          "traces": 6.46,
+          "wins": 48.23,
+          "events": 10.82,
+          "traces": 6.44,
           "tracesIgnored": 0,
           "attention": {
             "requestsMet": 9.94,
-            "greeted": 1.09,
+            "greeted": 1.08,
             "flowHours": 0.16,
             "hotHours": 37.26,
-            "chatterSeen": 3.74
+            "chatterSeen": 3.76
           },
           "itemsHeld": 5.09,
           "fullAtCheckIn": 0.244,
           "netruns": {
-            "runs": 25.85,
-            "disconnects": 1.38,
+            "runs": 25.84,
+            "disconnects": 1.39,
             "fragments": 2.17,
             "codexCapped": 0,
             "cleared": {
@@ -6274,10 +6274,10 @@
             },
             "byRegion": {
               "public": 7.4,
-              "bazaar": 4.91,
-              "corp": 4.95,
-              "ruins": 3.64,
-              "deep": 4.21,
+              "bazaar": 4.89,
+              "corp": 4.93,
+              "ruins": 3.62,
+              "deep": 4.23,
               "source": 0.76
             }
           },
@@ -6333,11 +6333,11 @@
             }
           },
           "scrip": {
-            "end": 63.3,
-            "peak": 87.4,
-            "bought": 11.41,
-            "sold": 3.36,
-            "affordable": 0.813,
+            "end": 63.8,
+            "peak": 87.6,
+            "bought": 11.38,
+            "sold": 3.34,
+            "affordable": 0.812,
             "marketsPerRun": 0.91
           }
         }
@@ -8692,7 +8692,7 @@
           "adult": 1,
           "fullLife": 1,
           "medianDays": 5,
-          "mistakes": 1.25,
+          "mistakes": 1.26,
           "deaths": {
             "end of life cycle": 1
           },
@@ -8717,7 +8717,7 @@
           },
           "axes": {
             "allegiance": 0.17,
-            "stability": -20.91
+            "stability": -20.88
           },
           "atAdult": {
             "allegiance": 0.15,
@@ -8744,23 +8744,23 @@
             "ghostPathPlayOnce": 0.13,
             "ghostPath": 0.15
           },
-          "wins": 47.49,
+          "wins": 47.47,
           "events": 10.54,
           "traces": 6.41,
           "tracesIgnored": 0,
           "attention": {
-            "requestsMet": 9.8,
-            "greeted": 0.91,
+            "requestsMet": 9.79,
+            "greeted": 0.92,
             "flowHours": 0.4,
             "hotHours": 21.23,
-            "chatterSeen": 3.64
+            "chatterSeen": 3.66
           },
           "itemsHeld": 5.13,
-          "fullAtCheckIn": 0.278,
+          "fullAtCheckIn": 0.277,
           "netruns": {
             "runs": 26.07,
-            "disconnects": 1.13,
-            "fragments": 2.33,
+            "disconnects": 1.15,
+            "fragments": 2.32,
             "codexCapped": 0,
             "cleared": {
               "public": 1,
@@ -8773,10 +8773,10 @@
             "byRegion": {
               "public": 7.61,
               "bazaar": 5.06,
-              "corp": 5.08,
+              "corp": 5.07,
               "ruins": 3.55,
-              "deep": 4,
-              "source": 0.78
+              "deep": 3.99,
+              "source": 0.8
             }
           },
           "mainframe": {
@@ -8831,12 +8831,12 @@
             }
           },
           "scrip": {
-            "end": 86.7,
+            "end": 86.6,
             "peak": 99.9,
-            "bought": 7.14,
-            "sold": 5.19,
+            "bought": 7.12,
+            "sold": 5.18,
             "affordable": 0.978,
-            "marketsPerRun": 0.91
+            "marketsPerRun": 0.9
           }
         }
       ]
@@ -9995,8 +9995,8 @@
             "mainframe": 0.39
           },
           "axes": {
-            "allegiance": 1.19,
-            "stability": 9.9
+            "allegiance": 1.15,
+            "stability": 9.89
           },
           "atAdult": {
             "allegiance": 0.68,
@@ -10023,16 +10023,16 @@
             "ghostPathPlayOnce": 0.35,
             "ghostPath": 0.39
           },
-          "wins": 53.79,
-          "events": 9.49,
-          "traces": 5.63,
+          "wins": 53.77,
+          "events": 9.47,
+          "traces": 5.62,
           "tracesIgnored": 0,
           "attention": {
-            "requestsMet": 10.19,
+            "requestsMet": 10.21,
             "greeted": 0.96,
-            "flowHours": 21.24,
+            "flowHours": 21.26,
             "hotHours": 0.39,
-            "chatterSeen": 3.56
+            "chatterSeen": 3.55
           },
           "itemsHeld": 5.19,
           "fullAtCheckIn": 0.324,
@@ -10051,11 +10051,11 @@
             },
             "byRegion": {
               "public": 7.76,
-              "bazaar": 4.99,
-              "corp": 5.07,
+              "bazaar": 4.98,
+              "corp": 5.08,
               "ruins": 3.45,
-              "deep": 3.89,
-              "source": 0.59
+              "deep": 3.9,
+              "source": 0.58
             }
           },
           "mainframe": {
@@ -10110,9 +10110,9 @@
             }
           },
           "scrip": {
-            "end": 80.3,
+            "end": 80.1,
             "peak": 98.1,
-            "bought": 12.58,
+            "bought": 12.59,
             "sold": 6.56,
             "affordable": 0.915,
             "marketsPerRun": 0.94
