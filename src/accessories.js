@@ -920,7 +920,7 @@ export const PROPS = [
     name: 'Mini device',
     rarity: 'veryrare',
     source: 'earned',
-    hint: 'collect the nine original shells. then look closer.',
+    hint: 'collect all (?) the shells. then look closer.',
     size: [4, 6],
     draw: (px, frame) => {
       const rows = ['.##.', '#oo#', '#oo#', '#..#', '#++#', '.##.'];
