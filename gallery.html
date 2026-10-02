@@ -442,12 +442,12 @@
         },
 
         nodes() {
-          const s = section('nodes', 'NETRUN NODE MARKERS', 'The eight map markers, in each region\'s colors, fresh and spent (spent draws at 45% alpha). Drawn by the game\'s own drawNode.');
+          const s = section('nodes', 'NETRUN NODE MARKERS', 'The nine map markers (a market draws as a black market or a corp exchange), in each region\'s colors, fresh and spent (spent draws at 45% alpha). Drawn by the game\'s own drawNode.');
           if (!drawNode) {
             s.append(el('p', { className: 'note warn', textContent: 'Not shown: this browser is using an older copy of src/netrun/view.js that does not export drawNode. ' }), el('button', { textContent: 'clear stored copies and reload', onclick: () => window.__resetCopies() }));
             return s;
           }
-          const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'anomaly', 'exit'];
+          const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'exchange', 'anomaly', 'exit'];
           const g = grid(types.length, types);
           for (const region of REGION_ORDER) {
             for (const spent of [false, true]) {

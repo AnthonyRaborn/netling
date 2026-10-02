@@ -92,7 +92,7 @@ test('feeding shifts allegiance and respects a full buffer', () => {
   const s = booted();
   s.stats.charge = 20;
   assert.ok(act(s, 'corp', s.lastTick, noRng).ok);
-  assert.equal(s.axes.allegiance, 1);
+  assert.equal(s.axes.allegiance, CFG.feedAllegiance);
   s.stats.charge = 99;
   assert.equal(act(s, 'scav', s.lastTick, noRng).ok, false);
 });

@@ -42,13 +42,13 @@ export const ARCHETYPES = {
   sysadmin: { checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)), jitter: 10, diet: 0.5, trace: 'mix', winRate: 0.7 },
   ghosthunter: {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
-    jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true,
+    jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, // keeps it cool: Ghost needs stability at 0 or above, and only choices move it
   },
   // Attentive care, but takes every risk that doesn't cost a fault: plays hot, uses Overclock rigs,
   // SALVAGE and RAID. Shows whether a caring player can lean chaotic.
   daredevil: { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', hot: true, anomaly: 'risky' },
   // Attentive players steering for one form with every choice they have (Ghost's is ghosthunter).
-  'steer-chrome': { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', shop: false },
+  'steer-chrome': { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp' },
   'steer-firewall': { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie' },
   'steer-daemon': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', anomaly: 'orderly' },
   // Glitch: keeps it overclocked (Heat 65 to 72) without letting it reach the 85+ danger zone.

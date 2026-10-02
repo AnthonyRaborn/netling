@@ -107,7 +107,7 @@ Trouble shows up as an icon on the screen, a bar at the top, and a chirp (or a n
 |---|---|---|
 | **!** | It needs something | Check the bars |
 | Virus icon | It's infected and losing Integrity | PATCH it |
-| Eye | A **corp trace**: someone is scanning it | **HIDE** (costs Charge and Heat) or **COMPLY** (costs Integrity and Sync) within 2 hours, or lose Integrity. Your choice leans it toward one side or the other |
+| Eye | A **corp trace**: someone is scanning it | **HIDE** (costs Charge and Heat) or **COMPLY** (costs Sync) within 2 hours, or lose Integrity. Your choice leans it toward one side or the other |
 | Crosshair | An **intrusion** attempt | **DEFEND** within an hour by winning a random mini-game, or it installs a virus |
 | Overflowing chip | A **memory overflow** | **PURGE** within 45 minutes, or it crashes: Integrity loss, a full cache, and 20 minutes rebooting where you can only turn the lights on and off. More cache files make overflows likelier |
 | Screen flicker | A **power surge**: instant Heat and a little Charge | Nothing to do, but watch the Heat |
@@ -157,8 +157,9 @@ A netrun is an expedition. **Jack in** with at least 30 Charge while it is awake
 | **Data cache** | May hold an item |
 | **ICE** | A mini-game. Win to pass; lose and it bites into Integrity |
 | **Relay** | Recharges and cools it, and lets you bank your loot and jack out safely |
-| **Checkpoint** | A corp scan: hide, comply or pay with a voucher |
-| **Market** | Buy items with scrip plus some Charge, and sometimes something stylish. While a market is open, the inventory's button sells for half price |
+| **Checkpoint** | A corp scan: hide (costs Charge and Heat, and you might get scorched), comply (a small scrip fee; with no scrip they confiscate loot) or pay with a voucher |
+| **Black market** (purple) | Buy items with scrip plus some Charge, and sometimes something stylish. Cheaper, with riskier stock, and buying leans your netling toward the indie side. While a market is open, the inventory's button sells for half price |
+| **Corp exchange** (yellow) | The same, but with safe, official stock (Corp vouchers among it) at a higher Charge price, and buying leans it toward the corps. Each kind also sells a few accessories the other doesn't |
 | **Anomaly** | A strange event with a risky choice |
 | **Exit** | Banks everything you carry, plus a bonus, and clears the region |
 

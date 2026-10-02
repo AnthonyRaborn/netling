@@ -24,6 +24,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Bazaar** | The Darknet Bazaar netrun region: markets and Black ICE. Second on the way down: needs a teen that has cleared the Public Net | `netrun/regions.js` |
 | **Bitling** | The baby form | `sim.js` `SPECIES` |
 | **Black ICE shard** | Item: +40 Sync, +20 Heat, may carry a virus, leans indie and unstable | `sim.js` |
+| **Black market** | A netrun market that leans indie (-0.5 a buy): cheaper, risky stock, its own accessories. Most of the Bazaar's | `netrun/run.js` |
 | **Booster (Signal booster)** | Item: the next mini-game win counts double | `sim.js` |
 | **Bored** | The state of being awake with the lights off: Sync drains at twice the rate | `sim.js` |
 | **Breach Protocol** | Mini-game: pick grid codes, alternating row and column, to land a target sequence | `games/breach.js` |
@@ -43,10 +44,11 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Codex** | The 27 lore fragments collected on netruns (22 count toward Root Access). Shared across generations. Each netling can recover at most 8 new ones | `netrun/codex.js` |
 | **Codex inbox** | `pet.codexInbox`: fragments a run found, waiting for the UI to bank them into the shared codex | `netrun/run.js`, `ui/archive.js` |
 | **Compile / script** | A new generation starts as a `script` that compiles for 3 minutes into a baby | `sim.js` |
-| **Comply** | Trace answer: accept the scan. Integrity -5, Sync -10, allegiance +1 | `sim.js` |
+| **Comply** | Trace answer: accept the scan. Sync -10, allegiance +1 (no Integrity cost since the corp-choice pass). At a netrun checkpoint: a 5 scrip fee | `sim.js`, `netrun/run.js` |
 | **Contract** | A netrun job for one region (reach the exit, get past ICE, crack caches, buy, bring back a fragment), posted while the uplink is ready; every route through that run can meet it | `netrun/run.js` `updateContract` |
 | **Coolant cell** | Item: vents 50 Heat | `sim.js` |
 | **Cooldown (uplink cooldown)** | Time before the next netrun: 240/210/180 minutes by stage, minus bonuses, never under 120 | `sim.js` |
+| **Corp exchange** | A netrun market that leans corp (+0.5 a buy): pricier (less for Chrome), safe stock and the only Corp vouchers for sale, its own accessories. Most of the Corp Grid's | `netrun/run.js` |
 | **Corp Grid** | Netrun region full of checkpoints. Needs a teen that has cleared the Bazaar | `netrun/regions.js` |
 | **Corp packet (CORP PKT)** | Food: +30 Charge, leans corp | `sim.js` |
 | **Corp trace** | Timed event: HIDE or COMPLY within 2 hours or lose Integrity and lean corp | `sim.js` |
@@ -73,7 +75,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Field manual** | The in-game help dialog, built from live `CFG` values | `ui/onboarding.js` |
 | **Firewall** | Adult form leaning indie. Trait Hardened. ICE deals half damage | `sim.js` |
 | **Firewall Dodge** | Mini-game: slide between five lanes to avoid falling blocks for 15 seconds | `games/dodge.js` |
-| **Flow** | Three good hours in a row, awake: it glows, events are 25% rarer (calm), visitors 25% likelier, and stability builds twice as fast | `sim.js` `inFlow` |
+| **Flow** | Three good hours in a row, awake: it glows, events are 25% rarer (calm), visitors 25% likelier, and stability builds (+0.2/hr; plain awake time adds none) | `sim.js` `inFlow` |
 | **Form** | A netling's body. Eight exist: Bitling, Kernel, Stub, Chrome, Firewall, Daemon, Glitch, Ghost | `sim.js` `SPECIES` |
 | **Fragment** | Two meanings. 1) **Death fragment**: what a dead netling leaves (form, trait and its level, history, quirk, keepsake, scrip). 2) **Codex fragment**: a lore entry. Context decides | `sim.js`, `netrun/codex.js` |
 | **Gate (write gate)** | `canWrite` in `ui/app.js`: decides whether storage may be written | `ui/app.js` |
@@ -105,7 +107,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Lock (transfer lock)** | The screen shown after transferring out. The device stops simulating | `ui/system.js` |
 | **Loot** | Items carried in a netrun, banked on jack-out | `netrun/run.js` |
 | **Mainframe** | Fourth life stage, after adult: Plat, Airgap, Init, Panic or Whisper. Reached on the last ordinary day with 3 Deep exits this life (or 2 clean) and Root Access in the line. Adds a day of life | `sim.js` |
-| **Market** | A netrun node where scrip and Charge buy items and sometimes an accessory, and the inventory sells for half price | `netrun/run.js` |
+| **Market** | A netrun node where scrip and Charge buy items and sometimes an accessory, and the inventory sells for half price. Either a black market (leans indie, cheaper, risky stock) or a corp exchange (leans corp, pricier, safe stock); each sells a few accessories the other doesn't | `netrun/run.js`, `netrun/map.js` |
 | **Memory overflow** | Timed event: PURGE within 45 minutes or it crashes | `sim.js` |
 | **Memory shard** | Item: rewrites one quirk | `sim.js` |
 | **Mini device** | Secret prop for owning every shell | `ui/style.js` |

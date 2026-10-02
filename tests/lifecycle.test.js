@@ -171,7 +171,7 @@ test('a Segfault adds two faults and their stability cost', () => {
   const res = act(s, 'use', s.lastTick, noRng, { slot: 0 });
   assert.ok(res.ok, res.msg);
   assert.equal(s.careMistakes, ITEM_CFG.segfaultFaults);
-  assert.equal(s.axes.stability, -2 * ITEM_CFG.segfaultFaults);
+  assert.equal(s.axes.stability, -CFG.faultStability * ITEM_CFG.segfaultFaults);
   assert.equal(s.inventory.length, 0);
 });
 

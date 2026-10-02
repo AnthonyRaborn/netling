@@ -44,7 +44,10 @@ function decide(pet, style, rng) {
   if (p.kind === 'market') {
     const room = pet.inventory.length + pet.run.loot.length < INVENTORY_SLOTS;
     const wanted = p.options.find((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled && (!style.keep || style.keep.includes(p.offers[Number(o.id.slice(3))])));
-    return style.shop !== false && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
+    // Each kind of market leans its own way: a player steering one way only shops on that side.
+    const side = p.flavor === 'corp' ? 'corp' : 'indie';
+    const fits = style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (pet.axes.allegiance > 0) === (side === 'indie') : true;
+    return style.shop !== false && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
   }
   const prefs = ANOMALY_PREFS[style.anomaly ?? 'random'];
   const preferred = prefs.find((id) => has(id));

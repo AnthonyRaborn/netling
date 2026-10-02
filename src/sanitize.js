@@ -125,7 +125,8 @@ function cleanPending(phase, p, strict) {
     const accOffer = p.accOffer == null ? null : STYLE_IDS.has(p.accOffer) ? p.accOffer : undefined;
     if (accOffer === undefined) return null;
     if (!(Number.isFinite(p.price) && p.price >= 0 && p.price <= 100)) return null; // rejected, not clamped: 0 would mean free
-    Object.assign(extra, { offers: [...p.offers], price: p.price, accOffer });
+    // Which kind of market (black or corp exchange): older saves have none, and every market was a black one.
+    Object.assign(extra, { offers: [...p.offers], price: p.price, accOffer, flavor: p.flavor === 'corp' ? 'corp' : 'black' });
   }
   if (p.kind === 'anomaly') extra.event = p.event;
   const allowed = choiceIds({ ...p, ...extra });
@@ -156,7 +157,7 @@ function cleanRun(raw, s, strict) {
   if ((phase === 'ice' || phase === 'choice') && !pending) phase = 'map';
   if (phase === 'map' && !at.edges.length) return null; // a dead end the runner could never leave
   const map = strict
-    ? { region: str(raw.map.region, raw.region), nodes: nodes.map(({ id, layer, type, edges }) => ({ id, layer, type, edges: [...edges] })), layerCount: raw.map.layerCount }
+    ? { region: str(raw.map.region, raw.region), nodes: nodes.map(({ id, layer, type, edges, flavor }) => ({ id, layer, type, edges: [...edges], ...(type === 'market' ? { flavor: flavor === 'corp' ? 'corp' : 'black' } : {}) })), layerCount: raw.map.layerCount }
     : raw.map;
   return {
     ...(strict ? {} : raw),
