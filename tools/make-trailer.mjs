@@ -1,7 +1,8 @@
-// Renders the trailer (about 49 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
-// real app. Spoiler-free on purpose, like the player README: only a Bitling is ever shown, the
-// evolution cuts away before the new form appears, the flatline card's fragment rows and the next
-// generation's trait are hidden, and the region list names only the Public Net.
+// Renders the trailer (about 59 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
+// real app. It shows no more than a first life does: the baby and a teen, a first life's codex, and the
+// endgame only as the corruption a first life sees (the corrupted sector, records and manual line).
+// The evolution to an adult strobes and cuts away before the form settles, and the flatline card's
+// fragment rows and the next generation's trait are hidden.
 //
 // Every scene is a fresh page on a fake clock (Playwright's page.clock) with a seeded Math.random,
 // so the same build always renders the same trailer. Each frame is a screenshot taken after the
@@ -81,6 +82,25 @@ const settled = (save) => ({
   'netling.wardrobe': { head: 'partyhat' },
 });
 
+// The same netling as a Kernel teen deep into its first life: its eight codex fragments found (a life's
+// memory), the Public Net cleared, and raised loyal to the grid, so it grows into a Chrome.
+const CODEX_FIRST_LIFE = ['public-1', 'public-2', 'public-3', 'public-4', 'corp-1', 'corp-2', 'corp-3', 'corp-4'];
+const firstLife = () => ({
+  ...settled(
+    Object.assign(bitling(), {
+      ageMin: 1500,
+      stage: 'teen',
+      form: 'kernel',
+      teenForm: 'kernel',
+      axes: { allegiance: 30, stability: 4 },
+      codexFound: 8,
+      cleared: ['public'],
+    }),
+  ),
+  'netling.dex': ['bitling', 'kernel'],
+  'netling.codex': CODEX_FIRST_LIFE,
+});
+
 // --- scenes ---
 // at: [[seconds into the scene, action(page)]]. warmup: seconds that run before recording starts.
 // captions and cards use trailer time (see TIMELINE below), so a caption can span a cut.
@@ -97,6 +117,23 @@ const inPage = (fn) => (page) =>
     };
     (${fn})(m);
   })()`);
+
+// Scrolls `sel` (or the page) so that `target` (a selector, or text it contains) sits mid-view, eased from
+// `from` to `to` seconds into the scene. For a scene's per-frame hook.
+const scrollTo = ({ sel = null, target, from = 0, to = 0 }) => (page, t) =>
+  page.evaluate(
+    ({ sel, target, k }) => {
+      const box = sel ? document.querySelector(sel) : document.scrollingElement;
+      const el = [...(sel ? box : document).querySelectorAll('*')].find((e) => (target.startsWith('text:') ? e.children.length === 0 && e.textContent.includes(target.slice(5)) : e.matches(target)));
+      if (!box || !el) return;
+      box.__start ??= box.scrollTop;
+      const r = el.getBoundingClientRect();
+      const view = sel ? box.getBoundingClientRect() : { top: 0, height: innerHeight };
+      box.__end ??= box.scrollTop + r.top - view.top - (view.height - r.height) / 2;
+      box.scrollTop = box.__start + (box.__end - box.__start) * k;
+    },
+    { sel, target, k: to > from ? (1 - Math.cos(Math.PI * Math.min(1, Math.max(0, (t - from) / (to - from))))) / 2 : 1 },
+  );
 
 // Skips the clock forward without simulating the gap (the dev EVO button's trick), then ticks.
 const skipMinutes = (mins) =>
@@ -190,14 +227,56 @@ const SCENES = [
       [5.4, aim],
     ],
   },
+  // Depth: a first life's codex, the way down, and what stays corrupted. The corrupted names glitch every
+  // BLINK_MS (3.2 s, ui/corrupt.js) from page load, so each warmup puts one glitch on camera.
+  {
+    name: 'codex',
+    duration: 3.5,
+    seed: firstLife,
+    warmup: [
+      [0.1, click('#open-archive')],
+      [0.2, click('#tab-btn-codex')],
+    ],
+    warmupSeconds: 0.3,
+    // From the Public Net's lore down to a corp memo, whose <<REDACTED>> glitches at 2.9 s.
+    frame: scrollTo({ sel: '#tab-codex', target: '#tab-codex .corrupt', from: 0.3, to: 2.6 }),
+  },
+  {
+    name: 'sector',
+    duration: 3.5,
+    seed: firstLife,
+    warmup: [[0.1, click('#btn-netrun')]],
+    warmupSeconds: 0.5, // a glitch at 2.7 s
+    frame: scrollTo({ target: 'text:SECTOR CORRUPTED', from: 0.2, to: 2.2 }),
+  },
+  {
+    name: 'dex',
+    duration: 1.5,
+    seed: firstLife,
+    warmup: [
+      [0.1, click('#open-archive')],
+      [0.2, click('#tab-btn-dex')],
+    ],
+    warmupSeconds: 2.2, // a glitch at 1.0 s
+    frame: scrollTo({ sel: '#tab-dex', target: '#tab-dex .corrupt' }),
+  },
+  {
+    name: 'manual',
+    duration: 1.5,
+    seed: firstLife,
+    warmup: [[0.1, click('#open-help')]],
+    warmupSeconds: 2.2,
+    frame: scrollTo({ sel: '#help-body', target: 'text:unrecoverable. for now.' }),
+  },
   {
     name: 'evolve',
-    duration: 3.5,
-    seed: () => settled(bitling({ ageMin: 600 })),
-    // Straight to the eve of the teen years; the jump itself happens on camera (well, off it).
-    warmup: [[0.1, inPage(`(m) => { m.app.app.state.life.teenAt = m.app.app.state.ageMin + 2; }`)]],
+    duration: 3.7,
+    seed: firstLife,
+    hideReadout: true, // the readout and the status line would name the new form
+    // Straight to the eve of adulthood. The strobe plays, and the shot cuts away before the new form settles.
+    warmup: [[0.1, inPage(`(m) => { m.app.app.state.life.adultAt = m.app.app.state.ageMin + 2; }`)]],
     warmupSeconds: 0.2,
-    at: [[1.6, skipMinutes(3)]],
+    at: [[1.0, skipMinutes(3)]], // the strobe starts; the card covers it 0.7 s in
   },
   {
     name: 'flatline',
@@ -243,8 +322,11 @@ const TIMELINE = {
     [sceneStart('care') + 3.6, sceneStart('care') + 5.2, 'KEEP IT COOL.'],
     [sceneStart('care') + 5.2, sceneStart('breach'), 'KEEP IT CLEAN.'],
     [sceneStart('breach'), sceneStart('netrun'), 'PLAY WITH IT.'],
-    [sceneStart('netrun') + 0.2, sceneStart('evolve'), 'JACK IN.'],
-    [sceneStart('evolve') + 0.1, sceneStart('evolve') + 1.6, 'IT GROWS UP.'],
+    [sceneStart('netrun') + 0.2, sceneStart('codex'), 'JACK IN.'],
+    [sceneStart('codex') + 0.2, sceneStart('sector'), 'THERE IS A STORY HERE.'],
+    [sceneStart('sector') + 0.1, sceneStart('dex'), 'SOMETHING IS DOWN THERE.'],
+    [sceneStart('dex') + 0.1, sceneStart('evolve'), 'UNRECOVERABLE.\nFOR NOW.'],
+    [sceneStart('evolve') + 0.1, sceneStart('evolve') + 1.7, 'IT GROWS UP.'],
     [sceneStart('flatline') + 0.3, sceneStart('flatline') + 2.6, 'IT WILL FLATLINE.'],
     [sceneStart('flatline') + 2.6, sceneStart('flatline') + 5.2, 'SOMETHING SURVIVES.'],
     [sceneStart('flatline') + 5.2, sceneStart('flatline') + 7.6, 'THE NEXT ONE COMPILES.'],
@@ -252,7 +334,7 @@ const TIMELINE = {
   ],
   // Full-screen cards over the game. [from, to, kind]
   cards: [
-    [sceneStart('evolve') + 1.6, sceneStart('evolve') + 3.5, 'evolve'],
+    [sceneStart('evolve') + 1.7, sceneStart('evolve') + 3.7, 'evolve'],
     [sceneStart('flatline') + 11.6, TOTAL + 1, 'end'],
   ],
 };
@@ -305,8 +387,7 @@ const TRAILER_CSS = `
   body { overflow: hidden; }
   .brand, .inventory, #log, #dev, #ios-hint, #update-bar, #status:empty { display: none !important; }
   .device { margin-top: 120px !important; }
-  #region-list .region:not(:first-child) { visibility: hidden; } /* regions past the Public Net stay unnamed */
-  #tr-band { position: fixed; inset: 0 0 auto 0; height: 118px; display: flex; align-items: center; justify-content: center;
+  #tr-band { position: fixed; inset: 0 0 auto 0; height: 118px; background: linear-gradient(#07070c 80%, #07070c00); display: flex; align-items: center; justify-content: center;
     padding: 0 18px; text-align: center; font: 38px/1.05 'VT323', monospace; letter-spacing: 2px; color: #c7f9ff;
     text-shadow: 0 0 6px #05d9e8, 0 0 14px #05d9e8aa; z-index: 50; pointer-events: none; }
   #tr-band > span { white-space: pre-line; } /* a \n in a caption is a forced break */
@@ -319,8 +400,12 @@ const TRAILER_CSS = `
   #tr-card .url { font-size: 24px; color: #05d9e8; text-shadow: 0 0 8px #05d9e8aa; margin-top: 18px; }
   #tr-card .small { font-size: 18px; color: #809fa6; position: absolute; bottom: 28px; left: 0; right: 0; }
   #tr-fade { position: fixed; inset: 0; background: #000; opacity: 0; z-index: 70; pointer-events: none; }
+  #tr-band, #tr-card, #tr-fade { margin: 0; border: 0; width: 100%; overflow: hidden; }
+  #tr-card, #tr-fade { height: 100%; }
+  dialog.archive { margin-top: 122px; max-height: calc(100vh - 132px); } /* below the caption band */
 `;
-const OVERLAY_HTML = '<div id="tr-band"></div><div id="tr-card"></div><div id="tr-fade"></div>';
+// Popovers, so the overlay can be raised above an open dialog (which sits in the browser's top layer).
+const OVERLAY_HTML = '<div id="tr-band" popover="manual"></div><div id="tr-card" popover="manual"></div><div id="tr-fade" popover="manual"></div>';
 
 const CARDS = {
   evolve: '<div class="big">WHAT IT BECOMES<br>IS UP TO YOU.</div>',
@@ -333,6 +418,16 @@ const CARDS = {
 function drawOverlay({ first, t, sceneT, sceneLen, caption, card, cards, redact, fadeIn, fadeOut }) {
   const band = document.getElementById('tr-band');
   if (!band) return;
+  // A dialog that opened since the last frame went into the top layer above the overlay: raise the overlay again.
+  const dialogs = document.querySelectorAll('dialog[open]').length;
+  if (dialogs !== window.__dialogs) {
+    window.__dialogs = dialogs;
+    for (const id of ['tr-band', 'tr-card', 'tr-fade']) {
+      const el = document.getElementById(id);
+      if (el.matches(':popover-open')) el.hidePopover();
+      el.showPopover();
+    }
+  }
   if (caption) {
     const [from, , str] = caption;
     const shown = Math.min(str.length, Math.floor((t - from) * 32));
@@ -384,7 +479,7 @@ function drawOverlay({ first, t, sceneT, sceneLen, caption, card, cards, redact,
 }
 
 // Soft transitions between the big beats; the mini-game montage hard-cuts.
-const FADES = { intro: [0.4, 0.25], care: [0.25, 0.2], breach: [0.2, 0], netrun: [0.2, 0.2], evolve: [0.2, 0], flatline: [0.2, 0.6] };
+const FADES = { intro: [0.4, 0.25], care: [0.25, 0.2], breach: [0.2, 0], netrun: [0.2, 0.2], codex: [0.2, 0.15], sector: [0.15, 0], evolve: [0.2, 0], flatline: [0.2, 0.6] };
 
 // --- recording ---
 
@@ -452,7 +547,9 @@ async function recordScene(browser, scene, video, frameIndex) {
   const [fadeIn, fadeOut] = FADES[scene.name] ?? [0, 0];
   for (let f = 0; f < frames; f++) {
     const sceneT = f / FPS;
+    if (scene.hideReadout) await page.evaluate(() => ['readout', 'status'].forEach((id) => (document.getElementById(id).style.visibility = 'hidden')));
     await runTo(page, clockState, Math.round(warm + (f * 1000) / FPS), actions);
+    await scene.frame?.(page, sceneT);
     const t = scene.start + sceneT;
     await page.evaluate(drawOverlay, {
       first: f === 0,
@@ -525,6 +622,8 @@ function musicPlan() {
   if (ONLY) return null;
   const on = sceneStart('intro') + 5.0; // the tap that compiles the first netling
   const run = sceneStart('netrun');
+  const back = sceneStart('codex'); // home again after the run
+  const depth = sceneStart('sector'); // the corrupted shots, until the evolution
   const evolve = sceneStart('evolve');
   const flat = sceneStart('flatline');
   const flatlineAt = flat + 0.8;
@@ -537,19 +636,20 @@ function musicPlan() {
     // render, where in it to start, trailer time, length, and a level change in dB
     takes: [
       { render: 'home', from: 0, at: on, len: first },
-      { render: 'run', from: runFrom, at: run, len: evolve - run, db: 4 },
-      { render: 'home', from: first, at: evolve, len: flatlineAt + 2 - evolve },
+      { render: 'run', from: runFrom, at: run, len: back - run, db: 4 },
+      { render: 'home', from: first, at: back, len: flatlineAt + 2 - back },
       { render: 'next', from: 0, at: hatch, len: TOTAL - hatch, db: 2 }, // Night drive sits about 2 dB under idle
     ],
     renders: {
-      home: { track: 'idle', seed: 7, seconds: first + (flatlineAt + 2 - evolve) + 1 },
-      run: { track: 'netrun', region: 'public', seed: 7, seconds: runFrom + evolve - run + 1 },
+      home: { track: 'idle', seed: 7, seconds: first + (flatlineAt + 2 - back) + 1 },
+      run: { track: 'netrun', region: 'public', seed: 7, seconds: runFrom + back - run + 1 },
       next: { track: 'nightdrive', seed: 8, seconds: TOTAL - hatch + 1 }, // the track generation 2 unlocks
     },
     // Gain over trailer time: [from, to, level], eased over 0.3 s at each change.
     levels: [
       [sceneStart('breach'), run, 0.7],
-      [evolve + 1.6, evolve + 4.0, 0.3],
+      [depth, evolve, 0.55], // quieter under the corruption
+      [evolve + 1.0, evolve + 3.4, 0.3], // under the evolve jingle
     ],
     fadeOut: [flatlineAt, flatlineAt + 2],
     end: TOTAL - 1.5,
