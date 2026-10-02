@@ -1,5 +1,6 @@
 // Anomaly events. Each option's apply(ctx) mutates the pet/run through helpers and returns a log line.
 // ctx: { pet, run, rng, loot(item?), hurt(n, why), lean(allegiance, stability), reveal(depth), fragment(chance) }
+// regions: the regions it can turn up in; omitted means anywhere.
 
 export const ANOMALIES = [
   {
@@ -109,4 +110,32 @@ export const ANOMALIES = [
       { id: 'move', label: 'MOVE ON', hint: 'nothing happens', apply: () => 'the echo faded.' },
     ],
   },
+  {
+    // The Source's own (codex source-3 is the same order): what it says is the price of reading it.
+    id: 'purge',
+    title: 'THE PURGE ORDER',
+    text: 'an unexecuted directive, signed by no one. status: pending.',
+    regions: ['source'],
+    options: [
+      {
+        id: 'read',
+        label: 'READ IT',
+        hint: '-15 int, it may remember something',
+        apply: (c) => `${c.hurt(15, 'PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end.')}${c.fragment(0.6)}`,
+      },
+      {
+        id: 'leave',
+        label: 'LEAVE IT',
+        hint: '+15 sync, order',
+        apply: (c) => {
+          c.pet.stats.sync += 15;
+          c.lean(0, 1);
+          return 'left pending. pending. pending. something down here stops holding its breath.';
+        },
+      },
+    ],
+  },
 ];
+
+// The anomalies that can turn up in a region.
+export const anomaliesFor = (region) => ANOMALIES.filter((e) => !e.regions || e.regions.includes(region));

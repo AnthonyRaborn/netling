@@ -4,7 +4,7 @@ import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from './map.js
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
-import { ANOMALIES } from './anomalies.js';
+import { ANOMALIES, anomaliesFor } from './anomalies.js';
 import { weighted } from '../random.js';
 
 // The uplink cooldown lives in sim.js (CFG.runCooldownMin and friends), where items can shorten it.
@@ -336,7 +336,8 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'market' };
     }
     case 'anomaly': {
-      const ev = ANOMALIES[Math.floor(rng() * ANOMALIES.length)];
+      const pool = anomaliesFor(run.region);
+      const ev = pool[Math.floor(rng() * pool.length)];
       openChoice(run, {
         kind: 'anomaly',
         event: ev.id,

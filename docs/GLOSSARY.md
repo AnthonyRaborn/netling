@@ -14,7 +14,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Alert** | The single most urgent reason to call the player back (`alertReason`). Drives the chirp and notifications | `sim.js` |
 | **Allegiance** | Hidden axis: positive is corp, negative is indie (scavenged data, hiding). Picks Chrome or Firewall | `sim.js` `axes` |
 | **Anchors** | Positions (head top, eyes, mouth, body span) computed from a sprite's pixels so accessories fit any form | `accessories.js` `anchorsFor` |
-| **Anomaly** | A netrun node with a two-option risk or reward prompt. Five exist | `netrun/anomalies.js` |
+| **Anomaly** | A netrun node with a two-option risk or reward prompt. Six exist; the purge order turns up only in the Source | `netrun/anomalies.js` |
 | **Antivirus patch** | Item: cures a virus and shields against new ones for 6 hours | `sim.js` |
 | **Archive** | The dialog with LINEAGE, DEX, CODEX and STYLE tabs, and the SYSTEM button | `ui/archive.js` |
 | **Armed button** | A button that needs a second press within a few seconds to confirm (scrap or sell, transfer out, restart) | `ui/app.js` `armed` |

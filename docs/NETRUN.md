@@ -221,7 +221,7 @@ Careful play, 4000 runs each, disconnect rates: The Deep 11 / 10 / 14 / 13 / 12%
 
 ## Anomalies
 
-Five events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (`lean(allegiance, stability)`).
+Six events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (`lean(allegiance, stability)`). An anomaly with `regions` set turns up only there (`anomaliesFor(region)`); the other five turn up anywhere, so an anomaly node in the Source picks from all six and one elsewhere from five.
 
 | Event | Option A | Option B |
 |---|---|---|
@@ -230,6 +230,7 @@ Five events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (
 | Stray signal | FOLLOW: Heat +5, reveals the next 2 layers | TUNE OUT: nothing |
 | Overclock rig | PLUG IN: Charge +25, Heat +25, stability -1 | LEAVE IT: nothing |
 | Echo | LISTEN: Sync +15, 50% a codex fragment | MOVE ON: nothing |
+| The purge order (the Source only) | READ IT: -15 Integrity, 60% the next codex fragment ("PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end.") | LEAVE IT: Sync +15, stability +1 ("left pending. pending. pending. something down here stops holding its breath.") |
 
 After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Charge at 0 afterwards disconnects.
 

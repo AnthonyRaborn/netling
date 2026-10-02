@@ -5,7 +5,7 @@ A cyberpunk Tamagotchi-style pet in the browser. Vanilla ES modules, canvas, no 
 ## Commands
 
 ```bash
-npm test          # 455 unit tests, Node 22
+npm test          # 457 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174

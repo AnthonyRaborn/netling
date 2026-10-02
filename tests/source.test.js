@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { createScript, mainframeAt, mulberry32, tick, CFG, MIN } from '../src/sim.js';
 import { FRAGMENTS, ROOT_FRAGMENT_IDS, codexByRegion, liveFragments, nextFragment } from '../src/netrun/codex.js';
 import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/regions.js';
-import { MAINFRAME_ABILITIES, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
+import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
+import { ANOMALIES, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
 import { COSMETICS, LEGACY, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
@@ -303,3 +304,55 @@ test('a mainframe\'s plush still fits in the plush\'s box', () => {
     for (const [x, y] of pts) assert.ok(x >= 0 && y >= 0 && x < plush.size[0] && y < plush.size[1], `${form}: ${x},${y} outside the box`);
   }
 });
+
+// --- The purge order: the Source's own anomaly ---
+
+test('the purge order turns up only in the Source, as one anomaly among the others', () =>
+  switchedOn(() => {
+    assert.deepEqual(anomaliesFor('source').map((e) => e.id), ANOMALIES.map((e) => e.id));
+    for (const region of REGION_ORDER.filter((r) => r !== 'source')) assert.ok(!anomaliesFor(region).some((e) => e.id === 'purge'), region);
+    const seen = { source: new Set(), public: new Set() };
+    for (let seed = 1; seed <= 120; seed++) {
+      for (const region of ['source', 'public']) {
+        const s = netling('mainframe', 'plat');
+        moveTo(s, into(s, region, 'anomaly', seed).id, mulberry32(seed));
+        seen[region].add(s.run.pending.event);
+      }
+    }
+    assert.ok(seen.source.has('purge') && seen.source.size === 6, [...seen.source].join());
+    assert.ok(!seen.public.has('purge'));
+  }));
+
+// A Source run standing on the purge order.
+function atPurge(seed = 1) {
+  for (let n = seed; n < seed + 500; n++) {
+    const s = netling('mainframe', 'plat');
+    moveTo(s, into(s, 'source', 'anomaly', n).id, mulberry32(n));
+    if (s.run.pending?.event === 'purge') return s;
+  }
+  throw new Error('no purge order found');
+}
+
+test('READ IT costs 15 Integrity and may give the next Source fragment; LEAVE IT calms and leans to order', () =>
+  switchedOn(() => {
+    const read = atPurge();
+    const before = read.stats.integrity;
+    const res = choose(read, 'read', () => 0.1);
+    assert.ok(res.ok);
+    assert.equal(read.stats.integrity, before - 15);
+    assert.deepEqual(read.run.fragments, ['source-1']);
+    assert.match(res.msg, /every netling ever compiled/);
+
+    const unlucky = atPurge(50);
+    choose(unlucky, 'read', () => 0.9);
+    assert.deepEqual(unlucky.run.fragments, [], 'a 60% chance, not a sure thing');
+
+    const left = atPurge();
+    left.stats.sync = 50;
+    const integrity = left.stats.integrity;
+    const r = choose(left, 'leave', noRng);
+    assert.ok(r.ok);
+    assert.equal(left.stats.sync, 65);
+    assert.equal(left.stats.integrity, integrity);
+    assert.match(r.msg, /pending/);
+  }));

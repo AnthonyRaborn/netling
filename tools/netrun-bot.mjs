@@ -23,7 +23,7 @@ export const RUN_STYLES = {
 // Anomaly options a player picks when steering; anything not listed is picked at random.
 export const ANOMALY_PREFS = {
   random: [],
-  risky: ['salvage', 'raid', 'use', 'follow', 'listen'], // chaos and loot
+  risky: ['salvage', 'raid', 'use', 'follow', 'listen', 'read'], // chaos and loot (and reading the purge order)
   orderly: ['repair', 'leave', 'follow', 'listen'],
   corp: ['repair', 'report', 'leave', 'follow', 'listen'],
   indie: ['raid', 'repair', 'leave', 'follow', 'listen'],

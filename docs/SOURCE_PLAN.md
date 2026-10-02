@@ -8,7 +8,7 @@ Ids are permanent now that they have shipped (CLAUDE.md rule 1). Lore text can s
 
 - **Pacing in real play.** The bots run more than people do. Watch real play before changing the feat counts (3 exits, or 2 clean) or `deep-5`'s place; Root Access stays the gate.
 - **The Chrome corp-relay fix** is what makes the feat fair to Chrome. If corp relays ever go, revisit the feat ([below](#chrome-lags-on-exits-fixed-corp-relays)).
-- **A Source-only anomaly** ("The purge order") and **five mainframe shells**: left out of the first cut ([Optional](#optional-not-in-the-first-cut), [Unlocks](#unlocks-and-cosmetics)).
+- **Five mainframe shells**: left out of the first cut ([Unlocks](#unlocks-and-cosmetics)). The Source-only anomaly was built after shipping ([The purge order](#after-shipping-the-purge-order)).
 - **A human pass** on a phone: the art, the glitching Source name, and a listen to the Source theme and First commit.
 
 ## Contents
@@ -144,7 +144,7 @@ Once the Source is open, `updateContract` offers it like any other region. There
 
 ### Optional, not in the first cut
 
-A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Anomalies have no region filter today, so this would add one. It can wait for a later pass.
+A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Anomalies have no region filter today, so this would add one. It can wait for a later pass. **Built after shipping:** see [The purge order](#after-shipping-the-purge-order).
 
 ## Codex
 
@@ -479,6 +479,17 @@ Not done here: a human look at the art and the glitching name on a phone; listen
 ## After shipping: the blink
 
 The corrupted dex records blink like the Source's name, and the blink now changes the text too (asked for after step 7: color and slant alone were too slight for a 0.4 s blink). `ui/corrupt.js` drives every `.corrupt` element and every static thumbnail from one timer: every 3.2 s, for 0.4 s, about 30% of the letters become block glyphs (`░▒▓█`) or look-alike digits (O to 0, E to 3), different each time, and the static re-rolls with a three-row band shifted sideways. A Zalgo look (stacked combining marks) was considered and left out: it spills into neighbouring lines and renders unevenly across fonts. The CSS animation is gone; with motion calmed nothing blinks. Tests: `tests/corrupt.test.js`, and the smoke scenario checks a blink, its return and the calm setting.
+
+## After shipping: the purge order
+
+The Source's own anomaly, `purge` in `ANOMALIES` with `regions: ['source']`; `anomaliesFor(region)` is the new region filter, so an anomaly node in the Source picks from six and elsewhere from the same five as before. It is the order in `source-3` ("PURGE sector 7F. status: pending."), found unexecuted.
+
+| Option | Effect | Log |
+|---|---|---|
+| READ IT | -15 Integrity, 60% the next codex fragment (the per-life cap applies) | "PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end." |
+| LEAVE IT | Sync +15, stability +1 | "left pending. pending. pending. something down here stops holding its breath." |
+
+Chosen by the maintainer from three drafts ("knowledge costs"). The bots' `risky` style reads it; `orderly`, `corp` and `indie` leave it (their existing `leave` preference); the rest pick at random. Baselines: `lives.json` did not move. In `netruns.json` the Source gives 0.03 to 0.07 more fragments a run and its stability lean is about 0.2 less negative for every style and form; exits move by 2 to 4 points for a few (within noise). `lineages.json` moves only by small amounts (under 0.1 in most rows), from Source runs drawing differently.
 
 ## Risks
 
