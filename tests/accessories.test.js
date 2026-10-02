@@ -265,7 +265,9 @@ test('wearables that used to look alike now differ in silhouette', () => {
     assert.ok(overlap('chromejaw', 'rebreather', sprite) < 0.7, 'jaw and rebreather');
     assert.ok(overlap('mohawk', 'partyhat', sprite) < 0.5, 'mohawk and party hat');
     assert.ok(overlap('cap', 'crown', sprite) < 0.5, 'cap and crown');
-    assert.ok(overlap('shades', 'visor', sprite) < 0.6, 'shades and visor');
+    // Three unbroken lines is the visor's whole shape, so on Chrome's wide face it overlaps the Shades more (0.67); the
+    // colors still differ (black lenses against a colored band).
+    assert.ok(overlap('shades', 'visor', sprite) < 0.7, 'shades and visor');
   }
 });
 
@@ -334,5 +336,50 @@ test('a second accessory on a visitor comes from another slot', () => {
     const first = rollWornAccessory(rng);
     const second = rollWornAccessory(rng, [first]);
     assert.notEqual(accessoryById(first).slot, accessoryById(second).slot);
+  }
+});
+
+test('orbiting floaters draw last and nothing else moves to make room for them', () => {
+  const orbiters = ACCESSORIES.filter((a) => a.orbits).map((a) => a.id);
+  assert.deepEqual(orbiters.sort(), ['dataaura', 'drone', 'glitchmoth']);
+  for (const [name, sprite] of [['whisperA', SPRITES.whisperA], ['whisperB', SPRITES.whisperB], ['ghostA', SPRITES.ghostA], ['bitlingA', SPRITES.bitlingA]]) {
+    for (const orbiter of orbiters) {
+      for (const body of ['scarf', 'lanyard', 'barcode', 'kernelpin']) {
+        for (let t = 0; t < 4000; t += 250) {
+          const worn = placeWorn([{ id: orbiter }, { id: body }], sprite, { time: t });
+          assert.equal(worn[worn.length - 1].id, orbiter, `${orbiter} is drawn last`);
+          const alone = placeWorn([{ id: body }], sprite, { time: t })[0];
+          assert.equal(worn.find((w) => w.id === body).dy, alone.dy, `${body} on ${name} stays put at ${t} ms with ${orbiter}`);
+        }
+      }
+    }
+  }
+});
+
+test('the visor is three unbroken lines with a scan light running in and out on the middle one', () => {
+  for (const [name, sprite] of FORM_SPRITES) {
+    const a = anchorsFor(sprite);
+    const cells = [];
+    const run = (time) => {
+      const out = [];
+      accessoryById('visor').draw((x, y, color) => out.push({ x, y, color }), a, 0, time, accessoryColors('visor', null));
+      return out;
+    };
+    const base = run(0);
+    const rows = [...new Set(base.map((p) => p.y))].sort((m, n) => m - n);
+    assert.deepEqual(rows, [a.eyeRow - 1, a.eyeRow, a.eyeRow + 1], `${name}: only the three lines`);
+    const xs = [...new Set(base.map((p) => p.x))].sort((m, n) => m - n);
+    for (const y of rows) {
+      const row = new Set(base.filter((p) => p.y === y).map((p) => p.x));
+      assert.deepEqual([...row].sort((m, n) => m - n), xs.filter((x) => x >= xs[0] && x <= xs[xs.length - 1]), `${name}: row ${y} has no gap`);
+    }
+    // The lights are on the middle line only, in matching pairs, and sweep outer, middle, inner, middle.
+    const lights = (time) => run(time).filter((p) => p.color === '#ffffff');
+    const offs = [0, 280, 560, 840].map((t) => lights(t).map((p) => p.x).sort((m, n) => m - n));
+    for (const l of offs) assert.ok(l.length === 2 || l.length === 1, `${name}: a pair of lights`);
+    assert.ok(lights(0).every((p) => p.y === a.eyeRow), `${name}: lights on the middle line`);
+    cells.push(offs);
+    assert.deepEqual(offs[1], offs[3], `${name}: the middle position comes round twice`);
+    assert.ok(offs[1][0] >= offs[0][0] && offs[2][0] >= offs[1][0], `${name}: moving inward`);
   }
 });
