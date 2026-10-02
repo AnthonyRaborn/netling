@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
+import { encodeCard } from '../src/visitcard.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS, ROOT_FRAGMENTS } from '../src/netrun/codex.js';
 import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
@@ -271,6 +272,57 @@ await scenario('hostile import code (wrong types everywhere) is repaired', async
   assert((await page.evaluate(() => localStorage.getItem('netling.codex'))) === '[]', 'codex not cleaned');
   await page.click('#open-archive');
   for (const t of ['dex', 'codex', 'wardrobe', 'lineage']) await page.click(`#tab-btn-${t}`);
+});
+
+await scenario('visitor card: make one, open a link, invite', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel' }), 'netling.wardrobe': { body: 'bowtie' } }));
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.click('#card-make');
+  const link = await page.inputValue('#card-link');
+  assert(/#visit=NV1\.[\w-]+\.[0-9a-f]{8}$/.test(link), `no card link: ${link}`);
+  assert(await visible(page, '#card-qr'), 'no QR for the card');
+  assert((await page.evaluate(() => document.getElementById('card-qr').width)) > 0, 'the QR is empty');
+
+  // A friend's Mainframe netling, opened from a link before Root Access: a corrupted record, then queued.
+  const code = encodeCard({ f: 'plat', p: 1, a: ['checksum'], g: 5, d: 2, r: true, x: 1 });
+  await page.close(); // one tab at a time: a waiting tab keeps the link
+  const other = await open(`${BASE}#visit=${code}`, seed());
+  const preview = await other.textContent('#import-preview');
+  assert(/<<corrupted record>>/.test(preview) && /gen 5, <<corrupted>>/.test(preview), `preview gives it away: ${preview}`);
+  assert(!/plat|checksum|root|below/i.test(preview.replace(/corrupted/g, '')), `preview leaks: ${preview}`);
+  assert((await other.evaluate(() => location.hash)) === '', 'the card stays in the address bar');
+  await other.click('#import-preview button');
+  assert(/on its way/.test(await other.textContent('#import-preview')), 'not invited');
+  const s = await saved(other);
+  assert(s.friends.length === 1 && s.friends[0].form === 'plat', `not queued: ${JSON.stringify(s.friends)}`);
+  await other.fill('#import-code', link.replace('#visit=', '#visit=%20'));
+  await other.click('#check-code');
+  await other.click('#import-preview button');
+  assert(/on its way/.test(await other.textContent('#import-preview')), 'a pasted link was not read');
+  await other.fill('#import-code', link);
+  await other.click('#check-code');
+  await other.click('#import-preview button');
+  assert(/already on its way/.test(await other.textContent('#import-preview')), 'the same card queued twice');
+});
+
+await scenario('visitor card: a friend drops by, is greeted, and signs the guestbook', async ({ open }) => {
+  const now = Date.now();
+  const friend = { id: '0badcafe', form: 'plat', palette: 1, accessories: [], gen: 5, deep: 2, root: true, below: 1, at: now - 2 * 3600_000 };
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', friends: [friend], lastTick: now - 3 * 60_000 }) }));
+  await page.waitForTimeout(800);
+  const s = await saved(page);
+  assert(s.visit?.friend?.gen === 5 && s.friends.length === 0, `the friend did not arrive: ${JSON.stringify(s.visit)}`);
+  assert(await visible(page, '#wish-greet'), 'no GREET for the friend');
+  const bar = await page.textContent('#wish-text');
+  assert(bar.includes("a friend's corrupted record dropped by"), `the bar gives it away: ${bar}`);
+  await page.click('#wish-greet');
+  await page.click('#open-archive');
+  await page.click('#tab-btn-chatter');
+  const row = page.locator('#guestbook .frag').first();
+  const text = await row.evaluate((d) => [...d.childNodes].map((n) => n.dataset?.text ?? n.textContent).join(''));
+  assert(/a friend's <<corrupted record>> \(gen 5, <<corrupted>>\)/.test(text), `guestbook row: ${text}`);
+  assert(await row.locator('.corrupt').count(), 'the corrupted name does not glitch');
 });
 
 await scenario('corrupted local storage does not break startup', async ({ open }) => {

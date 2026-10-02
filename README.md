@@ -86,6 +86,7 @@ None of these ever costs a fault; they are small rewards for checking in often.
 
 - **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
 - **Visitors**: say hello with **GREET** while one is here.
+- **Visitor cards**: ARCHIVE > SYSTEM > **Make visitor card** gives a link and a QR code for your netling. When a friend opens it, your netling drops by their device within the hour, and theirs can visit you the same way. Friends you greet sign the guestbook in the **CHATTER** tab. A card carries only how your netling looks and one thing its line has done.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
 - **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often and visitors drop by more.
 - **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
@@ -201,7 +202,7 @@ Only one browser tab looks after the netling at a time. Other tabs show a guard 
 
 ## Privacy
 
-Nothing you do in the game leaves your device. There are no accounts, no analytics, no ads and no tracking, and the game loads nothing from other sites (even its fonts are bundled). Your netling lives only in your browser's storage, and the only way it goes anywhere else is a transfer code you make and move yourself. The game is hosted on GitHub Pages, so GitHub sees a visit when the page loads, as any web host would.
+Nothing you do in the game leaves your device. There are no accounts, no analytics, no ads and no tracking, and the game loads nothing from other sites (even its fonts are bundled). Your netling lives only in your browser's storage, and the only way it goes anywhere else is a transfer code or visitor card you make and share yourself. A visitor card link keeps the card after the `#`, a part of the address that browsers never send to the host. The game is hosted on GitHub Pages, so GitHub sees a visit when the page loads, as any web host would.
 
 ## Install, offline and controllers
 

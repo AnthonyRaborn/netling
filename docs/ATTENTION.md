@@ -16,6 +16,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 |---|---|
 | Requests | The netling asks for one game or COOL; the count is `progress.requestsMet` |
 | Greet a visitor | One GREET per visit; count is `progress.visitorsGreeted` |
+| Visitor cards | A friend's netling visits from a card link or QR; greeted friends sign the guestbook. See [Visitor cards](#visitor-cards) |
 | Flow | A glow after 3 hours in good shape; time spent counts across lives (`flowMin`) |
 | Chatter | 50 lines; heard lines are kept in the Archive's CHATTER tab (`progress.chatter`) |
 | Daily check-in | A seven-day reward ladder for opening the app once after each morning it wakes; rewards wait in a reward box |
@@ -76,6 +77,18 @@ Rules and numbers are in [NETRUN.md](NETRUN.md#contracts).
 - **Solvable on every route.** When the run starts, the map is fixed so that every route from entry to exit meets the job without perfect play: an ICE job gets one ICE more than it asks for on every route, so one lost fight doesn't sink it; a cache job gets enough caches on every route; a market job gets a market in the first half of every route, each offering one of the cheapest items. A fragment job is only posted where an unread fragment waits and the netling's memory has room, and it makes the exit's fragment certain. A market job needs 15 scrip when posted. Winning ICE fights is still up to the player.
 - **Pay.** 15 to 25 scrip by job, and a 25% chance of one cheapest-tier item, named when posted, paid into the run's loot on jack-out (so a disconnect or abort loses it with the rest). A missed job pays nothing and costs nothing.
 - **Not measured.** The balance bots never take contracts (they are posted by the UI), so the baselines did not move and there is no measured rate yet.
+
+## Visitor cards
+
+The first multiplayer feature, with no server (`visitcard.js`, `stepFriends` in `sim.js`). ARCHIVE > SYSTEM > MAKE VISITOR CARD shows a link (`<page>#visit=NV1.<base64url(json)>.<crc32>`) and its QR. Opening the link, or pasting it or the bare card into BRING ONE HERE, shows a preview and INVITE.
+
+- **What a card carries**: form, palette, the accessories worn (one per wear slot, no colors or props), the generation, and three account facts: Deep exits, Root Access earned, Source exits. No stats, items or text a player typed, so there is nothing to cheat and nothing to moderate. The crc is the card's id. Imported cards are cleaned like any code (`cleanCard`).
+- **Queue**: up to `friendQueueMax` (3) cards wait in the save (`friends`); the same id twice is refused while queued. The queue carries over to the next compile.
+- **Arrival**: the first card in line arrives once the netling is awake, has no event, visitor, netrun or reboot: each such minute with chance `friendChancePerMin` (1/30), or at the first free minute after `friendWaitMaxMin` (60) of waiting. An empty queue rolls nothing, so the balance baselines do not move. The visit then plays exactly like a stray's (Sync, Heat, gift chances, GREET and its chatter line).
+- **Feat**: `friendFeat` shows the generation and the rarest of: trips below the bottom (Source exits, worded so the region's name stays hidden), root access, Deep exits.
+- **Spoilers**: before Root Access (`rootEarnedIn`, and the switch), a Mainframe form arrives as static on the LCD and a "corrupted record" in text, and Mainframe accessories stay behind (on any form). Root and Source feats read `<<corrupted>>`. The preview and guestbook use `rootUnlocked()` and update once Root Access is earned.
+- **Guestbook**: each greeted friend adds `{ at, form, gen, deep, root, below }` to `progress.guestbook` (last 20), shown under CHATTER. There is no cosmetic for it: a card can be reused, so one friend could unlock it alone.
+- **Not built**: card colors for recolored accessories, the device shell (it is not on the LCD), and any limit on reusing a card after its visit.
 
 ## Limits
 

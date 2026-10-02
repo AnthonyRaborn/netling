@@ -1,13 +1,14 @@
-// Archive > SYSTEM: transfer out (and the lock screen), bring one here, hibernate, restart,
-// volume, and storage safety.
-import { hibernate, hibernateBlockReason, wake, wakeAvailableAt, CFG, MIN } from '../sim.js';
+// Archive > SYSTEM: transfer out (and the lock screen), bring one here, visitor cards, hibernate,
+// restart, volume, and storage safety.
+import { hibernate, hibernateBlockReason, wake, wakeAvailableAt, CFG, MIN, SPECIES, isMainframeForm, friendFeat } from '../sim.js';
 import { encodeSave, decodeSave, describeSave, TRANSFER_KEYS } from '../transfer.js';
+import { cardFor, encodeCard, decodeCard, cardCodeFrom, isCardText, queueCard, CARD_HASH } from '../visitcard.js';
 import { encodeQR, drawQR } from '../qr.js';
 import { sfx, unlockAudio, setVolume } from '../audio.js';
 import { setMusicVolume } from '../music.js';
 import { syncMusicMode } from './soundtrack.js';
 import { KEYS } from '../storage.js';
-import { $, app, armed, flashStatus, now, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
+import { $, app, armed, flashStatus, now, rootUnlocked, save, setTestMode, setTestSpeed, store, TEST, testMode } from './app.js';
 import { fmtAge, updateHUD } from './hud.js';
 import { advance } from './life.js';
 import { renderScreenPrefs } from './device.js';
@@ -90,6 +91,7 @@ export function openSystem() {
   $('music-volume-value').textContent = `${Math.round(app.prefs.musicVolume * 100)}%`;
   renderScreenPrefs();
   $('import-preview').hidden = true;
+  $('card-box').hidden = true;
   renderHibernateNote();
   renderTestMode();
   $('transfer').showModal();
@@ -188,6 +190,7 @@ async function checkImport() {
   box.hidden = false;
   box.className = 'tx-preview';
   box.replaceChildren();
+  if (isCardText($('import-code').value)) return checkCard(box);
   const code = codeFrom($('import-code').value);
   try {
     pendingImport = await decodeSave(code, now());
@@ -246,8 +249,90 @@ function applyImport() {
   location.replace(location.pathname + location.search);
 }
 
-// A scanned QR opens the game with #import=<code>: go straight to the import preview.
+// --- visitor cards ---
+
+const cardUrl = (code) => `${location.origin}${location.pathname}${CARD_HASH}${code}`;
+
+// Who is on the card, as this player may see it: a Mainframe form before Root Access is a corrupted record.
+export function friendName(form, rootKnown = rootUnlocked()) {
+  return isMainframeForm(form) && !rootKnown ? '<<corrupted record>>' : SPECIES[form].name.toLowerCase();
+}
+
+function makeCard() {
+  const card = cardFor(app.state, app.wardrobe, app.progress);
+  if (!card) {
+    sfx('error', app.state.quirk.pitch);
+    return flashStatus(app.state.stage === 'dead' ? 'a flatlined netling cannot visit anyone.' : 'it has to finish compiling first.');
+  }
+  const url = cardUrl(encodeCard(card));
+  $('card-link').value = url;
+  drawQR($('card-qr'), encodeQR(url), 4);
+  $('card-share').hidden = !navigator.share;
+  $('card-box').hidden = false;
+  sfx('select', app.state.quirk.pitch);
+}
+
+// A card in the paste box: who it is, and INVITE to queue the visit.
+function checkCard(box) {
+  let card;
+  try {
+    card = decodeCard(cardCodeFrom($('import-code').value));
+  } catch (err) {
+    box.className = 'tx-preview error';
+    box.textContent = err?.message || 'could not read that card.';
+    sfx('error', 660);
+    return;
+  }
+  const dl = document.createElement('dl');
+  for (const [k, v] of [
+    ['visitor', `a friend's ${friendName(card.form)}`],
+    ['line', friendFeat(card, rootUnlocked())],
+  ]) {
+    const dt = document.createElement('dt');
+    dt.textContent = k;
+    const dd = document.createElement('dd');
+    dd.textContent = v;
+    dl.append(dt, dd);
+  }
+  const note = document.createElement('p');
+  note.className = 'tx-note';
+  note.textContent = 'It drops by within the hour, once your netling is awake and free. Nothing on this device is replaced.';
+  const go = document.createElement('button');
+  go.type = 'button';
+  go.textContent = 'INVITE';
+  go.addEventListener('click', () => inviteCard(card, box));
+  box.replaceChildren(dl, note, go);
+}
+
+function inviteCard(card, box) {
+  const why = app.lock ? 'this device is locked: load a netling first.' : app.state.stage === 'dead' ? 'compile a new netling first.' : null;
+  const result = why ? null : queueCard(app.state, card, now(), CFG.friendQueueMax);
+  const msg = why ?? {
+    queued: "invited. it's on its way.",
+    already: 'that card is already on its way.',
+    full: `${CFG.friendQueueMax} visitors are already on their way. try again after one drops by.`,
+  }[result];
+  box.className = result === 'queued' ? 'tx-preview' : 'tx-preview error';
+  box.textContent = msg;
+  if (result === 'queued') {
+    save();
+    $('import-code').value = '';
+    sfx('patch', app.state.quirk.pitch);
+  } else {
+    sfx('error', 660);
+  }
+}
+
+// A scanned QR opens the game with #import=<code> (a save) or #visit=<card>: go straight to the preview.
 export function importFromUrl() {
+  if (location.hash.startsWith(CARD_HASH)) {
+    const card = location.hash;
+    history.replaceState(null, '', location.pathname + location.search);
+    $('import-code').value = card;
+    openSystem();
+    checkImport();
+    return;
+  }
   if (!location.hash.startsWith('#import=')) return;
   const code = codeFrom(location.hash);
   history.replaceState(null, '', location.pathname + location.search);
@@ -331,6 +416,21 @@ export function initSystem() {
   });
 
   $('transfer-out').addEventListener('click', transferOut);
+
+  $('card-make').addEventListener('click', makeCard);
+  $('card-copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($('card-link').value);
+      $('card-copy').textContent = 'COPIED';
+    } catch {
+      $('card-link').select();
+      $('card-copy').textContent = 'SELECTED: COPY IT';
+    }
+    setTimeout(() => ($('card-copy').textContent = 'COPY LINK'), 2000);
+  });
+  $('card-share').addEventListener('click', () => {
+    navigator.share?.({ title: 'Netling visitor card', text: 'My netling wants to visit yours.', url: $('card-link').value }).catch(() => {});
+  });
 
   $('lock-copy').addEventListener('click', async () => {
     try {

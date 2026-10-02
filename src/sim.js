@@ -129,6 +129,10 @@ export const CFG = {
   visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
   visitSecondAccessoryChance: 0.5, // and half of those a second, from another slot
+  // Friends' visitor cards (docs/ATTENTION.md): queued, then one drops by within about the hour, as soon as it is free.
+  friendQueueMax: 3,
+  friendChancePerMin: 1 / 30,
+  friendWaitMaxMin: 60,
   // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
   requestChancePerHour: 0.25,
@@ -374,7 +378,7 @@ export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= 
 // newForms: adult forms the player has never raised; they win ties a little more often.
 // rootAccess: the codex is complete, so NL-0 watches over this generation,
 // unless NL-0 spent itself rescuing the previous one: then it rests for a generation.
-export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [] }) {
+export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [], friends = [] }) {
   const rootCooling = rootAccess && Boolean(fragment?.rootUsed);
   if (rootCooling) rootAccess = false;
   const quirk = rollQuirk(rng, { origin: rootAccess || rootCooling });
@@ -423,6 +427,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     runCooldownCut: 0,
     visit: null,
     visitAccGifts: 0,
+    friends, // friends' visitor cards on their way: [{ id, form, palette, accessories, gen, deep, root, below, at }]
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
     contractCheckAge: null, // the netling minute the UI last looked at posting one
@@ -590,6 +595,7 @@ function step(s, t, rng) {
   else if (!rest && !alertReason(s)) s.axes.stability += (inFlow(s) ? CFG.flowStabilityPerHour : CFG.uptimeStabilityPerHour) / 60;
 
   stepVisit(s, t, rng);
+  stepFriends(s, t, rng);
   stepEvents(s, t, rng);
   stepRequest(s, t, rng);
   stepFlow(s);
@@ -684,6 +690,47 @@ function startVisit(s, t, rng) {
   s.visit = { startedAge: s.ageMin, len, form, palette, accessories };
   const wearing = accessories.length ? ` in a ${accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')}` : '';
   log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
+}
+
+// --- friends' visitor cards -----------------------------------------------------------------
+// A card carries a friend's look and a few facts, nothing that plays (docs/ATTENTION.md). Before Root Access, a
+// Mainframe friend arrives as a corrupted record and its Mainframe items stay behind, as with the dex.
+
+export const visitHidden = (s, visit) => Boolean(visit) && isMainframeForm(visit.form) && !(CFG.mainframe && rootEarnedIn(s));
+
+// What the visitor is called in the log: a friend's form, or a corrupted record.
+export const visitorName = (s, visit) => (visitHidden(s, visit) ? 'corrupted record' : SPECIES[visit.form].name.toLowerCase());
+
+// The rarest thing a friend's line has done, after its generation. What only Root Access would explain stays corrupted.
+export function friendFeat(f, rootKnown) {
+  const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+  const best =
+    f.below > 0 ? (rootKnown ? plural(f.below, 'trip below the bottom', 'trips below the bottom') : '<<corrupted>>')
+    : f.root ? (rootKnown ? 'root access' : '<<corrupted>>')
+    : f.deep > 0 ? plural(f.deep, 'deep exit')
+    : '';
+  return best ? `gen ${f.gen}, ${best}` : `gen ${f.gen}`;
+}
+
+// The first card in line arrives once the netling is awake and free: by chance within the hour, or as soon as it can
+// after waiting that long. An empty queue rolls nothing, so the balance runs are unchanged.
+function stepFriends(s, t, rng) {
+  if (!s.friends?.length || s.visit || s.run || s.event || resting(s) || rebootMinutesLeft(s) > 0) return;
+  const due = t - s.friends[0].at >= CFG.friendWaitMaxMin * MIN;
+  if (!due && rng() >= CFG.friendChancePerMin) return;
+  const card = s.friends.shift();
+  const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
+  const visit = { startedAge: s.ageMin, len, form: card.form, palette: card.palette, accessories: [], friend: { gen: card.gen, deep: card.deep, root: card.root, below: card.below } };
+  const hidden = visitHidden(s, visit);
+  visit.accessories = hidden ? [] : card.accessories.filter((id) => !accessoryById(id)?.mainframe || rootEarnedIn(s));
+  s.visit = visit;
+  const feat = friendFeat(visit.friend, rootEarnedIn(s));
+  if (hidden) {
+    log(s, t, `> a friend's netling pinged in. its record is corrupted (${feat}). they're playing.`);
+    return;
+  }
+  const wearing = visit.accessories.length ? ` in a ${visit.accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')}` : '';
+  log(s, t, `> a friend's ${visitorName(s, visit)}${wearing} pinged in (${feat}). they're playing.`);
 }
 
 // While a visitor is here, Sync and Heat (not in flow) rise a little each minute. It leaves when time's up,
@@ -936,6 +983,7 @@ export function migrate(s) {
   s.runCooldownCut ??= 0;
   s.visit ??= null;
   s.visitAccGifts ??= 0;
+  s.friends ??= [];
   s.life ??= { ...LEGACY_LIFE }; // compiled before lives were shortened: it keeps its seven days
   s.newForms ??= [];
   s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
@@ -1209,7 +1257,9 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.visit.greeted = true;
       const line = pick(visitorLines(), rng);
       s.chatter = { id: line.id, startedAge: s.ageMin };
-      res = { ...ok(`said hello to the ${SPECIES[s.visit.form].name.toLowerCase()}.`, 'visit'), greeted: true };
+      const v = s.visit;
+      res = { ...ok(`said hello to the ${visitorName(s, v)}.`, 'visit'), greeted: true };
+      if (v.friend) res.friend = { form: v.form, ...v.friend };
       break;
     }
     case 'cool': {

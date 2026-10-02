@@ -216,7 +216,45 @@ function cleanVisitWear(raw) {
   return out.slice(0, WEAR_SLOTS.length);
 }
 
-// A stray netling playing with it: { startedAge, len, form, palette, accessories }.
+// What a friend's visitor card says about its line: a generation and three feats (sim.js friendFeat).
+function cleanFeats(raw) {
+  return { gen: int(raw.gen, 1, 1, 1e6), deep: int(raw.deep, 0, 0, 1e6), root: bool(raw.root), below: int(raw.below, 0, 0, 1e6) };
+}
+
+// A friend's visitor card (visitcard.js): its id, look and feats, or null. Imported cards are hostile like any code.
+export function cleanCard(raw) {
+  if (!isObj(raw) || !has(SPECIES, raw.form) || typeof raw.id !== 'string' || !/^[0-9a-f]{8}$/.test(raw.id)) return null;
+  return {
+    id: raw.id,
+    form: raw.form,
+    palette: int(raw.palette, 0, 0, PALETTES.length - 1),
+    accessories: cleanVisitWear(raw.accessories),
+    ...cleanFeats(raw),
+  };
+}
+
+// Cards on their way, oldest first: at most friendQueueMax, each id once, each with the time it was queued.
+function cleanFriends(raw, now) {
+  const out = [];
+  for (const c of Array.isArray(raw) ? raw : []) {
+    const card = cleanCard(c);
+    if (card && !out.some((x) => x.id === card.id)) out.push({ ...card, at: num(c.at, now, 0) });
+  }
+  return out.slice(0, CFG.friendQueueMax);
+}
+
+// The friends greeted, newest last: { at, form, gen, deep, root, below }.
+export const GUESTBOOK_MAX = 20;
+function cleanGuestbook(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((e) => isObj(e) && has(SPECIES, e.form) && Number.isFinite(e.at))
+    .slice(-GUESTBOOK_MAX)
+    .map((e) => ({ at: e.at, form: e.form, ...cleanFeats(e) }));
+}
+
+// A stray netling playing with it: { startedAge, len, form, palette, accessories }, and `friend` (its feats) when it came
+// from a visitor card.
 function cleanVisit(raw) {
   if (!isObj(raw) || !has(SPECIES, raw.form) || !Number.isFinite(raw.startedAge)) return null;
   return {
@@ -226,6 +264,7 @@ function cleanVisit(raw) {
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
     accessories: cleanVisitWear(raw.accessories ?? (raw.accessory ? [raw.accessory] : [])), // older visits wore one: `accessory`
     ...(raw.greeted === true ? { greeted: true } : {}),
+    ...(isObj(raw.friend) ? { friend: cleanFeats(raw.friend) } : {}),
   };
 }
 
@@ -386,6 +425,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     runCooldownCut: num(raw.runCooldownCut, 0, 0, 24 * 60),
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
+    friends: cleanFriends(raw.friends, now),
     request: cleanRequest(raw.request),
     contract: cleanContract(raw.contract),
     contractCheckAge: numOrNull(raw.contractCheckAge),
@@ -471,6 +511,7 @@ export function cleanProgress(raw) {
     requestsMet: int(p.requestsMet, 0, 0),
     contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
+    ...(Array.isArray(p.guestbook) ? { guestbook: cleanGuestbook(p.guestbook) } : {}),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
     hotMin: int(p.hotMin, 0, 0), // awake minutes overclocked over past lives (the same way)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),

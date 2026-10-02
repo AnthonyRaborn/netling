@@ -7,7 +7,8 @@ import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, flashStatus, rootUnlocked, store } from './app.js';
+import { $, app, flashStatus, now, rootUnlocked, store } from './app.js';
+import { GUESTBOOK_MAX } from '../sanitize.js';
 import { syncMusicMode } from './soundtrack.js';
 
 // Bank accessories a finished run left on the pet into the shared collection.
@@ -87,6 +88,8 @@ export function countAttention(res) {
   if (!res?.ok || !(res.requestMet || res.greeted)) return;
   if (res.requestMet) app.progress.requestsMet = (app.progress.requestsMet ?? 0) + 1;
   if (res.greeted) app.progress.visitorsGreeted = (app.progress.visitorsGreeted ?? 0) + 1;
+  // A friend's netling signs the guestbook (Archive > CHATTER), newest last.
+  if (res.friend) app.progress.guestbook = [...(app.progress.guestbook ?? []), { at: now(), ...res.friend }].slice(-GUESTBOOK_MAX);
   store.set(KEYS.progress, app.progress);
   checkUnlocks();
 }

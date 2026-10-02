@@ -252,6 +252,7 @@
       <section id="tab-chatter" role="tabpanel" aria-labelledby="tab-btn-chatter" hidden>
         <p class="tx-note">Things it said while you were watching. Each netling mutters now and then while it is awake and idle.</p>
         <div id="chatter-list" class="codex chatter"></div>
+        <div id="guestbook" class="codex chatter"></div>
       </section>
       <section id="tab-codex" role="tabpanel" aria-labelledby="tab-btn-codex" hidden>
         <div id="codex-gift" class="gift" hidden>
@@ -273,12 +274,24 @@
         <button type="button" id="transfer-out">TRANSFER OUT</button>
 
         <h3>BRING ONE HERE</h3>
-        <textarea id="import-code" rows="3" placeholder="paste a code" aria-label="Transfer code to load"></textarea>
+        <textarea id="import-code" rows="3" placeholder="paste a transfer code or a visitor card" aria-label="Transfer code or visitor card"></textarea>
         <div class="tx-row">
           <button type="button" id="check-code">CHECK CODE</button>
           <label class="file-btn">LOAD FILE<input type="file" id="import-file" accept=".txt,text/plain" hidden /></label>
         </div>
         <div id="import-preview" class="tx-preview" hidden></div>
+
+        <h3>VISITOR CARD</h3>
+        <p class="tx-note">Send your netling to visit a friend. The card carries its look and one thing its line has done, nothing else. Open their card link, or paste it above, and their netling drops by within the hour.</p>
+        <button type="button" id="card-make">MAKE VISITOR CARD</button>
+        <div id="card-box" class="card-box" hidden>
+          <canvas id="card-qr" class="lock-qr" aria-label="Visitor card QR code"></canvas>
+          <textarea id="card-link" readonly rows="2" aria-label="Visitor card link"></textarea>
+          <div class="tx-row">
+            <button type="button" id="card-copy">COPY LINK</button>
+            <button type="button" id="card-share" hidden>SHARE</button>
+          </div>
+        </div>
 
         <h3>STORAGE</h3>
         <p class="tx-note" id="storage-note"></p>

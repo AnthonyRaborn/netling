@@ -1275,6 +1275,12 @@ body.intro-active .brand .prefs {
   border: 4px solid #fff;
 }
 
+.card-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .lock textarea {
   font: inherit;
   font-size: 12px;

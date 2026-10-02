@@ -1,6 +1,6 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
-import { PALETTES, SPECIES, CFG } from '../sim.js';
+import { PALETTES, SPECIES, CFG, friendFeat, isMainframeForm } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, shownRegions } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, liveFragments, ROOT_FRAGMENTS } from '../netrun/codex.js';
@@ -225,6 +225,7 @@ function renderArchive() {
   );
 
   renderChatter();
+  renderGuestbook();
 
   const entries = dexEntries(app.dex, { rootEarned: rootUnlocked() });
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
@@ -274,6 +275,34 @@ function renderChatter() {
       return [h, ...groupLines];
     }),
   );
+}
+
+// Friends' netlings greeted, newest first. A Mainframe friend stays a corrupted record until Root Access.
+function renderGuestbook() {
+  const book = app.progress.guestbook ?? [];
+  const rootKnown = rootUnlocked();
+  const h = document.createElement('h3');
+  h.textContent = 'GUESTBOOK ';
+  const count = document.createElement('span');
+  count.textContent = String(book.length);
+  h.append(count);
+  if (!book.length) {
+    const d = document.createElement('div');
+    d.className = 'frag missing';
+    d.textContent = "say hello when a friend's netling drops by. visitor cards are in SYSTEM.";
+    return $('guestbook').replaceChildren(h, d);
+  }
+  const rows = [...book].reverse().map((e) => {
+    const d = document.createElement('div');
+    d.className = 'frag';
+    const who = document.createElement('span');
+    const hidden = isMainframeForm(e.form) && !rootKnown;
+    who.textContent = hidden ? '<<corrupted record>>' : SPECIES[e.form].name.toLowerCase();
+    if (hidden) who.className = 'corrupt';
+    d.append(`${new Date(e.at).toLocaleDateString()}: a friend's `, who, ` (${friendFeat(e, rootKnown)})`);
+    return d;
+  });
+  $('guestbook').replaceChildren(h, ...rows);
 }
 
 function selectTab(name) {

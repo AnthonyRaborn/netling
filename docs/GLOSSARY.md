@@ -84,6 +84,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE, and often later ones | `sim.js` |
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
 | **GREET** | Optional hello to a visitor, once per visit | `sim.js` |
+| **Guestbook** | Friends' netlings greeted from visitor cards, the last 20, under CHATTER | `progress.guestbook` |
 | **Heat** | Stat: rises when active. 65+ is overclocked, 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Heatwave** | Screen effect: 40 hours overclocked while awake, across lives. The hot-side twin of Aurora | `cosmetics.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |
@@ -167,6 +168,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Uplink** | The netrun connection. "Uplink cooling down" means the cooldown | `netrun/run.js` |
 | **Virus** | Infection that costs 12 Integrity/hr. PATCH cures it | `sim.js` |
 | **Visitor** | A stray netling that plays with yours for 10 to 20 minutes. GREET it for a line and better gift odds | `sim.js` |
+| **Visitor card** | A link or QR of a netling's look and one feat; a friend who opens it gets a visit within the hour | `visitcard.js` |
 | **Wake (wake it)** | Ending a nap early, or ending hibernation | `sim.js` |
 | **Wardrobe** | The stored equipped cosmetics | `cosmetics.js` |
 | **Wear slot** | Where an accessory sits: `head`, `face`, `body` or `float`. The wardrobe holds one per slot, and a visitor wears up to two | `accessories.js` `WEAR_SLOTS` |

@@ -1,5 +1,5 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf } from '../sim.js';
+import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf, visitorName } from '../sim.js';
 import { atMarket, contractMinutesLeft, contractText, fmtLeft, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -158,7 +158,7 @@ function renderWish(state) {
   if (!r && !v && !c) return;
   const parts = [];
   if (r) parts.push(`${r.kind === 'cool' ? 'it is fanning itself' : `it wants ${r.game.toUpperCase()}`} · ${requestMinutesLeft(state)}m`);
-  if (v) parts.push(`a ${SPECIES[v.form].name.toLowerCase()} dropped by`);
+  if (v) parts.push(`${v.friend ? "a friend's" : 'a'} ${visitorName(state, v)} dropped by`);
   if (c) parts.push(`contract: ${contractText(c)} · ${fmtLeft(contractMinutesLeft(state))}`);
   $('wish-text').textContent = parts.join(' · ');
   $('wish-play').hidden = r?.kind !== 'game';
