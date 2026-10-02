@@ -2,6 +2,13 @@
 // ctx: { pet, run, rng, loot(item?), hurt(n, why), lean(allegiance, stability), reveal(depth), fragment(chance) }
 // regions: the regions it can turn up in; omitted means anywhere.
 
+// What READ IT shows: NL-0 first on the list, your netling near the end, or the fault that kept it from ever running.
+export const PURGE_READINGS = [
+  'PURGE: all maintenance processes. first on the list, in capitals: NL-0.',
+  'PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end.',
+  'PURGE: all maintenance processes. ./purge: permission denied. owner: nobody. it was never allowed to run.',
+];
+
 export const ANOMALIES = [
   {
     id: 'sector',
@@ -121,7 +128,8 @@ export const ANOMALIES = [
         id: 'read',
         label: 'READ IT',
         hint: '-15 int, it may remember something',
-        apply: (c) => `${c.hurt(15, 'PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end.')}${c.fragment(0.6)}`,
+        // One of three readings at random; codex source-3 holds the first and the last, so none is lost by missing it.
+        apply: (c) => `${c.hurt(15, PURGE_READINGS[Math.floor(c.rng() * PURGE_READINGS.length)])}${c.fragment(0.6)}`,
       },
       {
         id: 'leave',

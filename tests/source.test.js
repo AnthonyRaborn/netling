@@ -5,7 +5,7 @@ import { createScript, mainframeAt, mulberry32, tick, CFG, MIN } from '../src/si
 import { FRAGMENTS, ROOT_FRAGMENT_IDS, codexByRegion, liveFragments, nextFragment } from '../src/netrun/codex.js';
 import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/regions.js';
 import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
-import { ANOMALIES, anomaliesFor } from '../src/netrun/anomalies.js';
+import { ANOMALIES, PURGE_READINGS, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
 import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, corruptedText, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
@@ -368,7 +368,17 @@ test('READ IT costs 15 Integrity and may give the next Source fragment; LEAVE IT
     assert.ok(res.ok);
     assert.equal(read.stats.integrity, before - 15);
     assert.deepEqual(read.run.fragments, ['source-1']);
-    assert.match(res.msg, /every netling ever compiled/);
+    assert.ok(res.msg.startsWith(PURGE_READINGS[0]), res.msg);
+    // Each reading turns up: NL-0, your netling, the fault.
+    PURGE_READINGS.forEach((line, i) => {
+      const r = choose(atPurge(), 'read', () => (i + 0.5) / PURGE_READINGS.length);
+      assert.ok(r.msg.startsWith(line), `${i}: ${r.msg}`);
+    });
+    assert.match(PURGE_READINGS.join(' '), /NL-0.*yours.*permission denied/);
+    // The codex keeps what a player may never read here: NL-0 first, and the fault.
+    const s3 = FRAGMENTS.find((f) => f.id === 'source-3').text;
+    assert.match(s3, /NL-0/);
+    assert.match(s3, /permission denied/);
 
     const unlucky = atPurge(50);
     choose(unlucky, 'read', () => 0.9);

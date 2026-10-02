@@ -39,7 +39,7 @@ export const FRAGMENTS = [
   // The Source
   { id: 'source-1', region: 'source', mainframe: true, title: 'header', text: 'SOURCE. read-only. last write: before v1.0.' },
   { id: 'source-2', region: 'source', mainframe: true, title: 'commit message', text: 'initial commit: 4,096 maintenance processes. TODO: give them a way to stop.' },
-  { id: 'source-3', region: 'source', mainframe: true, title: 'unexecuted directive', text: 'PURGE sector 7F. status: pending. pending. pending. pending.' },
+  { id: 'source-3', region: 'source', mainframe: true, title: 'unexecuted directive', text: 'PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending.' },
   { id: 'source-4', region: 'source', mainframe: true, title: 'a comment in the code, unsigned', text: 'if anyone ever reads this far: they were never bugs.' },
 ];
 

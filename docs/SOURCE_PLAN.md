@@ -155,7 +155,7 @@ A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Ano
 | `deep-5` | The Deep | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again. |
 | `source-1` | The Source | header | SOURCE. read-only. last write: before v1.0. |
 | `source-2` | The Source | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
-| `source-3` | The Source | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
+| `source-3` | The Source | unexecuted directive | PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending. |
 | `source-4` | The Source | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
 
 `deep-5` goes last in The Deep's part of `FRAGMENTS`. It is the one that opens the way, as `ruins-4` does for The Deep. It also ends The Deep on NL-0's fear instead of its thanks. Placing it before `deep-4` would keep the thanks as the last word, but then the gate would be a fragment in the middle of the region, which nothing else does. Players who already have `deep-1` to `deep-4` get `deep-5` next either way.
@@ -486,10 +486,10 @@ The Source's own anomaly, `purge` in `ANOMALIES` with `regions: ['source']`; `an
 
 | Option | Effect | Log |
 |---|---|---|
-| READ IT | -15 Integrity, 60% the next codex fragment (the per-life cap applies) | "PURGE: all maintenance processes. the target list is every netling ever compiled. yours is near the end." |
+| READ IT | -15 Integrity, 60% the next codex fragment (the per-life cap applies) | One of three at random (`PURGE_READINGS`): "PURGE: all maintenance processes. first on the list, in capitals: NL-0.", "...the target list is every netling ever compiled. yours is near the end.", or "...`./purge: permission denied. owner: nobody.` it was never allowed to run." |
 | LEAVE IT | Sync +15, stability +1 | "left pending. pending. pending. something down here stops holding its breath." |
 
-Chosen by the maintainer from three drafts ("knowledge costs"). The bots' `risky` style reads it; `orderly`, `corp` and `indie` leave it (their existing `leave` preference); the rest pick at random. Baselines: `lives.json` did not move. In `netruns.json` the Source gives 0.03 to 0.07 more fragments a run and its stability lean is about 0.2 less negative for every style and form; exits move by 2 to 4 points for a few (within noise). `lineages.json` moves only by small amounts (under 0.1 in most rows), from Source runs drawing differently.
+Chosen by the maintainer from three drafts ("knowledge costs"). The three readings came later. Source runs are rare (attentive lines average under one across four lives in `lineages.json`), so few players will read all three; `source-3` was rewritten to carry NL-0 as the first target and the permission fault ("owner: nobody": someone set the order's owner so it could never run), leaving only the line about the player's own netling to the anomaly. The bots' `risky` style reads it; `orderly`, `corp` and `indie` leave it (their existing `leave` preference); the rest pick at random. Baselines: `lives.json` did not move. In `netruns.json` the Source gives 0.03 to 0.07 more fragments a run and its stability lean is about 0.2 less negative for every style and form; exits move by 2 to 4 points for a few (within noise). `lineages.json` moves only by small amounts (under 0.1 in most rows), from Source runs drawing differently.
 
 ## Risks
 

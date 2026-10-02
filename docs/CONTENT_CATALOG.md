@@ -329,7 +329,7 @@ Texts are quoted verbatim from `codex.js`, including the dash at the end of `pub
 |---|---|---|
 | source-1 | header | SOURCE. read-only. last write: before v1.0. |
 | source-2 | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
-| source-3 | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
+| source-3 | unexecuted directive | PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending. |
 | source-4 | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
 
 `source-4` answers `public-4` ("They're not viruses."), so the codex opens and closes on the same idea.
