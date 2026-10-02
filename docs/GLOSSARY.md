@@ -117,6 +117,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Nap** | Rest on demand for up to 2 hours at 35% drain | `sim.js` |
 | **Netling** | The pet | everywhere |
 | **Netrun** | The node-map expedition | `netrun/` |
+| **Daily trace** | One seeded map a day, the same for everyone on the same date, run once with nothing at stake; it ends in a share line, and ten exits earn the Uptime crest | `netrun/daily.js` |
 | **Challenge** | A rule for one run in the Deep or the Source (Glass, Unplugged, Blackout, Bare metal), open after a Deep exit; each earns a cosmetic | `netrun/challenges.js` |
 | **Ending** | Every fragment plus a Source exit: the player runs `sudo rm purge`, NL-0 rests, and the credits list the line. Once, with a replay | `ending.js` |
 | **NL-0** | The first netling, the story's hidden benefactor. Grants Root Access, and rests after the ending | `index.html`, `sim.js` |

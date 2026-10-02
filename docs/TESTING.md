@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 488 tests in 47 files. The smoke test has 79 scenarios (Playwright 1.56.1).
+`npm test` runs 500 tests in 48 files. The smoke test has 80 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -76,6 +76,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `mainframe.test.js` | 14 | The Mainframe stage, with its switch on and off: forms and lines, the gate (age, feat, home, once), the switch off, feat first and age first, the extra day, the Deep exit counter, a mainframe keeping its line's ability, the level II trait, save cleaning, the lineage and dex, its own art (18 wide, no taller than an adult, shaped like its line), visitors (only to a line with root) and chatter (its line's, plus one line of its own) |
 | `visitcard.test.js` | 13 | Visitor cards: the code round trip and its id, the handle, damaged and hostile cards, the card from a living netling, links in the paste box, the queue of three, arrival within the hour (and never while busy), an empty queue rolling nothing, a Mainframe friend as a corrupted record before Root Access, the feat, the queue surviving a compile, and the cleaned queue, visit and guestbook |
 | `challenges.test.js` | 9 | Challenge runs: kept only in the Deep and the Source and open after a Deep exit, each rule (Glass cancels on a lost fight, Unplugged's dark relays, Blackout's sight, Bare metal's warnings and what breaks it), no win on a disconnect or abort, the rewards and Exit code 0, the cleaned fields, and the bot pushing past relays |
+| `daily.test.js` | 12 | The daily trace: the day, its number and seed, the same map for everyone (one day pinned, so a generator change bumps `DAILY.rules`), rolls seeded by node (any rng, after a reload), the same ICE fight for every form, nothing at stake (a disconnect, a checkpoint, a market, an abort, the cooldown), an item used mid-run spent, opening during the cooldown but not asleep, the share line, the cleaners, and the Uptime crest |
 | `ending.test.js` | 7 | The ending: when it is due (every fragment and a Source exit, once), the scene's text (stops at the prompt, no process count), the credits, the Root prompt crest, NL-0's sleepy lines (rescue, cooling, Source jack-in, chatter), and the cleaned flags |
 | `lease.test.js` | 4 | The one-tab lease |
 | `qr.test.js` | 4 | Versions, finder and timing patterns, capacity |
@@ -119,6 +120,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Crashes: a crashing mini-game is closed, a crashing netrun is aborted, a crash in the tutorial still finishes onboarding.
 - The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
 - A posted contract in the bar and the region picker, taken along on a jack-in.
+- Daily trace: the list opens for it during the cooldown, the row starts a daily run and marks the day's attempt, an abort closes into the share dialog with the line, the stats are as they were, and the row then reopens the line instead of a second attempt.
 - Challenges: hidden before a Deep exit, then the picker cycles, the Deep says so and the Public Net does not, and the run carries it.
 - The codex: the corp memo's `<<REDACTED>>` is a glitching span.
 - The ending: a player with every fragment and a Source exit sees it on load, it waits at `sudo rm purge`, the credits name the line and the makers, the crest unlocks, it does not play twice, REPLAY ENDING shows; one fragment short or no Source exit, it waits.
@@ -176,7 +178,7 @@ Reference results are in [KNOWN_ISSUES.md](KNOWN_ISSUES.md#verified-facts).
 
 The bot answers checkpoints by lean (`corp`, `indie`, `mix`, `balance`; an indie player won't spend a voucher), buys the first market offer when Charge is over 50 unless the style says `shop: false`, and picks anomaly options from an `ANOMALY_PREFS` list (`random`, `risky`, `orderly`, `corp`, `indie`).
 
-`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. It also reports `exit`, the share of runs that reach the exit node (a relay jack-out is not one): disconnect rates alone hid that Chrome banked early. Styles include a weak baby, each adult form with its ability, and each mainframe form (`plat`, `airgap`, `init`, `panic`, `whisper`) with its line's ability and its upgrade. `region` may be `all`, which prints the disconnect and exit rates, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region, and the mainframe forms in The Deep and the Source. `JSON=1` prints JSON.
+`node tools/netrun-balance.mjs [runs=2000] [region=public]` reports, per style, the jacked-out and disconnected rates, items banked, Integrity and Charge spent, and the average axis lean. It also reports `exit`, the share of runs that reach the exit node (a relay jack-out is not one): disconnect rates alone hid that Chrome banked early. Styles include a weak baby, each adult form with its ability, and each mainframe form (`plat`, `airgap`, `init`, `panic`, `whisper`) with its line's ability and its upgrade. `region` may be `daily` (each seed plays a different day's map), or `all`, which prints the disconnect and exit rates, items, fragments per run and Integrity spent for careful and skilled players and every adult form, in every region, and the mainframe forms in The Deep and the Source. `JSON=1` prints JSON.
 
 ### `tools/balance-diff.mjs`
 

@@ -32,6 +32,7 @@ import { CHATTER_IDS } from './chatter.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
+import { DAILY, TRAIL_CHARS, dailySeed, isDayKey } from './netrun/daily.js';
 import { ANOMALIES } from './netrun/anomalies.js';
 import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
 import { CHECKIN } from './checkin.js';
@@ -138,6 +139,37 @@ function cleanPending(phase, p, strict) {
   return { ...(strict ? {} : p), kind: p.kind, title: p.title.slice(0, 200), text: p.text.slice(0, 500), ...extra, options };
 }
 
+// The daily trace's fields (netrun/daily.js). The seed always comes from the date, never from storage.
+function cleanStake(raw) {
+  const k = isObj(raw) ? raw : {};
+  const delta = (v) => num(v, 0, -1000, 1000);
+  const items = (v) => (Array.isArray(v) ? v.filter((id) => has(ITEMS, id)).slice(0, 50) : []);
+  const st = isObj(k.stats) ? k.stats : {};
+  const ax = isObj(k.axes) ? k.axes : {};
+  return {
+    stats: { charge: delta(st.charge), sync: delta(st.sync), integrity: delta(st.integrity), heat: delta(st.heat) },
+    axes: { allegiance: delta(ax.allegiance), stability: delta(ax.stability) },
+    scrip: delta(k.scrip),
+    careMistakes: int(k.careMistakes, 0, -100, 100),
+    taken: items(k.taken),
+    given: items(k.given),
+    order: items(k.order),
+  };
+}
+function cleanDailyRun(raw) {
+  const day = isDayKey(raw.day) ? raw.day : DAILY.epoch;
+  return {
+    daily: true,
+    day,
+    seed: dailySeed(day),
+    rollKey: Number.isInteger(raw.rollKey) && raw.rollKey >= 0 ? raw.rollKey : null,
+    rolls: int(raw.rolls, 0, 0, 10000),
+    stake: cleanStake(raw.stake),
+    trail: Array.isArray(raw.trail) ? raw.trail.filter((c) => typeof c === 'string' && c.length === 1 && TRAIL_CHARS.includes(c)).slice(0, 40) : [],
+    refunded: bool(raw.refunded),
+  };
+}
+
 function cleanRun(raw, s, strict) {
   if (!isObj(raw) || !has(REGIONS, raw.region) || !isObj(raw.map) || !Array.isArray(raw.map.nodes)) return null;
   if (!Number.isInteger(raw.map.layerCount) || raw.map.layerCount < 2) return null;
@@ -197,6 +229,7 @@ function cleanRun(raw, s, strict) {
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
     messages: Array.isArray(raw.messages) ? raw.messages.filter((m) => typeof m === 'string').slice(-20) : [],
     startedAge: num(raw.startedAge, s.ageMin, 0),
+    ...(REGIONS[raw.region].daily ? cleanDailyRun(raw) : {}),
   };
 }
 
@@ -524,6 +557,11 @@ export function cleanProgress(raw) {
     ...(Array.isArray(p.challenges) ? { challenges: idList(p.challenges, (id) => CHALLENGE_IDS.includes(id)) } : {}), // challenges completed
     ...(p.ended === true ? { ended: true } : {}), // the ending has played (ending.js)
     ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)
+    // The daily trace (netrun/daily.js): the last day played, with its share line once it ended, and the exits reached.
+    ...(isObj(p.daily) && isDayKey(p.daily.day)
+      ? { daily: { day: p.daily.day, ...(typeof p.daily.share === 'string' ? { share: p.daily.share.slice(0, 300) } : {}), exit: bool(p.daily.exit) } }
+      : {}),
+    ...(Object.hasOwn(p, 'dailyWins') ? { dailyWins: int(p.dailyWins, 0, 0) } : {}),
   };
 }
 

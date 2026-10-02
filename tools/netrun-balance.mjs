@@ -1,5 +1,5 @@
 // Monte Carlo netrun outcomes for a few play styles.
-// Usage: node tools/netrun-balance.mjs [runs=2000] [region=public|all]
+// Usage: node tools/netrun-balance.mjs [runs=2000] [region=public|daily|all] (all: the regions in order, not the daily)
 // JSON=1 prints a report that tools/balance-diff.mjs can compare.
 // CHALLENGE=glass|unplugged|blackout|baremetal plays every run under that challenge (the Deep and the Source only) and
 // adds `won`, the share of runs that kept it to the exit (docs/NETRUN.md#challenges).
@@ -33,7 +33,9 @@ function play(style, seed, region = 'public') {
   if (style.form) pet.form = style.form;
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 }, style.start);
   const start = { ...pet.stats };
-  playRun(pet, process.env.CHALLENGE ? { ...style, challenge: process.env.CHALLENGE } : style, region, rng);
+  // The daily trace (region=daily): each seed plays a different day's map, over a year of them.
+  const day = region === 'daily' ? new Date(Date.UTC(2026, 9, 1) + (seed % 365) * 86400000).toISOString().slice(0, 10) : undefined;
+  playRun(pet, { ...style, ...(process.env.CHALLENGE ? { challenge: process.env.CHALLENGE } : {}), ...(day ? { day } : {}) }, region, rng);
   return {
     result: pet.run.result,
     // Reached the exit node (not a relay jack-out): disconnect rates alone once hid that Chrome banked early.

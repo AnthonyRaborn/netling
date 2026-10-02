@@ -1645,6 +1645,42 @@ await scenario('challenges: hidden before a Deep exit, then picked and carried i
   assert(s.run?.region === 'deep' && s.run.challenge === 'glass' && s.run.challengeVoid === false, `run: ${JSON.stringify({ region: s.run?.region, c: s.run?.challenge })}`);
 });
 
+await scenario('daily trace: open during the cooldown, once a day, nothing kept, and a share line', async ({ open }) => {
+  const pet = awakeNetling({ stage: 'teen', form: 'kernel' });
+  pet.lastRunEndAge = pet.ageMin; // the uplink is cooling down
+  const page = await open(BASE, seed({ 'netling.save': pet, 'netling.progress': {} }));
+  const before = (await saved(page)).stats;
+  await page.click('#btn-netrun');
+  assert(await visible(page, '#region-daily'), 'the list did not open for the daily trace during the cooldown');
+  assert(/^DAILY TRACE #\d+/.test(await page.textContent('#region-daily .rname')), 'no daily row');
+  assert(/exits 0\/10/.test(await page.textContent('#region-daily')), 'no exit count');
+  await page.click('#region-daily');
+  await page.waitForTimeout(400);
+  const s = await saved(page);
+  assert(s.run?.region === 'daily' && s.run.daily === true && /^\d{4}-\d{2}-\d{2}$/.test(s.run.day), `run: ${JSON.stringify({ region: s.run?.region, day: s.run?.day })}`);
+  const p = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(p.daily?.day === s.run.day && !p.daily.share, 'the attempt was not marked at jack-in');
+  // Abort at once (a first move could start an ICE fight): the summary closes into the share dialog.
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(400);
+  assert(await page.evaluate(() => document.getElementById('daily').open), 'no share dialog');
+  const share = await page.textContent('#daily-text');
+  assert(/^NETLING daily #\d+ \(\d{4}-\d{2}-\d{2}\) r1\nABORTED 0\/9 {2}ICE 0\/0 {2}Kernel\n>\.$/.test(share), `share: ${share}`);
+  await page.click('#daily-close');
+  const after = await saved(page);
+  assert(!after.run, 'the run is still open');
+  for (const k of ['charge', 'integrity', 'heat']) assert(Math.abs(after.stats[k] - before[k]) < 2, `${k} not given back: ${before[k]} -> ${after.stats[k]}`);
+  // Once a day: the row now offers the line again instead of a second attempt.
+  await page.click('#btn-netrun');
+  assert(/done today/.test(await page.textContent('#region-daily')), 'the row does not say done');
+  await page.click('#region-daily');
+  assert(await page.evaluate(() => document.getElementById('daily').open), 'the done row does not reopen the line');
+  assert(!(await saved(page)).run, 'a second attempt started');
+});
+
 await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
   const adult = { 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['deep-1'] };
   const page = await open(BASE, seed(adult));

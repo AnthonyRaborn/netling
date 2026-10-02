@@ -9,6 +9,7 @@ import { ITEMS } from '../sim.js';
 import { fragmentById } from './codex.js';
 import { accessoryById } from '../accessories.js';
 import { challengeById } from './challenges.js';
+import { dayNumber } from './daily.js';
 
 const CONFIRM_MS = 3000; // an option with `confirm` needs a second press within this
 
@@ -169,7 +170,7 @@ export class RunView {
       this.abortNow();
     } else {
       this.abortArmed = performance.now() + 2500;
-      this.toast = { msg: 'press ABORT again to bail out. loot will be lost.', until: this.abortArmed };
+      this.toast = { msg: this.run.daily ? "press ABORT again to end today's trace." : 'press ABORT again to bail out. loot will be lost.', until: this.abortArmed };
     }
   }
 
@@ -321,7 +322,7 @@ export class RunView {
       [`CHG ${Math.round(st.charge)}`, st.charge < 15 ? pal.accent : '#c7f9ff'],
       [`INT ${Math.round(st.integrity)}`, st.integrity < 35 ? pal.accent : '#c7f9ff'],
       [`HEAT ${Math.round(st.heat)}`, hot ? pal.accent : '#c7f9ff'],
-      [`LOOT ${this.run.loot.length}`, '#f9f002'],
+      this.run.daily ? [`#${dayNumber(this.run.day)}`, '#f9f002'] : [`LOOT ${this.run.loot.length}`, '#f9f002'],
     ];
     parts.forEach(([t, c], i) => text(ctx, t, 12 + i * 96, 260, { size: 20, color: c }));
   }
@@ -330,9 +331,11 @@ export class RunView {
     const run = this.run;
     const region = REGIONS[run.region];
     const good = run.result === 'jacked';
-    const title = { jacked: 'JACKED OUT', disconnected: 'DISCONNECTED', aborted: 'RUN ABORTED' }[run.result];
+    const exit = run.result === 'jacked' && nodeById(run.map, run.pos)?.type === 'exit';
+    const title = run.daily && exit ? 'TRACE COMPLETE' : { jacked: 'JACKED OUT', disconnected: 'DISCONNECTED', aborted: 'RUN ABORTED' }[run.result];
     const tone = good ? region.palette.main : '#ff2a6d'; // failure always reads red
-    text(ctx, region.name.toUpperCase(), W / 2, 22, { size: 18, align: 'center', color: DIM });
+    text(ctx, run.daily ? `${region.name.toUpperCase()} #${dayNumber(run.day)}` : region.name.toUpperCase(), W / 2, 22, { size: 18, align: 'center', color: DIM });
+    if (run.daily) return this.drawDailySummary(ctx, pal, exit);
     text(ctx, title, W / 2, 52, { size: 40, align: 'center', color: tone, glow: tone });
 
     // Run record: how far, how the ICE went, what it cost.
@@ -363,6 +366,19 @@ export class RunView {
     if (job === 'met') lines.unshift([`contract complete: +${contractPay(run.contract)}`, '#f9f002']);
     if (job === 'missed') lines.unshift(['contract not met. no harm done.', DIM]);
     lines.slice(0, 5).forEach(([s, c], i) => text(ctx, s, W / 2, 140 + i * 20, { size: 19, align: 'center', color: c }));
+    text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
+  }
+
+  // The daily trace keeps nothing, so its card shows the route as it will be shared (daily.js) instead of loot.
+  drawDailySummary(ctx, pal, exit) {
+    const run = this.run;
+    const t = run.tally ?? {};
+    const reached = nodeById(run.map, run.pos)?.layer ?? 0;
+    text(ctx, `layers ${reached}/${run.map.layerCount - 1}   ICE ${t.iceWon ?? 0}W ${t.iceLost ?? 0}L ${t.icePhased ?? 0}~`, W / 2, 86, { size: 20, align: 'center', color: '#c7f9ff' });
+    const tail = exit ? [] : run.result === 'disconnected' ? ['!'] : run.result === 'aborted' ? ['.'] : [];
+    text(ctx, [...(run.trail ?? []), ...tail].join(' '), W / 2, 124, { size: 22, align: 'center', color: exit ? pal.main : '#ff2a6d' });
+    text(ctx, 'nothing kept, nothing lost.', W / 2, 160, { size: 19, align: 'center', color: DIM });
+    text(ctx, 'the result is ready to share.', W / 2, 182, { size: 19, align: 'center', color: DIM });
     text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
   }
 }

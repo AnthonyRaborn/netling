@@ -152,7 +152,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (10)
+### Crests (11)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -167,6 +167,7 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
 | `rack` | Rack mount | Any mainframe form in the dex. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
 | `cracked` | Cracked pane | Complete the Glass challenge. A pane with one crack running down it | "reach the bottom without losing a single fight." |
+| `uptime` | Uptime | Reach the exit of 10 daily traces (`progress.dailyWins`; [NETRUN.md](NETRUN.md#the-daily-trace)). A calendar page, ticked | "reach the exit of ten daily traces." |
 | `rootprompt` | Root prompt | The ending has played (`progress.ended`; [SOURCE_PLAN.md](SOURCE_PLAN.md#after-shipping-the-ending)). The `#` of a root shell; corrupted until Root Access | "let the oldest one rest." |
 
 Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).

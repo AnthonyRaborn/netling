@@ -115,7 +115,7 @@ export function sellAtMarket(pet, keep = null) {
 // Plays one full run on the pet. Returns the finished run (before it's cleared).
 // style.challenge: a challenge id (netrun/challenges.js) for the run, in the Deep or the Source.
 export function playRun(pet, style, region, rng, codex = []) {
-  startRun(pet, region, rng, codex, [], { challenge: style.challenge ?? null });
+  startRun(pet, region, rng, codex, [], { challenge: style.challenge ?? null, day: style.day });
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 40) {
     const run = pet.run;

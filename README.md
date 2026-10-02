@@ -171,6 +171,8 @@ Every netling starts with only the Public Net. Reaching a region's exit **clears
 
 Once one of your netlings has made it all the way down, the region list also offers **challenges**: a rule for a single run in the deepest regions, such as losing no ICE fight. Break the rule and the run simply goes on without it. Each challenge kept to the exit earns something to wear.
 
+Every day there is also a **daily trace**: one map, the same for everyone that day, with nothing kept and nothing lost. It doesn't wait for the uplink to cool down, and you get one go a day. At the end you get a short result to copy and share with friends, so you can compare routes.
+
 ## Growing up, and what comes after
 
 - **Baby**: the first 17 hours. How it is raised through them decides which teen it becomes; good care (two faults or fewer) grows a healthier one.

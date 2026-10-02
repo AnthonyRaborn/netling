@@ -13,6 +13,7 @@ import { $, app, DEV, TEST, newForms, rootUnlocked, flashStatus, loadAll, now, s
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
+import { initDaily } from './ui/daily.js';
 import { initEnding, maybeShowEnding } from './ui/ending.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
@@ -43,6 +44,7 @@ initSystem();
 initTabs();
 initGamepad();
 initDevice();
+initDaily();
 initEnding();
 
 // --- settings ---

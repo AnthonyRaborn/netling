@@ -4,6 +4,7 @@
 // Items marked `mainframe` belong to the Mainframe stage (docs/SOURCE_PLAN.md) and are hidden while CFG.mainframe is off.
 import { FRAGMENTS, ROOT_FRAGMENTS } from './netrun/codex.js';
 import { CHALLENGE_IDS } from './netrun/challenges.js';
+import { DAILY } from './netrun/daily.js';
 import { CFG, FORMS, TRAITS, TRAIT_CFG, SPECIES, isMainframeForm, lineOf } from './sim.js';
 import { CHATTER_GROUPS, chatterProgress, shownChatter } from './chatter.js';
 
@@ -185,6 +186,14 @@ export const COSMETICS = {
       check: (c) => challengeDone(c, 'glass'),
       // A pane of glass with one crack running down it.
       pixels: ['#########', '#....#..#', '#...#...#', '#..##...#', '#....#..#', '#.....#.#', '#....#..#', '#...#...#', '#########'],
+    },
+    {
+      id: 'uptime',
+      name: 'Uptime',
+      hint: 'reach the exit of ten daily traces.',
+      check: (c) => (c.progress.dailyWins ?? 0) >= DAILY.winsForReward, // netrun/daily.js
+      // A calendar page, ticked.
+      pixels: ['.#.....#.', '#########', '#.......#', '#......##', '#.....#.#', '#.#..#..#', '#..##...#', '#.......#', '#########'],
     },
     {
       id: 'rootprompt',

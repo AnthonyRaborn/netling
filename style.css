@@ -1097,6 +1097,37 @@ button:active {
   border-color: #b967ff;
 }
 
+/* The daily trace (ui/daily.js): its row above the regions, and the share dialog. */
+.daily-pick {
+  width: 100%;
+  margin: 0 0 6px;
+}
+.daily-pick.done .rmeta {
+  color: var(--yellow);
+}
+.daily-text {
+  margin: 8px 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #ffb000;
+  background: #0d0902;
+  border: 1px solid #5a4410;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+}
+.daily-note {
+  font-size: 14px;
+  color: var(--dim);
+}
+.daily-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 /* --- onboarding ------------------------------------------------------------------ */
 
 .intro {

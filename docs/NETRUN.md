@@ -17,8 +17,9 @@ A **netrun** is the game's dungeon crawl: the netling jacks into the net and wal
 11. [Accessories in runs](#accessories-in-runs)
 12. [Contracts](#contracts)
 13. [Challenges](#challenges)
-14. [The tutorial run](#the-tutorial-run)
-15. [Where the run lives](#where-the-run-lives)
+14. [The daily trace](#the-daily-trace)
+15. [The tutorial run](#the-tutorial-run)
+16. [Where the run lives](#where-the-run-lives)
 
 ## Run lifecycle
 
@@ -316,6 +317,31 @@ A rule for one run, picked in the region list (`src/netrun/challenges.js`). The 
 | Bare metal | 45% | 73% | 71 to 76% | 19% | 48% | 51 to 61% |
 
 Glass is the hardest and favours the forms that skip ICE (Glitch, Ghost, Panic, Whisper). Blackout and Bare metal read as easy for the bots only because the bots plan three steps ahead at most and never use items mid-run; people lean on both, so they should play harder than these numbers. The default baselines do not move: no bot takes a challenge unless `CHALLENGE` is set.
+
+## The daily trace
+
+One map a day, the same for everyone on the same local date, run by the player's own netling with nothing at stake (`src/netrun/daily.js`, `REGIONS.daily`, `src/ui/daily.js`). Its row sits above the regions once onboarding is done, for any stage. The region id `daily` is permanent; it is not in `REGION_ORDER`, opens nothing and needs nothing cleared.
+
+- **The day** is the local calendar date (`dayKey`), numbered from `DAILY.epoch` (2026-10-01 is #1). People in other time zones play the same map on their own date.
+- **The seed** is FNV-1a over the date and `DAILY.rules` (`dailySeed`). It makes the map, and every roll in the run is seeded too: by node and by lane (arriving, the ICE result, a choice), with a counter saved in the run (`rollKey`, `rolls`), so a cache holds the same for everyone who reaches it, whatever route they took, and a reload rolls the same. The ICE fight at a node is picked from its own lane, so every form meets the same mini-game there (a Ghost's or Glitch's slip still decides whether it fights at all). The rng passed in is ignored. Mini-game outcomes are still down to the player.
+- **Once a day.** Starting it uses the day's attempt (`progress.daily = { day }`, written at jack-in). Afterwards the row shows "done today" and reopens the share line. A run that spans midnight counts for the day it started.
+- **Outside the cooldown.** `runBlockReason` skips the cooldown for it (`noCooldown`), and the NETRUN button opens the list while the uplink cools down so the row can be reached. Sleep, a nap, a reboot and the 30 Charge minimum still apply.
+- **Nothing at stake.** Every run.js rules call in a daily run (`moveTo`, `resolveIce`, `choose`, `sellItem`, `abortRun`) records what it changed on the netling in `run.stake`: stats, axes, scrip, care mistakes, and items taken from or added to the inventory. When the run ends, all of it is given back (`stakeRefund`), the inventory in its old order. Time is not undone: needs keep decaying during the run as usual. A disconnect logs no care mistake, the exit gives no bonus and clears nothing, no loot, scrip, fragments or accessories are kept (none are offered), contracts wait, challenges do not apply, and the run counts toward neither `runStats`, `progress.runs` nor the bandage. An item used from the inventory mid-run is not a rules call: it is spent and keeps its effect, as at home (refunding it would make shields, buffs and cooldown cuts free).
+- **The share line** (`shareText`), plain text so it pastes anywhere:
+
+  ```
+  NETLING daily #2 (2026-10-02) r1
+  EXIT 9/9  ICE 5/6  Ghost
+  >#$x+~?#%#>
+  ```
+
+  `r1` is `DAILY.rules`. The second line is how it ended (EXIT, JACKED OUT at a relay, DISCONNECTED or ABORTED), the deepest layer reached, ICE passed out of ICE met, and the form (a Mainframe form goes by its line's name, so the line spoils nothing). The trail has one symbol per node: `>` entry and exit, `#` ICE beaten, `x` ICE lost, `~` ICE slipped, `$` cache, `+` relay, `=` checkpoint, `%` market, `?` anomaly, then `!` for a disconnect or `.` for an abort. The summary card shows the trail; closing it opens a dialog with COPY and SHARE (the system share sheet, where there is one). The line is kept in `progress.daily.share`.
+- **Reward:** ten exits (`progress.dailyWins`, `DAILY.winsForReward`) unlock the crest Uptime. Nothing else.
+- **Versions.** A change to `generateMap`, `REGIONS.daily` or the order of rolls in run.js changes the daily maps. Bump `DAILY.rules` with it; `tests/daily.test.js` pins one day's map to catch that.
+
+**Region:** 8 middle layers, 2 to 3 wide; cache 3, ICE 7, relay 1, checkpoint 1, market 1, anomaly 2; ICE damage 45; amber.
+
+**Measured** (`node tools/netrun-balance.mjs 2000 daily`, each seed a different day over a year). Share of runs reaching the exit: careful 53%, greedy 62%, skilled 83%, a weak baby 42%, adult forms 73 to 84%, mainframes 79 to 94%. The careful bot banks at the relay when hurt, which a player with nothing to lose is less likely to do.
 
 ## The tutorial run
 
