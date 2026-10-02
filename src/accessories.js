@@ -207,25 +207,20 @@ export const ACCESSORIES = [
     ],
     draw: (px, a, frame, time, colors) => {
       const [band, light] = colors ?? ['#ff2a6d', '#ffffff'];
-      // An augmented-vision visor: two tinted lenses with a bridge between them, rounded corners, a scan light sweeping
-      // each lens and a blip of readout above the right one. Not a single bar across the face.
+      // An augmented-vision visor: three unbroken lines across the face, a dark line above and below a colored band, with
+      // a scan light on each end of the band sweeping in and back out (outer, middle, inner, middle, outer).
       const left = Math.min(a.headLeft, a.eyeLeft);
       const right = Math.max(a.headRight, a.eyeRight);
-      const lenses = [[left, a.cx - 1], [a.cx + 1, right]];
-      for (const [from, to] of lenses) {
-        for (let x = from; x <= to; x++) {
-          px(x, a.eyeRow, band);
-          if (x > from && x < to) {
-            px(x, a.eyeRow - 1, '#050508');
-            px(x, a.eyeRow + 1, '#050508');
-          }
-        }
+      for (let x = left; x <= right; x++) {
+        px(x, a.eyeRow, band);
+        px(x, a.eyeRow - 1, '#050508');
+        px(x, a.eyeRow + 1, '#050508');
       }
-      px(a.cx, a.eyeRow, '#050508'); // the bridge
-      const sweep = frame % 2 ? 2 : 0;
-      px(left + 1 + sweep, a.eyeRow, light); // scan lights, one per lens, moving together
-      px(right - 1 - sweep, a.eyeRow, light);
-      px(right - 1, a.eyeRow - 2, frame % 2 ? light : band); // readout blip
+      const reach = Math.max(0, Math.min(2, Math.floor((right - left - 2) / 2)));
+      const step = (time ? Math.floor(time / 280) : frame) % 4;
+      const off = Math.min(reach, step === 3 ? 1 : step);
+      px(left + 1 + off, a.eyeRow, light); // two scan lights, mirrored, moving together
+      px(right - 1 - off, a.eyeRow, light);
     },
   },
   {
@@ -415,6 +410,7 @@ export const ACCESSORIES = [
     id: 'drone',
     name: 'Drone buddy',
     slot: 'float',
+    orbits: true,
     rarity: 'veryrare',
     regions: ['deep'],
     hint: 'something small follows runners up from the deep.',
@@ -524,6 +520,7 @@ export const ACCESSORIES = [
     id: 'glitchmoth',
     name: 'Glitch moth',
     slot: 'float',
+    orbits: true,
     rarity: 'rare',
     shop: 'black',
     hint: 'rarely sold at black markets. or it just found you.',
@@ -622,6 +619,7 @@ ACCESSORIES.push(
     id: 'dataaura',
     name: 'Data aura',
     slot: 'float',
+    orbits: true,
     rarity: 'rare',
     regions: ['ruins'],
     hint: 'echoes cling to runners in the Old Web Ruins.',
@@ -875,7 +873,7 @@ export const DIM_WEARABLE = '#2f6b73';
 // for it, and any other wearable pixel that sits on the body and would blend into it is swapped for a color that does not.
 // Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
 // above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
-// pixels covered, the smallest on a tie. Orbiting ones (the drone, the data aura) pass in front instead of jumping.
+// pixels covered, the smallest on a tie. Orbiting ones (`orbits: true`: the drone, the data aura, the glitch moth) draw last, in front of everything, and nothing makes room for them.
 const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, lanyard: 1, necktie: 1, spikedcollar: 1, bandolier: 1, halo: -1, spark: -1, holologo: -1 };
 const ROOM_MAX = 4;
 export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRow = -Infinity } = {}) {
@@ -890,10 +888,14 @@ export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRo
     acc.draw((x, y, color) => pts.push({ x, y, color: fixed && pal && touchesBody(x, y) ? contrastColor(color, pal.main) : color }), a, frame, time, accessoryColors(w.id, w.colors ?? null, pal));
     return pts;
   };
-  const worn = wearOrder(list).map((w) => ({ id: w.id, dy: 0, pts: pixelsOf(w) }));
+  // Orbiting floaters (acc.orbits: the drone, the data aura, the glitch moth) pass in front of everything, so they draw
+  // last and are never an obstacle: nothing else moves to make room for them.
+  const orbits = (w) => Boolean(accessoryById(w.id).orbits);
+  const ordered = wearOrder(list);
+  const worn = [...ordered.filter((w) => !orbits(w)), ...ordered.filter(orbits)].map((w) => ({ id: w.id, dy: 0, pts: pixelsOf(w) }));
   const key = (x, y) => `${x},${y}`;
   const taken = new Set();
-  for (const w of worn) if (!ROOM[w.id]) for (const p of w.pts) taken.add(key(p.x, p.y));
+  for (const w of worn) if (!ROOM[w.id] && !orbits(w)) for (const p of w.pts) taken.add(key(p.x, p.y));
   // Body items settle first (lowest in the draw order), then the risers see them too.
   for (const w of [...worn].filter((x) => ROOM[x.id]).sort((x, y) => ROOM[y.id] - ROOM[x.id])) {
     const dir = ROOM[w.id];
