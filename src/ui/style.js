@@ -1,13 +1,13 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
 import { PALETTES, CFG } from '../sim.js';
-import { COSMETICS, ORIGINAL_SHELLS, SLOTS, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
+import { COSMETICS, CORRUPTED_SHELL, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
 import { setGameBg } from '../games/common.js';
 import { sfx, setSoundPack } from '../audio.js';
 import { KEYS } from '../storage.js';
-import { $, app, flashStatus, store } from './app.js';
+import { $, app, flashStatus, rootUnlocked, store } from './app.js';
 import { syncMusicMode } from './soundtrack.js';
 
 // Bank accessories a finished run left on the pet into the shared collection.
@@ -187,6 +187,7 @@ export function renderWardrobe() {
   const shownItems = (items) => items.filter((x) => CFG.mainframe || !x.mainframe);
   const total = SLOTS.reduce((n, s) => n + shownCosmetics(s).length, 0) + 1 + shownItems(STYLE_ITEMS).length; // + label + accessories/props
   $('wardrobe-count').textContent = `${app.unlocked.length + app.ownedAccessories.length}/${total}`;
+  const rootEarned = rootUnlocked();
   const labels = { shell: 'SHELL', tint: 'SCREEN TINT', effect: 'SCREEN EFFECT', sound: 'SOUND PACK', crest: 'CREST', music: 'MUSIC' };
   $('wardrobe-list').replaceChildren(
     ...SLOTS.flatMap((slot) => {
@@ -214,11 +215,13 @@ export function renderWardrobe() {
           drawCrest(cv, c.pixels, '#ff2a6d');
           sw.append(cv);
         }
+        const corrupted = corruptedCosmetic(slot, c, { open, rootEarned });
         const name = document.createElement('span');
-        name.textContent = open ? c.name : '???';
+        name.textContent = open ? c.name : corrupted ? CORRUPTED_SHELL.name : '???';
+        if (corrupted) name.className = 'corrupt'; // it blinks like the dex's corrupted records (ui/corrupt.js)
         const hint = document.createElement('span');
         hint.className = 'ch';
-        hint.textContent = open ? (w[slot] === c.id ? 'equipped' : 'tap to equip') : c.hint;
+        hint.textContent = open ? (w[slot] === c.id ? 'equipped' : 'tap to equip') : corrupted ? CORRUPTED_SHELL.hint : c.hint;
         b.append(sw, name, hint);
         if (open) {
           b.addEventListener('click', () => {

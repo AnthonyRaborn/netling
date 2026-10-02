@@ -193,7 +193,7 @@ Decided ids (none is used anywhere today). Cosmetic ids are stored per slot (`sl
 
 The Source's own netrun theme (a region variant in `tracks.js`, [Art and sound](#art-and-sound)) plays on its own and needs no unlock; `firstcommit` is a separate track for home.
 
-Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed. **Built after shipping:** `platinum`, `airgap`, `pidone`, `torn` and `faint`, each unlocked by having its form in the dex, the same rule as the adult-form shells; they do not count toward the Mini device ([CONTENT_CATALOG.md](CONTENT_CATALOG.md#shells-14)).
+Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed. **Built after shipping:** `platinum`, `airgap`, `pidone`, `torn` and `faint`, each unlocked by having its form in the dex, the same rule as the adult-form shells; they do not count toward the Mini device ([CONTENT_CATALOG.md](CONTENT_CATALOG.md#shells-14)). Locked, they read as `<<SHELL CORRUPTED>>` until Root Access, like the dex's records.
 
 The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lineOf`), so a mainframe still counts as its adult form.
 

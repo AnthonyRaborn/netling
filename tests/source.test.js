@@ -7,7 +7,7 @@ import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/r
 import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
 import { ANOMALIES, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
-import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
+import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
 import { cleanProgress } from '../src/sanitize.js';
 import { SPRITES } from '../src/sprites.js';
@@ -271,6 +271,12 @@ test('a shell for each mainframe form: raised once, hidden while off, and not ne
   // The Mini device asks for the nine shells from before the stage, so that goal did not move.
   assert.deepEqual(ORIGINAL_SHELLS, COSMETICS.shell.filter((c) => !c.mainframe).map((c) => c.id));
   assert.equal(ORIGINAL_SHELLS.length, 9);
+  // Locked, they read as corrupted until Root Access, like the dex's records; earned, or after Root Access, they do not.
+  const platinum = COSMETICS.shell.find((c) => c.id === 'platinum');
+  assert.equal(corruptedCosmetic('shell', platinum, { open: false, rootEarned: false }), true);
+  assert.equal(corruptedCosmetic('shell', platinum, { open: false, rootEarned: true }), false);
+  assert.equal(corruptedCosmetic('shell', platinum, { open: true, rootEarned: false }), false);
+  assert.equal(corruptedCosmetic('shell', COSMETICS.shell.find((c) => c.id === 'chrome'), { open: false, rootEarned: false }), false);
 });
 
 test('progress keeps the Source exits and the one-time repair of its name, cleaned', () => {

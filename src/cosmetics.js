@@ -203,6 +203,11 @@ export function sanitizeLabel(raw) {
   return clean || LABEL.fallback;
 }
 
+// A locked Mainframe shell before Root Access: corrupted data, not ??? and a hint, like the dex's corrupted records.
+export const CORRUPTED_SHELL = { name: '<<SHELL CORRUPTED>>', hint: 'read error at 0x00. it will not load.' };
+// Whether a wardrobe item shows as corrupted: a locked Mainframe shell while Root Access has not been earned.
+export const corruptedCosmetic = (slot, c, { open, rootEarned }) => slot === 'shell' && Boolean(c.mainframe) && !open && !rootEarned;
+
 // The shells that count toward the Mini device: the nine from before the Mainframe stage.
 export const ORIGINAL_SHELLS = ['standard', 'matte', 'chrome', 'brick', 'crimson', 'shifted', 'clear', 'gold', 'holo'];
 
