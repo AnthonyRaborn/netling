@@ -317,26 +317,6 @@ const SCENES = [
   game('dodge', { lead: 5 }), // later, when the firewalls come thick and fast
   game('tune', { duration: 2, lead: 0.6 }),
   game('feast', { lead: 4 }), // the screen full of packets
-  {
-    name: 'netrun',
-    duration: 5.3,
-    seed: () => settled(bitling({ stats: { charge: 90, sync: 80 } })),
-    // Pick the region before the first frame, so the cut from the games lands on the map.
-    warmup: [
-      [0.1, click('#btn-netrun')],
-      [0.2, click('#region-list button')],
-    ],
-    warmupSeconds: 0.4,
-    at: [
-      [0.9, aim],
-      [1.3, go],
-      [2.2, aim],
-      [2.6, go],
-      [3.5, aim],
-      [3.9, go],
-      [4.7, aim],
-    ],
-  },
   // Sharing: a visitor card, then a friend's netling dropping by. The friend is a Bitling in colors the trailer has not
   // shown, wearing common things, so it teases nothing a first life would not meet.
   {
@@ -361,6 +341,26 @@ const SCENES = [
     at: [
       [0.3, skipMinutes(1)],
       [1.5, click('#wish-greet')],
+    ],
+  },
+  {
+    name: 'netrun',
+    duration: 5.3,
+    seed: () => settled(bitling({ stats: { charge: 90, sync: 80 } })),
+    // Pick the region before the first frame, so the cut from the games lands on the map.
+    warmup: [
+      [0.1, click('#btn-netrun')],
+      [0.2, click('#region-list button')],
+    ],
+    warmupSeconds: 0.4,
+    at: [
+      [0.9, aim],
+      [1.3, go],
+      [2.2, aim],
+      [2.6, go],
+      [3.5, aim],
+      [3.9, go],
+      [4.7, aim],
     ],
   },
   // Depth: a first life's codex, the way down, and what stays corrupted. The corrupted names glitch every
@@ -457,11 +457,11 @@ const TIMELINE = {
     [sceneStart('care') + 2.0, sceneStart('care') + 3.6, 'KEEP IT PATCHED.'],
     [sceneStart('care') + 3.6, sceneStart('care') + 5.2, 'KEEP IT COOL.'],
     [sceneStart('care') + 5.2, sceneStart('breach'), 'KEEP IT CLEAN.'],
-    [sceneStart('breach'), sceneStart('netrun'), 'PLAY WITH IT.'],
-    [sceneStart('netrun') + 0.2, sceneStart('card'), 'JACK IN.'],
+    [sceneStart('breach'), sceneStart('card'), 'PLAY WITH IT.'],
     [sceneStart('card') + 0.1, sceneStart('visit'), 'SHARE A VISITOR CARD.'],
-    [sceneStart('visit') + 0.2, sceneStart('codex'), 'FRIENDS DROP BY.'],
-    [sceneStart('codex') + 0.2, sceneStart('sector'), 'FRAGMENTS RECOVERED.'],
+    [sceneStart('visit') + 0.2, sceneStart('netrun'), 'FRIENDS DROP BY.'],
+    [sceneStart('netrun') + 0.2, sceneStart('codex'), 'JACK IN.\nEXPLORE THE NET.'],
+    [sceneStart('codex') + 0.2, sceneStart('sector'), 'RECOVER FRAGMENTS.'],
     [sceneStart('sector') + 0.1, sceneStart('dex'), 'SECTOR CORRUPTED...'],
     [sceneStart('dex') + 0.1, sceneStart('evolve'), 'ACCESS DENIED.\nFOR NOW.'],
     [sceneStart('evolve') + 0.1, sceneStart('evolve') + 1.7, 'IT GROWS UP.'],
@@ -769,7 +769,7 @@ function musicPlan() {
   if (ONLY) return null;
   const on = sceneStart('intro') + 5.0; // the tap that compiles the first netling
   const run = sceneStart('netrun');
-  const back = sceneStart('card'); // home again after the run
+  const back = sceneStart('codex'); // home again after the run
   const depth = sceneStart('sector'); // the corrupted shots, until the evolution
   const evolve = sceneStart('evolve');
   const flat = sceneStart('flatline');
@@ -794,7 +794,7 @@ function musicPlan() {
     },
     // Gain over trailer time: [from, to, level], eased over 0.3 s at each change.
     levels: [
-      [sceneStart('breach'), run, 0.7],
+      [sceneStart('breach'), sceneStart('card'), 0.7],
       [depth, evolve, 0.55], // quieter under the corruption
       [evolve + 1.0, evolve + 3.4, 0.3], // under the evolve jingle
     ],
