@@ -31,6 +31,13 @@ export const RUN_CFG = {
   caughtDamage: 15,
   complyDamage: 5,
   marketPrice: 12, // Charge per purchase, on top of the item's scrip price (SCRIP.price)
+  // Two kinds of market: black markets (indie, cheaper, risky stock) and corp exchanges (corp, pricier, safe stock).
+  exchangePrice: 16,
+  exchangeChromePrice: 11, // corp credentials
+  blackLean: -0.5,
+  exchangeLean: 0.5,
+  blackStock: { blackice: 3, booster: 2, overclock: 2, memory: 2, segfault: 1, coolant: 1 },
+  exchangeStock: { voucher: 3, coolant: 2, repair: 2, antivirus: 2, memory: 1 },
   cacheFragmentChance: 0.15,
   // A netling's memory holds this many new codex fragments; the rest wait for the next generation.
   codexPerLife: 8,
@@ -296,7 +303,8 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'checkpoint' };
     }
     case 'market': {
-      const table = region.market ?? region.loot;
+      const corp = rng() < (region.exchangeShare ?? 0.5);
+      const table = corp ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
       // Under a market contract, the first offer is always one of the cheapest items.
       const cheap = run.contract?.kind === 'market' ? cheapestOf(table) : null;
       const offers = [weighted(cheap ?? table, rng)];
@@ -304,11 +312,12 @@ export function moveTo(pet, nodeId, rng) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
       }
-      const price = region.marketPrice ?? RUN_CFG.marketPrice;
+      const price = corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
       const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region) : null;
       openChoice(run, {
         kind: 'market',
-        title: 'BLACK MARKET',
+        flavor: corp ? 'corp' : 'black',
+        title: corp ? 'CORP EXCHANGE' : 'BLACK MARKET',
         text: `a vendor process. scrip, plus ${price} charge.`,
         offers,
         price,
@@ -514,7 +523,7 @@ export function choose(pet, optionId, rng) {
       pet.scrip -= SCRIP.price[item];
       run.loot.push(item);
       run.tally.bought++;
-      lean(-0.5, 0);
+      lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
     }
   } else if (p.kind === 'anomaly') {

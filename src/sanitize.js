@@ -125,7 +125,8 @@ function cleanPending(phase, p, strict) {
     const accOffer = p.accOffer == null ? null : STYLE_IDS.has(p.accOffer) ? p.accOffer : undefined;
     if (accOffer === undefined) return null;
     if (!(Number.isFinite(p.price) && p.price >= 0 && p.price <= 100)) return null; // rejected, not clamped: 0 would mean free
-    Object.assign(extra, { offers: [...p.offers], price: p.price, accOffer });
+    // Which kind of market (black or corp exchange): older saves have none, and every market was a black one.
+    Object.assign(extra, { offers: [...p.offers], price: p.price, accOffer, flavor: p.flavor === 'corp' ? 'corp' : 'black' });
   }
   if (p.kind === 'anomaly') extra.event = p.event;
   const allowed = choiceIds({ ...p, ...extra });

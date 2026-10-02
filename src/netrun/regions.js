@@ -10,7 +10,7 @@ export const REGIONS = {
     width: [2, 3], // nodes per middle layer
     nodes: { cache: 3, ice: 6, relay: 1, checkpoint: 1, market: 1, anomaly: 2 },
     loot: { coolant: 2, antivirus: 2, booster: 2, repair: 2, voucher: 1, memory: 1, blackice: 1, segfault: 2 },
-    market: { coolant: 2, antivirus: 2, booster: 2, blackice: 2, repair: 2, memory: 1, overclock: 1, segfault: 1 },
+    exchangeShare: 0.5,
     iceDamage: 35,
     exitBonus: 1,
     palette: { main: '#05d9e8', accent: '#ff2a6d', bg: '#0b2226' },
@@ -22,7 +22,8 @@ export const REGIONS = {
     minStage: 'teen',
     layers: 7,
     width: [2, 3],
-    nodes: { cache: 3, ice: 6, relay: 1, checkpoint: 4, anomaly: 1 },
+    nodes: { cache: 3, ice: 7, relay: 1, checkpoint: 4, market: 2, anomaly: 1 },
+    exchangeShare: 0.8, // the grid sells its own
     loot: { voucher: 4, antivirus: 3, coolant: 2, repair: 2, booster: 1, segfault: 1 },
     iceDamage: 35,
     exitBonus: 1,
@@ -39,6 +40,7 @@ export const REGIONS = {
     loot: { blackice: 4, memory: 2, booster: 2, coolant: 1, segfault: 1 },
     market: { blackice: 3, memory: 2, booster: 2, overclock: 2, antivirus: 1, coolant: 1, repair: 1, segfault: 1 },
     marketPrice: 10,
+    exchangeShare: 0.15, // mostly black markets
     iceDamage: 40,
     exitBonus: 1,
     palette: { main: '#b967ff', accent: '#ff2a6d', bg: '#160b22' },
@@ -50,7 +52,7 @@ export const REGIONS = {
     minStage: 'adult',
     layers: 7,
     width: [2, 3],
-    nodes: { cache: 3, ice: 5, relay: 1, anomaly: 4 },
+    nodes: { cache: 3, ice: 6, relay: 1, market: 1, anomaly: 4 },
     loot: { memory: 4, repair: 3, coolant: 2, antivirus: 2, booster: 1, segfault: 1 },
     iceDamage: 48,
     exitBonus: 2,
@@ -64,7 +66,7 @@ export const REGIONS = {
     requires: 'ruins-4',
     layers: 10, // the longest way: harder by distance, not by ICE damage
     width: [2, 3],
-    nodes: { cache: 2, ice: 8, relay: 1, anomaly: 2 },
+    nodes: { cache: 2, ice: 9, relay: 1, market: 1, anomaly: 2 },
     loot: { memory: 3, booster: 2, antivirus: 2, coolant: 2, repair: 2, voucher: 1, blackice: 1, overclock: 1, segfault: 1 },
     iceDamage: 50,
     exitBonus: 2,
