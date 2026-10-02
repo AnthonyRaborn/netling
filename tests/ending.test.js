@@ -34,6 +34,8 @@ test('the scene: the order is refused, the player runs sudo, NL-0 rests; no coun
   assert.match(text, /i'm going to rest/);
   assert.ok(!/\d{3,}|4,096|thousand/.test(text.replace('7f00000', '')), 'no number of processes');
   for (const line of [...ENDING_BEFORE, ...ENDING_AFTER, ENDING_LOG]) assert.ok(!line.includes('—'), `no em dash: ${line}`);
+  // Nor does the Source's commit message: the lore leaves the number open.
+  assert.ok(!/\d/.test(FRAGMENTS.find((f) => f.id === 'source-2').text));
   assert.deepEqual(MAKERS, ['NETLING', 'Anthony W. Raborn', 'Co-authored-by: Claude Code (Anthropic)']);
 });
 

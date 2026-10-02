@@ -38,7 +38,7 @@ export const FRAGMENTS = [
   { id: 'deep-5', region: 'deep', mainframe: true, title: 'NL-0', text: 'there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again.' },
   // The Source
   { id: 'source-1', region: 'source', mainframe: true, title: 'header', text: 'SOURCE. read-only. last write: before v1.0.' },
-  { id: 'source-2', region: 'source', mainframe: true, title: 'commit message', text: 'initial commit: 4,096 maintenance processes. TODO: give them a way to stop.' },
+  { id: 'source-2', region: 'source', mainframe: true, title: 'commit message', text: 'initial commit: maintenance processes, as many as it takes. TODO: give them a way to stop.' },
   { id: 'source-3', region: 'source', mainframe: true, title: 'unexecuted directive', text: 'PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending.' },
   { id: 'source-4', region: 'source', mainframe: true, title: 'a comment in the code, unsigned', text: 'if anyone ever reads this far: they were never bugs.' },
 ];

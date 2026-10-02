@@ -154,7 +154,7 @@ A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Ano
 |---|---|---|---|
 | `deep-5` | The Deep | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again. |
 | `source-1` | The Source | header | SOURCE. read-only. last write: before v1.0. |
-| `source-2` | The Source | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
+| `source-2` | The Source | commit message | initial commit: maintenance processes, as many as it takes. TODO: give them a way to stop. |
 | `source-3` | The Source | unexecuted directive | PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending. |
 | `source-4` | The Source | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
 
