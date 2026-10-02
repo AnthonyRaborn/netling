@@ -1,4 +1,4 @@
-// Renders the trailer (about 59 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
+// Renders the trailer (about 60 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
 // real app. It shows no more than a first life does: the baby and a teen, a first life's codex, and the
 // endgame only as the corruption a first life sees (the corrupted sector, records and manual line).
 // The evolution to an adult strobes and cuts away before the form settles, and the flatline card's
@@ -164,23 +164,119 @@ const aim = async (page) => {
 };
 const go = key(' ');
 
-// A mini-game, already past its title card, played by pressing things.
-function game(id, seed) {
-  const rng = mulberry32(seed);
-  const at = [];
-  for (let t = 0.1; t < 1.5; t += 0.22) at.push([t, key(['ArrowLeft', 'ArrowRight', ' '][Math.floor(rng() * 3)])]);
+// A mini-game played by a bot that reads the game each frame (see botStep), from its start through the
+// lead-in, so the clip opens mid-game. `lead` is how long it plays before the clip starts.
+function game(id, { duration = 1.5, lead = 0.4 } = {}) {
   return {
     name: id,
-    duration: 1.5,
+    duration,
     seed: () => settled(bitling()),
     warmup: [
       [0.1, click('#btn-play')],
       [0.2, click(`[data-game="${id}"]`)],
-      [0.5, key(' ')],
+      [0.5, key(' ')], // past the title card
     ],
-    warmupSeconds: 0.9,
-    at,
+    warmupSeconds: 0.5 + lead,
+    bot: playBot,
   };
+}
+
+const BOT_KEYS = { left: 'ArrowLeft', right: 'ArrowRight', a: ' ' };
+const playBot = async (page) => {
+  for (const k of await page.evaluate(botStep)) await page.keyboard.press(BOT_KEYS[k]);
+};
+
+// One frame of play, in the page: the keys to press now. Paced like a quick player (a press at most every
+// BOT_GAP_MS, two at once only to get out of the way in Dodge), and it never presses at random.
+async function botStep() {
+  const session = (await import('/src/ui/app.js')).app.session;
+  const BOT_GAP_MS = session?.id === 'breach' ? 200 : 120; // a puzzle reads better at a thinking pace
+  const g = session?.game;
+  if (!g || session.phase !== 'play' || g.done) return [];
+  const now = performance.now();
+  const bot = (window.__bot ??= { last: -Infinity });
+  if (now - bot.last < BOT_GAP_MS) return [];
+  const press = (...keys) => {
+    if (keys.length) bot.last = now;
+    return keys;
+  };
+  const toward = (from, to) => (to > from ? 'right' : 'left');
+
+  if (session.id === 'breach') {
+    // Plan once: the fewest picks, alternating row and column, that put the target in the buffer.
+    if (!bot.plan) {
+      const N = g.grid.length;
+      const goal = g.target.join(' ');
+      let limit;
+      const search = (axis, index, used, buffer) => {
+        if (buffer.join(' ').includes(goal)) return [];
+        if (buffer.length >= limit) return null;
+        for (let k = 0; k < N; k++) {
+          const [r, c] = axis === 'row' ? [index, k] : [k, index];
+          if (used.has(`${r},${c}`)) continue;
+          const next = axis === 'row' ? ['col', c] : ['row', r];
+          const rest = search(...next, new Set([...used, `${r},${c}`]), [...buffer, g.grid[r][c]]);
+          if (rest) return [k, ...rest];
+        }
+        return null;
+      };
+      for (limit = g.target.length; limit <= 4 && !bot.plan; limit++) bot.plan = search(g.axis, g.index, g.used, g.buffer);
+      bot.plan ??= [];
+    }
+    const want = bot.plan[0];
+    if (want === undefined) return [];
+    if (g.cursor !== want) {
+      const n = g.grid.length;
+      return press((want - g.cursor + n) % n <= n / 2 ? 'right' : 'left');
+    }
+    bot.plan.shift();
+    return press('a');
+  }
+
+  if (session.id === 'dodge') {
+    // A lane is safe if no firewall will be level with the packet in the next 0.45 s.
+    const LANES = 5;
+    const playerY = 280 - 44;
+    const speed = 140 + 140 * Math.min(1, g.elapsed / 15);
+    const safe = (lane, ahead) => !g.blocks.some((b) => b.lane === lane && b.y + 22 > playerY - speed * ahead && b.y < playerY + 18);
+    if (safe(g.lane, 0.45)) return [];
+    const options = [...Array(LANES).keys()].filter((l) => safe(l, 0.45)).sort((x, y) => Math.abs(x - g.lane) - Math.abs(y - g.lane));
+    // Slide through lanes that are clear right now; the moves land in the same frame.
+    const target = options.find((l) => {
+      for (let x = g.lane; x !== l; x += Math.sign(l - g.lane)) if (!safe(x + Math.sign(l - g.lane), 0.05)) return false;
+      return true;
+    });
+    if (target === undefined) return [];
+    return press(...Array(Math.min(2, Math.abs(target - g.lane))).fill(toward(g.lane, target)));
+  }
+
+  if (session.id === 'tune') {
+    // Lock when the waves all but match (the game allows 0.15).
+    if (g.pause > 0) return [];
+    return Math.abs(g.freq() - g.target) < 0.05 ? press('a') : [];
+  }
+
+  if (session.id === 'feast') {
+    const LANES = 5;
+    const playerY = 280 - 50;
+    // A corrupted packet about to land rules its lane out; the clean packet that lands soonest, among
+    // those it can reach in time with no corrupted one landing first in its lane, is the one to eat.
+    const landsIn = (k) => (playerY - k.y) / k.speed;
+    const bad = g.packets.filter((k) => !k.clean && landsIn(k) > -0.15);
+    const danger = new Set(bad.filter((k) => landsIn(k) < 0.45).map((k) => k.lane));
+    const food = g.packets
+      .filter((k) => k.clean && landsIn(k) > Math.abs(k.lane - g.lane) * 0.14 && !danger.has(k.lane))
+      .filter((k) => !bad.some((b) => b.lane === k.lane && landsIn(b) < landsIn(k) + 0.2))
+      .sort((x, y) => landsIn(x) - landsIn(y))[0];
+    let target = food?.lane ?? g.lane;
+    if (danger.has(target) || (danger.has(g.lane) && target === g.lane)) {
+      target = [...Array(LANES).keys()].filter((l) => !danger.has(l)).sort((x, y) => Math.abs(x - g.lane) - Math.abs(y - g.lane))[0] ?? g.lane;
+    }
+    if (target === g.lane) return [];
+    const step = g.lane + Math.sign(target - g.lane);
+    return danger.has(step) && step !== target ? [] : press(toward(g.lane, target));
+  }
+  return [];
 }
 
 const SCENES = [
@@ -206,10 +302,10 @@ const SCENES = [
       [6.9, click('[data-act="scav"]')],
     ],
   },
-  game('breach', 11),
-  game('dodge', 12),
-  game('tune', 13),
-  game('feast', 14),
+  game('breach', { duration: 2, lead: 0 }), // the whole solve on camera
+  game('dodge', { lead: 5 }), // later, when the firewalls come thick and fast
+  game('tune', { duration: 2, lead: 0.6 }),
+  game('feast', { lead: 4 }), // the screen full of packets
   {
     name: 'netrun',
     duration: 6,
@@ -539,7 +635,15 @@ async function recordScene(browser, scene, video, frameIndex) {
   // Warmup: open the game or menu off camera, then start recording (and the sound) from here.
   const clockState = { ms: 0 };
   const warm = (scene.warmupSeconds ?? 0) * 1000;
-  await runTo(page, clockState, Math.round(warm), [...(scene.warmup ?? [])]);
+  const warmActions = [...(scene.warmup ?? [])];
+  if (scene.bot) {
+    // A bot plays through the warmup too, a frame at a time.
+    for (let ms = 0; ms < warm; ms += 1000 / FPS) {
+      await runTo(page, clockState, Math.round(ms), warmActions);
+      await scene.bot(page);
+    }
+  }
+  await runTo(page, clockState, Math.round(warm), warmActions);
   await page.evaluate(() => (window.__t0 = performance.now()));
 
   const actions = (scene.at ?? []).map(([t, fn]) => [t + warm / 1000, fn]).sort((x, y) => x[0] - y[0]);
@@ -550,6 +654,7 @@ async function recordScene(browser, scene, video, frameIndex) {
     if (scene.hideReadout) await page.evaluate(() => ['readout', 'status'].forEach((id) => (document.getElementById(id).style.visibility = 'hidden')));
     await runTo(page, clockState, Math.round(warm + (f * 1000) / FPS), actions);
     await scene.frame?.(page, sceneT);
+    await scene.bot?.(page);
     const t = scene.start + sceneT;
     await page.evaluate(drawOverlay, {
       first: f === 0,
