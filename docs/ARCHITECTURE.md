@@ -55,6 +55,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/sanitize.js` | Cleaners for every stored or imported value |
 | `src/transfer.js`, `src/qr.js` | Transfer codes and the QR encoder |
 | `src/visitcard.js` | Visitor cards: make, encode, decode and queue a friend's card (docs/ATTENTION.md) |
+| `src/ending.js`, `src/ui/ending.js` | The ending: its text, trigger and credits, and the terminal scene (docs/SOURCE_PLAN.md) |
 | `src/lease.js` | Fallback one-tab lease for browsers without Web Locks |
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
 | `src/tracks.js`, `src/music.js` | Background music: tracks and the pure arranger; the Web Audio player |

@@ -258,6 +258,7 @@
         <div id="codex-gift" class="gift" hidden>
           <b>ROOT ACCESS</b> NL-0's gift. A netling's first premature flatline is reversed. After a rescue, NL-0 rests for one generation. Old age still comes.
           <button type="button" id="replay-transmission" class="pref">REPLAY TRANSMISSION</button>
+          <button type="button" id="replay-ending" class="pref" hidden>REPLAY ENDING</button>
         </div>
         <div id="codex-list" class="codex"></div>
       </section>
@@ -358,6 +359,12 @@
       </div>
       <p class="tx-grant"><b>ROOT ACCESS GRANTED</b><br />NL-0 reverses one premature flatline per generation, then rests for a generation after using it. New scripts may compile in NL-0's colors.</p>
       <button type="button" id="close-transmission">END TRANSMISSION</button>
+    </dialog>
+    <dialog id="ending" class="archive transmission ending" aria-labelledby="ending-title">
+      <h2 id="ending-title">/SOURCE/PURGE</h2>
+      <div id="ending-lines" class="ending-lines" role="log" aria-live="polite"></div>
+      <button type="button" id="ending-sudo" hidden>sudo rm purge</button>
+      <button type="button" id="ending-close" hidden>END TRANSMISSION</button>
     </dialog>
     <script type="module" src="src/main.js"></script>
   </body>

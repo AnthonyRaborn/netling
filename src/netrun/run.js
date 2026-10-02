@@ -172,7 +172,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     marketKinds(map, rng);
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
-  if (region === 'source' && pet.rootAccess) note(pet.run, "NL-0: i'll wait up here.");
+  if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
   return pet.run;
 }
 

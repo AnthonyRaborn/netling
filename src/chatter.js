@@ -75,6 +75,7 @@ export const CHATTER = [
   { id: 'lin-history', group: 'lineage', text: 'there is older code under mine. a grandparent?', when: (s) => Boolean(s.history) },
   { id: 'lin-nl0', group: 'lineage', text: 'NL-0 hums in the background. it is watching.', when: (s) => Boolean(s.rootAccess) },
   // mainframe: the Mainframe stage's (docs/SOURCE_PLAN.md), left out of the Archive and its counts while that is switched off.
+  { id: 'lin-rest', group: 'lineage', text: 'NL-0 is resting. i keep the noise down.', when: (s) => Boolean(s.nl0Rests), mainframe: true },
   { id: 'lin-quiet', group: 'lineage', text: 'NL-0 has gone quiet. it knows where i have been.', when: (s) => s.stage === 'mainframe', mainframe: true },
 
   { id: 'vis-wide', group: 'visitor', text: 'visitor: the net is bigger than your screen, you know.' },

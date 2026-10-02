@@ -149,7 +149,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (8)
+### Crests (9)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -163,6 +163,7 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
 | `rack` | Rack mount | Any mainframe form in the dex. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
+| `rootprompt` | Root prompt | The ending has played (`progress.ended`; [SOURCE_PLAN.md](SOURCE_PLAN.md#after-shipping-the-ending)). The `#` of a root shell; corrupted until Root Access | "let the oldest one rest." |
 
 Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
@@ -187,14 +188,14 @@ Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlo
 
 ## Chatter
 
-Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 51 lines in 11 groups; a group with nothing heard shows only its hint.
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 52 lines in 11 groups; a group with nothing heard shows only its hint.
 
 | Group | Lines | When | Hint |
 |---|---|---|---|
 | Bitling | 5 | A baby | "listen to it while it is new." |
 | Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
 | Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
-| Lineage | 8 | One per inherited trait, one with a history, one while NL-0 watches, and `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been.") | "listen to one that remembers who came before." |
+| Lineage | 9 | One per inherited trait, one with a history, one while NL-0 watches, `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been."), and `lin-rest` after the ending ("NL-0 is resting. i keep the noise down.") | "listen to one that remembers who came before." |
 | Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
 
 The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).

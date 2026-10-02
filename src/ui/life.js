@@ -114,7 +114,7 @@ export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
     // Friends invited during the last life still come: the card was for the device, not one netling.
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms(), friends: prev.friends ?? [] });
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms(), friends: prev.friends ?? [], nl0Rests: app.progress.ended === true });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;

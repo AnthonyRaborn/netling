@@ -189,6 +189,7 @@ function renderArchive() {
 
   renderWardrobe();
   $('codex-gift').hidden = !rootUnlocked();
+  $('replay-ending').hidden = !app.progress.ended;
   const groups = codexByRegion(app.codex, shownRegions(CFG.mainframe));
   const live = liveFragments();
   $('codex-count').textContent = `${live.filter((f) => app.codex.includes(f.id)).length}/${live.length}`;

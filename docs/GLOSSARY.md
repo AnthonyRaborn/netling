@@ -117,7 +117,8 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Nap** | Rest on demand for up to 2 hours at 35% drain | `sim.js` |
 | **Netling** | The pet | everywhere |
 | **Netrun** | The node-map expedition | `netrun/` |
-| **NL-0** | The first netling, the story's hidden benefactor. Grants Root Access | `index.html`, `sim.js` |
+| **Ending** | Every fragment plus a Source exit: the player runs `sudo rm purge`, NL-0 rests, and the credits list the line. Once, with a replay | `ending.js` |
+| **NL-0** | The first netling, the story's hidden benefactor. Grants Root Access, and rests after the ending | `index.html`, `sim.js` |
 | **Node** | A point on a netrun map: entry, cache, ICE, relay, checkpoint, market, anomaly, exit | `netrun/map.js` |
 | **Onboarding** | First-run flow: intro, readme (field manual), nudge, tutorial, done | `ui/onboarding.js` |
 | **Origin palette** | NL-0's color scheme. Only rolls for netlings compiled with Root Access | `sim.js` |

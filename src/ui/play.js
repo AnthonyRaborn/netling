@@ -12,6 +12,7 @@ import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
 import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
+import { maybeShowEnding } from './ending.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
 export function showPanel(name) {
@@ -158,6 +159,7 @@ export function openRun() {
       if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
       bumpProgress(run);
       checkUnlocks();
+      maybeShowEnding();
       resetPadQuit();
       showPanel('controls');
       save();

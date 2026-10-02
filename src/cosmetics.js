@@ -171,6 +171,15 @@ export const COSMETICS = {
       // A server rack: a frame, three units with their lights, and its feet.
       pixels: ['#########', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#########', '.#.....#.'],
     },
+    {
+      id: 'rootprompt',
+      name: 'Root prompt',
+      mainframe: true,
+      hint: 'let the oldest one rest.',
+      check: (c) => c.progress.ended === true, // the ending has played (ending.js)
+      // The # of a root shell.
+      pixels: ['..#...#..', '..#...#..', '#########', '..#...#..', '..#...#..', '#########', '..#...#..', '..#...#..', '.........'],
+    },
   ],
   // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.
   music: [

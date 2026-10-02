@@ -378,7 +378,8 @@ export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= 
 // newForms: adult forms the player has never raised; they win ties a little more often.
 // rootAccess: the codex is complete, so NL-0 watches over this generation,
 // unless NL-0 spent itself rescuing the previous one: then it rests for a generation.
-export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [], friends = [] }) {
+// nl0Rests: the ending has played (ending.js), so NL-0 speaks in its sleep. Wording only.
+export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [], friends = [], nl0Rests = false }) {
   const rootCooling = rootAccess && Boolean(fragment?.rootUsed);
   if (rootCooling) rootAccess = false;
   const quirk = rollQuirk(rng, { origin: rootAccess || rootCooling });
@@ -427,6 +428,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     runCooldownCut: 0,
     visit: null,
     visitAccGifts: 0,
+    nl0Rests,
     friends, // friends' visitor cards on their way: [{ id, form, palette, accessories, gen, deep, root, below, at }]
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
@@ -451,7 +453,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     quirk,
     log: [
       { t: now, msg: `> compiling netling.v${generation}.0 ...` },
-      ...(rootCooling ? [{ t: now, msg: '> NL-0: i reached for the last one. i need to rest. be careful with this one.' }] : []),
+      ...(rootCooling ? [{ t: now, msg: nl0Rests ? '> NL-0 (asleep): i reached for the last one in my sleep. be careful with this one.' : '> NL-0: i reached for the last one. i need to rest. be careful with this one.' }] : []),
     ],
     deathCause: null,
     diedAt: null,
@@ -989,6 +991,7 @@ export function migrate(s) {
   s.visit ??= null;
   s.visitAccGifts ??= 0;
   s.friends ??= [];
+  s.nl0Rests ??= false;
   s.life ??= { ...LEGACY_LIFE }; // compiled before lives were shortened: it keeps its seven days
   s.newForms ??= [];
   s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
@@ -1034,7 +1037,7 @@ function rootRescue(s, t, cause) {
   s.virus = false;
   s.integrityZeroMin = 0;
   s.careMistakes = Math.min(s.careMistakes, CFG.maxMistakes - 1);
-  log(s, t, `> NL-0: not yet. (${cause} reversed. root access spent for this generation.)`);
+  log(s, t, `> ${s.nl0Rests ? 'NL-0 (asleep)' : 'NL-0'}: not yet. (${cause} reversed. root access spent for this generation.)`);
   return true;
 }
 

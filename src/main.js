@@ -13,6 +13,7 @@ import { $, app, DEV, TEST, newForms, rootUnlocked, flashStatus, loadAll, now, s
 import { initInventory, updateHUD } from './ui/hud.js';
 import { applyWardrobe, backfillEarned, checkUnlocks, drainAccessoryInbox, plushExtra } from './ui/style.js';
 import { drainCodexInbox, initArchive } from './ui/archive.js';
+import { initEnding, maybeShowEnding } from './ui/ending.js';
 import { initOnboarding, openHelp, setOnboarding, startIntro } from './ui/onboarding.js';
 import { dropSession, initPlay, openRun } from './ui/play.js';
 import { importFromUrl, initSystem, protectStorage, renderTestBadge, sessionBlockReason, showLock, storageProtected } from './ui/system.js';
@@ -42,6 +43,7 @@ initSystem();
 initTabs();
 initGamepad();
 initDevice();
+initEnding();
 
 // --- settings ---
 
@@ -213,6 +215,7 @@ advance();
 drainCodexInbox();
 drainAccessoryInbox();
 backfillEarned();
+setTimeout(maybeShowEnding, 900); // a player who already qualifies sees it once, after the page settles
 if (app.state.stage === 'dead') showFlatline();
 else if (app.state.run) openRun(); // resume a run after a reload
 syncDevice();

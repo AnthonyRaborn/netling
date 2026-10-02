@@ -426,6 +426,7 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
     friends: cleanFriends(raw.friends, now),
+    nl0Rests: bool(raw.nl0Rests),
     request: cleanRequest(raw.request),
     contract: cleanContract(raw.contract),
     contractCheckAge: numOrNull(raw.contractCheckAge),
@@ -516,6 +517,7 @@ export function cleanProgress(raw) {
     hotMin: int(p.hotMin, 0, 0), // awake minutes overclocked over past lives (the same way)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
+    ...(p.ended === true ? { ended: true } : {}), // the ending has played (ending.js)
     ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)
   };
 }

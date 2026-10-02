@@ -326,6 +326,50 @@ await scenario('visitor card: a friend drops by, is greeted, and signs the guest
   assert(await row.locator('.corrupt').count(), 'the corrupted name does not glitch');
 });
 
+await scenario('ending: every fragment plus a Source exit, sudo rm purge, credits, once', async ({ open }) => {
+  const done = {
+    'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', rootAccess: true, generation: 2 }),
+    'netling.codex': FRAGMENTS.map((f) => f.id),
+    'netling.progress': { rootEarned: true, sourceExits: 1, sourceSeen: true },
+    'netling.lineage': [{ generation: 1, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 6000 }],
+  };
+  const page = await open(BASE, seed(done));
+  await page.waitForSelector('#ending[open]', { timeout: 5000 });
+  await page.waitForSelector('#ending-sudo:not([hidden])', { timeout: 10000 });
+  const before = await page.textContent('#ending-lines');
+  assert(/permission denied/.test(before) && !/NL-0: \.\.\.it's gone/.test(before), `the scene ran past the prompt: ${before}`);
+  assert((await page.textContent('#ending-sudo')).trim() === 'sudo rm purge', 'no sudo button');
+  await page.click('#ending-sudo');
+  await page.waitForSelector('#ending-close:not([hidden])', { timeout: 20000 });
+  const all = await page.textContent('#ending-lines');
+  for (const want of ["removed 'purge'.", 'so many of us', 'v1.0  Daemon', 'v2.0  Chrome', 'running', 'and NL-0, who waited.', 'Anthony W. Raborn', 'Co-authored-by: Claude Code (Anthropic)']) {
+    assert(all.includes(want), `missing "${want}"`);
+  }
+  const progress = await saved(page, 'netling.progress');
+  assert(progress.ended === true, 'not recorded');
+  assert((await saved(page)).nl0Rests === true, 'NL-0 does not rest in this netling');
+  assert((await page.evaluate(() => JSON.parse(localStorage.getItem('netling.unlocked')))).includes('crest:rootprompt'), 'no Root prompt crest');
+  await page.click('#ending-close');
+  await page.reload();
+  await page.waitForTimeout(1800);
+  assert(!(await page.locator('#ending[open]').count()), 'the ending played twice');
+  await page.click('#open-archive');
+  await page.click('#tab-btn-codex');
+  assert(await visible(page, '#replay-ending'), 'no REPLAY ENDING');
+});
+
+await scenario('ending: one fragment short, or no Source exit, it waits', async ({ open }) => {
+  for (const [codex, progress] of [
+    [FRAGMENTS.map((f) => f.id).filter((id) => id !== 'public-1'), { rootEarned: true, sourceExits: 2 }],
+    [FRAGMENTS.map((f) => f.id), { rootEarned: true }],
+  ]) {
+    const page = await open(BASE, seed({ 'netling.codex': codex, 'netling.progress': progress }));
+    await page.waitForTimeout(1800);
+    assert(!(await page.locator('#ending[open]').count()), `the ending played early: ${JSON.stringify(progress)}`);
+    await page.close();
+  }
+});
+
 await scenario('corrupted local storage does not break startup', async ({ open }) => {
   const page = await open(
     BASE,
@@ -1607,12 +1651,13 @@ await scenario('mainframe: before Root Access, the Source and the new forms read
   const bad = shells.filter((x) => x.name === '<<SHELL CORRUPTED>>');
   assert(bad.length === 5 && bad.every((x) => x.corrupt && /read error/.test(x.hint)), `corrupted shells: ${JSON.stringify(shells)}`);
   assert(!shells.some((x) => /never stops growing/.test(x.hint)), 'a corrupted shell shows its hint');
-  for (const [section, word] of [['SCREEN TINT', 'TINT'], ['SCREEN EFFECT', 'EFFECT'], ['CREST', 'CREST'], ['MUSIC', 'TRACK'], ['ACCESSORY: BODY', 'ITEM']]) {
+  // Rack mount and Root prompt are the Mainframe's two crests.
+  for (const [section, word, n = 1] of [['SCREEN TINT', 'TINT'], ['SCREEN EFFECT', 'EFFECT'], ['CREST', 'CREST', 2], ['MUSIC', 'TRACK'], ['ACCESSORY: BODY', 'ITEM']]) {
     const hit = items[section].filter((x) => x.name === `<<${word} CORRUPTED>>`);
-    assert(hit.length === 1 && hit[0].corrupt, `${section}: ${JSON.stringify(items[section])}`);
+    assert(hit.length === n && hit.every((x) => x.corrupt), `${section}: ${JSON.stringify(items[section])}`);
   }
   const all = Object.values(items).flat();
-  assert(!all.some((x) => /written from|into the light|below the bottom|bravest/.test(x.hint)), 'a corrupted item shows its hint');
+  assert(!all.some((x) => /written from|into the light|below the bottom|bravest|oldest one rest/.test(x.hint)), 'a corrupted item shows its hint');
 });
 
 await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ??? and hints, and the Source opens', async ({ open }) => {
