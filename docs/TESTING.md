@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 453 tests in 41 files. The smoke test has 73 scenarios (Playwright 1.56.1).
+`npm test` runs 455 tests in 41 files. The smoke test has 73 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -51,7 +51,7 @@ They use `node:test` and `node:assert/strict` and import the modules under test 
 | `sprites.test.js` | 5 | Every form has its own dead and sleep sprite, dead eyes are X's, asleep eyes are slits, the Shell is solid with a void, every color map covers every mark |
 | `colors.test.js` | 2 | Color distance and the contrast swap |
 | `sprite-checks.test.js` | 7 | The sprite review arithmetic: color distance, blending, clipping, lost pixels, overlap, silhouettes |
-| `accessories.test.js` | 22 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, wear slots (every accessory has one, draw order, what the wardrobe has on, making room, a visitor's second item from another slot), colors (per-palette defaults, the generated table is current, the contrast swap) |
+| `accessories.test.js` | 26 | Sprite anchors (authored rows for every form and frame, no jumping between frames, the neck row), every accessory on every form, rarity rolls, regions, earned exclusion, props, wear slots (every accessory has one, draw order, what the wardrobe has on, making room, a visitor's second item from another slot), colors (per-palette defaults, the generated table is current, the contrast swap), the ten found-anywhere wearables (slots, markets, the check-in pool) and the progress bar's and power cell's animation against the flash limit |
 | `events.test.js` | 11 | Intrusions, shield, DEFEND, overflow and crash, hibernation blocking, loading stored events |
 | `storage.test.js` | 9 | The store: parsing, the write gate, failures, all-or-nothing `setAll`, `clearAll`, test namespace |
 | `checkin.test.js` | 8 | Daily check-in: the morning wake is recorded (not a nap), due once per morning however many passed, the seven-day ladder and its loop, item tiers (never a Segfault), accessory days from the general pool (never owned or waiting, scrip when none are left), a full box holding it back, taking from the box, cleaning, and transfer keys |

@@ -636,6 +636,157 @@ ACCESSORIES.push(
       }
     },
   },
+  // --- found anywhere, for the slots that had the fewest (float, body, face) -----------------
+  {
+    id: 'raincloud',
+    name: 'Rain cloud',
+    slot: 'float',
+    rarity: 'common',
+    draw: (px, a, frame) => {
+      // A little grey cloud over the head, two drops falling from it in turn.
+      const y = a.top - 3;
+      for (let x = a.cx - 1; x <= a.cx + 1; x++) px(x, y - 1, '#c8c8d8');
+      for (let x = a.cx - 2; x <= a.cx + 2; x++) px(x, y, '#9a9ab8');
+      const [near, far] = frame % 2 ? [a.cx + 1, a.cx - 1] : [a.cx - 1, a.cx + 1];
+      px(near, y + 1, '#05d9e8');
+      px(far, y + 2, '#05d9e8');
+    },
+  },
+  {
+    id: 'cursor',
+    name: 'Cursor',
+    slot: 'float',
+    rarity: 'common',
+    draw: (px, a, frame) => {
+      // An old mouse pointer hovering at the top right of the head, bobbing a pixel.
+      const x = a.cx + 2;
+      const y = a.top - 4 - (frame % 2);
+      for (const [dx, dy] of [[0, 0], [0, 1], [1, 1], [0, 2], [1, 2], [2, 2], [0, 3], [1, 3], [2, 4]]) px(x + dx, y + dy, '#ffffff');
+      px(x + 1, y + 4, '#050508'); // the notch between the arrow and its tail
+    },
+  },
+  {
+    id: 'progressbar',
+    name: 'Progress bar',
+    slot: 'float',
+    rarity: 'rare',
+    draw: (px, a, frame, time = 0) => {
+      // A bar over the head that fills one cell every 0.4 s and starts over: it never finishes loading.
+      const y = a.top - 3;
+      const filled = Math.floor(time / 400) % 6;
+      px(a.cx - 3, y, '#8a93a3');
+      px(a.cx + 4, y, '#8a93a3');
+      for (let i = 0; i < 6; i++) px(a.cx - 2 + i, y, i < filled ? '#39ff14' : '#5a6a7a');
+    },
+  },
+  {
+    id: 'extralife',
+    name: 'Extra life',
+    slot: 'float',
+    rarity: 'veryrare',
+    draw: (px, a, frame) => {
+      // A pixel heart, bobbing over the head.
+      const y = a.top - 4 - (frame % 2);
+      ['##.##', '#####', '.###.', '..#..'].forEach((row, dy) => [...row].forEach((ch, dx) => ch === '#' && px(a.cx - 2 + dx, y + dy, '#ff1a4a')));
+      px(a.cx - 2, y, '#ffffff'); // a shine
+    },
+  },
+  {
+    id: 'bowtie',
+    name: 'Bow tie',
+    slot: 'body',
+    rarity: 'common',
+    colors: [['tie', '#b967ff']],
+    draw: (px, a, frame, time, colors) => {
+      // Two wings and a knot just under the neck, wider than the Necktie and lying flat.
+      const [c] = colors ?? ['#b967ff'];
+      const y = a.neckRow + 1;
+      for (const dx of [-2, 2]) for (const dy of [-1, 0, 1]) px(a.cx + dx, y + dy, c);
+      px(a.cx - 1, y, c);
+      px(a.cx + 1, y, c);
+      px(a.cx, y, '#050508'); // the knot
+    },
+  },
+  {
+    id: 'goldchain',
+    name: 'Gold chain',
+    slot: 'body',
+    rarity: 'rare',
+    draw: (px, a) => {
+      // Links from either side of the neck dipping to a pendant in the middle.
+      px(a.neckLeft + 1, a.neckRow, '#d8b04a');
+      px(a.neckRight - 1, a.neckRow, '#d8b04a');
+      for (let x = a.neckLeft + 2; x <= a.neckRight - 2; x++) if ((x - a.neckLeft) % 2 === 0 || x === a.cx) px(x, a.neckRow + 1, '#d8b04a');
+      px(a.cx, a.neckRow + 2, '#f9f002');
+    },
+  },
+  {
+    id: 'powercell',
+    name: 'Power cell',
+    slot: 'body',
+    rarity: 'common',
+    draw: (px, a, frame, time = 0) => {
+      // A battery pack clipped to the side of the body that drains and charges again, one level every 0.9 s.
+      const x = a.bodyRight + 1;
+      const level = [3, 0, 1, 2][Math.floor(time / 900) % 4];
+      px(x, a.mid - 1, '#c8d0dc'); // the terminal
+      px(x + 1, a.mid - 1, '#8a93a3');
+      for (let i = 0; i < 3; i++) {
+        const c = 2 - i < level ? '#39ff14' : '#3a3f49';
+        px(x, a.mid + i, c);
+        px(x + 1, a.mid + i, c);
+      }
+      px(x, a.mid + 3, '#8a93a3');
+      px(x + 1, a.mid + 3, '#8a93a3');
+    },
+  },
+  {
+    id: 'blush',
+    name: 'Blush',
+    slot: 'face',
+    rarity: 'common',
+    colors: [['blush', '#ff6b9a']],
+    draw: (px, a, frame, time, colors) => {
+      // Two pink marks on the cheeks, just under the outer edge of each eye.
+      const [c] = colors ?? ['#ff6b9a'];
+      const y = a.eyeRow + 2;
+      for (const x of [a.eyeLeft, a.eyeLeft + 1, a.eyeRight - 1, a.eyeRight]) px(x, y, c);
+    },
+  },
+  {
+    id: 'mustache',
+    name: 'Mustache',
+    slot: 'face',
+    rarity: 'common',
+    draw: (px, a) => {
+      // A bar over the mouth with tips that droop at both ends; never up over the eyes (or Chrome's visor).
+      const y = Math.max(a.mouthRow - 1, a.eyeRow + 2);
+      const left = Math.min(a.mouthLeft, a.cx - 1);
+      const right = Math.max(a.mouthRight, left + 3);
+      for (let x = left; x <= right; x++) px(x, y, '#5a3a22');
+      px(left - 1, y + 1, '#5a3a22');
+      px(right + 1, y + 1, '#5a3a22');
+    },
+  },
+  {
+    id: 'monocle',
+    name: 'Monocle',
+    slot: 'face',
+    rarity: 'rare',
+    draw: (px, a) => {
+      // A gold ring around the left eye, open in the middle so the eye still shows, and a chain hanging from it.
+      const x0 = a.eyeLeft - 1;
+      const y0 = a.eyeRow - 1;
+      for (let i = 0; i < 4; i++) {
+        px(x0 + i, y0, '#d8b04a');
+        px(x0 + i, y0 + 3, '#d8b04a');
+        px(x0, y0 + i, '#d8b04a');
+        px(x0 + 3, y0 + i, '#d8b04a');
+      }
+      px(x0, y0 + 4, '#8a93a3');
+      px(x0 - 1, y0 + 5, '#8a93a3');
+    },
+  },
 );
 // Worn slots: one accessory from each can be worn at once, drawn in this order (later ones on top).
 export const WEAR_SLOTS = ['body', 'face', 'head', 'float'];
@@ -874,7 +1025,10 @@ export const DIM_WEARABLE = '#2f6b73';
 // Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
 // above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
 // pixels covered, the smallest on a tie. Orbiting ones (`orbits: true`: the drone, the data aura, the glitch moth) draw last, in front of everything, and nothing makes room for them.
-const ROOM = { scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, lanyard: 1, necktie: 1, spikedcollar: 1, bandolier: 1, halo: -1, spark: -1, holologo: -1 };
+const ROOM = {
+  scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, lanyard: 1, necktie: 1, spikedcollar: 1, bandolier: 1, bowtie: 1, goldchain: 1, powercell: 1,
+  halo: -1, spark: -1, holologo: -1, raincloud: -1, cursor: -1, progressbar: -1, extralife: -1,
+};
 const ROOM_MAX = 4;
 export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRow = -Infinity } = {}) {
   const a = anchorsFor(sprite);

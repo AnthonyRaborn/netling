@@ -58,11 +58,11 @@ Rules in `src/checkin.js` (`CHECKIN`), the UI in `src/ui/rewards.js`.
   | 2 | A cheapest-tier item (coolant, antivirus, repair, booster, memory) |
   | 3 | 25 scrip |
   | 4 | A middle-tier item (voucher, black ICE; never a Segfault) |
-  | 5 | An unowned common accessory from the general pool (Cap, Scarf, Headphones, Flower, Bow), else 25 scrip |
+  | 5 | An unowned common accessory from the general pool (13: Cap, Scarf, Headphones, Flower, Bow, Lanyard, Spiked collar, Rain cloud, Cursor, Bow tie, Power cell, Blush, Mustache), else 25 scrip |
   | 6 | An Bypass chip |
-  | 7 | An unowned rare or very rare accessory from the general pool (Shades, Visor, Crown, Halo, Spark), else 40 scrip |
+  | 7 | An unowned rare or very rare accessory from the general pool (13: Shades, Visor, Crown, Necktie, Chip bandolier, Holo logo, Glitch moth, Progress bar, Gold chain, Monocle, Halo, Spark, Extra life), else 40 scrip |
 
-  The general pool is the accessories found anywhere: regional drops and earned items stay the reward for exploring and for events.
+  The general pool is the accessories found anywhere (shop exclusives included, since a check-in ignores `shop`): regional drops and earned items stay the reward for exploring and for events. With 13 in each pool, a player who checks in every day gets an accessory on both accessory days for 13 weeks before they fall back to scrip.
 - **The reward box.** Rewards wait in a box kept per device (`netling.rewardBox`, up to 30; a check-in waits while it is full), which moves with a transfer code like the rest of the collection. The BOX button beside the scrip count opens it with the ladder. TAKE moves scrip to the netling up to the cap (the rest stays in the box), an item when the inventory has room, an accessory to the collection at any time. Nothing is taken during a netrun or without a living netling, except accessories.
 - **Where it shows.** A line in the netling's log, the box count in yellow, and a notification with ALERTS on. Never the status line, which carries notices that matter more.
 - **Not measured.** The balance bots do not check in, so the baselines do not include it.
@@ -83,4 +83,4 @@ Notifications are local: they fire while the app is open or in a background tab.
 
 ## Open ideas
 
-- **Rebalance the check-in accessories** once more general-pool accessories exist (see [Daily check-in](#daily-check-in)): with today's ten, the accessory days fall back to scrip after about ten weeks of check-ins.
+- **The check-in accessory pools** (see [Daily check-in](#daily-check-in)) were deepened from 7 common and 9 rare or better to 13 each by ten found-anywhere wearables. If more are added, keep the two pools about level so neither accessory day runs dry first.

@@ -78,7 +78,7 @@ test('regional accessories only roll in their region; the originals roll anywher
   }
   assert.ok(home.has('drone') && !home.has('checksum'));
   assert.ok(!worn.has('checksum'));
-  assert.equal(ACCESSORIES.length, 31);
+  assert.equal(ACCESSORIES.length, 41);
 });
 
 test('the drone orbits: its position changes over time', () => {
@@ -381,5 +381,54 @@ test('the visor is three unbroken lines with a scan light running in and out on 
     cells.push(offs);
     assert.deepEqual(offs[1], offs[3], `${name}: the middle position comes round twice`);
     assert.ok(offs[1][0] >= offs[0][0] && offs[2][0] >= offs[1][0], `${name}: moving inward`);
+  }
+});
+
+// --- the ten found anywhere, for the slots that had the fewest -----------------------------------
+
+import { CHECKIN_ACCESSORIES } from '../src/checkin.js';
+import { FLASH_TOGGLE_MS } from '../src/games/common.js';
+
+const NEW_TEN = ['raincloud', 'cursor', 'progressbar', 'extralife', 'bowtie', 'goldchain', 'powercell', 'blush', 'mustache', 'monocle'];
+
+test('the ten newer wearables are found anywhere, sold by both markets, and feed the daily check-in', () => {
+  const slots = {};
+  for (const id of NEW_TEN) {
+    const x = accessoryById(id);
+    assert.ok(x, id);
+    assert.ok(!x.regions && !x.shop && !x.source && !x.mainframe, `${id} is found anywhere`);
+    assert.ok(CHECKIN_ACCESSORIES.includes(id), `${id} can come from a check-in`);
+    slots[x.slot] = (slots[x.slot] ?? 0) + 1;
+  }
+  assert.deepEqual(slots, { float: 4, body: 3, face: 3 });
+  // Every slot now has at least ten, and the check-in has a common and a rare-or-better pool each over ten deep.
+  for (const slot of ['float', 'body', 'face']) assert.ok(ACCESSORIES.filter((x) => x.slot === slot).length >= 10, slot);
+  const rarity = (id) => accessoryById(id).rarity;
+  assert.ok(CHECKIN_ACCESSORIES.filter((id) => rarity(id) === 'common').length >= 12);
+  assert.ok(CHECKIN_ACCESSORIES.filter((id) => rarity(id) !== 'common').length >= 12);
+});
+
+test('the progress bar and the power cell change no faster than the flash limit', () => {
+  for (const id of ['progressbar', 'powercell']) {
+    for (const sprite of [SPRITES.bitlingA, SPRITES.platA]) {
+      const at = (t) => {
+        const pts = [];
+        accessoryById(id).draw((x, y, c) => pts.push(`${x},${y},${c}`), anchorsFor(sprite), 0, t);
+        return pts.join(' ');
+      };
+      let last = at(0);
+      let lastChange = 0;
+      let changes = 0;
+      for (let t = 10; t <= 10000; t += 10) {
+        const now = at(t);
+        if (now !== last) {
+          assert.ok(t - lastChange >= FLASH_TOGGLE_MS, `${id} changed ${t - lastChange} ms after the last change`);
+          lastChange = t;
+          last = now;
+          changes++;
+        }
+      }
+      assert.ok(changes > 3, `${id} animates`);
+    }
   }
 });
