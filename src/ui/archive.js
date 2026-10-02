@@ -217,7 +217,7 @@ function renderArchive() {
           d.className = 'frag';
           const b = document.createElement('b');
           b.textContent = e.title;
-          d.append(b, e.text);
+          d.append(b, ...redacted(e.text));
         }
         return d;
       });
@@ -313,6 +313,19 @@ function renderGuestbook() {
     }),
   );
   $('guestbook').replaceChildren(h, log);
+}
+
+// A fragment's text, with each <<REDACTED>> glitching now and then like a corrupted record (ui/corrupt.js). Unlike those,
+// it never repairs: the corp blacked it out, nothing is locked behind it.
+export const REDACTED = '<<REDACTED>>';
+function redacted(text) {
+  return text.split(REDACTED).flatMap((part, i) => {
+    if (!i) return [part];
+    const mark = document.createElement('span');
+    mark.className = 'corrupt';
+    mark.textContent = REDACTED;
+    return [mark, part];
+  });
 }
 
 function selectTab(name) {

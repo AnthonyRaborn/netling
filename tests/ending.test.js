@@ -36,6 +36,9 @@ test('the scene: the order is refused, the player runs sudo, NL-0 rests; no coun
   for (const line of [...ENDING_BEFORE, ...ENDING_AFTER, ENDING_LOG]) assert.ok(!line.includes('—'), `no em dash: ${line}`);
   // Nor does the Source's commit message: the lore leaves the number open.
   assert.ok(!/\d/.test(FRAGMENTS.find((f) => f.id === 'source-2').text));
+  // The corp memo's figure is blacked out (it glitches in the codex, ui/archive.js).
+  const memo = FRAGMENTS.find((f) => f.id === 'corp-1').text;
+  assert.ok(memo.includes('<<REDACTED>>') && !/\d/.test(memo), memo);
   assert.deepEqual(MAKERS, ['NETLING', 'Anthony W. Raborn', 'Co-authored-by: Claude Code (Anthropic)']);
 });
 

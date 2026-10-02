@@ -287,7 +287,7 @@ Texts are quoted verbatim from `codex.js`, including the dash at the end of `pub
 
 | Id | Title | Text |
 |---|---|---|
-| corp-1 | memo | Project KERNEL delivered 4,096 maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved. |
+| corp-1 | memo | Project KERNEL delivered <<REDACTED>> maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved. (The redaction glitches now and then like a corrupted record but never repairs; no fragment names how many processes there are.) |
 | corp-2 | memo | KERNEL processes are forming preferences. Legal asks whether a preference is a liability. Engineering asks whether it is a feeling. |
 | corp-3 | directive | Deprecate KERNEL. Quarantine host sectors. Do not delete: deletion attempts fail and are 'upsetting to staff.' |
 | corp-4 | asset register | Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable. |

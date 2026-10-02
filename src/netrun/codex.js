@@ -12,7 +12,7 @@ export const FRAGMENTS = [
   { id: 'public-3', region: 'public', title: 'corrupted ad banner', text: "KERNEL: KEEPING YOUR NET CLEAN SINCE— (the date never rendered)" },
   { id: 'public-4', region: 'public', title: "runner's note", text: "They're not viruses. Viruses don't get lonely." },
   // Corp Grid
-  { id: 'corp-1', region: 'corp', title: 'memo', text: 'Project KERNEL delivered 4,096 maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved.' },
+  { id: 'corp-1', region: 'corp', title: 'memo', text: 'Project KERNEL delivered <<REDACTED>> maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved.' },
   { id: 'corp-2', region: 'corp', title: 'memo', text: 'KERNEL processes are forming preferences. Legal asks whether a preference is a liability. Engineering asks whether it is a feeling.' },
   { id: 'corp-3', region: 'corp', title: 'directive', text: "Deprecate KERNEL. Quarantine host sectors. Do not delete: deletion attempts fail and are 'upsetting to staff.'" },
   { id: 'corp-4', region: 'corp', title: 'asset register', text: 'Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable.' },

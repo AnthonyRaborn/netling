@@ -19,7 +19,7 @@ What tests exist, how to run them, what each tool does, and where coverage is th
 | `node tools/make-trailer.mjs` | Renders the spoiler-free trailer (49 s, 1080x1920, 30 fps) from the real app, with its sound effects and one continuous take of the game's music under them (`renderMusic`, following the rules in [MUSIC.md](MUSIC.md); `MUSIC_DB=n` sets its level over the game's own, default 4) to `trailer/netling-trailer.mp4` (git ignores it). Deterministic: a fake clock and a seeded `Math.random`. `SCENES=care,netrun` renders only those scenes (effects only, no music), `STILLS=dir` saves every 15th frame, `OUT=file.mp4` moves the output. Takes about 9 minutes | Playwright, and an ffmpeg with libx264 and aac on `PATH` or in `FFMPEG` (`pip install imageio-ffmpeg` bundles one) |
 | `npm run serve` | Serves the folder at http://localhost:5174 | Python 3 |
 
-`npm test` runs 479 tests in 46 files. The smoke test has 77 scenarios (Playwright 1.56.1).
+`npm test` runs 479 tests in 46 files. The smoke test has 78 scenarios (Playwright 1.56.1).
 
 CI (`.github/workflows/test.yml`) runs on every pull request and every push to `main`: Node 22, `npm test`, then Playwright 1.56.1 and `npm run smoke`. `pages.yml` deploys only after that workflow succeeds on `main`.
 
@@ -118,6 +118,7 @@ Helpers: `seed()` writes a prepared save into localStorage before load, `awakeNe
 - Crashes: a crashing mini-game is closed, a crashing netrun is aborted, a crash in the tutorial still finishes onboarding.
 - The daily check-in fills the box once a morning and TAKE moves it (other scenarios seed today's check-in as claimed).
 - A posted contract in the bar and the region picker, taken along on a jack-in.
+- The codex: the corp memo's `<<REDACTED>>` is a glitching span.
 - The ending: a player with every fragment and a Source exit sees it on load, it waits at `sudo rm purge`, the credits name the line and the makers, the crest unlocks, it does not play twice, REPLAY ENDING shows; one fragment short or no Source exit, it waits.
 - Visitor cards: SYSTEM makes a link and QR; a `#visit=` link previews a Mainframe friend as an email from `???_g5@???` and ACCEPT INVITE queues it, a pasted link works, the same card is refused twice; a queued friend arrives, the bar reads `???_g5 is in #netling`, GREET works, and the guestbook's channel-log row glitches.
 - Shell change keeps accessory and label (and an old single accessory moves to its slot); a hat and shades worn together, and a second hat replaces the first; flatline and next generation; hibernate; dev mode.

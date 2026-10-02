@@ -370,6 +370,17 @@ await scenario('ending: one fragment short, or no Source exit, it waits', async 
   }
 });
 
+await scenario('codex: the corp memo is redacted, and the redaction glitches', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': ['corp-1'] }));
+  await page.click('#open-archive');
+  await page.click('#tab-btn-codex');
+  const mark = page.locator('#codex-list .frag .corrupt').first();
+  assert(await mark.count(), 'no glitching redaction');
+  assert((await mark.evaluate((m) => m.dataset.text ?? m.textContent)) === '<<REDACTED>>', 'wrong redaction');
+  const row = await mark.evaluate((m) => m.parentElement.textContent);
+  assert(/delivered .+ maintenance processes/.test(row) && !/4,096/.test(row), `memo: ${row}`);
+});
+
 await scenario('corrupted local storage does not break startup', async ({ open }) => {
   const page = await open(
     BASE,
