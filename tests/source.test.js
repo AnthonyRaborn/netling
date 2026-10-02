@@ -7,7 +7,7 @@ import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/r
 import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
 import { ANOMALIES, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
-import { COSMETICS, LEGACY, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
+import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
 import { cleanProgress } from '../src/sanitize.js';
 import { SPRITES } from '../src/sprites.js';
@@ -256,6 +256,21 @@ test('the Mainframe unlocks: hidden while switched off, each earned by its own g
     assert.deepEqual(ids({ progress: { sourceExits: 3 } }).sort(), ['effect:sourcelight', 'music:firstcommit'], 'three times');
     for (const slot of SLOTS) assert.equal(shownCosmetics(slot).length, COSMETICS[slot].length);
   });
+});
+
+test('a shell for each mainframe form: raised once, hidden while off, and not needed for the Mini device', () => {
+  const SHELLS = { plat: 'platinum', airgap: 'airgap', init: 'pidone', panic: 'torn', whisper: 'faint' };
+  for (const [form, id] of Object.entries(SHELLS)) {
+    const shell = COSMETICS.shell.find((c) => c.id === id);
+    assert.ok(shell?.mainframe, `${id} is marked`);
+    assert.ok(!shownCosmetics('shell', false).some((c) => c.id === id), `${id} is out of the wardrobe while off`);
+    assert.ok(!switchedOff(() => unlockedIds(progressCtx({ dex: [form] }))).includes(`shell:${id}`));
+    const got = switchedOn(() => unlockedIds(progressCtx({ dex: [form] })).filter((k) => k.startsWith('shell:') && k !== 'shell:standard'));
+    assert.deepEqual(got, [`shell:${id}`], `${form} unlocks only its own shell`);
+  }
+  // The Mini device asks for the nine shells from before the stage, so that goal did not move.
+  assert.deepEqual(ORIGINAL_SHELLS, COSMETICS.shell.filter((c) => !c.mainframe).map((c) => c.id));
+  assert.equal(ORIGINAL_SHELLS.length, 9);
 });
 
 test('progress keeps the Source exits and the one-time repair of its name, cleaned', () => {

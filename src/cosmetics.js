@@ -72,6 +72,13 @@ export const COSMETICS = {
     { id: 'clear', name: 'Ghost clear', swatch: 'rgba(200,200,255,0.25)', hint: 'raise the one nobody sees.', check: (c) => c.dex.includes('ghost') },
     { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => ROOT_FRAGMENTS.every((f) => c.codex.includes(f.id)) },
     { id: 'holo', name: 'Holographic', swatch: 'linear-gradient(135deg,#ff2a6d,#05d9e8,#f9f002)', hint: 'see five lives through to the end.', check: (c) => fullLives(c) >= 5 },
+    // One for each Mainframe form, a step beyond its adult form's shell. They do not count toward the Mini device
+    // (ORIGINAL_SHELLS), so that goal stays where it was.
+    { id: 'platinum', name: 'Platinum', swatch: 'linear-gradient(160deg,#f2f4f8,#a9b0bd)', mainframe: true, hint: 'one loyal to the grid, that never stops growing.', check: (c) => c.dex.includes('plat') },
+    { id: 'airgap', name: 'Air gap', swatch: 'linear-gradient(180deg,#5a1f2a 45%,#050506 45% 55%,#5a1f2a 55%)', mainframe: true, hint: 'one that trusts nothing, that never stops growing.', check: (c) => c.dex.includes('airgap') },
+    { id: 'pidone', name: 'PID 1', swatch: '#1a0306', mainframe: true, hint: 'one that never misses a cycle, that never stops growing.', check: (c) => c.dex.includes('init') },
+    { id: 'torn', name: 'Panic tear', swatch: 'linear-gradient(100deg,#1d3040 48%,#000 48% 52%,#3a1020 52%)', mainframe: true, hint: 'one that lives on the edge, that never stops growing.', check: (c) => c.dex.includes('panic') },
+    { id: 'faint', name: 'Whisper', swatch: 'rgba(200,200,255,0.1)', mainframe: true, hint: 'the one nobody sees, that never stops growing.', check: (c) => c.dex.includes('whisper') },
   ],
   tint: [
     { id: 'teal', name: 'Classic teal', swatch: '#0b2226', lcd: '#0b2226', dark: '#03090a', free: true },
@@ -195,6 +202,9 @@ export function sanitizeLabel(raw) {
     .slice(0, LABEL.max);
   return clean || LABEL.fallback;
 }
+
+// The shells that count toward the Mini device: the nine from before the Mainframe stage.
+export const ORIGINAL_SHELLS = ['standard', 'matte', 'chrome', 'brick', 'crimson', 'shifted', 'clear', 'gold', 'holo'];
 
 export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep', crest: 'none', music: 'idle' };
 

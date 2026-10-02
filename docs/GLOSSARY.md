@@ -110,7 +110,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Market** | A netrun node where scrip and Charge buy items and sometimes an accessory, and the inventory sells for half price. Either a black market (leans indie, cheaper, risky stock) or a corp exchange (leans corp, pricier, safe stock); each sells a few accessories the other doesn't | `netrun/run.js`, `netrun/map.js` |
 | **Memory overflow** | Timed event: PURGE within 45 minutes or it crashes | `sim.js` |
 | **Memory shard** | Item: rewrites one quirk | `sim.js` |
-| **Mini device** | Secret prop for owning every shell | `ui/style.js` |
+| **Mini device** | Secret prop for owning the nine original shells (`ORIGINAL_SHELLS`) | `ui/style.js` |
 | **Mistake (care mistake)** | A need left unmet past its grace. 10 ends the run | `sim.js` |
 | **Nap** | Rest on demand for up to 2 hours at 35% drain | `sim.js` |
 | **Netling** | The pet | everywhere |

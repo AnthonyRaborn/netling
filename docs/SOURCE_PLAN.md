@@ -8,7 +8,7 @@ Ids are permanent now that they have shipped (CLAUDE.md rule 1). Lore text can s
 
 - **Pacing in real play.** The bots run more than people do. Watch real play before changing the feat counts (3 exits, or 2 clean) or `deep-5`'s place; Root Access stays the gate.
 - **The Chrome corp-relay fix** is what makes the feat fair to Chrome. If corp relays ever go, revisit the feat ([below](#chrome-lags-on-exits-fixed-corp-relays)).
-- **Five mainframe shells**: left out of the first cut ([Unlocks](#unlocks-and-cosmetics)). The Source-only anomaly was built after shipping ([The purge order](#after-shipping-the-purge-order)).
+- Nothing left from the first cut: the five mainframe shells ([Unlocks](#unlocks-and-cosmetics)) and the Source-only anomaly ([The purge order](#after-shipping-the-purge-order)) were built after shipping.
 - **A human pass** on a phone: the art, the glitching Source name, and a listen to the Source theme and First commit.
 
 ## Contents
@@ -193,7 +193,7 @@ Decided ids (none is used anywhere today). Cosmetic ids are stored per slot (`sl
 
 The Source's own netrun theme (a region variant in `tracks.js`, [Art and sound](#art-and-sound)) plays on its own and needs no unlock; `firstcommit` is a separate track for home.
 
-Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed.
+Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed. **Built after shipping:** `platinum`, `airgap`, `pidone`, `torn` and `faint`, each unlocked by having its form in the dex, the same rule as the adult-form shells; they do not count toward the Mini device ([CONTENT_CATALOG.md](CONTENT_CATALOG.md#shells-14)).
 
 The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lineOf`), so a mainframe still counts as its adult form.
 

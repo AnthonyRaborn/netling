@@ -1,6 +1,6 @@
 // Style: earned items and their announcements, unlock checks, and the wardrobe (Archive > STYLE).
 import { PALETTES, CFG } from '../sim.js';
-import { COSMETICS, SLOTS, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
+import { COSMETICS, ORIGINAL_SHELLS, SLOTS, LABEL, cosmeticById, shownCosmetics, unlockedIds, resolveWardrobe, sanitizeLabel } from '../cosmetics.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, accessoryById, accessoryHint, accessoryColors, rollAccessory } from '../accessories.js';
 import { formSprite, paletteColors } from '../sprites.js';
 import { setLcdTint } from '../render.js';
@@ -130,7 +130,7 @@ export function checkUnlocks({ silent = false } = {}) {
   if (!fresh.length) return;
   app.unlocked = [...new Set([...app.unlocked, ...earnedNow])];
   store.set(KEYS.unlocked, app.unlocked);
-  if (COSMETICS.shell.every((c) => app.unlocked.includes(`shell:${c.id}`))) {
+  if (ORIGINAL_SHELLS.every((id) => app.unlocked.includes(`shell:${id}`))) {
     grantStyle('minidevice', 'secret: a mini device. it has a pet of its own.');
   }
   // Free items (e.g. defaults added in an update) join quietly.

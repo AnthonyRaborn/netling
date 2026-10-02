@@ -1643,6 +1643,50 @@ body:has(#pad:not([hidden])) .update-bar {
     background-position: 300% 0;
   }
 }
+/* Mainframe shells: each a step beyond its adult form's shell. */
+.device.shell-platinum {
+  background: linear-gradient(160deg, #f2f4f8, #c4c9d3 40%, #8a909c 75%, #5d636e);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 1px #3a3f49, 0 0 28px rgba(232, 240, 255, 0.35);
+  --dim: #1c2129; /* a light shell, like Brushed chrome and Corp gold */
+}
+.device.shell-platinum .logo {
+  color: #1a1d24;
+  text-shadow: 1px 1px 0 #ffffff;
+}
+/* Air gap: the Firewall brick, cut in two by a band of nothing. */
+.device.shell-airgap {
+  background:
+    linear-gradient(transparent 47%, #050506 47%, #050506 53%, transparent 53%),
+    linear-gradient(transparent 92%, rgba(0, 0, 0, 0.35) 92%) 0 0 / 100% 18px,
+    linear-gradient(90deg, transparent 94%, rgba(0, 0, 0, 0.35) 94%) 0 0 / 36px 36px,
+    linear-gradient(160deg, #6a2530, #4a1820 60%, #2a0d12);
+  border: 2px dashed #b03a48;
+}
+/* PID 1: Daemon red with the traces of a process tree running through it. */
+.device.shell-pidone {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 11px, rgba(255, 40, 70, 0.14) 11px 12px),
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(255, 40, 70, 0.14) 23px 24px),
+    linear-gradient(160deg, #2a0509, #1a0306 60%, #0a0102);
+  border-color: #b01a33;
+  box-shadow: 0 0 0 1px #000, 0 0 40px rgba(255, 20, 60, 0.4);
+}
+/* Panic tear: Glitch shift torn down the middle, the halves in different colors. */
+.device.shell-torn {
+  background: linear-gradient(100deg, #1d3040, #10202b 48%, #000 48%, #000 52%, #2a0d1c 52%, #3a1020);
+  border-color: #2a5a70 #7a2a48 #7a2a48 #2a5a70;
+  box-shadow:
+    -5px 0 0 rgba(255, 42, 109, 0.55),
+    5px 0 0 rgba(5, 217, 232, 0.55),
+    0 0 32px rgba(255, 42, 109, 0.2);
+}
+/* Whisper: fainter than Ghost clear, an edge you can barely see. */
+.device.shell-faint {
+  background: rgba(200, 200, 255, 0.025);
+  border: 1px dotted rgba(200, 200, 255, 0.3);
+  backdrop-filter: blur(5px);
+}
 
 /* screen effects */
 .screen.fx-aurora .fx-layer {
