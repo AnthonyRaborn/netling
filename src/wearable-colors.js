@@ -29,4 +29,10 @@ export const AUTO_COLORS = {
     { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#b967ff', toxic: '#ff2a6d', ultra: '#ff2a6d', origin: '#ff2a6d' },
     { ice: '#f9f002', neon: '#f9f002', acid: '#39ff14', toxic: '#f9f002', ultra: '#39ff14', origin: '#f9f002' },
   ],
+  bowtie: [
+    { ice: '#b967ff', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', origin: '#b967ff' },
+  ],
+  blush: [
+    { ice: '#b967ff', neon: '#b967ff', acid: '#c8d0dc', toxic: '#ff6b9a', ultra: '#ff6b9a', origin: '#ff6b9a' },
+  ],
 };

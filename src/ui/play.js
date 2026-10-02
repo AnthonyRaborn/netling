@@ -1,17 +1,21 @@
 // Mini-games (PLAY), netruns (NETRUN), the control pad and the keyboard.
-import { act, blockReason, gameSpeed, log, tick, CFG, GAME_IDS } from '../sim.js';
+import { act, blockReason, gameSpeed, isAlive, log, tick, CFG, GAME_IDS } from '../sim.js';
 import { recordGame } from '../cosmetics.js';
 import { GameSession } from '../games/session.js';
 import { RunView } from '../netrun/view.js';
 import { abortRun, closeRun, codexRoom, contractMinutesLeft, contractPay, contractText, fmtLeft, runBlockReason, startRun, RUN_CFG } from '../netrun/run.js';
 import { REGIONS, regionLock, shownRegions } from '../netrun/regions.js';
 import { liveFragments, allFragmentsFound } from '../netrun/codex.js';
+import { CHALLENGES, CHALLENGE_REGIONS, challengeById, challengesOpen } from '../netrun/challenges.js';
 import { sfx, unlockAudio } from '../audio.js';
 import { KEYS } from '../storage.js';
 import { $, app, flashStatus, now, playAnim, save, store } from './app.js';
 import { updateHUD } from './hud.js';
 import { checkUnlocks, countAttention, countGame, drainAccessoryInbox, grantStyle } from './style.js';
 import { drainCodexInbox } from './archive.js';
+import { maybeShowEnding } from './ending.js';
+import { markDailyStart, playedToday, recordDaily, showDaily, todayKey } from './daily.js';
+import { DAILY, dayNumber } from '../netrun/daily.js';
 import { advanceIntro, finishOnboarding, introWaiting, startTutorial } from './onboarding.js';
 
 export function showPanel(name) {
@@ -126,6 +130,7 @@ function confirmQuit() {
 }
 
 function bumpProgress(run) {
+  if (run?.daily) return run.result && recordDaily(run); // nothing at stake: it counts only toward its own record
   const progress = app.progress;
   if (run?.result) progress.runs = { ...progress.runs, [run.result]: (progress.runs?.[run.result] ?? 0) + 1 };
   if (run?.result === 'jacked') {
@@ -134,6 +139,7 @@ function bumpProgress(run) {
     if (run.region === 'deep' && at?.type === 'exit') progress.deepExits = (progress.deepExits ?? 0) + 1;
     if (run.region === 'source' && at?.type === 'exit') progress.sourceExits = (progress.sourceExits ?? 0) + 1;
     if (run.contract?.settled === 'met') progress.contractsDone = (progress.contractsDone ?? 0) + 1;
+    if (run.challengeWon && !(progress.challenges ?? []).includes(run.challenge)) progress.challenges = [...(progress.challenges ?? []), run.challenge];
   }
   if (run?.result) store.set(KEYS.progress, progress);
 }
@@ -155,9 +161,10 @@ export function openRun() {
     onClose: (run) => {
       app.session = null;
       if (run?.region === 'tutorial') finishOnboarding();
-      if (run?.result === 'disconnected') grantStyle('bandage', 'earned: bandage. you made it back.');
+      if (run?.result === 'disconnected' && !run.daily) grantStyle('bandage', 'earned: bandage. you made it back.');
       bumpProgress(run);
       checkUnlocks();
+      maybeShowEnding();
       resetPadQuit();
       showPanel('controls');
       save();
@@ -176,13 +183,61 @@ function jackIn(region) {
     playAnim('refuse');
     return flashStatus(blocked);
   }
-  startRun(app.state, region, Math.random, app.codex, app.ownedAccessories);
+  const daily = REGIONS[region].daily;
+  if (daily && playedToday()) return flashStatus("today's trace is done. a new one at midnight.");
+  const day = todayKey();
+  if (daily) markDailyStart(day); // the day's one attempt is used the moment it starts
+  startRun(app.state, region, Math.random, app.codex, app.ownedAccessories, { challenge: CHALLENGE_REGIONS.includes(region) ? pickedChallenge : null, day });
   sfx('boot', app.state.quirk.pitch * REGIONS[region].sound.mult, REGIONS[region].sound.wave);
   save();
   openRun();
 }
 
+// The challenge picked in the region list (challenges.js): null, or an id. It applies to the Deep and the Source only.
+let pickedChallenge = null;
+
+function renderChallenge() {
+  const btn = $('region-challenge');
+  btn.hidden = !challengesOpen(app.progress);
+  if (btn.hidden) return (pickedChallenge = null);
+  const c = challengeById(pickedChallenge);
+  const done = (id) => (app.progress.challenges ?? []).includes(id);
+  btn.classList.toggle('on', Boolean(c));
+  btn.textContent = c
+    ? `CHALLENGE: ${c.name.toUpperCase()}${done(c.id) ? ' (DONE)' : ''}. ${c.rule} DEEP AND SOURCE ONLY. TAP TO CHANGE.`
+    : `CHALLENGE: NONE. ${CHALLENGES.filter((x) => done(x.id)).length}/${CHALLENGES.length} DONE. TAP TO PICK ONE.`;
+}
+
+// The daily trace (netrun/daily.js): open to any netling once the first run is done, once a day, outside the cooldown.
+const dailyOpen = () => app.onboarding === 'done' && !playedToday() && !runBlockReason(app.state, 'daily', app.codex);
+
+function renderDaily() {
+  const b = $('region-daily');
+  b.hidden = app.onboarding !== 'done';
+  if (b.hidden) return;
+  const r = REGIONS.daily;
+  const key = todayKey();
+  const d = app.progress.daily;
+  const done = d?.day === key;
+  const wins = app.progress.dailyWins ?? 0;
+  const name = document.createElement('span');
+  name.className = 'rname';
+  name.textContent = `${r.name.toUpperCase()} #${dayNumber(key)}`;
+  name.style.color = r.palette.main;
+  const frag = document.createElement('span');
+  frag.className = 'rfrag';
+  frag.textContent = wins >= DAILY.winsForReward ? `exits ${wins}` : `exits ${wins}/${DAILY.winsForReward}`;
+  const meta = document.createElement('span');
+  meta.className = 'rmeta';
+  meta.textContent = done ? (d.share ? `done today: ${d.exit ? 'reached the exit' : 'no exit'}. tap to share.` : 'done today. a new one at midnight.') : r.blurb;
+  b.style.borderLeftColor = r.palette.main;
+  b.classList.toggle('done', done);
+  b.replaceChildren(name, frag, meta);
+}
+
 function renderRegions() {
+  renderDaily();
+  renderChallenge();
   const room = codexRoom(app.state);
   $('region-memory').textContent = `CODEX MEMORY ${RUN_CFG.codexPerLife - room}/${RUN_CFG.codexPerLife} THIS LIFE${room ? '' : ' · FULL'}`;
   $('region-memory').classList.toggle('full', !room);
@@ -225,6 +280,7 @@ function renderRegions() {
       const meta = document.createElement('span');
       meta.className = 'rmeta';
       meta.textContent = (secret && r.lockedBlurb) || (lock ?? (c?.region === id ? `contract: ${contractText(c)}.` : r.blurb));
+      if (!lock && pickedChallenge && CHALLENGE_REGIONS.includes(id)) meta.textContent = `challenge: ${challengeById(pickedChallenge).name.toLowerCase()}. ${meta.textContent}`;
       if (c?.region === id && !lock) meta.classList.add('contract');
       b.append(name, frag, meta);
       b.addEventListener('click', () => jackIn(id));
@@ -333,8 +389,9 @@ export function initPlay() {
     tick(app.state, now());
     if (app.state.run) return openRun(); // resume
     if (app.onboarding === 'nudge') return startTutorial();
+    // The daily trace stays open while the uplink cools down, so the list opens for it (or for today's line to share).
     const blocked = runBlockReason(app.state, 'public', app.codex);
-    if (blocked) {
+    if (blocked && !dailyOpen() && !(isAlive(app.state) && playedToday() && app.progress.daily?.share)) {
       sfx('error', app.state.quirk.pitch);
       playAnim('refuse');
       return flashStatus(blocked);
@@ -344,6 +401,19 @@ export function initPlay() {
     showPanel('regions');
   });
   $('regions-back').addEventListener('click', () => showPanel('controls'));
+  $('region-daily').addEventListener('click', () => {
+    if (playedToday()) {
+      if (app.progress.daily?.share) return showDaily();
+      return flashStatus("today's trace is done. a new one at midnight.");
+    }
+    jackIn('daily');
+  });
+  $('region-challenge').addEventListener('click', () => {
+    const ids = [null, ...CHALLENGES.map((c) => c.id)];
+    pickedChallenge = ids[(ids.indexOf(pickedChallenge) + 1) % ids.length];
+    sfx('select', app.state.quirk.pitch);
+    renderRegions();
+  });
   $('event-defend').addEventListener('click', startDefense);
 
   document.querySelectorAll('[data-key]').forEach((btn) =>

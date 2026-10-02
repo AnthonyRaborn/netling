@@ -16,8 +16,10 @@ A **netrun** is the game's dungeon crawl: the netling jacks into the net and wal
 10. [Codex fragments](#codex-fragments)
 11. [Accessories in runs](#accessories-in-runs)
 12. [Contracts](#contracts)
-13. [The tutorial run](#the-tutorial-run)
-14. [Where the run lives](#where-the-run-lives)
+13. [Challenges](#challenges)
+14. [The daily trace](#the-daily-trace)
+15. [The tutorial run](#the-tutorial-run)
+16. [Where the run lives](#where-the-run-lives)
 
 ## Run lifecycle
 
@@ -221,7 +223,7 @@ Careful play, 4000 runs each, disconnect rates: The Deep 11 / 10 / 14 / 13 / 12%
 
 ## Anomalies
 
-Five events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (`lean(allegiance, stability)`).
+Six events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (`lean(allegiance, stability)`). An anomaly with `regions` set turns up only there (`anomaliesFor(region)`); the other five turn up anywhere, so an anomaly node in the Source picks from all six and one elsewhere from five.
 
 | Event | Option A | Option B |
 |---|---|---|
@@ -230,6 +232,7 @@ Five events in `ANOMALIES`. Each has two options. Choices lean the hidden axes (
 | Stray signal | FOLLOW: Heat +5, reveals the next 2 layers | TUNE OUT: nothing |
 | Overclock rig | PLUG IN: Charge +25, Heat +25, stability -1 | LEAVE IT: nothing |
 | Echo | LISTEN: Sync +15, 50% a codex fragment | MOVE ON: nothing |
+| The purge order (the Source only) | READ IT: -15 Integrity, 60% the next codex fragment (once the Source's codex is complete: reveals the next 3 layers instead, and its hint says so, `codexDoneHint`); shows one of three readings at random (`PURGE_READINGS`: NL-0 first on the list, every netling with yours near the end, or `./purge: permission denied. owner: nobody.`) | LEAVE IT: Sync +15, stability +1 ("left pending. pending. pending. something down here stops holding its breath.") |
 
 After an anomaly, Charge, Heat and Sync are clamped to 0..100. Integrity or Charge at 0 afterwards disconnects.
 
@@ -288,6 +291,57 @@ Accessories found or bought are held in `run.accessories` and are lost on a disc
 - `run.tally` counts `icePhased` (ICE a Ghost or Glitch slipped past), `caches` and `bought` alongside `nodes`, `iceWon` and `iceLost`. The run screen shows the job and its progress at the top right (`contractShort`).
 - `settleContract` runs first in `jackOut`, `disconnect` and `abortRun`: `run.contract.settled` becomes `met` (the pay joins `run.scrip` and `run.loot`, so it is banked with them), `missed` or `void`. `jackOut` returns `contract: 'met' | 'missed' | null`; the UI counts a met one in `progress.contractsDone` (the Seal crest at 10).
 - The balance bots never take contracts, so the baselines do not include them.
+
+## Challenges
+
+A rule for one run, picked in the region list (`src/netrun/challenges.js`). The row appears once any netling has reached the Deep's exit (`progress.deepExits`, no Root Access needed) and cycles NONE, GLASS, UNPLUGGED, BLACKOUT, BARE METAL. The rule rides along only into the Deep or the Source (`CHALLENGE_REGIONS`); other regions run without it. Ids are permanent.
+
+| Id | Name | Rule | Broken by |
+|---|---|---|---|
+| `glass` | Glass | Lose no ICE fight (an Airgap's soft loss counts) | A lost fight: the challenge is off, the run goes on |
+| `unplugged` | Unplugged | Relays are dark: no Charge, no venting, no Chrome or Plat patch. JACK OUT still works there, but only the exit counts | Nothing on its own; it is lost the usual way (Charge or Integrity) |
+| `blackout` | Blackout | Only visited nodes and one step ahead are seen and drawn: no reveals, no Ghost or Daemon sight (`visibleNodeIds`) | Nothing on its own |
+| `baremetal` | Bare metal | Buy no item and use no item. Accessories and selling are fine | Buying an item (the market option asks twice: `confirm`) or using one mid-run (USE asks twice): the challenge is off |
+
+`run.challenge`, `run.challengeVoid` (broken) and `run.challengeWon` (set at the exit node if it still held) are saved with the run. A disconnect or abort never completes one. On jack-out the UI adds the id to `progress.challenges`. The map header shows the name (dimmed with OFF once broken) and the summary says "challenge complete" or "challenge not met".
+
+**Rewards** (CONTENT_CATALOG): Glass the crest Cracked pane, Unplugged the shell Cut cable, Blackout the tint Blackout, Bare metal the effect Bare metal, and all four the track Exit code 0.
+
+**Measured** (`CHALLENGE=<id> node tools/netrun-balance.mjs 1000 all`; under a challenge the bot never banks at a relay and, for Bare metal, never buys an item). Share of runs that complete it:
+
+| Challenge | Deep, careful | Deep, skilled | Deep, adult forms | Source, careful | Source, skilled | Source, mainframes |
+|---|---|---|---|---|---|---|
+| Glass | 16% | 41% | 15 to 43% | 6% | 27% | 6 to 30% |
+| Unplugged | 37% | 68% | 51 to 72% | 10% | 33% | 28 to 52% |
+| Blackout | 45% | 73% | 70 to 75% | 19% | 48% | 48 to 56% |
+| Bare metal | 45% | 73% | 71 to 76% | 19% | 48% | 51 to 61% |
+
+Glass is the hardest and favours the forms that skip ICE (Glitch, Ghost, Panic, Whisper). Blackout and Bare metal read as easy for the bots only because the bots plan three steps ahead at most and never use items mid-run; people lean on both, so they should play harder than these numbers. The default baselines do not move: no bot takes a challenge unless `CHALLENGE` is set.
+
+## The daily trace
+
+One map a day, the same for everyone on the same local date, run by the player's own netling with nothing at stake (`src/netrun/daily.js`, `REGIONS.daily`, `src/ui/daily.js`). Its row sits above the regions once onboarding is done, for any stage. The region id `daily` is permanent; it is not in `REGION_ORDER`, opens nothing and needs nothing cleared.
+
+- **The day** is the local calendar date (`dayKey`), numbered from `DAILY.epoch` (2026-10-01 is #1). People in other time zones play the same map on their own date.
+- **The seed** is FNV-1a over the date and `DAILY.rules` (`dailySeed`). It makes the map, and every roll in the run is seeded too: by node and by lane (arriving, the ICE result, a choice), with a counter saved in the run (`rollKey`, `rolls`), so a cache holds the same for everyone who reaches it, whatever route they took, and a reload rolls the same. The ICE fight at a node is picked from its own lane, so every form meets the same mini-game there (a Ghost's or Glitch's slip still decides whether it fights at all). The rng passed in is ignored. Mini-game outcomes are still down to the player.
+- **Once a day.** Starting it uses the day's attempt (`progress.daily = { day }`, written at jack-in). Afterwards the row shows "done today" and reopens the share line. A run that spans midnight counts for the day it started.
+- **Outside the cooldown.** `runBlockReason` skips the cooldown for it (`noCooldown`), and the NETRUN button opens the list while the uplink cools down so the row can be reached. Sleep, a nap, a reboot and the 30 Charge minimum still apply.
+- **Nothing at stake.** Every run.js rules call in a daily run (`moveTo`, `resolveIce`, `choose`, `sellItem`, `abortRun`) records what it changed on the netling in `run.stake`: stats, axes, scrip, care mistakes, and items taken from or added to the inventory. When the run ends, all of it is given back (`stakeRefund`), the inventory in its old order. Time is not undone: needs keep decaying during the run as usual. A disconnect logs no care mistake, the exit gives no bonus and clears nothing, no loot, scrip, fragments or accessories are kept (none are offered), contracts wait, challenges do not apply, and the run counts toward neither `runStats`, `progress.runs` nor the bandage. Items cannot be used from the inventory during it (`itemBlockReason`; the inventory says why USE is off): their effects (shields, buffs, cooldown cuts, quirk rerolls) reach past the run, so refunding them would make those free, and spending them would put something at stake. Paying a checkpoint with a voucher is part of the run and is given back; selling at a market is too, and scrapping works as at home.
+- **The share line** (`shareText`), plain text so it pastes anywhere:
+
+  ```
+  NETLING daily #2 (2026-10-02) r1
+  EXIT 9/9  ICE 5/6  Ghost
+  >#$x+~?#%#>
+  ```
+
+  `r1` is `DAILY.rules`. The second line is how it ended (EXIT, JACKED OUT at a relay, DISCONNECTED or ABORTED), the deepest layer reached, ICE passed out of ICE met, and the form (a Mainframe form goes by its line's name, so the line spoils nothing). The trail has one symbol per node: `>` entry and exit, `#` ICE beaten, `x` ICE lost, `~` ICE slipped, `$` cache, `+` relay, `=` checkpoint, `%` market, `?` anomaly, then `!` for a disconnect or `.` for an abort. The summary card shows the trail; closing it opens a dialog with COPY and SHARE (the system share sheet, where there is one). The line is kept in `progress.daily.share`.
+- **Reward:** ten exits (`progress.dailyWins`, `DAILY.winsForReward`) unlock the crest Uptime. Nothing else.
+- **Versions.** A change to `generateMap`, `REGIONS.daily` or the order of rolls in run.js changes the daily maps. Bump `DAILY.rules` with it; `tests/daily.test.js` pins one day's map to catch that.
+
+**Region:** 8 middle layers, 2 to 3 wide; cache 3, ICE 7, relay 1, checkpoint 1, market 1, anomaly 2; ICE damage 45; amber.
+
+**Measured** (`node tools/netrun-balance.mjs 2000 daily`, each seed a different day over a year). Share of runs reaching the exit: careful 53%, greedy 62%, skilled 83%, a weak baby 42%, adult forms 73 to 84%, mainframes 79 to 94%. The careful bot banks at the relay when hurt, which a player with nothing to lose is less likely to do.
 
 ## The tutorial run
 

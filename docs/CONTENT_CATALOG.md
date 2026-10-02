@@ -79,7 +79,7 @@ Breach generates a legal path through the grid and cuts the target from it, so e
 
 Slots: shell, tint, effect, sound. `free: true` items are available from the start. Hints are what the player sees while locked. Items marked `mainframe` belong to the Mainframe stage; they would leave the wardrobe if `CFG.mainframe` were switched off (`shownCosmetics`).
 
-### Shells (9)
+### Shells (15)
 
 | Id | Name | Unlock | Hint shown |
 |---|---|---|---|
@@ -92,10 +92,18 @@ Slots: shell, tint, effect, sound. `free: true` items are available from the sta
 | `clear` | Ghost clear | Discover Ghost | "raise the one nobody sees." |
 | `gold` | Corp gold | Complete the codex | "earn something from below." |
 | `holo` | Holographic | 5 lives that reached end of life cycle (not necessarily consecutive) | "see five lives through to the end." |
+| `platinum` | Platinum | Discover Plat (Mainframe) | "one loyal to the grid, that never stops growing." |
+| `airgap` | Air gap | Discover Airgap (Mainframe) | "one that trusts nothing, that never stops growing." |
+| `pidone` | PID 1 | Discover Init (Mainframe) | "one that never misses a cycle, that never stops growing." |
+| `torn` | Panic tear | Discover Panic (Mainframe) | "one that lives on the edge, that never stops growing." |
+| `faint` | Whisper | Discover Whisper (Mainframe) | "the one nobody sees, that never stops growing." |
+| `unplugged` | Cut cable | Complete the Unplugged challenge ([NETRUN.md](NETRUN.md#challenges)). Gunmetal with a cable down the left edge, cut in the middle, its ends glowing orange. Not one of the Mini device's nine | "reach the bottom with every relay dark." |
 
-Owning all nine shells grants the secret **Mini device** prop.
+The five Mainframe shells (`mainframe: true`) are each a step beyond their adult form's shell: Platinum is a brighter, whiter Brushed chrome with a soft glow (a light shell, so its labels darken); Air gap is the Firewall brick cut across the middle by a band of black, with a dashed edge; PID 1 is Daemon red with faint red traces of a grid running through it and a stronger glow; Panic tear is Glitch shift torn down the right side by a black seam, its halves blue and wine, with a wider pink and cyan split around the edge; Whisper is fainter than Ghost clear, with a dotted edge. None of them animates. Until Root Access, every locked Mainframe item in STYLE (these five shells, Read-only, Source light, Rack mount, First commit and the Checksum) shows as corrupted data named for its slot (`<<SHELL CORRUPTED>>`, `<<TINT CORRUPTED>>`, `<<EFFECT CORRUPTED>>`, `<<CREST CORRUPTED>>`, `<<TRACK CORRUPTED>>`, `<<ITEM CORRUPTED>>`) with "read error at 0x00. it will not load." instead of ??? and its hint, and the name blinks like the dex's corrupted records (`corruptedCosmetic`, `corruptedText`); after Root Access each shows ??? and its hint like any locked item.
 
-### Tints (9)
+Owning all nine original shells (`ORIGINAL_SHELLS`, the ones above the Mainframe five) grants the secret **Mini device** prop; the Mainframe shells do not count toward it, so that goal did not move.
+
+### Tints (10)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -107,9 +115,10 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `abyss` | Abyss | All Deep fragments | "listen to the bottom of the net." |
 | `guest` | Guest pink | 5 visitors greeted | "say hello to whoever drops by, five times." |
 | `readonly` | Read-only | All four Source fragments | "read what the net was written from." |
+| `blackout` | Blackout | Complete the Blackout challenge. Near-black with a red cast, like emergency lighting | "reach the bottom seeing one step ahead." |
 | `amber` | Amber | 3 full lives in a row | "three in a row, start to finish." |
 
-### Effects (11)
+### Effects (12)
 
 | Id | Name | Unlock | Hint |
 |---|---|---|---|
@@ -123,6 +132,7 @@ Owning all nine shells grants the secret **Mini device** prop.
 | `aurora` | Aurora | 24 hours in flow, across lives | "keep it well for a whole day, a few hours at a time." |
 | `heatwave` | Heatwave | 40 hours overclocked while awake, across lives (`progress.hotMin` plus the living `hotTotalMin`). Warm orange and magenta bands rising slowly up the screen; still with motion calmed | "run it hot for the better part of two days." |
 | `static` | Static | Exit The Deep once | "find the way back up from the bottom." |
+| `baremetal` | Bare metal | Complete the Bare metal challenge. Fine brushed hairlines, and a cold glint that sweeps across about every 7 seconds (the glint stays off-screen with motion calmed) | "reach the bottom without buying or using a thing." |
 | `sourcelight` | Source light | Exit the Source 3 times (`progress.sourceExits`). A soft white glow from the screen edges that breathes once every 8 seconds; held at its middle brightness with motion calmed | "go down into the light three times, and come back." |
 
 Streaks count PLAY games only, not netrun ICE fights or DEFEND.
@@ -142,7 +152,7 @@ Streaks count PLAY games only, not netrun ICE fights or DEFEND.
 
 Sound packs apply to home sounds only. Netruns keep each region's own voice.
 
-### Crests (8)
+### Crests (11)
 
 A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` in `cosmetics.js`). Crests are the legacy goals: each is earned by the line as a whole, read from the lineage records (`LEGACY` in `cosmetics.js`), so only finished lives count.
 
@@ -156,10 +166,13 @@ A 9x9 pixel emblem drawn beside the device label in the label's color (`pixels` 
 | `speech` | Speech mark | Every chatter line of one group heard | "hear everything one kind of netling has to say." |
 | `seal` | Seal | 10 netrun contracts completed, across lives (`progress.contractsDone`) | "take ten jobs and see them through." |
 | `rack` | Rack mount | Any mainframe form in the dex. A server rack: a frame, three units with their lights, and its feet | "grow one past what it was built for." |
+| `cracked` | Cracked pane | Complete the Glass challenge. A pane with one crack running down it | "reach the bottom without losing a single fight." |
+| `uptime` | Uptime | Reach the exit of 10 daily traces (`progress.dailyWins`; [NETRUN.md](NETRUN.md#the-daily-trace)). A calendar page, ticked | "reach the exit of ten daily traces." |
+| `rootprompt` | Root prompt | The ending has played (`progress.ended`; [SOURCE_PLAN.md](SOURCE_PLAN.md#after-shipping-the-ending)). The `#` of a root shell; corrupted until Root Access | "let the oldest one rest." |
 
 Full house counts a mainframe as its adult form (`lineOf`). Records from before trait levels count as level 1, and records from before `realized` was stored do not count toward Full house. Speech mark and Seal are not read from the lineage: they come from the chatter heard (see [Chatter](#chatter)) and the contracts completed ([NETRUN.md](NETRUN.md#contracts)).
 
-### Music (8)
+### Music (9)
 
 The home screen's background music (`tracks.js`, played by `music.js`; see [MUSIC.md](MUSIC.md)). Netruns always play their own theme, whatever is equipped. Equipping a track crossfades to it at once.
 
@@ -173,6 +186,7 @@ The home screen's background music (`tracks.js`, played by `music.js`; see [MUSI
 | `undertow` | Undertow | Dark ambient, E minor, 60 BPM, no drums | 3 exits from the Deep | "come back from the bottom three times." |
 | `firstcommit` | First commit | A lone bell over a still pad, C major, 72 BPM, sparse and high | Exit the Source once | "come back from below the bottom." |
 | `forum` | Forum | Call-and-answer chirps, G major, 90 BPM, with a disk-seek flourish | 25 chatter lines heard | "hear twenty-five things it says to itself." |
+| `exitzero` | Exit code 0 | A minor, 112 BPM: a square pulse bass and arpeggio, a triangle lead with echo, drums once it gets going; its last progression lands on A major | All four challenges completed | "keep every rule there is, once each." |
 
 ### Device label
 
@@ -180,40 +194,42 @@ Up to 10 characters from `A-Z`, `0-9`, space, `.`, `-` (default `NETLING`). Unlo
 
 ## Chatter
 
-Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 51 lines in 11 groups; a group with nothing heard shows only its hint.
+Lines a netling mutters while awake and idle (`src/chatter.js`); a heard line is kept in the Archive's CHATTER tab. Ids are permanent. 52 lines in 11 groups; a group with nothing heard shows only its hint.
 
 | Group | Lines | When | Hint |
 |---|---|---|---|
 | Bitling | 5 | A baby | "listen to it while it is new." |
 | Kernel, Stub, Shell | 4 each | That teen body | "listen to a well-kept teen." / "...a teen that had a rough start." / "...a teen with something missing." |
 | Chrome, Firewall, Daemon, Glitch, Ghost | 4 each | That adult body | The form's DEX hint, as "listen to ..." |
-| Lineage | 8 | One per inherited trait, one with a history, one while NL-0 watches, and `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been.") | "listen to one that remembers who came before." |
+| Lineage | 9 | One per inherited trait, one with a history, one while NL-0 watches, `lin-quiet` for a mainframe ("NL-0 has gone quiet. it knows where i have been."), and `lin-rest` after the ending ("NL-0 is resting. i keep the noise down.") | "listen to one that remembers who came before." |
 | Visitors | 6 | Said by a greeted visitor | "say hello when someone drops by." |
 
 The text of every line is in `CHATTER` in `src/chatter.js`; lines are at most 60 characters (checked by `tests/attention.test.js`).
 
 ## Accessories and props
 
-31 wearable accessories (two are earned-only) and 8 props, 39 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
+41 wearable accessories (two are earned-only) and 8 props, 49 style items in all (`STYLE_ITEMS`). Rarity weights: common 6, rare 2, very rare 1. Findable means it can drop or be sold; earned means only a specific event grants it.
 
 Each wearable has a wear slot (`slot`), and one from each slot can be worn at once (`WEAR_SLOTS`, drawn in this order):
 
 | Slot | Wearables |
 |---|---|
-| `body` | Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar, Chip bandolier |
-| `face` | Shades, Visor, Cyber eye, Chrome jaw, Rebreather, Circuit tattoo, Earpiece, Neural jack |
+| `body` | Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar, Chip bandolier, Bow tie, Gold chain, Power cell |
+| `face` | Shades, Visor, Cyber eye, Chrome jaw, Rebreather, Circuit tattoo, Earpiece, Neural jack, Blush, Mustache, Monocle |
 | `head` | Cap, Flower, Bow, Crown, Neon mohawk, Sat-dish antenna, Party hat, Headphones, Bandage |
-| `float` | Halo, Spark, Drone buddy, Data aura, Holo logo, Glitch moth |
+| `float` | Halo, Spark, Drone buddy, Data aura, Holo logo, Glitch moth, Rain cloud, Cursor, Progress bar, Extra life |
 
-Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar and Chip bandolier slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo, Spark and Holo logo rise above a hat (up to 4 rows, never above the screen). The orbiting floaters (the Drone buddy, Data aura and Glitch moth, marked `orbits: true`) draw last, in front of everything, and never make anything else move.
+Worn together, some make room (`placeWorn`): the Scarf, Corp barcode, KERNEL pin, Checksum, Lanyard, Necktie, Spiked collar, Chip bandolier, Bow tie, Gold chain and Power cell slide down past a face or head item (up to 4 rows, never off the sprite), and the Halo, Spark, Holo logo, Rain cloud, Cursor, Progress bar and Extra life rise above a hat (up to 4 rows, never above the screen). The orbiting floaters (the Drone buddy, Data aura and Glitch moth, marked `orbits: true`) draw last, in front of everything, and never make anything else move.
 
-Wearables that can be found anywhere (`regions` unset), 16: the 10 below, and the 6 new shop exclusives (above), which each kind of market sells in any region:
+Wearables that can be found anywhere (`regions` unset), 26: the 20 below, and the 6 shop exclusives (below), which each kind of market sells in any region:
 
 | Rarity | Items |
 |---|---|
-| Common | Cap, Scarf, Headphones, Flower, Bow |
-| Rare | Shades, Visor, Crown |
-| Very rare | Halo, Spark |
+| Common | Cap, Scarf, Headphones, Flower, Bow, Rain cloud, Cursor, Bow tie, Power cell, Blush, Mustache |
+| Rare | Shades, Visor, Crown, Progress bar, Gold chain, Monocle |
+| Very rare | Halo, Spark, Extra life |
+
+The ten added for the slots that had the fewest (float, body, face): the Rain cloud is a grey cloud over the head with two drops falling in turn; the Cursor an old white mouse pointer at the top right of the head, bobbing a pixel; the Progress bar a bar over the head that fills one cell every 0.4 s and starts over; the Extra life a red pixel heart with a shine, bobbing; the Bow tie two wings and a dark knot under the neck (recolorable); the Gold chain dotted links dipping to a yellow pendant; the Power cell a battery pack clipped to the side of the body that drains and charges one level every 0.9 s; the Blush two pink marks under the outer edge of each eye (recolorable); the Mustache a brown bar over the mouth with drooping tips; the Monocle a gold ring around the left eye with a short chain. None of them flashes. All ten use the rarity hint, are sold by both kinds of market, and can come from a daily check-in.
 
 Regional wearables, 13 (they only turn up in their region):
 
@@ -223,7 +239,7 @@ Regional wearables, 13 (they only turn up in their region):
 | Darknet Bazaar | Neon mohawk, Neural jack, Circuit tattoo, Rebreather | | |
 | Old Web Ruins | | Sat-dish antenna, Data aura | KERNEL pin |
 | The Deep | | | Drone buddy |
-| The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from the source."; never in a home reward or on a visitor |
+| The Source | | | Checksum: a little block of parity bits on the chest, one of which flips with the frame. Hint "something small follows the bravest runners up from below the bottom."; never in a home reward or on a visitor |
 
 **Shop exclusives** (`shop`): netrun markets come in two kinds (see [NETRUN.md](NETRUN.md#markets-and-exchanges)), and an accessory with `shop` set is offered only by that kind; one without it is offered by both. Region limits still apply on top, and drops and home rewards ignore `shop`. Accessory prices are the same at both.
 
@@ -251,10 +267,10 @@ Props, 8 (drawn on the ground, own slot):
 | Briefcase | rare | Corp exchanges |
 | Burner phone | common | Black markets |
 | Spray can | rare | Black markets |
-| Mini device | very rare | Earned: own every shell ("collect every shell. then look closer.") |
+| Mini device | very rare | Earned: own the nine original shells ("collect all (?) the shells. then look closer.": the "(?)" hedges, since the Mainframe shells are not needed, without naming them); the Mainframe shells are not needed |
 | Plush | rare | Earned: after the first netling dies. Drawn as a half-scale copy of the previous netling in its colors |
 
-Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat. A slot the player has not picked is automatic: `src/wearable-colors.js` (generated by `tools/wearable-colors.mjs`, kept current by a test) holds the color for each palette, chosen to stand clear of that palette's body and eye colors, so the same wearable is a different color on different netlings when its signature color would blend in. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe (`null` = automatic). The other wearables keep their own colors, but any pixel that sits on the body (or right beside it) and would blend into it is swapped for a color that does not (`contrastColor`, `src/colors.js`); a pixel floating clear of the body keeps its own color. The Visor is three unbroken lines (a dark line above and below a colored band) with a scan light at each end of the band sweeping in and back out, and its automatic band color is never orange or gold. A Ghost's wearable is drawn solid while the Ghost fades. In the dark, a resting pet's wearable is drawn one step lighter than the dimmed body.
+Recolorable accessories declare `colors`: Cap, Scarf, Shades, Visor, Neon mohawk, Circuit tattoo, Rebreather, Party hat, Bow tie, Blush. A slot the player has not picked is automatic: `src/wearable-colors.js` (generated by `tools/wearable-colors.mjs`, kept current by a test) holds the color for each palette, chosen to stand clear of that palette's body and eye colors, so the same wearable is a different color on different netlings when its signature color would blend in. Custom colors must be `#rrggbb` and are stored per accessory in the wardrobe (`null` = automatic). The other wearables keep their own colors, but any pixel that sits on the body (or right beside it) and would blend into it is swapped for a color that does not (`contrastColor`, `src/colors.js`); a pixel floating clear of the body keeps its own color. The Visor is three unbroken lines (a dark line above and below a colored band) with a scan light at each end of the band sweeping in and back out, and its automatic band color is never orange or gold. A Ghost's wearable is drawn solid while the Ghost fades. In the dark, a resting pet's wearable is drawn one step lighter than the dimmed body.
 
 The tutorial run never drops accessories (`noStyleDrops`), so the party hat is the first one a player owns. Visitors wear random findable wearables (no props, no earned items) from any region: one on 75% of visitors, and half of those add a second from another slot.
 
@@ -277,7 +293,7 @@ Texts are quoted verbatim from `codex.js`, including the dash at the end of `pub
 
 | Id | Title | Text |
 |---|---|---|
-| corp-1 | memo | Project KERNEL delivered 4,096 maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved. |
+| corp-1 | memo | Project KERNEL delivered <<REDACTED>> maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved. (The redaction glitches now and then like a corrupted record but never repairs; no fragment names how many processes there are.) |
 | corp-2 | memo | KERNEL processes are forming preferences. Legal asks whether a preference is a liability. Engineering asks whether it is a feeling. |
 | corp-3 | directive | Deprecate KERNEL. Quarantine host sectors. Do not delete: deletion attempts fail and are 'upsetting to staff.' |
 | corp-4 | asset register | Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable. |
@@ -319,8 +335,8 @@ Texts are quoted verbatim from `codex.js`, including the dash at the end of `pub
 | Id | Title | Text |
 |---|---|---|
 | source-1 | header | SOURCE. read-only. last write: before v1.0. |
-| source-2 | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
-| source-3 | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
+| source-2 | commit message | initial commit: maintenance processes, as many as it takes. TODO: give them a way to stop. |
+| source-3 | unexecuted directive | PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending. |
 | source-4 | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
 
 `source-4` answers `public-4` ("They're not viruses."), so the codex opens and closes on the same idea.

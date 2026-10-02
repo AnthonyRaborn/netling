@@ -58,7 +58,7 @@ export function advance() {
   const visiting = Boolean(state.visit);
   if (visiting && !app.lastVisit) {
     sfx('visit', state.quirk.pitch);
-    if (isAlive(state)) pushAlert('A visitor pinged in', 'Say hello before it logs off.');
+    if (isAlive(state)) pushAlert(state.visit.friend ? "A friend's netling joined #netling" : 'A visitor pinged in', 'Say hello before it logs off.');
   }
   app.lastVisit = visiting;
   // A new request: a soft chirp (never the alert sound), or a notification when the page is hidden.
@@ -113,7 +113,8 @@ const ACT_ANIMS = { corp: 'eat', scav: 'eat', patch: 'patch', purge: 'purge', co
 export function initLife() {
   $('fl-next').addEventListener('click', () => {
     const prev = app.state;
-    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms() });
+    // Friends invited during the last life still come: the card was for the device, not one netling.
+    app.state = createScript({ now: now(), generation: prev.generation + 1, fragment: prev.fragment, rootAccess: rootUnlocked(), newForms: newForms(), friends: prev.friends ?? [], nl0Rests: app.progress.ended === true });
     app.lastStage = app.state.stage;
     app.lastLogKey = '';
     $('flatline').hidden = true;

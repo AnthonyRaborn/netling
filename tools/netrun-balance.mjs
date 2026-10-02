@@ -1,6 +1,8 @@
 // Monte Carlo netrun outcomes for a few play styles.
-// Usage: node tools/netrun-balance.mjs [runs=2000] [region=public|all]
+// Usage: node tools/netrun-balance.mjs [runs=2000] [region=public|daily|all] (all: the regions in order, not the daily)
 // JSON=1 prints a report that tools/balance-diff.mjs can compare.
+// CHALLENGE=glass|unplugged|blackout|baremetal plays every run under that challenge (the Deep and the Source only) and
+// adds `won`, the share of runs that kept it to the exit (docs/NETRUN.md#challenges).
 process.env.TZ = 'UTC';
 const { createScript, mulberry32 } = await import('../src/sim.js');
 const { playRun, RUN_STYLES } = await import('./netrun-bot.mjs');
@@ -31,7 +33,9 @@ function play(style, seed, region = 'public') {
   if (style.form) pet.form = style.form;
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 }, style.start);
   const start = { ...pet.stats };
-  playRun(pet, style, region, rng);
+  // The daily trace (region=daily): each seed plays a different day's map, over a year of them.
+  const day = region === 'daily' ? new Date(Date.UTC(2026, 9, 1) + (seed % 365) * 86400000).toISOString().slice(0, 10) : undefined;
+  playRun(pet, { ...style, ...(process.env.CHALLENGE ? { challenge: process.env.CHALLENGE } : {}), ...(day ? { day } : {}) }, region, rng);
   return {
     result: pet.run.result,
     // Reached the exit node (not a relay jack-out): disconnect rates alone once hid that Chrome banked early.
@@ -41,6 +45,7 @@ function play(style, seed, region = 'public') {
     chargeSpent: start.charge - pet.stats.charge,
     mistakes: pet.careMistakes,
     fragments: pet.run.result === 'jacked' ? pet.run.fragments.length : 0,
+    won: Boolean(pet.run.challengeWon),
     allegiance: pet.axes.allegiance,
     stability: pet.axes.stability,
   };
@@ -62,6 +67,7 @@ function summary(rs) {
     chargeSpent: avg('chargeSpent'),
     allegiance: avg('allegiance'),
     stability: avg('stability'),
+    ...(process.env.CHALLENGE ? { won: share((r) => r.won) } : {}),
   };
 }
 const pct = (x) => `${Math.round(x * 100)}%`;
@@ -78,7 +84,7 @@ if (region === 'all') {
       const sum = summary(Array.from({ length: n }, (_, i) => play(st, i + 1, r)));
       report.archetypes[`${r}.${name}`] = sum;
       if (!process.env.JSON) {
-        console.log(`${r.padEnd(7)} ${name.padEnd(8)} disconnected ${pct(sum.disconnected).padStart(4)} · exit ${pct(sum.exit).padStart(4)} · items ${sum.items.toFixed(2)} · fragments/run ${sum.fragments.toFixed(2)} · int spent ${sum.intSpent.toFixed(2)}`);
+        console.log(`${r.padEnd(7)} ${name.padEnd(8)} disconnected ${pct(sum.disconnected).padStart(4)} · exit ${pct(sum.exit).padStart(4)}${sum.won !== undefined ? ` · won ${pct(sum.won).padStart(4)}` : ''} · items ${sum.items.toFixed(2)} · fragments/run ${sum.fragments.toFixed(2)} · int spent ${sum.intSpent.toFixed(2)}`);
       }
     }
   }

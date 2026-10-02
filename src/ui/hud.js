@@ -1,5 +1,6 @@
 // The home screen around the LCD: vitals, readout, log, alerts and the inventory.
-import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf } from '../sim.js';
+import { act, alertReason, bedtimeOnDevice, eventMinutesLeft, inFlow, isAlive, overclocked, requestMinutesLeft, itemBlockReason, napBlockReason, napMinutesLeft, rebootMinutesLeft, resting, tick, CFG, EVENTS, FORM_MODS, INVENTORY_SLOTS, ITEMS, SCRIP, SPECIES, TRAITS, sellValue, traitLabel, lineOf, visitorName, friendHandle, visitHidden } from '../sim.js';
+import { challengeOn } from '../netrun/challenges.js';
 import { atMarket, contractMinutesLeft, contractText, fmtLeft, sellItem } from '../netrun/run.js';
 import { drawSprite, ITEM_SPRITES, ITEM_COLORS } from '../sprites.js';
 import { sfx, unlockAudio } from '../audio.js';
@@ -158,7 +159,7 @@ function renderWish(state) {
   if (!r && !v && !c) return;
   const parts = [];
   if (r) parts.push(`${r.kind === 'cool' ? 'it is fanning itself' : `it wants ${r.game.toUpperCase()}`} · ${requestMinutesLeft(state)}m`);
-  if (v) parts.push(`a ${SPECIES[v.form].name.toLowerCase()} dropped by`);
+  if (v) parts.push(v.friend ? `${friendHandle(v.form, v.friend.gen, visitHidden(state, v))} is in #netling` : `a ${visitorName(state, v)} dropped by`);
   if (c) parts.push(`contract: ${contractText(c)} · ${fmtLeft(contractMinutesLeft(state))}`);
   $('wish-text').textContent = parts.join(' · ');
   $('wish-play').hidden = r?.kind !== 'game';
@@ -252,6 +253,7 @@ function renderInventory() {
     $('inv-name').textContent = ITEMS[id].name;
     $('inv-desc').textContent = ITEMS[id].desc;
     const blocked = itemBlockReason(app.state, selectedSlot);
+    if (blocked && app.state.run?.daily) $('inv-desc').textContent = `${ITEMS[id].desc} ${blocked}`; // say why USE is off
     $('inv-use').disabled = Boolean(blocked);
     $('inv-use').title = blocked ?? '';
   }
@@ -265,6 +267,8 @@ export function initInventory() {
     const id = app.state.inventory[selectedSlot];
     // A Segfault adds faults, and faults can end a life: it takes a second press.
     if (id === 'segfault' && !armed($('inv-use'), '+2 FAULTS?', 'USE', 3000)) return;
+    // Bare metal: using an item mid-run ends the challenge.
+    if (challengeOn(app.state.run, 'baremetal') && !armed($('inv-use'), 'ENDS BARE METAL?', 'USE', 3000)) return;
     const res = act(app.state, 'use', now(), Math.random, { slot: selectedSlot });
     sfx(res.sfx, app.state.quirk.pitch);
     playAnim(res.ok ? ITEM_ANIMS[id] ?? 'item' : 'refuse');

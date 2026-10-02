@@ -53,13 +53,13 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 - **A caring player who takes risks becomes Firewall more often than Glitch** unless they also play hot: RAID and black-market buys lean indie faster than risks lean chaotic.
 - **More play moves the axes.** Playing hot costs stability, so fewer attentive players drift into Daemon.
 - **The bots' overclock skill is assumed.** They win a slowed (overclocked) game or ICE fight 8 points more often (`OVERCLOCK_WIN_BONUS` in `tools/netrun-bot.mjs`). Real players may gain more or less from the 15% slowdown; playtesting should check it.
-- **Casual codex lines can take many lives.** Later fragments sit in regions casual players rarely reach (0.5% finish within 4 lives).
+- **Casual codex lines can take many lives.** Later fragments sit in regions casual players rarely reach (0.5% finish within 4 lives). Accepted: the ending is meant to be a long goal.
 
-## Open questions
+## Decided at the soft freeze
 
-- **Passive stability gain**: lowering it was raised and never decided.
-- **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): parked. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
-- **Mainframe pacing in real play.** The bots run more than people do, so real players will reach the stage less often than the measurements say, casual ones most of all. The feat counts (3, or 2 clean) and `deep-5`'s place are the levers; leave them until playtesting says otherwise. The history of the decisions is in [SOURCE_PLAN.md](SOURCE_PLAN.md).
+- **Passive stability gain**: decided. Plain awake time adds nothing (`uptimeStabilityPerHour` 0, from 0.1/hr; see above).
+- **New evolution forms from lineage** (hybrid adults from trait plus leaning, ascended bloodline forms, heritage teens): out of scope after the freeze. Kept here as a reference for whoever lifts it. Any new form needs a permanent id, sprites, DEX entry and hints, a trait, a keepsake, a netrun ability, a check of every "all forms" condition (cosmetics, archive), `CONTENT_CATALOG.md` and `gallery.html`.
+- **Mainframe pacing in real play.** The bots run more than people do, so real players will reach the stage less often than the measurements say, casual ones most of all. The feat counts (3, or 2 clean) and `deep-5`'s place are the levers; leave them until playtesting says otherwise. Accepted until then; a clear problem in real play counts as a balance fix. The history of the decisions is in [SOURCE_PLAN.md](SOURCE_PLAN.md).
 
 ## Working on balance
 

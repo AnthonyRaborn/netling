@@ -47,13 +47,15 @@ For regressions (rerun the audit):
 - Highest crest pair overlap: Seal and Rack mount 0.37 (Rack mount is a framed block, 41 lit; the Seal a ring with tails), then Full house and Seal 0.30.
 - Highest form pair overlap: Firewall and Airgap 0.82 (a line and its mainframe, meant to look alike); same stage, Firewall and Ghost 0.81, then Plat and Airgap 0.72 among the mainframes.
 - Worn together (`--check=combos`, worst over every form, pose and orbit time): Chrome jaw over Scarf 0.82 and Rebreather over Scarf 0.73 (Glitch, which has almost no neck), Bandage over Cyber eye 0.67 (Panic, whose '!' eyes sit high; 0.60 on Kernel), Circuit tattoo over KERNEL pin 0.44, Chrome jaw and Rebreather over the Checksum 0.33 (it slides down like the other chest items). Before the room-making, Chrome jaw and Rebreather hid the Corp barcode and KERNEL pin entirely on Daemon.
+- The ten found-anywhere wearables (Rain cloud, Cursor, Progress bar, Extra life, Bow tie, Gold chain, Power cell, Blush, Mustache, Monocle) add no off-screen or contrast cases. Their closest pairs are Rain cloud and Extra life 0.53 and Lanyard and Gold chain 0.50 (different colors). Worn together: the Data aura can pass over the whole Blush for a moment (seen in 10% of cases, as it orbits), Chrome jaw over Gold chain 0.86 and over Bow tie 0.67 (they slide down first), and the Cursor over the Sat-dish antenna 0.71 (the Cursor rises 3 rows first).
 - The gallery outlines a wearable when half or more of its pixels blend in, computed from the sprite's own colors. The audit measures the real render, so counts can differ slightly at the edges.
 
-## Open
+## Device pass (the maintainer's, before the full freeze)
 
 - **Human pass in a browser** (not done): motion and flicker, phone-size legibility, anything flashing, and Daemon's, Chrome's and Bitling's idle animation, which barely differs between frames.
 - **Crests on the real shells.** The gallery uses the picker swatch colors, so crests still need checking on the shell art in the app. The pink logo color on the Firewall brick and Holographic shell swatches is low contrast.
 - **Not looked at closely:** the palette-`all` matrices (the audit covers their numbers) and the wearable-plus-prop matrix. The COMBINATIONS section was looked at on Daemon only, plus the audit's worst pairs rendered on their worst forms.
-- **Mouthwear and a Scarf on Glitch.** The Chrome jaw or Rebreather still hides most of a Scarf on Glitch; only its tail shows. The Bandage sits over a Kernel's visor rim and cyber eye.
-- **The Visor has no description text**, only the rarity hint.
-- **The smoke test was not run against the sprite changes.** The only game-code change from the review's tooling is `export` on `drawNode` in `src/netrun/view.js`.
+
+## Accepted as is
+
+- **Mouthwear and a Scarf on Glitch.** The Chrome jaw or Rebreather still hides most of a Scarf on Glitch; only its tail shows. The Bandage sits over a Kernel's visor rim and cyber eye. Cosmetic overlaps, kept.

@@ -1,11 +1,13 @@
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from './map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
 import { nextFragment, fragmentById } from './codex.js';
 import { rollAccessory, accessoryById, RARITY } from '../accessories.js';
-import { ANOMALIES } from './anomalies.js';
+import { ANOMALIES, anomaliesFor } from './anomalies.js';
 import { weighted } from '../random.js';
+import { CHALLENGE_IDS, CHALLENGE_REGIONS, challengeById, challengeOn, voidChallenge } from './challenges.js';
+import { DAILY, LANE, TRAIL, dailySeed, laneRng, newStake, seededRoll, stakeRecord, stakeRefund, stakeSnap } from './daily.js';
 
 // The uplink cooldown lives in sim.js (CFG.runCooldownMin and friends), where items can shorten it.
 export { runCooldownLeft };
@@ -121,7 +123,7 @@ export function runBlockReason(pet, region = 'public', codex = []) {
   if ((pet.rebootUntilAge ?? 0) > pet.ageMin) return 'still rebooting.';
   const lock = regionLock(region, pet.stage, codex, pet.cleared ?? []);
   if (lock) return `${REGIONS[region].name}: ${lock}`;
-  const cd = runCooldownLeft(pet);
+  const cd = REGIONS[region].noCooldown ? 0 : runCooldownLeft(pet);
   if (cd > 0) {
     return `uplink cooling down${runCooldownAtFloor(pet) ? ', laying low from corp sweeps' : ''}. ${fmtLeft(cd)} left.`;
   }
@@ -132,8 +134,12 @@ export function runBlockReason(pet, region = 'public', codex = []) {
 // How fast ICE fights run: slower for a netling that jacked in overclocked.
 export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
 
-export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
-  const map = generateMap(region, rng);
+// opts.challenge: a challenge id (challenges.js), kept only for a region that has challenges. opts.day: the daily
+// trace's date (daily.js), which seeds its map and every roll in it; rng is then unused.
+export function startRun(pet, region, rng, codex = [], ownedAccessories = [], opts = {}) {
+  const daily = Boolean(REGIONS[region].daily);
+  const day = daily ? opts.day ?? DAILY.epoch : null;
+  const map = generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
   pet.run = {
     region,
     map,
@@ -161,7 +167,12 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     result: null, // jacked | disconnected | aborted
     messages: [],
     startedAge: pet.ageMin,
+    challenge: CHALLENGE_REGIONS.includes(region) && CHALLENGE_IDS.includes(opts.challenge) ? opts.challenge : null,
+    challengeVoid: false, // the rule was broken: the run goes on without it
+    challengeWon: false, // reached the exit with the rule kept
+    ...(daily ? { daily: true, day, seed: dailySeed(day), rollKey: null, rolls: 0, stake: newStake(pet.inventory), trail: [TRAIL.entry] } : {}),
   };
+  if (pet.run.challenge) note(pet.run, `challenge: ${challengeById(pet.run.challenge).name.toUpperCase()}. ${challengeById(pet.run.challenge).rule}`);
   // An open contract for this region comes along, and the map is fixed so every route can meet it.
   const c = pet.contract;
   if (c && c.region === region && !REGIONS[region].tutorial) {
@@ -172,7 +183,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = []) {
     marketKinds(map, rng);
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
-  if (region === 'source' && pet.rootAccess) note(pet.run, "NL-0: i'll wait up here.");
+  if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
   return pet.run;
 }
 
@@ -194,8 +205,12 @@ function takeAccessory(run, rng) {
 export const codexRoom = (pet) => Math.max(0, RUN_CFG.codexPerLife - (pet.codexFound ?? 0) - (pet.run?.fragments.length ?? 0));
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
+// Whether this region's codex still has a fragment the line has not found (this run's finds included).
+const fragmentsLeft = (run) => nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]) !== null;
+
 function takeFragment(pet) {
   const run = pet.run;
+  if (REGIONS[run.region].noFragments) return '';
   const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
   if (!id) return '';
   if (!codexRoom(pet)) return ' a codex fragment, but its memory is full: it will keep for the next generation.';
@@ -203,17 +218,36 @@ function takeFragment(pet) {
   return ` codex fragment: "${fragmentById(id).title}".`;
 }
 
+// A daily run (daily.js) writes what each rules call changed on the netling to its ledger, and gives it all back
+// once the run ends. Other runs just make the call.
+function staked(pet, fn) {
+  const run = pet.run;
+  if (!run?.daily) return fn();
+  const before = stakeSnap(pet);
+  const res = fn();
+  stakeRecord(run, before, pet);
+  if (run.phase === 'done' && !run.refunded) {
+    stakeRefund(pet, run.stake, { scrip: SCRIP.max, inventory: INVENTORY_SLOTS });
+    run.refunded = true;
+  }
+  return res;
+}
+
 // Move to an adjacent node and trigger it. Returns the node's encounter.
-export function moveTo(pet, nodeId, rng) {
+export const moveTo = (pet, nodeId, rng) => staked(pet, () => moveToNode(pet, nodeId, rng));
+
+function moveToNode(pet, nodeId, rng) {
   const run = pet.run;
   if (run.phase !== 'map') return { ok: false, msg: 'finish this node first.' };
   if (!runOptions(run).some((n) => n.id === nodeId)) return { ok: false, msg: 'no route to that node.' };
+  if (run.daily) rng = laneRng(run, nodeId, LANE.arrive);
   const st = pet.stats;
   st.charge = clamp(st.charge - RUN_CFG.moveCharge);
   st.heat = clamp(st.heat + RUN_CFG.moveHeat);
   run.pos = nodeId;
   run.visited.push(nodeId);
   if (run.tally) run.tally.nodes++;
+  if (run.trail) run.trail.push(TRAIL[nodeById(run.map, nodeId).type] ?? '.');
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   const repair = upgraded(pet) ? RUN_CFG.initMoveRepair : RUN_CFG.daemonMoveRepair;
   if (ability(pet) === 'daemon' && repair) st.integrity = clamp(st.integrity + repair);
@@ -246,6 +280,7 @@ export function moveTo(pet, nodeId, rng) {
     case 'ice': {
       if (ability(pet) === 'ghost' && rng() < (upgraded(pet) ? RUN_CFG.whisperSlipChance : RUN_CFG.ghostSlipChance)) {
         run.tally.icePhased++;
+        markTrail(run, TRAIL.icePhased);
         note(run, 'the ICE looked straight through it.');
         return { ok: true, kind: 'ice', phased: true };
       }
@@ -253,6 +288,7 @@ export function moveTo(pet, nodeId, rng) {
       const freeUsed = Math.max(run.freePhases ?? 0, run.phased ? 1 : 0);
       if (ability(pet) === 'glitch' && freeUsed >= free && rng() < RUN_CFG.glitchPhaseChance) {
         run.tally.icePhased++;
+        markTrail(run, TRAIL.icePhased);
         note(run, 'glitched through the ICE again.');
         return { ok: true, kind: 'ice', phased: true };
       }
@@ -260,15 +296,31 @@ export function moveTo(pet, nodeId, rng) {
         run.phased = true;
         run.freePhases = freeUsed + 1;
         run.tally.icePhased++;
+        markTrail(run, TRAIL.icePhased);
         note(run, 'glitched straight through the ICE.');
         return { ok: true, kind: 'ice', phased: true };
       }
-      const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
+      // The daily trace picks the fight by node alone, so every form meets the same one there.
+      const game = GAME_IDS[Math.floor((run.daily ? seededRoll(run.seed, nodeId * 8 + LANE.game, 0) : rng()) * GAME_IDS.length)];
       run.phase = 'ice';
       run.pending = { game };
       return { ok: true, kind: 'ice', game };
     }
     case 'relay': {
+      // Unplugged: the relay is dark. It still lets the runner out, but only the exit counts for the challenge.
+      if (run.challenge === 'unplugged') {
+        note(run, 'relay found. dark: unplugged.');
+        openChoice(run, {
+          kind: 'relay',
+          title: 'DARK RELAY',
+          text: 'no power, no venting. it can still get you out.',
+          options: [
+            { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
+            { id: 'out', label: `JACK OUT (${run.loot.length})`, hint: 'bank loot, end run. the challenge only counts at the exit' },
+          ],
+        });
+        return { ok: true, kind: 'relay', dark: true };
+      }
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
       // Corp relays: the grid services its own.
@@ -282,7 +334,7 @@ export function moveTo(pet, nodeId, rng) {
         text: `recharged${patched ? ', vented and patched' : ' and vented'}. safe place to bank your loot.`,
         options: [
           { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
-          { id: 'out', label: `JACK OUT (${run.loot.length})`, hint: 'bank loot, end run' },
+          { id: 'out', label: run.daily ? 'JACK OUT' : `JACK OUT (${run.loot.length})`, hint: run.daily ? 'end the trace here' : 'bank loot, end run' },
         ],
       });
       return { ok: true, kind: 'relay' };
@@ -317,7 +369,7 @@ export function moveTo(pet, nodeId, rng) {
         if (next !== offers[0]) offers.push(next);
       }
       const price = corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
-      const accOffer = rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
+      const accOffer = !region.noStyleDrops && rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
       openChoice(run, {
         kind: 'market',
         flavor: corp ? 'corp' : 'black',
@@ -336,24 +388,30 @@ export function moveTo(pet, nodeId, rng) {
       return { ok: true, kind: 'market' };
     }
     case 'anomaly': {
-      const ev = ANOMALIES[Math.floor(rng() * ANOMALIES.length)];
+      const pool = anomaliesFor(run.region);
+      const ev = pool[Math.floor(rng() * pool.length)];
       openChoice(run, {
         kind: 'anomaly',
         event: ev.id,
         title: ev.title,
         text: ev.text,
-        options: ev.options.map(({ id, label, hint }) => ({ id, label, hint })),
+        // An option may say something else once the region's codex is complete (codexDoneHint).
+        options: ev.options.map(({ id, label, hint, codexDoneHint }) => ({ id, label, hint: codexDoneHint && !fragmentsLeft(run) ? codexDoneHint : hint })),
       });
       return { ok: true, kind: 'anomaly', event: ev.id };
     }
     case 'exit': {
+      if (run.daily) {
+        note(run, 'exit node. trace complete.');
+        return { ok: true, kind: 'exit', ...jackOut(pet) };
+      }
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
       run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip;
       const exitFragment = region.exitFragment ?? (run.contract?.kind === 'fragment' ? 1 : RUN_CFG.exitFragmentChance);
       const frag = (rng() < exitFragment ? takeFragment(pet) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
-      const opened = !region.tutorial && !(pet.cleared ??= []).includes(run.region);
+      const opened = !region.tutorial && !region.daily && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
@@ -365,15 +423,22 @@ export function moveTo(pet, nodeId, rng) {
       // The Deep stays unnamed: its way in is a secret.
       const opens = next && !REGIONS[next].requires ? `: the ${REGIONS[next].name} ${young ? 'opens once it grows up' : 'is open to it'}.` : '.';
       note(run, `exit node. bonus: ${bonus.map((b) => ITEMS[b].name).join(', ')}, ${RUN_CFG.exitScrip} scrip.${frag}${opened ? ` region cleared${opens}` : ''}`);
+      if (run.challenge && !run.challengeVoid) {
+        run.challengeWon = true;
+        note(run, `challenge complete: ${challengeById(run.challenge).name.toUpperCase()}.`);
+      }
       return { ok: true, kind: 'exit', ...jackOut(pet) };
     }
   }
   return { ok: true, kind: node.type };
 }
 
-export function resolveIce(pet, won, rng) {
+export const resolveIce = (pet, won, rng) => staked(pet, () => resolveIceFight(pet, won, rng));
+
+function resolveIceFight(pet, won, rng) {
   const run = pet.run;
   if (run.phase !== 'ice') return { ok: false };
+  if (run.daily) rng = laneRng(run, run.pos, LANE.ice);
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
@@ -391,6 +456,7 @@ export function resolveIce(pet, won, rng) {
   }
   const soft = ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses;
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
+  markTrail(run, TRAIL.iceLost);
   const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
   const dmg = Math.round(
     REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
@@ -398,6 +464,7 @@ export function resolveIce(pet, won, rng) {
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
   note(run, `ICE bit back${hot ? ' hard: overclocked' : ''}. -${dmg} integrity.`);
+  if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
 }
@@ -412,6 +479,11 @@ function insured(pet) {
   pet.stats.integrity = RUN_CFG.chromeInsurance;
   note(run, `corp insurance paid out. integrity restored to ${RUN_CFG.chromeInsurance}.`);
   return true;
+}
+
+// Changes the daily trail's mark for the node just reached (an ICE fight slipped or lost).
+function markTrail(run, mark) {
+  if (run.trail?.length) run.trail[run.trail.length - 1] = mark;
 }
 
 function openChoice(run, pending) {
@@ -435,6 +507,11 @@ export function refreshMarket(pet) {
     const short = scrip < cost ? `needs ${cost} scrip, has ${scrip}` : charge <= chg + 5 ? `needs ${chg + 5}+ charge` : null;
     o.disabled = Boolean(short);
     o.hint = short ?? `-${cost} scrip, -${chg} chg${acc ? ` · ${accessoryById(p.accOffer).rarity === 'common' ? 'accessory' : 'rare accessory'}` : ''}`;
+    // Bare metal: an item (not an accessory) ends the challenge, so the view asks twice (confirm).
+    if (!acc && challengeOn(pet.run, 'baremetal')) {
+      o.confirm = 'ENDS BARE METAL. AGAIN TO BUY';
+      if (!short) o.hint += ' · ends bare metal';
+    } else delete o.confirm;
   }
 }
 
@@ -442,7 +519,9 @@ export function refreshMarket(pet) {
 export const atMarket = (pet) => pet.run?.phase === 'choice' && pet.run.pending?.kind === 'market';
 
 // Sells an inventory slot: half the price at an open market, a quarter anywhere else (SCRAP).
-export function sellItem(pet, slot) {
+export const sellItem = (pet, slot) => staked(pet, () => sellSlot(pet, slot));
+
+function sellSlot(pet, slot) {
   const id = pet.inventory?.[slot];
   if (!id) return { ok: false, msg: 'empty slot.' };
   const market = atMarket(pet);
@@ -458,9 +537,12 @@ export function sellItem(pet, slot) {
 }
 
 // Resolve the open choice node. Returns { ok, msg, result? }.
-export function choose(pet, optionId, rng) {
+export const choose = (pet, optionId, rng) => staked(pet, () => chooseOption(pet, optionId, rng));
+
+function chooseOption(pet, optionId, rng) {
   const run = pet.run;
   if (run.phase !== 'choice') return { ok: false, msg: 'nothing to choose.' };
+  if (run.daily) rng = laneRng(run, run.pos, LANE.choice);
   const p = run.pending;
   if (p.kind === 'market') refreshMarket(pet); // selling since it opened may have changed what it can afford
   const opt = p.options.find((o) => o.id === optionId);
@@ -488,6 +570,7 @@ export function choose(pet, optionId, rng) {
     return `${why} -${n} integrity.`;
   };
   let msg = '';
+  let boughtItem = false;
 
   if (p.kind === 'relay') {
     if (optionId === 'out') return jackOut(pet);
@@ -532,6 +615,7 @@ export function choose(pet, optionId, rng) {
       run.tally.bought++;
       lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
+      boughtItem = true;
     }
   } else if (p.kind === 'anomaly') {
     const ev = ANOMALIES.find((e) => e.id === p.event);
@@ -539,12 +623,13 @@ export function choose(pet, optionId, rng) {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
     const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
-    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment });
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run) });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
     st.sync = clamp(st.sync);
   }
   note(run, msg);
+  if (boughtItem && challengeOn(run, 'baremetal')) voidChallenge(run, 'an item was bought.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity collapsed mid-run.');
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   return { ok: true, msg };
@@ -566,6 +651,8 @@ function nodesWithin(run, fromId, depth) {
 // Which node types the player can see: visited, adjacent, revealed, plus form sight.
 export function visibleNodeIds(pet) {
   const run = pet.run;
+  // Blackout: only where it has been and one step ahead; no reveals, no form sight.
+  if (run.challenge === 'blackout') return new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
   const ids = new Set([...run.visited, ...run.revealed, ...nodeById(run.map, run.pos).edges]);
   const form = ability(pet);
   if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
@@ -577,6 +664,7 @@ function endRun(pet, result) {
   const run = pet.run;
   run.phase = 'done';
   run.result = result;
+  if (run.daily) return; // nothing at stake: no cooldown, and not counted among the netling's runs
   if (!REGIONS[run.region].noCooldown) {
     pet.lastRunEndAge = pet.ageMin;
     // A clean clear (out through the front door, no ICE lost) shortens the next cooldown.
@@ -590,6 +678,11 @@ function endRun(pet, result) {
 
 export function jackOut(pet) {
   const run = pet.run;
+  if (run.daily) {
+    note(run, 'jacked out. nothing kept, nothing lost: what the trace cost is given back.');
+    endRun(pet, 'jacked');
+    return { ok: true, result: 'jacked', kept: [], lost: [], fragments: [], contract: null };
+  }
   settleContract(pet, 'jacked');
   const lostInt = (run.startStats?.integrity ?? pet.stats.integrity) - pet.stats.integrity;
   const restored = lostInt > 0 ? Math.round(lostInt * RUN_CFG.jackOutRestore) : 0;
@@ -631,10 +724,10 @@ export function disconnect(pet, why) {
   st.sync = clamp(st.sync - RUN_CFG.disconnectSync);
   pet.axes.stability -= 1;
   // A care mistake, but never the fatal one.
-  const mistake = pet.careMistakes < CFG.maxMistakes - 1;
+  const mistake = !run.daily && pet.careMistakes < CFG.maxMistakes - 1;
   if (mistake) pet.careMistakes++;
   settleContract(pet, 'disconnected');
-  note(run, `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
+  note(run, run.daily ? `DISCONNECTED: ${why} trace over. nothing lost: what it cost is given back.` : `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
   run.scrip = 0;
   run.fragments = [];
@@ -644,7 +737,9 @@ export function disconnect(pet, why) {
 }
 
 // Bail out: forfeit the loot, no other penalty.
-export function abortRun(pet) {
+export const abortRun = (pet) => staked(pet, () => abortNow(pet));
+
+function abortNow(pet) {
   settleContract(pet, 'aborted');
   pet.run.loot = [];
   pet.run.scrip = 0;

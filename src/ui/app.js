@@ -164,7 +164,7 @@ export function loadAll() {
   app.newerSave = app.corruptSave !== null && isNewerSave(stored);
   const up = state ? upgradeSave(stored) : null;
   app.preUpgrade = up?.upgraded ? { from: up.from, raw: rawSave } : null;
-  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms() });
+  if (!state) state = createScript({ now: now(), rootAccess: rootUnlocked(), newForms: newForms(), nl0Rests: app.progress?.ended === true });
   migrate(state);
   // Root Access is earned once and kept. Remember it for players who finished the codex, or whom NL-0 had
   // already covered, before it was recorded (boot writes it back to storage).

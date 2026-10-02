@@ -16,6 +16,7 @@ Opt-in extras for players who check in often. The rules and numbers are in [SIMU
 |---|---|
 | Requests | The netling asks for one game or COOL; the count is `progress.requestsMet` |
 | Greet a visitor | One GREET per visit; count is `progress.visitorsGreeted` |
+| Visitor cards | A friend's netling visits from a card link or QR; greeted friends sign the guestbook. See [Visitor cards](#visitor-cards) |
 | Flow | A glow after 3 hours in good shape; time spent counts across lives (`flowMin`) |
 | Chatter | 50 lines; heard lines are kept in the Archive's CHATTER tab (`progress.chatter`) |
 | Daily check-in | A seven-day reward ladder for opening the app once after each morning it wakes; rewards wait in a reward box |
@@ -58,11 +59,11 @@ Rules in `src/checkin.js` (`CHECKIN`), the UI in `src/ui/rewards.js`.
   | 2 | A cheapest-tier item (coolant, antivirus, repair, booster, memory) |
   | 3 | 25 scrip |
   | 4 | A middle-tier item (voucher, black ICE; never a Segfault) |
-  | 5 | An unowned common accessory from the general pool (Cap, Scarf, Headphones, Flower, Bow), else 25 scrip |
+  | 5 | An unowned common accessory from the general pool (13: Cap, Scarf, Headphones, Flower, Bow, Lanyard, Spiked collar, Rain cloud, Cursor, Bow tie, Power cell, Blush, Mustache), else 25 scrip |
   | 6 | An Bypass chip |
-  | 7 | An unowned rare or very rare accessory from the general pool (Shades, Visor, Crown, Halo, Spark), else 40 scrip |
+  | 7 | An unowned rare or very rare accessory from the general pool (13: Shades, Visor, Crown, Necktie, Chip bandolier, Holo logo, Glitch moth, Progress bar, Gold chain, Monocle, Halo, Spark, Extra life), else 40 scrip |
 
-  The general pool is the accessories found anywhere: regional drops and earned items stay the reward for exploring and for events.
+  The general pool is the accessories found anywhere (shop exclusives included, since a check-in ignores `shop`): regional drops and earned items stay the reward for exploring and for events. With 13 in each pool, a player who checks in every day gets an accessory on both accessory days for 13 weeks before they fall back to scrip.
 - **The reward box.** Rewards wait in a box kept per device (`netling.rewardBox`, up to 30; a check-in waits while it is full), which moves with a transfer code like the rest of the collection. The BOX button beside the scrip count opens it with the ladder. TAKE moves scrip to the netling up to the cap (the rest stays in the box), an item when the inventory has room, an accessory to the collection at any time. Nothing is taken during a netrun or without a living netling, except accessories.
 - **Where it shows.** A line in the netling's log, the box count in yellow, and a notification with ALERTS on. Never the status line, which carries notices that matter more.
 - **Not measured.** The balance bots do not check in, so the baselines do not include it.
@@ -77,10 +78,23 @@ Rules and numbers are in [NETRUN.md](NETRUN.md#contracts).
 - **Pay.** 15 to 25 scrip by job, and a 25% chance of one cheapest-tier item, named when posted, paid into the run's loot on jack-out (so a disconnect or abort loses it with the rest). A missed job pays nothing and costs nothing.
 - **Not measured.** The balance bots never take contracts (they are posted by the UI), so the baselines did not move and there is no measured rate yet.
 
+## Visitor cards
+
+The first multiplayer feature, with no server (`visitcard.js`, `stepFriends` in `sim.js`). ARCHIVE > SYSTEM > MAKE VISITOR CARD shows a link (`<page>#visit=NV1.<base64url(json)>.<crc32>`) and its QR. Opening the link, or pasting it or the bare card into BRING ONE HERE, shows a preview and INVITE.
+
+- **What a card carries**: form, palette, the accessories worn (one per wear slot, no colors or props), the generation, and three account facts: Deep exits, Root Access earned, Source exits. No stats, items or text a player typed, so there is nothing to cheat and nothing to moderate. The crc is the card's id. Imported cards are cleaned like any code (`cleanCard`).
+- **Queue**: up to `friendQueueMax` (3) cards wait in the save (`friends`); the same id twice is refused while queued. The queue carries over to the next compile.
+- **Arrival**: the first card in line arrives once the netling is awake, has no event, visitor, netrun or reboot: each such minute with chance `friendChancePerMin` (1/30), or at the first free minute after `friendWaitMaxMin` (60) of waiting. An empty queue rolls nothing, so the balance baselines do not move. The visit then plays exactly like a stray's (Sync, Heat, gift chances, GREET and its chatter line).
+- **Feat**: `friendFeat` shows the generation and the rarest of: trips below the bottom (Source exits, worded so the region's name stays hidden), root access, Deep exits.
+- **Spoilers**: before Root Access (`rootEarnedIn`, and the switch), a Mainframe form arrives as static on the LCD and a "corrupted record" in text, and Mainframe accessories stay behind (on any form). Root and Source feats read `<<corrupted>>`. The preview and guestbook use `rootUnlocked()` and update once Root Access is earned.
+- **Look**: a card reads like a message and a visit like a chat channel. Each friend has a handle built from the card, never typed: its form and generation (`daemon_g3`, `friendHandle`), or `???_g5` for a corrupted record. The preview is an email (`From: daemon_g3@wider.net`, `To: you@netling`, `Subject: can i come over?`, `X-Line:` the feat, ACCEPT INVITE). The visit logs IRC lines: `--> daemon_g3 has joined #netling (feat)`, one line from it (what it wears, a hello, or `r3c0rd c0rrupt3d` for a corrupted record), and `<-- daemon_g3 has quit (...)` with the gift it left, `see you around`, or `connection reset` when sent away early. The bar reads `daemon_g3 is in #netling`. Strangers keep the plain wording.
+- **Guestbook**: each greeted friend adds `{ at, form, gen, deep, root, below }` to `progress.guestbook` (last 20), shown under CHATTER as a channel log (`[10/02 12:04] --> daemon_g3 has joined (feat)`). There is no cosmetic for it: a card can be reused, so one friend could unlock it alone.
+- **Not built**: card colors for recolored accessories, the device shell (it is not on the LCD), and any limit on reusing a card after its visit.
+
 ## Limits
 
 Notifications are local: they fire while the app is open or in a background tab. A closed or suspended app gets nothing, because a static site has no push server. Reliable notifications with the app closed need a native wrapper ([PLATFORMS.md](PLATFORMS.md)).
 
-## Open ideas
+## Notes for later (reference, if the freeze is lifted)
 
-- **Rebalance the check-in accessories** once more general-pool accessories exist (see [Daily check-in](#daily-check-in)): with today's ten, the accessory days fall back to scrip after about ten weeks of check-ins.
+- **The check-in accessory pools** (see [Daily check-in](#daily-check-in)) were deepened from 7 common and 9 rare or better to 13 each by ten found-anywhere wearables. If more are added, keep the two pools about level so neither accessory day runs dry first.

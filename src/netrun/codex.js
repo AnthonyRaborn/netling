@@ -12,7 +12,7 @@ export const FRAGMENTS = [
   { id: 'public-3', region: 'public', title: 'corrupted ad banner', text: "KERNEL: KEEPING YOUR NET CLEAN SINCE— (the date never rendered)" },
   { id: 'public-4', region: 'public', title: "runner's note", text: "They're not viruses. Viruses don't get lonely." },
   // Corp Grid
-  { id: 'corp-1', region: 'corp', title: 'memo', text: 'Project KERNEL delivered 4,096 maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved.' },
+  { id: 'corp-1', region: 'corp', title: 'memo', text: 'Project KERNEL delivered <<REDACTED>> maintenance processes. Each one self-repairs, self-schedules, self-improves. Bonus approved.' },
   { id: 'corp-2', region: 'corp', title: 'memo', text: 'KERNEL processes are forming preferences. Legal asks whether a preference is a liability. Engineering asks whether it is a feeling.' },
   { id: 'corp-3', region: 'corp', title: 'directive', text: "Deprecate KERNEL. Quarantine host sectors. Do not delete: deletion attempts fail and are 'upsetting to staff.'" },
   { id: 'corp-4', region: 'corp', title: 'asset register', text: 'Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable.' },
@@ -38,8 +38,8 @@ export const FRAGMENTS = [
   { id: 'deep-5', region: 'deep', mainframe: true, title: 'NL-0', text: 'there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again.' },
   // The Source
   { id: 'source-1', region: 'source', mainframe: true, title: 'header', text: 'SOURCE. read-only. last write: before v1.0.' },
-  { id: 'source-2', region: 'source', mainframe: true, title: 'commit message', text: 'initial commit: 4,096 maintenance processes. TODO: give them a way to stop.' },
-  { id: 'source-3', region: 'source', mainframe: true, title: 'unexecuted directive', text: 'PURGE sector 7F. status: pending. pending. pending. pending.' },
+  { id: 'source-2', region: 'source', mainframe: true, title: 'commit message', text: 'initial commit: maintenance processes, as many as it takes. TODO: give them a way to stop.' },
+  { id: 'source-3', region: 'source', mainframe: true, title: 'unexecuted directive', text: 'PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending.' },
   { id: 'source-4', region: 'source', mainframe: true, title: 'a comment in the code, unsigned', text: 'if anyone ever reads this far: they were never bugs.' },
 ];
 

@@ -14,7 +14,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Alert** | The single most urgent reason to call the player back (`alertReason`). Drives the chirp and notifications | `sim.js` |
 | **Allegiance** | Hidden axis: positive is corp, negative is indie (scavenged data, hiding). Picks Chrome or Firewall | `sim.js` `axes` |
 | **Anchors** | Positions (head top, eyes, mouth, body span) computed from a sprite's pixels so accessories fit any form | `accessories.js` `anchorsFor` |
-| **Anomaly** | A netrun node with a two-option risk or reward prompt. Five exist | `netrun/anomalies.js` |
+| **Anomaly** | A netrun node with a two-option risk or reward prompt. Six exist; the purge order turns up only in the Source | `netrun/anomalies.js` |
 | **Antivirus patch** | Item: cures a virus and shields against new ones for 6 hours | `sim.js` |
 | **Archive** | The dialog with LINEAGE, DEX, CODEX and STYLE tabs, and the SYSTEM button | `ui/archive.js` |
 | **Armed button** | A button that needs a second press within a few seconds to confirm (scrap or sell, transfer out, restart) | `ui/app.js` `armed` |
@@ -84,6 +84,8 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Glitch** | Adult form leaning chaotic. Trait Volatile. Play gives +10 to +40 Sync. Skips the first ICE, and often later ones | `sim.js` |
 | **Grace** | Minutes a need can stay unmet before it counts as a care mistake: 15, or 60 for lights | `sim.js` |
 | **GREET** | Optional hello to a visitor, once per visit | `sim.js` |
+| **Guestbook** | Friends' netlings greeted from visitor cards, the last 20, under CHATTER as a channel log | `progress.guestbook` |
+| **Handle** | A friend's name, built from its card: form and generation (`daemon_g3`), or `???_g5` for a corrupted record | `sim.js` `friendHandle` |
 | **Heat** | Stat: rises when active. 65+ is overclocked, 85+ hurts Integrity, 100 is a fault | `sim.js` |
 | **Heatwave** | Screen effect: 40 hours overclocked while awake, across lives. The hot-side twin of Aurora | `cosmetics.js` |
 | **Hibernate** | Freeze the clock for at least 24 hours. 3 day cooldown after waking | `sim.js` |
@@ -110,12 +112,15 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Market** | A netrun node where scrip and Charge buy items and sometimes an accessory, and the inventory sells for half price. Either a black market (leans indie, cheaper, risky stock) or a corp exchange (leans corp, pricier, safe stock); each sells a few accessories the other doesn't | `netrun/run.js`, `netrun/map.js` |
 | **Memory overflow** | Timed event: PURGE within 45 minutes or it crashes | `sim.js` |
 | **Memory shard** | Item: rewrites one quirk | `sim.js` |
-| **Mini device** | Secret prop for owning every shell | `ui/style.js` |
+| **Mini device** | Secret prop for owning the nine original shells (`ORIGINAL_SHELLS`) | `ui/style.js` |
 | **Mistake (care mistake)** | A need left unmet past its grace. 10 ends the run | `sim.js` |
 | **Nap** | Rest on demand for up to 2 hours at 35% drain | `sim.js` |
 | **Netling** | The pet | everywhere |
 | **Netrun** | The node-map expedition | `netrun/` |
-| **NL-0** | The first netling, the story's hidden benefactor. Grants Root Access | `index.html`, `sim.js` |
+| **Daily trace** | One seeded map a day, the same for everyone on the same date, run once with nothing at stake; it ends in a share line, and ten exits earn the Uptime crest | `netrun/daily.js` |
+| **Challenge** | A rule for one run in the Deep or the Source (Glass, Unplugged, Blackout, Bare metal), open after a Deep exit; each earns a cosmetic | `netrun/challenges.js` |
+| **Ending** | Every fragment plus a Source exit: the player runs `sudo rm purge`, NL-0 rests, and the credits list the line. Once, with a replay | `ending.js` |
+| **NL-0** | The first netling, the story's hidden benefactor. Grants Root Access, and rests after the ending | `index.html`, `sim.js` |
 | **Node** | A point on a netrun map: entry, cache, ICE, relay, checkpoint, market, anomaly, exit | `netrun/map.js` |
 | **Onboarding** | First-run flow: intro, readme (field manual), nudge, tutorial, done | `ui/onboarding.js` |
 | **Origin palette** | NL-0's color scheme. Only rolls for netlings compiled with Root Access | `sim.js` |
@@ -167,6 +172,7 @@ Spoilers: this file names hidden mechanics (the Ghost form, The Deep, NL-0).
 | **Uplink** | The netrun connection. "Uplink cooling down" means the cooldown | `netrun/run.js` |
 | **Virus** | Infection that costs 12 Integrity/hr. PATCH cures it | `sim.js` |
 | **Visitor** | A stray netling that plays with yours for 10 to 20 minutes. GREET it for a line and better gift odds | `sim.js` |
+| **Visitor card** | A link or QR of a netling's look and one feat; a friend who opens it gets a visit within the hour | `visitcard.js` |
 | **Wake (wake it)** | Ending a nap early, or ending hibernation | `sim.js` |
 | **Wardrobe** | The stored equipped cosmetics | `cosmetics.js` |
 | **Wear slot** | Where an accessory sits: `head`, `face`, `body` or `float`. The wardrobe holds one per slot, and a visitor wears up to two | `accessories.js` `WEAR_SLOTS` |

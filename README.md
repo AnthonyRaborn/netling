@@ -20,6 +20,7 @@ No build step, no dependencies: vanilla JavaScript modules and canvas.
 - [Growing up, and what comes after](#growing-up-and-what-comes-after)
 - [Style](#style)
 - [Saving, moving and pausing](#saving-moving-and-pausing)
+- [Privacy](#privacy)
 - [Install, offline and controllers](#install-offline-and-controllers)
 - [For developers](#for-developers)
 
@@ -85,6 +86,7 @@ None of these ever costs a fault; they are small rewards for checking in often.
 
 - **Requests**: now and then it asks for one mini-game, or for a COOL when it's warm, in a bar under the inventory. Answer within 45 minutes and it's delighted; otherwise it simply stops asking.
 - **Visitors**: say hello with **GREET** while one is here.
+- **Visitor cards**: ARCHIVE > SYSTEM > **Make visitor card** gives a link and a QR code for your netling. When a friend opens it, your netling drops by their device within the hour, and theirs can visit you the same way. Friends you greet sign the guestbook in the **CHATTER** tab. A card carries only how your netling looks and one thing its line has done.
 - **Chatter**: it mutters to itself in a speech bubble. Lines you see are collected in the Archive's **CHATTER** tab.
 - **A glow**: keep it in good shape (and cool) for a few hours and it shows. While it glows, trouble comes less often and visitors drop by more.
 - **Daily check-in**: the first time you open the app after your netling wakes each day, a reward lands in the **BOX** beside your scrip. The rewards climb over seven days and start over; a missed day never resets them. Take what's in the box whenever you like.
@@ -167,6 +169,10 @@ Loot is only safe once you **jack out**, at a relay or the exit. If Integrity or
 
 Every netling starts with only the Public Net. Reaching a region's exit **clears** it and opens the next one down, and some regions also wait for the netling to grow up. Each new netling finds its own way down. Runs also recover **codex fragments**, scraps of lore you can read in the Archive's CODEX tab. A netling's memory only holds eight new fragments in its life (the region list shows how many it has); the rest wait for the next generation. Each adult form has a knack that helps on runs, listed in the DEX once you have raised it.
 
+Once one of your netlings has made it all the way down, the region list also offers **challenges**: a rule for a single run in the deepest regions, such as losing no ICE fight. Break the rule and the run simply goes on without it. Each challenge kept to the exit earns something to wear.
+
+Every day there is also a **daily trace**: one map, the same for everyone that day, with nothing kept and nothing lost. It doesn't wait for the uplink to cool down, and you get one go a day. At the end you get a short result to copy and share with friends, so you can compare routes.
+
 ## Growing up, and what comes after
 
 - **Baby**: the first 17 hours. How it is raised through them decides which teen it becomes; good care (two faults or fewer) grows a healthier one.
@@ -197,6 +203,10 @@ ARCHIVE > **SYSTEM** has:
 If a saved netling can't be read, it is set aside instead of overwritten, a new one compiles, and SYSTEM offers the old save as a download.
 
 Only one browser tab looks after the netling at a time. Other tabs show a guard screen, take over when the first closes, or take over on request.
+
+## Privacy
+
+Nothing you do in the game leaves your device. There are no accounts, no analytics, no ads and no tracking, and the game loads nothing from other sites (even its fonts are bundled). Your netling lives only in your browser's storage, and the only way it goes anywhere else is a transfer code or visitor card you make and share yourself. A visitor card link keeps the card after the `#`, a part of the address that browsers never send to the host. The game is hosted on GitHub Pages, so GitHub sees a visit when the page loads, as any web host would.
 
 ## Install, offline and controllers
 

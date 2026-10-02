@@ -54,6 +54,10 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
 | `src/storage.js` | The `localStorage` wrapper, key list and the write gate hook |
 | `src/sanitize.js` | Cleaners for every stored or imported value |
 | `src/transfer.js`, `src/qr.js` | Transfer codes and the QR encoder |
+| `src/visitcard.js` | Visitor cards: make, encode, decode and queue a friend's card (docs/ATTENTION.md) |
+| `src/netrun/challenges.js` | Challenge runs: the four rules' table and helpers, with no imports (docs/NETRUN.md#challenges) |
+| `src/netrun/daily.js`, `src/ui/daily.js` | The daily trace: the day and its seed, seeded rolls by node, the no-stakes ledger and the share line (no imports), and its region row and share dialog (docs/NETRUN.md#the-daily-trace) |
+| `src/ending.js`, `src/ui/ending.js` | The ending: its text, trigger and credits, and the terminal scene (docs/SOURCE_PLAN.md) |
 | `src/lease.js` | Fallback one-tab lease for browsers without Web Locks |
 | `src/audio.js`, `src/notify.js` | WebAudio blips and local notifications |
 | `src/tracks.js`, `src/music.js` | Background music: tracks and the pure arranger; the Web Audio player |
@@ -93,7 +97,7 @@ Netling is a static web app: vanilla ES modules, HTML and CSS, canvas rendering.
      |
      +--> render.js, sprites.js, audio.js, notify.js   (drawing and output)
      +--> games/*, netrun/view.js                       (sessions)
-     +--> transfer.js, qr.js, storage.js, lease.js      (data movement)
+     +--> transfer.js, visitcard.js, qr.js, storage.js, lease.js  (data movement)
      |
    sanitize.js, archive.js, cosmetics.js                (data rules, pure)
      |

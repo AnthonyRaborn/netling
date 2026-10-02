@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { encodeSave } from '../src/transfer.js';
+import { encodeCard } from '../src/visitcard.js';
 import { createScript, isSleepHour, tick } from '../src/sim.js';
 import { FRAGMENTS, ROOT_FRAGMENTS } from '../src/netrun/codex.js';
 import { moveTo, runOptions, startRun } from '../src/netrun/run.js';
@@ -271,6 +272,113 @@ await scenario('hostile import code (wrong types everywhere) is repaired', async
   assert((await page.evaluate(() => localStorage.getItem('netling.codex'))) === '[]', 'codex not cleaned');
   await page.click('#open-archive');
   for (const t of ['dex', 'codex', 'wardrobe', 'lineage']) await page.click(`#tab-btn-${t}`);
+});
+
+await scenario('visitor card: make one, open a link, invite', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel' }), 'netling.wardrobe': { body: 'bowtie' } }));
+  await page.click('#open-archive');
+  await page.click('#open-transfer');
+  await page.click('#card-make');
+  const link = await page.inputValue('#card-link');
+  assert(/#visit=NV1\.[\w-]+\.[0-9a-f]{8}$/.test(link), `no card link: ${link}`);
+  assert(await visible(page, '#card-qr'), 'no QR for the card');
+  assert((await page.evaluate(() => document.getElementById('card-qr').width)) > 0, 'the QR is empty');
+
+  // A friend's Mainframe netling, opened from a link before Root Access: a corrupted record, then queued.
+  const code = encodeCard({ f: 'plat', p: 1, a: ['checksum'], g: 5, d: 2, r: true, x: 1 });
+  await page.close(); // one tab at a time: a waiting tab keeps the link
+  const other = await open(`${BASE}#visit=${code}`, seed());
+  const preview = await other.textContent('#import-preview');
+  const from = await other.evaluate(() => document.querySelector('#import-preview dl.mail dd.corrupt')?.dataset.text ?? document.querySelector('#import-preview dl.mail dd.corrupt')?.textContent);
+  assert(from === '???_g5@???' && /Subject:can i come over\?/.test(preview) && /gen 5, <<corrupted>>/.test(preview), `preview gives it away: ${from} ${preview}`);
+  assert(!/plat|checksum|root|below/i.test(preview.replace(/corrupted/g, '')), `preview leaks: ${preview}`);
+  assert((await other.evaluate(() => location.hash)) === '', 'the card stays in the address bar');
+  await other.click('#import-preview button');
+  assert(/on its way/.test(await other.textContent('#import-preview')), 'not invited');
+  const s = await saved(other);
+  assert(s.friends.length === 1 && s.friends[0].form === 'plat', `not queued: ${JSON.stringify(s.friends)}`);
+  await other.fill('#import-code', link.replace('#visit=', '#visit=%20'));
+  await other.click('#check-code');
+  await other.click('#import-preview button');
+  assert(/on its way/.test(await other.textContent('#import-preview')), 'a pasted link was not read');
+  await other.fill('#import-code', link);
+  await other.click('#check-code');
+  await other.click('#import-preview button');
+  assert(/already on its way/.test(await other.textContent('#import-preview')), 'the same card queued twice');
+});
+
+await scenario('visitor card: a friend drops by, is greeted, and signs the guestbook', async ({ open }) => {
+  const now = Date.now();
+  const friend = { id: '0badcafe', form: 'plat', palette: 1, accessories: [], gen: 5, deep: 2, root: true, below: 1, at: now - 2 * 3600_000 };
+  const page = await open(BASE, seed({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', friends: [friend], lastTick: now - 3 * 60_000 }) }));
+  await page.waitForTimeout(800);
+  const s = await saved(page);
+  assert(s.visit?.friend?.gen === 5 && s.friends.length === 0, `the friend did not arrive: ${JSON.stringify(s.visit)}`);
+  assert(await visible(page, '#wish-greet'), 'no GREET for the friend');
+  const bar = await page.textContent('#wish-text');
+  assert(bar.includes('???_g5 is in #netling'), `the bar gives it away: ${bar}`);
+  await page.click('#wish-greet');
+  await page.click('#open-archive');
+  await page.click('#tab-btn-chatter');
+  const row = page.locator('#guestbook .channel-log > div').first();
+  const text = await row.evaluate((d) => [...d.childNodes].map((n) => n.dataset?.text ?? n.textContent).join(''));
+  assert(/^\[\d\d\/\d\d \d\d:\d\d\] --> \?\?\?_g5 has joined \(gen 5, <<corrupted>>\)$/.test(text), `guestbook row: ${text}`);
+  assert(await row.locator('.corrupt').count(), 'the corrupted name does not glitch');
+});
+
+await scenario('ending: every fragment plus a Source exit, sudo rm purge, credits, once', async ({ open }) => {
+  const done = {
+    'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', rootAccess: true, generation: 2 }),
+    'netling.codex': FRAGMENTS.map((f) => f.id),
+    'netling.progress': { rootEarned: true, sourceExits: 1, sourceSeen: true },
+    'netling.lineage': [{ generation: 1, form: 'daemon', realized: true, cause: 'end of life cycle', ageMin: 6000 }],
+  };
+  const page = await open(BASE, seed(done));
+  await page.waitForSelector('#ending[open]', { timeout: 5000 });
+  await page.waitForSelector('#ending-sudo:not([hidden])', { timeout: 10000 });
+  const before = await page.textContent('#ending-lines');
+  assert(/permission denied/.test(before) && !/NL-0: \.\.\.it's gone/.test(before), `the scene ran past the prompt: ${before}`);
+  assert((await page.textContent('#ending-sudo')).trim() === 'sudo rm purge', 'no sudo button');
+  await page.click('#ending-sudo');
+  await page.waitForSelector('#ending-close:not([hidden])', { timeout: 20000 });
+  const all = await page.textContent('#ending-lines');
+  for (const want of ["removed 'purge'.", 'so many of us', 'v1.0  Daemon', 'v2.0  Chrome', 'running', 'and NL-0, who waited.', 'Anthony W. Raborn', 'Co-authored-by: Claude Code (Anthropic)']) {
+    assert(all.includes(want), `missing "${want}"`);
+  }
+  const progress = await saved(page, 'netling.progress');
+  assert(progress.ended === true, 'not recorded');
+  assert((await saved(page)).nl0Rests === true, 'NL-0 does not rest in this netling');
+  assert((await page.evaluate(() => JSON.parse(localStorage.getItem('netling.unlocked')))).includes('crest:rootprompt'), 'no Root prompt crest');
+  await page.click('#ending-close');
+  await page.reload();
+  await page.waitForTimeout(1800);
+  assert(!(await page.locator('#ending[open]').count()), 'the ending played twice');
+  await page.click('#open-archive');
+  await page.click('#tab-btn-codex');
+  assert(await visible(page, '#replay-ending'), 'no REPLAY ENDING');
+});
+
+await scenario('ending: one fragment short, or no Source exit, it waits', async ({ open }) => {
+  for (const [codex, progress] of [
+    [FRAGMENTS.map((f) => f.id).filter((id) => id !== 'public-1'), { rootEarned: true, sourceExits: 2 }],
+    [FRAGMENTS.map((f) => f.id), { rootEarned: true }],
+  ]) {
+    const page = await open(BASE, seed({ 'netling.codex': codex, 'netling.progress': progress }));
+    await page.waitForTimeout(1800);
+    assert(!(await page.locator('#ending[open]').count()), `the ending played early: ${JSON.stringify(progress)}`);
+    await page.close();
+  }
+});
+
+await scenario('codex: the corp memo is redacted, and the redaction glitches', async ({ open }) => {
+  const page = await open(BASE, seed({ 'netling.codex': ['corp-1'] }));
+  await page.click('#open-archive');
+  await page.click('#tab-btn-codex');
+  const mark = page.locator('#codex-list .frag .corrupt').first();
+  assert(await mark.count(), 'no glitching redaction');
+  assert((await mark.evaluate((m) => m.dataset.text ?? m.textContent)) === '<<REDACTED>>', 'wrong redaction');
+  const row = await mark.evaluate((m) => m.parentElement.textContent);
+  assert(/delivered .+ maintenance processes/.test(row) && !/4,096/.test(row), `memo: ${row}`);
 });
 
 await scenario('corrupted local storage does not break startup', async ({ open }) => {
@@ -1498,6 +1606,87 @@ const dexRows = async (page) => {
   return unblinked(page, '#dex-grid li');
 };
 
+// STYLE's cosmetics, section by section: { SHELL: [{ name, hint, corrupt }], ... }, names read through a blink (data-text).
+async function wardrobeItems(page) {
+  await page.click('#open-archive');
+  await page.click('#tab-btn-wardrobe');
+  return page.evaluate(() =>
+    Object.fromEntries(
+      [...document.querySelectorAll('#wardrobe-list h3')].map((h) => [
+        h.textContent,
+        [...(h.nextElementSibling?.querySelectorAll('button.cosmetic') ?? [])].map((b) => {
+          const [, name, hint] = b.children;
+          return { name: name?.dataset.text ?? name?.textContent ?? '', hint: hint?.textContent ?? '', corrupt: Boolean(name?.classList.contains('corrupt')) };
+        }),
+      ]),
+    ),
+  );
+}
+
+await scenario('challenges: hidden before a Deep exit, then picked and carried into a Deep run', async ({ open }) => {
+  const adult = (extra) => ({ 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['ruins-4'], ...extra });
+  const fresh = await open(BASE, seed(adult({ 'netling.progress': {} })));
+  await fresh.click('#btn-netrun');
+  assert(!(await visible(fresh, '#region-challenge')), 'challenges open before any Deep exit');
+  await fresh.close();
+
+  const page = await open(BASE, seed(adult({ 'netling.progress': { deepExits: 1 } })));
+  await page.click('#btn-netrun');
+  assert(/CHALLENGE: NONE\. 0\/4 DONE/.test(await page.textContent('#region-challenge')), 'no challenge row');
+  await page.click('#region-challenge');
+  assert(/CHALLENGE: GLASS\..*DEEP AND SOURCE ONLY/.test(await page.textContent('#region-challenge')), 'Glass not picked');
+  const deepMeta = await page.locator('#region-list button').nth(4).locator('.rmeta').textContent();
+  assert(/^challenge: glass\./.test(deepMeta), `the Deep does not show it: ${deepMeta}`);
+  const publicMeta = await page.locator('#region-list button').nth(0).locator('.rmeta').textContent();
+  assert(!/challenge/.test(publicMeta), 'the Public Net claims a challenge');
+  await page.locator('#region-list button').nth(4).click();
+  await page.waitForTimeout(500);
+  const s = await saved(page);
+  assert(s.run?.region === 'deep' && s.run.challenge === 'glass' && s.run.challengeVoid === false, `run: ${JSON.stringify({ region: s.run?.region, c: s.run?.challenge })}`);
+});
+
+await scenario('daily trace: open during the cooldown, once a day, nothing kept, and a share line', async ({ open }) => {
+  const pet = awakeNetling({ stage: 'teen', form: 'kernel', inventory: ['coolant'] });
+  pet.lastRunEndAge = pet.ageMin; // the uplink is cooling down
+  const page = await open(BASE, seed({ 'netling.save': pet, 'netling.progress': {} }));
+  const before = (await saved(page)).stats;
+  await page.click('#btn-netrun');
+  assert(await visible(page, '#region-daily'), 'the list did not open for the daily trace during the cooldown');
+  assert(/^DAILY TRACE #\d+/.test(await page.textContent('#region-daily .rname')), 'no daily row');
+  assert(/exits 0\/10/.test(await page.textContent('#region-daily')), 'no exit count');
+  await page.click('#region-daily');
+  await page.waitForTimeout(400);
+  const s = await saved(page);
+  assert(s.run?.region === 'daily' && s.run.daily === true && /^\d{4}-\d{2}-\d{2}$/.test(s.run.day), `run: ${JSON.stringify({ region: s.run?.region, day: s.run?.day })}`);
+  const p = await page.evaluate(() => JSON.parse(localStorage.getItem('netling.progress')));
+  assert(p.daily?.day === s.run.day && !p.daily.share, 'the attempt was not marked at jack-in');
+  // No items from the inventory on the daily trace.
+  await page.locator('#inv-slots button').first().click();
+  assert(await page.isDisabled('#inv-use'), 'USE is open on the daily trace');
+  assert(/no items on the daily trace/.test(await page.textContent('#inv-desc')), 'the inventory does not say why');
+  await page.click('#inv-cancel');
+  // Abort at once (a first move could start an ICE fight): the summary closes into the share dialog.
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(400);
+  assert(await page.evaluate(() => document.getElementById('daily').open), 'no share dialog');
+  const share = await page.textContent('#daily-text');
+  assert(/^NETLING daily #\d+ \(\d{4}-\d{2}-\d{2}\) r1\nABORTED 0\/9 {2}ICE 0\/0 {2}Kernel\n>\.$/.test(share), `share: ${share}`);
+  await page.click('#daily-close');
+  const after = await saved(page);
+  assert(!after.run, 'the run is still open');
+  assert(after.inventory.includes('coolant'), 'the item is gone');
+  for (const k of ['charge', 'integrity', 'heat']) assert(Math.abs(after.stats[k] - before[k]) < 2, `${k} not given back: ${before[k]} -> ${after.stats[k]}`);
+  // Once a day: the row now offers the line again instead of a second attempt.
+  await page.click('#btn-netrun');
+  assert(/done today/.test(await page.textContent('#region-daily')), 'the row does not say done');
+  await page.click('#region-daily');
+  assert(await page.evaluate(() => document.getElementById('daily').open), 'the done row does not reopen the line');
+  assert(!(await saved(page)).run, 'a second attempt started');
+});
+
 await scenario('mainframe: before Root Access, the Source and the new forms read as corrupted', async ({ open }) => {
   const adult = { 'netling.save': awakeNetling({ stage: 'adult', form: 'chrome', teenForm: 'kernel', cleared: DEEP_CLEARED }), 'netling.codex': ['deep-1'] };
   const page = await open(BASE, seed(adult));
@@ -1530,6 +1719,20 @@ await scenario('mainframe: before Root Access, the Source and the new forms read
   await page.keyboard.press('Escape');
   const terms = await helpTerms(page);
   assert(terms.includes('0x00') && !terms.includes('mainframe'), `the field manual names the stage: ${terms}`);
+  await page.keyboard.press('Escape');
+  // In STYLE, the Mainframe unlocks are corrupted too: no ??? and no hint until Root Access.
+  const items = await wardrobeItems(page);
+  const shells = items.SHELL;
+  const bad = shells.filter((x) => x.name === '<<SHELL CORRUPTED>>');
+  assert(bad.length === 5 && bad.every((x) => x.corrupt && /read error/.test(x.hint)), `corrupted shells: ${JSON.stringify(shells)}`);
+  assert(!shells.some((x) => /never stops growing/.test(x.hint)), 'a corrupted shell shows its hint');
+  // Rack mount and Root prompt are the Mainframe's two crests.
+  for (const [section, word, n = 1] of [['SCREEN TINT', 'TINT'], ['SCREEN EFFECT', 'EFFECT'], ['CREST', 'CREST', 2], ['MUSIC', 'TRACK'], ['ACCESSORY: BODY', 'ITEM']]) {
+    const hit = items[section].filter((x) => x.name === `<<${word} CORRUPTED>>`);
+    assert(hit.length === n && hit.every((x) => x.corrupt), `${section}: ${JSON.stringify(items[section])}`);
+  }
+  const all = Object.values(items).flat();
+  assert(!all.some((x) => /written from|into the light|below the bottom|bravest|oldest one rest/.test(x.hint)), 'a corrupted item shows its hint');
 });
 
 await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ??? and hints, and the Source opens', async ({ open }) => {
@@ -1557,6 +1760,13 @@ await scenario('mainframe: after Root Access, a mainframe draws, the dex shows ?
   await page.keyboard.press('Escape');
   const terms = await helpTerms(page);
   assert(terms.includes('mainframe'), `the field manual has no rule: ${terms}`);
+  await page.keyboard.press('Escape');
+  // After Root Access the Mainframe shells are ordinary: Plat's is earned, the other four are ??? with a hint.
+  const items = await wardrobeItems(page);
+  const shells = items.SHELL;
+  assert(!Object.values(items).flat().some((x) => x.corrupt || x.name.includes('CORRUPTED')), `an item is still corrupted: ${JSON.stringify(items)}`);
+  assert(shells.some((x) => x.name === 'Platinum'), 'Platinum not earned by Plat');
+  assert(shells.filter((x) => x.name === '???' && /never stops growing/.test(x.hint)).length === 4, `no hints: ${JSON.stringify(shells)}`);
 });
 
 await scenario('mainframe: a Source run plays its own theme, and Source light can be worn', async ({ open }) => {

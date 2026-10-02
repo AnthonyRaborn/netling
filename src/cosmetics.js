@@ -3,6 +3,8 @@
 // { dex, codex, lineage, generation, progress: { streaks: { breach: { best } ... }, cleanJackouts, deepExits, sourceExits } }
 // Items marked `mainframe` belong to the Mainframe stage (docs/SOURCE_PLAN.md) and are hidden while CFG.mainframe is off.
 import { FRAGMENTS, ROOT_FRAGMENTS } from './netrun/codex.js';
+import { CHALLENGE_IDS } from './netrun/challenges.js';
+import { DAILY } from './netrun/daily.js';
 import { CFG, FORMS, TRAITS, TRAIT_CFG, SPECIES, isMainframeForm, lineOf } from './sim.js';
 import { CHATTER_GROUPS, chatterProgress, shownChatter } from './chatter.js';
 
@@ -61,6 +63,9 @@ export const LEGACY = {
 
 export const SLOTS = ['shell', 'tint', 'effect', 'sound', 'crest', 'music'];
 
+// A challenge run kept to the exit of the Deep or the Source (netrun/challenges.js).
+const challengeDone = (c, id) => (c.progress.challenges ?? []).includes(id);
+
 export const COSMETICS = {
   shell: [
     { id: 'standard', name: 'Standard issue', swatch: '#14121f', free: true },
@@ -72,6 +77,14 @@ export const COSMETICS = {
     { id: 'clear', name: 'Ghost clear', swatch: 'rgba(200,200,255,0.25)', hint: 'raise the one nobody sees.', check: (c) => c.dex.includes('ghost') },
     { id: 'gold', name: 'Corp gold', swatch: '#b8912a', hint: 'earn something from below.', check: (c) => ROOT_FRAGMENTS.every((f) => c.codex.includes(f.id)) },
     { id: 'holo', name: 'Holographic', swatch: 'linear-gradient(135deg,#ff2a6d,#05d9e8,#f9f002)', hint: 'see five lives through to the end.', check: (c) => fullLives(c) >= 5 },
+    // One for each Mainframe form, a step beyond its adult form's shell. They do not count toward the Mini device
+    // (ORIGINAL_SHELLS), so that goal stays where it was.
+    { id: 'platinum', name: 'Platinum', swatch: 'linear-gradient(160deg,#f2f4f8,#a9b0bd)', mainframe: true, hint: 'one loyal to the grid, that never stops growing.', check: (c) => c.dex.includes('plat') },
+    { id: 'airgap', name: 'Air gap', swatch: 'linear-gradient(180deg,#5a1f2a 45%,#050506 45% 55%,#5a1f2a 55%)', mainframe: true, hint: 'one that trusts nothing, that never stops growing.', check: (c) => c.dex.includes('airgap') },
+    { id: 'pidone', name: 'PID 1', swatch: '#1a0306', mainframe: true, hint: 'one that never misses a cycle, that never stops growing.', check: (c) => c.dex.includes('init') },
+    { id: 'torn', name: 'Panic tear', swatch: 'linear-gradient(100deg,#1d3040 48%,#000 48% 52%,#3a1020 52%)', mainframe: true, hint: 'one that lives on the edge, that never stops growing.', check: (c) => c.dex.includes('panic') },
+    { id: 'unplugged', name: 'Cut cable', swatch: 'linear-gradient(90deg,#121418 30%,#4b525d 30% 45%,#ff9f1c 45% 55%,#4b525d 55% 70%,#121418 70%)', hint: 'reach the bottom with every relay dark.', check: (c) => challengeDone(c, 'unplugged') },
+    { id: 'faint', name: 'Whisper', swatch: 'rgba(200,200,255,0.1)', mainframe: true, hint: 'the one nobody sees, that never stops growing.', check: (c) => c.dex.includes('whisper') },
   ],
   tint: [
     { id: 'teal', name: 'Classic teal', swatch: '#0b2226', lcd: '#0b2226', dark: '#03090a', free: true },
@@ -82,6 +95,7 @@ export const COSMETICS = {
     { id: 'abyss', name: 'Abyss', swatch: '#08081a', lcd: '#08081a', dark: '#020206', hint: 'listen to the bottom of the net.', check: (c) => regionDone(c, 'deep') },
     { id: 'guest', name: 'Guest pink', swatch: '#260d1c', lcd: '#260d1c', dark: '#0c0409', hint: 'say hello to whoever drops by, five times.', check: (c) => (c.progress.visitorsGreeted ?? 0) >= ATTENTION.greetings },
     { id: 'readonly', name: 'Read-only', swatch: '#0c0c0e', lcd: '#0c0c0e', dark: '#030304', mainframe: true, hint: 'read what the net was written from.', check: (c) => sourceDone(c) },
+    { id: 'blackout', name: 'Blackout', swatch: '#140405', lcd: '#140405', dark: '#050101', hint: 'reach the bottom seeing one step ahead.', check: (c) => challengeDone(c, 'blackout') },
     { id: 'amber', name: 'Amber', swatch: '#261a08', lcd: '#261a08', dark: '#0c0803', hint: 'three in a row, start to finish.', check: (c) => fullLifeStreak(c) >= 3 },
   ],
   effect: [
@@ -95,6 +109,7 @@ export const COSMETICS = {
     { id: 'aurora', name: 'Aurora', hint: 'keep it well for a whole day, a few hours at a time.', check: (c) => (c.flowMin ?? 0) >= ATTENTION.flowHours * 60 },
     { id: 'heatwave', name: 'Heatwave', hint: 'run it hot for the better part of two days.', check: (c) => (c.hotMin ?? 0) >= ATTENTION.hotHours * 60 },
     { id: 'static', name: 'Static', hint: 'find the way back up from the bottom.', check: (c) => (c.progress.deepExits ?? 0) >= 1 },
+    { id: 'baremetal', name: 'Bare metal', hint: 'reach the bottom without buying or using a thing.', check: (c) => challengeDone(c, 'baremetal') },
     { id: 'sourcelight', name: 'Source light', mainframe: true, hint: 'go down into the light three times, and come back.', check: (c) => (c.progress.sourceExits ?? 0) >= 3 },
   ],
   // Home sounds only; netruns keep each region's own voice.
@@ -164,6 +179,31 @@ export const COSMETICS = {
       // A server rack: a frame, three units with their lights, and its feet.
       pixels: ['#########', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#.......#', '#.##.#..#', '#########', '.#.....#.'],
     },
+    {
+      id: 'cracked',
+      name: 'Cracked pane',
+      hint: 'reach the bottom without losing a single fight.',
+      check: (c) => challengeDone(c, 'glass'),
+      // A pane of glass with one crack running down it.
+      pixels: ['#########', '#....#..#', '#...#...#', '#..##...#', '#....#..#', '#.....#.#', '#....#..#', '#...#...#', '#########'],
+    },
+    {
+      id: 'uptime',
+      name: 'Uptime',
+      hint: 'reach the exit of ten daily traces.',
+      check: (c) => (c.progress.dailyWins ?? 0) >= DAILY.winsForReward, // netrun/daily.js
+      // A calendar page, ticked.
+      pixels: ['.#.....#.', '#########', '#.......#', '#......##', '#.....#.#', '#.#..#..#', '#..##...#', '#.......#', '#########'],
+    },
+    {
+      id: 'rootprompt',
+      name: 'Root prompt',
+      mainframe: true,
+      hint: 'let the oldest one rest.',
+      check: (c) => c.progress.ended === true, // the ending has played (ending.js)
+      // The # of a root shell.
+      pixels: ['..#...#..', '..#...#..', '#########', '..#...#..', '..#...#..', '#########', '..#...#..', '..#...#..', '.........'],
+    },
   ],
   // Background music for home (tracks.js; docs/MUSIC.md). Netruns keep their own theme.
   music: [
@@ -175,6 +215,7 @@ export const COSMETICS = {
     { id: 'undertow', name: 'Undertow', hint: 'come back from the bottom three times.', check: (c) => (c.progress.deepExits ?? 0) >= 3 },
     { id: 'firstcommit', name: 'First commit', mainframe: true, hint: 'come back from below the bottom.', check: (c) => (c.progress.sourceExits ?? 0) >= 1 },
     { id: 'forum', name: 'Forum', hint: 'hear twenty-five things it says to itself.', check: (c) => (c.progress.chatter?.length ?? 0) >= ATTENTION.chatterHeard },
+    { id: 'exitzero', name: 'Exit code 0', hint: 'keep every rule there is, once each.', check: (c) => CHALLENGE_IDS.every((id) => challengeDone(c, id)) },
   ],
 };
 
@@ -195,6 +236,15 @@ export function sanitizeLabel(raw) {
     .slice(0, LABEL.max);
   return clean || LABEL.fallback;
 }
+
+// A locked Mainframe item before Root Access: corrupted data, not ??? and a hint, like the dex's corrupted records.
+const CORRUPTED_WORD = { shell: 'SHELL', tint: 'TINT', effect: 'EFFECT', sound: 'SOUND', crest: 'CREST', music: 'TRACK', item: 'ITEM' };
+export const corruptedText = (slot) => ({ name: `<<${CORRUPTED_WORD[slot]} CORRUPTED>>`, hint: 'read error at 0x00. it will not load.' });
+// Whether a wardrobe item shows as corrupted: a locked Mainframe item while Root Access has not been earned.
+export const corruptedCosmetic = (slot, c, { open, rootEarned }) => Boolean(c.mainframe) && !open && !rootEarned;
+
+// The shells that count toward the Mini device: the nine from before the Mainframe stage.
+export const ORIGINAL_SHELLS = ['standard', 'matte', 'chrome', 'brick', 'crimson', 'shifted', 'clear', 'gold', 'holo'];
 
 export const DEFAULT_WARDROBE = { shell: 'standard', tint: 'teal', effect: 'scanlines', sound: 'beep', crest: 'none', music: 'idle' };
 

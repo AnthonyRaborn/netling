@@ -3,6 +3,7 @@
 import { accessoryById, rollWornAccessory } from './accessories.js';
 import { weighted } from './random.js';
 import { clearedForStage } from './netrun/regions.js';
+import { challengeOn, voidChallenge } from './netrun/challenges.js';
 import { chatterPool, visitorLines } from './chatter.js';
 
 export const MIN = 60_000;
@@ -114,7 +115,8 @@ export const CFG = {
   overflowCrashIntegrity: 15,
   rebootMin: 20,
   // Integrity recovers whenever nothing is wrong, faster while it rests in the dark or naps.
-  // Tuned so an attentive player can bring it from 0 to 100 in about 16 hours with care actions.
+  // From 0 to 100 with nothing wrong: 20 hours awake, 12.5 in dark sleep or naps. Across a day with the lights off at
+  // night that measured 14.6 to 17.8 hours before any care action (COOL, PURGE and PATCH add more).
   integrityRegenPerHour: 5,
   integrityRestRegenPerHour: 8,
   careIntegrity: 4, // COOL, and PURGE with something to purge (PATCH already restores 10)
@@ -129,6 +131,10 @@ export const CFG = {
   visitGreetedAccessoryChance: 0.05, // GREET makes a stylish gift likelier
   visitWearsAccessoryChance: 0.75, // most visitors show off something from the wider net
   visitSecondAccessoryChance: 0.5, // and half of those a second, from another slot
+  // Friends' visitor cards (docs/ATTENTION.md): queued, then one drops by within about the hour, as soon as it is free.
+  friendQueueMax: 3,
+  friendChancePerMin: 1 / 30,
+  friendWaitMaxMin: 60,
   // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
   requestChancePerHour: 0.25,
@@ -374,7 +380,8 @@ export const mainframeDue = (s) => s.stage === 'adult' && !s.run && s.ageMin >= 
 // newForms: adult forms the player has never raised; they win ties a little more often.
 // rootAccess: the codex is complete, so NL-0 watches over this generation,
 // unless NL-0 spent itself rescuing the previous one: then it rests for a generation.
-export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [] }) {
+// nl0Rests: the ending has played (ending.js), so NL-0 speaks in its sleep. Wording only.
+export function createScript({ now, generation = 1, fragment = null, rng = Math.random, rootAccess = false, newForms = [], friends = [], nl0Rests = false }) {
   const rootCooling = rootAccess && Boolean(fragment?.rootUsed);
   if (rootCooling) rootAccess = false;
   const quirk = rollQuirk(rng, { origin: rootAccess || rootCooling });
@@ -423,6 +430,8 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     runCooldownCut: 0,
     visit: null,
     visitAccGifts: 0,
+    nl0Rests,
+    friends, // friends' visitor cards on their way: [{ id, form, palette, accessories, gen, deep, root, below, at }]
     request: null, // { kind: 'game' | 'cool', game?, startedAge }
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
     contractCheckAge: null, // the netling minute the UI last looked at posting one
@@ -446,7 +455,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     quirk,
     log: [
       { t: now, msg: `> compiling netling.v${generation}.0 ...` },
-      ...(rootCooling ? [{ t: now, msg: '> NL-0: i reached for the last one. i need to rest. be careful with this one.' }] : []),
+      ...(rootCooling ? [{ t: now, msg: nl0Rests ? '> NL-0 (asleep): i reached for the last one in my sleep. be careful with this one.' : '> NL-0: i reached for the last one. i need to rest. be careful with this one.' }] : []),
     ],
     deathCause: null,
     diedAt: null,
@@ -590,6 +599,7 @@ function step(s, t, rng) {
   else if (!rest && !alertReason(s)) s.axes.stability += (inFlow(s) ? CFG.flowStabilityPerHour : CFG.uptimeStabilityPerHour) / 60;
 
   stepVisit(s, t, rng);
+  stepFriends(s, t, rng);
   stepEvents(s, t, rng);
   stepRequest(s, t, rng);
   stepFlow(s);
@@ -686,6 +696,51 @@ function startVisit(s, t, rng) {
   log(s, t, `> a stray ${SPECIES[form].name.toLowerCase()}${wearing} pinged in. they're playing.`);
 }
 
+// --- friends' visitor cards -----------------------------------------------------------------
+// A card carries a friend's look and a few facts, nothing that plays (docs/ATTENTION.md). Before Root Access, a
+// Mainframe friend arrives as a corrupted record and its Mainframe items stay behind, as with the dex.
+
+export const visitHidden = (s, visit) => Boolean(visit) && isMainframeForm(visit.form) && !(CFG.mainframe && rootEarnedIn(s));
+
+// What the visitor is called in the log: a friend's form, or a corrupted record.
+export const visitorName = (s, visit) => (visitHidden(s, visit) ? 'corrupted record' : SPECIES[visit.form].name.toLowerCase());
+
+// A friend's handle, the way an IRC nick reads: its form and generation (daemon_g3), or ???_g5 for a corrupted record.
+// Built from the card, so no player types it.
+export const friendHandle = (form, gen, hidden) => `${hidden ? '???' : SPECIES[form].name.toLowerCase().replace(/[^a-z0-9]+/g, '')}_g${gen}`;
+const visitHandle = (s, v) => friendHandle(v.form, v.friend.gen, visitHidden(s, v));
+
+// The rarest thing a friend's line has done, after its generation. What only Root Access would explain stays corrupted.
+export function friendFeat(f, rootKnown) {
+  const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+  const best =
+    f.below > 0 ? (rootKnown ? plural(f.below, 'trip below the bottom', 'trips below the bottom') : '<<corrupted>>')
+    : f.root ? (rootKnown ? 'root access' : '<<corrupted>>')
+    : f.deep > 0 ? plural(f.deep, 'deep exit')
+    : '';
+  return best ? `gen ${f.gen}, ${best}` : `gen ${f.gen}`;
+}
+
+// The first card in line arrives once the netling is awake and free: by chance within the hour, or as soon as it can
+// after waiting that long. An empty queue rolls nothing, so the balance runs are unchanged.
+function stepFriends(s, t, rng) {
+  if (!s.friends?.length || s.visit || s.run || s.event || resting(s) || rebootMinutesLeft(s) > 0) return;
+  const due = t - s.friends[0].at >= CFG.friendWaitMaxMin * MIN;
+  if (!due && rng() >= CFG.friendChancePerMin) return;
+  const card = s.friends.shift();
+  const len = CFG.visitMinMin + Math.floor(rng() * (CFG.visitMaxMin - CFG.visitMinMin + 1));
+  const visit = { startedAge: s.ageMin, len, form: card.form, palette: card.palette, accessories: [], friend: { gen: card.gen, deep: card.deep, root: card.root, below: card.below } };
+  const hidden = visitHidden(s, visit);
+  visit.accessories = hidden ? [] : card.accessories.filter((id) => !accessoryById(id)?.mainframe || rootEarnedIn(s));
+  s.visit = visit;
+  // A friend's visit reads like a chat channel: it joins, says something, and quits (stepVisit).
+  const nick = visitHandle(s, visit);
+  log(s, t, `--> ${nick} has joined #netling (${friendFeat(visit.friend, rootEarnedIn(s))})`);
+  if (hidden) log(s, t, `<${nick}> r3c0rd c0rrupt3d. pl4y1ng anyw4y.`);
+  else if (visit.accessories.length) log(s, t, `<${nick}> wearing a ${visit.accessories.map((id) => accessoryById(id).name.toLowerCase()).join(' and ')} today`);
+  else log(s, t, `<${nick}> hi! want to play?`);
+}
+
 // While a visitor is here, Sync and Heat (not in flow) rise a little each minute. It leaves when time's up,
 // or early if the netling rests, crashes or jacks in. Now and then it leaves a gift.
 function stepVisit(s, t, rng) {
@@ -693,7 +748,7 @@ function stepVisit(s, t, rng) {
   if (!v) return;
   if (resting(s) || s.run || rebootMinutesLeft(s) > 0) {
     s.visit = null;
-    log(s, t, '> the visitor logged off.');
+    log(s, t, v.friend ? `<-- ${visitHandle(s, v)} has quit (connection reset)` : '> the visitor logged off.');
     return;
   }
   s.stats.sync = clamp(s.stats.sync + CFG.visitSync / v.len);
@@ -701,17 +756,18 @@ function stepVisit(s, t, rng) {
   if (!inFlow(s)) s.stats.heat = clamp(s.stats.heat + CFG.visitHeat / v.len);
   if (s.ageMin - v.startedAge < v.len) return;
   s.visit = null;
-  let gift = '';
+  let gift = ''; // what it left behind, as the end of a sentence: 'something stylish behind'
   if (rng() < (v.greeted ? CFG.visitGreetedAccessoryChance : CFG.visitAccessoryChance)) {
     // The UI picks which accessory (it knows what's already owned): see drainAccessoryInbox.
     s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
-    gift = ' it left something stylish behind.';
+    gift = 'something stylish behind';
   } else if (rng() < CFG.visitItemChance) {
     const id = weighted(DROPS.visit, rng);
     const name = ITEMS[id].name;
-    gift = grantItem(s, id).includes('full') ? ` it left a ${name}, but inventory is full.` : ` it left a gift: ${name}.`;
+    gift = grantItem(s, id).includes('full') ? `a ${name}, but inventory is full` : `a gift: ${name}`;
   }
-  log(s, t, `> the visitor logged off.${gift}`);
+  if (v.friend) log(s, t, `<-- ${visitHandle(s, v)} has quit (${gift ? `left ${gift}` : 'see you around'})`);
+  else log(s, t, `> the visitor logged off.${gift ? ` it left ${gift}.` : ''}`);
 }
 
 // --- attention rewards ---------------------------------------------------------------------
@@ -936,6 +992,8 @@ export function migrate(s) {
   s.runCooldownCut ??= 0;
   s.visit ??= null;
   s.visitAccGifts ??= 0;
+  s.friends ??= [];
+  s.nl0Rests ??= false;
   s.life ??= { ...LEGACY_LIFE }; // compiled before lives were shortened: it keeps its seven days
   s.newForms ??= [];
   s.cleared ??= clearedForStage(s.stage); // from before the unlock order: nothing it could reach closes
@@ -981,7 +1039,7 @@ function rootRescue(s, t, cause) {
   s.virus = false;
   s.integrityZeroMin = 0;
   s.careMistakes = Math.min(s.careMistakes, CFG.maxMistakes - 1);
-  log(s, t, `> NL-0: not yet. (${cause} reversed. root access spent for this generation.)`);
+  log(s, t, `> ${s.nl0Rests ? 'NL-0 (asleep)' : 'NL-0'}: not yet. (${cause} reversed. root access spent for this generation.)`);
   return true;
 }
 
@@ -1081,6 +1139,8 @@ export function itemBlockReason(s, slot) {
   if (base) return base;
   const id = s.inventory?.[slot];
   if (!id) return 'empty slot.';
+  // The daily trace keeps nothing at stake (netrun/daily.js), and an item's effects reach past the run.
+  if (s.run?.daily) return 'no items on the daily trace.';
   if (ITEMS[id].awake && resting(s)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (id === 'repair' && s.stats.integrity >= 100) return 'integrity already at 100.';
   if (id === 'overclock') {
@@ -1193,7 +1253,9 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       const id = s.inventory[slot];
       const msg = useItem(s, id, rng);
       s.inventory.splice(slot, 1);
-      res = ok(msg, 'patch');
+      // Bare metal (netrun/challenges.js): using an item mid-run ends the challenge (the UI asks first).
+      const broke = challengeOn(s.run, 'baremetal') && voidChallenge(s.run, 'an item was used.');
+      res = ok(`${msg}${broke ? ' bare metal broken.' : ''}`, 'patch');
       break;
     }
     case 'patch': {
@@ -1209,7 +1271,9 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.visit.greeted = true;
       const line = pick(visitorLines(), rng);
       s.chatter = { id: line.id, startedAge: s.ageMin };
-      res = { ...ok(`said hello to the ${SPECIES[s.visit.form].name.toLowerCase()}.`, 'visit'), greeted: true };
+      const v = s.visit;
+      res = { ...ok(v.friend ? `said hello to ${visitHandle(s, v)}.` : `said hello to the ${visitorName(s, v)}.`, 'visit'), greeted: true };
+      if (v.friend) res.friend = { form: v.form, ...v.friend };
       break;
     }
     case 'cool': {

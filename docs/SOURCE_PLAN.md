@@ -8,7 +8,7 @@ Ids are permanent now that they have shipped (CLAUDE.md rule 1). Lore text can s
 
 - **Pacing in real play.** The bots run more than people do. Watch real play before changing the feat counts (3 exits, or 2 clean) or `deep-5`'s place; Root Access stays the gate.
 - **The Chrome corp-relay fix** is what makes the feat fair to Chrome. If corp relays ever go, revisit the feat ([below](#chrome-lags-on-exits-fixed-corp-relays)).
-- **A Source-only anomaly** ("The purge order") and **five mainframe shells**: left out of the first cut ([Optional](#optional-not-in-the-first-cut), [Unlocks](#unlocks-and-cosmetics)).
+- Nothing left from the first cut: the five mainframe shells ([Unlocks](#unlocks-and-cosmetics)) and the Source-only anomaly ([The purge order](#after-shipping-the-purge-order)) were built after shipping.
 - **A human pass** on a phone: the art, the glitching Source name, and a listen to the Source theme and First commit.
 
 ## Contents
@@ -144,7 +144,7 @@ Once the Source is open, `updateContract` offers it like any other region. There
 
 ### Optional, not in the first cut
 
-A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Anomalies have no region filter today, so this would add one. It can wait for a later pass.
+A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Anomalies have no region filter today, so this would add one. It can wait for a later pass. **Built after shipping:** see [The purge order](#after-shipping-the-purge-order).
 
 ## Codex
 
@@ -154,8 +154,8 @@ A Source-only anomaly (for example, "The purge order": READ IT or LEAVE IT). Ano
 |---|---|---|---|
 | `deep-5` | The Deep | NL-0 | there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again. |
 | `source-1` | The Source | header | SOURCE. read-only. last write: before v1.0. |
-| `source-2` | The Source | commit message | initial commit: 4,096 maintenance processes. TODO: give them a way to stop. |
-| `source-3` | The Source | unexecuted directive | PURGE sector 7F. status: pending. pending. pending. pending. |
+| `source-2` | The Source | commit message | initial commit: maintenance processes, as many as it takes. TODO: give them a way to stop. |
+| `source-3` | The Source | unexecuted directive | PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending. |
 | `source-4` | The Source | a comment in the code, unsigned | if anyone ever reads this far: they were never bugs. |
 
 `deep-5` goes last in The Deep's part of `FRAGMENTS`. It is the one that opens the way, as `ruins-4` does for The Deep. It also ends The Deep on NL-0's fear instead of its thanks. Placing it before `deep-4` would keep the thanks as the last word, but then the gate would be a fragment in the middle of the region, which nothing else does. Players who already have `deep-1` to `deep-4` get `deep-5` next either way.
@@ -187,13 +187,13 @@ Decided ids (none is used anywhere today). Cosmetic ids are stored per slot (`sl
 | Source codex complete | tint | `readonly` | Read-only | read what the net was written from. | all four Source fragments found (`regionDone(c, 'source')`), as every region's codex unlocks a tint; a neutral near-black LCD to match the Source's palette |
 | Back from the Source | music | `firstcommit` | First commit | come back from below the bottom. | reach the Source's exit once (`progress.sourceExits`, counted like `deepExits`) |
 | Back from the Source, three times | effect | `sourcelight` | Source light | go down into the light three times, and come back. | `progress.sourceExits >= 3` |
-| Source-only find | accessory, body slot | `checksum` | Checksum | something small follows the bravest runners up from the source. | found only in the Source (`regions: ['source']`), very rare, like the Deep's drone buddy |
+| Source-only find | accessory, body slot | `checksum` | Checksum | something small follows the bravest runners up from below the bottom. | found only in the Source (`regions: ['source']`), very rare, like the Deep's drone buddy |
 
 **Source light** is a soft white glow: a CSS layer like the other effects (`style.css`, `.screen.fx-sourcelight .fx-layer`), a faint white inner glow from the screen edges (a radial gradient, around 6 to 12% white) that breathes very slowly (about 8 seconds a cycle, `ease-in-out`). It must read apart from Bloom (a cyan drop shadow on the LCD) and Aurora (drifting colours). A slow fade is not a flash, but it still follows CLAUDE.md rule 7, and under the Calm motion setting or `prefers-reduced-motion` it holds still at its middle brightness, as Aurora does. The exact look is settled when it is built, against the LCD and every tint.
 
 The Source's own netrun theme (a region variant in `tracks.js`, [Art and sound](#art-and-sound)) plays on its own and needs no unlock; `firstcommit` is a separate track for home.
 
-Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed.
+Left for later: five mainframe shells, one per form, to match the adult-form shells. Ids can be added later but never renamed. **Built after shipping:** `platinum`, `airgap`, `pidone`, `torn` and `faint`, each unlocked by having its form in the dex, the same rule as the adult-form shells; they do not count toward the Mini device ([CONTENT_CATALOG.md](CONTENT_CATALOG.md#shells-14)). Locked, they read as `<<SHELL CORRUPTED>>` until Root Access, like the dex's records, and so do the other locked Mainframe unlocks in STYLE (named for their slot) and the Checksum, whose hint no longer names the Source ("...up from below the bottom.").
 
 The `LEGACY.adultsRaised` goal counts `FORMS[e.form]`. It must count lines (`lineOf`), so a mainframe still counts as its adult form.
 
@@ -479,6 +479,26 @@ Not done here: a human look at the art and the glitching name on a phone; listen
 ## After shipping: the blink
 
 The corrupted dex records blink like the Source's name, and the blink now changes the text too (asked for after step 7: color and slant alone were too slight for a 0.4 s blink). `ui/corrupt.js` drives every `.corrupt` element and every static thumbnail from one timer: every 3.2 s, for 0.4 s, about 30% of the letters become block glyphs (`░▒▓█`) or look-alike digits (O to 0, E to 3), different each time, and the static re-rolls with a three-row band shifted sideways. A Zalgo look (stacked combining marks) was considered and left out: it spills into neighbouring lines and renders unevenly across fonts. The CSS animation is gone; with motion calmed nothing blinks. Tests: `tests/corrupt.test.js`, and the smoke scenario checks a blink, its return and the calm setting.
+
+## After shipping: the purge order
+
+The Source's own anomaly, `purge` in `ANOMALIES` with `regions: ['source']`; `anomaliesFor(region)` is the new region filter, so an anomaly node in the Source picks from six and elsewhere from the same five as before. It is the order in `source-3` ("PURGE sector 7F. status: pending."), found unexecuted.
+
+| Option | Effect | Log |
+|---|---|---|
+| READ IT | -15 Integrity, 60% the next codex fragment (the per-life cap applies) | One of three at random (`PURGE_READINGS`): "PURGE: all maintenance processes. first on the list, in capitals: NL-0.", "...the target list is every netling ever compiled. yours is near the end.", or "...`./purge: permission denied. owner: nobody.` it was never allowed to run." |
+| LEAVE IT | Sync +15, stability +1 | "left pending. pending. pending. something down here stops holding its breath." |
+
+Chosen by the maintainer from three drafts ("knowledge costs"). The three readings came later. Source runs are rare (attentive lines average under one across four lives in `lineages.json`), so few players will read all three; `source-3` was rewritten to carry NL-0 as the first target and the permission fault ("owner: nobody": someone set the order's owner so it could never run), leaving only the line about the player's own netling to the anomaly. Once the line knows all four Source fragments, READ IT has nothing left to give from the codex, so it reveals the next 3 layers instead ("you know this list by heart now. the sector map in its margin is new."), and its hint reads "-15 int, reveal ahead" (`codexDoneHint`, `ctx.codexDone`). Chosen by the maintainer over loot or deleting the order. The bots' `risky` style reads it; `orderly`, `corp` and `indie` leave it (their existing `leave` preference); the rest pick at random. Baselines: `lives.json` did not move. In `netruns.json` the Source gives 0.03 to 0.07 more fragments a run and its stability lean is about 0.2 less negative for every style and form; exits move by 2 to 4 points for a few (within noise). `lineages.json` moves only by small amounts (under 0.1 in most rows), from Source runs drawing differently.
+
+## After shipping: the ending
+
+The story's close (`src/ending.js` for the text, trigger and credits; `src/ui/ending.js` for the scene). Decided by the maintainer: the same for everyone, the player runs the command, and NL-0 never names a number of processes ("so many of us"), so the scene does not tie the lore down.
+
+- **Trigger** (`endingDue`): every fragment in play (27 with the stage on) and at least one Source exit (`progress.sourceExits`), once (`progress.ended`). Nothing else (dex, style, lineage goals). Checked when a run closes (`play.js`) and about a second after load, so a player who already qualified sees it once; never over a session, the lock, another tab, onboarding or another dialog.
+- **Scene**: a `/SOURCE/PURGE` terminal dialog types `ENDING_BEFORE` a line every 600 ms (`cat purge`, `./purge`, permission denied), then waits on a `sudo rm purge` button. Pressing it records the ending at once (closing the dialog early still counts), then types `ENDING_AFTER` (root access granted by NL-0, `removed 'purge'.`, NL-0's goodbye, a `git commit -m "give them a way to stop"`) and the credits. With motion calmed each part prints at once.
+- **Credits** (`creditLines`): `git log --reverse --oneline` of the player's line from the lineage records (version, the body it ended in, age, cause), the living netling as `running`, "and NL-0, who waited.", then `NETLING`, `Anthony W. Raborn`, `Co-authored-by: Claude Code (Anthropic)` (`MAKERS`).
+- **After**: the crest Root prompt (`rootprompt`, a `#`; hint "let the oldest one rest."; corrupted until Root Access like the other Mainframe unlocks); REPLAY ENDING in the codex beside REPLAY TRANSMISSION; the home log keeps `> removed 'purge'. NL-0 is resting.`. NL-0 speaks in its sleep from then on (`nl0Rests` on the save, passed to each new compile): `NL-0 (asleep): not yet.` on a rescue, the cooling line, `NL-0 (asleep): zzz. i'll wait up here.` on a Source jack-in, and the chatter line `lin-rest` ("NL-0 is resting. i keep the noise down."). Wording only: Root Access works as before, and the baselines did not move.
 
 ## Risks
 

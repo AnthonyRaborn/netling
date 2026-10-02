@@ -112,7 +112,7 @@ Damage sources add up. If there are none, Integrity regenerates.
 
 Care actions add flat Integrity on top: COOL +4, PURGE that clears something +4, PATCH +10, Repair kit +40.
 
-The `integrityRegenPerHour` comment in `sim.js` says a full recovery takes "about 16 hours". Not measured. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md#open-questions).
+A full recovery from 0 takes 20 hours awake or 12.5 hours of dark sleep or naps. Measured across a real day with the lights off at night: 14.6 hours from 20:00, 15.5 from 14:00, 17.8 from 08:00, before any care action.
 
 ### Cache and digestion
 

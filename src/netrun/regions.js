@@ -108,6 +108,27 @@ REGIONS.tutorial = {
   noCooldown: true,
 };
 
+// The daily trace (daily.js): one map a day, the same for everyone, with nothing at stake. Not in the region order: it
+// opens nothing and needs nothing cleared. Its rolls are seeded, it keeps no loot, finds no fragments or accessories,
+// and what the run cost the netling is given back at the end.
+REGIONS.daily = {
+  name: 'Daily Trace',
+  blurb: 'the same map for everyone today. nothing kept, nothing lost.',
+  minStage: 'baby',
+  daily: true,
+  layers: 8,
+  width: [2, 3],
+  nodes: { cache: 3, ice: 7, relay: 1, checkpoint: 1, market: 1, anomaly: 2 },
+  loot: { coolant: 2, antivirus: 2, booster: 2, repair: 2, memory: 1, voucher: 1, blackice: 1, segfault: 1 },
+  iceDamage: 45,
+  exitBonus: 1,
+  noStyleDrops: true,
+  noFragments: true,
+  noCooldown: true,
+  palette: { main: '#ffb000', accent: '#ff2a6d', bg: '#1f1503' },
+  sound: { mult: 1.1, wave: 'square' },
+};
+
 // The way down: each region opens once this netling has reached the exit of the one before it.
 export const REGION_ORDER = ['public', 'bazaar', 'corp', 'ruins', 'deep', 'source'];
 // The regions in play: every one, or all but the Mainframe stage's while it is switched off (pass CFG.mainframe;

@@ -1,6 +1,6 @@
 // The Archive dialog (lineage, record, dex, codex), the codex and dex bookkeeping behind it,
 // and NL-0's transmission.
-import { PALETTES, SPECIES, CFG } from '../sim.js';
+import { PALETTES, SPECIES, CFG, friendFeat, friendHandle, isMainframeForm } from '../sim.js';
 import { dexEntries, discover, lineageChain } from '../archive.js';
 import { REGIONS, shownRegions } from '../netrun/regions.js';
 import { allFragmentsFound, codexByRegion, fragmentById, liveFragments, ROOT_FRAGMENTS } from '../netrun/codex.js';
@@ -189,6 +189,7 @@ function renderArchive() {
 
   renderWardrobe();
   $('codex-gift').hidden = !rootUnlocked();
+  $('replay-ending').hidden = !app.progress.ended;
   const groups = codexByRegion(app.codex, shownRegions(CFG.mainframe));
   const live = liveFragments();
   $('codex-count').textContent = `${live.filter((f) => app.codex.includes(f.id)).length}/${live.length}`;
@@ -216,7 +217,7 @@ function renderArchive() {
           d.className = 'frag';
           const b = document.createElement('b');
           b.textContent = e.title;
-          d.append(b, e.text);
+          d.append(b, ...redacted(e.text));
         }
         return d;
       });
@@ -225,6 +226,7 @@ function renderArchive() {
   );
 
   renderChatter();
+  renderGuestbook();
 
   const entries = dexEntries(app.dex, { rootEarned: rootUnlocked() });
   $('dex-count').textContent = `${entries.filter((e) => e.found).length}/${entries.length}`;
@@ -274,6 +276,56 @@ function renderChatter() {
       return [h, ...groupLines];
     }),
   );
+}
+
+// Friends' netlings greeted, newest first, as a channel log: [10/02 12:04] --> daemon_g3 has joined (gen 3, 2 deep exits).
+// A Mainframe friend stays ???_g5 until Root Access.
+const two = (n) => String(n).padStart(2, '0');
+const stamp = (at) => {
+  const d = new Date(at);
+  return `[${two(d.getMonth() + 1)}/${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}]`;
+};
+function renderGuestbook() {
+  const book = app.progress.guestbook ?? [];
+  const rootKnown = rootUnlocked();
+  const h = document.createElement('h3');
+  h.textContent = 'GUESTBOOK ';
+  const count = document.createElement('span');
+  count.textContent = String(book.length);
+  h.append(count);
+  if (!book.length) {
+    const d = document.createElement('div');
+    d.className = 'frag missing';
+    d.textContent = "say hello when a friend's netling drops by. visitor cards are in SYSTEM.";
+    return $('guestbook').replaceChildren(h, d);
+  }
+  const log = document.createElement('div');
+  log.className = 'channel-log';
+  log.append(
+    ...[...book].reverse().map((e) => {
+      const d = document.createElement('div');
+      const hidden = isMainframeForm(e.form) && !rootKnown;
+      const nick = document.createElement('span');
+      nick.textContent = friendHandle(e.form, e.gen, hidden);
+      if (hidden) nick.className = 'corrupt';
+      d.append(`${stamp(e.at)} --> `, nick, ` has joined (${friendFeat(e, rootKnown)})`);
+      return d;
+    }),
+  );
+  $('guestbook').replaceChildren(h, log);
+}
+
+// A fragment's text, with each <<REDACTED>> glitching now and then like a corrupted record (ui/corrupt.js). Unlike those,
+// it never repairs: the corp blacked it out, nothing is locked behind it.
+export const REDACTED = '<<REDACTED>>';
+function redacted(text) {
+  return text.split(REDACTED).flatMap((part, i) => {
+    if (!i) return [part];
+    const mark = document.createElement('span');
+    mark.className = 'corrupt';
+    mark.textContent = REDACTED;
+    return [mark, part];
+  });
 }
 
 function selectTab(name) {

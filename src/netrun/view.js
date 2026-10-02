@@ -8,6 +8,10 @@ import { iceSpeed, moveTo, resolveIce, choose, abortRun, closeRun, runOptions, v
 import { ITEMS } from '../sim.js';
 import { fragmentById } from './codex.js';
 import { accessoryById } from '../accessories.js';
+import { challengeById } from './challenges.js';
+import { dayNumber } from './daily.js';
+
+const CONFIRM_MS = 3000; // an option with `confirm` needs a second press within this
 
 const MAP_TOP = 24;
 const MAP_BOTTOM = 212;
@@ -116,10 +120,17 @@ export class RunView {
       const opts = run.pending.options;
       if (key === 'left' || key === 'right') {
         this.choiceCursor = (this.choiceCursor + (key === 'left' ? opts.length - 1 : 1)) % opts.length;
+        this.confirming = null;
         this.sound('move');
       } else if (key === 'a') {
         const opt = opts[this.choiceCursor];
         if (opt.disabled) return this.sound('error');
+        // Bare metal: buying an item ends the challenge, so it takes a second press.
+        if (opt.confirm && !(this.confirming?.id === opt.id && performance.now() < this.confirming.until)) {
+          this.confirming = { id: opt.id, until: performance.now() + CONFIRM_MS };
+          return this.sound('error');
+        }
+        this.confirming = null;
         const res = choose(this.pet, opt.id, this.rng);
         if (!res.ok) return this.sound('error');
         this.sound(res.result === 'disconnected' ? 'lose' : res.result === 'jacked' ? 'win' : 'select');
@@ -159,7 +170,7 @@ export class RunView {
       this.abortNow();
     } else {
       this.abortArmed = performance.now() + 2500;
-      this.toast = { msg: 'press ABORT again to bail out. loot will be lost.', until: this.abortArmed };
+      this.toast = { msg: this.run.daily ? "press ABORT again to end today's trace." : 'press ABORT again to bail out. loot will be lost.', until: this.abortArmed };
     }
   }
 
@@ -196,10 +207,16 @@ export class RunView {
     const nodePal = REGIONS[run.region].palette; // node colors stay fixed so types read at a glance
     const visible = visibleNodeIds(this.pet);
 
+    // Blackout: nothing past one step ahead is drawn, not even the shape of the map.
+    const dark = run.challenge === 'blackout';
+    const ahead = nodeById(map, run.pos).layer + 1;
+    const shown = (n) => !dark || n.layer <= ahead || run.visited.includes(n.id);
     // edges
     for (const n of map.nodes) {
+      if (!shown(n)) continue;
       const a = this.nodePos(n);
       for (const e of n.edges) {
+        if (!shown(nodeById(map, e))) continue;
         const b = this.nodePos(nodeById(map, e));
         const walked = run.visited.includes(n.id) && run.visited.includes(e);
         const live = n.id === run.pos && opts.some((o) => o.id === e);
@@ -213,6 +230,7 @@ export class RunView {
     }
     // nodes
     for (const n of map.nodes) {
+      if (!shown(n)) continue;
       const { x, y } = this.nodePos(n);
       if (!visible.has(n.id) && n.type !== 'exit') {
         ctx.fillStyle = DIM;
@@ -255,6 +273,11 @@ export class RunView {
     text(ctx, region, 12, 12, { size: 18, color: DIM });
     // Jacked in overclocked: ICE runs slower and bites harder all run.
     if (run.hot) text(ctx, 'OC', 22 + ctx.measureText(region).width, 12, { size: 18, color: '#ff9f1c' });
+    // The challenge, dimmed once broken.
+    if (run.challenge) {
+      const label = `${challengeById(run.challenge).name.toUpperCase()}${run.challengeVoid ? ' OFF' : ''}`;
+      text(ctx, label, W / 2, 12, { size: 18, align: 'center', color: run.challengeVoid ? DIM : '#05d9e8' });
+    }
     const job = contractShort(run);
     if (job) text(ctx, job, W - 12, 12, { size: 18, align: 'right', color: job.startsWith('JOB LOST') ? DIM : '#f9f002' });
     if (tutorial) this.drawTutorialTip(ctx, sel, toast);
@@ -288,7 +311,8 @@ export class RunView {
       text(ctx, `${on ? '>' : ' '} ${o.label}`, 44, 108 + i * 26, { size: 22, color });
     });
     const sel = p.options[this.choiceCursor];
-    text(ctx, sel?.hint ?? '', 12, 234, { size: 18, color: sel?.disabled ? '#2f4f54' : '#c7f9ff' });
+    const asking = sel?.confirm && this.confirming?.id === sel.id && performance.now() < this.confirming.until;
+    text(ctx, asking ? sel.confirm.toLowerCase() : sel?.hint ?? '', 12, 234, { size: 18, color: asking ? '#f9f002' : sel?.disabled ? '#2f4f54' : '#c7f9ff' });
   }
 
   drawHud(ctx, pal) {
@@ -298,7 +322,7 @@ export class RunView {
       [`CHG ${Math.round(st.charge)}`, st.charge < 15 ? pal.accent : '#c7f9ff'],
       [`INT ${Math.round(st.integrity)}`, st.integrity < 35 ? pal.accent : '#c7f9ff'],
       [`HEAT ${Math.round(st.heat)}`, hot ? pal.accent : '#c7f9ff'],
-      [`LOOT ${this.run.loot.length}`, '#f9f002'],
+      this.run.daily ? [`#${dayNumber(this.run.day)}`, '#f9f002'] : [`LOOT ${this.run.loot.length}`, '#f9f002'],
     ];
     parts.forEach(([t, c], i) => text(ctx, t, 12 + i * 96, 260, { size: 20, color: c }));
   }
@@ -307,9 +331,11 @@ export class RunView {
     const run = this.run;
     const region = REGIONS[run.region];
     const good = run.result === 'jacked';
-    const title = { jacked: 'JACKED OUT', disconnected: 'DISCONNECTED', aborted: 'RUN ABORTED' }[run.result];
+    const exit = run.result === 'jacked' && nodeById(run.map, run.pos)?.type === 'exit';
+    const title = run.daily && exit ? 'TRACE COMPLETE' : { jacked: 'JACKED OUT', disconnected: 'DISCONNECTED', aborted: 'RUN ABORTED' }[run.result];
     const tone = good ? region.palette.main : '#ff2a6d'; // failure always reads red
-    text(ctx, region.name.toUpperCase(), W / 2, 22, { size: 18, align: 'center', color: DIM });
+    text(ctx, run.daily ? `${region.name.toUpperCase()} #${dayNumber(run.day)}` : region.name.toUpperCase(), W / 2, 22, { size: 18, align: 'center', color: DIM });
+    if (run.daily) return this.drawDailySummary(ctx, pal, exit);
     text(ctx, title, W / 2, 52, { size: 40, align: 'center', color: tone, glow: tone });
 
     // Run record: how far, how the ICE went, what it cost.
@@ -332,10 +358,27 @@ export class RunView {
         ]
       : [[run.result === 'disconnected' ? 'loot and fragments lost.' : 'loot abandoned.', '#ff2a6d']];
     if (good && !lines.length) lines.push(['came back empty-handed.', DIM]);
+    if (run.challenge) {
+      const name = challengeById(run.challenge).name.toLowerCase();
+      lines.unshift(run.challengeWon ? [`challenge complete: ${name}`, '#05d9e8'] : [`challenge not met: ${name}`, DIM]);
+    }
     const job = run.contract?.settled;
     if (job === 'met') lines.unshift([`contract complete: +${contractPay(run.contract)}`, '#f9f002']);
     if (job === 'missed') lines.unshift(['contract not met. no harm done.', DIM]);
     lines.slice(0, 5).forEach(([s, c], i) => text(ctx, s, W / 2, 140 + i * 20, { size: 19, align: 'center', color: c }));
+    text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
+  }
+
+  // The daily trace keeps nothing, so its card shows the route as it will be shared (daily.js) instead of loot.
+  drawDailySummary(ctx, pal, exit) {
+    const run = this.run;
+    const t = run.tally ?? {};
+    const reached = nodeById(run.map, run.pos)?.layer ?? 0;
+    text(ctx, `layers ${reached}/${run.map.layerCount - 1}   ICE ${t.iceWon ?? 0}W ${t.iceLost ?? 0}L ${t.icePhased ?? 0}~`, W / 2, 86, { size: 20, align: 'center', color: '#c7f9ff' });
+    const tail = exit ? [] : run.result === 'disconnected' ? ['!'] : run.result === 'aborted' ? ['.'] : [];
+    text(ctx, [...(run.trail ?? []), ...tail].join(' '), W / 2, 124, { size: 22, align: 'center', color: exit ? pal.main : '#ff2a6d' });
+    text(ctx, 'nothing kept, nothing lost.', W / 2, 160, { size: 19, align: 'center', color: DIM });
+    text(ctx, 'the result is ready to share.', W / 2, 182, { size: 19, align: 'center', color: DIM });
     text(ctx, '[ PRESS A ]', W / 2, 256, { size: 24, align: 'center', color: pal.main });
   }
 }

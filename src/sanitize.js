@@ -2,6 +2,7 @@
 // Stored data can be damaged, edited by hand, or arrive in a hostile code, so nothing is trusted:
 // each value is rebuilt from known fields, and anything unusable falls back to a safe default.
 // Pure functions; no DOM.
+import { CHALLENGE_IDS, CHALLENGE_REGIONS } from './netrun/challenges.js';
 import {
   SAVE_VERSION,
   SPECIES,
@@ -31,6 +32,7 @@ import { CHATTER_IDS } from './chatter.js';
 import { ACCESSORIES, PROPS, STYLE_ITEMS, WEAR_SLOTS, HEX, accessoryById } from './accessories.js';
 import { FRAGMENTS } from './netrun/codex.js';
 import { REGIONS, REGION_ORDER, clearedForStage } from './netrun/regions.js';
+import { DAILY, TRAIL_CHARS, dailySeed, isDayKey } from './netrun/daily.js';
 import { ANOMALIES } from './netrun/anomalies.js';
 import { CONTRACT_KINDS, RUN_CFG } from './netrun/run.js';
 import { CHECKIN } from './checkin.js';
@@ -137,6 +139,37 @@ function cleanPending(phase, p, strict) {
   return { ...(strict ? {} : p), kind: p.kind, title: p.title.slice(0, 200), text: p.text.slice(0, 500), ...extra, options };
 }
 
+// The daily trace's fields (netrun/daily.js). The seed always comes from the date, never from storage.
+function cleanStake(raw) {
+  const k = isObj(raw) ? raw : {};
+  const delta = (v) => num(v, 0, -1000, 1000);
+  const items = (v) => (Array.isArray(v) ? v.filter((id) => has(ITEMS, id)).slice(0, 50) : []);
+  const st = isObj(k.stats) ? k.stats : {};
+  const ax = isObj(k.axes) ? k.axes : {};
+  return {
+    stats: { charge: delta(st.charge), sync: delta(st.sync), integrity: delta(st.integrity), heat: delta(st.heat) },
+    axes: { allegiance: delta(ax.allegiance), stability: delta(ax.stability) },
+    scrip: delta(k.scrip),
+    careMistakes: int(k.careMistakes, 0, -100, 100),
+    taken: items(k.taken),
+    given: items(k.given),
+    order: items(k.order),
+  };
+}
+function cleanDailyRun(raw) {
+  const day = isDayKey(raw.day) ? raw.day : DAILY.epoch;
+  return {
+    daily: true,
+    day,
+    seed: dailySeed(day),
+    rollKey: Number.isInteger(raw.rollKey) && raw.rollKey >= 0 ? raw.rollKey : null,
+    rolls: int(raw.rolls, 0, 0, 10000),
+    stake: cleanStake(raw.stake),
+    trail: Array.isArray(raw.trail) ? raw.trail.filter((c) => typeof c === 'string' && c.length === 1 && TRAIL_CHARS.includes(c)).slice(0, 40) : [],
+    refunded: bool(raw.refunded),
+  };
+}
+
 function cleanRun(raw, s, strict) {
   if (!isObj(raw) || !has(REGIONS, raw.region) || !isObj(raw.map) || !Array.isArray(raw.map.nodes)) return null;
   if (!Number.isInteger(raw.map.layerCount) || raw.map.layerCount < 2) return null;
@@ -171,6 +204,9 @@ function cleanRun(raw, s, strict) {
     pending,
     phased: bool(raw.phased),
     hot: bool(raw.hot), // jacked in overclocked
+    challenge: CHALLENGE_REGIONS.includes(raw.region) && CHALLENGE_IDS.includes(raw.challenge) ? raw.challenge : null, // netrun/challenges.js
+    challengeVoid: bool(raw.challengeVoid),
+    challengeWon: bool(raw.challengeWon),
     insured: bool(raw.insured), // Chrome's corp insurance, spent for this run
     insuredTimes: int(raw.insuredTimes, raw.insured === true ? 1 : 0, 0, 9), // how many times it paid out
     freePhases: int(raw.freePhases, raw.phased === true ? 1 : 0, 0, 9), // ICE a Glitch line slipped for certain
@@ -193,6 +229,7 @@ function cleanRun(raw, s, strict) {
     result: oneOf(raw.result, RUN_RESULTS, phase === 'done' ? 'aborted' : null),
     messages: Array.isArray(raw.messages) ? raw.messages.filter((m) => typeof m === 'string').slice(-20) : [],
     startedAge: num(raw.startedAge, s.ageMin, 0),
+    ...(REGIONS[raw.region].daily ? cleanDailyRun(raw) : {}),
   };
 }
 
@@ -216,7 +253,45 @@ function cleanVisitWear(raw) {
   return out.slice(0, WEAR_SLOTS.length);
 }
 
-// A stray netling playing with it: { startedAge, len, form, palette, accessories }.
+// What a friend's visitor card says about its line: a generation and three feats (sim.js friendFeat).
+function cleanFeats(raw) {
+  return { gen: int(raw.gen, 1, 1, 1e6), deep: int(raw.deep, 0, 0, 1e6), root: bool(raw.root), below: int(raw.below, 0, 0, 1e6) };
+}
+
+// A friend's visitor card (visitcard.js): its id, look and feats, or null. Imported cards are hostile like any code.
+export function cleanCard(raw) {
+  if (!isObj(raw) || !has(SPECIES, raw.form) || typeof raw.id !== 'string' || !/^[0-9a-f]{8}$/.test(raw.id)) return null;
+  return {
+    id: raw.id,
+    form: raw.form,
+    palette: int(raw.palette, 0, 0, PALETTES.length - 1),
+    accessories: cleanVisitWear(raw.accessories),
+    ...cleanFeats(raw),
+  };
+}
+
+// Cards on their way, oldest first: at most friendQueueMax, each id once, each with the time it was queued.
+function cleanFriends(raw, now) {
+  const out = [];
+  for (const c of Array.isArray(raw) ? raw : []) {
+    const card = cleanCard(c);
+    if (card && !out.some((x) => x.id === card.id)) out.push({ ...card, at: num(c.at, now, 0) });
+  }
+  return out.slice(0, CFG.friendQueueMax);
+}
+
+// The friends greeted, newest last: { at, form, gen, deep, root, below }.
+export const GUESTBOOK_MAX = 20;
+function cleanGuestbook(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((e) => isObj(e) && has(SPECIES, e.form) && Number.isFinite(e.at))
+    .slice(-GUESTBOOK_MAX)
+    .map((e) => ({ at: e.at, form: e.form, ...cleanFeats(e) }));
+}
+
+// A stray netling playing with it: { startedAge, len, form, palette, accessories }, and `friend` (its feats) when it came
+// from a visitor card.
 function cleanVisit(raw) {
   if (!isObj(raw) || !has(SPECIES, raw.form) || !Number.isFinite(raw.startedAge)) return null;
   return {
@@ -226,6 +301,7 @@ function cleanVisit(raw) {
     palette: int(raw.palette, 0, 0, PALETTES.length - 1),
     accessories: cleanVisitWear(raw.accessories ?? (raw.accessory ? [raw.accessory] : [])), // older visits wore one: `accessory`
     ...(raw.greeted === true ? { greeted: true } : {}),
+    ...(isObj(raw.friend) ? { friend: cleanFeats(raw.friend) } : {}),
   };
 }
 
@@ -386,6 +462,8 @@ export function cleanSave(raw, now = Date.now(), { strict = false } = {}) {
     runCooldownCut: num(raw.runCooldownCut, 0, 0, 24 * 60),
     visit: cleanVisit(raw.visit),
     visitAccGifts: int(raw.visitAccGifts, 0, 0, 10),
+    friends: cleanFriends(raw.friends, now),
+    nl0Rests: bool(raw.nl0Rests),
     request: cleanRequest(raw.request),
     contract: cleanContract(raw.contract),
     contractCheckAge: numOrNull(raw.contractCheckAge),
@@ -471,11 +549,19 @@ export function cleanProgress(raw) {
     requestsMet: int(p.requestsMet, 0, 0),
     contractsDone: int(p.contractsDone, 0, 0),
     visitorsGreeted: int(p.visitorsGreeted, 0, 0),
+    ...(Array.isArray(p.guestbook) ? { guestbook: cleanGuestbook(p.guestbook) } : {}),
     flowMin: int(p.flowMin, 0, 0), // minutes in flow over past lives (the current one adds its own)
     hotMin: int(p.hotMin, 0, 0), // awake minutes overclocked over past lives (the same way)
     chatter: idList(p.chatter, (id) => CHATTER_IDS.has(id)),
     ...(p.rootEarned === true ? { rootEarned: true } : {}), // Root Access was earned (see rootUnlocked in codex.js)
+    ...(Array.isArray(p.challenges) ? { challenges: idList(p.challenges, (id) => CHALLENGE_IDS.includes(id)) } : {}), // challenges completed
+    ...(p.ended === true ? { ended: true } : {}), // the ending has played (ending.js)
     ...(p.sourceSeen === true ? { sourceSeen: true } : {}), // the Source's name has repaired itself once (ui/play.js)
+    // The daily trace (netrun/daily.js): the last day played, with its share line once it ended, and the exits reached.
+    ...(isObj(p.daily) && isDayKey(p.daily.day)
+      ? { daily: { day: p.daily.day, ...(typeof p.daily.share === 'string' ? { share: p.daily.share.slice(0, 300) } : {}), exit: bool(p.daily.exit) } }
+      : {}),
+    ...(Object.hasOwn(p, 'dailyWins') ? { dailyWins: int(p.dailyWins, 0, 0) } : {}),
   };
 }
 

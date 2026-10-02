@@ -72,6 +72,7 @@ Keys, tempos and unlocks are also in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#mus
 | `tracker` | Tracker | Demoscene: fluttering chip arpeggios, pulse bass, busy lead | none | 150 games | "a hundred and fifty games, win or lose." |
 | `undertow` | Undertow | Dark ambient: detuned sine drones, echoing pings, no drums | none | 3 exits from the Deep | "come back from the bottom three times." |
 | `firstcommit` | First commit | C major, 72 BPM: a lone triangle bell line through the echo over a still sine pad and a low triangle, the odd key click; sparse and high like the Source. Gain 0.78 (rms 0.0097 rendered, level with Idle loop and Undertow). | none | 1 exit from the Source | "come back from below the bottom." |
+| `exitzero` | Exit code 0 | A minor, 112 BPM: square pulse bass and arpeggio, a triangle lead through the echo, drums in the middle section; it lands on A major. Gain 1.65 (rms 0.0084 at 40%) | none | All four challenges | "keep every rule there is, once each." |
 | `forum` | Forum | A message board: two square voices post and reply, key clicks | A disk seek every 12 to 20 bars | 25 chatter lines heard | "hear twenty-five things it says to itself." |
 
 **Netrun theme** (`netrun`, not a wardrobe item): E minor, 110 BPM, pulse bass, a tense two-note lead, drums. Each region colors the upper parts with the wave and pitch of its sound effects (`REGIONS[*].sound`): Corp Grid rings in triangle, the Bazaar buzzes in sawtooth. The Deep slows to 70 BPM with only bass and far-off pings. The Source is its opposite: a fifth up at 60 BPM with only the pings and a still, high sine pad (`pad`, a part only the Source unmutes), rendered at rms 0.0035 against the Deep's 0.0033.
@@ -90,7 +91,7 @@ Keys, tempos and unlocks are also in [CONTENT_CATALOG.md](CONTENT_CATALOG.md#mus
 - The trailer (`tools/make-trailer.mjs`) mutes the music in its scenes, since each is a fresh page and the music would restart at every cut, and lays one continuous take from `renderMusic` under the whole trailer instead, following the table above. After the next generation hatches it plays Night drive, the track that generation unlocks.
 - By ear: `node tools/render-music.mjs <dir>` renders every track and variant at the game's own level, with `reference-effects.wav` to compare.
 
-## Open
+## Device pass (the maintainer's, before the full freeze)
 
 - **iOS**: Web Audio follows the ringer switch on some iOS versions, so music (like the effects) can be silent on a silenced phone. Not checked on a device; the README mentions it.
 - **Battery**: music keeps the audio clock running while the page is open. Not measured on a phone; MUSIC at 0 stops it.

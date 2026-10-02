@@ -1,6 +1,6 @@
 import { SPRITES, drawSprite, formSprite, paletteColors, DEAD_COLORS, DIM_COLORS, POWERED_DOWN_COLORS, WHITE_COLORS } from './sprites.js';
 import { drawWorn, drawProp, visitAccessories } from './accessories.js';
-import { PALETTES, CFG, needsAttention, isAlive, overclocked, rebootMinutesLeft, resting, lineOf } from './sim.js';
+import { PALETTES, CFG, needsAttention, isAlive, overclocked, rebootMinutesLeft, resting, lineOf, visitHidden } from './sim.js';
 import { FLASH_TOGGLE_MS } from './games/common.js';
 
 export const LCD_W = 40;
@@ -22,6 +22,22 @@ export const FLOW_BREATH_MS = 1600;
 // Overclocked: heat wisps rise off it, one pixel per this many ms (a still shimmer in calm mode).
 export const HEAT_RISE_MS = 400;
 const HEAT_COLOR = '#ff9f1c';
+// A friend's visitor card from a Mainframe form, before Root Access: static in the dim locked-record color, re-rolled
+// about once a second (well under the three-flashes-a-second limit), the same field for the same step.
+export const STATIC_STEP_MS = 900;
+const VISITOR_STATIC = [10, 11]; // columns, rows
+const STATIC_COLORS = { '#': '#2f6b73' };
+export function visitorStatic(step) {
+  let h = Math.imul(step + 1, 2654435761) >>> 0 || 1;
+  const next = () => {
+    h = (h ^ (h << 13)) >>> 0;
+    h = (h ^ (h >>> 17)) >>> 0;
+    h = (h ^ (h << 5)) >>> 0;
+    return h / 2 ** 32;
+  };
+  const [w, rows] = VISITOR_STATIC;
+  return Array.from({ length: rows }, () => Array.from({ length: w }, () => (next() < 0.4 ? '#' : '.')).join(''));
+}
 
 // A repeatable 0..1 sequence for one glitch step, so the look holds for the whole step.
 function stepRandom(step) {
@@ -128,7 +144,8 @@ export function renderLCD(canvas, s, time, opts = {}) {
     const visit = s.visit && !rest && !rebooting ? s.visit : null;
     // They bounce toward each other by up to four columns each, but never closer than two columns apart: two adults
     // (16 wide) have room for only two columns of swing each.
-    const visitorWidth = visit ? formSprite(visit.form, 'a')[0].length : 0;
+    const hiddenVisitor = visitHidden(s, visit);
+    const visitorWidth = !visit ? 0 : hiddenVisitor ? VISITOR_STATIC[0] : formSprite(visit.form, 'a')[0].length;
     const swingCap = visit ? Math.max(0, Math.floor((LCD_W - 4 - sprite[0].length - visitorWidth) / 2)) : 4;
     const swing = (phase) => Math.min(swingCap, opts.calm ? 2 : Math.round((Math.sin(time / 700 + phase) + 1) * 2));
     const hop = (up) => (opts.calm ? 0 : up ? 1 : 0);
@@ -189,7 +206,13 @@ export function renderLCD(canvas, s, time, opts = {}) {
     // The prop stands in front of the pet, so a pet at the right edge does not hide it.
     if (opts.prop) drawProp(bctx, opts.prop, LCD_W, frame, time, opts.propExtra, dark);
 
-    if (visit) {
+    if (visit && hiddenVisitor) {
+      // A corrupted record: a field of static where the friend's netling would be, re-rolled every STATIC_STEP_MS.
+      const vs = visitorStatic(opts.calm ? 0 : Math.floor(time / STATIC_STEP_MS));
+      const vx = 1 + swing(0);
+      drawSprite(bctx, vs, vx, 20 - vs.length - hop(frame), STATIC_COLORS);
+      if (frame) plus(bctx, '#f9f002', Math.round((vx + vs[0].length + x) / 2), 6);
+    } else if (visit) {
       const vs = formSprite(visit.form, frame ? 'a' : 'b');
       const vp = PALETTES[visit.palette] ?? PALETTES[0];
       const vx = 1 + swing(0);

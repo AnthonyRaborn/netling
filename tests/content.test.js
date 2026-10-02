@@ -89,7 +89,7 @@ test('regions only mention items, node types, stages and fragments that exist', 
     assert.ok(r.layers >= 1 && r.width[0] >= 1 && r.width[1] >= r.width[0], `${id} map size`);
     assert.ok(r.iceDamage > 0 && r.palette?.main && r.palette?.bg && r.sound?.wave, `${id} is missing fields`);
   }
-  assert.deepEqual([...REGION_ORDER].sort(), Object.keys(REGIONS).filter((r) => r !== 'tutorial').sort());
+  assert.deepEqual([...REGION_ORDER].sort(), Object.keys(REGIONS).filter((r) => r !== 'tutorial' && r !== 'daily').sort());
 });
 
 test('codex fragments: unique ids, real regions, titles and text, and a story for every region', () => {
@@ -141,7 +141,7 @@ test('cosmetics: unique ids, hints for locked items, working checks, real defaul
       fragmentLevel: i === all.length - 1 ? 3 : 1,
     })),
     generation: 9,
-    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 150, cleanJackouts: 20, deepExits: 3, sourceExits: 3, requestsMet: 30, contractsDone: 10, visitorsGreeted: 12, chatter: CHATTER.map((c) => c.id) },
+    progress: { streaks: Object.fromEntries(GAME_IDS.map((g) => [g, { cur: 10, best: 10 }])), acts: { corp: 200, scav: 200, patch: 50, comply: 20, hide: 20 }, gamesPlayed: 150, cleanJackouts: 20, deepExits: 3, sourceExits: 3, requestsMet: 30, contractsDone: 10, visitorsGreeted: 12, ended: true, challenges: ['glass', 'unplugged', 'blackout', 'baremetal'], dailyWins: 10, chatter: CHATTER.map((c) => c.id) },
     flowMin: 25 * 60,
     hotMin: 41 * 60,
   };

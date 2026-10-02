@@ -17,6 +17,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Add a feature safely | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Run or write tests, or use the balance tools | [TESTING.md](TESTING.md) |
 | See known bugs, risks and open questions | [KNOWN_ISSUES.md](KNOWN_ISSUES.md) |
+| Run the device checks that come before the full freeze | [DEVICE_PASS.md](DEVICE_PASS.md) |
 | See what the balance passes changed and what is still open | [BALANCE.md](BALANCE.md) |
 | Look up the opt-in rewards for attentive players (requests, visitors, flow, chatter) | [ATTENTION.md](ATTENTION.md) |
 | Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
@@ -30,8 +31,8 @@ Netling is a Tamagotchi-style pet that runs in real time in the browser. A pure 
 
 ## Numbers at a glance
 
-- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 41 unit test files (453 tests) and a 73-scenario browser smoke test.
-- 9 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost), 9 items, 4 mini-games, 5 netrun regions plus a tutorial, 22 codex fragments, 28 style items (24 accessories, 4 props), 48 cosmetics (9 shells, 8 tints, 9 effects, 8 sounds, 7 crests, 7 music tracks) plus a device label, 50 chatter lines.
+- About 13,600 lines of code, tests and markup in 74 tracked files (before these docs); 48 unit test files (500 tests) and an 80-scenario browser smoke test.
+- 14 forms (Bitling, Kernel, Stub, Shell, Chrome, Firewall, Daemon, Glitch, Ghost, and the Mainframe forms Plat, Airgap, Init, Panic, Whisper), 9 items, 4 mini-games, 6 netrun regions plus a tutorial and the daily trace, 27 codex fragments, 49 style items (41 accessories, 8 props), 65 cosmetics (15 shells, 10 tints, 12 effects, 8 sounds, 11 crests, 9 music tracks) plus a device label, 52 chatter lines, 4 challenge runs, and an ending.
 - Life: up to 5 days; teen at 17 hours; adult at 51 hours (netlings compiled before this keep 7 days, 24 and 72); 10 care mistakes end it.
 
 ## Keeping these docs true

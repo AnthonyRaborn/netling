@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import { createScript, mainframeAt, mulberry32, tick, CFG, MIN } from '../src/sim.js';
 import { FRAGMENTS, ROOT_FRAGMENT_IDS, codexByRegion, liveFragments, nextFragment } from '../src/netrun/codex.js';
 import { REGIONS, REGION_ORDER, regionLock, shownRegions } from '../src/netrun/regions.js';
-import { MAINFRAME_ABILITIES, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
+import { MAINFRAME_ABILITIES, choose, moveTo, resolveIce, runOptions, startRun, visibleNodeIds, RUN_CFG } from '../src/netrun/run.js';
+import { ANOMALIES, PURGE_READINGS, anomaliesFor } from '../src/netrun/anomalies.js';
 import { dexEntries, mainframeManual, CORRUPTED } from '../src/archive.js';
-import { COSMETICS, LEGACY, SLOTS, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
+import { COSMETICS, LEGACY, ORIGINAL_SHELLS, SLOTS, corruptedCosmetic, corruptedText, shownCosmetics, unlockedIds } from '../src/cosmetics.js';
 import { PROPS } from '../src/accessories.js';
 import { cleanProgress } from '../src/sanitize.js';
 import { SPRITES } from '../src/sprites.js';
@@ -257,6 +258,34 @@ test('the Mainframe unlocks: hidden while switched off, each earned by its own g
   });
 });
 
+test('a shell for each mainframe form: raised once, hidden while off, and not needed for the Mini device', () => {
+  const SHELLS = { plat: 'platinum', airgap: 'airgap', init: 'pidone', panic: 'torn', whisper: 'faint' };
+  for (const [form, id] of Object.entries(SHELLS)) {
+    const shell = COSMETICS.shell.find((c) => c.id === id);
+    assert.ok(shell?.mainframe, `${id} is marked`);
+    assert.ok(!shownCosmetics('shell', false).some((c) => c.id === id), `${id} is out of the wardrobe while off`);
+    assert.ok(!switchedOff(() => unlockedIds(progressCtx({ dex: [form] }))).includes(`shell:${id}`));
+    const got = switchedOn(() => unlockedIds(progressCtx({ dex: [form] })).filter((k) => k.startsWith('shell:') && k !== 'shell:standard'));
+    assert.deepEqual(got, [`shell:${id}`], `${form} unlocks only its own shell`);
+  }
+  // The Mini device asks for the nine shells from before the stage, so that goal did not move.
+  // The original nine: every shell but the Mainframe's five and the challenge reward (Cut cable).
+  assert.deepEqual(ORIGINAL_SHELLS, COSMETICS.shell.filter((c) => !c.mainframe && c.id !== 'unplugged').map((c) => c.id));
+  assert.equal(ORIGINAL_SHELLS.length, 9);
+  // Locked, they read as corrupted until Root Access, like the dex's records; earned, or after Root Access, they do not.
+  const platinum = COSMETICS.shell.find((c) => c.id === 'platinum');
+  assert.equal(corruptedCosmetic('shell', platinum, { open: false, rootEarned: false }), true);
+  assert.equal(corruptedCosmetic('shell', platinum, { open: false, rootEarned: true }), false);
+  assert.equal(corruptedCosmetic('shell', platinum, { open: true, rootEarned: false }), false);
+  assert.equal(corruptedCosmetic('shell', COSMETICS.shell.find((c) => c.id === 'chrome'), { open: false, rootEarned: false }), false);
+  // The other Mainframe unlocks read the same way, each named for its slot.
+  for (const key of MAINFRAME_UNLOCKS) {
+    const [slot, id] = key.split(':');
+    assert.equal(corruptedCosmetic(slot, COSMETICS[slot].find((c) => c.id === id), { open: false, rootEarned: false }), true, key);
+  }
+  assert.equal(corruptedText('music').name, '<<TRACK CORRUPTED>>');
+});
+
 test('progress keeps the Source exits and the one-time repair of its name, cleaned', () => {
   assert.equal(cleanProgress({ sourceExits: 4, sourceSeen: true }).sourceExits, 4);
   assert.equal(cleanProgress({ sourceSeen: true }).sourceSeen, true);
@@ -303,3 +332,88 @@ test('a mainframe\'s plush still fits in the plush\'s box', () => {
     for (const [x, y] of pts) assert.ok(x >= 0 && y >= 0 && x < plush.size[0] && y < plush.size[1], `${form}: ${x},${y} outside the box`);
   }
 });
+
+// --- The purge order: the Source's own anomaly ---
+
+test('the purge order turns up only in the Source, as one anomaly among the others', () =>
+  switchedOn(() => {
+    assert.deepEqual(anomaliesFor('source').map((e) => e.id), ANOMALIES.map((e) => e.id));
+    for (const region of REGION_ORDER.filter((r) => r !== 'source')) assert.ok(!anomaliesFor(region).some((e) => e.id === 'purge'), region);
+    const seen = { source: new Set(), public: new Set() };
+    for (let seed = 1; seed <= 120; seed++) {
+      for (const region of ['source', 'public']) {
+        const s = netling('mainframe', 'plat');
+        moveTo(s, into(s, region, 'anomaly', seed).id, mulberry32(seed));
+        seen[region].add(s.run.pending.event);
+      }
+    }
+    assert.ok(seen.source.has('purge') && seen.source.size === 6, [...seen.source].join());
+    assert.ok(!seen.public.has('purge'));
+  }));
+
+// A Source run standing on the purge order (knowing `codex` at jack-in).
+function atPurge(seed = 1, codex = []) {
+  for (let n = seed; n < seed + 500; n++) {
+    const s = netling('mainframe', 'plat');
+    startRun(s, 'source', mulberry32(n), codex);
+    const next = runOptions(s.run)[0];
+    next.type = 'anomaly';
+    moveTo(s, next.id, mulberry32(n));
+    if (s.run.pending?.event === 'purge') return s;
+  }
+  throw new Error('no purge order found');
+}
+
+test('READ IT costs 15 Integrity and may give the next Source fragment; LEAVE IT calms and leans to order', () =>
+  switchedOn(() => {
+    const read = atPurge();
+    const before = read.stats.integrity;
+    const res = choose(read, 'read', () => 0.1);
+    assert.ok(res.ok);
+    assert.equal(read.stats.integrity, before - 15);
+    assert.deepEqual(read.run.fragments, ['source-1']);
+    assert.ok(res.msg.startsWith(PURGE_READINGS[0]), res.msg);
+    // Each reading turns up: NL-0, your netling, the fault.
+    PURGE_READINGS.forEach((line, i) => {
+      const r = choose(atPurge(), 'read', () => (i + 0.5) / PURGE_READINGS.length);
+      assert.ok(r.msg.startsWith(line), `${i}: ${r.msg}`);
+    });
+    assert.match(PURGE_READINGS.join(' '), /NL-0.*yours.*permission denied/);
+    // The codex keeps what a player may never read here: NL-0 first, and the fault.
+    const s3 = FRAGMENTS.find((f) => f.id === 'source-3').text;
+    assert.match(s3, /NL-0/);
+    assert.match(s3, /permission denied/);
+
+    const unlucky = atPurge(50);
+    choose(unlucky, 'read', () => 0.9);
+    assert.deepEqual(unlucky.run.fragments, [], 'a 60% chance, not a sure thing');
+
+    const left = atPurge();
+    left.stats.sync = 50;
+    const integrity = left.stats.integrity;
+    const r = choose(left, 'leave', noRng);
+    assert.ok(r.ok);
+    assert.equal(left.stats.sync, 65);
+    assert.equal(left.stats.integrity, integrity);
+    assert.match(r.msg, /pending/);
+  }));
+
+test('with the Source codex complete, READ IT shows the way on instead of a fragment', () =>
+  switchedOn(() => {
+    const all = FRAGMENTS.map((f) => f.id);
+    const s = atPurge(1, all);
+    const read = s.run.pending.options.find((o) => o.id === 'read');
+    assert.equal(read.hint, '-15 int, reveal ahead');
+    const seen = s.run.revealed.length;
+    const before = s.stats.integrity;
+    const res = choose(s, 'read', () => 0.1);
+    assert.equal(s.stats.integrity, before - 15);
+    assert.deepEqual(s.run.fragments, []);
+    assert.ok(s.run.revealed.length > seen, 'nothing revealed');
+    assert.match(res.msg, /by heart/);
+    // While a Source fragment is still missing, the hint and the reward stay as they were.
+    const partial = atPurge(1, all.filter((id) => id !== 'source-4'));
+    assert.equal(partial.run.pending.options.find((o) => o.id === 'read').hint, '-15 int, it may remember something');
+    choose(partial, 'read', () => 0.1);
+    assert.deepEqual(partial.run.fragments, ['source-4']);
+  }));

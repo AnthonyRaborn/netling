@@ -30,7 +30,7 @@ const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
   return c >>> 0;
 });
-function crc32(bytes) {
+export function crc32(bytes) {
   let c = 0xffffffff;
   for (const b of bytes) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
   return ((c ^ 0xffffffff) >>> 0).toString(16).padStart(8, '0');
@@ -59,13 +59,13 @@ async function pipe(bytes, stream, maxBytes = Infinity) {
   return out;
 }
 
-function toBase64Url(bytes) {
+export function toBase64Url(bytes) {
   let bin = '';
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64Url(text) {
+export function fromBase64Url(text) {
   const b64 = text.replace(/-/g, '+').replace(/_/g, '/');
   const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
