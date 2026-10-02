@@ -1,4 +1,4 @@
-// Renders the trailer (about 60 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
+// Renders the trailer (about 64 s, 1080x1920 portrait, 30 fps, with the game's own sound) from the
 // real app. It shows no more than a first life does: the baby and a teen, a first life's codex, and the
 // endgame only as the corruption a first life sees (the corrupted sector, records and manual line).
 // The evolution to an adult strobes and cuts away before the form settles, and the flatline card's
@@ -134,6 +134,17 @@ const scrollTo = ({ sel = null, target, from = 0, to = 0 }) => (page, t) =>
     },
     { sel, target, k: to > from ? (1 - Math.cos(Math.PI * Math.min(1, Math.max(0, (t - from) / (to - from))))) / 2 : 1 },
   );
+
+// The card the game just made carries this page's address (localhost); show the public one, and redraw the QR code to
+// match, so a viewer who scans it gets a working card.
+const publicCard = (page) =>
+  page.evaluate(async (base) => {
+    const link = document.getElementById('card-link');
+    const url = base + link.value.slice(link.value.indexOf('#'));
+    link.value = url;
+    const { encodeQR, drawQR } = await import('/src/qr.js');
+    drawQR(document.getElementById('card-qr'), encodeQR(url), 4);
+  }, `https://${URL_TEXT}/`);
 
 // Skips the clock forward without simulating the gap (the dev EVO button's trick), then ticks.
 const skipMinutes = (mins) =>
@@ -323,6 +334,32 @@ const SCENES = [
       [5.4, aim],
     ],
   },
+  // Sharing: a visitor card, then a friend's netling dropping by. The friend is a Bitling in colors the trailer has not
+  // shown, wearing common things, so it teases nothing a first life would not meet.
+  {
+    name: 'card',
+    duration: 1.8,
+    seed: () => settled(bitling()),
+    warmup: [
+      [0.1, click('#open-archive')],
+      [0.2, click('#open-transfer')],
+      [0.3, click('#card-make')],
+      [0.35, publicCard],
+    ],
+    warmupSeconds: 0.5,
+    frame: scrollTo({ sel: '#transfer .transfer-body', target: '#card-qr' }),
+  },
+  {
+    name: 'visit',
+    duration: 2.8,
+    // A friend's card queued two hours ago is due: it drops by on the next minute.
+    seed: () => settled(bitling({ friends: [{ id: '0badcafe', form: 'bitling', palette: 4, accessories: ['headphones', 'cursor'], gen: 3, deep: 0, root: false, below: 0, at: T0 - 120 * MIN }] })),
+    warmupSeconds: 0.7, // past the screen's power-on
+    at: [
+      [0.3, skipMinutes(1)],
+      [1.5, click('#wish-greet')],
+    ],
+  },
   // Depth: a first life's codex, the way down, and what stays corrupted. The corrupted names glitch every
   // BLINK_MS (3.2 s, ui/corrupt.js) from page load, so each warmup puts one glitch on camera.
   {
@@ -418,7 +455,9 @@ const TIMELINE = {
     [sceneStart('care') + 3.6, sceneStart('care') + 5.2, 'KEEP IT COOL.'],
     [sceneStart('care') + 5.2, sceneStart('breach'), 'KEEP IT CLEAN.'],
     [sceneStart('breach'), sceneStart('netrun'), 'PLAY WITH IT.'],
-    [sceneStart('netrun') + 0.2, sceneStart('codex'), 'JACK IN.'],
+    [sceneStart('netrun') + 0.2, sceneStart('card'), 'JACK IN.'],
+    [sceneStart('card') + 0.1, sceneStart('visit'), 'SEND IT TO A FRIEND.'],
+    [sceneStart('visit') + 0.2, sceneStart('codex'), 'THEIRS CAN VISIT YOURS.'],
     [sceneStart('codex') + 0.2, sceneStart('sector'), 'THERE IS A STORY HERE.'],
     [sceneStart('sector') + 0.1, sceneStart('dex'), 'SOMETHING IS DOWN THERE.'],
     [sceneStart('dex') + 0.1, sceneStart('evolve'), 'UNRECOVERABLE.\nFOR NOW.'],
@@ -575,7 +614,7 @@ function drawOverlay({ first, t, sceneT, sceneLen, caption, card, cards, redact,
 }
 
 // Soft transitions between the big beats; the mini-game montage hard-cuts.
-const FADES = { intro: [0.4, 0.25], care: [0.25, 0.2], breach: [0.2, 0], netrun: [0.2, 0.2], codex: [0.2, 0.15], sector: [0.15, 0], evolve: [0.2, 0], flatline: [0.2, 0.6] };
+const FADES = { intro: [0.4, 0.25], care: [0.25, 0.2], breach: [0.2, 0], netrun: [0.2, 0.2], card: [0.2, 0], visit: [0, 0.2], codex: [0.2, 0.15], sector: [0.15, 0], evolve: [0.2, 0], flatline: [0.2, 0.6] };
 
 // --- recording ---
 
@@ -727,7 +766,7 @@ function musicPlan() {
   if (ONLY) return null;
   const on = sceneStart('intro') + 5.0; // the tap that compiles the first netling
   const run = sceneStart('netrun');
-  const back = sceneStart('codex'); // home again after the run
+  const back = sceneStart('card'); // home again after the run
   const depth = sceneStart('sector'); // the corrupted shots, until the evolution
   const evolve = sceneStart('evolve');
   const flat = sceneStart('flatline');
