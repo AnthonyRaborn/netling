@@ -172,7 +172,7 @@ Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 s
 - **Teen:** at least 3 wins in each of the four games (1.0's Shell number), plus low Standing on both tracks.
 - **Adult:** at least 4 wins in each game and 29 in all (1.0's Ghost numbers; boosted wins count as 2), plus low Standing on both tracks.
 - "Low" is a placeholder: both tracks under 3 points, which is close to 1.0's allegiance band (under 2). It depends on the dependency above.
-- For scale, 1.0's casual archetype met the games requirement at the teen check in a minority of lives (the Shell path flag was 27% before the play requirement and 18% for the play once), so the hidden forms stay hard.
+- For scale, in 1.0's baseline 27% of casual teens met the axis conditions for Shell (allegiance near zero, stability not negative, at most 1 fault), 18% also had at least 1 win in every game, and 1% had at least 2 wins in every game. Shell asks for 3 in every game, which is rarer still, so the hidden path stays hard. (My first version of this note misread those figures.)
 
 **Bugs** (all guesses, to tune)
 
