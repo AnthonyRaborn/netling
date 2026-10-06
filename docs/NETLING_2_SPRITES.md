@@ -122,14 +122,66 @@ Drawn, authored: one elder per adult, each its adult grown to 18 columns (agains
 | Contrast, asleep with the lights off | 0 | 0 |
 | Worst worn combination (upper slot hiding the lower) | Chrome jaw over gold chain 0.86; Data aura over blush 1.00 for a moment | Chrome jaw over gold chain 0.90; Data aura over blush 1.00 for a moment |
 | Plush prop covers the pet | up to 42% (46% with a visitor) | up to 33% (45% with a visitor) |
-| Highest same-stage silhouette overlap | Firewall and Ghost 0.81 | Gronk and Splat 0.85, the two Gronk and Splat elders 0.83, Gronk's elder and Guru's elder 0.82, Munch and Thrash 0.81 |
+| Highest same-stage silhouette overlap | Firewall and Ghost 0.81 | Munch and Thrash 0.81, then a group at 0.80 (after the Gronk and Splat redraw; before it, Gronk and Splat were 0.85 and their elders 0.83) |
 | Asleep and dead poses | n/a | 8 to 10 cells differ asleep, 14 to 18 dead |
 
 - **Wearables hold up.** Iron's forms are no worse than 1.0's on clipping and contrast, and better on contrast, with no wearable losing half its pixels in the dark.
-- **The silhouette overlap is the one result that is worse.** Three same-stage pairs sit above 1.0's highest (0.81): Gronk and Splat (0.85) and their elders (0.83) are the two forms of the Breach role, and Gronk's elder and Guru's elder are 0.82. Munch and Thrash (the Feast pair) tie 1.0's highest at 0.81. The sibling pairs are meant to be a family, but the audit does not know that, and Gronk and Splat is the clearest candidate for a redraw if the maintainer wants it nearer 0.80.
+- **The silhouette overlap was the one result that was worse, and the redraw fixed it** (see The Gronk and Splat redraw). Munch and Thrash (the Feast pair) now tie 1.0's highest at 0.81.
 - **The audit's cross-stage pairs** (an elder against its own adult, for example Feep's elder and Feep at 0.86) are expected and not a problem: 1.0 only reads same-stage pairs.
 - **A discrepancy in 1.0's own doc, found on the way.** `docs/SPRITES.md` lists "Off-screen wearable cases: 0", but the current audit reports 39 holologo cases on 1.0's forms, 1 px above the screen. I did not change it; it is a separate fix (suggested separately).
 - **`gallery.html` is not extended.** The audit is; the gallery's by-eye review for Iron is the review page here.
+
+## The Gronk and Splat redraw
+
+The audit flagged Gronk and Splat (the two forms of the Breach role) at 0.85, above anything in 1.0, and their elders at 0.83. Both were near-rectangles (16 wide, 14 rows). I redrew them with opposite proportions and let the elders follow:
+
+- **Splat** (corp): a wide hammer-head slab, 16 across, over a narrower 12 column body, with its piston on top and its eyes a row higher.
+- **Gronk** (street): a narrower head (12) over broad shoulders (16), the arms apart from the torso with a gap column, horns and teeth kept. Its elder's arms run down to the hem so its fists reach the floor.
+- **Elders:** each is its adult stretched to 18 columns and one row taller, with a brow mark, as before.
+
+| | Before | After |
+|---|---|---|
+| Gronk and Splat | 0.85 | 0.61 |
+| Their elders | 0.83 | 0.63 |
+| Gronk's elder and Guru's elder | 0.82 | 0.81 |
+| Each elder closest to its own adult, scaled | yes | yes (Gronk's 0.79 against Guru's 0.73, Splat's 0.90 against Munch's 0.72) |
+
+- **First try on the elder missed.** After the redraw, Gronk's elder overlapped Guru's elder at 0.821, just over the 1.0 bar of 0.82. Extending its arms down to the hem brought it to 0.806, still closest to Gronk. The test is the 1.0 bar (0.82), not looser.
+- **A test that hard-coded the old Gronk's rows failed and was updated** to check the marks instead (horns, teeth, arms apart).
+- **Judge by eye.** The numbers are a screen; the redrawn pair should be looked at in the gallery (see Reviewing the sprites).
+
+## The holologo clip (1.0), and the options
+
+The one wearable that clips (the holologo, 1 px above the screen) clips on 1.0's forms too. The audit only says it leaves the screen at some point of the idle motion; I measured how much of the time, over 60 to 200 seconds of each idle (bounce, sway, hover), on 1.0's 14 forms:
+
+| Idle | Forms with any clip | Share of time clipped (mean, worst form) | Longest unbroken run |
+|---|---|---|---|
+| bounce | 13 of 14 | 32%, 62% | 5.7 s |
+| sway | 13 of 14 | 30%, 48% | 7.3 s |
+| hover | 13 of 14 | 45%, 77% | 2.9 s |
+
+It is **not a brief artifact of the top of a bounce**: on most forms it is cut about a third of the time, in runs of several seconds, and always the same single tip pixel (the diamond's top). Cause: the holologo sits 6 rows above the head (`a.top - 4`, with the tip 2 above that) while the idle motion reserves 5 rows (sized for the halo), and a 15 row form has only 5 rows of room even at rest.
+
+Options, none applied (a 1.0 art or layout change is the maintainer's call):
+
+| Option | Effect | Cost |
+|---|---|---|
+| Draw the holologo one row lower (`a.top - 3`) | Fits the 5 rows the idle already reserves, fixes every form including the 15 row ones | The diamond's bottom tip touches the head top (no gap row). Smallest change |
+| Move the sprite space down one pixel (floor 20 to 21) | Gives every form and the halo one more row | Touches the whole layout: the prop floor (row 21), the flatline (row 23) and the cache icons below. Largest |
+| Resize the viewscreen | Same, by adding a row at the top | Also changes the HUD slots at the top (virus, trace, bang, Z); every row-based number moves |
+| Leave it | A single tip pixel is lost about a third of the time; the diamond stays recognisable | None, but it is not the temporary flicker it might seem |
+
+My lean is the first (one row lower), or leaving it if the touching tip looks worse than the clipped one. Check both in the gallery before choosing.
+
+## Reviewing the sprites
+
+Three places, from broad to specific.
+
+1. **Every form, with the real game's code (the gallery).** `npm run proto:gallery` writes `prototype/netling2/gallery.html`, which is the unchanged `gallery.html` with Iron's 22 forms (and 1.0's Chrome and Bitling as its reference bodies) instead of 1.0's; it is generated, not committed. Then `npm run serve` and open `http://localhost:5174/prototype/netling2/gallery.html`. It is the real gallery: raw A, B, sleep and dead sprites at 10x, silhouettes, the real LCD in every state, every wearable alone and worn together, every palette and tint, props, visitors. The `form` control picks one form for the scene, wearable and combination views; the section buttons (forms, silhouettes, scenes, wearables, matrix, combos, props and so on) jump to a part, and the link keeps the view (`#sec=forms&form=protoB_gronk`). Pink outlines mark a wearable that blends into the pet; hover a cell for the reason. Forms appear as `protoB_<id>`.
+2. **A specific problem, from the audit.** `npm run proto:audit` runs the real audit on Iron's forms and names each candidate (for example `protoB_gronk / protoB_splat`). `--check=forms` (silhouette pairs), `--check=clip`, `--check=combos`, `--check=poses` and so on run one part, and `--json` gives the raw rows. Then open the gallery on that form (`#form=protoB_gronk`) and look. The audit flags candidates; a person judges them.
+3. **The prototype review page, for what the gallery does not have.** `http://localhost:5174/prototype/netling2/`: the whole Iron tree in rows (the line, the three teens and the hidden branch, all nine adults and elders), the temper tell at any level, the neglect and bug looks driven by sliders, and a pose, wearable and anchor-row control. `bugs-and-neglect` and the tell are only here.
+
+`npm run proto:test` runs the prototype's own tests; `npm test` is the game's. Whichever you use, say what was not run on a device: nothing here has been looked at on a phone.
 
 ## What the wider run showed (commit 580db88, not reproducible from this tree)
 

@@ -104,10 +104,11 @@ test('the elder is a variant of its adult: wider, no taller than 15 rows, closes
   console.log(`  elder against gronk ${overlap('gronk').toFixed(2)}, teen ${overlap('teenStreet').toFixed(2)}, baby ${overlap('baby').toFixed(2)}`);
   // 1.0's mainframes sit at 0.77 to 0.82 of their adult line, and closer to it than to any other form.
   assert.ok(overlap('gronk') > overlap('teenStreet') && overlap('gronk') > overlap('baby'));
-  assert.ok(overlap('gronk') >= 0.7 && overlap('gronk') < 0.9, overlap('gronk').toFixed(2));
-  // It keeps the adult's marks: the horn studs on the top row, the toothed jaw and the broad shoulders.
-  assert.ok(elder.a[0].includes('#') && elder.a[8].includes('+#+') && elder.a[9].startsWith('##'));
-  assert.ok(set.gronk.a[8].includes('+#+'));
+  assert.ok(scaledOverlap(elder.a, set.gronk.a) >= 0.75 && overlap('gronk') < 0.9, `${scaledOverlap(elder.a, set.gronk.a).toFixed(2)} scaled, ${overlap('gronk').toFixed(2)} raw`);
+  // It keeps the adult's marks: the horns on the top row, the toothed jaw and the arms apart from the torso.
+  const marks = (rows) => ({ horns: rows[0].includes('#'), teeth: rows.some((r) => r.includes('+#+')), arms: rows.some((r) => /^###\.#/.test(r)) });
+  assert.deepEqual(marks(elder.a), marks(set.gronk.a));
+  assert.deepEqual(marks(set.gronk.a), { horns: true, teeth: true, arms: true });
 });
 
 // --- the hidden path: distinct, not marks over the others' outline (decided) --------------------------------------------------
