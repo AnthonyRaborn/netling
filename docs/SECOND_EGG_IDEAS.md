@@ -7,6 +7,7 @@ Sources read in full or in part (downloaded and read locally):
 - Jargon File 1.0.0.33 (1981 era, MIT/SAIL/CMU/WPI), read in full.
 - Jargon File 4.4.7, about 90 selected entries out of roughly 2,300 (creatures, bugs, hardware, archetypes, folklore). Not read in full.
 - Cyberpunk 2020 slang glossary (WyldeSide), read in full.
+- FDA "Glossary of Computer System Software Development Terminology" (8/95), 768 terms drawn mostly from IEEE and NBS standards. About 110 entries read in full; the rest scanned by term name only.
 
 No terms below come from anywhere else. Where a term is the maintainer's existing name for something, that is noted.
 
@@ -99,6 +100,46 @@ Implications for the egg choice:
 - **Heat is already a hardware meter.** Heat, Coolant cell and "Heat 85+" are the magic-smoke and fry idea, so the first egg is not purely software.
 - **Chrome is spoken for.** A Wetware egg needs a different word for its augmented lines.
 
+## FDA glossary review
+
+A different kind of source. It is a sober 1995 regulated-industry glossary (IEEE, NBS, DOD and FDA definitions), so it supplies little slang or creature naming. It is strong on structure: life cycles, kinds of failure, kinds of maintenance, qualification gates and safety design. Its voice is the corp pole of the game (audit, certification, change control, quality assurance) more than a new egg identity.
+
+### Where it confirms existing content
+
+- **Stub** (the 3+ mistakes teen): "special code segments that ... simulate the behavior of designed and specified modules not yet constructed." A placeholder standing in for something not built yet fits that teen very well.
+- **Region** (a Netling term): "a clearly described area within the computer's storage that is logically and/or physically distinct ... used to separate testing from production." Syn: partition.
+- **Boot**: "to cause a computer system to reach a known beginning state", which matches the 20 minute reboot after a crash. **Crash**: "the sudden and complete failure of a computer system or component", the same as the game's use.
+- **Trace** and **audit trail**: a record of execution; a chronological record sufficient to reconstruct the events leading to a result. Fits the corp trace event and could name lineage records.
+- **Watchdog timer**, **fail-safe**, **patch** ("a change made directly to an object program without reassembling or recompiling"), **workaround**, **virus** and **worm**, **bomb** (logic, time and letter bomb), **overflow**, **buffer**, **checksum**, **CRC** and **parity**: all consistent with the current events and items.
+- **Coroutine**: "begins execution at the point at which operation was last suspended" and need not return to its caller. That is close to hibernation resuming exactly as it was.
+- Weak or absent: Kernel, Shell, Firewall, Daemon (nearest is "utility program" and "service program"), and Mainframe (defined only as "a large computer").
+
+### What it adds
+
+**Failure vocabulary with real distinctions.** The glossary separates fault (an incorrect step or data definition), error (a discrepancy between a computed and the correct value), failure (inability to perform within requirements), exception (an event that suspends normal execution), anomaly (deviation from expectation), defect and latent defect. A care loop could use cause, state and outcome as three different things the player handles, rather than one "virus". It also defines **drift**: "the unwanted change of the value of an output signal ... over a period of time when the values of all input signals are kept constant", and **calibration** as the fix. Drift is a slow, no-input decay that differs from Jargon's bit rot because routine upkeep corrects it.
+
+**Three kinds of maintenance.** Corrective (fix faults), adaptive (make it usable in a changed environment), perfective (improve performance or maintainability). The glossary has no preventive entry. Current care maps mostly to corrective (PATCH, PURGE). Adaptive could be a response to travel or a changed schedule (the stored `zone`), and perfective could be tuning. The three could be separate actions or separate egg specialties.
+
+**Life-cycle phases as growth stages.** Concept, requirements, design, implementation, test, installation and checkout, operation and maintenance. The glossary has no retirement phase; it ends the life cycle when "the product is no longer available for use". The waterfall and spiral models contrast a one-pass life with an iterative one, which could differ between eggs.
+
+**Qualification gates.** Installation qualification, operational qualification ("capable of consistently operating within established limits and tolerances") and process performance qualification ("effective and reproducible"). Three sequential gates are a ready-made shape for the easy unlock the maintainer wants, for example: raise one adult, raise a second form, then a reproducibility check.
+
+**Alpha and beta testing.** Alpha is controlled and observed by the developer; beta is a live environment the developer does not control. Could describe region risk tiers or an egg that grows in a sandbox versus the wild.
+
+**Real time, batch and interactive.** Batch collects inputs and processes them all at once; real time responds as an external process occurs. A batch-style creature and a real-time creature would differ in pacing. **Polling versus interrupt**: polling checks each device in turn; an interrupt notifies the CPU; a **non-maskable interrupt** cannot be disabled by another interrupt. The first egg's rest suppresses new events; a non-maskable event would ignore that rule. This is a clean way to differentiate how the two eggs call the player back.
+
+**Safety analysis.** Hazard (a prerequisite to a mishap), mishap (an unplanned loss event), severity, hazard probability, and risk as probability times consequence. Fault tree analysis and FMEA. Useful for designing events with a probability and a severity, and a possible name and shape for a failure-analysis mini-game.
+
+**Software diversity** and **mutation analysis.** Diversity: "two or more functionally identical variants of a program ... developed from the same specification by different programmers" to improve reliability. Mutation analysis tests against "slight variants (mutants)" of a program. Parallel testing runs a new system on the same data as the standard system for comparison. See Candidate 5 below.
+
+**Dead code** and **spaghetti code**: code that can never execute, and code with no coherent structure. Candidates for vestigial features or a hoarding or rot line.
+
+### Honest limits of this source
+
+- It is not thematic on its own. Used alone it would pull the second egg toward a compliance and bureaucracy tone, which suits the Corp Grid and the Chrome line but not a creature identity.
+- It supports the Iron and Wetware candidates only indirectly (hardware, firmware and sensors appear as plain definitions).
+- Whether the game already has a checksum on its transfer code was not checked, so the CRC and parity link is only a naming match.
+
 ## Candidate second eggs
 
 Each candidate gets its own hidden axes and its own failure model, so it is not a recolor. Adult names are suggestions only. I checked that none of the words below already appear in `src/` or `docs/`.
@@ -142,11 +183,22 @@ Each candidate gets its own hidden axes and its own failure model, so it is not 
 - Failure model: **being hunted**. Rogue hunters replace corp traces.
 - Pairs naturally with the existing ending and the Source.
 
+### Candidate 5: Variant (same spec, different implementation)
+
+Added after the FDA glossary review and the maintainer's decisions.
+
+- Idea: the second egg runs on the same meters and care loop as the first (Charge, Heat, Sync, Integrity), with different hidden axes, a different adult tree and a different tone. Named for software diversity: functionally identical variants built from one specification.
+- Why it fits the decisions: with lineage shared and forms separate, traits like Persistent or Hardened apply to the second egg unchanged, because the meters are the same. This removes the main design cost of the other candidates (trait translation). An easy unlock also matches, since a variant can be offered once two different adults have been raised.
+- Cost: less contrast. The egg differs in tree and axes, but the player does the same chores. The first egg's gaps (software only, one failure model) stay open unless this egg adds a new failure model (for example drift and calibration, or the fault, error and failure split).
+- Possible axes: **Honor** (code of honor, from CP2020 bushi, giri, samurai versus ronin) and **Tempo** (batch versus real time).
+- Possible adult lines: Samurai, Ronin, Wizard, Guru, Real Programmer, Fixer, Rigger.
+- Could be combined with another candidate later: the Variant egg first, then a second tier with new meters.
+
 ## Recommendation
 
 Candidate 1 (Wetware) gives the clearest contrast with the least risk to the core loop: same Tamagotchi care structure, new meters and items, a new world pole (flesh and chrome), and CP2020 supplies most of the vocabulary. Candidate 2 (Iron) is the best contrast in pacing and tone, and Jargon 1.0 and 4.4.7 supply its vocabulary. Candidate 3 is the most original but changes the genre of the game. I would start with Wetware or Iron and use the bug taxonomy (section B) in whichever egg is chosen, since it is cheap to add as event types.
 
-If the first egg should also gain differentiation from these sources without new forms, section B (bug types as events) and section D (a night-mode sleep phase) can apply to the existing line.
+With the shared-lineage decision, Candidate 5 (Variant) is the lowest-risk path and Candidate 1 (Wetware) the highest-contrast path that still keeps the care structure. The choice depends on how much the second egg should feel like a different game. If the first egg should also gain differentiation from these sources without new forms, section B (bug types as events) and section D (a night-mode sleep phase) can apply to the existing line.
 
 ## Open questions for the maintainer
 
@@ -157,7 +209,8 @@ Answered: access (unlocked choice, easy unlock) and lineage (shared, forms separ
 3. Shared lineage and traits: reuse the first egg's meters in the second egg, or translate traits between the two?
 4. Exactly what counts as the easy unlock (two different adult forms, or something else)?
 5. Expected scope: new meters and items only, or new netrun regions and mini-games per egg?
-6. More references are coming. Which themes should I weight when they arrive?
+6. Should the second egg reuse the first egg's meters (Candidate 5) or bring new ones (Wetware, Replicator)?
+7. More references are coming. Which themes should I weight when they arrive?
 
 ## Not done
 
