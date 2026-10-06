@@ -266,7 +266,7 @@ How those prices sit against the data (1.0 simulator, packets at 0.25, 200 lives
 
 **Bug anomaly:** it is one entry in the anomaly pool, so its frequency is its share of the pool times the anomaly share of nodes. Not set.
 
-**Scrip and Standing prices** are above. **Segfault (decided):** it adds 2 faults (as in 1.0) and pushes temper noticeably volatile. One roll decides its bugs: 60% for one bug, 15% for two, 25% for none, so 75% for at least one. For comparison, two plain faults at 30% each give 42% for exactly one bug, 9% for two and 49% for none (51% for at least one), so a Segfault is about 24 points likelier to add a bug and has an expected 0.9 bugs against 0.6 (maintainer's figures, my check of the arithmetic). The size of the temper push is not set.
+**Scrip and Standing prices** are above. **Segfault (decided):** it adds 2 faults (as in 1.0) and pushes temper noticeably volatile. One roll decides its bugs: 60% for one bug, 15% for two, 25% for none, so 75% for at least one. For comparison, two plain faults at 30% each give 42% for exactly one bug, 9% for two and 49% for none (51% for at least one), so a Segfault is about 24 points likelier to add a bug and has an expected 0.9 bugs against 0.6 (maintainer's figures, my check of the arithmetic). The temper push is -4 on the temper scale (proposal; see Temper scale).
 
 ### Tie breaks (decided)
 
@@ -316,10 +316,67 @@ What to watch:
 
 ### Temper (proposal)
 
-- **Accrual:** reuse 1.0's stability table as a starting point (faults push volatile, calm uptime pushes orderly, overheating pushes volatile, a fast PATCH pushes orderly). Numbers go to the balance tools.
+- **Accrual and scale:** see Temper scale below.
 - **Effects:** the three tells already decided (sprite motion, idle behavior, chatter tone) plus mild care preferences. For example an orderly netling likes a steady routine and a volatile one likes novelty, and a match makes care slightly easier. Keep this small. Preferences change care values, and faults feed temper, so there is a loop; check it with the balance tools so it does not snowball.
 - **Perks:** 1.0's Daemon and Glitch perks were tied to forms. In 2.0 temper could carry small perks, or none. Open.
 - **Consequence for the layered model:** the "temper variant" in composed forms (egg body, temper variant, role overlay) becomes an animation and idle skin, not a separate sprite identity. The temper hints stay on the list, but they are now personality hints, so they can be vaguer and lower stakes.
+
+### Temper scale (proposal, measured on the 1.0 simulator)
+
+Temper is one number per netling, hidden, read only through the tells. It starts at 0 each life (my assumption; not stated). The measurements below use 1.0's stability axis as the stand-in for temper, with the bug prototype switched on (30% chance, clearing at 15 scrip) and the fault cap removed. 300 lives per archetype. The 2.0 sources for temper are not built, so this is a rough guide.
+
+**Sources (starting values, taken from 1.0's stability table)**
+
+| Effect on temper | Source |
+|---|---|
+| +0.2 an hour | Awake, in flow, no alert |
+| -0.2 an hour | Awake and overclocked (Heat 65 to 84) |
+| -1 an hour | Heat 85 or more |
+| -1 | Each fault |
+| +1 | A fast PATCH (within 30 minutes) or a repelled intrusion |
+| +0.5 | PURGE |
+| -1 | A slow PATCH, a Black ICE shard, a netrun disconnect |
+| -0.5 | A mini-game that leaves Heat above 70 |
+| 0 | Plain awake time |
+| -4 | A Segfault (two faults at -1 each, plus -2 for the noticeable push; proposal) |
+
+Bugs raise Heat gain, so they push temper unsteady through the Heat rows, with no row of their own.
+
+**Decay (proposed): temper drifts back toward 0 with a half-life of 24 hours.** In 1.0, stability only accumulates, so by the end of a life it is wide and permanent (attentive +10.6, daredevil -33, overclocker -36, median at end of life). A decayed temper reflects recent habits, stays bounded, and can recover (a netling that was run hot can settle down), which supports the countable-rhythm tells being readable. With a 24-hour half-life a netling in flow all day would settle near +7, calm care sits at about +2 to +4 and sustained overheating goes past -10.
+
+**Levels (proposed): asymmetric, because the steady side is slow and the unsteady side is fast.**
+
+| Level | Temper | Tell |
+|---|---|---|
+| Strongly unsteady | -6 or lower | strongest unsteady tell |
+| Unsteady | -6 to -2 | mild unsteady tell |
+| Middle | -2 to +2 | little or no tell |
+| Steady | +2 to +4 | steady tell |
+| Strongly steady | +4 or higher | strongest steady tell (clearest countable rhythm and ritual) |
+
+The steady thresholds are closer to 0 because steady play earns temper slowly and cannot go as far; symmetric thresholds of 2 and 5 with the 24-hour decay left strong steady at only 2% to 3% of lives even for the attentive and balance-seeking archetypes at adulthood. Share of lives at each level, with decay at 24 hours (percent: strongly unsteady / unsteady / middle / steady / strongly steady):
+
+| Archetype | At teen | At adulthood | At end of life |
+|---|---|---|---|
+| Casual | 0/4/88/8/0 | 1/33/65/0/0 | 2/40/55/2/0 |
+| Worker | 0/4/91/5/0 | 0/34/65/0/0 | 3/49/47/0/0 |
+| Attentive | 0/0/49/42/9 | 0/0/50/43/7 | 0/0/39/45/15 |
+| Sysadmin (very attentive) | 0/0/47/47/5 | 0/0/42/49/9 | 0/0/19/49/32 |
+| Steer-daemon (aims for calm) | 0/0/30/54/16 | 0/1/25/54/20 | 0/0/9/38/53 |
+| Balance seeker | 0/1/43/49/7 | 0/0/36/53/11 | 0/0/17/49/34 |
+| Steer-glitch (runs warm) | 1/47/51/1/0 | 12/79/9/0/0 | 42/56/2/0/0 |
+| Daredevil (runs hot) | 17/70/14/0/0 | 62/37/1/0/0 | 84/16/0/0/0 |
+| Overclocker | 38/60/2/0/0 | 83/17/0/0/0 | 93/7/0/0/0 |
+| Neglectful | 11/63/26/0/0 | 37/63/0/0/0 | 19/56/25/0/0 |
+
+What it means:
+
+- **Tells appear where behavior is clear.** Casual and worker netlings are mostly middle at the teen check (88% to 91%) and drift mildly unsteady by adulthood (about a third), mostly from faults and Heat. Careful players are steady about half the time. Hot players are unsteady, and strongly so over time.
+- **Strong steady takes dedicated play.** The attentive archetype is strongly steady in 7% to 15% of lives, a calm-seeking player in 16% to 53%. That is the intended reward for the steady rhythm tell.
+- **Strong unsteady is easy to reach by running hot** (62% to 93% of daredevil and overclocker lives by adulthood or the end).
+- **Hot play dominates temper.** A casual player's drift toward unsteady is mostly faults; a hot player's is Heat. Both read as the same tell, which is fine because temper is personality, not a form lever.
+- **Without decay the numbers are not usable.** At the end of life, 1.0's cumulative stability spans about -44 to +22 (the 10th to 90th percentile across archetypes), and the strong levels would be permanent.
+- **Not modeled or not measured:** the 2.0 temper sources as built, any difference between the baby stage and later, how fast the tell should change when temper crosses a level (hysteresis, to avoid flicker at a threshold), the effect of temper on care preferences, and decay in minutes versus per check-in. A 48-hour half-life was also run (with the symmetric 2 and 5 thresholds): it widens the spread (casual's end of life 17% strongly unsteady, attentive 39% strongly steady), so 24 hours keeps temper closer to recent habits. Which half-life feels right is a design call.
 
 ### Risks to check
 
@@ -587,7 +644,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
 9. Evolution: Standing sources and sizes are set as a starting point (see Starting numbers), including the voucher and Black ICE shard at 1; open is whether the measured spread (steerers certain early, everyone else random) is the intended feel. Tie breaks are decided (see Tie breaks); a netling with no lead is then just a tie, so there is no separate default teen, and no wins threshold is needed for a role.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
-11. Bugs: scrip price 15, Standing price 2 (any split) and the debug-station frequency are set as starting values; open are the ceiling and penalty values (the prototype supports the starting ones), the debug station's options, the names per egg, and the temper push of a Segfault (it depends on the temper scale, which is not designed).
+11. Bugs: scrip price 15, Standing price 2 (any split) and the debug-station frequency are set as starting values; open are the ceiling and penalty values (the prototype supports the starting ones), the debug station's options, the names per egg. The temper scale is proposed (see Temper scale), including the Segfault push of -4.
 12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
 
 ## Not designed yet
