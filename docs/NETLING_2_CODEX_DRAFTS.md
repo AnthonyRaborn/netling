@@ -202,7 +202,7 @@ Notes:
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
 - **Three registers:** Program is bureaucratic and technical, Iron is physical and procedural, Wetware is street-level and commercial. The same four jobs (breach, dodge, tune, feast) appear in each.
 - **No spoilers:** none of the 15 pages names another egg, NL-0, the purge order, Standing or temper.
-- **Length:** the 15 drafts have a median of 153 characters and a longest of 172 (`program-tune`), counted by script. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
+- **Length:** the 15 drafts have a median of 156 characters and a longest of 172 (`program-tune`), counted by script. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
 
 ## Open
 
