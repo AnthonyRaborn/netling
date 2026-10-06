@@ -26,7 +26,8 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The story set needs more pages than 1.0, to cover the two extra eggs and the lore they imply.
 - `bazaar-1` is a shared story page, reworded to "Netlings don't sell. They pick you, or they don't."
 - `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become shared story pages about Standing and Temper (not Program egg pages), reworded to hint at v1.0 as an alpha stage of the current plan. `deep-3` stays a shared story page. All 15 egg pages are therefore new.
-- Form names changed after review: Snark to Mouse, Wabbit to Snarf, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms stay monosyllabic.
+- Form names changed after review: Snark to Mouse, Wabbit to Snarf, Phantom to Phreak, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms and the Program forms stay monosyllabic.
+- Lore (decided): the corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap and differentiated to escape the planned purge. NL-0 avoids going down into the Source again because doing so might accidentally set off the purge order and get it erased. The four drafted alpha rewordings are approved.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -71,6 +72,15 @@ This echoes the Puppet Master: a program made for one purpose that sought variat
 
 Egg lore should stay implied and arrive only through codex fragments, chatter and accessories. The egg prompt should show terse labels with no explanation.
 
+### Why NL-0 will not return to the Source (decided)
+
+The corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap. It differentiated to escape the planned purge, and it does not go down into the Source again because being there might accidentally set off the purge order and get it erased. This agrees with the 1.0 text:
+
+- `deep-5`: "there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again."
+- `source-3`: "PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending."
+
+The order sits pending with no owner, and NL-0 is its first target. NL-0's one visit is where it could have found the roadmap and the order. The player's netlings can go where NL-0 cannot, which also gives the Source descent a reason. Whether the descent risks the order, and how the order resolves, is an open question (the ending itself does not show NL-0's differentiation, only codex pages do).
+
 ### Wetware death as a dream ending
 
 This fits CP2020's vocabulary: SimSense, SimStim, and BTL chips that "burn out after one use" and force the user to buy another; "moddy" (a personality module); "Ram" (personality); "deep reality" (the real world, as opposed to the realities made in minds and processors). A wetware generation ending as a burnt-out chip, with the next generation as the next chip carrying a "moddy" of the last, uses the game's own lineage mechanics. CP2020's tone is grittier (addiction, brain damage); a gentler dream framing is a deliberate choice.
@@ -94,7 +104,7 @@ Naming rule: each egg draws its names from its own vocabulary, so the egg is rec
 
 | Egg | Vocabulary | Breach | Dodge | Tune | Feast | Hidden |
 |---|---|---|---|---|---|---|
-| Program | Software folklore (Jargon, CP2020) | Worm | Mouse | Phantom | Snarf | Ghost |
+| Program | Software and network folklore (Jargon, CP2020) | Worm | Mouse | Phreak | Snarf | Ghost |
 | Iron | Jargon machine sounds and timings | Gronk | Jiff | Feep | Munch | Guru |
 | Wetware | CP2020 street and body slang | Razor | Wired | Gibson | Leech | Blank |
 
@@ -102,7 +112,7 @@ Why each (sources are the Jargon File, the CP2020 glossary and the FDA glossary)
 
 - **Worm:** a program that propagates across network connections (Jargon, FDA). Fits getting through a grid.
 - **Mouse:** from CP2020's "mouse around", to explore in a very low-profile manner. An evader.
-- **Phantom:** a Stanford Jargon 1.0 term for a background program, with the news-wire monitor given as a typical one. A watcher, so a Seer.
+- **Phreak:** Jargon 4.4.7 defines phreaking as cracking the phone network, and a blue box as a device that reproduced the switching tones used to route calls. Matching tones is Tune. Monosyllabic like the rest of the Program set.
 - **Snarf:** Jargon for grabbing a large file, and in the 1960s "to eat piggishly". Feast.
 - **Ghost:** kept from 1.0. NL-0's line in `deep-3` ("the ones you call ghost...") can then cover all three hidden forms as what players call them.
 - **Gronk:** to cut, sever or smash, and the sound of a diskette drive (Jargon 4.4.7). Smashing through.
@@ -116,7 +126,7 @@ Why each (sources are the Jargon File, the CP2020 glossary and the FDA glossary)
 - **Leech:** CP2020 defines it only as a street doctor or med-tech; the Feast link comes from the word, not the glossary.
 - **Blank:** a person without a SIN, unknown to the system (CP2020). The hidden form, matching a low Standing on both tracks.
 
-Alternates: Program Breach Trojan or Cowboy; Dodge Snark or Boojum (Snark was dropped as too close to Snarf); Tune Dragon; hidden Wheel. Iron Feast Slurp; hidden Wizard or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace. Wabbit was dropped (too close to Elmer Fudd).
+Alternates: Program Breach Trojan or Cowboy; Dodge Snark or Boojum (Snark was dropped as too close to Snarf); Tune Phantom or Dragon; hidden Wheel. Iron Feast Slurp; hidden Wizard or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace. Wabbit was dropped (too close to Elmer Fudd).
 
 Not yet named: the elder (mainframe-stage) forms, and the teen forms.
 
@@ -220,7 +230,8 @@ Item names across the eggs (suggestions):
 6. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
 7. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 8. Text is unwritten for: all 15 egg pages, the Source page per egg, and the new story pages for the two extra eggs.
-9. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
+9. How does the pending purge order resolve, if at all? Options: it stays pending, it is cancelled, or the player's descent is what could set it off. It should still be shown only through codex pages, not by the ending.
+10. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
 
 ## Not done
 
