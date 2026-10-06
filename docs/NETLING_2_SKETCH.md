@@ -419,6 +419,22 @@ Preferences stay hidden (decided): there is no Dex hint for them. The player fin
 - **For unsteady netlings it changes nothing measurable.** A request for a new game fits the rotation they already follow.
 - So biasing the steady request gives a stronger lock-in than the middle path was meant to. Options: keep both sides (steady lock-in is the price of a visible preference), bias only the unsteady request and leave the steady request random, or have the steady request pick one of the last two plays. Not decided; the maintainer chose the middle path before this measurement.
 
+**Follow-up measurement: softening the steady request (options from the maintainer).** Two ways to soften the lock-in were tried. **Last two:** the steady netling asks for one of its last two distinct plays instead of the last one. **Last two plus ICE:** the same, with the random game of each netrun ICE fight added to the play history (an ICE fight is a mini-game of a randomly chosen game in 1.0; it adds to the history only, not to the wins that decide a role, and gives no Sync bonus). Each cell is the share of lives with a certain role / the share reaching 4 wins in every game, for the follow bot, 300 lives:
+
+| Archetype | No preference | Random request | Asks for the last | Asks for one of the last two | Last two plus ICE |
+|---|---|---|---|---|---|
+| Attentive (runs netruns) | 5% / 100% | 59% / 63% | 92% / 31% | 76% / 35% | 32% / 95% |
+| Steer-daemon (runs netruns) | 5% / 100% | 61% / 51% | 98% / 8% | 84% / 13% | 42% / 90% |
+| Sysadmin (no netruns) | 5% / 100% | 67% / 66% | 96% / 34% | 77% / 41% | 77% / 41% |
+| Balance seeker (no netruns) | 8% / 100% | 71% / 79% | 96% / 39% | 86% / 46% | 86% / 46% |
+
+- **Last two alone softens it only a little** (role certain 76% to 86%, against 92% to 98% for the last game and 59% to 71% for a random request).
+- **Adding ICE softens it a lot for players who run.** Role certain falls to 32% for attentive and 42% for steer-daemon, and 90% to 95% still reach 4 wins in every game. A random ICE game in the history breaks the repetition, so the preference becomes a soft push, not a lock.
+- **It does nothing for players who never netrun** (sysadmin and the balance seeker are unchanged at 77% and 86%), because they have no ICE games in their history. Real players mostly run (18 to 24 runs a life in the casual and attentive archetypes), so the bot archetypes without runs are the worst case.
+- **For players who ignore the preference,** the ICE version leaves everything at the no-preference baseline (role certain 4% to 6%).
+- **Standing is unaffected** (the Standing gap stays 10 to 17 for steady followers), since packet choice is not prompted.
+- **Recommendation:** last two plus ICE. It keeps a visible, answerable preference, gives steady players the variety netruns already provide, and leaves a real but soft push toward specializing. Not decided; the maintainer proposed it as one of two options.
+
 **Interplay with evolution (not a form rule).**
 
 - Steady repeats the same packet and the same games, which pushes Standing steadily one way and concentrates wins in one game. That favors a clear lean and a certain role.
