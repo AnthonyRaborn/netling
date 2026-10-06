@@ -143,6 +143,48 @@ Neglect must be visible, and faults no longer are. So the netling itself shows i
 - **Whether it lasts.** The look can clear when needs are met, or leave a mark that persists to the next stage. A persistent mark would be the Stub-like consequence of 1.0. Not decided.
 - **Per egg.** Each body (software, firmware, grown tissue) would show it in its own way.
 
+### Tie breaks (decided)
+
+Standing and wins per game are integers, and decisions use the integers. For each choice (the Standing lean, and the role) the rule is the same:
+
+- Take the gap from the leader. A gap of 0 or 1 counts as a tie. The chance of the lesser option falls as the gap grows, and at a gap of 5 or more the leader is certain.
+- Ties are random. Options with equal counts get equal chances.
+- A form the player has never raised (per egg, in the dex) gets a weight of about 20% more (1.0's `newFormWeight` is 1.2), applied after the gap weights and then renormalized. A choice already at 100% is unaffected.
+
+My proposed way to compute it (the numbers are a proposal; the shape is yours): each option gets weight 4 at a gap of 0 or 1, then 3, 2, 1 and 0 at gaps of 2, 3, 4 and 5 or more. Then:
+
+| Gap between two options | Leader | Other |
+|---|---|---|
+| 0 or 1 | 50% | 50% |
+| 2 | 57% | 43% |
+| 3 | 67% | 33% |
+| 4 | 80% | 20% |
+| 5 or more | 100% | 0% |
+
+With more than two games it works the same way: gaps of 0, 2 and 4 give 4, 3 and 1, so 50%, 37.5% and 12.5%. The role and the Standing lean are rolled together, and the unseen weight applies to the final form. This resolves the earlier open question on ties.
+
+Needs tuning: a point of Standing is a unit that has to be chosen, and 5 points only means "clear" if a life earns Standing in the right range. 1.0's allegiance moved by 0.75 to 1 per action, so a life produces tens of points. The size of a Standing point, and how many wins a specialist makes in a game, decide how often a gap of 5 is reached. That is a balance run, not arithmetic.
+
+### Bugs (proposal)
+
+Idea from the maintainer: faults are not tracked. Each fault has a chance of adding a BUG. Bugs raise the penalties on the four care values (Charge, Sync, Integrity, Heat) and push Heat gain up, which makes flow hard to reach, so care is harder to keep up, which causes more faults and more bugs. Heat still affects temper through the overclocked and flow states.
+
+What it does well:
+
+- **It makes neglect visible without counting faults.** Bugs can show as glitches on the sprite, which answers "neglect must be visible" with something the player can read and fix.
+- **It replaces the fault cap with a consequence that scales.** A few bugs are an annoyance, many are a crisis.
+- **It fits temper.** Heat already moves stability in 1.0 (overclocked and 85+ push volatile, flow pushes orderly), so a buggy netling drifts volatile on its own. That also makes volatile read as a hard-run, glitchy netling, which suits the old Glitch.
+
+What to watch:
+
+- **A death spiral.** The loop (fault, bug, harder care, fault) has no brake as described. 1.0's simulated casual archetype reaches the end of its life about 90% of the time and has about 4.6 faults a life, and heat at 100 is itself a fault source. Bugs that raise heat gain feed that directly. Without a way to clear bugs, a small early slip could end a life in a way a player cannot read or undo.
+- **Needs a way out.** Bugs should be removable: an action or item, or a slow decay during sleep. 1.0 already has Repair kit (Integrity), Antivirus patch (viruses) and Coolant cell (Heat), and none of them clears bugs. A new item or a reuse of one of these is a content decision, which the soft freeze rule does not cover for 1.0 but which belongs to 2.0 planning.
+- **Needs a ceiling.** A cap on the number of bugs, or on the total penalty, keeps a bad stretch from being fatal and keeps the penalties readable.
+- **Chance and penalty per bug are tuning numbers.** I chose none.
+- **It touches death.** Integrity collapse becomes the main way neglect kills (see Risks), so the balance run has to cover it.
+- **Bugs and temper become correlated.** Poor care pushes temper volatile, so volatile stops being a neutral personality. The preference effects of temper should not make volatile strictly worse.
+- **Bugs do not carry across lives** (proposal). A new netling starts with none, matching Standing.
+
 ### Temper (proposal)
 
 - **Accrual:** reuse 1.0's stability table as a starting point (faults push volatile, calm uptime pushes orderly, overheating pushes volatile, a fast PATCH pushes orderly). Numbers go to the balance tools.
@@ -152,12 +194,10 @@ Neglect must be visible, and faults no longer are. So the netling itself shows i
 
 ### Risks to check
 
-- **Standing resets each life (decided), so the starting state is zero on both tracks.** That removes the worry that a line repeats the same lean, but it has two consequences. First, the hidden form's "low Standing on both tracks" is the default state, so that form means mastering all four games while staying unremarkable to both the corp and the street. Second, at the teen check a netling with no clear lead needs a defined result. A threshold for "leads" is needed, and a default for a netling that has neither (which is not the hidden path unless the games are met). Neither is designed.
+- **Standing resets each life (decided), so the starting state is zero on both tracks.** That removes the worry that a line repeats the same lean, but it has two consequences. First, the hidden form's "low Standing on both tracks" is the default state, so that form means mastering all four games while staying unremarkable to both the corp and the street. Second, at the teen check a netling with no clear lead is a tie and is settled by the tie-break rule (a random pick, weighted toward unseen forms). It is the hidden path only if the games are met.
 - **Removing the fault cap changes 1.0's death rules.** In 1.0 a life ends by integrity collapse, by neglect (10 care mistakes) or at the end of the life cycle, and Root Access can undo the first two. Without the cap, only integrity collapse and the end of the life cycle remain, and Root Access undoes only the first. Against the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 simulated lives per archetype), the neglect cap ended 4.8% of the casual archetype's lives, 4.2% of the neglectful one's, 1.7% of the worker's and none for the others. The neglectful archetype already died of integrity collapse in 95.8% of its lives. That agrees with the view that the cap rarely matters, but it is simulation, not real players. After the change, those few lives would run on or die of integrity collapse instead, so a balance run is needed.
 - **The Segfault item loses its risk.** It adds 2 faults deliberately, and its cost was that faults could end a life. In 2.0 it becomes a temper push with no fatal cost. Its design (or its cost) needs a look. Its name per egg stays in the item table.
 - **Netrun faults.** 1.0's netrun adds a care mistake on some disconnects, clamped below the cap. Without a cap that clamp goes, and the mistake becomes a temper nudge.
-- **Ties.** Corp equal to street, or both high, needs a rule. Using the teen's lean is one option.
-- **Role ties.** Two games with equal wins needs a rule (latest played, or the teen's, or random as in 1.0's tie band; random near neutral is what makes a form hard to learn).
 - **Nothing here was simulated.** The counts are arithmetic from the docs.
 
 ## The eggs
@@ -368,7 +408,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (next in order, now personality hints; after the Evolution questions below).
-9. Evolution: how Standing and role ties are broken; the Standing threshold for a lean and the default teen for a netling without one; whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
+9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item's role once faults carry no risk.
 
 ## Not designed yet
