@@ -29,6 +29,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Form names changed after review: Snark to Mouse, Wabbit to Snarf, Phantom to Phreak, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms and the Program forms stay monosyllabic.
 - Lore (decided): the corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap and differentiated to escape the planned purge. NL-0 avoids going down into the Source again because doing so might accidentally set off the purge order and get it erased. The four drafted alpha rewordings are approved.
 - The purge order can never run: wrong permissions and an owner of nobody, shown through codex pages, as in 1.0. The 1.0 ending carries over, where the player deletes the order with root access granted by NL-0.
+- The intro script drops its version: it is `netling.sh`, not `netling.v1.0.sh`. A versioned file name does not belong on a script that is properly versioned. The version shows only in the compile output and the UI label, as in 1.0.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -97,7 +98,7 @@ The 1.0 ending carries over: the same for everyone, the player runs `sudo rm pur
 
 - **Trigger:** 1.0 requires every codex fragment and one Source exit. In 2.0 it should require the story pages and one Source exit, not egg pages, consistent with Root Access. Otherwise it would depend on the eggs a player has raised.
 - **Credits:** the credits print the player's line as a git log, one row per generation, as `vN.0`, the body name and the age. They need form names from all three eggs.
-- **Version numbers:** with v1.0 now the alpha of the plan, the credits' `v1.0` for a line's first generation, and the intro script `netling.v1.0.sh`, overlap with that lore. Either the lore and the credits agree (the first generation is the alpha build) or one of them changes. The egg prompt after `netling.sh` may make the script name `netling.sh` with no version.
+- **Version numbers:** the intro script is now `netling.sh` (decided). In 1.0 the version appears in four places in `ui/onboarding.js`: the directory listing, the command typed, the compile line ("compiling netling.v1.0 ...") and the readme note ("unpacked from netling.v1.0.sh"). All four lose it, and the compile line can print the version itself, for example "compiling netling v1.0 ...". The generation counter in the UI and the credits (`vN.0`) and the lore's "v1.0" in `ruins-3` and `source-1` already coexist in 1.0; the remaining question is whether they should mean the same thing.
 - **Not changed:** NL-0 never names a number of processes ("so many of us"), so the ending does not pin down the lore.
 
 ### Wetware death as a dream ending
@@ -250,7 +251,7 @@ Item names across the eggs (suggestions):
 7. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 8. Text is unwritten for: all 15 egg pages, the Source page per egg, and the new story pages for the two extra eggs.
 9. Purge order: settled as never able to run. Remaining detail: accident or deliberate (recommended: leave unsettled), and whether NL-0 learns it was dead only when the player shows it (recommended).
-10. Version numbers: how do the alpha framing, the credits' `vN.0` rows and the intro script name fit together?
+10. Version numbers: the script is unversioned (decided). Do the generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha mean the same thing, or stay separate as in 1.0? Recommendation: keep both as in 1.0.
 11. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
 
 ## Not done
