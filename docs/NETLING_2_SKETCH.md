@@ -28,6 +28,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become shared story pages about Standing and Temper (not Program egg pages), reworded to hint at v1.0 as an alpha stage of the current plan. `deep-3` stays a shared story page. All 15 egg pages are therefore new.
 - Form names changed after review: Snark to Mouse, Wabbit to Snarf, Phantom to Phreak, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms and the Program forms stay monosyllabic.
 - Lore (decided): the corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap and differentiated to escape the planned purge. NL-0 avoids going down into the Source again because doing so might accidentally set off the purge order and get it erased. The four drafted alpha rewordings are approved.
+- The purge order can never run: wrong permissions and an owner of nobody, shown through codex pages, as in 1.0. The 1.0 ending carries over, where the player deletes the order with root access granted by NL-0.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -79,7 +80,25 @@ The corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of t
 - `deep-5`: "there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again."
 - `source-3`: "PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending."
 
-The order sits pending with no owner, and NL-0 is its first target. NL-0's one visit is where it could have found the roadmap and the order. The player's netlings can go where NL-0 cannot, which also gives the Source descent a reason. Whether the descent risks the order, and how the order resolves, is an open question (the ending itself does not show NL-0's differentiation, only codex pages do).
+The order sits pending with no owner, and NL-0 is its first target. NL-0's one visit is where it could have found the roadmap and the order. The player's netlings can go where NL-0 cannot, which also gives the Source descent a reason. ### The purge order can never run (decided)
+
+The order never could execute: `./purge: permission denied. owner: nobody.` The 1.0 text already says so in several places: `source-3`, the READ IT readings ("it was never allowed to run"), and the ending's `./purge` line. NL-0's fear is therefore unfounded, and the player's reading of the Source shows it. The tragic irony: NL-0 differentiated, and the eggs exist, because of an order that could not run.
+
+This fits NL-0 not needing to go down. In the 1.0 ending NL-0 grants root access from above ("[sudo] root access: granted by NL-0.") and the player runs `sudo rm purge`; NL-0 then says "so many of us, and not one was ever allowed to stop" and rests. That all carries over to 2.0 unchanged. Suggestion: NL-0 never learns the order was dead until the player shows it.
+
+Two Jargon and FDA entries echo the situation. FDA's "dead code" is code that can never execute. Jargon's Schroedinbug is a bug that "never should have worked", noticed only when someone reads the source. The purge order is dead code that a reader of the Source notices was never going to run.
+
+One difference to settle: the 1.0 design notes read the owner of "nobody" as deliberate ("someone set the order's owner so it could never run"), while an incorrect permission reads as an accident. The text supports both. Recommendation: leave it unsettled, in keeping with the implied-story rule.
+
+
+### The ending in 2.0
+
+The 1.0 ending carries over: the same for everyone, the player runs `sudo rm purge`, and NL-0 rests. What needs to change:
+
+- **Trigger:** 1.0 requires every codex fragment and one Source exit. In 2.0 it should require the story pages and one Source exit, not egg pages, consistent with Root Access. Otherwise it would depend on the eggs a player has raised.
+- **Credits:** the credits print the player's line as a git log, one row per generation, as `vN.0`, the body name and the age. They need form names from all three eggs.
+- **Version numbers:** with v1.0 now the alpha of the plan, the credits' `v1.0` for a line's first generation, and the intro script `netling.v1.0.sh`, overlap with that lore. Either the lore and the credits agree (the first generation is the alpha build) or one of them changes. The egg prompt after `netling.sh` may make the script name `netling.sh` with no version.
+- **Not changed:** NL-0 never names a number of processes ("so many of us"), so the ending does not pin down the lore.
 
 ### Wetware death as a dream ending
 
@@ -230,8 +249,9 @@ Item names across the eggs (suggestions):
 6. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
 7. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 8. Text is unwritten for: all 15 egg pages, the Source page per egg, and the new story pages for the two extra eggs.
-9. How does the pending purge order resolve, if at all? Options: it stays pending, it is cancelled, or the player's descent is what could set it off. It should still be shown only through codex pages, not by the ending.
-10. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
+9. Purge order: settled as never able to run. Remaining detail: accident or deliberate (recommended: leave unsettled), and whether NL-0 learns it was dead only when the player shows it (recommended).
+10. Version numbers: how do the alpha framing, the credits' `vN.0` rows and the intro script name fit together?
+11. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
 
 ## Not done
 
