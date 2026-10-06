@@ -319,6 +319,34 @@ Why each (sources are the Jargon File, the CP2020 glossary and the FDA glossary)
 - **Leech:** CP2020 defines it only as a street doctor or med-tech; the Feast link comes from the word, not the glossary.
 - **Blank:** a person without a SIN, unknown to the system (CP2020). The hidden form, matching a low Standing on both tracks.
 
+### Second form names for option C (proposal)
+
+Option C gives each role two named forms, one leaning corp and one leaning street, so 12 new names are needed. The existing 12 role names stay; each takes one lean, and a new name takes the other. Which existing name takes which lean is arbitrary and is a proposal. Every new word below was checked against the glossary named; the Iron names are monosyllabic, as decided.
+
+| Egg | Role | Corp-leaning | Street-leaning | New name's source |
+|---|---|---|---|---|
+| Program | Breach | **Tiger** | Worm | Jargon 4.4.7: tiger team, paid professionals who penetrate security to test it |
+| Program | Dodge | **Spoof** | Mouse | Jargon: to alter a communication stream so it misleads the recipient |
+| Program | Tune | **Parse** | Phreak | Jargon: to understand or comprehend (and to work out structure) |
+| Program | Feast | **Gobble** | Snarf | Jargon: to consume; points to snarf |
+| Iron | Breach | **Splat** | Gronk | Jargon: the squashed-bug mark, so smashing and tidying |
+| Iron | Dodge | Jiff | **Bamf** | Jargon: the sound of something teleporting in or out |
+| Iron | Tune | **Ping** | Feep | Jargon: a small message sent to check that something is there (from a sonar pulse) |
+| Iron | Feast | Munch | **Hog** | Jargon: a program or hardware that eats far more than its share |
+| Wetware | Breach | Razor | **Solo** | CP2020: a mercenary who works the streets |
+| Wetware | Dodge | Wired | **Chipped** | CP2020: senses, skills and reflexes enhanced by cyberware |
+| Wetware | Tune | **Mentat** | Gibson | CP2020: someone who stares at a problem and answers without visible steps |
+| Wetware | Feast | **Wirehead** | Leech | CP2020: someone addicted to electronic communication or direct stimulation |
+
+New names are in bold. The hidden forms (Ghost, Guru, Blank) are unchanged.
+
+Notes:
+
+- **Lean assignment is a guess.** I gave the corp lean the tidier or paid word (a hired team, a clean signal, serial processing) and the street lean the wilder one, following 1.0's Chrome (licensed) and Firewall (street-minded). Swap any pair; nothing else depends on it.
+- **Weak links.** Spoof (deception reads more outlaw than corp), Wirehead (addiction, not feeding, so the Feast link is loose) and Splat (smashing, close to Gronk) are the least certain. Alternates: Program Breach Sneaker (also verified, a hired breaker); Iron Breach Gib (Jargon: destroy utterly) or Scag; Wetware Breach Blade (CP2020: a fighter with edged weapons, or a surgeon), Wetware Dodge Edge (the fringe of society).
+- **Form-bound pages.** Under option C one page covers both forms of a role, so a page must read right for both. The existing role pages use the street-lean names as in-world words in two places (`iron-gronk`, `iron-jiff`); a page could use either name or neither.
+- **Not checked:** how the names read in the UI, or whether any collides with a 1.0 form name. None of them is a 1.0 form (Chrome, Firewall, Daemon, Glitch, Ghost, Stub, Shell, Kernel and the mainframe names).
+
 Alternates: Program Breach Trojan or Cowboy; Dodge Snark or Boojum (Snark was dropped as too close to Snarf); Tune Phantom or Dragon; hidden Wheel. Iron Feast Slurp; hidden Wizard or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace. Wabbit was dropped (too close to Elmer Fudd).
 
 Not yet named: the elder (mainframe-stage) forms, and the teen forms.
@@ -428,6 +456,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
 11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
+12. The 12 second form names (see Second form names): confirm or replace them, and the lean each name takes.
 
 ## Not designed yet
 

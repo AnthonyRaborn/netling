@@ -190,6 +190,7 @@ Notes:
 - **One pair per channel per egg.** The three channels are the decided tells (sprite motion, idle behavior, chatter tone), skinned for each egg as the sketch proposes: Program stutters and drops frames, Iron drifts, Wetware pulses.
 - **Vocabulary follows the egg.** Program talks about loops, tasks and lines. Iron talks about its own joints, checklists and a fault bell. The first Iron draft said "housing" and "panels", which imply background scenery the sprite may not have, so those words were removed. Wetware uses plain words only (pulse, routine, technician, chart), with no CP2020 terms.
 - **Nothing here flashes.** The volatile hints describe skipped or early frames and drift, which must still stay under three changes a second in the actual animation, with a calmer version in reduced motion.
+- **Idle hints to revisit (kept as a note).** A routine with a countable number of steps is the least natural of the three channels, and the chatter hints (a fixed gap, a fixed item count) may be hard to notice in practice. Test all three against the real animations before trusting the wording, and expect the idle and chatter hints to change.
 - **Preferences stay hidden (decided).** Temper may also shape care preferences (a steady netling likes routine, an unsteady one likes novelty), and no hint names them. The idle hints touch this only lightly.
 - **Length:** the 18 hints have a median of 68 characters and a longest of 111, against 90 and 166 in 1.0's pages.
 
@@ -208,4 +209,4 @@ Notes:
 4. Edit any story page or Source page text.
 5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
 6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
-7. Edit the temper hints. They sit in the Dex for now.
+7. Edit the temper hints. They sit in the Dex for now. Revisit the idle and chatter hints (see the note in Temper hints).
