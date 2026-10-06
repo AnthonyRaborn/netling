@@ -178,11 +178,11 @@ What it does well:
 What to watch:
 
 - **A death spiral.** The loop (fault, bug, harder care, fault) has no brake as described. 1.0's simulated casual archetype reaches the end of its life about 90% of the time and has about 4.6 faults a life, and heat at 100 is itself a fault source. Bugs that raise heat gain feed that directly. Without a way to clear bugs, a small early slip could end a life in a way a player cannot read or undo.
-- **Needs a way out.** Bugs should be removable: an action or item, or a slow decay during sleep. 1.0 already has Repair kit (Integrity), Antivirus patch (viruses) and Coolant cell (Heat), and none of them clears bugs. A new item or a reuse of one of these is a content decision, which the soft freeze rule does not cover for 1.0 but which belongs to 2.0 planning.
-- **Needs a ceiling.** A cap on the number of bugs, or on the total penalty, keeps a bad stretch from being fatal and keeps the penalties readable.
+- **Needs a way out (decided that bugs can be cleared).** The maintainer's options: pay with Standing, with scrip, or with an action taken while on a run. A netling can be "defragged" or "bugfixed", at least in the Program line; the Iron and Wetware wording is not chosen. 1.0 already has Repair kit (Integrity), Antivirus patch (viruses) and Coolant cell (Heat), and none of them clears bugs, so this is new 2.0 content. A cost in Standing is notable: Standing is an evolution lever, and with a gap of 5 deciding a form a few points matter, so cleaning bugs can cost form progress. Which cost is the default, and whether each is a separate way, is open.
+- **Needs a ceiling (decided).** The total penalty is capped so a bad stretch is recoverable, but not so low that the maximum can be ignored. The Integrity penalty should be relatively smaller at the maximum than the other three, so a player has a realistic chance to recover. The maintainer's sentence ended mid-thought here ("so players can have realistic opportunities to ..."); I read it as "recover", which is not confirmed.
 - **Chance and penalty per bug are tuning numbers.** I chose none.
 - **It touches death.** Integrity collapse becomes the main way neglect kills (see Risks), so the balance run has to cover it.
-- **Bugs and temper become correlated.** Poor care pushes temper volatile, so volatile stops being a neutral personality. The preference effects of temper should not make volatile strictly worse.
+- **Volatile does not need bugs (decided).** A netling can be volatile with no bugs and no faults by running hot consistently, so volatile is not only a symptom of poor care. Bugs still push heat up and so push temper that way. The preference effects of temper should not make volatile strictly worse.
 - **Bugs do not carry across lives** (proposal). A new netling starts with none, matching Standing.
 
 ### Temper (proposal)
@@ -409,7 +409,8 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (next in order, now personality hints; after the Evolution questions below).
 9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
-10. The Segfault item's role once faults carry no risk.
+10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
+11. Bugs: the default way to clear them (Standing, scrip, or a run action), the names per egg, the ceiling values, and the chance a fault adds a bug.
 
 ## Not designed yet
 
