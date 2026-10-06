@@ -181,7 +181,7 @@ What it means:
 
 - **Players who steer are predictable early.** A committed steerer is almost always certain at the teen check, and a player who feeds only one packet type is mostly certain by adulthood and at least 84% at the teen. This fixes the weak teen preview from the earlier run.
 - **Players who do not steer stay random.** Casual, attentive and worker netlings are a coin flip about a third to a half of the time and about 55% to 68% for the leader on average. That is the intent: no stance, no guarantee.
-- **The middle is real.** A casual player who commits a little (checkpoint and anomaly choices at 1 each) can move from the coin to roughly 70% to 80% in a life, which makes small stances worth something.
+- **The middle was not measured.** The archetypes are all-or-nothing: either they steer hard or they do not. A player who commits only a little has no archetype here, so how far a few choices move the leader chance is untested.
 - **Caveats:** one signed number stands in for two tracks, which can differ (a netling with both tracks high is a "broker" with a small gap and large totals, and 1.0's allegiance cannot show that); 300 lives is small; the hidden path's "low on both" was not measured; and Standing sources in 2.0 are not the same as 1.0's allegiance sources, so the totals are a rough guide.
 
 **Wins that make a role**
