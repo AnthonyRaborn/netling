@@ -55,6 +55,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 - The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
+- Root Access and the ten new story pages (option C): only `corp-6` and `corp-7` count toward Root, which then needs 24 pages. The other eight new pages carry a lategame flag and never count toward Root. `deep-6` is kept.
 - In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Wired, Gibson, Leech, Blank) stay as they are.
 
 ## Architecture
@@ -217,7 +218,7 @@ The class names (Chrome, Daemon, Firewall, Glitch) remain as the corp's and the 
 
 Arithmetic from the 1.0 tables, not a simulation.
 
-- Story set: the original 22 Root pages are unchanged in count (public 4, corp 5, bazaar 5, ruins 4, deep 4). Beyond Root: `deep-5` and `source-1` to `source-4`, 5 pages. At 8 a life, 22 story pages takes 3 lives, as in 1.0. New story pages for the two extra eggs add to this.
+- Story set: 24 Root pages (the original 22 plus `corp-6` and `corp-7`) and 13 late pages (eight new ones plus `deep-5` and the four Source pages), 37 in all. At 8 a life, 24 Root pages takes 3 lives, as in 1.0.
 - Egg pages: 15, all new (5 per egg).
 
 ### What follows
@@ -282,7 +283,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (after the codex pages).
-9. How many of the ten new story pages count toward Root Access (options A, B, C in the drafts file; C recommended). This sets whether Root Access, and what depends on it, moves a life later.
+9. The meaning of the lategame flag (see the drafts file): when late pages drop (recommended: once the line holds Root Access), whether the ending requires them (recommended: yes), whether regional unlocks count them (recommended: no), and whether it replaces 1.0's `mainframe` flag for `deep-5` and the Source pages.
 
 ## Not designed yet
 
