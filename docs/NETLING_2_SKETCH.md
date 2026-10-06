@@ -27,7 +27,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 **Key terms.**
 - **Egg:** the substrate a netling is raised on: Program (software, the original line), Iron (firmware and infrastructure) or Wetware (grown tissue running software).
 - **Temper:** a hidden orderly-to-volatile axis, shown by sprite motion, idle behavior and chatter tone.
-- **Standing:** two visible reputation tracks, corp and street, that carry across lives.
+- **Standing:** two visible reputation tracks, corp and street, that belong to one netling and reset each life.
 - **Role:** which mini-game a form is built around (Breach, Dodge, Tune, Feast). Each egg has four role forms and one hidden form that masters all four.
 - **NL-0:** the first netling, an offshoot of the corp's roadmap that differentiated to escape a planned purge. It speaks in codex pages and grants root access from above.
 - **Root Access:** earned by finding the Root story pages (24 of them). It unlocks the late game.
@@ -78,7 +78,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 | Egg (substrate) | The player's choice at the prompt | The single fixed software egg |
 | Temper (body) | One hidden axis, orderly to volatile, fed by faults and handling, shown by behavior and sprite tells. It shapes personality, not the form (decided; see Evolution) | Stability axis and its pull on Daemon and Glitch |
 | Role | What it specialized in, from the four mini-games | Netrun abilities tied to form |
-| Standing | Visible reputation that carries across lives | Allegiance axis, Chrome and Firewall |
+| Standing | Visible reputation of one netling; it starts at zero each life and does not carry over (decided) | Allegiance axis, Chrome and Firewall |
 
 Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system (the idea behind the form name Blank), which replaces the Ghost's "neutral allegiance" condition.
 
@@ -100,6 +100,10 @@ Sketch from the maintainer's direction on 2026-10-06, prompted by [issue 28](htt
 - Standing is at least one of the levers.
 - Faults (care mistakes) feed Temper. Temper is mostly personality: how the netling interacts, talks and idles, and possibly its care preferences. It does not choose a form.
 - Teens depend on Standing only, except the hidden path, which also needs the games played, as 1.0's Shell does (3 wins in each of the four games).
+- Adult forms use option C: two named forms per role, one codex page per role (decided, first try). Option B is the fallback. If B is used, each form needs a terminal indicator of its Standing variant, because the variant would no longer be a different named form.
+- Standing does not carry across lives (decided). It is the netling's own standing, and the world treats the next netling as a new entity, rightly or wrongly. What carries over is the lineage (trait, quirk, keepsake), Root Access, the codex and the dex, as in 1.0.
+- Neglect must have a visible effect (decided). Part of the 2.0 redesign is to revisit the netling sprites (see below).
+- Faults are hidden (not logged) and have no cap (decided). They only feed temper. The 1.0 rule that 10 faults end a life is removed.
 
 ### Does Standing as a lever force more forms?
 
@@ -111,7 +115,7 @@ Yes, if Standing is supposed to change the adult form. For one role (say Breach)
 | B. One named form per role, Standing as a visible variant | 15 (as now) | 15 + 3 = 18 | Cheapest. The sketch already allows composed forms, so the lean is a look and a small perk, not a new form |
 | C. Two named forms per role, one page per role | 27 | 15 + 3 = 18 (a page covers both forms of a role) | Keeps page count, but a page then cannot be one form's own document |
 
-Recommendation: A or C if the forms should feel like real branches; B if the codex and name count matter most. Not decided. Note the Rogue gate is all egg pages, so A changes it from 18 to 30 pages.
+Decided: try C first, with B as the fallback (B needs a visible Standing indicator on each form). A is not chosen, since it would raise the Rogue gate from 18 to 30 pages. Under C the egg pages stay at 18: 5 per egg (four role pages, each covering both forms of that role, and one hidden form page) and 3 Source pages. Consequence for the drafts: the 12 role form pages already written describe one form each. They need rewording so one page fits both a corp-leaning and a street-leaning form, or a second page per role (which is A). Option C also needs 12 new form names (a second named form for each of the 12 role slots across the eggs), which are not chosen. Not done yet.
 
 ### Levers by stage (proposal)
 
@@ -120,15 +124,24 @@ Recommendation: A or C if the forms should feel like real branches; B if the cod
 | Baby to teen | Standing only: which track leads (corp or street) | Three teen types per egg: corp-leaning, street-leaning, and the hidden path. The hidden-path teen also needs wins in each of the four games (the number is a balance question) and low Standing on both tracks. Faults are not required (not decided) |
 | Teen to adult | Role (the game with the most wins this life) and Standing lean at that time | The teen is a preview of the Standing lean, as a checkpoint the player can read. The lean is recomputed at adulthood, so it can still change |
 | Hidden adult | All four games mastered, low Standing on both tracks | Needs a threshold for mastery, as 1.0's Ghost does (4 wins each and 29 in all) |
-| Failure form | None yet | Faults no longer pick a teen form (1.0's Stub). Whether neglect still has a visible consequence for form is open |
+| Neglect | A visible sprite effect (decided), form effect not decided | Faults no longer pick a teen form (1.0's Stub). Neglect shows on the netling instead (see Neglect and the sprites). Whether sustained neglect also marks the form is open |
 
 What the player can see (proposal, resolves issue 28 for 2.0 without an item):
 
 - **Standing:** visible, two tracks.
 - **Wins per game:** a visible tally per life, like effort or training counts.
-- **Faults:** already visible in 1.0 (faults x/max in the HUD), and the cap can end a life. They stay visible by default; whether they should become hidden is an open question below.
+- **Faults:** hidden and uncapped (decided). They are no longer shown in the HUD, the life screen or the log, and nothing counts them toward a death.
 - **Temper:** hidden, shown only by tells. Because it does not choose a form, guessing it wrong costs nothing, which is the point.
 - An item like issue 28's "sysmonitor" is no longer needed for form routing. It could still exist as flavor that reads temper.
+
+### Neglect and the sprites (decided in principle)
+
+Neglect must be visible, and faults no longer are. So the netling itself shows it. Part of the 2.0 redesign is to revisit the netling sprites; this is the only place the sketch has noted that, besides the composed-form sprite spec in the backlog and the shared anchor rows for the wearables (see Architecture). Nothing here is designed. Questions for that pass:
+
+- **A neglected look per body.** A reversible state tied to needs left unmet, readable at a glance (dimmed, worn, glitching, or a posture), with a calmer version when motion is reduced and nothing that flashes more than three times a second.
+- **Separate from temper.** Temper shows through motion rhythm and idle behavior. Neglect needs a different channel (pose, color, wear) so the two are not confused.
+- **Whether it lasts.** The look can clear when needs are met, or leave a mark that persists to the next stage. A persistent mark would be the Stub-like consequence of 1.0. Not decided.
+- **Per egg.** Each body (software, firmware, grown tissue) would show it in its own way.
 
 ### Temper (proposal)
 
@@ -139,7 +152,10 @@ What the player can see (proposal, resolves issue 28 for 2.0 without an item):
 
 ### Risks to check
 
-- **Standing carries across lives (decided), and it picks the teen.** A line can then repeat the same teen and adult lean every life. 1.0 handles this for forms with a small weight for forms the player has never raised (`newFormWeight`); something similar, or a Standing decay, may be needed. Not designed.
+- **Standing resets each life (decided), so the starting state is zero on both tracks.** That removes the worry that a line repeats the same lean, but it has two consequences. First, the hidden form's "low Standing on both tracks" is the default state, so that form means mastering all four games while staying unremarkable to both the corp and the street. Second, at the teen check a netling with no clear lead needs a defined result. A threshold for "leads" is needed, and a default for a netling that has neither (which is not the hidden path unless the games are met). Neither is designed.
+- **Removing the fault cap changes 1.0's death rules.** In 1.0 a life ends by integrity collapse, by neglect (10 care mistakes) or at the end of the life cycle, and Root Access can undo the first two. Without the cap, only integrity collapse and the end of the life cycle remain, and Root Access undoes only the first. Against the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 simulated lives per archetype), the neglect cap ended 4.8% of the casual archetype's lives, 4.2% of the neglectful one's, 1.7% of the worker's and none for the others. The neglectful archetype already died of integrity collapse in 95.8% of its lives. That agrees with the view that the cap rarely matters, but it is simulation, not real players. After the change, those few lives would run on or die of integrity collapse instead, so a balance run is needed.
+- **The Segfault item loses its risk.** It adds 2 faults deliberately, and its cost was that faults could end a life. In 2.0 it becomes a temper push with no fatal cost. Its design (or its cost) needs a look. Its name per egg stays in the item table.
+- **Netrun faults.** 1.0's netrun adds a care mistake on some disconnects, clamped below the cap. Without a cap that clamp goes, and the mistake becomes a temper nudge.
 - **Ties.** Corp equal to street, or both high, needs a rule. Using the teen's lean is one option.
 - **Role ties.** Two games with equal wins needs a rule (latest played, or the teen's, or random as in 1.0's tie band; random near neutral is what makes a form hard to learn).
 - **Nothing here was simulated.** The counts are arithmetic from the docs.
@@ -352,7 +368,8 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (next in order, now personality hints; after the Evolution questions below).
-9. Evolution: adult form count (options A, B or C in Evolution), whether neglect still has a visible form consequence, whether faults stay visible, how Standing and role ties are broken, and what Standing does across lives.
+9. Evolution: how Standing and role ties are broken; the Standing threshold for a lean and the default teen for a netling without one; whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
+10. The Segfault item's role once faults carry no risk.
 
 ## Not designed yet
 
