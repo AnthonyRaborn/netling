@@ -180,5 +180,5 @@ Notes:
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
 4. Edit any story page or Source page text.
 5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
-6. Still open from the sketch: Rogue's gate, and the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
+6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
 7. Next in order: temper hints.

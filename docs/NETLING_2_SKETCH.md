@@ -198,7 +198,7 @@ Not yet named: the elder (mainframe-stage) forms, and the teen forms.
 Two kinds (decided):
 
 - **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). Ten new ones are drafted, to cover the two extra eggs and the lore they imply.
-- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate. They are rare drops with no per-life limit (decided): the rate should be set so that a very consistent player could in principle collect all of an egg's pages in one life but would more realistically need about two. The rate itself is to be tuned with the balance tools, and no number is chosen. Each egg also has one Source page, which is an egg page (decided), so 6 per egg and 18 in all. The earlier idea of a page per teen form is discarded, and elder forms get no pages (decided): they are hidden until after Root, and the codex is already growing a lot.
+- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate, which needs all 18 (decided). They are rare drops with no per-life limit (decided): the rate should be set so that a very consistent player could in principle collect all of an egg's pages in one life but would more realistically need about two. The rate itself is to be tuned with the balance tools, and no number is chosen. Each egg also has one Source page, which is an egg page (decided), so 6 per egg and 18 in all. The earlier idea of a page per teen form is discarded, and elder forms get no pages (decided): they are hidden until after Root, and the codex is already growing a lot.
 
 ### The six form-bound 1.0 pages
 
@@ -291,7 +291,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. Current drafts put each egg's pages in its home region and the three hidden pages in The Deep.
 3. Decided: egg pages have no per-life limit. Open: the drop rate that makes full collection take about 2 lives for a consistent player, to be tuned with the balance tools.
 4. Decided: elder forms get no pages.
-5. Rogue's gate: all 18 egg pages (15 form pages and 3 Source pages), the 15 form pages, or all pages of one egg?
+5. Decided: Rogue's gate is all 18 egg pages (15 form pages and 3 Source pages), so a player must raise all three eggs and find every egg page. It is a secret egg and should be hard to get. Consequence to tune: at about 2 lives per egg for a consistent player, that is about 6 lives at the least, and a Source page needs Root and the Source descent in each egg.
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (next in order).
