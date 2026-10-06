@@ -81,7 +81,7 @@ Ids match drop position within a region (decided). That means some 1.0 pages tak
 | Id | Region | Tier | Title | Text |
 |---|---|---|---|---|
 | `public-4` | Public Net | Root | classified ad | FOR SALE: one sealed lab dish, warm, no label. One server rack, humming, no label. Price: whatever you can carry. |
-| `public-6` | Public Net | late | field guide, errata slip | Page 9 lists four adult kinds. Three readers have written in about a fifth. The editor has checked every entry and found no fifth. The editor has stopped checking the entries. |
+| `public-6` | Public Net | late | field guide, errata slip | Page 9 lists four adult kinds. Three readers have written in about a fifth. The editor has checked every entry and found no fifth. |
 | `public-7` | Public Net | late | runner's note, scratched in a node wall | Four kinds in the guide. I raised one that was not in it. It did not look like a mistake. It looked like it had been waiting for me to notice. |
 | `corp-2` | Corp Grid | Root | release schedule | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. |
 | `corp-7` | Corp Grid | late | deletion log | Attempt 1: wipe failed, rewritten by morning. Attempt 2: wipe failed, no write path. Attempt 3: wipe failed, regrew overnight. Legal asks us to stop calling them attempts. |
@@ -96,13 +96,13 @@ Ids match drop position within a region (decided). That means some 1.0 pages tak
 Notes:
 
 - **A thread across regions.** `public-4` plants two objects, a dish and a rack, as an early Root hook. `ruins-5`, `ruins-6` and `ruins-7` follow the rack (a unit nobody installed, read-only, nobody has touched it). `bazaar-6`, `bazaar-7` and `bazaar-8` follow the dish (cultures that were there first, grown not built, never scanned). A player who reads only one region gets half the picture.
-- **Public Net's late pages.** `public-6` and `public-7` are the region's only late pages. They hint that hidden forms exist and say nothing about how to reach one. `public-6` gives the numbers (four listed, a fifth reported) and ends on an uncanny beat. `public-7` is a first-hand sighting, and "waiting for me to notice" invites the player to look. Both say "four kinds" and "adult", which matches every egg having four role forms plus one hidden form. The Deep's hidden pages stay the only place a specific hidden form is described.
+- **Public Net's late pages.** `public-6` and `public-7` are the region's only late pages. They hint that hidden forms exist and say nothing about how to reach one. `public-6` gives the numbers (four listed, a fifth reported) and ends on the editor's failed check. `public-7` is a first-hand sighting, and "waiting for me to notice" invites the player to look. Both say "four kinds" and "adult", which matches every egg having four role forms plus one hidden form. The Deep's hidden pages stay the only place a specific hidden form is described.
 - **Iron, in the Ruins.** `ruins-6` ties to 1.0's `source-1` ("SOURCE. read-only. last write: before v1.0."): a read-only image that is a copy of an archive copy plus forty lines nobody wrote. That is NL-0 writing itself where nothing can overwrite it, shown without saying so.
 - **Wetware, in the Bazaar.** `bazaar-7` says the first culture was "grown, not built" and that later ones remember it, which also echoes the lineage fragments. `bazaar-8` explains the escape in one line: the order scanned the net and the racks, and nobody scanned the dish.
 - **The corp, in the Corp Grid.** `corp-2` is the roadmap (v1.0 is the alpha; later builds are "not for distribution"), matching the approved rewordings, and sits right after the "delivered" memo. `corp-7` is a deletion log that shows three different failures without naming a substrate: rewritten, no write path, regrew. As a late page it comes after the region's Root pages, so it follows the directive by position, not adjacency. The per-egg deletion failure lives in a story page, not the egg pages, and the directive is unchanged.
 - **NL-0, in the Deep.** `deep-5` is NL-0 saying directly that it is in more than one kind of place, and that it did not expect them to differ. This is the Puppet Master idea (variation), and the only page where NL-0 states the differentiation. Kept (decided).
 - **The purge order stays hidden.** None of these pages says the order could not run; the Source reveals that (`source-3`, READ IT, the ending).
-- **Length:** the twelve pages have a median of 142 characters and a longest of 175 (`public-6`), against 90 and 166 in 1.0. `bazaar-8` is the shortest at 70. Counted by script.
+- **Length:** the twelve pages have a median of 135 characters and a longest of 171 (`corp-7`), against 90 and 166 in 1.0. `bazaar-8` is the shortest at 70. Counted by script.
 
 ### Id mapping from 1.0
 
@@ -175,7 +175,7 @@ Notes:
 
 ## Open
 
-1. Edit any text. These are first drafts, including `public-6` and `public-7`.
+1. Edit any text. These are first drafts. `public-7` is approved as written; `public-6` is approved with its last sentence removed.
 2. Confirm the ids (they now match position) and the region placement for the egg pages.
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
 4. Edit any story page or Source page text.
