@@ -1,6 +1,6 @@
 // What each model costs to author for the line, and how the line's forms relate. Shared by the page and the tests.
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ADULTS, TEENS, BABY, ELDER } from './art.js';
-import { forms, LINE } from './models.js';
+import { forms, LINE, TEENS_ALL, HIDDEN_BRANCH } from './models.js';
 import { silhouetteIou, poseDistance, markDistance, spriteCells } from '../../tools/lib/sprite-checks.mjs';
 
 const cells = (rows) => rows.reduce((n, r) => n + [...r].filter((c) => c !== '.').length, 0);
@@ -35,3 +35,14 @@ export function modelGap(id) {
   return { id, outline: poseDistance(a, b), marks: markDistance(a, b), iou: silhouetteIou(a, b) };
 }
 export const paintedCells = (model, id) => spriteCells(forms(model)[id].a).length;
+
+// The three teens (authored model) and the hidden branch: how far apart the teens are, and how the hidden-path teen relates to the
+// adult it grows into (Guru) against the street teen's relation to it.
+export function teenOverlaps() {
+  const set = forms('B');
+  const out = [];
+  for (let i = 0; i < TEENS_ALL.length; i++) for (let j = i + 1; j < TEENS_ALL.length; j++) out.push({ pair: `${TEENS_ALL[i]}/${TEENS_ALL[j]}`, iou: silhouetteIou(set[TEENS_ALL[i]].a, set[TEENS_ALL[j]].a), outline: poseDistance(set[TEENS_ALL[i]].a, set[TEENS_ALL[j]].a) });
+  return out;
+}
+export const hiddenBranch = () => HIDDEN_BRANCH;
+export const iouB = (x, y) => silhouetteIou(forms('B')[x].a, forms('B')[y].a);

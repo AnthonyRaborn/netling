@@ -175,6 +175,71 @@ export const TEEN_OVERLAYS = {
 
 // --- model B: authored in full -------------------------------------------------------------------------------------------------
 export const TEENS = {
+  // Option C's other main teen (corp lean): a squared head with an under-eye strip. It differs only slightly from the street teen.
+  teenCorp: {
+    a: [
+      '..............',
+      '..####..####..',
+      '.############.',
+      '.############.',
+      '.##oo####oo##.',
+      '.##oo####oo##.',
+      '.############.',
+      '.##++++++++##.',
+      '.############.',
+      '.##xx####xx##.',
+      '.############.',
+      '..##.####.##..',
+    ],
+    b: [
+      '..............',
+      '..............',
+      '..####..####..',
+      '.############.',
+      '.##oo####oo##.',
+      '.##oo####oo##.',
+      '.############.',
+      '.##++++++++##.',
+      '.############.',
+      '.##xx####xx##.',
+      '.############.',
+      '.###..##..###.',
+    ],
+  },
+  // The hidden-path teen (decided: distinct, not marks over the others' outline): taller (13 rows against 12), crowned, with a third
+  // eye, a narrow neck over a robed body. It foreshadows Guru, the hidden adult it grows into.
+  teenHidden: {
+    a: [
+      '....#.##.#....',
+      '....######....',
+      '...########...',
+      '...###oo###...',
+      '...#oo##oo#...',
+      '...#oo##oo#...',
+      '...########...',
+      '....#+##+#....',
+      '.....####.....',
+      '..##########..',
+      '.#.o######o.#.',
+      '...########...',
+      '...##....##...',
+    ],
+    b: [
+      '..............',
+      '....#.##.#....',
+      '....######....',
+      '...###oo###...',
+      '...#oo##oo#...',
+      '...#oo##oo#...',
+      '...########...',
+      '....#+##+#....',
+      '.....####.....',
+      '..##########..',
+      '..#o######o#..',
+      '...########...',
+      '....##..##....',
+    ],
+  },
   teenStreet: {
     a: [
       '..........#...',
@@ -207,6 +272,43 @@ export const TEENS = {
   },
 };
 export const ADULTS = {
+  // Guru (hidden): the tallest, crowned, a third eye and lit seams, the hidden path's adult. 15 rows, the most an adult may be.
+  guru: {
+    a: [
+      '....#.#..#.#....',
+      '....########....',
+      '...##########...',
+      '..############..',
+      '..#####oo#####..',
+      '..##oo####oo##..',
+      '..##oo####oo##..',
+      '..############..',
+      '...###+##+###...',
+      '....########....',
+      '.##############.',
+      '.##o########o##.',
+      '.##o########o##.',
+      '.##############.',
+      '..##..####..##..',
+    ],
+    b: [
+      '................',
+      '....#.#..#.#....',
+      '....########....',
+      '...##########...',
+      '..#####oo#####..',
+      '..##oo####oo##..',
+      '..##oo####oo##..',
+      '..############..',
+      '...###+##+###...',
+      '....########....',
+      '.##############.',
+      '.##o########o##.',
+      '.##o########o##.',
+      '.##############.',
+      '..##.######.##..',
+    ],
+  },
   // Gronk (Breach, street lean): broad and low, horned, angry brow, toothed jaw, full-width shoulders.
   gronk: {
     a: [
@@ -255,4 +357,7 @@ export const ANCHORS = {
   // Model B: each authored form's own.
   teenStreet: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
   gronk: {a: {headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9}, b: {headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9}},
+  teenCorp: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
+  teenHidden: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
+  guru: {a: {headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9}, b: {headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9}},
 };

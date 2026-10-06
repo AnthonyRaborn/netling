@@ -2,7 +2,7 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forms, compose, FORMS, LINE } from './models.js';
+import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
@@ -16,11 +16,13 @@ import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/
 const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
 
 // --- the line ---------------------------------------------------------------------------------------------------------------
-test('the line is four forms in life order: baby, a street-leaning teen, Gronk (Breach, street) and Gronk\'s elder', () => {
+test('the main line is four forms in life order; the other main teen and the hidden branch exist in the authored model only', () => {
   assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'gronkElder']);
   assert.deepEqual(LINE.map((id) => FORMS[id].stage), ['baby', 'teen', 'adult', 'elder']);
   assert.deepEqual(Object.keys(forms('A')), LINE);
-  assert.deepEqual(Object.keys(forms('B')), LINE);
+  assert.deepEqual(Object.keys(forms('B')), [...LINE, 'teenCorp', 'teenHidden', 'guru']);
+  assert.deepEqual(HIDDEN_BRANCH, ['baby', 'teenHidden', 'guru']);
+  assert.deepEqual(TEENS_ALL, ['teenCorp', 'teenStreet', 'teenHidden']);
 });
 
 // --- art ------------------------------------------------------------------------------------------------------------------
@@ -104,6 +106,34 @@ test('the elder is a variant of its adult: wider, no taller than 15 rows, closes
   // It keeps the adult's marks: the horn studs on the top row, the toothed jaw and the broad shoulders.
   assert.ok(elder.a[0].includes('#') && elder.a[8].includes('+#+') && elder.a[9].startsWith('##'));
   assert.ok(set.gronk.a[8].includes('+#+'));
+});
+
+// --- the hidden path: distinct, not marks over the others' outline (decided) --------------------------------------------------
+test('the hidden-path teen is the most distinct of the three: further from each main teen than the main teens are from each other', () => {
+  const set = forms('B');
+  const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
+  const mains = iou('teenCorp', 'teenStreet');
+  const toCorp = iou('teenHidden', 'teenCorp');
+  const toStreet = iou('teenHidden', 'teenStreet');
+  console.log(`  teen overlaps: corp/street ${mains.toFixed(2)}, hidden/corp ${toCorp.toFixed(2)}, hidden/street ${toStreet.toFixed(2)}`);
+  // The two main teens may differ only slightly (decided); the hidden one has to stand clear of both.
+  assert.ok(mains >= 0.7, 'the main teens are meant to be close');
+  assert.ok(toCorp < mains - 0.1 && toStreet < mains - 0.1, 'the hidden teen is not clearly more distinct than the main teens are from each other');
+  assert.ok(toCorp < 0.7 && toStreet < 0.7);
+  // And by a real outline difference, not marks: many cells that are painted in one and empty in the other.
+  assert.ok(poseDistance(set.teenHidden.a, set.teenStreet.a) >= 20 && poseDistance(set.teenHidden.a, set.teenCorp.a) >= 20);
+  assert.ok(poseDistance(set.teenCorp.a, set.teenStreet.a) < poseDistance(set.teenHidden.a, set.teenStreet.a));
+});
+
+test('the hidden-path teen foreshadows Guru: a crown and a third eye above the eyes, taller than the other teens', () => {
+  const set = forms('B');
+  const hidden = set.teenHidden;
+  const eye = hidden.anchors.a.eyeRow;
+  assert.ok(hidden.a[eye - 1].includes('oo'), 'third eye');
+  assert.ok(hidden.a[0].includes('#.#'), 'crown');
+  assert.ok(set.guru.a[0].includes('#.#') && set.guru.a[set.guru.anchors.a.eyeRow - 1].includes('oo'), 'Guru has the same marks');
+  assert.ok(hidden.a.length > set.teenStreet.a.length && hidden.a.length > set.teenCorp.a.length);
+  assert.equal(FORMS.teenHidden.lean, 'hidden');
 });
 
 // --- the line and the two models -----------------------------------------------------------------------------------------------

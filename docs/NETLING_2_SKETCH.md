@@ -814,7 +814,7 @@ Settled items are listed under Decided. What is still open:
 
 The backlog. None of this has been decided or drafted.
 
-- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, how the test and balance tools drive the new forms, and the art itself: the Iron line was prototyped (see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)); Program, Wetware and the rest of Iron's 14 forms are not drawn. Forms are authored in full (decided).
+- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, how the test and balance tools drive the new forms, and the art itself: the Iron line was prototyped (see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)); Iron's hidden-path teen and Guru are drawn too; Program, Wetware and the rest of Iron's forms are not. Forms are authored in full (decided).
 - **Per-egg meters and care buttons:** Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
 - **Baby and teen stages and forms per egg;** the elder stage rules (1.0's Mainframe gating replaced by the `late` flag); Source access rules.
 - **Netrun abilities per form,** regions per egg, events per egg, the debug station's options, and the tutorial run per egg.

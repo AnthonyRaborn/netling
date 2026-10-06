@@ -36,6 +36,10 @@
     <div id="rowA" class="row"></div>
     <h2>THE LINE, MODEL B: AUTHORED</h2>
     <div id="rowB" class="row"></div>
+    <h2>THE THREE TEENS, AND THE HIDDEN BRANCH (authored)</h2>
+    <p class="note">The two main teens (corp, street) differ only slightly. The hidden-path teen has its own outline: taller, crowned, a third eye, a narrow neck. Second row: the hidden branch, baby, hidden-path teen, Guru. Guru's elder is not drawn.</p>
+    <div id="teensRow" class="row"></div>
+    <div id="hiddenRow" class="row"></div>
     <h2>HOW MODEL A IS BUILT</h2>
     <p class="note">Body (grey), role overlay (pink), lean overlay (yellow; erased cells dark red) and the result, in the A frame.</p>
     <div id="layers" class="row"></div>
@@ -55,13 +59,13 @@
       import { SPRITES, ANCHOR_ROWS, drawSprite, paletteColors, DEAD_COLORS } from '../../src/sprites.js';
       import { PALETTES } from '../../src/sim.js';
       import { register } from './register.js';
-      import { forms, FORMS, LINE } from './models.js';
+      import { forms, FORMS, LINE, TEENS_ALL, HIDDEN_BRANCH } from './models.js';
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { neglected } from './neglect.js';
       import { guardedNeglect } from './needs.js';
       import { glitched, MAX_BUGS } from './glitch.js';
-      import { authoring, sharedCells, lineOverlaps, modelGap } from './metrics.js';
+      import { authoring, sharedCells, lineOverlaps, modelGap, teenOverlaps, iouB } from './metrics.js';
 
       const fail = (e) => {
         const box = document.getElementById('fail');
@@ -144,6 +148,9 @@
           make(document.getElementById('rowA'), what, A[id]);
           make(document.getElementById('rowB'), what, B[id]);
         }
+
+        for (const id of TEENS_ALL) make(document.getElementById('teensRow'), `${id} (teen, ${FORMS[id].lean})`, B[id]);
+        for (const id of HIDDEN_BRANCH) make(document.getElementById('hiddenRow'), `${id} (hidden branch)`, B[id]);
 
         function drawCell({ ctx, f, fixed }, time) {
           const pal = PALETTES[state.palette];
@@ -248,6 +255,8 @@
         const lA = lineOverlaps('A');
         const lB = lineOverlaps('B');
         const gap = ['teenStreet', 'gronk'].map(modelGap);
+        const teens = teenOverlaps();
+        const rel = [['teenHidden', 'guru'], ['teenStreet', 'guru'], ['teenHidden', 'gronk']];
         m.innerHTML = `
           <table>
             <tr><th>teen + adult</th><th>model A (composed)</th><th>model B (authored)</th></tr>
@@ -260,6 +269,11 @@
             ${lA.map((p, i) => `<tr><td>${p.pair}</td><td>${p.iou.toFixed(2)}</td><td>${lB[i].iou.toFixed(2)}</td></tr>`).join('')}
           </table>
           <p class="note">The 1.0 audit's screen (tools/lib/sprite-checks.mjs): lower is more distinct; 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.</p>
+          <table>
+            <tr><th>the three teens (authored)</th><th>outline overlap</th><th>outline cells that differ</th></tr>
+            ${teens.map((p) => `<tr><td>${p.pair}</td><td>${p.iou.toFixed(2)}</td><td>${p.outline}</td></tr>`).join('')}
+          </table>
+          <p class="note">The main teens may differ slightly; the hidden-path teen has to stand clear of both. Against the adult it grows into: ${rel.map(([x, y]) => `${x}/${y} ${iouB(x, y).toFixed(2)}`).join(', ')}. The hidden teen is further from Guru by outline than the street teen is; what it shares with Guru is the crown and the third eye.</p>
           <table>
             <tr><th>composed against authored</th><th>outline cells that differ</th><th>mark cells that differ</th><th>outline overlap</th></tr>
             ${gap.map((g) => `<tr><td>${g.id}</td><td>${g.outline}</td><td>${g.marks}</td><td>${g.iou.toFixed(2)}</td></tr>`).join('')}

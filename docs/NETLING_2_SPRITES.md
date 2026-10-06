@@ -14,7 +14,7 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 ### Decided since (maintainer)
 
 - **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). The prototype's elder is Gronk's.
-- **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which does not meet this: a hidden-path teen needs its own outline. The hidden adult (Guru) was already distinct (closest overlap 0.77).
+- **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which did not meet this. Iron's hidden-path teen is now drawn with its own outline (see The hidden path, below). The hidden adult (Guru) was already distinct (closest overlap 0.77).
 - **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
 
 ## Scope
@@ -42,7 +42,7 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 
 ## Results for the line
 
-Measured by `npm run proto:test` (37 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
+Measured by `npm run proto:test` (39 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
 
 | | Model A, composed | Model B, authored |
 |---|---|---|
@@ -70,6 +70,22 @@ Baby and the elder are 584 hand-placed cells in both (154 and 430).
 - **Neglect.** Level 2 contains level 1's patches (the look grows and clears without jumping), only body cells below the mouth row change, and the outline is identical in every form and frame, in both models.
 - **Anchors.** Every form's head, eye, mouth and neck rows are in range and in order, point at painted cells, and move at most one row between frames (the 1.0 rule).
 
+## The hidden path (Iron)
+
+Drawn, authored: the **hidden-path teen**, which grows into **Guru** (the hidden adult, restored from the wider run). The other main teen (corp lean) is back too, so the three teens can be compared. Both are in the authored model only. Guru's elder is not drawn.
+
+| Teen pair (outline overlap) | Overlap | Outline cells that differ |
+|---|---|---|
+| Corp and Street (the two main teens) | 0.74 | 14 |
+| Hidden and Corp | 0.59 | 56 |
+| Hidden and Street | 0.61 | 44 |
+
+- **It stands clear of both.** The hidden teen is further from each main teen (0.59 and 0.61) than they are from each other (0.74), by tens of outline cells and not by marks. A test enforces both: more than 0.1 lower overlap than the main pair, and at least 20 outline cells different.
+- **How it is built.** Slimmer than the others (a 10 column body against 12), a narrow neck, a crown, a third eye, and two detached side orbs, 13 rows against 12. It shares Guru's crown and third eye.
+- **First try failed.** My first draw kept the blocky body and only added the crown and third eye; it overlapped the street teen at 0.80, less distinct than the main teens are from each other. I redrew it. This is the same marks-over-an-outline problem the wider run had.
+- **Against the adult it grows into.** By outline the hidden teen is further from Guru (0.56) than the street teen is (0.66). What carries the lineage is the crown and the third eye, not the silhouette. Whether that is enough of a preview is a judgment; a person should look at it.
+- **Not drawn:** the hidden-path teens of Program and Wetware, Guru's elder, and the elders of the other eight adults.
+
 ## What the wider run showed (commit 580db88, not reproducible from this tree)
 
 Before the scope was narrowed I built the full option C tree (3 teens and 9 adults) in both models. These figures were measured then with the same checks; the code that produced them is in that commit only.
@@ -92,7 +108,7 @@ The composition question is closed (see Decision).
 
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. Neglect and bugs: the thresholds, the bug look and whether two looks are readable together on a device are untested; see What drives neglect and bugs.
-3. Hidden-path teens and the other eight elders are not drawn.
+3. Not drawn: the hidden-path teens of Program and Wetware, and every elder except Gronk's (eight more under one elder per adult, nine with Guru's).
 4. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
 
 ## What drives neglect and bugs

@@ -4,18 +4,27 @@
 //   Model B, authored: the teen and the adult drawn in full.
 // Baby and elder are the same art in both (one each per egg, no role or lean).
 //
-// The line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder. The sketch's
-// full tree (3 teens and 9 adults per egg) was prototyped earlier and is in git history at commit 580db88.
+// The main line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder. Beside it
+// are the other main teen and the hidden branch (hidden-path teen and Guru), authored only. The sketch's full tree (3 teens and 9
+// adults per egg) was prototyped earlier and is in git history at commit 580db88.
 import { BABY, ELDER, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
-// Form id -> what it is, in life order.
+// Form id -> what it is, in life order. `authoredOnly` forms exist in model B only: the composed model was rejected, so it is not
+// extended to them.
 export const FORMS = {
   baby: { stage: 'baby' },
   teenStreet: { stage: 'teen', lean: 'street' },
   gronk: { stage: 'adult', role: 'breach', lean: 'street' },
   gronkElder: { stage: 'elder', from: 'gronk' }, // one elder per adult (decided): a variant of the adult it grows from
+  // The other main teen and the hidden path (Iron). The hidden-path teen grows into Guru, the hidden adult; Guru's elder is not drawn.
+  teenCorp: { stage: 'teen', lean: 'corp', authoredOnly: true },
+  teenHidden: { stage: 'teen', lean: 'hidden', authoredOnly: true },
+  guru: { stage: 'adult', role: 'hidden', authoredOnly: true },
 };
-export const LINE = Object.keys(FORMS);
+// The main line, baby to elder, and the hidden branch (baby is shared, then the hidden-path teen and its adult).
+export const LINE = ['baby', 'teenStreet', 'gronk', 'gronkElder'];
+export const HIDDEN_BRANCH = ['baby', 'teenHidden', 'guru'];
+export const TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
 
 // Merge an overlay onto a body: '_' erases, any other non-'.' replaces.
 export function compose(body, overlay) {
@@ -100,5 +109,5 @@ function anchorsA(id) {
 const cache = {};
 // Memoized: the same arrays every call, because src/accessories.js keys its anchor table on array identity (register.js).
 export function forms(model) {
-  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id])])));
+  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).filter((id) => model === 'B' || !FORMS[id].authoredOnly).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id])])));
 }
