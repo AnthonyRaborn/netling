@@ -1,0 +1,13 @@
+import { ARCHETYPES, simulate } from './tools/balance.mjs';
+import { CFG, BUG_CFG } from './src/sim.js';
+const [name, n, label] = [process.argv[2], Number(process.argv[3] ?? 300), process.argv[4] ?? ''];
+if (process.env.NOCAP) CFG.maxMistakes = 1e9;
+const p = { ...ARCHETYPES[name] };
+if (name === 'neglectful') p.noFix = true;
+const rs = [];
+for (let seed = 1; seed <= n; seed++) rs.push(simulate(p, seed));
+const avg = (f) => +(rs.reduce((a, r) => a + f(r), 0) / rs.length).toFixed(2);
+const causes = {};
+for (const r of rs) causes[r.cause] = (causes[r.cause] ?? 0) + 1;
+for (const k in causes) causes[k] = +(causes[k] / rs.length).toFixed(3);
+console.log(JSON.stringify({ label, name, n, faults: avg((r) => r.mistakes), bugsEnd: avg((r) => r.bugsEnd), bugPeak: avg((r) => r.bugPeak), atCeiling: avg((r) => (r.bugPeak >= BUG_CFG.max ? 1 : 0)), fixed: avg((r) => r.bugsFixed), scripEnd: avg((r) => r.scrip.end), fullLife: +(causes['end of life cycle'] ?? 0).toFixed(3), causes }));

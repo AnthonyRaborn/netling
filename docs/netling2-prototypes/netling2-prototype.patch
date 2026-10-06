@@ -1,0 +1,291 @@
+diff -ruN a/src/netrun/run.js b/src/netrun/run.js
+--- a/src/netrun/run.js	2026-10-06 21:00:06.598929121 +0000
++++ b/src/netrun/run.js	2026-10-06 20:53:28.703889397 +0000
+@@ -1,5 +1,5 @@
+ // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
+-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP } from '../sim.js';
++import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame } from '../sim.js';
+ import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from './map.js';
+ import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from './regions.js';
+ import { nextFragment, fragmentById } from './codex.js';
+@@ -439,6 +439,7 @@
+   const run = pet.run;
+   if (run.phase !== 'ice') return { ok: false };
+   if (run.daily) rng = laneRng(run, run.pos, LANE.ice);
++  if (PREF.on && PREF.ice && run.pending?.game) pushGame(pet, run.pending.game);
+   run.phase = 'map';
+   run.pending = null;
+   const st = pet.stats;
+@@ -618,6 +619,7 @@
+       boughtItem = true;
+     }
+   } else if (p.kind === 'anomaly') {
++    pet.anomalies = (pet.anomalies ?? 0) + 1;
+     const ev = ANOMALIES.find((e) => e.id === p.event);
+     const reveal = (depth) => {
+       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
+diff -ruN a/src/sim.js b/src/sim.js
+--- a/src/sim.js	2026-10-06 21:00:06.600347190 +0000
++++ b/src/sim.js	2026-10-06 20:53:24.195321715 +0000
+@@ -9,6 +9,23 @@
+ export const MIN = 60_000;
+ export const SAVE_VERSION = 2;
+ 
++export const BUG_CFG = { chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.10, integrity: 0.04, segfault: [0.25, 0.60, 0.15], clearCost: 15, clear: false, on: true };
++if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
++export const PREF = { on: false, mild: 2, strong: 4 };
++if (process.env.PREF) Object.assign(PREF, JSON.parse(process.env.PREF));
++export const pushGame = (s, game) => { const last = s.lastGames ?? []; s.lastGames = PREF.distinct ? [game, ...last.filter((g) => g !== game)].slice(0, 2) : [game, ...last].slice(0, 2); };
++export const tempLevel = (s) => { const v = s.axes.stability; return v <= -6 ? -2 : v <= -2 ? -1 : v >= 6 ? 2 : v >= 3 ? 1 : 0; };
++function prefApply(s, lv, match) {
++  s.prefActions = (s.prefActions ?? 0) + (lv ? 1 : 0);
++  if (lv && match) {
++    const b = Math.abs(lv) === 2 ? PREF.strong : PREF.mild;
++    s.stats.sync = Math.min(100, s.stats.sync + b);
++    s.prefBonus = (s.prefBonus ?? 0) + b;
++    s.prefMatches = (s.prefMatches ?? 0) + 1;
++    return lv > 0 ? ' it settles into the routine.' : ' something new. it perks up.';
++  }
++  return '';
++}
+ export const CFG = {
+   bootMinutes: 3,
+   drainPerHour: { charge: 15.4, sync: 13.2 },
+@@ -413,6 +430,7 @@
+     rebootUntilAge: null,
+     lightsOn: true,
+     careMistakes: 0,
++    bugs: 0,
+     zeroMin: { charge: 0, sync: 0, heat: 0, lights: 0 },
+     flagged: { charge: false, sync: false, heat: false, lights: false },
+     integrityZeroMin: 0,
+@@ -556,11 +574,11 @@
+   const rest = resting(s);
+   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
+   if (rest) rate *= 1 - traitEffect(s, 'persistent');
+-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult'));
++  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * (s.bugs ?? 0)));
+   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
+-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult'));
++  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * (s.bugs ?? 0)));
+   st.heat = clamp(
+-    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
++    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * (s.bugs ?? 0))) / 60,
+   );
+ 
+   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
+@@ -588,6 +606,7 @@
+   if (s.cache >= 3) dInt -= 5;
+   if (st.heat >= 85) dInt -= 8;
+   if (st.charge <= 0) dInt -= 6;
++  if (dInt < 0) dInt *= 1 + BUG_CFG.integrity * (s.bugs ?? 0);
+   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
+   const deepRest = s.nap || (s.asleep && !s.lightsOn);
+   if (dInt === 0) dInt = deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour;
+@@ -598,6 +617,7 @@
+   else if (!rest && overclocked(s)) s.axes.stability += CFG.overclockStabilityPerHour / 60;
+   else if (!rest && !alertReason(s)) s.axes.stability += (inFlow(s) ? CFG.flowStabilityPerHour : CFG.uptimeStabilityPerHour) / 60;
+ 
++  if (BUG_CFG.tdecay !== undefined) s.axes.stability *= BUG_CFG.tdecay;
+   stepVisit(s, t, rng);
+   stepFriends(s, t, rng);
+   stepEvents(s, t, rng);
+@@ -606,10 +626,10 @@
+   stepOverclock(s, t);
+   stepChatter(s, rng);
+ 
+-  checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted');
+-  checkMistake(s, t, 'sync', st.sync <= 0, 'sync lost');
+-  checkMistake(s, t, 'heat', st.heat >= 100, 'thermal overload');
+-  checkMistake(s, t, 'lights', s.asleep && s.lightsOn, 'no rest with the lights on', CFG.lightsGraceMin);
++  checkMistake(s, t, 'charge', st.charge <= 0, 'charge depleted', undefined, rng);
++  checkMistake(s, t, 'sync', st.sync <= 0, 'sync lost', undefined, rng);
++  checkMistake(s, t, 'heat', st.heat >= 100, 'thermal overload', undefined, rng);
++  checkMistake(s, t, 'lights', s.asleep && s.lightsOn, 'no rest with the lights on', CFG.lightsGraceMin, rng);
+ 
+   s.integrityZeroMin = st.integrity <= 0 ? s.integrityZeroMin + 1 : 0;
+ 
+@@ -796,7 +816,13 @@
+     s.request = { kind: 'cool', startedAge: s.ageMin };
+     log(s, t, '> it is fanning itself. it wants a COOL.');
+   } else {
+-    const game = pick(GAME_IDS, rng);
++    let game = pick(GAME_IDS, rng);
++    if (PREF.on && PREF.reqbias) {
++      const lv = tempLevel(s);
++      const last = s.lastGames ?? [];
++      if (lv > 0 && last.length) game = PREF.steadyMode === 'last2' ? pick(last, rng) : last[0];
++      else if (lv < 0 && last.length) { const pool = GAME_IDS.filter((g) => !last.includes(g)); game = pick(pool, rng); }
++    }
+     s.request = { kind: 'game', game, startedAge: s.ageMin };
+     log(s, t, `> it wants to play ${game.toUpperCase()}.`);
+   }
+@@ -901,7 +927,11 @@
+   return s.event?.type === 'trace' ? eventMinutesLeft(s) : 0;
+ }
+ 
+-function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
++function rollBug(s, rng, chance = BUG_CFG.chance) {
++  if (BUG_CFG.on && (s.bugs ?? 0) < BUG_CFG.max && rng() < chance) s.bugs = (s.bugs ?? 0) + 1;
++}
++
++function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin, rng = null) {
+   if (!cond) {
+     s.zeroMin[key] = 0;
+     s.flagged[key] = false;
+@@ -911,6 +941,7 @@
+   if (s.zeroMin[key] >= grace && !s.flagged[key]) {
+     s.flagged[key] = true;
+     s.careMistakes++;
++    if (rng) rollBug(s, rng);
+     s.axes.stability -= CFG.faultStability;
+     log(s, t, `> care mistake: ${label}. [${s.careMistakes}/${CFG.maxMistakes}]`);
+   }
+@@ -1155,6 +1186,8 @@
+   const blocked = blockReason(s, action);
+   if (blocked) return fail(blocked);
+   const st = s.stats;
++  s.actCount = s.actCount ?? {};
++  s.actCount[action] = (s.actCount[action] ?? 0) + 1;
+ 
+   let res;
+   switch (action) {
+@@ -1168,6 +1201,12 @@
+       s.axes.allegiance += action === 'corp' ? CFG.feedAllegiance : -CFG.feedAllegiance;
+       s.sinceFed = 0;
+       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
++      if (PREF.on) {
++        const lv = tempLevel(s);
++        const match = lv > 0 ? s.lastPacket === action : lv < 0 ? Boolean(s.lastPacket) && s.lastPacket !== action : false;
++        msg += prefApply(s, lv, match);
++        s.lastPacket = action;
++      }
+       if (s.quirk.favPacket === action) {
+         st.sync = clamp(st.sync + 8);
+         msg += ' it loves these.';
+@@ -1208,6 +1247,13 @@
+       st.charge = clamp(st.charge - 6 + (game === 'feast' ? (won ? CFG.feastWinCharge : CFG.feastLoseCharge) : 0));
+       st.heat = clamp(st.heat + 12);
+       if (st.heat > 70) s.axes.stability -= 0.5;
++      if (PREF.on) {
++        const lv = tempLevel(s);
++        const last = s.lastGames ?? [];
++        const match = lv > 0 ? last.includes(game) : lv < 0 ? last.length > 0 && !last.includes(game) : false;
++        prefApply(s, lv, match);
++        pushGame(s, game);
++      }
+       s.games[game].played++;
+       if (won) s.games[game].won += boosted ? 2 : 1;
+       let msg = won
+@@ -1343,8 +1389,10 @@
+   switch (id) {
+     case 'coolant':
+       st.heat = clamp(st.heat - 50);
++      if (process.env.ITEMTEMPER) s.axes.stability += Number(process.env.ITEMTEMPER);
+       return `${name} vented. heat down.`;
+     case 'antivirus': {
++      if (process.env.ITEMTEMPER) s.axes.stability += Number(process.env.ITEMTEMPER);
+       const cured = s.virus;
+       s.virus = false;
+       s.buffs.shieldUntilAge = s.ageMin + ITEM_CFG.shieldMinutes;
+@@ -1381,6 +1429,7 @@
+       // Deliberate faults count like any other: the same stability cost, the same limit.
+       s.careMistakes += ITEM_CFG.segfaultFaults;
+       s.axes.stability -= CFG.faultStability * ITEM_CFG.segfaultFaults;
++      if (BUG_CFG.on) { const u = rng(); const n = u < BUG_CFG.segfault[0] ? 0 : u < BUG_CFG.segfault[0] + BUG_CFG.segfault[1] ? 1 : 2; for (let i = 0; i < n; i++) rollBug(s, rng, 1); }
+       return `${name} triggered. care mistakes on purpose. [${s.careMistakes}/${CFG.maxMistakes}]`;
+     }
+     case 'overclock': {
+diff -ruN a/tools/balance.mjs b/tools/balance.mjs
+--- a/tools/balance.mjs	2026-10-06 21:00:06.604370616 +0000
++++ b/tools/balance.mjs	2026-10-06 20:39:04.306935594 +0000
+@@ -8,7 +8,7 @@
+ // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
+ // the earliest a lineage can reach The Deep) starts every single life knowing that much.
+ process.env.TZ = 'UTC';
+-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
++const { BUG_CFG, PREF, tempLevel, createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('../src/sim.js');
+ const { RUN_CFG, runCooldownLeft } = await import('../src/netrun/run.js');
+ const { runBlockReason } = await import('../src/netrun/run.js');
+ const { REGION_ORDER, regionLock } = await import('../src/netrun/regions.js');
+@@ -75,6 +75,10 @@
+     return doAct('use', { slot }).ok;
+   };
+   ctx.checkIns = (ctx.checkIns ?? 0) + 1;
++  ctx.bugPeak = Math.max(ctx.bugPeak ?? 0, s.bugs ?? 0);
++  if (BUG_CFG.clear && !p.noFix) {
++    while ((s.bugs ?? 0) > 0 && (s.scrip ?? 0) >= BUG_CFG.clearCost) { s.scrip -= BUG_CFG.clearCost; s.bugs--; ctx.bugsFixed = (ctx.bugsFixed ?? 0) + 1; }
++  }
+   if (s.inventory.length >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
+   // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else scraps it.
+   const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
+@@ -107,7 +111,12 @@
+   const mayPlay = !holdBack || s.flagged.sync;
+   const feed = () => {
+     for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
+-      const corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
++      let corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
++      if (process.env.PREFBOT === 'follow' && PREF.on && s.lastPacket) {
++        const lv = tempLevel(s);
++        if (lv > 0) corp = s.lastPacket === 'corp';
++        else if (lv < 0) corp = s.lastPacket !== 'corp';
++      }
+       doAct(corp ? 'corp' : 'scav');
+     }
+   };
+@@ -176,7 +185,13 @@
+   }
+   const syncTarget = p.gamer ? 90 : 80;
+   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
+-    const game = GAME_IDS[ctx.games++ % GAME_IDS.length];
++    let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
++    if (process.env.PREFBOT === 'follow' && PREF.on) {
++      const lv = tempLevel(s);
++      const last = s.lastGames ?? [];
++      if (lv > 0 && last.length) game = last[0];
++      else if (lv < 0 && last.length) { const pool = GAME_IDS.filter((g) => !last.includes(g)); game = pool.sort((x, y) => s.games[x].played - s.games[y].played)[0] ?? game; }
++    }
+     doAct('play', { game, won: rng() < winChance(overclocked(s), p.winRate) });
+     if (s.stats.heat > coolAt + 10) doAct('cool');
+   }
+@@ -197,6 +212,8 @@
+   const rng = mulberry32(seed);
+   const t0 = Date.UTC(2026, 0, 5, 8, 0);
+   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
++  { let v = s.axes.allegiance; s.standing = { corp: 0, street: 0 };
++    Object.defineProperty(s.axes, 'allegiance', { get() { return v; }, set(x) { if (x > v) s.standing.corp += x - v; else s.standing.street += v - x; v = x; }, enumerable: true, configurable: true }); }
+   const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
+   const codexAtStart = ctx.codex.length;
+   const lastCheck = Math.max(...p.checks);
+@@ -245,12 +262,12 @@
+     if (s.stage === 'teen' && teenAt === null) {
+       teenAt = minute;
+       teenForm = s.form;
+-      ctx.atTeen = { axes: { ...s.axes }, mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
++      ctx.atTeen = { standing: { ...s.standing }, axes: { ...s.axes }, mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
+     }
+     if (s.stage === 'mainframe' && mainframeStart === null) mainframeStart = minute;
+     if (s.stage === 'adult' && adultAt === null) {
+       adultAt = minute;
+-      ctx.atAdult = { axes: { ...s.axes }, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), mistakes: s.careMistakes };
++      ctx.atAdult = { standing: { ...s.standing }, axes: { ...s.axes }, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), mistakes: s.careMistakes };
+     }
+     const due = schedule.find((x) => x.t === (at(8) + minute) % DAY);
+     if (due && s.stage !== 'dead') {
+@@ -267,6 +284,16 @@
+     ageMin: s.ageMin,
+     cause: s.deathCause,
+     mistakes: s.careMistakes,
++    bugsEnd: s.bugs ?? 0,
++    prefBonus: s.prefBonus ?? 0,
++    prefMatches: s.prefMatches ?? 0,
++    prefActions: s.prefActions ?? 0,
++    gamesWon: GAME_IDS.map((id) => s.games[id].won),
++    actCount: { ...(s.actCount ?? {}) },
++    standingEnd: { ...s.standing },
++    anomalies: s.anomalies ?? 0,
++    bugPeak: Math.max(ctx.bugPeak ?? 0, s.bugs ?? 0),
++    bugsFixed: ctx.bugsFixed ?? 0,
+     teenForm,
+     adultForm: adultAt ? s.form : null,
+     axes: { ...s.axes },

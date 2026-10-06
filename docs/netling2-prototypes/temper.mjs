@@ -1,0 +1,15 @@
+import { ARCHETYPES, simulate } from './tools/balance.mjs';
+import { CFG } from './src/sim.js';
+const [name, n] = [process.argv[2], Number(process.argv[3] ?? 300)];
+CFG.feedAllegiance = 0.25; CFG.maxMistakes = 1e9; if (process.env.FLOW) CFG.flowStabilityPerHour = Number(process.env.FLOW);
+const rs = [];
+for (let seed = 1; seed <= n; seed++) rs.push(simulate({ ...ARCHETYPES[name] }, seed));
+const q = (a, p) => { const s = [...a].sort((x, y) => x - y); return +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1); };
+const sum = (a) => ({ n: a.length, p10: q(a, 0.1), p50: q(a, 0.5), p90: q(a, 0.9), mean: +(a.reduce((x, y) => x + y, 0) / a.length).toFixed(1) });
+const T = rs.filter((r) => r.atTeen).map((r) => r.atTeen.axes.stability), A = rs.filter((r) => r.atAdult).map((r) => r.atAdult.axes.stability), E = rs.map((r) => r.axes.stability);
+const S1 = Number(process.env.S1 ?? 2), S2 = Number(process.env.S2 ?? 4), U1 = Number(process.env.U1 ?? 2), U2 = Number(process.env.U2 ?? 6);
+const lvl = (x) => (x <= -U2 ? -2 : x <= -U1 ? -1 : x >= S2 ? 2 : x >= S1 ? 1 : 0);
+const dist = (a) => { const c = { '-2': 0, '-1': 0, '0': 0, '1': 0, '2': 0 }; for (const x of a) c[lvl(x)]++; for (const k in c) c[k] = +(c[k] / a.length).toFixed(2); return c; };
+const T1 = Number(process.env.T1 ?? 3), T2 = Number(process.env.T2 ?? 10);
+const band = (a, lo, hi) => ({ low: +(a.filter((x) => x <= lo).length / a.length).toFixed(2), mid: +(a.filter((x) => x > lo && x < hi).length / a.length).toFixed(2), high: +(a.filter((x) => x >= hi).length / a.length).toFixed(2) });
+console.log(JSON.stringify({ name, T1, T2, lvlTeen: dist(T), lvlAdult: dist(A), lvlEnd: dist(E), teen: sum(T), adult: sum(A), end: sum(E), adultBand3: band(A, -3, 3), adultBand5: band(A, -5, 5), adultBand8: band(A, -8, 8), endBand5: band(E, -5, 5), endBand10: band(E, -10, 10) }));
