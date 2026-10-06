@@ -2,14 +2,14 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL } from './models.js';
+import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL, ADULTS_ALL, ELDER_OF } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
 import { neglectLevel, guardedNeglect, LINES, GUARD as NEED_GUARD } from './needs.js';
 import { glitched, tearRows, MAX_BUGS, TWITCH_EVERY_MS, TWITCH_MS } from './glitch.js';
 import { register, protoKey, MODELS } from './register.js';
-import { lineOverlaps, authoring, modelGap } from './metrics.js';
+import { lineOverlaps, authoring, modelGap, elderTable, scaledOverlap } from './metrics.js';
 import { silhouetteIou } from '../../tools/lib/sprite-checks.mjs';
 import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
@@ -20,7 +20,9 @@ test('the main line is four forms in life order; the other main teen and the hid
   assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'gronkElder']);
   assert.deepEqual(LINE.map((id) => FORMS[id].stage), ['baby', 'teen', 'adult', 'elder']);
   assert.deepEqual(Object.keys(forms('A')), LINE);
-  assert.deepEqual(Object.keys(forms('B')), [...LINE, 'teenCorp', 'teenHidden', 'guru']);
+  assert.deepEqual(Object.keys(forms('B')), Object.keys(FORMS));
+  assert.equal(Object.keys(FORMS).filter((id) => FORMS[id].stage === 'adult').length, 9);
+  assert.equal(Object.keys(FORMS).filter((id) => FORMS[id].stage === 'elder').length, 9, 'one elder per adult');
   assert.deepEqual(HIDDEN_BRANCH, ['baby', 'teenHidden', 'guru']);
   assert.deepEqual(TEENS_ALL, ['teenCorp', 'teenStreet', 'teenHidden']);
 });
@@ -134,6 +136,45 @@ test('the hidden-path teen foreshadows Guru: a crown and a third eye above the e
   assert.ok(set.guru.a[0].includes('#.#') && set.guru.a[set.guru.anchors.a.eyeRow - 1].includes('oo'), 'Guru has the same marks');
   assert.ok(hidden.a.length > set.teenStreet.a.length && hidden.a.length > set.teenCorp.a.length);
   assert.equal(FORMS.teenHidden.lean, 'hidden');
+});
+
+// --- one elder per adult: all nine of Iron's ------------------------------------------------------------------------------------
+test('every adult has exactly one elder, a variant of it: wider, no taller than 15 rows, and keeping its kinds of marks', () => {
+  const set = forms('B');
+  const elders = Object.keys(FORMS).filter((id) => FORMS[id].stage === 'elder');
+  assert.deepEqual(elders.map((id) => FORMS[id].from).sort(), [...ADULTS_ALL].sort());
+  for (const adult of ADULTS_ALL) {
+    const id = ELDER_OF(adult);
+    assert.equal(FORMS[id].from, adult);
+    const elder = set[id];
+    assert.equal(elder.a[0].length, 18, `${id}: width`);
+    assert.ok(elder.a.length <= 15 && elder.a.length >= set[adult].a.length, `${id}: ${elder.a.length} rows against ${set[adult].a.length}`);
+    for (const ch of new Set(set[adult].a.join('').replace(/[.]/g, ''))) assert.ok(elder.a.join('').includes(ch), `${id}: lost the ${ch} mark`);
+  }
+});
+
+test('each elder is closest, after scaling, to the adult it grows from, among all nine adults (the sibling of its role included)', () => {
+  const table = elderTable();
+  console.log('  elder against its adult (scaled), best other: ' + table.map((r) => `${r.adult} ${r.own.toFixed(2)} vs ${r.other} ${r.otherValue.toFixed(2)}`).join(', '));
+  for (const r of table) assert.ok(r.own > r.otherValue, `${r.adult}: its elder is closer to ${r.other} (${r.otherValue.toFixed(2)}) than to it (${r.own.toFixed(2)})`);
+  // The margins are thin for a few; this records them so a redraw that loses one is caught.
+  for (const r of table) assert.ok(r.own >= 0.75, `${r.adult}: only ${r.own.toFixed(2)}`);
+});
+
+test('the nine elders are distinct from one another (1.0 flags nothing above 0.82 within a stage, siblings of a role aside)', () => {
+  const set = forms('B');
+  const pairs = [];
+  for (let i = 0; i < ADULTS_ALL.length; i++) for (let j = i + 1; j < ADULTS_ALL.length; j++) {
+    const x = ADULTS_ALL[i];
+    const y = ADULTS_ALL[j];
+    const sibling = FORMS[x].role === FORMS[y].role;
+    pairs.push({ pair: `${ELDER_OF(x)}/${ELDER_OF(y)}`, sibling, iou: silhouetteIou(set[ELDER_OF(x)].a, set[ELDER_OF(y)].a) });
+  }
+  const cross = pairs.filter((p) => !p.sibling).sort((p, q) => q.iou - p.iou);
+  const sib = pairs.filter((p) => p.sibling);
+  console.log(`  elders, different roles: worst ${cross[0].pair} ${cross[0].iou.toFixed(2)}; siblings ${sib.map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  for (const p of cross) assert.ok(p.iou < 0.82, `${p.pair} ${p.iou.toFixed(3)}`);
+  for (const p of sib) assert.ok(p.iou < 0.95 && p.iou > 0.5, `${p.pair} ${p.iou.toFixed(2)}`);
 });
 
 // --- the line and the two models -----------------------------------------------------------------------------------------------

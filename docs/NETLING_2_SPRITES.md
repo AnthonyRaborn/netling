@@ -8,12 +8,13 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 
 - Each form is drawn in full and carries its own anchor rows, as in 1.0. The prototype ran every 1.0 wearable on the authored forms unchanged.
 - The sprite audit and gallery will need the new forms added; the temper tell and neglect look are independent of how a form is built, so they carry over.
-- Cost, an extrapolation from the Iron figures and not a measurement: the wider run was 3146 hand-placed cells for 3 teens and 9 adults, plus 154 for the baby, plus one elder per adult at 430 each as drawn (both frames), so roughly 7200 cells per egg and about 21500 for three, before any rework after review. The elders are over half of that.
+- Cost: Iron's whole tree is now drawn and measured, 22 forms and 6306 hand-placed cells counting both frames (baby 154, three teens 626, nine adults 2470, nine elders 3056). If Program and Wetware cost the same, three eggs come to about 19000 cells (an extrapolation, not a measurement), before any rework after review. The elders are about half of it.
 - The composed code (`OVERLAYS`, `LEAN_OVERLAYS`, `TEEN_OVERLAYS`, `compose`, model A in `models.js`) stays in the prototype for reference and can be deleted; it is in git history either way.
 
 ### Decided since (maintainer)
 
-- **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). The prototype's elder is Gronk's.
+- **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). All nine of Iron's are drawn.
+- **Babies:** eventually each egg gets its own baby. Iron's is the only one drawn; Program and Wetware babies are not.
 - **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which did not meet this. Iron's hidden-path teen is now drawn with its own outline (see The hidden path, below). The hidden adult (Guru) was already distinct (closest overlap 0.77).
 - **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
 
@@ -42,7 +43,7 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 
 ## Results for the line
 
-Measured by `npm run proto:test` (39 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
+Measured by `npm run proto:test` (42 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
 
 | | Model A, composed | Model B, authored |
 |---|---|---|
@@ -86,6 +87,30 @@ Drawn, authored: the **hidden-path teen**, which grows into **Guru** (the hidden
 - **Against the adult it grows into.** By outline the hidden teen is further from Guru (0.56) than the street teen is (0.66). What carries the lineage is the crown and the third eye, not the silhouette. Whether that is enough of a preview is a judgment; a person should look at it.
 - **Not drawn:** the hidden-path teens of Program and Wetware, Guru's elder, and the elders of the other eight adults.
 
+## The nine elders (Iron)
+
+Drawn, authored: one elder per adult, each its adult grown to 18 columns (against 16) and no taller than 15 rows, keeping that adult's own marks. The other seven adults (Splat, Jiff, Bamf, Ping, Feep, Munch, Thrash) are restored from the wider run, authored only, so Iron's whole tree is now in the prototype: baby, three teens, nine adults, nine elders. Elder names are not decided; ids follow the adult (`splatElder`, ...).
+
+**The 1.0 overlap score misleads for a form that has grown.** It centres two sprites without scaling, so a wider elder scores lower against its own adult than against a big filled slab (Splat, a full rectangle, attracts every blocky elder). By that raw score five elders are closer to another adult than to their own (Gronk's to Splat 0.81, Jiff's to Ping 0.76, Ping's to Guru 0.81, Thrash's to Splat 0.83, Guru's to Splat 0.84). A plain stretch of an adult shows the same effect, so it is the measure and not the drawing. I therefore also measure the overlap after scaling the adult to the elder's size (nearest neighbour) and require that: each elder must be closest to its own adult among all nine.
+
+| Elder | Overlap with its own adult (scaled) | Closest other adult |
+|---|---|---|
+| Splat's | 0.95 | Gronk 0.79 |
+| Gronk's | 0.84 | Splat 0.82 |
+| Jiff's | 0.82 | Ping 0.70 |
+| Bamf's | 0.81 | Ping 0.76 |
+| Ping's | 0.82 | Munch 0.80 |
+| Feep's | 0.92 | Munch 0.81 |
+| Munch's | 0.84 | Splat 0.81 |
+| Thrash's | 0.81 | Splat 0.80 |
+| Guru's | 0.87 | Splat 0.79 |
+
+- **Margins are thin** for Gronk (0.02 over its sibling Splat), Ping (0.02), Munch (0.03) and Thrash (0.01). A redraw that loses one is caught by a test, but these are the ones to look at by eye.
+- **First pass failed on three.** My first Bamf, Munch and Thrash elders were drawn from scratch and read as generic bigger blobs: each was closer to another adult (Bamf's to Guru, Munch's to Splat, Thrash's to Splat). I rebuilt those three from their own adult widened and one row taller, with a small mark (a brow mark for Bamf and Munch, a second row of spikes for Thrash). The other six were drawn by hand and passed.
+- **The nine elders are distinct from each other.** Elders of different roles overlap at most 0.82 (Gronk's and Guru's, 0.817, just under the 1.0 bar); the two elders of one role overlap 0.83 (Splat's and Gronk's), 0.71, 0.73 and 0.80.
+- **Wearables.** 3198 cases across all 22 forms; 16 clip a pixel above the screen, all the holologo on 15 row sprites, as 1.0's own 15 row forms do.
+- **Not drawn:** the elders of Program and Wetware, and the Program and Wetware babies and teens.
+
 ## What the wider run showed (commit 580db88, not reproducible from this tree)
 
 Before the scope was narrowed I built the full option C tree (3 teens and 9 adults) in both models. These figures were measured then with the same checks; the code that produced them is in that commit only.
@@ -108,8 +133,9 @@ The composition question is closed (see Decision).
 
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. Neglect and bugs: the thresholds, the bug look and whether two looks are readable together on a device are untested; see What drives neglect and bugs.
-3. Not drawn: the hidden-path teens of Program and Wetware, and every elder except Gronk's (eight more under one elder per adult, nine with Guru's).
-4. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
+3. Not drawn: everything for Program and Wetware (each egg gets its own baby, eventually, then its teens, adults and elders).
+4. Elder names, and whether the thin elder margins (above) read right by eye.
+5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
 
 ## What drives neglect and bugs
 

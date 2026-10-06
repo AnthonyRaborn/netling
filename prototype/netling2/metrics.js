@@ -1,6 +1,6 @@
 // What each model costs to author for the line, and how the line's forms relate. Shared by the page and the tests.
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ADULTS, TEENS, BABY, ELDER } from './art.js';
-import { forms, LINE, TEENS_ALL, HIDDEN_BRANCH } from './models.js';
+import { forms, LINE, TEENS_ALL, HIDDEN_BRANCH, ADULTS_ALL, ELDER_OF } from './models.js';
 import { silhouetteIou, poseDistance, markDistance, spriteCells } from '../../tools/lib/sprite-checks.mjs';
 
 const cells = (rows) => rows.reduce((n, r) => n + [...r].filter((c) => c !== '.').length, 0);
@@ -46,3 +46,31 @@ export function teenOverlaps() {
 }
 export const hiddenBranch = () => HIDDEN_BRANCH;
 export const iouB = (x, y) => silhouetteIou(forms('B')[x].a, forms('B')[y].a);
+
+// --- elders: one per adult, each a variant of the adult it grows from ------------------------------------------------------------
+// The 1.0 overlap score (silhouetteIou) centres two sprites without scaling them, so an elder that has grown wider scores lower
+// against its own adult than against a big filled slab. The better test of "a variant of its own adult" is shape after scaling the
+// adult to the elder's size (nearest neighbour), so both are reported; the scaled one is what the tests require.
+const grid = (rows) => rows.map((r) => [...r].map((c) => c !== '.'));
+function scaleTo(rows, w, h) {
+  const g = grid(rows);
+  return Array.from({ length: h }, (_, y) => Array.from({ length: w }, (_, x) => g[Math.floor((y * g.length) / h)][Math.floor((x * g[0].length) / w)]));
+}
+export function scaledOverlap(elder, adult) {
+  const a = grid(elder);
+  const b = scaleTo(adult, elder[0].length, elder.length);
+  let both = 0;
+  let either = 0;
+  a.forEach((row, y) => row.forEach((v, x) => { if (v && b[y][x]) both++; if (v || b[y][x]) either++; }));
+  return both / either;
+}
+// For each adult: its elder's scaled overlap with that adult, with the closest other adult, and the raw 1.0 score against its own.
+export function elderTable() {
+  const set = forms('B');
+  return ADULTS_ALL.map((adult) => {
+    const elder = set[ELDER_OF(adult)].a;
+    const ranked = ADULTS_ALL.map((x) => ({ x, v: scaledOverlap(elder, set[x].a) })).sort((p, q) => q.v - p.v);
+    const other = ranked.find((r) => r.x !== adult);
+    return { adult, own: scaledOverlap(elder, set[adult].a), other: other.x, otherValue: other.v, raw: silhouetteIou(elder, set[adult].a), rows: elder.length, cells: spriteCells(elder).length };
+  });
+}

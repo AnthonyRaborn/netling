@@ -56,6 +56,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The hidden temper shows through sprite motion, idle behavior and chatter tone together, in all three eggs.
 - The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and the egg-specific codex pages (the merge itself uses lineage fragments).
 - Each egg's elder stage has its own form. (Refined, see below: one elder per adult.)
+- Babies (decided): eventually each egg gets its own baby. Only Iron's is drawn.
 - Elders (decided): one elder per adult, each a variant of the adult it grows from, as 1.0's mainframes are of their lines. That is 9 per egg and 27 in all, each wider than its adult (18 columns against 16) and no taller than 15 rows. Elder forms still get no pages. The names are not decided.
 - Neglect and bugs (decided to try): neglect is a transient look from unmet care needs; bugs are a persistent look, glitches on the sprite, that stay until cleared. Both showing together is intended: neglect leads to faults and faults roll bugs, so the rust and the glitches appear together by design, and bugs do not suppress the rust.
 - Teens and hidden paths (decided): the two main teens per egg (corp lean, street lean) may differ only slightly. The hidden path must be distinct, so a hidden-path teen needs its own outline, not just marks over the others'.
@@ -814,7 +815,7 @@ Settled items are listed under Decided. What is still open:
 
 The backlog. None of this has been decided or drafted.
 
-- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, how the test and balance tools drive the new forms, and the art itself: the Iron line was prototyped (see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)); Iron's hidden-path teen and Guru are drawn too; Program, Wetware and the rest of Iron's forms are not. Forms are authored in full (decided).
+- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, how the test and balance tools drive the new forms, and the art itself: the Iron line was prototyped (see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)); Iron's whole tree is drawn (baby, three teens, nine adults, nine elders); Program and Wetware are not. Forms are authored in full (decided).
 - **Per-egg meters and care buttons:** Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
 - **Baby and teen stages and forms per egg;** the elder stage rules (1.0's Mainframe gating replaced by the `late` flag); Source access rules.
 - **Netrun abilities per form,** regions per egg, events per egg, the debug station's options, and the tutorial run per egg.

@@ -7,7 +7,7 @@
 // The main line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder. Beside it
 // are the other main teen and the hidden branch (hidden-path teen and Guru), authored only. The sketch's full tree (3 teens and 9
 // adults per egg) was prototyped earlier and is in git history at commit 580db88.
-import { BABY, ELDER, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
+import { BABY, ELDER, ELDERS, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
 // Form id -> what it is, in life order. `authoredOnly` forms exist in model B only: the composed model was rejected, so it is not
 // extended to them.
@@ -20,7 +20,27 @@ export const FORMS = {
   teenCorp: { stage: 'teen', lean: 'corp', authoredOnly: true },
   teenHidden: { stage: 'teen', lean: 'hidden', authoredOnly: true },
   guru: { stage: 'adult', role: 'hidden', authoredOnly: true },
+  // The other adults of Iron's nine (option C: a corp and a street form for each of four roles), authored only.
+  splat: { stage: 'adult', role: 'breach', lean: 'corp', authoredOnly: true },
+  jiff: { stage: 'adult', role: 'dodge', lean: 'corp', authoredOnly: true },
+  bamf: { stage: 'adult', role: 'dodge', lean: 'street', authoredOnly: true },
+  ping: { stage: 'adult', role: 'tune', lean: 'corp', authoredOnly: true },
+  feep: { stage: 'adult', role: 'tune', lean: 'street', authoredOnly: true },
+  munch: { stage: 'adult', role: 'feast', lean: 'corp', authoredOnly: true },
+  thrash: { stage: 'adult', role: 'feast', lean: 'street', authoredOnly: true },
+  // The other eight elders, one per adult.
+  splatElder: { stage: 'elder', from: 'splat', authoredOnly: true },
+  jiffElder: { stage: 'elder', from: 'jiff', authoredOnly: true },
+  bamfElder: { stage: 'elder', from: 'bamf', authoredOnly: true },
+  pingElder: { stage: 'elder', from: 'ping', authoredOnly: true },
+  feepElder: { stage: 'elder', from: 'feep', authoredOnly: true },
+  munchElder: { stage: 'elder', from: 'munch', authoredOnly: true },
+  thrashElder: { stage: 'elder', from: 'thrash', authoredOnly: true },
+  guruElder: { stage: 'elder', from: 'guru', authoredOnly: true },
 };
+// Iron's nine adults and their elders, in option C order (corp then street within a role, hidden last).
+export const ADULTS_ALL = ['splat', 'gronk', 'jiff', 'bamf', 'ping', 'feep', 'munch', 'thrash', 'guru'];
+export const ELDER_OF = (adult) => `${adult}Elder`;
 // The main line, baby to elder, and the hidden branch (baby is shared, then the hidden-path teen and its adult).
 export const LINE = ['baby', 'teenStreet', 'gronk', 'gronkElder'];
 export const HIDDEN_BRANCH = ['baby', 'teenHidden', 'guru'];
@@ -97,7 +117,7 @@ function framesA(id) {
 function framesB(id) {
   const { stage } = FORMS[id];
   if (stage === 'baby') return BABY;
-  if (stage === 'elder') return ELDER;
+  if (stage === 'elder') return ELDERS[id];
   return stage === 'teen' ? TEENS[id] : ADULTS[id];
 }
 // Model A's forms share the body's anchors (that is its premise); model B authors each form's own.
