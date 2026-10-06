@@ -27,6 +27,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Read the second-egg reference review (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
+| Re-run or inspect the Netling 2.0 rule prototypes (bugs, temper, Standing, care preferences) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 
 ## The project in one paragraph
 

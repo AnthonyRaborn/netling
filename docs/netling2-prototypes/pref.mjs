@@ -1,0 +1,11 @@
+import { ARCHETYPES, simulate } from './tools/balance.mjs';
+import { CFG, tempLevel } from './src/sim.js';
+CFG.feedAllegiance = 0.25; CFG.maxMistakes = 1e9; CFG.flowStabilityPerHour = 0.5;
+const [name, n, label] = [process.argv[2], Number(process.argv[3] ?? 300), process.argv[4] ?? ''];
+const rs = [];
+for (let seed = 1; seed <= n; seed++) rs.push(simulate({ ...ARCHETYPES[name] }, seed));
+const avg = (f) => +(rs.reduce((a, r) => a + f(r), 0) / rs.length).toFixed(2);
+const causes = {}; for (const r of rs) causes[r.cause] = (causes[r.cause] ?? 0) + 1;
+const roleGap = (r) => { const w = [...r.gamesWon].sort((a, b) => b - a); return w[0] - w[1]; };
+const minWins = (r) => Math.min(...r.gamesWon);
+console.log(JSON.stringify({ label, name, n, faults: avg((r) => r.mistakes), syncFaults: avg((r) => r.mistakeKinds?.sync ?? 0), full: +((causes['end of life cycle'] ?? 0) / n).toFixed(3), integ: +((causes['integrity collapse'] ?? 0) / n).toFixed(3), bonus: avg((r) => r.prefBonus), matched: avg((r) => r.prefMatches), actions: avg((r) => r.prefActions), roleGap: avg(roleGap), roleGap5: avg((r) => (roleGap(r) >= 5 ? 1 : 0)), minWins: avg(minWins), minWins4: avg((r) => (minWins(r) >= 4 ? 1 : 0)), standGap: avg((r) => Math.abs(r.axes.allegiance)), standLe1: avg((r) => (Math.abs(r.axes.allegiance) <= 1 ? 1 : 0)), wins: avg((r) => r.wins) }));

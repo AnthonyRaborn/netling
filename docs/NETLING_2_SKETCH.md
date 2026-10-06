@@ -4,16 +4,20 @@ Status: planning notes for a separate app, not a change to this repository's gam
 
 ## Handoff
 
-**Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. All codex page text is drafted (egg form pages, new story pages, Source pages). Temper hints and most of the mechanical design are not; see Not designed yet.
+**Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a story frame, and a codex page model. Since the first sketch, these are settled or measured: all codex page text (15 role and hidden form pages, 12 new story pages, 3 Source pages, 18 temper hints); the late-page flag and Root Access arithmetic; evolution (Standing and the mini-game roles are the levers, with tie-break rules); two named forms per role (option C) with 12 second form names; hidden-path rules; bugs (faults feed bugs, bugs raise drain, cleared with scrip, Standing or a netrun anomaly); the temper scale, its tells, its catalogue and its care preferences; and starting numbers for Standing, bugs, temper and the egg page drop rate. All numbers come from prototypes on 1.0's simulator and are starting values to retest in 2.0 (see `docs/netling2-prototypes/README.md`). What is not designed: see Not designed yet.
 
-**Next steps, in the maintainer's order.**
-1. Review and edit the page drafts in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md): 15 egg form pages, twelve new story pages and three Source pages. The four approved rewordings of 1.0 pages are in this file, under Rewording the four pages.
-2. Temper hints are drafted in the drafts file (a hint names a behavior to look for, not a temper value). The Evolution section still has open numbers: the size of a Standing point, the wins that make a role, and the bug and ceiling values.
-3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
+**Next steps (the maintainer has not set an order after the sprite work was raised).**
+1. **Sprite redesign** (the largest open piece): the three bodies, a visible neglect look, the temper tells (countable rhythm for steady, growing chaos for unsteady, with a calmer reduced-motion version and nothing flashing more than three times a second), a flicker guard so a tell does not flip at a level threshold. See Neglect and the sprites and The temper tell.
+2. **Per-egg meters and care buttons**, then baby and teen stages and forms per egg, then the elder stage rules.
+3. **Netrun content per egg** (abilities, regions, events, tutorial run) and the debug station anomaly's options.
+4. Review and edit all drafted text in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md). Idle and chatter temper hints are flagged for revisiting.
+5. Retest every starting number once 2.0 exists; the prototypes only approximate it.
 
-**Document map.** This file holds the decisions, the architecture and the open questions. [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) holds all page text. [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) is the reference review that started this, partly superseded.
+**Document map.** This file holds the decisions, the architecture, the measured starting numbers and the open questions. [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) holds all page text and the temper hints. [netling2-prototypes/README.md](netling2-prototypes/README.md) holds the patch and the drivers that produced every measured figure, with how to re-run them. [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) is the reference review that started this, partly superseded.
 
-**Working agreements.** Avoid emojis and em dashes. Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps. Record each decision here as it is made, marked Decided or proposal. Keep in-game Wetware text to plain words (see The eggs). Do not open a pull request unless asked. The soft freeze in `CLAUDE.md` still applies to this repository's game code; only documents change here. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
+**What was and was not run.** Only documents changed in this repository. The prototypes ran on scratch copies of 1.0's simulator; `npm test` was run after the docs change to confirm nothing broke, and `npm run smoke` was not run (it needs Playwright and a browser). No 2.0 code exists. No page text has been read in context or playtested.
+
+**Working agreements.** Avoid emojis and em dashes. Measure before claiming a number, and say what a measurement does not cover. Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps. Record each decision here as it is made, marked Decided or proposal. Keep in-game Wetware text to plain words (see The eggs). Do not open a pull request unless asked. The soft freeze in `CLAUDE.md` still applies to this repository's game code; only documents change here. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
 
 **Sources** (the four references; local copies are not kept in the repository, so re-download if needed):
 - Jargon File 1.0.0.33: https://jargon-file.org/archive/jargon-1.0.0.33.dos.txt
@@ -54,9 +58,9 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - New codex pages are allowed. NL-0's differentiation is carried by pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
 - The Source stays one place (option B with a touch of A): each egg finds one extra page there that the others do not, and the descent is drawn in that egg's own style.
 - Root Access needs the general, shared story pages at minimum. Egg-specific pages are for Rogue's unlock only, not for Root Access.
-- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per adult form (5 adult forms per egg, one of them hidden), so 15 egg form pages in all, plus 3 Source pages, which are egg pages (decided). Teen pages are discarded, and elder forms get no pages (decided). Egg pages count toward Rogue's gate. They are rare drops with no per-life limit (decided), so they do not share the story pages' cap. Work order: codex pages first, temper hints after.
+- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per role (each covering both of the role's forms) plus one hidden-form page, so 5 form pages per egg and 15 in all, plus 3 Source pages, which are egg pages (decided). Teen pages are discarded, and elder forms get no pages (decided). Egg pages count toward Rogue's gate. They are rare drops with no per-life limit (decided), so they do not share the story pages' cap. Work order: codex pages first, temper hints after.
 - Any member of an egg can find that egg's form pages, whatever its own form.
-- Each egg has 5 adult forms: one per mini-game (Breach, Dodge, Tune, Feast) plus one hidden form that masters all four. The role is a descriptor for the DEX and hints, not the form's name.
+- Each egg has 5 role-or-hidden pages but 9 adult forms (decided, option C): each of the four roles (Breach, Dodge, Tune, Feast) has two named forms, one corp-leaning and one street-leaning, plus one hidden form that masters all four. The role is a descriptor for the DEX and hints, not the form's name. The original first-pass names are in Adult forms and names; the 12 second names are in Second form names.
 - The story set needs more pages than 1.0, to cover the two extra eggs and the lore they imply.
 - `bazaar-1` is a shared story page, reworded to "Netlings don't sell. They pick you, or they don't."
 - `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become shared story pages about Standing and Temper (not Program egg pages), reworded to hint at v1.0 as an alpha stage of the current plan. `deep-3` stays a shared story page. All 15 egg pages are therefore new.
@@ -69,7 +73,19 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Evolution direction (see Evolution): Standing and the mini-game roles are the levers; faults feed temper; temper is personality and does not choose forms; teens depend on Standing only, except the hidden path, which also needs the games played.
 - The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
 - Root Access and the twelve new story pages: only `public-4` (classified ad) and `corp-2` (release schedule) count toward Root, which then needs 24 pages. The other ten carry the `late` flag and never count toward Root. `late` pages drop only once the line holds Root, are required by the ending, are ignored by regional unlocks, and replace 1.0's `mainframe` flag. Ids match drop position, so some 1.0 ids move (mapping in the drafts file). Ids in this sketch's older text are 1.0 ids unless noted.
-- In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Wired, Gibson, Leech, Blank) stay as they are.
+- In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Solo, Wired, Chipped, Gibson, Mentat, Leech, Nutri, Blank) are exempt.
+
+**Decisions from the evolution and numbers pass (details and measurements in the sections named).**
+
+- Standing resets each life; it is shown as the floor of each track, labeled as a rough estimate; decisions use the fractions (Evolution, Starting numbers).
+- Standing sources: packets 0.25, COMPLY, HIDE, an ignored trace, checkpoint and anomaly choices 1, market purchases 0.5, voucher and Black ICE shard 1; plain care and mini-games add nothing.
+- Tie breaks: a gap of 1 or less is a coin flip, the lesser option's chance falls to 0 at a gap of 5, unseen forms weigh about 20% more. Same rule for the Standing lean and the role.
+- Hidden path: the Standing tracks within 1 point plus the games requirement; faults and stability are not conditions.
+- Faults are hidden (not logged) and uncapped; the 10-fault death is removed. Faults feed temper and roll bugs.
+- Bugs: 30% per fault, ceiling 5, clearable for 15 scrip, 2 Standing in any split, or a netrun debug station anomaly. Segfault: 60% one bug, 15% two, 25% none, temper -4. The penalty ceiling is not ignorable and smaller for Integrity.
+- Temper: resets each life, 24-hour half-life, flow +0.5 an hour, Coolant cell and Antivirus patch +1, levels at -6, -2, +3, +6, tells through motion, idle behavior and chatter, hints in the Dex (Temper scale, The temper tell, the drafts file).
+- Care preferences: steady likes routine, unsteady likes novelty (Sync +2 mild, +4 strong), hidden; game requests are biased (steady: one of the last two distinct plays with netrun ICE games in the history; unsteady: a game not among them); no packet request (Care preferences).
+- Egg pages are rare drops (0.10 per run), no per-life limit; Rogue's gate is all 18 egg pages; elder forms get no pages.
 
 ## Architecture
 
@@ -526,7 +542,7 @@ Two things the catalogue shows. First, almost nothing besides faults, Heat and P
 - **Removing the fault cap changes 1.0's death rules.** In 1.0 a life ends by integrity collapse, by neglect (10 care mistakes) or at the end of the life cycle, and Root Access can undo the first two. Without the cap, only integrity collapse and the end of the life cycle remain, and Root Access undoes only the first. Against the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 simulated lives per archetype), the neglect cap ended 4.8% of the casual archetype's lives, 4.2% of the neglectful one's, 1.7% of the worker's and none for the others. The neglectful archetype already died of integrity collapse in 95.8% of its lives. That agrees with the view that the cap rarely matters, but it is simulation, not real players. After the change, those few lives would run on or die of integrity collapse instead, so a balance run is needed.
 - **The Segfault item loses its risk.** It adds 2 faults deliberately, and its cost was that faults could end a life. In 2.0 it becomes a temper push with no fatal cost. Its design (or its cost) needs a look. Its name per egg stays in the item table.
 - **Netrun faults.** 1.0's netrun adds a care mistake on some disconnects, clamped below the cap. Without a cap that clamp goes, and the mistake becomes a temper nudge.
-- **Nothing here was simulated.** The counts are arithmetic from the docs.
+- **Simulation limits.** The counts are arithmetic from the docs; the Standing, bug, temper and preference numbers come from 1.0's simulator with stand-ins (see `netling2-prototypes/README.md`), not from 2.0.
 
 ## The eggs
 
@@ -686,7 +702,7 @@ Not yet named: the elder (mainframe-stage) forms, and the teen forms.
 
 Two kinds (decided):
 
-- **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). Ten new ones are drafted, to cover the two extra eggs and the lore they imply.
+- **Story pages:** shared by every egg. Root Access needs these at minimum (24 Root pages). Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). Twelve new ones are drafted, to cover the two extra eggs and the lore they imply; 15 are `late` (see the drafts file).
 - **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate, which needs all 18 (decided). They are rare drops with no per-life limit (decided): the rate should be set so that a very consistent player could in principle collect all of an egg's pages in one life but would more realistically need about two. The rate itself is to be tuned with the balance tools, and no number is chosen. Each egg also has one Source page, which is an egg page (decided), so 6 per egg and 18 in all. The earlier idea of a page per teen form is discarded, and elder forms get no pages (decided): they are hidden until after Root, and the codex is already growing a lot.
 
 ### The six form-bound 1.0 pages
@@ -747,7 +763,7 @@ Terminology (decided): codex story pages are "pages"; lineage records left by de
 |---|---|
 | Mini-game mechanics | Unchanged |
 | Mini-game text and modifiers | Re-skin per egg, add a modifier per egg |
-| Items (9) | Rename per egg, same effects |
+| Items (9) | Rename per egg; Coolant cell and Antivirus patch gain +1 temper, Segfault gains temper -4 and a bug chance (see the catalogue) |
 | Wearables (41) and props (8) | Mostly unchanged, if bodies share anchor rows |
 | Tints, effects, sounds | Unchanged |
 | Shells (15) | 10 unlock by "discover form X" and need rewriting |
@@ -756,7 +772,7 @@ Terminology (decided): codex story pages are "pages"; lineage records left by de
 | Music (9) | Mostly unchanged; one track or timbre per egg is a possible addition |
 | Chatter (52 lines) | 32 rewrite (teen and adult bodies); 20 survive |
 | Dex (14 entries) | All rewrite |
-| Codex (27 pages in 1.0) | Five reworded (`corp-4`, `corp-5`, `bazaar-1`, `bazaar-4`, `bazaar-5`), `deep-3` unchanged; 2.0 has 37 story pages (24 Root, 13 late) and 18 egg pages (15 form pages, 3 Source pages) |
+| Codex (27 pages in 1.0) | Five reworded (`corp-4`, `corp-5`, `bazaar-1`, `bazaar-4`, `bazaar-5`), `deep-3` unchanged; 2.0 has 39 story pages (24 Root, 15 late) and 18 egg pages (15 form pages, 3 Source pages) |
 | Field manual | Generated from config |
 | Ending | Carries over; trigger and credits adapt (see The ending in 2.0) |
 
@@ -776,39 +792,42 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 
 ## Open questions
 
-1. Names for the elder and teen forms. The 15 adult names had no objections after their last revision.
-2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. Current drafts put each egg's pages in its home region and the three hidden pages in The Deep.
-3. Decided: egg pages have no per-life limit. Open: the drop rate that makes full collection take about 2 lives for a consistent player, to be tuned with the balance tools.
-4. Decided: elder forms get no pages.
-5. Decided: Rogue's gate is all 18 egg pages (15 form pages and 3 Source pages), so a player must raise all three eggs and find every egg page. It is a secret egg and should be hard to get. Consequence to tune: at about 2 lives per egg for a consistent player, that is about 6 lives at the least, and a Source page needs Root and the Source descent in each egg.
-6. Decided: the three Source pages are egg pages.
-7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
-8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
-9. Evolution: Standing sources and sizes are set as a starting point (see Starting numbers), including the voucher and Black ICE shard at 1; open is whether the measured spread (steerers certain early, everyone else random) is the intended feel. Tie breaks are decided (see Tie breaks); a netling with no lead is then just a tie, so there is no separate default teen, and no wins threshold is needed for a role.
-10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
-11. Bugs: scrip price 15, Standing price 2 (any split) and the debug-station frequency are set as starting values; open are the ceiling and penalty values (the prototype supports the starting ones), the debug station's options, the names per egg. The temper scale is proposed (see Temper scale), including the Segfault push of -4.
-12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
+Settled items are listed under Decided. What is still open:
+
+1. **Names for the elder and teen forms**, and whether each egg's elder form keeps the line mapping.
+2. **Where form pages drop** (the drafts put each egg's pages in its home region and the hidden pages in The Deep); not confirmed.
+3. **Purge order details.** Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
+4. **Standing:** whether the measured spread (committed players certain early, everyone else random) is the intended feel; whether Standing is also shown to the player as a gap or only as two floors.
+5. **Bugs:** the debug station's options and cost, the names of the clearing action per egg (Program: defrag or bugfix), and the ceiling and penalty values once the 2.0 loop exists.
+6. **Temper:** a flicker guard at level thresholds, decay per minute or per check-in, whether strong steady should have its own reward, which items beyond Segfault and Black ICE should be retooled.
+7. **Care preferences:** whether the steady lock-in that remains for players who never netrun is acceptable; the base-rate difference between steady and unsteady under fixed-order play; wording of the log lines.
+8. **Second form names:** Nutri is decided; the other 11 are proposals (Spoof and Mouse swapped, Thrash proposed over Hog), and the corp or street lean each name takes is a guess.
+9. **Pages:** the idle and chatter temper hints (flagged for revisiting), the word order and length of the longer drafts, region placement for the egg pages.
+10. **UI:** the Dex structure for hints, the floor display of Standing, and how a bug and neglect show; to be revisited once the game decisions are final.
+11. **Egg page drop rate** (0.10 per run) and the bug values need retesting in 2.0.
 
 ## Not designed yet
 
 The backlog. None of this has been decided or drafted.
 
-- Per-egg meters and care buttons: Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
-- The exact tells per egg and the numbers for temper accrual (see Evolution); how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions are set (all four games mastered, Standing within 1 point).
-- Baby and teen stages and forms per egg; the elder stage rules (1.0's Mainframe gating replaced); Source access rules.
-- Netrun abilities per form, regions per egg, events per egg, and the tutorial run per egg.
-- The Rogue egg beyond the merge idea and its gate.
-- The composed-form sprite spec, and how the test and balance tools drive composed forms.
-- Mini-game modifiers per egg.
-- Shells, crests and the Mini device prop, which depended on 1.0 forms.
-- The Source descent's presentation per egg (read, burned in, dreamed), and how the late-page gating by Root Access interacts with the elder stage.
-- Unlocks for the late pages themselves, if any.
-- Save format and storage keys for the new app. Migration from 1.0 saves is not planned.
+- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, the composed-form sprite spec, and how the test and balance tools drive composed forms.
+- **Per-egg meters and care buttons:** Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
+- **Baby and teen stages and forms per egg;** the elder stage rules (1.0's Mainframe gating replaced by the `late` flag); Source access rules.
+- **Netrun abilities per form,** regions per egg, events per egg, the debug station's options, and the tutorial run per egg.
+- **The Rogue egg** beyond the merge idea and its gate.
+- **Mini-game modifiers per egg.**
+- **Shells, crests and the Mini device prop,** which depended on 1.0 forms.
+- **The Source descent's presentation per egg** (read, burned in, dreamed), and how the late-page gating by Root Access interacts with the elder stage.
+- **Unlocks for the late pages themselves,** if any.
+- **Save format and storage keys for the new app.** Migration from 1.0 saves is not planned.
 
 ## Not done
 
-- No code was read for feasibility. All counts come from the docs.
-- The Puppet Master details are from memory of the film.
-- The dream framing draws on my reading of CP2020's simulated-reality entries (BTL, SimSense, moddy).
+- No 2.0 code exists. The 1.0 code was read for the prototypes only (`src/sim.js`, `src/netrun/run.js`, `tools/balance.mjs`), not for feasibility of the whole design.
+- All measured numbers use 1.0's simulator and archetype bots with stand-ins (single signed allegiance for Standing, stability for temper). They are starting values, not results for 2.0.
+- No bot follows the preference only part of the time, none adapts its play to bugs, and bugs from netrun faults, Heat from actions, and Standing or anomaly clearing are not modeled.
 - No page text has been playtested or read in context. The drafts run longer than 1.0's pages (see the drafts file).
 - The page counts and the Root Access arithmetic are from the 1.0 tables, not simulation.
+- The Puppet Master details are from memory of the film.
+- The dream framing draws on a reading of CP2020's simulated-reality entries (BTL, SimSense, moddy).
+- `npm run smoke` was not run (needs Playwright and a browser). Only documents changed in this repository.

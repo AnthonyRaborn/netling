@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 egg form pages, twelve new story pages and three Source pages (one per egg), for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints.
+Status: first drafts of the 15 form pages (five per egg: one page per role, covering both of the role's forms, plus one hidden-form page), twelve new story pages, three Source pages (one per egg) and 18 temper hints, for the maintainer to edit. Nothing here is implemented or tested, and none of it has been read in context. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints. Contents: What these pages are, Style, Program, Iron, Wetware, New story pages (with the id mapping from 1.0 and the late flag), Source pages, Temper hints, Cross-checks, Open.
 
 ## What these pages are
 
@@ -206,10 +206,11 @@ Notes:
 
 ## Open
 
-1. Edit any text. These are first drafts. `public-7` is approved as written; `public-6` is approved with its last sentence removed.
-2. Confirm the ids (they now match position) and the region placement for the egg pages.
-3. Decided: `iron-breach` and `iron-dodge` use the elegiac versions with no form names.
-4. Edit any story page or Source page text.
-5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
-6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
-7. Edit the temper hints. They sit in the Dex for now. Revisit the idle and chatter hints (see the note in Temper hints).
+Decided: the three Source pages are egg pages (18 egg pages in all); egg pages are rare drops (0.10 per run, no per-life limit); elder forms get no pages; Rogue's gate is all 18 egg pages; `iron-breach` and `iron-dodge` use the elegiac versions with no form names; `public-7` is approved as written and `public-6` with its last sentence removed; ids are named by role for role pages and by form for hidden pages; temper hints sit in the Dex for now.
+
+Still open:
+
+1. Edit any text. These are first drafts; the longer ones (`program-tune`, `iron-dodge`, `corp-7`) can be trimmed toward 1.0's terseness.
+2. Confirm the ids and the region placement for the egg pages.
+3. Revisit the idle and chatter temper hints (see the note in Temper hints) against the real animations.
+4. Retest the egg page drop rate (0.10 per run) once 2.0 exists.
