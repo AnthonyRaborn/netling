@@ -7,7 +7,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 **Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. Drafts of the 15 egg pages are written; the other pages are not.
 
 **Next steps, in the maintainer's order.**
-1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: new story pages covering the two extra eggs (these also carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar), one extra Source page per egg, and the approved rewordings of the four 1.0 pages.
+1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) and ten new story pages (which carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: one extra Source page per egg. The approved rewordings of the four 1.0 pages are in this file.
 2. Then temper hints: a hint should name a behavior to look for, not a temper value.
 3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
 
@@ -223,7 +223,7 @@ Arithmetic from the 1.0 tables, not a simulation.
 ### What follows
 
 - Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only. The Corp Grid and the Bazaar keep their five pages each.
-- Corp deletion failing differently per egg should be told in the Iron and Wetware egg pages, not by editing `corp-3`, which stays shared.
+- Corp deletion failing differently per egg is told in the new story page `corp-7` (deletion log), not in the egg pages and not by editing `corp-3`, which stays shared.
 - In-world version numbering: `ruins-3` ("back to v1.0") and `source-1` ("last write: before v1.0") use "v1.0" as lore, which is now the alpha. The intro script is unversioned. The generation counter (`vN.0`) stays separate, as in 1.0.
 - The word "fragment" is used in-world for lineage records (`bazaar-2`, `bazaar-3`, `ruins-3`, `deep-2`, `deep-4`), so renaming only the codex side to "pages" keeps the lore consistent.
 
@@ -282,6 +282,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (after the codex pages).
+9. How many of the ten new story pages count toward Root Access (options A, B, C in the drafts file; C recommended). This sets whether Root Access, and what depends on it, moves a life later.
 
 ## Not designed yet
 

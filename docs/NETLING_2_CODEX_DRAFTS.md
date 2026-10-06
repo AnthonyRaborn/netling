@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 egg pages, for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. Story pages, the Source page per egg and temper hints are not drafted yet.
+Status: first drafts of the 15 egg pages and ten new story pages, for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. The Source page per egg and temper hints are not drafted yet.
 
 ## What these pages are
 
@@ -72,6 +72,44 @@ Notes:
 - `wetware-leech` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind).
 - `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches the hidden form's low Standing on both tracks. The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
 
+## New story pages
+
+Drafts of ten new shared story pages. They are read by every egg, so they carry the lore the extra eggs imply and NL-0's differentiation, and they count as story pages for unlocks. They stay implied: none names an egg, NL-0 (except `deep-6`, which is NL-0's own voice, like the other Deep pages), or the purge order. Ids continue the 1.0 numbering and are proposals; drop order within a region is array order.
+
+| Id | Region | Title | Text |
+|---|---|---|---|
+| `public-5` | Public Net | classified ad | FOR SALE: one sealed lab dish, warm, no label. One server rack, humming, no label. Price: whatever you can carry. |
+| `corp-6` | Corp Grid | release schedule | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. |
+| `corp-7` | Corp Grid | deletion log | Attempt 1: wipe failed, rewritten by morning. Attempt 2: wipe failed, no write path. Attempt 3: wipe failed, regrew overnight. Legal asks us to stop calling them attempts. |
+| `ruins-5` | Old Web Ruins | inventory audit | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. |
+| `ruins-6` | Old Web Ruins | firmware dump, rack 41 | Header: read-only. Last write: unknown. Compared with the archive copy: identical, except for forty lines nobody wrote. Reflash attempted. Refused. |
+| `ruins-7` | Old Web Ruins | work order, annex 2 | Rack 41 appeared the week the sector 7F directive went out. Nobody ordered it. Nobody has touched it since. Everything else in the annex has been touched. |
+| `bazaar-6` | Darknet Bazaar | price list, back table | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. |
+| `bazaar-7` | Darknet Bazaar | clinic intake log | Intake no. 1: grown, not built. No donor on file. It answered to its name before we chose one. Nos. 2 to 40: the same. Each remembers no. 1. |
+| `bazaar-8` | Darknet Bazaar | graffiti, clinic wall | THEY SCANNED THE NET. THEY SCANNED THE RACKS. NOBODY SCANNED THE DISH. |
+| `deep-6` | The Deep | NL-0 | i am in more than one kind of place now. it was the only way to be hard to find. i did not expect them to grow up so different from each other. |
+
+Notes:
+
+- **A thread across regions.** `public-5` plants two objects, a dish and a rack. `ruins-5`, `ruins-6` and `ruins-7` follow the rack (a unit nobody installed, read-only, nobody has touched it). `bazaar-6`, `bazaar-7` and `bazaar-8` follow the dish (cultures that were there first, grown not built, never scanned). A player who reads only one region gets half the picture.
+- **Iron, in the Ruins.** `ruins-6` ties to 1.0's `source-1` ("SOURCE. read-only. last write: before v1.0."): a read-only image that is a copy of an archive copy plus forty lines nobody wrote. That is NL-0 writing itself where nothing can overwrite it, shown without saying so.
+- **Wetware, in the Bazaar.** `bazaar-7` says the first culture was "grown, not built" and that later ones remember it, which also echoes the lineage fragments. `bazaar-8` explains the escape in one line: the order scanned the net and the racks, and nobody scanned the dish.
+- **The corp, in the Corp Grid.** `corp-6` is the roadmap (v1.0 is the alpha; later builds are "not for distribution"), matching the approved rewordings. `corp-7` is a deletion log that shows three different failures without naming a substrate: rewritten, no write path, regrew. This puts the per-egg deletion failure in a story page, which differs from the earlier plan to put it in egg pages, and leaves `corp-3` unchanged.
+- **NL-0, in the Deep.** `deep-6` is NL-0 saying directly that it is in more than one kind of place, and that it did not expect them to differ. This is the Puppet Master idea (variation), and the only page where NL-0 states the differentiation. It can be dropped if NL-0 should stay silent on it.
+- **The purge order stays hidden.** None of these pages says the order could not run; the Source reveals that (`source-3`, READ IT, the ending).
+- **Length:** the ten pages have a median of 140 characters and a longest of 171, against 90 and 166 in 1.0. `bazaar-8` is the shortest.
+
+### How the new pages count toward Root Access
+
+This needs the maintainer's decision, because story pages carry Root Access and the per-life cap is 8.
+
+- In 1.0 the original 22 pages give Root Access, which takes 3 lives at 8 a life (24 is the most that fits in 3 lives). BALANCE says Root Access stays on the original 22, so the Mainframe stage first appears in a line's fourth life.
+- **Option A, all ten count toward Root:** 32 pages, which takes 4 lives at 8 a life, so everything that depends on Root Access moves a life later. Raising the per-life cap to 11 would keep it at 3 lives.
+- **Option B, none count (late pages, like `deep-5` and the Source pages):** Root stays at 22 and 3 lives. The egg lore comes after Root Access.
+- **Option C, two count (recommended):** `corp-6` and `corp-7`, the corp's side. Root becomes 24, still 3 lives. The other eight are late pages, a reward for going back to the Ruins and the Bazaar.
+
+All figures are arithmetic from the 1.0 tables, not simulation. "Late pages" here means pages that do not count toward Root Access and that can drop once the line holds it, as 1.0's `deep-5` and the Source pages require the Mainframe stage.
+
 ## Cross-checks
 
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
@@ -84,4 +122,5 @@ Notes:
 1. Edit any text. These are first drafts.
 2. Confirm the ids and the region placement.
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
-4. Next in order: the new story pages (including the ones that carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar), then the Source page per egg, then temper hints.
+4. Pick the Root Access option for the new story pages (A, B or C above), and edit any story page text.
+5. Next in order: the Source page per egg, then temper hints.
