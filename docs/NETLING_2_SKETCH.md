@@ -407,7 +407,40 @@ Preferences stay hidden (decided): there is no Dex hint for them. The player fin
 - Unsteady switches packets and games, which keeps Standing balanced and spreads wins across the four games. That is also what the hidden path needs (Standing within 1 point, every game played).
 - So personality gives a soft push toward specializing (steady) or toward the hidden path (unsteady). Temper still does not choose a form, and the push is worth +2 to +4 Sync an action, but it is a real effect and worth knowing before it ships.
 
-**Not tested.** The simulator's bots cycle games in a fixed order and pick packets at random, so they cannot test a preference-following player. A bot that follows the preference (and one that ignores it) is needed to measure the effect on faults and full-life rates, and to check the Sync estimate. The numbers (+2 and +4) are starting values.
+**Prototype on the 1.0 simulator (measured, with limits).** I added the rule to a scratch copy and built a bot that follows it. The bot knows the netling's temper level, which a real player has to infer from tells, and follows the preference on every feed and play it controls (a pet's own game request still forces that game). Scenarios: **off** (no preference), **ignore** (preference on, the usual bots, which cycle games in order and pick packets at random) and **follow**. Temper uses the decided scale (flow +0.5, 24-hour decay, items +1, thresholds -6, -2, +3, +6), bugs are on with clearing, and 300 lives per cell. Doubling the size to +4 and +8 was also run for the survival numbers.
+
+Survival and faults (faults a life / full-life rate):
+
+| Archetype | Off | Ignore | Follow | Sync bonus a life (follow) | Matched actions (follow) |
+|---|---|---|---|---|---|
+| Casual | 4.79 / 94.0% | 4.72 / 94.7% | 4.56 / 96.3% | 46 | 23 of 23 |
+| Worker | 7.03 / 91.0% | 6.9 / 91.3% | 6.94 / 90.7% | 67 | 32 of 32 |
+| Attentive (mostly steady) | 0.15 / 99.3% | 0.14 / 100.0% | 0.13 / 100.0% | 336 | 119 of 123 |
+| Sysadmin (steady) | 0.02 / 100.0% | 0.01 / 100.0% | 0.02 / 99.7% | 337 | 113 of 117 |
+| Daredevil (unsteady) | 1 / 100.0% | 0.92 / 100.0% | 0.93 / 100.0% | 283 | 113 of 116 |
+| Overclocker (unsteady) | 1.66 / 96.7% | 1.39 / 97.7% | 1.29 / 97.0% | 389 | 128 of 129 |
+
+- **Survival barely moves.** Casual rises from 94.0% to 96.3% full-life and from 4.8 to 4.6 faults, a gain close to the noise of 300 lives (about 1.4 points). The worker, whose faults come from missed care, does not move. Careful archetypes have almost no faults to remove, so 340 Sync a life changes nothing for them.
+- **Doubling the size did not change that** (casual 96.0%, overclocker 95.3% with +4 and +8, within noise). The preference is flavor at both sizes; the +2 and +4 starting values are not near any instability.
+- **Following is easy.** The follow bot matches almost every action it controls, so a player who notices the log lines and the tells can collect the bonus nearly always. A netling near the middle of the scale has no preference at all, which is why casual and worker netlings had only 23 to 32 preference-bearing actions a life against 113 to 129 for the steady and hot archetypes.
+- **Under the ordinary bots (ignore),** steady netlings match about a third of actions and unsteady about 60% to 70%, because those bots cycle games in a fixed order (never a repeat, always a novelty) and pick packets at random. So with that play pattern the unsteady side gets the bonus more often. Real players with a favorite game would tilt it the other way. This is the base-rate caveat from the rule above: the two sides are not equal under every play pattern.
+
+Effect on the evolution levers (off / follow):
+
+| Archetype | Role certain (gap 5 or more) | All four games at 4 wins or more | Standing gap at end | Standing within 1 point |
+|---|---|---|---|---|
+| Attentive | 5% / 59% | 100% / 63% | 4.12 / 16.56 | 14% / 2% |
+| Sysadmin | 5% / 67% | 100% / 66% | 3.13 / 13.54 | 22% / 4% |
+| Steer-daemon (balances Standing) | 5% / 61% | 100% / 51% | 0.29 / 10.77 | 96% / 2% |
+| Balance seeker | 8% / 71% | 100% / 79% | 0.18 / 9.9 | 100% / 3% |
+| Overclocker | 3% / 2% | 99% / 98% | 3.28 / 2.64 | 22% / 26% |
+| Daredevil | 2% / 1% | 100% / 100% | 9.01 / 8.66 | 6% / 7% |
+| Casual | 1% / 8% | 97% / 95% | 3.79 / 3.86 | 18% / 18% |
+
+- **For steady netlings, following is a strong specializing push.** Repeating the same game and packet makes the role certain in 59% to 71% of lives (against 5% to 8% otherwise), cuts the share who reach 4 wins in every game from 100% to 51% to 79%, and opens the Standing gap from about 3 to 4 up to 10 to 17. A balance seeker who followed the preference would fall from 100% to 3% within 1 point. So a steady netling whose player follows its routine is on a clear, predictable path, and the hidden path then needs the player to ignore the preference.
+- **For unsteady netlings the nudge toward the hidden path is mild.** Overclocker followers keep Standing a little more balanced (gap 3.3 to 2.6, within 1 point 22% to 26%) and still play all four games. Casual and daredevil barely change. (A first version of the bot starved one game for unsteady followers; that was a bot fault and is fixed in these figures.)
+- **The force comes from behavior, not from the Sync.** The bonus is small; what moves evolution is that following a routine means repeating one game and one packet. The cost of not following is small for careful players, who have few faults to lose, so a hidden-path player can ignore it cheaply. For a player short on Sync it costs more.
+- **Limits.** One bot design, 300 lives, a bot that sees temper directly, and 1.0's allegiance standing in for Standing. A bot that follows only part of the time was not built.
 
 ### Catalogue: what affects temper (1.0 code and docs)
 
