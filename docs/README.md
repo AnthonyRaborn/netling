@@ -26,6 +26,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Read how the Mainframe stage and the Source were decided, built and measured | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
 | Read the second-egg reference review (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
+| Compare composed and authored sprites for Netling 2.0 (prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
 
 ## The project in one paragraph

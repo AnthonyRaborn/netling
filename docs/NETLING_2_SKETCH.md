@@ -294,7 +294,7 @@ The backlog. None of this has been decided or drafted.
 - Baby and teen stages and forms per egg; the elder stage rules (1.0's Mainframe gating replaced); Source access rules.
 - Netrun abilities per form, regions per egg, events per egg, and the tutorial run per egg.
 - The Rogue egg beyond the merge idea and its gate.
-- The composed-form sprite spec, and how the test and balance tools drive composed forms.
+- The composed-form sprite spec, and how the test and balance tools drive composed forms. A prototype of both approaches for the Iron egg, with results, is in [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md); the choice between them is open.
 - Mini-game modifiers per egg.
 - Shells, crests and the Mini device prop, which depended on 1.0 forms.
 - Save format and storage keys for the new app. Migration from 1.0 saves is not planned.
