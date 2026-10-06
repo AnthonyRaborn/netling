@@ -276,6 +276,19 @@ Decided: it shows through all three channels at once, in every egg. Proposal for
 - Constraint from 1.0: nothing flashes more than three times a second, in any motion setting, so a volatile tell must stay under that limit and have a calmer variant when motion is reduced.
 - The tell should come from the temper value, not be a label, and the exact thresholds should be tuned with the balance tools like any other number.
 
+### Making the steady end legible (proposal)
+
+The problem: the unsteady end can grow more chaotic, but the steady end is the absence of chaos, which is easy to miss. The fix is to make steadiness something the player can notice and predict, not merely a lack of noise, and to let it grow stronger the same way chaos does. Ideas, to combine as wanted:
+
+- **A countable rhythm.** A steady netling does a small signature move on an exact beat (a blink or a settle every N seconds, always the same N). A player can count it, and the tell is "I can predict it". Keep any pulse at or below one change a second.
+- **A visible ritual that grows.** The idle routine is a fixed sequence of steps that the player can learn, and at the strong end it repeats exactly. This ties to the idle hints (the same three tasks in the same order).
+- **Tidiness.** Poses snap to a grid, the sprite returns to the same spot after each move, and there is no stray motion. The unsteady end is the same set of parts, drifting.
+- **Sound.** A steady netling has a clean tone with a regular tick; an unsteady one wobbles in pitch. Every sound tell needs a non-sound equivalent for players with audio off.
+- **Chatter format.** A steady netling uses a recognizable frame (the same opener and sign-off); an unsteady one breaks it.
+- **Strength levels.** Both ends get two or three levels. The steady end gets crisper and more ritual, the unsteady end more chaotic, so strength reads in both directions.
+
+The tell on each end must still stay under three flashes or changes a second in every motion setting, with a calmer variant under reduced motion. The steady end suits reduced motion well, since it is calm by nature. None of this is designed in detail. The numbers and animations are for the sprite redesign pass.
+
 ## Adult forms and names
 
 Decided: one adult form per mini-game, plus a hidden form that masters all four. The role (Cracker, Evader, Seer, Scavenger) describes the form in the DEX and hints; it is not the name. 1.0's names are single evocative words (Daemon, Glitch, Ghost), so these are too.
