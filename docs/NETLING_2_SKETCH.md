@@ -345,37 +345,38 @@ Bugs raise Heat gain, so they push temper unsteady through the Heat rows, with n
 
 **Why decay.** In 1.0, stability only accumulates, so by the end of a life it is wide and permanent (attentive +10.6, daredevil -33, overclocker -36, median at end of life, cumulative). A decayed temper reflects recent habits, stays bounded, and can recover, which supports the countable-rhythm tells being readable. With a 24-hour half-life and flow at +0.5, a netling in flow all day would settle near +17, though real play (alerts, sleep, care gaps) lands far below that. Calm care sits at about +3 to +4 and sustained overheating goes past -10.
 
-**Levels (proposed): asymmetric, because the steady side is slow and the unsteady side is fast.**
+**Levels (decided): asymmetric by one step, because the steady side is slow and the unsteady side is fast.**
 
 | Level | Temper | Tell |
 |---|---|---|
 | Strongly unsteady | -6 or lower | strongest unsteady tell |
 | Unsteady | -6 to -2 | mild unsteady tell |
-| Middle | -2 to +2 | little or no tell |
-| Steady | +2 to +5 | steady tell |
-| Strongly steady | +5 or higher | strongest steady tell (clearest countable rhythm and ritual) |
+| Middle | -2 to +3 | little or no tell |
+| Steady | +3 to +6 | steady tell |
+| Strongly steady | +6 or higher | strongest steady tell (clearest countable rhythm and ritual) |
 
-Share of lives at each level with flow at +0.5 and the Coolant cell and Antivirus patch at +1 each (percent: strongly unsteady / unsteady / middle / steady / strongly steady). The bots use a Coolant cell whenever Heat is above 70 and an Antivirus patch on a schedule or a virus, as soon as they have one:
+Share of lives at each level with flow at +0.5, the Coolant cell and Antivirus patch at +1 each, and the thresholds above (percent: strongly unsteady / unsteady / middle / steady / strongly steady). The bots use a Coolant cell whenever Heat is above 70 and an Antivirus patch on a schedule or a virus, as soon as they have one:
 
 | Archetype | At teen | At adulthood | At end of life |
 |---|---|---|---|
-| Casual | 0/3/74/23/0 | 0/20/70/9/0 | 0/20/71/9/0 |
-| Worker | 0/3/87/10/0 | 0/24/73/3/0 | 2/37/56/4/0 |
-| Attentive | 0/0/16/58/26 | 0/0/12/52/36 | 0/0/5/34/61 |
-| Sysadmin (very attentive) | 0/0/19/62/19 | 0/0/10/57/33 | 0/0/5/29/66 |
-| Steer-daemon (aims for calm) | 0/0/8/55/37 | 0/0/5/40/55 | 0/0/0/14/86 |
-| Balance seeker | 0/1/19/56/24 | 0/0/10/52/38 | 0/0/4/25/71 |
-| Steer-glitch (runs warm) | 1/16/70/12/1 | 2/37/56/5/0 | 6/49/43/2/0 |
-| Daredevil (runs hot) | 6/43/48/4/0 | 17/57/24/2/0 | 24/53/22/1/0 |
+| Casual | 0/3/90/7/0 | 0/20/79/1/0 | 0/20/76/4/0 |
+| Worker | 0/3/93/4/0 | 0/24/75/1/0 | 2/37/60/0/0 |
+| Attentive | 0/0/29/60/11 | 0/0/23/58/19 | 0/0/10/46/43 |
+| Sysadmin (very attentive) | 0/0/40/53/7 | 0/0/26/60/13 | 0/0/10/42/47 |
+| Steer-daemon (aims for calm) | 0/0/22/59/19 | 0/0/12/54/34 | 0/0/1/25/74 |
+| Balance seeker | 0/1/37/56/7 | 0/0/21/66/12 | 0/0/9/42/49 |
+| Steer-glitch (runs warm) | 1/16/78/5/0 | 2/37/60/1/0 | 6/49/45/0/0 |
+| Daredevil (runs hot) | 6/43/50/1/0 | 17/57/25/1/0 | 24/53/22/0/0 |
 | Overclocker | 27/62/11/0/0 | 66/33/1/0/0 | 72/27/0/0/0 |
 | Neglectful | 11/62/27/0/0 | 34/66/0/0/0 | 18/56/25/0/0 |
 
 What it means:
 
-- **Items matter.** Without the +1 for Coolant cell and Antivirus patch, 62% of daredevil lives and 83% of overclocker lives were strongly unsteady at adulthood. With it, 17% and 66%. A warm-running player (steer-glitch) goes from 90% unsteady at adulthood to 39%, and the attentive archetype's strongly steady share at adulthood rises from 13% to 36%. The bots spend items immediately; a real player who stockpiles them will use fewer. Items are limited by drops and market stock, so this makes a Coolant cell a temper tool as well as a cooling one, and means a hot player can settle a temper deliberately.
+- **Thresholds (decided).** With steady at +2 and +5, careful players almost never read as middle (attentive was steady or strongly steady in 88% of lives at adulthood) and strongly steady was reached by 61% of attentive and 71% to 86% of calm-seeking players by the end of life. Moving the steady levels to +3 and +6 keeps a visible middle for careful players (23% to 26% at adulthood), halves strongly steady at adulthood (attentive 36% to 19%) and leaves it as the reward for a calm life by the end (attentive 43%, calm-seekers 74%). Casual and hot players do not move.
+- **Items matter.** Without the +1 for Coolant cell and Antivirus patch, 62% of daredevil lives and 83% of overclocker lives were strongly unsteady at adulthood. With it, 17% and 66%. A warm-running player (steer-glitch) goes from 90% unsteady at adulthood to 39%, and the attentive archetype's strongly steady share at adulthood rose from 13% to 36% (these two figures were measured with the earlier steady thresholds of +2 and +5; at +3 and +6 it is 19%). The bots spend items immediately; a real player who stockpiles them will use fewer. Items are limited by drops and market stock, so this makes a Coolant cell a temper tool as well as a cooling one, and means a hot player can settle a temper deliberately.
 - **Flow at +0.5 fixes the steady side.** Before the item change, with flow at +0.2 and a strong-steady threshold of +4, attentive reached strongly steady in 7% of lives at adulthood; at +0.5 and a threshold of +5 it reached 13%, and with symmetric thresholds of 2 and 5 at flow +0.2 only 2% to 3%. Casual and worker netlings barely change, because they rarely reach flow.
 - **Tells appear where behavior is clear.** Casual and worker netlings are mostly middle at the teen check (88% to 91%) and drift mildly unsteady by adulthood (about a third), mostly from faults and Heat. Careful players are steady most of the time.
-- **Strong steady takes sustained calm, helped by items.** Attentive is strongly steady in 36% of lives at adulthood and 61% by the end; players who aim for calm reach 37% to 55% at adulthood and 71% to 86% by the end.
+- **Strong steady takes sustained calm, helped by items.** Attentive is strongly steady in 19% of lives at adulthood and 43% by the end; players who aim for calm reach 34% at adulthood and 74% by the end.
 - **Strong unsteady needs sustained heat and no cooling.** Overclocker lives are strongly unsteady 66% of the time at adulthood and 72% by the end; daredevils, who cool when they can, 17% and 24%, with most of the rest unsteady.
 - **Hot play dominates temper.** A casual player's drift toward unsteady is mostly faults; a hot player's is Heat. Both read as the same tell, which is fine because temper is personality, not a form lever.
 - **Without decay the numbers are not usable.** At the end of life, 1.0's cumulative stability spans about -44 to +22 (the 10th to 90th percentile across archetypes), and the strong levels would be permanent.
