@@ -13,6 +13,8 @@ One egg page per adult form: five per egg (four role forms and one hidden form),
 - The role (Breach, Dodge, Tune, Feast) shows in the situation, not by name. The form name appears only as an in-world word, and only where it reads naturally (`iron-gronk`, `iron-jiff`).
 - No page names another egg, NL-0 or the purge order. NL-0's differentiation belongs to the story pages, which are the next piece.
 - Hidden-form pages do not say how the form is reached.
+- A page must read naturally to someone who never played the mini-games. It should not describe a game's mechanics (falling blocks, a numbered grid, a buffer) as if they were events in the world.
+- The Wetware pages should not lean on CP2020's own vocabulary (ripperdoc, eddies, chrome, SIN). The form names are the CP2020 link; the pages use plainer words (grower, technician, culture, broth, charge).
 - The vocabulary follows the egg: Program uses logs and tickets, Iron uses work orders and inspections, Wetware uses clinic notes and street signs.
 
 Ids below are proposals. In 1.0 ids are permanent once shipped, so confirm them before any code exists. Region placement is a proposal for the open question on where form pages drop: each egg's pages in its home region, and the three hidden pages in The Deep so they feel secret.
@@ -21,15 +23,16 @@ Ids below are proposals. In 1.0 ids are permanent once shipped, so confirm them 
 
 | Id | Region | Form (role) | Title | Text |
 |---|---|---|---|---|
-| `program-worm` | Corp Grid | Worm (Breach) | incident log, closed | Incident 0412: entry through a five by five access grid, four codes, buffer full on the first try. Logged as a fluke. Incidents 0413 to 0498: also flukes. |
-| `program-mouse` | Public Net | Mouse (Dodge) | sysadmin's note, taped to a monitor | Every block I drop, it is already somewhere else. I stopped dropping them. It is still somewhere else. It does not seem to mind. |
+| `program-worm` | Corp Grid | Worm (Breach) | incident log, closed | Incident 0412: entry through the access grid within four codes, buffer full immediately upon access. Logged as a fluke. Incidents 0413 to 0498: also flukes. |
+| `program-mouse` | Public Net | Mouse (Dodge) | trace log | Trace 4071 dropped on node 9: gone. Trace 4072 dropped on node 12: gone. Operator's note: it is always one hop ahead. I stopped sending them. It is still ahead. |
 | `program-phreak` | Public Net | Phreak (Tune) | fault ticket, closed | Line 9 holds one clean tone when nobody is calling. Technician matched the tone by ear. The tone matched back. Closed: could not reproduce, could not stop. |
 | `program-snarf` | Corp Grid | Snarf (Feast) | helpdesk ticket | Customer reports the packet feed arrives cleaner than it was sent. Something is eating the corrupted ones. Customer asks how to make it stop. Agent response: don't. |
 | `program-ghost` | The Deep | Ghost (hidden) | audit trail | Sector 7F audit: 0 anomalies, 0 faults, 0 entries. The auditor notes the log is perfect, and that a perfect log is a kind of silence. The note is unsigned. |
 
 Notes:
 
-- `program-worm` points at the Breach game (a five by five grid, a four-slot buffer, a target code). "Also flukes" is the joke and the unease.
+- `program-worm` nods at Breach only loosely (an access grid, four codes, a buffer). "Also flukes" is the joke and the unease.
+- `program-mouse` is a trace log: traces are dropped on a node and find the target already gone. "Dropped" can read as deployed or as failed, and both senses fit. It uses 1.0's trace idea.
 - `program-snarf` leaves the corrupted packets, which is how Packet Feast is played (two corrupted bites fail the game).
 - `program-ghost` reuses 1.0's idea of a netling with no logs and no faults, now as an audit finding.
 
@@ -55,26 +58,26 @@ Notes:
 
 | Id | Region | Form (role) | Title | Text |
 |---|---|---|---|---|
-| `wetware-razor` | Darknet Bazaar | Razor (Breach) | ripperdoc's invoice, annotated | Sharpen. Sharpen again. Nothing to sharpen: it keeps its own edge. Charged anyway. Margin note: it opened the safe on the way out. Not charged. |
-| `wetware-wired` | Darknet Bazaar | Wired (Dodge) | chart, black clinic | Reflex chip: none installed. Dropped one weight, then twenty. It was never under any of them. Ripperdoc: refund the customer. Customer: for what. |
-| `wetware-gibson` | Darknet Bazaar | Gibson (Tune) | stall sign | SIGNALS READ, 3 EDDIES. ASK FIRST, THEN LISTEN. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. READS BEST ASLEEP. NO REFUNDS. |
-| `wetware-leech` | Darknet Bazaar | Leech (Feast) | street doc's ledger | Paid in: soy, spare chrome, a debt, a favor, a week of someone else's sleep. Healed: 31. The ledger does not say who is feeding on whom. |
-| `wetware-blank` | The Deep | Blank (hidden) | collections note | SIN: none. Card: none. Debt: none. Collections tried three times and closed the file: nothing to collect from, and nobody to collect it for. |
+| `wetware-razor` | Darknet Bazaar | Razor (Breach) | grower's invoice, annotated | Trim. Trim again. Nothing to trim: it keeps its own edge. Billed anyway. Margin note: it opened the safe on the way out. Not billed. |
+| `wetware-wired` | Darknet Bazaar | Wired (Dodge) | lab chart, back room | Reflex stimulus: none applied. Tested with one probe, then twenty. It was never where any of them landed. Technician: refund the customer. Customer: for what. |
+| `wetware-gibson` | Darknet Bazaar | Gibson (Tune) | stall sign | SIGNALS READ, 3 CHARGE. ASK FIRST, THEN LISTEN. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. READS BEST ASLEEP. NO REFUNDS. |
+| `wetware-leech` | Darknet Bazaar | Leech (Feast) | healer's ledger | Paid in: broth, spare parts, a debt, a favor, a week of someone else's sleep. Healed: 31. The ledger does not say who is feeding on whom. |
+| `wetware-blank` | The Deep | Blank (hidden) | collections note | Registry entry: none. Card: none. Debt: none. Collections tried three times and closed the file: nothing to collect from, and nobody to collect it for. |
 
 Notes:
 
-- `wetware-razor` and `wetware-wired` use CP2020 words: ripperdoc, chrome, reflex chip, eddies.
-- `wetware-wired` is the Dodge game seen from outside: a falling weight, twenty times, never hit.
+- `wetware-razor` and `wetware-wired` use plain words (grower, technician, trim, reflex stimulus). Charge as a price comes from 1.0's `bazaar-2` ("Echo recordings: 3 charge").
+- `wetware-wired` is a reflex test: twenty probes, none of which found it. It no longer uses falling weights, which had the same game-mechanic problem as the old Mouse page.
 - `wetware-gibson` carries the dream idea lightly ("reads best asleep"), since a Wetware generation ends as a dream does.
-- `wetware-leech` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open.
-- `wetware-blank` uses CP2020's SIN (a citizen identification number). A person without one is unknown to the system, which matches the hidden form's low Standing on both tracks.
+- `wetware-leech` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind).
+- `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches the hidden form's low Standing on both tracks. The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
 
 ## Cross-checks
 
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
 - **Three registers:** Program is bureaucratic and technical, Iron is physical and procedural, Wetware is street-level and commercial. The same four jobs (breach, dodge, tune, feast) appear in each.
 - **No spoilers:** none of the 15 pages names another egg, NL-0, the purge order, Standing or temper.
-- **Length:** the 15 drafts have a median of 145 characters and a longest of 164. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
+- **Length:** the 15 drafts have a median of 155 characters and a longest of 164. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
 
 ## Open
 
