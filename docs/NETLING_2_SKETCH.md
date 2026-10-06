@@ -7,7 +7,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 **Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. Drafts of the 15 egg pages are written; the other pages are not.
 
 **Next steps, in the maintainer's order.**
-1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) and ten new story pages (which carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: one extra Source page per egg. The approved rewordings of the four 1.0 pages are in this file.
+1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) and twelve new story pages (which carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: one extra Source page per egg. The approved rewordings of the four 1.0 pages are in this file.
 2. Then temper hints: a hint should name a behavior to look for, not a temper value.
 3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
 
@@ -55,7 +55,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 - The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
-- Root Access and the ten new story pages (option C): only `corp-6` and `corp-7` count toward Root, which then needs 24 pages. The other eight new pages carry a lategame flag and never count toward Root. `deep-6` is kept.
+- Root Access and the twelve new story pages: only `public-4` (classified ad) and `corp-2` (release schedule) count toward Root, which then needs 24 pages. The other ten carry the `late` flag and never count toward Root. `late` pages drop only once the line holds Root, are required by the ending, are ignored by regional unlocks, and replace 1.0's `mainframe` flag. Ids match drop position, so some 1.0 ids move (mapping in the drafts file). Ids in this sketch's older text are 1.0 ids unless noted.
 - In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Wired, Gibson, Leech, Blank) stay as they are.
 
 ## Architecture
@@ -218,7 +218,7 @@ The class names (Chrome, Daemon, Firewall, Glitch) remain as the corp's and the 
 
 Arithmetic from the 1.0 tables, not a simulation.
 
-- Story set: 24 Root pages (the original 22 plus `corp-6` and `corp-7`) and 13 late pages (eight new ones plus `deep-5` and the four Source pages), 37 in all. At 8 a life, 24 Root pages takes 3 lives, as in 1.0.
+- Story set: 24 Root pages (the original 22 plus the new `public-4` and `corp-2`) and 15 late pages (ten new ones plus 1.0's `deep-5`, now `deep-6`, and the four Source pages), 39 in all. At 8 a life, 24 Root pages takes 3 lives, as in 1.0.
 - Egg pages: 15, all new (5 per egg).
 
 ### What follows
@@ -283,7 +283,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (after the codex pages).
-9. The meaning of the lategame flag (see the drafts file): when late pages drop (recommended: once the line holds Root Access), whether the ending requires them (recommended: yes), whether regional unlocks count them (recommended: no), and whether it replaces 1.0's `mainframe` flag for `deep-5` and the Source pages.
+9. Resolved: the meaning of the `late` flag (see the drafts file).
 
 ## Not designed yet
 

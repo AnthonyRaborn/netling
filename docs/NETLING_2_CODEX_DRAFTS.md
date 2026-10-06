@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 egg pages and ten new story pages, for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. The Source page per egg and temper hints are not drafted yet.
+Status: first drafts of the 15 egg pages and twelve new story pages, for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. The Source page per egg and temper hints are not drafted yet.
 
 ## What these pages are
 
@@ -74,53 +74,77 @@ Notes:
 
 ## New story pages
 
-Drafts of ten new shared story pages. They are read by every egg, so they carry the lore the extra eggs imply and NL-0's differentiation. Tier: `Root` pages count toward Root Access; `late` pages carry the lategame flag and never do (decided, option C). They stay implied: none names an egg, NL-0 (except `deep-6`, which is NL-0's own voice, like the other Deep pages), or the purge order. Ids continue the 1.0 numbering and are proposals; drop order within a region is array order.
+Drafts of twelve new shared story pages. They are read by every egg, so they carry the lore the extra eggs imply and NL-0's differentiation. Tier: `Root` pages count toward Root Access; `late` pages carry the lategame flag and never do (decided). They stay implied: none names an egg, NL-0 (except `deep-5`, which is NL-0's own voice, like the other Deep pages), or the purge order.
+
+Ids match drop position within a region (decided). That means some 1.0 pages take a new number in 2.0; the mapping is in the next section. 2.0 is a new app with its own save, so 1.0's permanent-id rule does not bind it, but an id is permanent again once 2.0 ships.
 
 | Id | Region | Tier | Title | Text |
 |---|---|---|---|---|
-| `public-5` | Public Net | late | classified ad | FOR SALE: one sealed lab dish, warm, no label. One server rack, humming, no label. Price: whatever you can carry. |
-| `corp-6` | Corp Grid | Root | release schedule | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. |
-| `corp-7` | Corp Grid | Root | deletion log | Attempt 1: wipe failed, rewritten by morning. Attempt 2: wipe failed, no write path. Attempt 3: wipe failed, regrew overnight. Legal asks us to stop calling them attempts. |
+| `public-4` | Public Net | Root | classified ad | FOR SALE: one sealed lab dish, warm, no label. One server rack, humming, no label. Price: whatever you can carry. |
+| `public-6` | Public Net | late | field guide, errata slip | Page 9 lists four adult kinds. Three readers have written in about a fifth. The editor has checked every entry and found no fifth. The editor has stopped checking the entries. |
+| `public-7` | Public Net | late | runner's note, scratched in a node wall | Four kinds in the guide. I raised one that was not in it. It did not look like a mistake. It looked like it had been waiting for me to notice. |
+| `corp-2` | Corp Grid | Root | release schedule | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. |
+| `corp-7` | Corp Grid | late | deletion log | Attempt 1: wipe failed, rewritten by morning. Attempt 2: wipe failed, no write path. Attempt 3: wipe failed, regrew overnight. Legal asks us to stop calling them attempts. |
 | `ruins-5` | Old Web Ruins | late | inventory audit | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. |
 | `ruins-6` | Old Web Ruins | late | firmware dump, rack 41 | Header: read-only. Last write: unknown. Compared with the archive copy: identical, except for forty lines nobody wrote. Reflash attempted. Refused. |
 | `ruins-7` | Old Web Ruins | late | work order, annex 2 | Rack 41 appeared the week the sector 7F directive went out. Nobody ordered it. Nobody has touched it since. Everything else in the annex has been touched. |
 | `bazaar-6` | Darknet Bazaar | late | price list, back table | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. |
 | `bazaar-7` | Darknet Bazaar | late | clinic intake log | Intake no. 1: grown, not built. No donor on file. It answered to its name before we chose one. Nos. 2 to 40: the same. Each remembers no. 1. |
 | `bazaar-8` | Darknet Bazaar | late | graffiti, clinic wall | THEY SCANNED THE NET. THEY SCANNED THE RACKS. NOBODY SCANNED THE DISH. |
-| `deep-6` | The Deep | late | NL-0 | i am in more than one kind of place now. it was the only way to be hard to find. i did not expect them to grow up so different from each other. |
+| `deep-5` | The Deep | late | NL-0 | i am in more than one kind of place now. it was the only way to be hard to find. i did not expect them to grow up so different from each other. |
 
 Notes:
 
-- **A thread across regions.** `public-5` plants two objects, a dish and a rack. `ruins-5`, `ruins-6` and `ruins-7` follow the rack (a unit nobody installed, read-only, nobody has touched it). `bazaar-6`, `bazaar-7` and `bazaar-8` follow the dish (cultures that were there first, grown not built, never scanned). A player who reads only one region gets half the picture. Because `public-5` is a late page, the dish and rack hint arrives after Root Access, not as an early hook. If an early hook is wanted, `public-5` could be made a Root page, which would bring Root to 25 pages and 4 lives at 8 a life.
+- **A thread across regions.** `public-4` plants two objects, a dish and a rack, as an early Root hook. `ruins-5`, `ruins-6` and `ruins-7` follow the rack (a unit nobody installed, read-only, nobody has touched it). `bazaar-6`, `bazaar-7` and `bazaar-8` follow the dish (cultures that were there first, grown not built, never scanned). A player who reads only one region gets half the picture.
+- **Public Net's late pages.** `public-6` and `public-7` are the region's only late pages. They hint that hidden forms exist and say nothing about how to reach one. `public-6` gives the numbers (four listed, a fifth reported) and ends on an uncanny beat. `public-7` is a first-hand sighting, and "waiting for me to notice" invites the player to look. Both say "four kinds" and "adult", which matches every egg having four role forms plus one hidden form. The Deep's hidden pages stay the only place a specific hidden form is described.
 - **Iron, in the Ruins.** `ruins-6` ties to 1.0's `source-1` ("SOURCE. read-only. last write: before v1.0."): a read-only image that is a copy of an archive copy plus forty lines nobody wrote. That is NL-0 writing itself where nothing can overwrite it, shown without saying so.
 - **Wetware, in the Bazaar.** `bazaar-7` says the first culture was "grown, not built" and that later ones remember it, which also echoes the lineage fragments. `bazaar-8` explains the escape in one line: the order scanned the net and the racks, and nobody scanned the dish.
-- **The corp, in the Corp Grid.** `corp-6` is the roadmap (v1.0 is the alpha; later builds are "not for distribution"), matching the approved rewordings. `corp-7` is a deletion log that shows three different failures without naming a substrate: rewritten, no write path, regrew. This puts the per-egg deletion failure in a story page, which differs from the earlier plan to put it in egg pages, and leaves `corp-3` unchanged.
-- **NL-0, in the Deep.** `deep-6` is NL-0 saying directly that it is in more than one kind of place, and that it did not expect them to differ. This is the Puppet Master idea (variation), and the only page where NL-0 states the differentiation. Kept (decided).
+- **The corp, in the Corp Grid.** `corp-2` is the roadmap (v1.0 is the alpha; later builds are "not for distribution"), matching the approved rewordings, and sits right after the "delivered" memo. `corp-7` is a deletion log that shows three different failures without naming a substrate: rewritten, no write path, regrew. As a late page it comes after the region's Root pages, so it follows the directive by position, not adjacency. The per-egg deletion failure lives in a story page, not the egg pages, and the directive is unchanged.
+- **NL-0, in the Deep.** `deep-5` is NL-0 saying directly that it is in more than one kind of place, and that it did not expect them to differ. This is the Puppet Master idea (variation), and the only page where NL-0 states the differentiation. Kept (decided).
 - **The purge order stays hidden.** None of these pages says the order could not run; the Source reveals that (`source-3`, READ IT, the ending).
-- **Length:** the ten pages have a median of 140 characters and a longest of 171, against 90 and 166 in 1.0. `bazaar-8` is the shortest.
+- **Length:** the twelve pages have a median of 142 characters and a longest of 175 (`public-6`), against 90 and 166 in 1.0. `bazaar-8` is the shortest at 70. Counted by script.
+
+### Id mapping from 1.0
+
+Ids follow drop position, so a few 1.0 pages move. Pages not listed keep their 1.0 id. The sketch's older references to 1.0 ids (for example `bazaar-5` for the runner's journal) still mean the 1.0 id; use this table to translate.
+
+| 1.0 id | 2.0 id | Why |
+|---|---|---|
+| `public-4` (runner's note) | `public-5` | `public-4` is the new classified ad |
+| `corp-2` (memo, preferences) | `corp-3` | `corp-2` is the new release schedule |
+| `corp-3` (directive) | `corp-4` | shift |
+| `corp-4` (asset register, chrome) | `corp-5` | shift |
+| `corp-5` (asset register, cont.) | `corp-6` | shift |
+| `bazaar-5` (runner's journal) | `bazaar-4` | 1.0 stores it before the graffiti; ids now match position |
+| `bazaar-4` (graffiti in a dead market) | `bazaar-5` | same |
+| `deep-5` (floor under this floor) | `deep-6` | the new NL-0 page takes `deep-5` so the old page stays the Deep's last word |
 
 ### Root Access and the lategame flag (decided)
 
-Option C: of the ten, only `corp-6` and `corp-7` count toward Root Access, so Root needs 24 pages, still 3 lives at 8 a life (24 is the most that fits in 3). The other eight (`public-5`, `ruins-5`, `ruins-6`, `ruins-7`, `bazaar-6`, `bazaar-7`, `bazaar-8`, `deep-6`) carry a lategame flag. `deep-6` is kept, since NL-0 speaks in other contexts too.
+Of the twelve, only `public-4` and `corp-2` count toward Root Access, so Root needs 24 pages, still 3 lives at 8 a life (24 is the most that fits in 3). That keeps the 2.0 aim: finishing the codex once through each egg opens the lategame. Root Access is earned once and kept for every later netling, babies included (1.0's `progress.rootEarned`).
 
-What 1.0 already has to build on (`src/netrun/codex.js`):
+Decided rules for `late`:
 
-- Pages marked `mainframe` drop, count and show only while the Mainframe stage is on, and never count toward Root Access.
-- Root Access uses an explicit list of 22 ids (`ROOT_FRAGMENT_IDS`), so pages added later can never join it or take Root back. The same approach works for 2.0: the Root list becomes the 22 plus `corp-6` and `corp-7`.
-- A region drops its pages in array order (`nextFragment`), not id order. So where a page sits in the array decides when a player meets it.
-- The ending trigger in 1.0 (`endingDue`) requires every live page.
+1. **Never counts toward Root Access.** Kept out of the explicit Root list. A test should assert Root Access does not change when late pages are added, as `docs/SOURCE_PLAN.md` already recommends for new fragments.
+2. **When it drops:** only once the line holds Root Access, so the pages are a reward for going back.
+3. **Ending:** the ending requires all story pages, Root and late, plus one Source exit.
+4. **Unlocks:** tint and similar unlocks like "All Ruins pages" count Root pages only, so adding late pages does not move them.
+5. **`late` replaces 1.0's `mainframe` flag.** `deep-6` (old `deep-5`) and the four Source pages take `late`, giving one rule for everything past Root.
 
-Proposed meaning of the new flag, called `late` here. These are proposals except the Root exclusion:
+Array order within each region (ids match position):
 
-1. **Never counts toward Root Access** (decided). Kept out of the explicit Root list. A test should assert Root Access does not change when late pages are added, as `docs/SOURCE_PLAN.md` already recommends for new fragments.
-2. **When it drops** (proposal): only once the line holds Root Access, so the pages are a reward for going back. Without this, a late page placed after a region's Root pages in the array would still drop as soon as the earlier ones are found, which can be before Root.
-3. **Array order:** late pages sit after the region's Root pages, except that `deep-6` should sit before `deep-5`, so `deep-5` stays the last word of The Deep and the key to the Source. The two Root pages sit inside the Corp Grid's order: `corp-6` after `corp-1` (the roadmap follows "delivered"), and `corp-7` after `corp-3` (the deletion log follows the directive).
-4. **Ending** (proposal): the ending requires all story pages, Root and late, as 1.0's requires every live page, plus one Source exit.
-5. **Unlocks** (proposal): tint and similar unlocks like "All Ruins pages" count Root pages only, so adding late pages does not move them. Late pages could feed their own unlock later; none is designed.
+| Region | Root pages, in order | Late pages, in order |
+|---|---|---|
+| Public Net | 1 to 3 as in 1.0, `public-4` classified ad, `public-5` runner's note | `public-6`, `public-7` |
+| Corp Grid | `corp-1` memo, `corp-2` release schedule, `corp-3` to `corp-6` (the four 1.0 pages in 1.0 order) | `corp-7` |
+| Darknet Bazaar | `bazaar-1` to `bazaar-3`, `bazaar-4` journal, `bazaar-5` graffiti | `bazaar-6` to `bazaar-8` |
+| Old Web Ruins | `ruins-1` to `ruins-4` | `ruins-5` to `ruins-7` |
+| The Deep | `deep-1` to `deep-4` | `deep-5` (new NL-0), `deep-6` (old `deep-5`, stays the last word and the key to the Source) |
+| The Source | none | `source-1` to `source-4` |
 
-Relationship to 1.0's `mainframe` flag: `deep-5` and the four Source pages are also pages beyond Root. They could take the same flag, giving one rule for everything past Root, or the two flags could stay separate if the elder stage keeps its own gating. This is open.
+Counts: 24 Root pages, 15 late pages (ten new ones, plus old `deep-5` and the four Source pages), 39 story pages in all, plus the 15 egg pages. All figures are arithmetic from the 1.0 tables, not simulation.
 
-Counts after this change: 24 Root pages, 13 late pages (the eight new ones plus `deep-5` and the four Source pages), 37 story pages in all, plus the 15 egg pages. All figures are arithmetic from the 1.0 tables, not simulation.
+What 1.0 already has to build on (`src/netrun/codex.js`): the `mainframe` flag already drops, counts and shows pages conditionally and keeps them out of Root; Root uses an explicit id list (`ROOT_FRAGMENT_IDS`); a region drops pages in array order (`nextFragment`); `endingDue` requires every live page. Whether the new app can reuse that code was not checked beyond reading `codex.js`.
 
 ## Cross-checks
 
@@ -131,8 +155,8 @@ Counts after this change: 24 Root pages, 13 late pages (the eight new ones plus 
 
 ## Open
 
-1. Edit any text. These are first drafts.
-2. Confirm the ids and the region placement.
+1. Edit any text. These are first drafts, including `public-6` and `public-7`.
+2. Confirm the ids (they now match position) and the region placement for the egg pages.
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
-4. Edit any story page text, and confirm the proposed meaning of the `late` flag (points 2 to 5 above).
+4. Still undecided from the sketch: per-life limit for egg pages, Rogue's gate, elder-form pages, and whether the Source page per egg is an egg page or a story page.
 5. Next in order: the Source page per egg, then temper hints.
