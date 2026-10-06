@@ -160,7 +160,7 @@ The idea behind them: the Source's own TODO asks for "a way to stop" (`source-2`
 
 Notes:
 
-- **Classification (proposal):** egg pages, so 18 egg pages in all (15 form pages and these 3), and also late: they are in the Source, they never count toward Root Access (egg pages never do), and they follow the Source's own gating. Whether Rogue's gate counts them is part of the open Rogue gate question.
+- **Classification (decided):** egg pages, so 18 egg pages in all (15 form pages and these 3), and also late: they are in the Source, they never count toward Root Access (egg pages never do), and they follow the Source's own gating. Whether Rogue's gate counts them is part of the open Rogue gate question.
 - **Tone:** they are annotated artifacts like the Source's other pages (a header, a commit message, an unexecuted directive, an unsigned comment). "Annotated" in two titles marks a later reader's note, which is how a page can know what happened after the original code was written.
 - **Echoes:** `program-source` ends on the flatline and the fragment, matching the credits' git log and the lineage mechanic. `iron-source` echoes the read-only Source and the decommission register. `wetware-source` is the dream register, with section 9 as the only section the others never mention.
 - **No spoilers:** none names an egg, NL-0 or the purge order.
@@ -179,6 +179,6 @@ Notes:
 2. Confirm the ids (they now match position) and the region placement for the egg pages.
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
 4. Edit any story page or Source page text.
-5. Confirm the classification of the Source pages as egg pages (18 in all).
-6. Still undecided from the sketch: per-life limit for egg pages, Rogue's gate, and elder-form pages.
+5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
+6. Still open from the sketch: Rogue's gate, and the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
 7. Next in order: temper hints.

@@ -54,7 +54,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - New codex pages are allowed. NL-0's differentiation is carried by pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
 - The Source stays one place (option B with a touch of A): each egg finds one extra page there that the others do not, and the descent is drawn in that egg's own style.
 - Root Access needs the general, shared story pages at minimum. Egg-specific pages are for Rogue's unlock only, not for Root Access.
-- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per adult form (5 adult forms per egg, one of them hidden), so 15 egg form pages in all, plus 3 Source pages (a proposal). Teen pages are discarded. Egg pages count toward Rogue's gate and do not share the story pages' per-life limit. Work order: codex pages first, temper hints after.
+- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per adult form (5 adult forms per egg, one of them hidden), so 15 egg form pages in all, plus 3 Source pages, which are egg pages (decided). Teen pages are discarded, and elder forms get no pages (decided). Egg pages count toward Rogue's gate. They are rare drops with no per-life limit (decided), so they do not share the story pages' cap. Work order: codex pages first, temper hints after.
 - Any member of an egg can find that egg's form pages, whatever its own form.
 - Each egg has 5 adult forms: one per mini-game (Breach, Dodge, Tune, Feast) plus one hidden form that masters all four. The role is a descriptor for the DEX and hints, not the form's name.
 - The story set needs more pages than 1.0, to cover the two extra eggs and the lore they imply.
@@ -198,7 +198,7 @@ Not yet named: the elder (mainframe-stage) forms, and the teen forms.
 Two kinds (decided):
 
 - **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). Ten new ones are drafted, to cover the two extra eggs and the lore they imply.
-- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate. They do not share the story pages' per-life limit; they get their own, to be set with the balance tools. The earlier idea of a page per teen form is discarded.
+- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate. They are rare drops with no per-life limit (decided): the rate should be set so that a very consistent player could in principle collect all of an egg's pages in one life but would more realistically need about two. The rate itself is to be tuned with the balance tools, and no number is chosen. Each egg also has one Source page, which is an egg page (decided), so 6 per egg and 18 in all. The earlier idea of a page per teen form is discarded, and elder forms get no pages (decided): they are hidden until after Root, and the codex is already growing a lot.
 
 ### The six form-bound 1.0 pages
 
@@ -231,7 +231,7 @@ The class names (Chrome, Daemon, Firewall, Glitch) remain as the corp's and the 
 Arithmetic from the 1.0 tables, not a simulation.
 
 - Story set: 24 Root pages (the original 22 plus the new `public-4` and `corp-2`) and 15 late pages (ten new ones plus 1.0's `deep-5`, now `deep-6`, and the four Source pages), 39 in all. At 8 a life, 24 Root pages takes 3 lives, as in 1.0.
-- Egg pages: 15 form pages (5 per egg), all new, plus 3 Source pages (one per egg), 18 in all (the Source pages' classification is a proposal).
+- Egg pages: 15 form pages (5 per egg), all new, plus 3 Source pages (one per egg), 18 in all (the Source pages are egg pages, decided).
 
 ### What follows
 
@@ -289,10 +289,10 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 
 1. Names for the elder and teen forms. The 15 adult names had no objections after their last revision.
 2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. Current drafts put each egg's pages in its home region and the three hidden pages in The Deep.
-3. What per-life limit do egg pages get, and should it be tuned with the balance tools?
-4. Do elder forms get pages? The rule so far covers adult forms only.
+3. Decided: egg pages have no per-life limit. Open: the drop rate that makes full collection take about 2 lives for a consistent player, to be tuned with the balance tools.
+4. Decided: elder forms get no pages.
 5. Rogue's gate: all 18 egg pages (15 form pages and 3 Source pages), the 15 form pages, or all pages of one egg?
-6. Are the three Source pages egg pages (recommended), or story pages? They are written and found by one egg each.
+6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints (next in order).
 
