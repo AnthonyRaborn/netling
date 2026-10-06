@@ -18,6 +18,8 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and fragments from all three eggs in the archive.
 - Each egg's elder stage has its own form.
 - New codex fragments are allowed. NL-0's differentiation is carried by fragments in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
+- The Source stays one place (option B with a touch of A): each egg finds one extra fragment there that the others do not, and the descent is drawn in that egg's own style.
+- Root Access needs the general, shared story fragments at minimum. Egg-specific fragments are for Rogue's unlock only, not for Root Access.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -85,7 +87,9 @@ Candidates, with fit:
 2. **Replicator (wabbit).** A playable prequel to the outbreak, tied to `public-1` ("unexplained process growth") and `public-2`. High build cost because it manages a population, not one pet.
 3. **Variant.** Same meters, different tree. Lowest cost, lowest contrast, and less of a secret.
 
-Possible gate for 1: the ending has played, and the archive holds fragments from all three eggs. Until then it should not appear at all, not even as a corrupted slot.
+Gate (decided): the ending has played, and the egg-specific codex fragments are what count toward it. Until then it should not appear at all, not even as a corrupted slot.
+
+Terminology: "fragment" means two things in 1.0, a codex story fragment and a lineage fragment left by a dead netling. In this doc, the Rogue gate uses egg-specific codex fragments, while the merge ending uses lineage fragments. Consider renaming one of them in 2.0 (for example codex "pages" and lineage "fragments") so the two are not confused.
 
 ## Impact on 1.0 content
 
@@ -120,14 +124,10 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. **Source per egg.** Undecided. Options:
-   - A. One Source, one text, with the descent drawn in each egg's own style (read, burned in, dreamed).
-   - B. One Source plus one extra fragment per egg found there, so each line learns something the others do not. Matches the decision that NL-0 stays the single original and that fragments carry the story.
-   - C. Three separate Sources. Costly, and it splits the one-commit story.
-   Suggestion: B, with a light touch of A in presentation.
-2. Which fragments count toward Root Access in 2.0? In 1.0 only the original 22 count and later additions never revoke it. With fragments per egg, decide whether the unlock needs all of them, or the shared set plus any one egg's set.
-3. Hint wording for temper that stays mysterious: a hint should name the behavior to look for, not the temper value. Exact lines are unwritten.
-4. Fragment text for the Ruins (Iron) and the Bazaar (Wetware) is unwritten.
+1. Does the Rogue gate need every egg-specific codex set (Program, Iron, Wetware), or any subset? The Program egg currently has no egg-specific fragments of its own (the 1.0 codex is the shared story), so either Program gets some or the gate is Iron and Wetware only.
+2. Hint wording for temper that stays mysterious: a hint should name the behavior to look for, not the temper value. Exact lines are unwritten.
+3. Fragment text is unwritten: the shared story set, the Ruins set (Iron), the Bazaar set (Wetware), and the one extra Source fragment per egg.
+4. Which of the 1.0 form-bound fragments (`corp-4`, `corp-5`, `bazaar-1`, `bazaar-4`, `bazaar-5`, `deep-3`) become general story, and which are rewritten for Standing and the new bodies?
 
 ## Not done
 
