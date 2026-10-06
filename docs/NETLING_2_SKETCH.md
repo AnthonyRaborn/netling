@@ -143,6 +143,63 @@ Neglect must be visible, and faults no longer are. So the netling itself shows i
 - **Whether it lasts.** The look can clear when needs are met, or leave a mark that persists to the next stage. A persistent mark would be the Stub-like consequence of 1.0. Not decided.
 - **Per egg.** Each body (software, firmware, grown tissue) would show it in its own way.
 
+### Starting numbers (proposal, not measured)
+
+Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 simulated lives per archetype) and `src/sim.js` and `src/netrun/run.js`. They are starting points for the balance tools, not results. None of the 2.0 mechanics exist yet, so nothing below was simulated in 2.0.
+
+**What the 1.0 data says**
+
+| Anchor | Casual | Attentive | Steered (Chrome or Firewall) |
+|---|---|---|---|
+| Absolute allegiance at the teen check | 2.6 | not recorded here | not recorded here |
+| Absolute allegiance at adulthood | 4.3 | 5.1 | 42 to 53 |
+| Wins (all four games) by adulthood / by end of life | 15.9 / 33.8 | 22.9 / 51.7 | about 22 to 24 / 48 to 49 |
+| Netruns per life | 17.9 | 24.3 | about 24 |
+| Faults per life | 4.6 | 0.16 | 0.1 to 0.2 |
+
+**Standing point (the size of one point)**
+
+- Keep 1.0's magnitudes, rounded to integers: a decision (COMPLY, HIDE, voucher, checkpoint) is 1 point and a packet is 1 point (1.0: 0.75). A market purchase is 1 point per two purchases (1.0: 0.5 each).
+- With those sizes the 1.0 data predicts how the gap rule behaves. A casual netling has a gap of about 2.6 at the teen check and about 4.3 at adulthood, so it lands on the weighted coin (roughly 60% to 80% for the leader). A player who commits reaches a gap of 5 early and is certain. So randomness lands on players who have not chosen a side, which is where it belongs. This is a read of 1.0's allegiance, which was one signed number; 2.0's two non-negative tracks can differ, and the gap is the closest equivalent.
+- **A dependency, not a number:** the list of actions that add Standing in 2.0 is not designed. The hidden form needs low Standing on both tracks, and in 1.0 almost every feed moves allegiance. If every feed adds to a track, "low on both" is impossible. Either some feeds and actions must add nothing, or "low" must be defined relative to activity. This needs deciding before the thresholds mean anything.
+
+**Wins that make a role**
+
+- No threshold is needed. The gap rule already handles it: equal wins give equal chances, and a gap of 5 or more is certain. At 1.0's win rates (about 16 by adulthood for casual, about 23 for attentive) a specialist reaches a gap of 5 easily, and a spread-out player is a weighted coin. A netling with no wins is simply a tie among all four.
+
+**Hidden path** (starting values from 1.0's Shell and Ghost, to be adjusted)
+
+- **Teen:** at least 3 wins in each of the four games (1.0's Shell number), plus low Standing on both tracks.
+- **Adult:** at least 4 wins in each game and 29 in all (1.0's Ghost numbers; boosted wins count as 2), plus low Standing on both tracks.
+- "Low" is a placeholder: both tracks under 3 points, which is close to 1.0's allegiance band (under 2). It depends on the dependency above.
+- For scale, 1.0's casual archetype met the games requirement at the teen check in a minority of lives (the Shell path flag was 27% before the play requirement and 18% for the play once), so the hidden forms stay hard.
+
+**Bugs** (all guesses, to tune)
+
+- **Chance a fault adds a bug:** 30%. Casual makes 4.6 faults a life, so about 1.4 bugs a life before feedback, and attentive nearly none. The feedback loop raises it.
+- **Per-bug penalty:** each bug adds about 8% to the drain of Charge and Sync, 10% to Heat gain, and 4% to the drain of Integrity. 1.0's perks are 15% to 20% slower drain, so one bug cancels half a perk.
+- **Ceiling:** 5 bugs. At the ceiling that is +40% Charge and Sync drain, +50% Heat gain and +20% Integrity drain. The Integrity penalty is smaller on purpose, so a player can recover (decided). 40% is not ignorable and is still survivable, but this is the number most likely to move after a balance run, since casual's full-life rate is 90.5% today.
+- **Clearing:** a scrip price of 15 per bug (the price of a Repair kit; a casual netling ends with about 63 scrip and buys about 6.7 items). A Standing price of 2 points per bug from a track the player picks. The anomaly clears one bug when taken. All are guesses.
+
+**Egg page drop rate** (computed from a simple model, so it is arithmetic, not a simulation)
+
+- Model: each netrun gives a chance `p` of an egg page, pages come in order with no repeats, and there is no per-life cap. Casual makes about 18 runs a life and attentive about 24.
+- The chance of finding all 5 form pages of one egg (the Source page is separate and needs Root and the Source descent):
+
+| p per run | Attentive, 1 life | 2 lives | 3 lives | Casual, 2 lives | 3 lives | 4 lives |
+|---|---|---|---|---|---|---|
+| 0.08 | 4% | 34% | 69% | 16% | 44% | 69% |
+| 0.10 | 9% | 53% | 86% | 29% | 64% | 86% |
+| 0.12 | 15% | 70% | 94% | 44% | 79% | 94% |
+| 0.15 | 29% | 87% | 99% | 65% | 92% | 99% |
+
+- Recommendation: `p = 0.10` per run. A very consistent player has a 9% chance of all five in one life and a median near 2 lives, which matches the intent. A casual player takes about 3 lives. At 0.15 a consistent player finishes in one life 29% of the time, which is more than "might".
+- For Rogue's gate (all 18 pages), a consistent player needs about 2 lives per egg for the form pages, so about 6 lives, plus a trip through Root and the Source for each Source page. A casual player needs closer to 9 or more.
+
+**Bug anomaly:** it is one entry in the anomaly pool, so its frequency is its share of the pool times the anomaly share of nodes. Not set.
+
+**Scrip and Standing prices** are above. **Segfault effects** are not set: it should add 2 faults (as in 1.0), push temper noticeably volatile, and carry a higher chance of adding a bug than a plain fault (for example 60%).
+
 ### Tie breaks (decided)
 
 Standing and wins per game are integers, and decisions use the integers. For each choice (the Standing lean, and the role) the rule is the same:
@@ -460,7 +517,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
-9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
+9. Evolution: starting numbers are proposed (see Starting numbers); open is the list of actions that add Standing, which the hidden form depends on (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen; no wins threshold is needed for a role); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
 11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
 12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
