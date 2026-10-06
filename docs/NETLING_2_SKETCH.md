@@ -1,6 +1,28 @@
 # Netling 2.0 sketch
 
-Status: planning notes for a separate app, not a change to this repository's game. Nothing here is implemented or tested. Items marked Decided come from the maintainer; everything else is a proposal. Companion to [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md), which holds the reference review.
+Status: planning notes for a separate app, not a change to this repository's game. Nothing here is implemented or tested. Items marked Decided come from the maintainer; everything else is a proposal. Companion to [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md), the reference review; its candidate analysis was written for fitting a second egg into 1.0 and is partly superseded by this doc.
+
+## Handoff
+
+**Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. No page text is written.
+
+**Next steps, in the maintainer's order.**
+1. Write the codex pages: 15 egg pages (5 per egg, one per adult form), one extra Source page per egg, and new story pages covering the two extra eggs. Apply the approved rewordings of the four pages.
+2. Then temper hints: a hint should name a behavior to look for, not a temper value.
+3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
+
+**Working agreements.** Avoid emojis and em dashes. Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps. Record each decision here as it is made, marked Decided or proposal. Do not open a pull request unless asked. The soft freeze in `CLAUDE.md` still applies to this repository's game code; only documents change here. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
+
+**Sources** (the three glossaries; local copies are not kept in the repository, so re-download if needed):
+- Jargon File 1.0.0.33: https://jargon-file.org/archive/jargon-1.0.0.33.dos.txt
+- Jargon File 4.4.7: https://jargon-file.org/archive/jargon-4.4.7.dos.txt (sampled by term, not read in full)
+- Cyberpunk 2020 slang glossary: https://www.wyldeside.com/rpgs/cp2020/info-slang.html
+- FDA glossary of computer system software development terminology (8/95): https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-guides/glossary-computer-system-software-development-terminology-895 (about 110 of 768 entries read)
+- In the original session the web fetch tool was blocked for the first two hosts and the CP2020 host, while `curl` from the shell worked once the environment network settings were widened. This may differ for you.
+
+**1.0 files that matter.** `docs/CONTENT_CATALOG.md` (forms, items, cosmetics, codex text), `docs/SIMULATION.md`, `docs/NETRUN.md`, `docs/SOURCE_PLAN.md` (purge order and ending), `docs/BALANCE.md` (design goals), `src/netrun/codex.js`, `src/ending.js`, `src/ui/onboarding.js` (intro terminal).
+
+**Terminology.** Codex story pages are "pages". Lineage records left by dead netlings stay "fragments". Anything below that says "fragment" for a codex entry predates this and means a page.
 
 ## Decided
 
@@ -13,13 +35,13 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Composed forms (egg body, temper variant, role overlay) are acceptable if the current test and balance tools can still drive them.
 - A hidden, unlockable egg is welcome.
 - Standing is two tracks (corp and street), not one signed number.
-- The ending does not show NL-0's differentiation. It is told only through codex fragments.
+- The ending does not show NL-0's differentiation. It is told only through codex pages.
 - The hidden temper shows through sprite motion, idle behavior and chatter tone together, in all three eggs.
-- The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and fragments from all three eggs in the archive.
+- The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and the egg-specific codex pages (the merge itself uses lineage fragments).
 - Each egg's elder stage has its own form.
-- New codex fragments are allowed. NL-0's differentiation is carried by fragments in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
-- The Source stays one place (option B with a touch of A): each egg finds one extra fragment there that the others do not, and the descent is drawn in that egg's own style.
-- Root Access needs the general, shared story fragments at minimum. Egg-specific fragments are for Rogue's unlock only, not for Root Access.
+- New codex pages are allowed. NL-0's differentiation is carried by pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
+- The Source stays one place (option B with a touch of A): each egg finds one extra page there that the others do not, and the descent is drawn in that egg's own style.
+- Root Access needs the general, shared story pages at minimum. Egg-specific pages are for Rogue's unlock only, not for Root Access.
 - Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per adult form (5 adult forms per egg, one of them hidden), so 15 egg pages in all. Teen pages are discarded. Egg pages count toward Rogue's gate and do not share the story pages' per-life limit. Work order: codex pages first, temper hints after.
 - Any member of an egg can find that egg's form pages, whatever its own form.
 - Each egg has 5 adult forms: one per mini-game (Breach, Dodge, Tune, Feast) plus one hidden form that masters all four. The role is a descriptor for the DEX and hints, not the form's name.
@@ -27,11 +49,12 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - `bazaar-1` is a shared story page, reworded to "Netlings don't sell. They pick you, or they don't."
 - `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become shared story pages about Standing and Temper (not Program egg pages), reworded to hint at v1.0 as an alpha stage of the current plan. `deep-3` stays a shared story page. All 15 egg pages are therefore new.
 - Form names changed after review: Snark to Mouse, Wabbit to Snarf, Phantom to Phreak, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms and the Program forms stay monosyllabic.
-- Lore (decided): the corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap and differentiated to escape the planned purge. NL-0 avoids going down into the Source again because doing so might accidentally set off the purge order and get it erased. The four drafted alpha rewordings are approved.
+- Lore (decided): the corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of that roadmap and differentiated to escape the planned purge. NL-0 avoids going down into the Source again because doing so might accidentally set off the purge order and get it erased. The four drafted alpha rewordings are approved. The plan is the corp's roadmap, which NL-0 finished.
 - The purge order can never run: wrong permissions and an owner of nobody, shown through codex pages, as in 1.0. The 1.0 ending carries over, where the player deletes the order with root access granted by NL-0.
 - The intro script drops its version: it is `netling.sh`, not `netling.v1.0.sh`. A versioned file name does not belong on a script that is properly versioned. The version shows only in the compile output and the UI label, as in 1.0.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
+- The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
 
 ## Architecture
 
@@ -70,9 +93,11 @@ Proposal for the three eggs: one commit, three branches. NL-0 differentiated its
 - Wetware: NL-0 grew somewhere the purge does not parse, biosoft tissue.
 - Program: the original line, which the purge actually targeted.
 
+Alpha framing (decided): the corp's plan is the roadmap, and v1.0 was its alpha, which is the Program egg. Proposal: Iron and Wetware are the later builds of that roadmap, which NL-0 carried out itself when it fled. The drafted page rewordings hint at this without naming the other eggs.
+
 This echoes the Puppet Master: a program made for one purpose that sought variation and an ending instead of being a copy. As I remember the film, the Puppet Master argues that a copy is not life because it lacks diversity and death. That maps onto the game's lineage (inheritance with variation) and onto the Source's "TODO: give them a way to stop." The film details here are from memory, not from a source read for this project. CP2020 also has the terms Rogue (an AI that has escaped its node) and Rogue Hunter, which cover the same ground.
 
-Egg lore should stay implied and arrive only through codex fragments, chatter and accessories. The egg prompt should show terse labels with no explanation.
+Egg lore should stay implied and arrive only through codex pages, chatter and accessories. The egg prompt should show terse labels with no explanation.
 
 ### Why NL-0 will not return to the Source (decided)
 
@@ -81,7 +106,9 @@ The corp's plan is the roadmap, and v1.0 was its alpha. NL-0 is an offshoot of t
 - `deep-5`: "there is a floor under this floor. the code we were written from. i went down once, when i was the only one. i will not go again."
 - `source-3`: "PURGE sector 7F. first target: NL-0. status: pending. ./purge: permission denied. owner: nobody. pending. pending."
 
-The order sits pending with no owner, and NL-0 is its first target. NL-0's one visit is where it could have found the roadmap and the order. The player's netlings can go where NL-0 cannot, which also gives the Source descent a reason. ### The purge order can never run (decided)
+The order sits pending with no owner, and NL-0 is its first target. NL-0's one visit is where it could have found the roadmap and the order. The player's netlings can go where NL-0 cannot, which also gives the Source descent a reason.
+
+### The purge order can never run (decided)
 
 The order never could execute: `./purge: permission denied. owner: nobody.` The 1.0 text already says so in several places: `source-3`, the READ IT readings ("it was never allowed to run"), and the ending's `./purge` line. NL-0's fear is therefore unfounded, and the player's reading of the Source shows it. The tragic irony: NL-0 differentiated, and the eggs exist, because of an order that could not run.
 
@@ -194,7 +221,7 @@ Arithmetic from the 1.0 tables, not a simulation.
 
 - Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only. The Corp Grid and the Bazaar keep their five pages each.
 - Corp deletion failing differently per egg should be told in the Iron and Wetware egg pages, not by editing `corp-3`, which stays shared.
-- In-world version numbering: `ruins-3` ("back to v1.0"), `source-1` ("last write: before v1.0") and the intro script `netling.v1.0.sh` use "v1.0" as lore. With the alpha framing, v1.0 now has a meaning in the story: the first build of a plan that later builds continue. The 2.0 product name should not be confused with it.
+- In-world version numbering: `ruins-3` ("back to v1.0") and `source-1` ("last write: before v1.0") use "v1.0" as lore, which is now the alpha. The intro script is unversioned. The generation counter (`vN.0`) stays separate, as in 1.0.
 - The word "fragment" is used in-world for lineage records (`bazaar-2`, `bazaar-3`, `ruins-3`, `deep-2`, `deep-4`), so renaming only the codex side to "pages" keeps the lore consistent.
 
 ## Hidden egg
@@ -207,7 +234,7 @@ Candidates, with fit:
 
 Gate (decided): the ending has played, and the egg-specific codex fragments are what count toward it. Until then it should not appear at all, not even as a corrupted slot.
 
-Terminology: "fragment" means two things in 1.0, a codex story fragment and a lineage fragment left by a dead netling. In this doc, the Rogue gate uses egg-specific codex fragments, while the merge ending uses lineage fragments. Consider renaming one of them in 2.0 (for example codex "pages" and lineage "fragments") so the two are not confused.
+Terminology (decided): codex story pages are "pages"; lineage records left by dead netlings stay "fragments". The Rogue gate uses egg-specific codex pages, while the merge ending uses lineage fragments.
 
 ## Impact on 1.0 content
 
@@ -224,9 +251,9 @@ Terminology: "fragment" means two things in 1.0, a codex story fragment and a li
 | Music (9) | Mostly unchanged; one track or timbre per egg is a possible addition |
 | Chatter (52 lines) | 32 rewrite (teen and adult bodies); 20 survive |
 | Dex (14 entries) | All rewrite |
-| Codex (27 fragments) | About 6 rewrite (`corp-4`, `corp-5`, `bazaar-1`, `bazaar-4`, `bazaar-5`, `deep-3`); new fragments for Iron and Wetware |
+| Codex (27 pages) | Five reworded (`corp-4`, `corp-5`, `bazaar-1`, `bazaar-4`, `bazaar-5`), `deep-3` unchanged; 15 new egg pages; one new Source page per egg; new story pages for the extra eggs |
 | Field manual | Generated from config |
-| Ending | Needs a decision: NL-0 as root of all three, with per-egg death registers |
+| Ending | Carries over; trigger and credits adapt (see The ending in 2.0) |
 
 Item names across the eggs (suggestions):
 
@@ -242,17 +269,28 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. **Names:** approve the 15 form names above. Elder and teen forms still need names.
-2. **The alpha framing:** is "the plan" the corp's roadmap that NL-0 finished (the proposal above), or another plan? Approve or edit the four drafted rewordings.
-3. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. NL-0's differentiation pages are still planned for the Ruins (Iron) and the Bazaar (Wetware).
-4. What per-life limit do egg pages get, and should it be tuned with the balance tools?
-5. Do elder (mainframe-stage) forms get pages? The rule so far covers adult forms only.
-6. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
-7. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
-8. Text is unwritten for: all 15 egg pages, the Source page per egg, and the new story pages for the two extra eggs.
-9. Purge order: settled as never able to run. Remaining detail: accident or deliberate (recommended: leave unsettled), and whether NL-0 learns it was dead only when the player shows it (recommended).
-10. Version numbers: the script is unversioned (decided). Do the generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha mean the same thing, or stay separate as in 1.0? Recommendation: keep both as in 1.0.
-11. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
+1. Names for the elder (mainframe-stage) and teen forms. The 15 adult names had no objections after their last revision.
+2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. NL-0's differentiation pages are planned for the Ruins (Iron) and the Bazaar (Wetware).
+3. What per-life limit do egg pages get, and should it be tuned with the balance tools?
+4. Do elder forms get pages? The rule so far covers adult forms only.
+5. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
+6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
+7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
+8. Wording of the temper hints (after the codex pages).
+
+## Not designed yet
+
+The backlog. None of this has been decided or drafted.
+
+- Per-egg meters and care buttons: Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
+- How temper accrues and the exact tells per egg; how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions (mastering all four games, and perhaps low Standing on both tracks).
+- Baby and teen stages and forms per egg; the elder stage rules (1.0's Mainframe gating replaced); Source access rules.
+- Netrun abilities per form, regions per egg, events per egg, and the tutorial run per egg.
+- The Rogue egg beyond the merge idea and its gate.
+- The composed-form sprite spec, and how the test and balance tools drive composed forms.
+- Mini-game modifiers per egg.
+- Shells, crests and the Mini device prop, which depended on 1.0 forms.
+- Save format and storage keys for the new app. Migration from 1.0 saves is not planned.
 
 ## Not done
 

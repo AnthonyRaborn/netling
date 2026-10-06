@@ -1,6 +1,6 @@
 # Second egg: reference review and ideas
 
-Status: brainstorm, not a decision. Nothing here is implemented or tested. The soft freeze in `CLAUDE.md` is waived for this design work only.
+Status: the reference review and the first brainstorm. It was written for fitting a second egg into 1.0; the planning has since moved to a from-scratch 2.0, so the candidate eggs and recommendation below are partly superseded by [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), which holds the current decisions. Nothing here is implemented or tested. The soft freeze in `CLAUDE.md` is waived for this design work only.
 
 Sources read in full or in part (downloaded and read locally):
 
