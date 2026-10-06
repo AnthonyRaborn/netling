@@ -12,6 +12,9 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Wetware death can read as a dream ending and a new one beginning.
 - Composed forms (egg body, temper variant, role overlay) are acceptable if the current test and balance tools can still drive them.
 - A hidden, unlockable egg is welcome.
+- Standing is two tracks (corp and street), not one signed number.
+- The ending does not show NL-0's differentiation. It is told only through codex fragments.
+- The hidden temper shows through sprite motion, idle behavior and chatter tone together, in all three eggs.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
 ## Architecture
@@ -23,7 +26,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 | Role | What it specialized in, from the four mini-games | Netrun abilities tied to form |
 | Standing | Visible reputation that carries across lives | Allegiance axis, Chrome and Firewall |
 
-Proposal: Standing as two non-negative tracks (corp and street), not one signed number. High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system, which matches CP2020's "blank" and "SINless" and replaces the Ghost's "neutral allegiance" condition.
+Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system, which matches CP2020's "blank" and "SINless" and replaces the Ghost's "neutral allegiance" condition.
 
 Proposal: roles map to the four games. Breach to a Cracker, Dodge to an Evader, Tune to a Seer, Feast to a Scavenger. Names draw on CP2020 icebreaker, Jargon cracker, "mouse around", gibson, and Jargon snarf.
 
@@ -58,6 +61,17 @@ Egg lore should stay implied and arrive only through codex fragments, chatter an
 ### Wetware death as a dream ending
 
 This fits CP2020's vocabulary: SimSense, SimStim, and BTL chips that "burn out after one use" and force the user to buy another; "moddy" (a personality module); "Ram" (personality); "deep reality" (the real world, as opposed to the realities made in minds and processors). A wetware generation ending as a burnt-out chip, with the next generation as the next chip carrying a "moddy" of the last, uses the game's own lineage mechanics. CP2020's tone is grittier (addiction, brain damage); a gentler dream framing is a deliberate choice.
+
+### The temper tell
+
+Decided: it shows through all three channels at once, in every egg. Proposal for how each channel works, kept consistent so a player can learn to read it:
+
+- **Sprite motion:** the idle animation changes with temper. An orderly body keeps a steady, even rhythm; a volatile one stutters, drifts or jumps frames. The existing idle quirk (bounce, sway, hover) stays a separate inherited trait, so temper has to read as a different kind of change, such as timing regularity.
+- **Idle behavior:** what it does when left alone. Orderly: repeats a routine in the same order. Volatile: does something unscheduled.
+- **Chatter tone:** chatter lines gain a temper voice. The existing 52 lines are 32 body-bound, so the rewrite for 2.0 is the natural place to add it.
+- **Per egg:** the three channels would be skinned for each substrate, so the tell for Iron differs from Program and Wetware (for example, drift for Iron, a pulse for Wetware).
+- Constraint from 1.0: nothing flashes more than three times a second, in any motion setting, so a volatile tell must stay under that limit and have a calmer variant when motion is reduced.
+- The tell should come from the temper value, not be a label, and the exact thresholds should be tuned with the balance tools like any other number.
 
 ## Hidden egg
 
@@ -102,11 +116,10 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. Standing: two tracks (corp and street) or one signed number?
-2. Hidden egg: Rogue with the merge ending, or another? Is the gate (ending played and fragments from all three eggs) right?
-3. Does the ending show NL-0's differentiation explicitly, or only through codex fragments?
-4. Does each egg's elder stage have its own form, and does the Source change per egg?
-5. How is the temper tell shown (sprite motion, idle behavior, chatter tone)?
+1. Hidden egg: Rogue with the merge ending, or another? Is the gate (ending played and fragments from all three eggs) right?
+2. Does each egg's elder stage have its own form, and does the Source change per egg?
+3. Which codex fragments carry NL-0's differentiation, and in which regions? (Ruins for Iron and the Bazaar or Corp Grid for Wetware are the natural fits.)
+4. How readable should the temper tell be to a new player, and is a per-egg DEX hint needed to teach it?
 
 ## Not done
 
