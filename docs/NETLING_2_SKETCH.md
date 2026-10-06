@@ -20,9 +20,11 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - New codex fragments are allowed. NL-0's differentiation is carried by fragments in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
 - The Source stays one place (option B with a touch of A): each egg finds one extra fragment there that the others do not, and the descent is drawn in that egg's own style.
 - Root Access needs the general, shared story fragments at minimum. Egg-specific fragments are for Rogue's unlock only, not for Root Access.
-- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, with one page per teen form and per adult form of that egg. Egg pages count toward Rogue's gate and do not share the story pages' per-life limit. Work order: codex pages first, temper hints after.
+- Codex fragments are called codex pages from here on. There are two kinds. Story pages are shared by every egg, start from the 1.0 codex, and carry Root Access and, by default, all unlocks. Egg pages are specific to one egg, one page per adult form (5 adult forms per egg, one of them hidden), so 15 egg pages in all. Teen pages are discarded. Egg pages count toward Rogue's gate and do not share the story pages' per-life limit. Work order: codex pages first, temper hints after.
+- Any member of an egg can find that egg's form pages, whatever its own form.
+- The story set needs more pages than 1.0, to cover the two extra eggs and the lore they imply.
 - `bazaar-1` is a shared story page, reworded to "Netlings don't sell. They pick you, or they don't."
-- `corp-4`, `corp-5` and `bazaar-5` become Program egg pages (the Chrome, Daemon and Firewall pages). `deep-3` stays a shared story page.
+- `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become Program egg pages (the Chrome, Daemon, Firewall and Glitch pages, all adult forms). `deep-3` stays a shared story page.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -86,8 +88,8 @@ Decided: it shows through all three channels at once, in every egg. Proposal for
 
 Two kinds (decided):
 
-- **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life).
-- **Egg pages:** specific to one egg, one page per teen form and per adult form of that egg. They count toward Rogue's gate. They do not share the story pages' per-life limit; they get their own, to be set with the balance tools.
+- **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). More are needed than in 1.0, to cover the two extra eggs and the lore they imply.
+- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden (like Ghost in 1.0), so 5 egg pages per egg and 15 in all. Any member of the egg can find its form pages. They count toward Rogue's gate. They do not share the story pages' per-life limit; they get their own, to be set with the balance tools. The earlier idea of a page per teen form is discarded.
 
 ### The six form-bound 1.0 pages
 
@@ -96,26 +98,26 @@ Two kinds (decided):
 | `corp-4` | Chrome (adult) | Program egg page |
 | `corp-5` | Daemon (adult) | Program egg page |
 | `bazaar-5` | Firewall (adult) | Program egg page |
+| `bazaar-4` | Glitch (adult) | Program egg page |
 | `bazaar-1` | Firewall | Shared story page, reworded "Netlings don't sell. They pick you, or they don't." |
-| `deep-3` | Ghost (adult) | Shared story page (NL-0's voice). Ghost still needs its own Program page. |
-| `bazaar-4` | Glitch | Open: see below |
-
-On `bazaar-4` ("GLITCH IS NOT A BUG. GLITCH IS A CHOICE."): in 1.0 Glitch is an adult form (stability dominant and negative; the teens are Kernel, Stub and Shell). It could become the Program egg's Glitch adult page, or a generic shared story page that keeps the "not bugs" motif (`public-4`, `source-4`). If the 2.0 Program egg makes its volatile body a teen, it would be a teen page instead. The 2.0 form list is not designed yet, so this depends on it.
+| `deep-3` | Ghost (adult) | Shared story page (NL-0's voice). The hidden Program form still needs its own egg page. |
 
 ### Page counts
 
 Arithmetic from the 1.0 tables, not a simulation.
 
-- If the Program egg keeps the 1.0 shape, it has 3 teen forms (Kernel, Stub, Shell) and 5 adult forms (Chrome, Firewall, Daemon, Glitch, Ghost): 8 egg pages. Existing pages cover Chrome, Daemon and Firewall, plus Glitch if `bazaar-4` stays Program. New pages are needed for Kernel, Stub, Shell and Ghost, plus Glitch if `bazaar-4` goes shared: 4 or 5 new.
-- If Iron and Wetware have the same shape, that is 8 egg pages each, all new, for 24 egg pages in total.
-- Story set: the original 22 Root pages minus `corp-4`, `corp-5` and `bazaar-5` is 19 (or 18 if `bazaar-4` goes Program). Beyond Root: `deep-5` and `source-1` to `source-4`, 5 pages, unchanged. At 8 a life, 18 or 19 story pages still takes 3 lives, so the "at least 3 lives" goal holds.
+- Program egg: 5 adult pages. Four exist (Chrome, Daemon, Firewall, Glitch); one is new, for the hidden form (Ghost in 1.0 terms).
+- Iron and Wetware: 5 new egg pages each. So 11 new egg pages in total.
+- Story set: the original 22 Root pages minus `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` is 18 pages (public 4, corp 3, bazaar 3, ruins 4, deep 4). Beyond Root: `deep-5` and `source-1` to `source-4`, 5 pages, unchanged. At 8 a life, 18 story pages still takes 3 lives, so the "at least 3 lives" goal holds, and new story pages only add to this.
+- The Corp Grid and the Bazaar now have 3 story pages each, against 5 each in 1.0. Restoring that parity would be about 2 new story pages each, 4 in all, more if the lore needs it.
 
 ### What follows
 
-- Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only. The Corp Grid then has 3 story pages and the Bazaar 3 or 4. New story pages in those regions would stop those unlocks being trivial.
+- Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only.
 - Corp deletion failing differently per egg should be told in the Iron and Wetware egg pages, not by editing `corp-3`, which stays shared.
 - In-world version numbering: `ruins-3` ("back to v1.0"), `source-1` ("last write: before v1.0") and the intro script `netling.v1.0.sh` use "v1.0" as lore. The 2.0 product name does not have to change that, but the two should not be confused.
 - The word "fragment" is used in-world for lineage records (`bazaar-2`, `bazaar-3`, `ruins-3`, `deep-2`, `deep-4`), so renaming only the codex side to "pages" keeps the lore consistent.
+- The five adult forms per egg are not designed yet, and the egg pages hang on them. See the first open question.
 
 ## Hidden egg
 
@@ -162,13 +164,14 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. `bazaar-4`: Program Glitch adult page, shared story page, or a teen page if the 2.0 Program volatile body is a teen?
-2. How are form pages found? Either any netling of that egg can find any of the egg's pages, or a page only drops for a netling that is that form (raising a form is how you read its page). The second fits one page per form and rewards raising variety, at the cost of more lives. Where the pages drop (the egg's home region, or any region) is part of this. NL-0's differentiation pages are still planned for the Ruins (Iron) and the Bazaar (Wetware).
+1. **What are the five adult forms per egg?** The page names depend on it. One reading that fits the earlier design: four role forms, one for each mini-game (Cracker for Breach, Evader for Dodge, Seer for Tune, Scavenger for Feast), plus one hidden master that needs all four. Temper would then be a hidden body variation with sprite, idle and chatter tells, and Standing would be separate, not a form. If so, the four Program pages (`corp-4`, `corp-5`, `bazaar-5`, `bazaar-4`), which name the 1.0 forms Chrome, Daemon, Firewall and Glitch, would need rewording to fit roles, or would stay as the corp's own classification of older forms.
+2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. NL-0's differentiation pages are still planned for the Ruins (Iron) and the Bazaar (Wetware).
 3. What per-life limit do egg pages get, and should it be tuned with the balance tools?
-4. Do elder (mainframe-stage) forms get pages? The rule so far covers teen and adult forms only.
-5. Rogue's gate: all egg pages (24 under the 1.0 shape) is heavy. All pages of one egg, or a fraction of the total?
-6. Text is unwritten for: new Program pages (Kernel, Stub, Shell, Ghost, and Glitch if shared), the Iron set, the Wetware set, the one extra Source page per egg, and the new shared story pages if added.
-7. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
+4. Do elder (mainframe-stage) forms get pages? The rule so far covers adult forms only.
+5. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
+6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
+7. Text is unwritten for: the new Program hidden-form page, the Iron set, the Wetware set, the Source page per egg, and the new story pages.
+8. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
 
 ## Not done
 
