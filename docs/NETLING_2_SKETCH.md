@@ -160,7 +160,7 @@ Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 s
 **Standing sources and size (decided as a starting point)**
 
 - A corp or scavenged packet adds 0.25 to its track. COMPLY, HIDE, an ignored trace, checkpoint choices and anomaly choices add 1 (the maintainer raised these to see what they give). A market purchase adds 0.5. Plain care and mini-games add nothing, so a player can stay at zero on both tracks.
-- A Corp voucher and a Black ICE shard are not named. I assumed 1, as in 1.0. Open.
+- A Corp voucher and a Black ICE shard add 1 each (set below).
 - **Display and decisions (decided):** decisions use the fractional values. The display shows the floor of each track and is clearly labeled as a rough estimate, so a player who wants a guaranteed form has to take a stronger stance. A displayed track can be up to 1 below the true value, so a displayed gap can be off by up to 1 either way. A displayed gap of 6 or more guarantees a true gap above 5 (a certain lean); a displayed gap of 5 might be a true gap of 4 to 6.
 - The earlier run (packets 0.1, decisions 0.5) gave casual a gap of about 1.4 at adulthood and steerers only 3.2 to 3.4 at the teen check, so the teen preview was weak. It is superseded by the numbers below.
 
@@ -225,6 +225,29 @@ What it shows:
 - **Removing the fault cap.** From B1 to B2, casual full-life rises 3 points and the worker 1.4, because neglect deaths (3.0% and 1.3% in these runs) now run on, and the neglectful archetype still dies of integrity collapse in essentially every life.
 - **Attentive and daredevil players get almost no bugs**, as intended.
 - **Not modeled:** bugs from netrun-disconnect faults (1.27 disconnects a life for casual, against 4.6 faults), Heat gained from actions such as playing (only the Heat drift is scaled), clearing with Standing or by anomaly, any change in how a real player reacts to a glitching sprite, and the temper effects of bugs. The bots clear only at their scheduled check-ins. So this probably understates the loop slightly and overstates how late bugs are cleared.
+
+**Clearing prices and frequency (set as starting values)**
+
+- **Scrip:** 15 per bug, as proposed.
+- **Standing:** 2 points per bug, paid from the tracks in any split the player picks (decided: the player picks). A split lets a player keep their gap while paying (1 from each track), or shift it on purpose (2 from one). Paying 2 from the leader narrows the gap by 2 and paying 2 from the other widens it by 2, which is the hidden retooling effect.
+- **Netrun anomaly:** one extra entry in the anomaly pool, called a debug station here, that clears 1 bug. It enters the pool only while the netling has at least one bug, so it is never a dead result. Its frequency is its share of the pool: each region has about five or six eligible anomalies, so about 1 in 6 anomaly nodes while a netling has bugs. Its options and cost are not designed (for example, clear one bug for a small Charge cost, or leave it).
+- **Corp voucher and Black ICE shard:** 1 Standing each (voucher to corp, shard to street), as in 1.0 and the same as the other choices.
+
+How those prices sit against the data (1.0 simulator, packets at 0.25, 200 lives per archetype; the track totals are the sum of everything added to that track, taken from 1.0's single signed allegiance by splitting its gains and losses, so they are a rough stand-in for two tracks):
+
+| Archetype | Runs a life | Anomaly nodes a life | Higher track at teen | Lower track at teen | Higher track at adult | Lower track at adult |
+|---|---|---|---|---|---|---|
+| Casual | 17.9 | 14.4 | 3.6 | 2.2 | 10.4 | 7.8 |
+| Attentive | 24.1 | 24.3 | 4.5 | 2.8 | 12.8 | 9.9 |
+| Worker | 2.5 | 2.4 | 2.5 | 1.4 | 5.6 | 3.8 |
+| Daredevil | 25.1 | 27.0 | 5.4 | 3.3 | 14.5 | 10.4 |
+| Steered Chrome | 24.2 | 25.5 | 7.3 | 0 | 20.6 | 1.2 |
+| Balance seeker (ghosthunter) | 0 | 0 | 2.7 | 2.5 | 7.0 | 6.8 |
+
+- **Both tracks grow.** Even a casual netling has about 10 on its higher track and 8 on its lower by adulthood, because every feed and every choice adds to one of them. So a price of 2 is affordable from adulthood for every archetype in the table, and is about a fifth of a casual netling's higher track. At the teen check, a track can be below 2 (casual's lower track is 2.2 on average), so a price of 2 is not always payable early.
+- **A price of 2 is cheap for a committed steerer** (their lead is 20) and meaningful for a casual netling (gap of 2.5, so one bug's worth of Standing can swing the leader's chance from about 60% (a gap of 2.5) to a coin flip or to about 90%). That matches the intent: the retooling is real for players who have not committed.
+- **Anomaly nodes are about one a run** (0.8 for casual, 1.0 for attentive). With a debug station at about 1 in 6, a casual netling that has bugs meets one about 2.4 times a life, and a worker (2.4 anomaly nodes a life) about 0.4 times. So the anomaly helps players who run, and the Standing price is the option for players who do not.
+- The balance seeker's two tracks stay together (2.7 and 2.5 at the teen check). Paying 2 from one track would break the "within 1 point" hidden-path rule, so a balance seeker pays 1 from each. A split price makes that possible.
 
 **Egg page drop rate** (computed from a simple model, so it is arithmetic, not a simulation)
 
@@ -562,9 +585,9 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
-9. Evolution: Standing sources and sizes are set as a starting point (see Starting numbers); open are the Corp voucher and Black ICE shard values, and whether the measured spread (steerers certain early, everyone else random) is the intended feel. Tie breaks are decided (see Tie breaks); a netling with no lead is then just a tie, so there is no separate default teen, and no wins threshold is needed for a role.
+9. Evolution: Standing sources and sizes are set as a starting point (see Starting numbers), including the voucher and Black ICE shard at 1; open is whether the measured spread (steerers certain early, everyone else random) is the intended feel. Tie breaks are decided (see Tie breaks); a netling with no lead is then just a tie, so there is no separate default teen, and no wins threshold is needed for a role.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
-11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
+11. Bugs: scrip price 15, Standing price 2 (any split) and the debug-station frequency are set as starting values; open are the ceiling and penalty values (the prototype supports the starting ones), the debug station's options, the names per egg, and the temper push of a Segfault (it depends on the temper scale, which is not designed).
 12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
 
 ## Not designed yet
