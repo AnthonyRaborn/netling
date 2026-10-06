@@ -174,23 +174,24 @@ For now they sit in the Dex (decided). The UI structure will be revisited once t
 
 | Egg | Tell | Steady end | Unsteady end |
 |---|---|---|---|
-| Program | Motion | Watch the idle loop. It repeats on the same beat, to the frame. | Watch the idle loop. Some frames come early. Some never come. |
-| Program | Idle | Left alone, it runs the same three tasks in the same order. | Left alone, it starts a task nobody scheduled, then drops it. |
-| Program | Chatter | Its lines come whole, in the same format every time. | Its lines arrive clipped, out of order, or twice. |
-| Iron | Motion | Watch it settle. It comes to rest on the same mark every cycle. | Watch it settle. It drifts, and the zero point is never where you left it. |
-| Iron | Idle | In the quiet it runs the same self-check, joint by joint. | In the quiet it tests a part of itself nobody asked it to test. |
-| Iron | Chatter | It speaks like a checklist: item, status, next item. | It speaks like a fault bell: short, sudden, sometimes a half step off. |
-| Wetware | Motion | Watch the pulse. It keeps a slow, even beat, like someone asleep and well. | Watch the pulse. It skips, then races, then settles for no reason. |
-| Wetware | Idle | Left alone, it keeps a routine: stretch, rest, stretch. | Left alone, it tries something new each time and drops it as fast. |
-| Wetware | Chatter | It talks in steady sentences, the way a technician reads a chart. | It talks in bursts, mid thought, as if answering someone else. |
+| Program | Motion | Count the beats between its blinks. The count never changes. | Count the beats between its blinks. It is never the same twice. |
+| Program | Idle | Left alone, it runs its tasks in the same order. Count the steps: the count holds. | Left alone, it starts a task nobody scheduled, then drops it. |
+| Program | Chatter | Time the gap between its lines. It is the same every time. | Its lines arrive clipped, out of order, or twice. |
+| Iron | Motion | Watch it settle. It comes to rest on the same mark, on the same count, every cycle. | Watch it settle. It drifts, and the zero point is never where you left it. |
+| Iron | Idle | In the quiet it runs the same self-check, joint by joint. Count the joints: the count never changes. | In the quiet it tests a part of itself nobody asked it to test. |
+| Iron | Chatter | It speaks like a checklist: item, status, next item. Count the items in a report; it is always the same number. | It speaks like a fault bell: short, sudden, sometimes a half step off. |
+| Wetware | Motion | Watch the pulse. Count between beats: the count holds, like someone asleep and well. | Watch the pulse. It skips, then races, then settles for no reason. |
+| Wetware | Idle | Left alone, it keeps a routine: stretch, rest, stretch. The rests come at the same interval. | Left alone, it tries something new each time and drops it as fast. |
+| Wetware | Chatter | Listen to the pauses. They fall at the same interval, the way a technician reads a chart. | It talks in bursts, mid thought, as if answering someone else. |
 
 Notes:
 
+- **The steady hints are built on the countable rhythm (decided).** Each one points the player at something to count or time: beats between blinks, steps in a routine, the gap between lines, items in a report, pauses. None gives the number, so the player has to count. The unsteady hints keep their chaotic wording, and the motion hint mirrors the steady one ("never the same twice").
 - **One pair per channel per egg.** The three channels are the decided tells (sprite motion, idle behavior, chatter tone), skinned for each egg as the sketch proposes: Program stutters and drops frames, Iron drifts, Wetware pulses.
 - **Vocabulary follows the egg.** Program talks about loops, tasks and lines. Iron talks about its own joints, checklists and a fault bell. The first Iron draft said "housing" and "panels", which imply background scenery the sprite may not have, so those words were removed. Wetware uses plain words only (pulse, routine, technician, chart), with no CP2020 terms.
 - **Nothing here flashes.** The volatile hints describe skipped or early frames and drift, which must still stay under three changes a second in the actual animation, with a calmer version in reduced motion.
 - **Preferences stay hidden (decided).** Temper may also shape care preferences (a steady netling likes routine, an unsteady one likes novelty), and no hint names them. The idle hints touch this only lightly.
-- **Length:** the 18 hints have a median of 61 characters and a longest of 76, against 90 and 166 in 1.0's pages.
+- **Length:** the 18 hints have a median of 68 characters and a longest of 111, against 90 and 166 in 1.0's pages.
 
 ## Cross-checks
 

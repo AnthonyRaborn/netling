@@ -280,7 +280,7 @@ Decided: it shows through all three channels at once, in every egg. Proposal for
 
 The problem: the unsteady end can grow more chaotic, but the steady end is the absence of chaos, which is easy to miss. The fix is to make steadiness something the player can notice and predict, not merely a lack of noise, and to let it grow stronger the same way chaos does. Ideas, to combine as wanted:
 
-- **A countable rhythm.** A steady netling does a small signature move on an exact beat (a blink or a settle every N seconds, always the same N). A player can count it, and the tell is "I can predict it". Keep any pulse at or below one change a second.
+- **A countable rhythm (chosen).** A steady netling does a small signature move on an exact beat (a blink or a settle every N seconds, always the same N). A player can count it, and the tell is "I can predict it". Keep any pulse at or below one change a second.
 - **A visible ritual that grows.** The idle routine is a fixed sequence of steps that the player can learn, and at the strong end it repeats exactly. This ties to the idle hints (the same three tasks in the same order).
 - **Tidiness.** Poses snap to a grid, the sprite returns to the same spot after each move, and there is no stray motion. The unsteady end is the same set of parts, drifting.
 - **Sound.** A steady netling has a clean tone with a regular tick; an unsteady one wobbles in pitch. Every sound tell needs a non-sound equivalent for players with audio off.
