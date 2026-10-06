@@ -57,7 +57,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and the egg-specific codex pages (the merge itself uses lineage fragments).
 - Each egg's elder stage has its own form. (Refined, see below: one elder per adult.)
 - Elders (decided): one elder per adult, each a variant of the adult it grows from, as 1.0's mainframes are of their lines. That is 9 per egg and 27 in all, each wider than its adult (18 columns against 16) and no taller than 15 rows. Elder forms still get no pages. The names are not decided.
-- Neglect and bugs (decided to try): neglect is a transient look from unmet care needs; bugs are a persistent look, glitches on the sprite, that stay until cleared.
+- Neglect and bugs (decided to try): neglect is a transient look from unmet care needs; bugs are a persistent look, glitches on the sprite, that stay until cleared. Both showing together is intended: neglect leads to faults and faults roll bugs, so the rust and the glitches appear together by design, and bugs do not suppress the rust.
 - Teens and hidden paths (decided): the two main teens per egg (corp lean, street lean) may differ only slightly. The hidden path must be distinct, so a hidden-path teen needs its own outline, not just marks over the others'.
 - New codex pages are allowed. NL-0's differentiation is carried by pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
 - The Source stays one place (option B with a touch of A): each egg finds one extra page there that the others do not, and the descent is drawn in that egg's own style.
