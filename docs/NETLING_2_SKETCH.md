@@ -178,8 +178,12 @@ What it does well:
 What to watch:
 
 - **A death spiral.** The loop (fault, bug, harder care, fault) has no brake as described. 1.0's simulated casual archetype reaches the end of its life about 90% of the time and has about 4.6 faults a life, and heat at 100 is itself a fault source. Bugs that raise heat gain feed that directly. Without a way to clear bugs, a small early slip could end a life in a way a player cannot read or undo.
-- **Needs a way out (decided that bugs can be cleared).** The maintainer's options: pay with Standing, with scrip, or with an action taken while on a run. A netling can be "defragged" or "bugfixed", at least in the Program line; the Iron and Wetware wording is not chosen. 1.0 already has Repair kit (Integrity), Antivirus patch (viruses) and Coolant cell (Heat), and none of them clears bugs, so this is new 2.0 content. A cost in Standing is notable: Standing is an evolution lever, and with a gap of 5 deciding a form a few points matter, so cleaning bugs can cost form progress. Which cost is the default, and whether each is a separate way, is open.
-- **Needs a ceiling (decided).** The total penalty is capped so a bad stretch is recoverable, but not so low that the maximum can be ignored. The Integrity penalty should be relatively smaller at the maximum than the other three, so a player has a realistic chance to recover. The maintainer's sentence ended mid-thought here ("so players can have realistic opportunities to ..."); I read it as "recover", which is not confirmed.
+- **Clearing bugs (decided).** A netling can be "defragged" or "bugfixed" (the Program wording; the Iron and Wetware wording is not chosen). There are three ways, in this order of weight:
+  1. **Scrip (the main way).** A price in scrip, so a player can always fix bugs by earning scrip.
+  2. **Standing (an alternate cost).** Paying in Standing also lets a player retool their evolution direction, since Standing is a lever (a gap of 5 decides a form). That is an intended side effect, and hidden: the game does not advertise it (decided). Which track the payment comes from, and whether the player chooses it, is open.
+  3. **A random netrun anomaly event.** Netruns already have anomalies (`src/netrun/anomalies.js` in 1.0), so a bug-clearing anomaly needs no new icon (decided).
+  1.0's Repair kit (Integrity), Antivirus patch (viruses) and Coolant cell (Heat) do not clear bugs, so this is new 2.0 content.
+- **Needs a ceiling (decided).** The total penalty is capped so a bad stretch is recoverable, but not so low that the maximum can be ignored. The Integrity penalty is relatively smaller at the maximum than the other three, so a player has a realistic chance to recover (confirmed by the maintainer).
 - **Chance and penalty per bug are tuning numbers.** I chose none.
 - **It touches death.** Integrity collapse becomes the main way neglect kills (see Risks), so the balance run has to cover it.
 - **Volatile does not need bugs (decided).** A netling can be volatile with no bugs and no faults by running hot consistently, so volatile is not only a symptom of poor care. Bugs still push heat up and so push temper that way. The preference effects of temper should not make volatile strictly worse.
@@ -410,7 +414,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 8. Wording of the temper hints (next in order, now personality hints; after the Evolution questions below).
 9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
-11. Bugs: the default way to clear them (Standing, scrip, or a run action), the names per egg, the ceiling values, and the chance a fault adds a bug.
+11. Bugs: the scrip price, the Standing price and which track pays, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
 
 ## Not designed yet
 
