@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 egg form pages, twelve new story pages and three Source pages (one per egg), for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. Temper hints are not drafted yet.
+Status: first drafts of the 15 egg form pages, twelve new story pages and three Source pages (one per egg), for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints.
 
 ## What these pages are
 
@@ -166,6 +166,32 @@ Notes:
 - **No spoilers:** none names an egg, NL-0 or the purge order.
 - **Length:** `program-source` 126, `iron-source` 149, `wetware-source` 114 characters, against a 1.0 median of 90.
 
+## Temper hints
+
+First drafts of the temper hints, for the maintainer to edit. Temper is now personality, not a form lever (decided, see Evolution in the sketch), so the hints are lighter than they once needed to be. The rule from the sketch holds: a hint names a behavior to look for, never a temper value, so none uses the words temper, orderly or volatile. The pairs below are the two ends; a netling near the middle simply shows less of either, and no hint is drafted for it.
+
+Where they appear (the DEX or elsewhere) is not decided. They are written as one-line field notes so they can sit in a dex entry or a codex-style page.
+
+| Egg | Tell | Steady end | Unsteady end |
+|---|---|---|---|
+| Program | Motion | Watch the idle loop. It repeats on the same beat, to the frame. | Watch the idle loop. Some frames come early. Some never come. |
+| Program | Idle | Left alone, it runs the same three tasks in the same order. | Left alone, it starts a task nobody scheduled, then drops it. |
+| Program | Chatter | Its lines come whole, in the same format every time. | Its lines arrive clipped, out of order, or twice. |
+| Iron | Motion | Check the housing. It settles to the same mark every cycle. | Check the housing. It drifts, and the zero point is never where you left it. |
+| Iron | Idle | In the quiet it walks the same round, panel by panel. | In the quiet it opens panels nobody asked it to open. |
+| Iron | Chatter | It speaks like a checklist: item, status, next item. | It speaks like a fault bell: short, sudden, sometimes a half step off. |
+| Wetware | Motion | Watch the pulse. It keeps a slow, even beat, like someone asleep and well. | Watch the pulse. It skips, then races, then settles for no reason. |
+| Wetware | Idle | Left alone, it keeps a routine: stretch, rest, stretch. | Left alone, it tries something new each time and drops it as fast. |
+| Wetware | Chatter | It talks in steady sentences, the way a technician reads a chart. | It talks in bursts, mid thought, as if answering someone else. |
+
+Notes:
+
+- **One pair per channel per egg.** The three channels are the decided tells (sprite motion, idle behavior, chatter tone), skinned for each egg as the sketch proposes: Program stutters and drops frames, Iron drifts, Wetware pulses.
+- **Vocabulary follows the egg.** Program talks about loops, tasks and lines. Iron talks about housings, panels, checklists and a fault bell. Wetware uses plain words only (pulse, routine, technician, chart), with no CP2020 terms.
+- **Nothing here flashes.** The volatile hints describe skipped or early frames and drift, which must still stay under three changes a second in the actual animation, with a calmer version in reduced motion.
+- **Preferences are not hinted.** Temper may also shape care preferences (a steady netling likes routine, an unsteady one likes novelty). The idle hints touch this lightly (routine versus something new). A separate hint for it is not drafted.
+- **Length:** the 18 hints have a median of 61 characters and a longest of 76, against 90 and 166 in 1.0's pages.
+
 ## Cross-checks
 
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
@@ -181,4 +207,4 @@ Notes:
 4. Edit any story page or Source page text.
 5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
 6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
-7. Next in order: temper hints.
+7. Edit the temper hints, and decide where they appear.
