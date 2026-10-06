@@ -73,7 +73,7 @@ Notes:
 - `wetware-dodge` is a reflex test: twenty probes, none of which found it. Wired and Chipped are both enhanced-reflex words. It no longer uses falling weights, which had the same game-mechanic problem as the old Mouse page.
 - `wetware-tune` carries the dream idea lightly ("reads best asleep"), since a Wetware generation ends as a dream does. Gibson hums the answer; Mentat answers with no visible steps.
 - `wetware-feast` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind). The new "Fed: 31" nods at Nutri.
-- `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches the hidden form's low Standing on both tracks. The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
+- `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches a hidden form that takes no side (Standing within 1 point). The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
 
 ## New story pages
 

@@ -80,7 +80,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 | Role | What it specialized in, from the four mini-games | Netrun abilities tied to form |
 | Standing | Visible reputation of one netling; it starts at zero each life and does not carry over (decided) | Allegiance axis, Chrome and Firewall |
 
-Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system (the idea behind the form name Blank), which replaces the Ghost's "neutral allegiance" condition.
+Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and tracks within 1 point of each other as balanced, which is the hidden path's Standing condition and replaces the Ghost's "neutral allegiance" condition (decided; the earlier idea of "both low" was dropped because feeding adds Standing, which makes "low on both" hard to reason about).
 
 Proposal: roles map to the four games. Breach to a Cracker, Dodge to an Evader, Tune to a Seer, Feast to a Scavenger. Names draw on CP2020 icebreaker, Jargon cracker, "mouse around", gibson, and Jargon snarf.
 
@@ -121,9 +121,9 @@ Decided: try C first, with B as the fallback (B needs a visible Standing indicat
 
 | Stage | Lever | Notes |
 |---|---|---|
-| Baby to teen | Standing only: which track leads (corp or street) | Three teen types per egg: corp-leaning, street-leaning, and the hidden path. The hidden-path teen also needs wins in each of the four games (the number is a balance question) and low Standing on both tracks. Faults are not required (not decided) |
+| Baby to teen | Standing only: which track leads (corp or street) | Three teen types per egg: corp-leaning, street-leaning, and the hidden path. The hidden-path teen also needs wins in each of the four games (the number is a balance question) and the two Standing tracks within 1 point of each other. Faults are not required (not decided) |
 | Teen to adult | Role (the game with the most wins this life) and Standing lean at that time | The teen is a preview of the Standing lean, as a checkpoint the player can read. The lean is recomputed at adulthood, so it can still change |
-| Hidden adult | All four games mastered, low Standing on both tracks | Needs a threshold for mastery, as 1.0's Ghost does (4 wins each and 29 in all) |
+| Hidden adult | All four games mastered, Standing tracks within 1 point of each other | Needs a threshold for mastery, as 1.0's Ghost does (4 wins each and 29 in all) |
 | Neglect | A visible sprite effect (decided), form effect not decided | Faults no longer pick a teen form (1.0's Stub). Neglect shows on the netling instead (see Neglect and the sprites). Whether sustained neglect also marks the form is open |
 
 What the player can see (proposal, resolves issue 28 for 2.0 without an item):
@@ -190,9 +190,10 @@ What it means:
 
 **Hidden path** (starting values from 1.0's Shell and Ghost, to be adjusted)
 
-- **Teen:** at least 3 wins in each of the four games (1.0's Shell number), plus low Standing on both tracks.
-- **Adult:** at least 4 wins in each game and 29 in all (1.0's Ghost numbers; boosted wins count as 2), plus low Standing on both tracks.
-- "Low" is a placeholder: both tracks under 3 points, which is close to 1.0's allegiance band (under 2). It depends on the dependency above.
+- **Standing condition (decided):** the two tracks stay within 1 point of each other. This replaces "low on both". A netling that takes no side qualifies, and so does one with both tracks high and equal.
+- **Teen:** at least 3 wins in each of the four games (1.0's Shell number), plus the Standing condition.
+- **Adult:** at least 4 wins in each game and 29 in all (1.0's Ghost numbers; boosted wins count as 2), plus the Standing condition.
+- **Measured:** 1.0's ghosthunter archetype, which balances corp and scavenged feeds and chooses evenly, kept the gap at 1 or less in about 100% of its lives at both checks, with packets at 0.25. By chance alone, casual netlings had a gap of 1 or less in 50% of lives at the teen check and 27% at adulthood. So the Standing condition is easy for a player who aims at it and common by accident; the games requirement is what makes the hidden path hard. Faults and stability, which 1.0's Ghost also needed, are no longer conditions.
 - For scale, in 1.0's baseline 27% of casual teens met the axis conditions for Shell (allegiance near zero, stability not negative, at most 1 fault), 18% also had at least 1 win in every game, and 1% had at least 2 wins in every game. Shell asks for 3 in every game, which is rarer still, so the hidden path stays hard. (My first version of this note misread those figures.)
 
 **Bugs** (all guesses, to tune)
@@ -201,6 +202,29 @@ What it means:
 - **Per-bug penalty:** each bug adds about 8% to the drain of Charge and Sync, 10% to Heat gain, and 4% to the drain of Integrity. 1.0's perks are 15% to 20% slower drain, so one bug cancels half a perk.
 - **Ceiling:** 5 bugs. At the ceiling that is +40% Charge and Sync drain, +50% Heat gain and +20% Integrity drain. The Integrity penalty is smaller on purpose, so a player can recover (decided). 40% is not ignorable and is still survivable, but this is the number most likely to move after a balance run, since casual's full-life rate is 90.5% today.
 - **Clearing:** a scrip price of 15 per bug (the price of a Repair kit; a casual netling ends with about 63 scrip and buys about 6.7 items). A Standing price of 2 points per bug from a track the player picks. The anomaly clears one bug when taken. All are guesses.
+
+**Bug prototype on the 1.0 simulator (measured, with limits)**
+
+I patched a scratch copy of 1.0's sim and balance tool to add bugs: a fault rolls a bug at 30%, up to 5; each bug adds 8% to Charge and Sync drain, 10% to the Heat drift and 4% to Integrity drain; Segfault rolls 25% none, 60% one, 15% two; the fault cap is removed. 300 lives per archetype and scenario. The bots do not adapt their play to bugs. Scenarios: **B1** is 1.0 as it is (cap 10, no bugs); **B2** removes the cap, no bugs; **S1** adds bugs, no clearing; **S2** adds bugs and pays 15 scrip per bug at check-ins when affordable; **S3** is S2 with a 50% bug chance; **S4** is a stress case with a 50% chance, a ceiling of 8 and no clearing. Cells show the full-life rate and the mean faults a life.
+
+| Archetype | B1 | B2 | S1 | S2 | S3 | S4 |
+|---|---|---|---|---|---|---|
+| Casual | 92.7%, 4.6 | 95.7%, 4.6 | 94.7%, 5.7 | 95.0%, 4.8 | 94.7%, 4.9 | 94.3%, 6.1 |
+| Worker | 91.3%, 5.3 | 92.7%, 5.3 | 92.7%, 7.7 | 92.7%, 7.2 | 90.7%, 8.8 | 88.3%, 9.6 |
+| Attentive | 99.3%, 0.2 | 99.3%, 0.2 | 99.3%, 0.2 | 99.3%, 0.2 | 99.3%, 0.2 | 99.3%, 0.2 |
+| Overclocker | 97.3%, 1.3 | 97.3%, 1.3 | 97.0%, 1.7 | 97.0%, 1.6 | 97.7%, 1.8 | 97.3%, 1.9 |
+| Steer-stub (uses Segfault) | 100%, 3.4 | 100%, 3.4 | 99.7%, 3.7 | 100%, 3.4 | 100%, 3.5 | 99.7%, 4.0 |
+| Neglectful | 0%, 4.0 | 0.3%, 4.1 | 0%, 4.3 | 0%, 4.3 | 0%, 4.2 | 0%, 4.2 |
+
+What it shows:
+
+- **No death spiral at the starting values.** Full-life rates in S1 and S2 sit within noise of B2 (300 lives gives about 1.5 points of noise on a rate near 93%, and bug rolls change the random stream, so differences under about 3 points are not meaningful). The feedback loop is real but mild.
+- **The loop does raise faults.** The worker, who has the least scrip, goes from 5.3 faults to 7.7 without clearing (+45%), and 17% of workers reach the ceiling of 5. The casual netling goes from 4.6 to 5.7.
+- **Clearing at 15 scrip works for players who run, not for those who do not.** Casual clears about 1.1 bugs a life and ends near zero bugs. The worker, who ends with about 19 scrip, clears under one bug a life and still ends with 1.3 bugs on average and 11% at the ceiling. The Standing price and the netrun anomaly matter most for players with little scrip.
+- **Stress.** At a 50% bug chance with no clearing and a ceiling of 8, the worker loses about 4.5 points of full-life rate (88.3% against 92.7%) and the casual netling does not move meaningfully. That is the edge of acceptable; the starting values are not near it.
+- **Removing the fault cap.** From B1 to B2, casual full-life rises 3 points and the worker 1.4, because neglect deaths (3.0% and 1.3% in these runs) now run on, and the neglectful archetype still dies of integrity collapse in essentially every life.
+- **Attentive and daredevil players get almost no bugs**, as intended.
+- **Not modeled:** bugs from netrun-disconnect faults (about a fifth of casual faults), Heat gained from actions such as playing (only the Heat drift is scaled), clearing with Standing or by anomaly, any change in how a real player reacts to a glitching sprite, and the temper effects of bugs. The bots clear only at their scheduled check-ins. So this probably understates the loop slightly and overstates how late bugs are cleared.
 
 **Egg page drop rate** (computed from a simple model, so it is arithmetic, not a simulation)
 
@@ -276,7 +300,7 @@ What to watch:
 
 ### Risks to check
 
-- **Standing resets each life (decided), so the starting state is zero on both tracks.** That removes the worry that a line repeats the same lean, but it has two consequences. First, the hidden form's "low Standing on both tracks" is the default state, so that form means mastering all four games while staying unremarkable to both the corp and the street. Second, at the teen check a netling with no clear lead is a tie and is settled by the tie-break rule (a random pick, weighted toward unseen forms). It is the hidden path only if the games are met.
+- **Standing resets each life (decided), so the starting state is zero on both tracks.** That removes the worry that a line repeats the same lean, but it has two consequences. First, the hidden form's Standing condition (the tracks within 1 point of each other) is the default state at zero, so that form is a matter of mastering all four games and not taking a side. Second, at the teen check a netling with no clear lead is a tie and is settled by the tie-break rule (a random pick, weighted toward unseen forms). It is the hidden path only if the games are met.
 - **Removing the fault cap changes 1.0's death rules.** In 1.0 a life ends by integrity collapse, by neglect (10 care mistakes) or at the end of the life cycle, and Root Access can undo the first two. Without the cap, only integrity collapse and the end of the life cycle remain, and Root Access undoes only the first. Against the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 simulated lives per archetype), the neglect cap ended 4.8% of the casual archetype's lives, 4.2% of the neglectful one's, 1.7% of the worker's and none for the others. The neglectful archetype already died of integrity collapse in 95.8% of its lives. That agrees with the view that the cap rarely matters, but it is simulation, not real players. After the change, those few lives would run on or die of integrity collapse instead, so a balance run is needed.
 - **The Segfault item loses its risk.** It adds 2 faults deliberately, and its cost was that faults could end a life. In 2.0 it becomes a temper push with no fatal cost. Its design (or its cost) needs a look. Its name per egg stays in the item table.
 - **Netrun faults.** 1.0's netrun adds a care mistake on some disconnects, clamped below the cap. Without a cap that clamp goes, and the mistake becomes a temper nudge.
@@ -395,7 +419,7 @@ Why each (sources are the Jargon File, the CP2020 glossary and the FDA glossary)
 - **Wired:** cyberware, especially increased reflexes (CP2020). Dodge.
 - **Gibson:** a psychic, or unexplained phenomena in the Net (CP2020). Tune.
 - **Leech:** CP2020 defines it only as a street doctor or med-tech; the Feast link comes from the word, not the glossary.
-- **Blank:** a person without a SIN, unknown to the system (CP2020). The hidden form, matching a low Standing on both tracks.
+- **Blank:** a person without a SIN, unknown to the system (CP2020). The hidden form, a netling that takes no side (Standing within 1 point).
 
 ### Second form names for option C (proposal)
 
@@ -548,7 +572,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 The backlog. None of this has been decided or drafted.
 
 - Per-egg meters and care buttons: Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
-- The exact tells per egg and the numbers for temper accrual (see Evolution); how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions (mastering all four games, and perhaps low Standing on both tracks).
+- The exact tells per egg and the numbers for temper accrual (see Evolution); how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions are set (all four games mastered, Standing within 1 point).
 - Baby and teen stages and forms per egg; the elder stage rules (1.0's Mainframe gating replaced); Source access rules.
 - Netrun abilities per form, regions per egg, events per egg, and the tutorial run per egg.
 - The Rogue egg beyond the merge idea and its gate.
