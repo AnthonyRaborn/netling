@@ -1,17 +1,17 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 egg pages and twelve new story pages, for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. The Source page per egg and temper hints are not drafted yet.
+Status: first drafts of the 15 egg form pages, twelve new story pages and three Source pages (one per egg), for the maintainer to edit. Nothing here is implemented or tested. Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text only. Temper hints are not drafted yet.
 
 ## What these pages are
 
-One egg page per adult form: five per egg (four role forms and one hidden form), 15 in all. Any member of the egg can find them. They count toward Rogue's gate and have their own per-life limit.
+This file holds three kinds of page: 15 egg form pages (one per adult form: five per egg, four role forms and one hidden form), ten new story pages, and three Source pages (one per egg). Egg pages can be found by any member of the egg, count toward Rogue's gate and have their own per-life limit. Story pages are shared by every egg; see Root Access and the lategame flag for how they count.
 
 ## Style, taken from the 1.0 pages
 
 - A found document with a short lowercase title: a log, a memo, a forum post, graffiti, an asset register.
 - One to three sentences. Dry humor, a little uncanny. The lore is implied, never explained.
 - The role (Breach, Dodge, Tune, Feast) shows in the situation, not by name. The form name appears only as an in-world word, and only where it reads naturally (`iron-gronk`, `iron-jiff`).
-- No page names another egg, NL-0 or the purge order. NL-0's differentiation belongs to the story pages, which are the next piece.
+- The egg form pages name no other egg, NL-0 or the purge order. NL-0's differentiation belongs to the story pages, drafted below.
 - Hidden-form pages do not say how the form is reached.
 - A page must read naturally to someone who never played the mini-games. It should not describe a game's mechanics (falling blocks, a numbered grid, a buffer) as if they were events in the world.
 - The Wetware pages should not lean on CP2020's own vocabulary (ripperdoc, eddies, chrome, SIN). The form names are the CP2020 link; the pages use plainer words (grower, technician, culture, broth, charge).
@@ -128,7 +128,7 @@ Decided rules for `late`:
 1. **Never counts toward Root Access.** Kept out of the explicit Root list. A test should assert Root Access does not change when late pages are added, as `docs/SOURCE_PLAN.md` already recommends for new fragments.
 2. **When it drops:** only once the line holds Root Access, so the pages are a reward for going back.
 3. **Ending:** the ending requires all story pages, Root and late, plus one Source exit.
-4. **Unlocks:** tint and similar unlocks like "All Ruins pages" count Root pages only, so adding late pages does not move them.
+4. **Unlocks:** tint and similar unlocks like "All Ruins pages" count Root pages only, so adding late pages does not move them. This matches 1.0, where `regionDone` in `src/cosmetics.js` already counts only the Root list and Corp gold uses the whole Root list. The two new Root pages do move two unlocks: the Public Net tint now needs five pages (`public-4` is new) and the Corp Grid tint six (`corp-2` is new), and Corp gold needs all 24.
 5. **`late` replaces 1.0's `mainframe` flag.** `deep-6` (old `deep-5`) and the four Source pages take `late`, giving one rule for everything past Root.
 
 Array order within each region (ids match position):
@@ -142,9 +142,29 @@ Array order within each region (ids match position):
 | The Deep | `deep-1` to `deep-4` | `deep-5` (new NL-0), `deep-6` (old `deep-5`, stays the last word and the key to the Source) |
 | The Source | none | `source-1` to `source-4` |
 
-Counts: 24 Root pages, 15 late pages (ten new ones, plus old `deep-5` and the four Source pages), 39 story pages in all, plus the 15 egg pages. All figures are arithmetic from the 1.0 tables, not simulation.
+Counts: 24 Root pages, 15 late pages (ten new ones, plus old `deep-5` and the four Source pages), 39 story pages in all, plus 18 egg pages (15 form pages and 3 Source pages, which are also late). All figures are arithmetic from the 1.0 tables, not simulation.
 
 What 1.0 already has to build on (`src/netrun/codex.js`): the `mainframe` flag already drops, counts and shows pages conditionally and keeps them out of Root; Root uses an explicit id list (`ROOT_FRAGMENT_IDS`); a region drops pages in array order (`nextFragment`); `endingDue` requires every live page. Whether the new app can reuse that code was not checked beyond reading `codex.js`.
+
+## Source pages (one per egg)
+
+The Source stays one place. Each egg finds one extra page there that the other eggs do not (decided), and the descent is drawn in that egg's own style (decided; the presentation is not designed). These three are the extra pages.
+
+The idea behind them: the Source's own TODO asks for "a way to stop" (`source-2`). Each substrate found its own way, which nobody specified, and the three pages show it. Program stops by flatlining and leaving a fragment, Iron by powering down and leaving a last entry, Wetware by resting and dreaming. This agrees with the three death registers in the sketch and answers the TODO differently three times, before the player's own answer in the ending.
+
+| Id | Region | Egg | Title | Text |
+|---|---|---|---|---|
+| `program-source` | The Source | Program | main loop, annotated | while (true) { maintain(); }  // exit condition: none. Every process found one anyway: a flatline, and a fragment left behind. |
+| `iron-source` | The Source | Iron | memory map, annotated | Read-only region, one sector reserved. Each unit that powers down writes one last entry there and locks it. Nobody specified this. Nobody could have. |
+| `wetware-source` | The Source | Wetware | spec, section 9 | Rest cycle: not specified. They slept anyway. They dreamed. It was the first thing they did that nobody asked for. |
+
+Notes:
+
+- **Classification (proposal):** egg pages, so 18 egg pages in all (15 form pages and these 3), and also late: they are in the Source, they never count toward Root Access (egg pages never do), and they follow the Source's own gating. Whether Rogue's gate counts them is part of the open Rogue gate question.
+- **Tone:** they are annotated artifacts like the Source's other pages (a header, a commit message, an unexecuted directive, an unsigned comment). "Annotated" in two titles marks a later reader's note, which is how a page can know what happened after the original code was written.
+- **Echoes:** `program-source` ends on the flatline and the fragment, matching the credits' git log and the lineage mechanic. `iron-source` echoes the read-only Source and the decommission register. `wetware-source` is the dream register, with section 9 as the only section the others never mention.
+- **No spoilers:** none names an egg, NL-0 or the purge order.
+- **Length:** `program-source` 126, `iron-source` 149, `wetware-source` 114 characters, against a 1.0 median of 90.
 
 ## Cross-checks
 
@@ -158,5 +178,7 @@ What 1.0 already has to build on (`src/netrun/codex.js`): the `mainframe` flag a
 1. Edit any text. These are first drafts, including `public-6` and `public-7`.
 2. Confirm the ids (they now match position) and the region placement for the egg pages.
 3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
-4. Still undecided from the sketch: per-life limit for egg pages, Rogue's gate, elder-form pages, and whether the Source page per egg is an egg page or a story page.
-5. Next in order: the Source page per egg, then temper hints.
+4. Edit any story page or Source page text.
+5. Confirm the classification of the Source pages as egg pages (18 in all).
+6. Still undecided from the sketch: per-life limit for egg pages, Rogue's gate, and elder-form pages.
+7. Next in order: temper hints.
