@@ -159,28 +159,30 @@ Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 s
 
 **Standing sources and size (decided as a starting point)**
 
-- A corp or scavenged packet adds 0.1 to its track. COMPLY or HIDE adds 0.5. A market purchase adds 0.5. Plain care and mini-games add nothing, so a player can stay at zero on both tracks (my suggestion, accepted as part of "a good start").
-- The sources the maintainer did not name are open: a Corp voucher, a Black ICE shard, an ignored trace, checkpoint choices, and anomaly choices. My test below gave the ones that were 1 in 1.0 a value of 0.5.
-- Standing now has fractions, so the gap thresholds (a tie within 1, certain at 5) are in these units unless Standing is rounded for display and decisions. Which is meant is open.
+- A corp or scavenged packet adds 0.25 to its track. COMPLY, HIDE, an ignored trace, checkpoint choices and anomaly choices add 1 (the maintainer raised these to see what they give). A market purchase adds 0.5. Plain care and mini-games add nothing, so a player can stay at zero on both tracks.
+- A Corp voucher and a Black ICE shard are not named. I assumed 1, as in 1.0. Open.
+- **Display and decisions (decided):** decisions use the fractional values. The display shows the floor of each track and is clearly labeled as a rough estimate, so a player who wants a guaranteed form has to take a stronger stance. A displayed track can be up to 1 below the true value, so a displayed gap can be off by up to 1 either way. A displayed gap of 6 or more guarantees a true gap above 5 (a certain lean); a displayed gap of 5 might be a true gap of 4 to 6.
+- The earlier run (packets 0.1, decisions 0.5) gave casual a gap of about 1.4 at adulthood and steerers only 3.2 to 3.4 at the teen check, so the teen preview was weak. It is superseded by the numbers below.
 
-What those sizes do (measured, with limits). I ran 1.0's balance tool on a scratch copy with feeds at 0.1, the 1.0 one-point decisions halved to 0.5, and the netrun one-point leans halved. 150 simulated lives per archetype. The gap is approximated by the absolute value of 1.0's single signed allegiance, which is the closest 1.0 equivalent of the corp-minus-street gap; 2.0's two tracks were not simulated.
+What those sizes do (measured, with limits). I ran 1.0's real simulator (`simulate()` from `tools/balance.mjs`) with packets at 0.25 and everything else at 1.0's own values, which already match the new ones: decisions and checkpoints at 1, markets at 0.5. 300 lives per archetype. The gap is approximated by the absolute value of 1.0's single signed allegiance, the closest 1.0 equivalent of the corp-minus-street gap; 2.0's two tracks were not simulated. "Leader chance" is the weight formula from Tie breaks (4 against clamp(5 minus the gap, 0, 4)) applied to each life's gap and averaged.
 
-| Archetype | Gap at teen, 1.0 values | Gap at teen, feed 0.1 | Gap at adult, 1.0 values | Gap at adult, feed 0.1 | Gap at adult, feed 0.25 |
-|---|---|---|---|---|---|
-| Casual | 2.6 | 0.65 | 4.3 | 1.4 | 1.8 |
-| Attentive | 3.1 | 0.79 | 5.1 | 1.6 | not run |
-| Steered Chrome (feeds and chooses corp) | 16.1 | 3.2 | 42 | 9.0 | 15.9 |
-| Steered Firewall | 18.9 | 3.4 | 52.6 | 11.5 | not run |
-| Corp-only feeding, no netruns | 11.2 | 1.8 | 27.6 | 4.3 | 9.5 |
-| Street-only feeding, no netruns | 12.8 | 2.0 | 33.0 | 5.4 | 11.5 |
+| Archetype | Teen: mean gap | Teen: certain (gap 5 or more) | Teen: coin flip (gap 1 or less) | Teen: leader chance | Adult: mean gap | Adult: certain | Adult: coin flip | Adult: leader chance |
+|---|---|---|---|---|---|---|---|---|
+| Casual | 1.4 | 1% | 50% | 55% | 2.5 | 11% | 27% | 65% |
+| Attentive | 1.7 | 0% | 38% | 57% | 2.9 | 21% | 25% | 68% |
+| Worker | 1.1 | 0% | 61% | 53% | 1.8 | 3% | 39% | 58% |
+| Daredevil | 2.0 | 7% | 35% | 61% | 4.1 | 35% | 17% | 76% |
+| Corp-only feeding, no netruns | 4.3 | 27% | 0% | 84% | 10.3 | 100% | 0% | 100% |
+| Street-only feeding, no netruns | 4.8 | 45% | 0% | 89% | 12.7 | 100% | 0% | 100% |
+| Steered Chrome | 7.3 | 92% | 0% | 99% | 19.5 | 100% | 0% | 100% |
+| Steered Firewall | 7.9 | 98% | 0% | 100% | 24.3 | 100% | 0% | 100% |
 
-What it means with the tie rule (a gap of 5 or more is certain, 0 to 1 is a coin flip, about 80% at 4):
+What it means:
 
-- **Casual and attentive players** stay near a coin flip at both checks (gap about 0.7 at the teen, about 1.5 at adulthood). That is the intent: a player who has not chosen gets a random lean.
-- **A committed steerer** is certain by adulthood (gap 9 to 11.5) but not at the teen check (gap about 3.2 to 3.4, about 67% to 70% for the leader). So the teen is only a weak preview of the lean, even for a player who is steering.
-- **A player who only feeds one packet type** ends adulthood at about 4.3 to 5.4, right at the edge of certain. Decisions and netrun choices are what carry a lean at these sizes.
-- **If the teen preview should be reliable for a steerer**, two levers fit: raise the packet value to about 0.25 (steerers reach about 5.8 at the teen, feed-only about 9.5 to 11.5 at adulthood, casual still near a coin flip at 1.8), or lower the "certain" gap from 5 to about 3. Not decided; the starting values stay as the maintainer set them.
-- **Caveats:** one signed number stands in for two tracks, 150 lives is small, and the unnamed sources were set to 0.5 by me. The hidden path's "low on both" is not tested here.
+- **Players who steer are predictable early.** A committed steerer is almost always certain at the teen check, and a player who feeds only one packet type is mostly certain by adulthood and at least 84% at the teen. This fixes the weak teen preview from the earlier run.
+- **Players who do not steer stay random.** Casual, attentive and worker netlings are a coin flip about a third to a half of the time and about 55% to 68% for the leader on average. That is the intent: no stance, no guarantee.
+- **The middle is real.** A casual player who commits a little (checkpoint and anomaly choices at 1 each) can move from the coin to roughly 70% to 80% in a life, which makes small stances worth something.
+- **Caveats:** one signed number stands in for two tracks, which can differ (a netling with both tracks high is a "broker" with a small gap and large totals, and 1.0's allegiance cannot show that); 300 lives is small; the hidden path's "low on both" was not measured; and Standing sources in 2.0 are not the same as 1.0's allegiance sources, so the totals are a rough guide.
 
 **Wins that make a role**
 
@@ -217,7 +219,7 @@ What it means with the tie rule (a gap of 5 or more is certain, 0 to 1 is a coin
 
 **Bug anomaly:** it is one entry in the anomaly pool, so its frequency is its share of the pool times the anomaly share of nodes. Not set.
 
-**Scrip and Standing prices** are above. **Segfault (decided):** it adds 2 faults (as in 1.0), pushes temper noticeably volatile, and has a 60% chance of adding a bug. I read the 60% as one roll for the whole use, adding at most one bug. For comparison, two plain faults at 30% each add at least one bug 51% of the time (the 49% figure is the chance of none) and can add two. The size of the temper push is not set.
+**Scrip and Standing prices** are above. **Segfault (decided):** it adds 2 faults (as in 1.0) and pushes temper noticeably volatile. One roll decides its bugs: 60% for one bug, 15% for two, 25% for none, so 75% for at least one. For comparison, two plain faults at 30% each give 42% for exactly one bug, 9% for two and 49% for none (51% for at least one), so a Segfault is about 24 points likelier to add a bug and has an expected 0.9 bugs against 0.6 (maintainer's figures, my check of the arithmetic). The size of the temper push is not set.
 
 ### Tie breaks (decided)
 
@@ -536,7 +538,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
-9. Evolution: Standing sources are set as a starting point (see Starting numbers); open are the unnamed sources (voucher, Black ICE, ignored trace, checkpoints, anomalies), whether Standing is rounded for decisions, and whether the teen preview should be made more reliable (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen; no wins threshold is needed for a role); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
+9. Evolution: Standing sources and sizes are set as a starting point (see Starting numbers); open are the Corp voucher and Black ICE shard values, and whether the measured spread (steerers certain early, everyone else random) is the intended feel. Tie breaks are decided (see Tie breaks); a netling with no lead is then just a tie, so there is no separate default teen, and no wins threshold is needed for a role.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
 11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
 12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
