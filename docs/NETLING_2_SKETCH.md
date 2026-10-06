@@ -380,7 +380,34 @@ What it means:
 - **Strong unsteady needs sustained heat and no cooling.** Overclocker lives are strongly unsteady 66% of the time at adulthood and 72% by the end; daredevils, who cool when they can, 17% and 24%, with most of the rest unsteady.
 - **Hot play dominates temper.** A casual player's drift toward unsteady is mostly faults; a hot player's is Heat. Both read as the same tell, which is fine because temper is personality, not a form lever.
 - **Without decay the numbers are not usable.** At the end of life, 1.0's cumulative stability spans about -44 to +22 (the 10th to 90th percentile across archetypes), and the strong levels would be permanent.
-- **Not measured:** the 2.0 temper sources as built, how often a player is in flow against overclocked (the maintainer's observation that overclocking is easier is taken as given; the simulator does not log it), a flicker guard (hysteresis) so a tell does not flip at a threshold, the effect of temper on care preferences, and decay per minute against per check-in. A 48-hour half-life was also run at flow +0.2: it widens the spread (casual's end of life 17% strongly unsteady), so 24 hours stays closer to recent habits.
+- **Not measured:** the 2.0 temper sources as built, how often a player is in flow against overclocked (the maintainer's observation that overclocking is easier is taken as given; the simulator does not log it), a flicker guard (hysteresis) so a tell does not flip at a threshold, the effect of temper on care preferences (proposed below, not tested), and decay per minute against per check-in. A 48-hour half-life was also run at flow +0.2: it widens the spread (casual's end of life 17% strongly unsteady), so 24 hours stays closer to recent habits.
+
+### Care preferences (proposal)
+
+Preferences stay hidden (decided): there is no Dex hint for them. The player finds them the way 1.0's favorite packet is found, from a log line and a small Sync gain. They need no new sprite work, only log text and numbers.
+
+**Rule.** The temper level decides which care choices please the netling.
+
+| Level | It likes | A match is |
+|---|---|---|
+| Strongly steady, steady | Routine | A feed of the same packet type as its last feed, or a mini-game that is one of its last two plays |
+| Middle | Nothing in particular | No bonus |
+| Unsteady, strongly unsteady | Novelty | A feed of the other packet type, or a mini-game that is not one of its last two plays |
+
+- **Reward:** Sync, on top of anything else. Mild levels +2, strong levels +4, once per action. It stacks with the favorite-packet bonus (+8 in 1.0) and with a form's perk.
+- **No penalty for a miss.** An unmatched action is simply normal. This keeps unsteady from being strictly worse, and steady from being strictly better.
+- **Log lines, as with "it loves these":** steady, "it settles into the routine."; unsteady, "something new. it perks up." Wording is a draft.
+- **Equal chance under random play.** With two packet types and four games, "same as the last" would match half the feeds but only a quarter of the plays, while "different from the last" would match half and three quarters. Using "one of the last two plays" for steady and "not one of the last two" for unsteady makes both about half under random choices, so neither side has an edge by luck. Real players' habits then decide it.
+
+**How big, from the 1.0 simulator (the number of care actions, not a preference test).** Average actions a life: casual 44 corp feeds, 44 scavenged feeds and 56 plays (144 in all); attentive 54, 55 and 73 (182); worker 30, 29 and 46 (105). At +2 and a match on every action, casual would gain 288 Sync a life at a mild level and 576 at a strong one. Sync drains at 13.2 an hour, so over a full life that is at most about 1,600 (an upper bound, since drain is lower asleep). So always matching would offset about 18% (mild) to 36% (strong) of Sync drain, and matching about half the time, about 9% to 18%. For comparison, 1.0's favorite packet (+8 on about half of 88 feeds) is about 350 Sync a life for casual, so +2 and +4 are smaller than something already in the game. Those figures are estimates.
+
+**Interplay with evolution (not a form rule).**
+
+- Steady repeats the same packet and the same games, which pushes Standing steadily one way and concentrates wins in one game. That favors a clear lean and a certain role.
+- Unsteady switches packets and games, which keeps Standing balanced and spreads wins across the four games. That is also what the hidden path needs (Standing within 1 point, every game played).
+- So personality gives a soft push toward specializing (steady) or toward the hidden path (unsteady). Temper still does not choose a form, and the push is worth +2 to +4 Sync an action, but it is a real effect and worth knowing before it ships.
+
+**Not tested.** The simulator's bots cycle games in a fixed order and pick packets at random, so they cannot test a preference-following player. A bot that follows the preference (and one that ignores it) is needed to measure the effect on faults and full-life rates, and to check the Sync estimate. The numbers (+2 and +4) are starting values.
 
 ### Catalogue: what affects temper (1.0 code and docs)
 
