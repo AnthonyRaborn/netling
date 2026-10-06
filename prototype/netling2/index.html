@@ -39,9 +39,12 @@
     <h2>HOW MODEL A IS BUILT</h2>
     <p class="note">Body (grey), role overlay (pink), lean overlay (yellow; erased cells dark red) and the result, in the A frame.</p>
     <div id="layers" class="row"></div>
-    <h2>NEGLECT LOOK (Iron: rust)</h2>
-    <p class="note">Levels 0, 1 and 2 on one form of each stage. It never moves, never changes the outline, and is separate from the temper tell.</p>
+    <h2>NEGLECT FROM UNMET NEEDS (Iron: rust)</h2>
+    <p class="note">Levels 0, 1 and 2 on each form. Driven by the four care sliders above (1.0's alert lines: Charge or Sync under 20, Heat over 80; earlier soft lines), transient, so it clears when the needs are met. It never moves and never changes the outline.</p>
     <div id="neglectRow" class="row"></div>
+    <h2>BUGS AS GLITCHES</h2>
+    <p class="note">0 to 5 bugs on Gronk, the still view. Each bug tears one more row a column sideways and stays until the bug is cleared. In motion a bugged netling also twitches a row every 3 s (use the bugs slider; reduced motion removes the twitch).</p>
+    <div id="bugRow" class="row"></div>
     <h2>TEMPER TELL OVER TIME</h2>
     <p class="note">The selected skin and level over 12 seconds: the picture (A high, B low, a dip for the blink), the settle or drift in columns and rows, and the brightness. Flash budget: no change closer than 200 ms.</p>
     <canvas id="timeline" width="720" height="190" style="width: 720px; height: 190px"></canvas>
@@ -56,6 +59,8 @@
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { neglected } from './neglect.js';
+      import { guardedNeglect } from './needs.js';
+      import { glitched, MAX_BUGS } from './glitch.js';
       import { authoring, sharedCells, lineOverlaps, modelGap } from './metrics.js';
 
       const fail = (e) => {
@@ -68,7 +73,7 @@
         const { ACCESSORIES, drawWorn } = await import('../../src/accessories.js');
 
         // temper is the hidden number; level is what the tell shows (it only moves GUARD past a threshold)
-        const state = { palette: 0, egg: 'iron', temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0 };
+        const state = { palette: 0, egg: 'iron', temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
         const A = forms('A');
         const B = forms('B');
         const LCD = { w: 40, h: 28 };
@@ -95,7 +100,15 @@
         const tLabel = document.createElement('span');
         bar.append(tLabel);
         t.oninput = () => (state.temper = Number(t.value));
-        select('neglect', [[0, 'none'], [1, 'worn'], [2, 'neglected']], 'neglect ', true);
+        // Neglect comes from unmet needs (transient); bugs are a persistent count with their own glitch look.
+        for (const [key, label] of [['charge', 'charge '], ['sync', 'sync '], ['integrity', 'integrity '], ['heat', 'heat ']]) {
+          const el = add(label, Object.assign(document.createElement('input'), { type: 'range', min: 0, max: 100, step: 1, value: state.stats[key], style: 'width: 80px' }));
+          el.oninput = () => (state.stats[key] = Number(el.value));
+        }
+        const bugs = add('bugs ', Object.assign(document.createElement('input'), { type: 'range', min: 0, max: MAX_BUGS, step: 1, value: state.bugs, style: 'width: 80px' }));
+        bugs.oninput = () => (state.bugs = Number(bugs.value));
+        const nLabel = document.createElement('span');
+        bar.append(nLabel);
         const seed = add('seed ', Object.assign(document.createElement('input'), { type: 'number', min: 0, max: 99, value: state.seed, style: 'width: 4em' }));
         seed.oninput = () => (state.seed = Number(seed.value) || 0);
         const flag = (key, label) => {
@@ -139,11 +152,14 @@
           ctx.fillRect(0, 0, LCD.w, LCD.h);
           const awake = state.pose === 'awake';
           const neglect = fixed?.neglect ?? state.neglect;
+          const nBugs = fixed ? fixed.bugs ?? 0 : state.bugs;
           const tell = awake && !fixed ? temperTell({ egg: state.egg, level: state.level, time, reduced: state.reduced, seed: state.seed }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
           const key = state.pose === 'sleep' || tell.blink ? 'sleep' : state.pose === 'dead' ? 'dead' : tell.frame ? 'b' : 'a';
           const sprite = f[key];
           const anchorsKey = key === 'dead' ? 'a' : key;
-          const look = neglect && key !== 'dead' ? neglected(sprite, f.anchors[anchorsKey], neglect, state.seed) : sprite;
+          const rusty = neglect && key !== 'dead' ? neglected(sprite, f.anchors[anchorsKey], neglect, state.seed) : sprite;
+          // Bugs tear rows (persistent); the twitch only moves when motion is allowed.
+          const look = nBugs && key !== 'dead' ? glitched(rusty, f.anchors[anchorsKey], nBugs, { time, reduced: state.reduced || Boolean(fixed), seed: state.seed }) : rusty;
           const x = Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx;
           const y = 20 - sprite.length + tell.dy + (awake ? 0 : 1);
           ctx.globalAlpha = tell.shade;
@@ -165,7 +181,9 @@
 
         // Neglect strip: three levels on one form of each stage, model B's art.
         const nr = document.getElementById('neglectRow');
-        for (const id of LINE) for (const level of [0, 1, 2]) cells.push({ ctx: canvasFor(nr, `${id}, level ${level}`, 4), f: B[id], fixed: { neglect: level } });
+        for (const id of LINE) for (const level of [0, 1, 2]) cells.push({ ctx: canvasFor(nr, `${id}, neglect ${level}`, 4), f: B[id], fixed: { neglect: level } });
+        const br = document.getElementById('bugRow');
+        for (let n = 0; n <= MAX_BUGS; n++) cells.push({ ctx: canvasFor(br, `gronk, ${n} bug${n === 1 ? '' : 's'}`, 4), f: B.gronk, fixed: { bugs: n } });
 
         // Model A layers: body, role overlay, lean overlay, result.
         const layers = document.getElementById('layers');
@@ -250,6 +268,8 @@
         function frame(now) {
           if (!state.paused) clock = now;
           state.level = guardedLevel(state.temper, state.level);
+          state.neglect = guardedNeglect(state.stats, state.neglect);
+          nLabel.textContent = `neglect ${state.neglect} (needs), bugs ${state.bugs}`;
           tLabel.textContent = `${state.temper.toFixed(1)} raw ${levelOf(state.temper)}, shown ${state.level} (guard ${GUARD})`;
           for (const c of cells) drawCell(c, clock);
           drawTimeline();

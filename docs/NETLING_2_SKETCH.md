@@ -57,6 +57,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and the egg-specific codex pages (the merge itself uses lineage fragments).
 - Each egg's elder stage has its own form. (Refined, see below: one elder per adult.)
 - Elders (decided): one elder per adult, each a variant of the adult it grows from, as 1.0's mainframes are of their lines. That is 9 per egg and 27 in all, each wider than its adult (18 columns against 16) and no taller than 15 rows. Elder forms still get no pages. The names are not decided.
+- Neglect and bugs (decided to try): neglect is a transient look from unmet care needs; bugs are a persistent look, glitches on the sprite, that stay until cleared.
 - Teens and hidden paths (decided): the two main teens per egg (corp lean, street lean) may differ only slightly. The hidden path must be distinct, so a hidden-path teen needs its own outline, not just marks over the others'.
 - New codex pages are allowed. NL-0's differentiation is carried by pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
 - The Source stays one place (option B with a touch of A): each egg finds one extra page there that the others do not, and the descent is drawn in that egg's own style.
@@ -159,7 +160,7 @@ Neglect must be visible, and faults no longer are. So the netling itself shows i
 
 - **A neglected look per body.** A reversible state tied to needs left unmet, readable at a glance (dimmed, worn, glitching, or a posture), with a calmer version when motion is reduced and nothing that flashes more than three times a second.
 - **Separate from temper.** Temper shows through motion rhythm and idle behavior. Neglect needs a different channel (pose, color, wear) so the two are not confused.
-- **Whether it lasts.** The look can clear when needs are met, or leave a mark that persists to the next stage. A persistent mark would be the Stub-like consequence of 1.0. Not decided. Open (maintainer, not decided). What would drive the look is also open: the prototype takes the level as a manual control and reads nothing from the simulation. Candidates are the care needs left unmet (transient, clears as soon as they are met), or uncleared bugs (persistent until cleared, as Standing is), or both, with bugs as the persistent layer. If bugs show as glitches on the sprite, a separate neglect look may be redundant; see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md).
+- **Whether it lasts.** The look can clear when needs are met, or leave a mark that persists to the next stage. A persistent mark would be the Stub-like consequence of 1.0. Not decided. Decided to try (maintainer): neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches on the sprite (torn rows, one more per bug, until cleared). Two looks on two channels, so a recovered netling loses its neglect look at once and keeps its glitches until the bugs are cleared. Prototyped in [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md); not yet tuned or judged on a device.
 - **Per egg.** Each body (software, firmware, grown tissue) would show it in its own way.
 
 ### Starting numbers (proposal, not measured)

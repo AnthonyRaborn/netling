@@ -6,6 +6,8 @@ import { forms, compose, FORMS, LINE } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
+import { neglectLevel, guardedNeglect, LINES, GUARD as NEED_GUARD } from './needs.js';
+import { glitched, tearRows, MAX_BUGS, TWITCH_EVERY_MS, TWITCH_MS } from './glitch.js';
 import { register, protoKey, MODELS } from './register.js';
 import { lineOverlaps, authoring, modelGap } from './metrics.js';
 import { silhouetteIou } from '../../tools/lib/sprite-checks.mjs';
@@ -205,6 +207,130 @@ test('neglect grows and clears without jumping: level 2 contains level 1, patche
       assert.ok(patches(l2) - patches(l0) >= 3, `${f.id}: neglect barely visible`);
     }
   }
+});
+
+
+// --- what drives neglect: unmet needs (transient) ----------------------------------------------------------------------------
+const OK = { charge: 70, sync: 70, integrity: 100, heat: 20 };
+test('neglect level follows the care needs: 1.0 alert lines (Charge and Sync under 20, Heat over 80) and earlier soft lines', () => {
+  assert.equal(LINES.charge.alert, 20);
+  assert.equal(LINES.sync.alert, 20);
+  assert.equal(LINES.heat.alert, 80);
+  assert.equal(neglectLevel(OK), 0);
+  assert.equal(neglectLevel({ ...OK, charge: 39 }), 1);
+  assert.equal(neglectLevel({ ...OK, heat: 66 }), 1);
+  assert.equal(neglectLevel({ ...OK, charge: 19 }), 2);
+  assert.equal(neglectLevel({ ...OK, heat: 81 }), 2);
+  assert.equal(neglectLevel({ ...OK, charge: 39, sync: 39 }), 2, 'two needs past soft is neglected');
+  assert.equal(neglectLevel({ ...OK, integrity: 29 }), 2);
+});
+
+test('neglect is transient: it is a function of the stats now, so meeting the needs clears it', () => {
+  for (const bad of [{ charge: 5 }, { sync: 5 }, { heat: 95 }, { integrity: 10 }, { charge: 30, sync: 30 }]) {
+    assert.equal(neglectLevel({ ...OK, ...bad }) > 0, true);
+    assert.equal(neglectLevel(OK), 0);
+    assert.equal(guardedNeglect(OK, neglectLevel({ ...OK, ...bad })), 0, 'it clears once every need is clear of its line');
+  }
+});
+
+test('the neglect guard: a stat hovering on a line does not flip the look', () => {
+  for (const [need, { alert, soft }] of Object.entries(LINES)) {
+    for (const line of [soft, alert]) {
+      let level = neglectLevel({ ...OK, [need]: line + (LINES[need].dir === 'under' ? 5 : -5) });
+      let flips = 0;
+      for (let i = 0; i < 40; i++) {
+        const wobble = (i % 2 ? 1 : -1) * (NEED_GUARD - 1);
+        const next = guardedNeglect({ ...OK, [need]: line + wobble }, level);
+        if (next !== level) flips++;
+        level = next;
+      }
+      assert.ok(flips <= 1, `${need} at ${line}: flipped ${flips} times`);
+    }
+  }
+  // Well past a line it still moves, both ways.
+  assert.equal(guardedNeglect({ ...OK, charge: 10 }, 0), 2);
+  assert.equal(guardedNeglect(OK, 2), 0);
+});
+
+// --- what bugs look like: glitches (persistent until cleared) ---------------------------------------------------------------
+test('bugs: none is untouched, and each bug tears one body row a column, never an eye row, never losing a cell', () => {
+  for (const f of Object.values(forms('B'))) {
+    const anchors = f.anchors.a;
+    assert.equal(glitched(f.a, anchors, 0, { reduced: true, seed: 2 }), f.a);
+    const rows = tearRows(f.a, anchors);
+    assert.ok(rows.length >= MAX_BUGS, `${f.id}: only ${rows.length} rows can tear`);
+    for (let n = 1; n <= MAX_BUGS; n++) {
+      const g = glitched(f.a, anchors, n, { reduced: true, seed: 2 });
+      const torn = g.map((row, y) => (row !== f.a[y] ? y : -1)).filter((y) => y >= 0);
+      assert.equal(torn.length, n, `${f.id}: ${n} bugs tore ${torn.length} rows`);
+      for (const y of torn) {
+        assert.ok(rows.includes(y) && y !== anchors.eyeRow && y !== anchors.eyeRow + 1);
+        assert.equal([...g[y]].filter((c) => c !== '.').length, [...f.a[y]].filter((c) => c !== '.').length, `${f.id}: a cell was lost`);
+        const left = g[y] === '.' + f.a[y].slice(0, -1);
+        const right = g[y] === f.a[y].slice(1) + '.';
+        assert.ok(left || right, `${f.id}: row ${y} moved more than a column`);
+      }
+    }
+  }
+});
+
+test('bugs are persistent: the same for any time under reduced motion, a new bug adds a tear and clearing removes the last', () => {
+  for (const f of Object.values(forms('B'))) {
+    for (let n = 0; n <= MAX_BUGS; n++) {
+      const still = glitched(f.a, f.anchors.a, n, { reduced: true, seed: 7 });
+      for (const time of [0, 1234, 99_999]) assert.deepEqual(glitched(f.a, f.anchors.a, n, { time, reduced: true, seed: 7 }), still);
+      if (n) {
+        const fewer = glitched(f.a, f.anchors.a, n - 1, { reduced: true, seed: 7 });
+        const added = still.map((row, y) => (row !== fewer[y] ? y : -1)).filter((y) => y >= 0);
+        assert.equal(added.length, 1, `${f.id}: bug ${n} should add exactly one tear`);
+      }
+    }
+  }
+});
+
+test('bugs keep the form recognisable: the outline stays close to the original at the ceiling', () => {
+  for (const f of Object.values(forms('B'))) {
+    const g = glitched(f.a, f.anchors.a, MAX_BUGS, { reduced: true, seed: 1 });
+    const iou = silhouetteIou(f.a, g);
+    assert.ok(iou >= 0.8, `${f.id}: overlap ${iou.toFixed(2)}`);
+    assert.ok(iou < 1, `${f.id}: five bugs should show`);
+  }
+});
+
+test('the twitch: in motion one extra row tears for 400 ms every 3 s; under reduced motion there is none; no change closer than 200 ms', () => {
+  const f = forms('B').gronk;
+  const a = f.anchors.a;
+  const still = glitched(f.a, a, 2, { reduced: true, seed: 3 });
+  let changes = 0;
+  let last = null;
+  let lastAt = 0;
+  for (let t = 0; t < 60_000; t += 10) {
+    const g = glitched(f.a, a, 2, { time: t, seed: 3 });
+    const key = g.join('|');
+    const extra = g.filter((row, y) => row !== still[y]).length;
+    assert.equal(extra, t % TWITCH_EVERY_MS < TWITCH_MS ? 1 : 0, `t=${t}`);
+    if (last !== null && key !== last) {
+      changes++;
+      assert.ok(t - lastAt >= 200 || changes === 1, `changed after ${t - lastAt} ms`);
+      lastAt = t;
+    }
+    if (last === null || key !== last) lastAt = t;
+    last = key;
+  }
+  assert.ok(changes >= 2 * (60_000 / TWITCH_EVERY_MS) - 2, `${changes} changes`);
+  assert.deepEqual(glitched(f.a, a, 2, { time: 100, reduced: true, seed: 3 }), still);
+});
+
+test('neglect marks and bug glitches are separate channels and combine: rust then tears', () => {
+  const f = forms('B').gronk;
+  const rust = neglected(f.a, f.anchors.a, 2, 4);
+  const both = glitched(rust, f.anchors.a, 3, { reduced: true, seed: 4 });
+  const tearsOnly = glitched(f.a, f.anchors.a, 3, { reduced: true, seed: 4 });
+  // Same rows torn whether or not it is rusty, and rust only ever changes marks.
+  both.forEach((row, y) => assert.equal(row.replace(/x/g, '#'), tearsOnly[y].replace(/x/g, '#'), `row ${y}: rust must not change which cells are painted or where they tear`));
+  assert.ok(both.join('').includes('x') && both.join('') !== tearsOnly.join(''));
+  assert.equal(poseDistance(rust, f.a), 0, 'rust does not change the outline');
+  assert.ok(poseDistance(tearsOnly, f.a) > 0, 'tears do');
 });
 
 // --- temper tell -----------------------------------------------------------------------------------------------------------

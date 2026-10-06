@@ -15,7 +15,7 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 
 - **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). The prototype's elder is Gronk's.
 - **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which does not meet this: a hidden-path teen needs its own outline. The hidden adult (Guru) was already distinct (closest overlap 0.77).
-- **Neglect persistence:** not decided. See What drives neglect, below.
+- **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
 
 ## Scope
 
@@ -34,14 +34,15 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 - **Model B, authored.** The teen and Gronk drawn in full, each with its own anchor rows.
 - **Temper tell** (`tell.js`), the same for both, on the sketch's five levels (strongly unsteady at -6 or lower, unsteady, middle, steady from +3, strongly steady from +6). Steady is a countable beat, the same move on an exact interval (every 6 s, every 3 s when strongly steady, independent of any seed). Unsteady is growing chaos: a stuttering frame and a drift, more of both when strong. Skins per egg: Iron settles a row on the beat and drifts a column at a time; Program blinks, stutters and hops; Wetware has a clean beat that goes irregular. Reduced motion keeps the steady beat (calm, tiny, predictable) and gives the unsteady levels a still variant (Iron one column off its grid, Program holding its alternate frame, Wetware a dimmer steady shade).
 - **Flicker guard.** `guardedLevel(temper, currentLevel)` only moves the shown level once temper is 0.5 beyond a threshold, so a value hovering on one does not flip the tell. The 0.5 is a placeholder.
-- **Neglect look** (`neglect.js`). Iron's skin is rust: dim patches that spread from the bottom up in two levels, never over the eyes or above the mouth, never changing the outline. It does not move, so it is a different channel from temper, and reduced motion needs no variant. Anchors, poses and wearables are unaffected.
+- **Neglect look** (`neglect.js`, level from `needs.js`). Iron's skin is rust: dim patches that spread from the bottom up in two levels, never over the eyes or above the mouth, never changing the outline. It does not move, so it is a different channel from temper, and reduced motion needs no variant. Anchors, poses and wearables are unaffected.
+- **Bug glitch** (`glitch.js`). Each bug (0 to 5) tears one body row a column sideways; see What drives neglect and bugs.
 - **Review page:** `npm run serve`, then `http://localhost:5174/prototype/netling2/`. Both lines side by side, controls for palette, tell skin, temper, neglect, reduced motion, pose, any 1.0 wearable and the anchor rows, how the composed forms are built, the timeline of the tell, and the metrics.
 - **Poses.** Sleep and dead are generated from the A frame, as in 1.0 (X eyes when dead, slits asleep).
 - **Real wearables.** `register.js` adds the prototype sprites to the game's own `SPRITES` and `ANCHOR_ROWS` tables before `src/accessories.js` loads, so the 1.0 wearable code places items on them unchanged. This only happens in the prototype page and its tests.
 
 ## Results for the line
 
-Measured by `npm run proto:test` (28 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
+Measured by `npm run proto:test` (37 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
 
 | | Model A, composed | Model B, authored |
 |---|---|---|
@@ -90,23 +91,27 @@ Three conclusions, which the one-line prototype cannot show:
 The composition question is closed (see Decision).
 
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
-2. Neglect: see What drives neglect. Persistence and the input are both open.
+2. Neglect and bugs: the thresholds, the bug look and whether two looks are readable together on a device are untested; see What drives neglect and bugs.
 3. Hidden-path teens and the other eight elders are not drawn.
 4. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
 
-## What drives neglect
+## What drives neglect and bugs
 
-Nothing, in the prototype: `neglected(sprite, anchors, level, seed)` takes a level from 0 to 2 that the review page sets with a control. It reads nothing from the simulation, so the look has no persistence of its own; it is a pure function of the level it is given. The sketch only says it should be a reversible state tied to needs left unmet, and separately that bugs could show as glitches on the sprite.
+Decided to try (maintainer): **neglect comes from unmet needs and is transient; bugs are the persistent layer and show as glitches.** Two looks on two channels, so the player reads each at a glance.
 
-The candidates for the input, for the maintainer to choose between:
-
-| Input | Persistence | Notes |
+| | Neglect | Bugs |
 |---|---|---|
-| Care needs left unmet (Charge, Sync, Integrity, Heat) | Transient: clears as soon as the needs are met | Closest to the sketch's wording. Cheap. Does not outlast a recovered netling |
-| Uncleared bugs | Persistent until cleared with scrip, Standing or an anomaly, so it behaves like Bugs and Standing | Already planned to show as glitches. A mark per bug level fits the rust skin; the player can read it and fix it |
-| Both | Bugs persist, needs fade | Two layers on two channels (a persistent glitch and a transient dimming) |
+| Input | The four care stats (Charge, Sync, Integrity, Heat, 0 to 100), read now | The bug count, 0 to 5 (the sketch's ceiling) |
+| Persistence | Transient: a function of the stats now, so it clears as soon as the needs are met | Persistent: stays until the bugs are cleared (scrip, Standing or a netrun debug station) |
+| Look | Rust: dim patches on the body from the bottom up, in two levels. Marks only, never moves, never changes the outline | Glitch: each bug tears one more body row a column sideways, in a fixed order, so the count reads at a glance |
+| Motion | None, so reduced motion needs no variant | A bugged netling also twitches one more row for 400 ms every 3 s; reduced motion drops the twitch and keeps the still tears |
+| Code | `needs.js`, `neglect.js` | `glitch.js` |
 
-If bugs already show on the sprite, a separate neglect look may be redundant, and the real question becomes whether the needs layer is wanted at all. Mine to build either way; the choice is the maintainer's.
+- **Neglect lines.** 1.0's own alert lines (Charge or Sync under 20, Heat over 80, from `needsAttention` in `src/sim.js`) are the alert line. A soft line sits earlier (40, 40, and Heat at 1.0's overclock line of 65). Integrity has no alert line in 1.0 (a virus is the alert), so its lines (60 and 30) are mine, to tune. Level 1 (worn) is one need past its soft line; level 2 (neglected) is one need past its alert line or two past soft.
+- **Flicker guard.** A need has to clear a line by 3 points before the look changes back, so a stat hovering on a line does not flicker it. Placeholder, like the temper guard.
+- **Tests (37 in all):** neglect lines and the transient behavior, the guard, one torn row per bug and never an eye row or a lost cell, persistence under reduced motion, a new bug adding exactly one tear, the outline staying within 0.8 overlap at five bugs, the twitch timing and its 200 ms floor, and the two looks combining without interfering.
+- **Not measured:** how often needs sit past a line in real play (the balance tools have not been run on this), and how bugs and low needs overlap, since a neglected netling tends to fault and so to pick up bugs. Both looks can show at once; I have not judged whether that is too busy.
+- **Open:** whether five bugs on a small form read as five distinct states or as a smear; the Dex and log wording for either look; the Iron, Wetware and Program skins other than rust and torn rows.
 
 ## Not done
 
