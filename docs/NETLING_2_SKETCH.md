@@ -337,6 +337,7 @@ Temper is one number per netling, hidden, read only through the tells. **It rese
 | +0.5 | PURGE |
 | -1 | A slow PATCH, a Black ICE shard, a netrun disconnect |
 | -0.5 | A mini-game that leaves Heat above 70 |
+| +1 | Using a Coolant cell or an Antivirus patch (decided) |
 | 0 | Plain awake time |
 | -4 | A Segfault (two faults at -1 each, plus -2 for the noticeable push; proposal) |
 
@@ -354,34 +355,35 @@ Bugs raise Heat gain, so they push temper unsteady through the Heat rows, with n
 | Steady | +2 to +5 | steady tell |
 | Strongly steady | +5 or higher | strongest steady tell (clearest countable rhythm and ritual) |
 
-Share of lives at each level with flow at +0.5 (percent: strongly unsteady / unsteady / middle / steady / strongly steady):
+Share of lives at each level with flow at +0.5 and the Coolant cell and Antivirus patch at +1 each (percent: strongly unsteady / unsteady / middle / steady / strongly steady). The bots use a Coolant cell whenever Heat is above 70 and an Antivirus patch on a schedule or a virus, as soon as they have one:
 
 | Archetype | At teen | At adulthood | At end of life |
 |---|---|---|---|
-| Casual | 0/4/88/8/0 | 1/33/65/0/0 | 2/40/55/2/0 |
-| Worker | 0/4/91/5/0 | 0/34/65/0/0 | 3/49/47/0/0 |
-| Attentive | 0/0/29/58/13 | 0/0/29/58/13 | 0/0/15/55/30 |
-| Sysadmin (very attentive) | 0/0/24/65/12 | 0/0/17/65/19 | 0/0/8/41/51 |
-| Steer-daemon (aims for calm) | 0/0/16/65/20 | 0/0/11/62/26 | 0/0/2/32/66 |
-| Balance seeker | 0/1/22/64/13 | 0/0/14/65/21 | 0/0/6/37/57 |
-| Steer-glitch (runs warm) | 1/47/52/1/0 | 12/78/10/0/0 | 41/57/3/0/0 |
-| Daredevil (runs hot) | 17/70/14/0/0 | 62/37/1/0/0 | 84/16/0/0/0 |
-| Overclocker | 38/60/2/0/0 | 83/17/0/0/0 | 92/8/0/0/0 |
-| Neglectful | 11/63/26/0/0 | 37/63/0/0/0 | 19/56/25/0/0 |
+| Casual | 0/3/74/23/0 | 0/20/70/9/0 | 0/20/71/9/0 |
+| Worker | 0/3/87/10/0 | 0/24/73/3/0 | 2/37/56/4/0 |
+| Attentive | 0/0/16/58/26 | 0/0/12/52/36 | 0/0/5/34/61 |
+| Sysadmin (very attentive) | 0/0/19/62/19 | 0/0/10/57/33 | 0/0/5/29/66 |
+| Steer-daemon (aims for calm) | 0/0/8/55/37 | 0/0/5/40/55 | 0/0/0/14/86 |
+| Balance seeker | 0/1/19/56/24 | 0/0/10/52/38 | 0/0/4/25/71 |
+| Steer-glitch (runs warm) | 1/16/70/12/1 | 2/37/56/5/0 | 6/49/43/2/0 |
+| Daredevil (runs hot) | 6/43/48/4/0 | 17/57/24/2/0 | 24/53/22/1/0 |
+| Overclocker | 27/62/11/0/0 | 66/33/1/0/0 | 72/27/0/0/0 |
+| Neglectful | 11/62/27/0/0 | 34/66/0/0/0 | 18/56/25/0/0 |
 
 What it means:
 
-- **Flow at +0.5 fixes the steady side.** With flow at +0.2 and a strong-steady threshold of +4, attentive reached strongly steady in 7% of lives at adulthood; at +0.5 and a threshold of +5 it reaches 13%, and 58% are steady. With symmetric thresholds of 2 and 5 at flow +0.2 it was only 2% to 3%. Casual and worker netlings barely change, because they rarely reach flow.
+- **Items matter.** Without the +1 for Coolant cell and Antivirus patch, 62% of daredevil lives and 83% of overclocker lives were strongly unsteady at adulthood. With it, 17% and 66%. A warm-running player (steer-glitch) goes from 90% unsteady at adulthood to 39%, and the attentive archetype's strongly steady share at adulthood rises from 13% to 36%. The bots spend items immediately; a real player who stockpiles them will use fewer. Items are limited by drops and market stock, so this makes a Coolant cell a temper tool as well as a cooling one, and means a hot player can settle a temper deliberately.
+- **Flow at +0.5 fixes the steady side.** Before the item change, with flow at +0.2 and a strong-steady threshold of +4, attentive reached strongly steady in 7% of lives at adulthood; at +0.5 and a threshold of +5 it reached 13%, and with symmetric thresholds of 2 and 5 at flow +0.2 only 2% to 3%. Casual and worker netlings barely change, because they rarely reach flow.
 - **Tells appear where behavior is clear.** Casual and worker netlings are mostly middle at the teen check (88% to 91%) and drift mildly unsteady by adulthood (about a third), mostly from faults and Heat. Careful players are steady most of the time.
-- **Strong steady takes sustained calm.** Attentive reaches it in 13% of lives at adulthood and 30% by the end; players who aim for calm reach 19% to 26% at adulthood and 51% to 66% by the end.
-- **Strong unsteady is easy to reach by running hot** (62% to 92% of daredevil and overclocker lives by adulthood or the end).
+- **Strong steady takes sustained calm, helped by items.** Attentive is strongly steady in 36% of lives at adulthood and 61% by the end; players who aim for calm reach 37% to 55% at adulthood and 71% to 86% by the end.
+- **Strong unsteady needs sustained heat and no cooling.** Overclocker lives are strongly unsteady 66% of the time at adulthood and 72% by the end; daredevils, who cool when they can, 17% and 24%, with most of the rest unsteady.
 - **Hot play dominates temper.** A casual player's drift toward unsteady is mostly faults; a hot player's is Heat. Both read as the same tell, which is fine because temper is personality, not a form lever.
 - **Without decay the numbers are not usable.** At the end of life, 1.0's cumulative stability spans about -44 to +22 (the 10th to 90th percentile across archetypes), and the strong levels would be permanent.
 - **Not measured:** the 2.0 temper sources as built, how often a player is in flow against overclocked (the maintainer's observation that overclocking is easier is taken as given; the simulator does not log it), a flicker guard (hysteresis) so a tell does not flip at a threshold, the effect of temper on care preferences, and decay per minute against per check-in. A 48-hour half-life was also run at flow +0.2: it widens the spread (casual's end of life 17% strongly unsteady), so 24 hours stays closer to recent habits.
 
 ### Catalogue: what affects temper (1.0 code and docs)
 
-Checked against `src/sim.js`, `src/netrun/run.js`, `src/netrun/anomalies.js` and `docs/CONTENT_CATALOG.md`. In 1.0 these change the stability axis, which 2.0's temper replaces. Items that touch temper directly are few, as remembered: only the Segfault and the Black ICE shard.
+Checked against `src/sim.js`, `src/netrun/run.js`, `src/netrun/anomalies.js` and `docs/CONTENT_CATALOG.md`. In 1.0 these change the stability axis, which 2.0's temper replaces. In 1.0 only the Segfault and the Black ICE shard touch temper directly. In 2.0 the Coolant cell and the Antivirus patch also add +1 (decided).
 
 **Items (nine in 1.0)**
 
@@ -389,8 +391,8 @@ Checked against `src/sim.js`, `src/netrun/run.js`, `src/netrun/anomalies.js` and
 |---|---|---|
 | Segfault | Direct, strong | +2 faults; -1 each in 1.0. 2.0 proposal: -4 at once and a 60/15/25 chance of 1, 2 or no bugs |
 | Black ICE shard | Direct, mild | -1, plus +20 Heat (which can push toward the Heat rows) and street Standing |
-| Coolant cell | Indirect | Vents 50 Heat, so it prevents the Heat 85+ and overclocking rows |
-| Antivirus patch | Indirect | Cures or prevents a virus, so it avoids the slow PATCH (-1) |
+| Coolant cell | Direct, mild (decided) | +1 when used, and it vents 50 Heat, which also stops the Heat 85+ and overclocking rows |
+| Antivirus patch | Direct, mild (decided) | +1 when used, and it cures or prevents a virus, which avoids the slow PATCH (-1) |
 | Corp voucher, Signal booster, Memory shard, Repair kit, Bypass chip | None | A voucher moves corp Standing only; the rest touch other stats |
 
 **Actions and care**
@@ -421,7 +423,7 @@ Checked against `src/sim.js`, `src/netrun/run.js`, `src/netrun/anomalies.js` and
 
 The debug station anomaly proposed for clearing bugs has no temper effect set.
 
-Two things the catalogue shows. First, almost nothing besides faults, Heat and PATCH and PURGE moves temper, so temper is mostly an echo of how the netling is cared for and how hot it runs. Second, no item raises temper directly. If the steady side should be reachable by an item, that would be new content; not decided.
+Two things the catalogue shows. First, almost nothing besides faults, Heat and PATCH and PURGE moves temper, so temper is mostly an echo of how the netling is cared for and how hot it runs. Second, with the Coolant cell and Antivirus patch now at +1, two items raise temper (toward steady) and two lower it (Segfault, Black ICE shard), so a player has a small amount of control in both directions.
 
 ### Risks to check
 
