@@ -4,7 +4,7 @@
 //   Model B, authored: the teen and the adult drawn in full.
 // Baby and elder are the same art in both (one each per egg, no role or lean).
 //
-// The line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and the Elder. The sketch's
+// The line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder. The sketch's
 // full tree (3 teens and 9 adults per egg) was prototyped earlier and is in git history at commit 580db88.
 import { BABY, ELDER, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
@@ -13,7 +13,7 @@ export const FORMS = {
   baby: { stage: 'baby' },
   teenStreet: { stage: 'teen', lean: 'street' },
   gronk: { stage: 'adult', role: 'breach', lean: 'street' },
-  elder: { stage: 'elder' },
+  gronkElder: { stage: 'elder', from: 'gronk' }, // one elder per adult (decided): a variant of the adult it grows from
 };
 export const LINE = Object.keys(FORMS);
 

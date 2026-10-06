@@ -8,12 +8,18 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 
 - Each form is drawn in full and carries its own anchor rows, as in 1.0. The prototype ran every 1.0 wearable on the authored forms unchanged.
 - The sprite audit and gallery will need the new forms added; the temper tell and neglect look are independent of how a form is built, so they carry over.
-- Cost, an extrapolation from the Iron figures and not a measurement: the wider run was 3146 hand-placed cells for 3 teens and 9 adults, plus 512 for baby and elder, so roughly 3700 cells per egg and about 11000 for three, before any rework after review.
+- Cost, an extrapolation from the Iron figures and not a measurement: the wider run was 3146 hand-placed cells for 3 teens and 9 adults, plus 154 for the baby, plus one elder per adult at 430 each as drawn (both frames), so roughly 7200 cells per egg and about 21500 for three, before any rework after review. The elders are over half of that.
 - The composed code (`OVERLAYS`, `LEAN_OVERLAYS`, `TEEN_OVERLAYS`, `compose`, model A in `models.js`) stays in the prototype for reference and can be deleted; it is in git history either way.
+
+### Decided since (maintainer)
+
+- **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). The prototype's elder is Gronk's.
+- **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which does not meet this: a hidden-path teen needs its own outline. The hidden adult (Guru) was already distinct (closest overlap 0.77).
+- **Neglect persistence:** not decided. See What drives neglect, below.
 
 ## Scope
 
-One line, four forms, as the maintainer asked: Iron, baby to elder. The line is **Baby, a street-leaning Teen, Gronk (Breach, street lean) and the Elder**. The sketch's full tree (3 teens and 9 adults per egg under option C) is not in this prototype. An earlier, wider version that drew all of it is in git history at commit `580db88`; its measured numbers are quoted below, marked as such, because the code that produced them is no longer in the tree. The line is a table (`FORMS` in `models.js`), so another can be swapped in.
+One line, four forms, as the maintainer asked: Iron, baby to elder. The line is **Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder**. The sketch's full tree (3 teens and 9 adults per egg under option C) is not in this prototype. An earlier, wider version that drew all of it is in git history at commit `580db88`; its measured numbers are quoted below, marked as such, because the code that produced them is no longer in the tree. The line is a table (`FORMS` in `models.js`), so another can be swapped in.
 
 ## What was built
 
@@ -22,7 +28,7 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 | Baby | Baby | 12 x 11 | authored, shared | authored, shared |
 | Teen | Teen (street lean) | 14 x 12 | teen body + street overlay | authored in full |
 | Adult | Gronk (Breach, street) | 16 x 14 | adult body + Breach overlay + street lean overlay | authored in full |
-| Elder | Elder | 18 x 15 | authored, shared | authored, shared |
+| Elder | Gronk's Elder | 18 x 15 | authored, a variant of Gronk, shared | authored, a variant of Gronk, shared |
 
 - **Model A, composed.** A body per stage with overlays merged onto it. An overlay is a layer the size of the body: a mark replaces the body cell, `_` erases it, `.` leaves it. The street lean is lopsided (one antenna, a notched head corner, a taped patch); Breach adds horn studs, a toothed grille and heavy shoulders. All forms of a stage share the body's anchor rows.
 - **Model B, authored.** The teen and Gronk drawn in full, each with its own anchor rows.
@@ -42,18 +48,19 @@ Measured by `npm run proto:test` (28 tests) and shown on the page. Silhouette ov
 | Hand-placed cells, teen and adult | 556 | 548 |
 | Sprites drawn | 10 | 4 |
 
-Baby and elder are 512 hand-placed cells in both.
+Baby and the elder are 584 hand-placed cells in both (154 and 430).
 
 | Stage against stage (outline overlap) | A | B |
 |---|---|---|
 | Baby and Teen | 0.73 | 0.73 |
 | Baby and Gronk | 0.51 | 0.48 |
-| Baby and Elder | 0.44 | 0.44 |
+| Baby and Elder | 0.37 | 0.37 |
 | Teen and Gronk | 0.69 | 0.64 |
-| Teen and Elder | 0.55 | 0.55 |
-| Gronk and Elder | 0.70 | 0.72 |
+| Teen and Elder | 0.50 | 0.50 |
+| Gronk and Elder | 0.70 | 0.77 |
 
 - **Both read as one line.** Every pair is under 0.82 and over 0.3, in both models.
+- **The elder is a variant of its adult.** It keeps Gronk's horns, slanted brow, toothed jaw and broad shoulders, grown to 18 columns and 15 rows. Against the authored Gronk it overlaps 0.77, the closest of any form in the line and inside the 0.77 to 0.82 that 1.0's mainframes sit at against their adult line; a test checks it. Against the composed Gronk it is 0.70, a small extra reason the authored adult suits a derived elder.
 - **For one line the models cost the same.** A needs two bodies and three overlays to make two forms, so it has nothing to amortize. Composing only pays when the bodies are reused across many forms.
 - **Where they differ.** The composed teen has the same outline as the authored one and differs by 2 mark cells. Composed Gronk differs from authored Gronk by 20 outline cells and 22 mark cells (outline overlap 0.89): the authored Gronk has a rounder brow, angry eyes and a ragged hem that an overlay on the shared body does not give.
 - **Wearables.** 984 cases (every 1.0 wearable on all four forms and every pose, both models, through the real `placeWorn`). Four clip one pixel above the screen: the holologo on the 15 row sprites (the elder in both models). 1.0's own 15 row forms (Chrome, Firewall and the mainframes) clip the same way, so this is an existing quirk, not something the prototype adds. I did not change it.
@@ -82,11 +89,24 @@ Three conclusions, which the one-line prototype cannot show:
 
 The composition question is closed (see Decision).
 
-1. Teens: both models read them as marks over one outline. Is that enough of a preview of the lean?
-2. Elder: one authored form per egg, as built, or grown from the adult body?
-3. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
-4. Neglect: reversible and tied to unmet needs, as the sketch asks, or does a mark persist to the next stage? The prototype only draws the reversible look.
-5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
+1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
+2. Neglect: see What drives neglect. Persistence and the input are both open.
+3. Hidden-path teens and the other eight elders are not drawn.
+4. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
+
+## What drives neglect
+
+Nothing, in the prototype: `neglected(sprite, anchors, level, seed)` takes a level from 0 to 2 that the review page sets with a control. It reads nothing from the simulation, so the look has no persistence of its own; it is a pure function of the level it is given. The sketch only says it should be a reversible state tied to needs left unmet, and separately that bugs could show as glitches on the sprite.
+
+The candidates for the input, for the maintainer to choose between:
+
+| Input | Persistence | Notes |
+|---|---|---|
+| Care needs left unmet (Charge, Sync, Integrity, Heat) | Transient: clears as soon as the needs are met | Closest to the sketch's wording. Cheap. Does not outlast a recovered netling |
+| Uncleared bugs | Persistent until cleared with scrip, Standing or an anomaly, so it behaves like Bugs and Standing | Already planned to show as glitches. A mark per bug level fits the rust skin; the player can read it and fix it |
+| Both | Bugs persist, needs fade | Two layers on two channels (a persistent glitch and a transient dimming) |
+
+If bugs already show on the sprite, a separate neglect look may be redundant, and the real question becomes whether the needs layer is wanted at all. Mine to build either way; the choice is the maintainer's.
 
 ## Not done
 

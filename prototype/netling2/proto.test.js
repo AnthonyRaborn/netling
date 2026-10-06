@@ -8,13 +8,14 @@ import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FR
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
 import { register, protoKey, MODELS } from './register.js';
 import { lineOverlaps, authoring, modelGap } from './metrics.js';
+import { silhouetteIou } from '../../tools/lib/sprite-checks.mjs';
 import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
 
 // --- the line ---------------------------------------------------------------------------------------------------------------
-test('the line is four forms in life order: baby, a street-leaning teen, Gronk (Breach, street) and the elder', () => {
-  assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'elder']);
+test('the line is four forms in life order: baby, a street-leaning teen, Gronk (Breach, street) and Gronk\'s elder', () => {
+  assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'gronkElder']);
   assert.deepEqual(LINE.map((id) => FORMS[id].stage), ['baby', 'teen', 'adult', 'elder']);
   assert.deepEqual(Object.keys(forms('A')), LINE);
   assert.deepEqual(Object.keys(forms('B')), LINE);
@@ -61,10 +62,10 @@ for (const model of MODELS) {
 
 }
 
-test('the two models share baby and elder, and build the teen and Gronk differently', () => {
+test('the two models share baby and the elder, and build the teen and Gronk differently', () => {
   const A = forms('A');
   const B = forms('B');
-  for (const id of ['baby', 'elder']) assert.deepEqual(A[id].a, B[id].a);
+  for (const id of ['baby', 'gronkElder']) assert.deepEqual(A[id].a, B[id].a);
   for (const id of ['teenStreet', 'gronk']) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
 });
 
@@ -85,6 +86,22 @@ test('every overlay is its body size in both frames, and changes the body', () =
   for (const [k, o] of Object.entries(OVERLAYS)) check(ADULT_BODY, o, `role ${k}`);
   for (const [k, o] of Object.entries(LEAN_OVERLAYS)) check(ADULT_BODY, o, `lean ${k}`);
   for (const [k, o] of Object.entries(TEEN_OVERLAYS)) check(TEEN_BODY, o, `teen ${k}`);
+});
+
+// --- one elder per adult --------------------------------------------------------------------------------------------------------
+test('the elder is a variant of its adult: wider, no taller than 15 rows, closest in outline to the adult it grows from', () => {
+  const set = forms('B');
+  const elder = set.gronkElder;
+  assert.equal(FORMS.gronkElder.from, 'gronk');
+  assert.ok(elder.a[0].length > set.gronk.a[0].length && elder.a.length <= 15);
+  const overlap = (id) => silhouetteIou(elder.a, set[id].a);
+  console.log(`  elder against gronk ${overlap('gronk').toFixed(2)}, teen ${overlap('teenStreet').toFixed(2)}, baby ${overlap('baby').toFixed(2)}`);
+  // 1.0's mainframes sit at 0.77 to 0.82 of their adult line, and closer to it than to any other form.
+  assert.ok(overlap('gronk') > overlap('teenStreet') && overlap('gronk') > overlap('baby'));
+  assert.ok(overlap('gronk') >= 0.7 && overlap('gronk') < 0.9, overlap('gronk').toFixed(2));
+  // It keeps the adult's marks: the horn studs on the top row, the toothed jaw and the broad shoulders.
+  assert.ok(elder.a[0].includes('#') && elder.a[8].includes('+#+') && elder.a[9].startsWith('##'));
+  assert.ok(set.gronk.a[8].includes('+#+'));
 });
 
 // --- the line and the two models -----------------------------------------------------------------------------------------------
@@ -338,5 +355,5 @@ test('the three eggs read differently at the same level', () => {
 
 test('the anchor table covers every form, and the shared bodies', () => {
   for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[id], id);
-  assert.ok(spriteCells(forms('B').elder.a).length > spriteCells(forms('B').gronk.a).length);
+  assert.ok(spriteCells(forms('B').gronkElder.a).length > spriteCells(forms('B').gronk.a).length);
 });
