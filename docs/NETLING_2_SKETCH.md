@@ -224,7 +224,7 @@ What it shows:
 - **Stress.** At a 50% bug chance with no clearing and a ceiling of 8, the worker loses about 4.5 points of full-life rate (88.3% against 92.7%) and the casual netling does not move meaningfully. That is the edge of acceptable; the starting values are not near it.
 - **Removing the fault cap.** From B1 to B2, casual full-life rises 3 points and the worker 1.4, because neglect deaths (3.0% and 1.3% in these runs) now run on, and the neglectful archetype still dies of integrity collapse in essentially every life.
 - **Attentive and daredevil players get almost no bugs**, as intended.
-- **Not modeled:** bugs from netrun-disconnect faults (about a fifth of casual faults), Heat gained from actions such as playing (only the Heat drift is scaled), clearing with Standing or by anomaly, any change in how a real player reacts to a glitching sprite, and the temper effects of bugs. The bots clear only at their scheduled check-ins. So this probably understates the loop slightly and overstates how late bugs are cleared.
+- **Not modeled:** bugs from netrun-disconnect faults (1.27 disconnects a life for casual, against 4.6 faults), Heat gained from actions such as playing (only the Heat drift is scaled), clearing with Standing or by anomaly, any change in how a real player reacts to a glitching sprite, and the temper effects of bugs. The bots clear only at their scheduled check-ins. So this probably understates the loop slightly and overstates how late bugs are cleared.
 
 **Egg page drop rate** (computed from a simple model, so it is arithmetic, not a simulation)
 
