@@ -25,7 +25,8 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Each egg has 5 adult forms: one per mini-game (Breach, Dodge, Tune, Feast) plus one hidden form that masters all four. The role is a descriptor for the DEX and hints, not the form's name.
 - The story set needs more pages than 1.0, to cover the two extra eggs and the lore they imply.
 - `bazaar-1` is a shared story page, reworded to "Netlings don't sell. They pick you, or they don't."
-- `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become Program egg pages (the Chrome, Daemon, Firewall and Glitch pages, all adult forms). `deep-3` stays a shared story page.
+- `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` become shared story pages about Standing and Temper (not Program egg pages), reworded to hint at v1.0 as an alpha stage of the current plan. `deep-3` stays a shared story page. All 15 egg pages are therefore new.
+- Form names changed after review: Snark to Mouse, Wabbit to Snarf, Jiffy to Jiff, Slurp to Munch, and the hidden Iron form is Guru, not Wizard. The non-hidden Iron forms stay monosyllabic.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
@@ -87,77 +88,84 @@ Decided: it shows through all three channels at once, in every egg. Proposal for
 
 ## Adult forms and names
 
-Decided: one adult form per mini-game, plus a hidden form that masters all four. The role (Cracker, Evader, Seer, Scavenger) describes the form in the DEX and hints; it is not the name. 1.0's names are single evocative words (Daemon, Glitch, Ghost), so these should be too.
+Decided: one adult form per mini-game, plus a hidden form that masters all four. The role (Cracker, Evader, Seer, Scavenger) describes the form in the DEX and hints; it is not the name. 1.0's names are single evocative words (Daemon, Glitch, Ghost), so these are too.
 
-Naming rule proposed here: each egg draws its names from its own vocabulary, so the egg is recognizable from the name alone. Names fit their role loosely, because the role is carried by the descriptor.
+Naming rule: each egg draws its names from its own vocabulary, so the egg is recognizable from the name alone. Names fit their role loosely, because the role is carried by the descriptor. The non-hidden Iron names are monosyllabic (decided).
 
 | Egg | Vocabulary | Breach | Dodge | Tune | Feast | Hidden |
 |---|---|---|---|---|---|---|
-| Program | Jargon software folklore | Worm | Snark | Phantom | Wabbit | Ghost |
-| Iron | Jargon machine sounds and timings | Gronk | Jiffy | Feep | Slurp | Wizard |
+| Program | Software folklore (Jargon, CP2020) | Worm | Mouse | Phantom | Snarf | Ghost |
+| Iron | Jargon machine sounds and timings | Gronk | Jiff | Feep | Munch | Guru |
 | Wetware | CP2020 street and body slang | Razor | Wired | Gibson | Leech | Blank |
 
 Why each (sources are the Jargon File, the CP2020 glossary and the FDA glossary):
 
 - **Worm:** a program that propagates across network connections (Jargon, FDA). Fits getting through a grid.
-- **Snark:** Jargon's "unexplained or threatening event" on a computer, from Lewis Carroll. Hard to pin down, which suits an evader. The poem's Snark that vanishes is from memory, not from a source read here.
+- **Mouse:** from CP2020's "mouse around", to explore in a very low-profile manner. An evader.
 - **Phantom:** a Stanford Jargon 1.0 term for a background program, with the news-wire monitor given as a typical one. A watcher, so a Seer.
-- **Wabbit:** Jargon for a hack that endlessly replicates. A creature that consumes resources by multiplying.
+- **Snarf:** Jargon for grabbing a large file, and in the 1960s "to eat piggishly". Feast.
 - **Ghost:** kept from 1.0. NL-0's line in `deep-3` ("the ones you call ghost...") can then cover all three hidden forms as what players call them.
 - **Gronk:** to cut, sever or smash, and the sound of a diskette drive (Jargon 4.4.7). Smashing through.
-- **Jiffy:** a tiny interval of time (Jargon 1.0). Quick.
+- **Jiff:** short for Jargon 1.0's "jiffy", a tiny interval of time. Quick.
 - **Feep:** the soft bell of a terminal (Jargon). A signal, so Tune.
-- **Slurp:** to read a whole file into memory (Jargon 1.0). Feast.
-- **Wizard:** someone who knows how a complex piece of hardware or software works and can fix it in an emergency (Jargon). The master.
+- **Munch:** Jargon for transforming information serially, close to crunch but with less pain. Feast.
+- **Guru:** Jargon 4.4.7: an expert with wizard skill and a history of being a knowledge resource for others. That last part matches the shared lineage.
 - **Razor:** heavily cybered muscle-for-hire (CP2020). Cuts through defenses.
 - **Wired:** cyberware, especially increased reflexes (CP2020). Dodge.
 - **Gibson:** a psychic, or unexplained phenomena in the Net (CP2020). Tune.
 - **Leech:** CP2020 defines it only as a street doctor or med-tech; the Feast link comes from the word, not the glossary.
 - **Blank:** a person without a SIN, unknown to the system (CP2020). The hidden form, matching a low Standing on both tracks.
 
-Alternates: Program Breach Trojan or Cowboy; Dodge Boojum or Mouse; Tune Gibson or Dragon; Feast Snarf or Zombie; hidden Wizard or Wheel. Iron Feast Munch; hidden Guru or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace.
+Alternates: Program Breach Trojan or Cowboy; Dodge Snark or Boojum (Snark was dropped as too close to Snarf); Tune Dragon; hidden Wheel. Iron Feast Slurp; hidden Wizard or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace. Wabbit was dropped (too close to Elmer Fudd).
 
 Not yet named: the elder (mainframe-stage) forms, and the teen forms.
-
-Consequence for the four existing pages: `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` name the 1.0 classes Chrome, Daemon, Firewall and Glitch. With role forms, what they describe is no longer a form: corp-loyal and street-minded are Standing, orderly and volatile are Temper, and both exist in every egg. Two options:
-1. Keep them as Program egg pages and reword them for Worm, Snark, Phantom and Wabbit (or as the corp's register of older classes).
-2. Make them shared story pages about Standing and Temper. Then all 15 egg pages are new, the story set stays at 22 pages, and the thin Corp Grid and Bazaar sets recover.
-Option 2 is the recommendation, because the text is about loyalty and temperament, not a role. This reverses the earlier decision, so it needs the maintainer's call.
 
 ## Codex pages
 
 Two kinds (decided):
 
 - **Story pages:** shared by every egg. Root Access needs these at minimum. Cosmetic and other unlocks default to story pages. They keep the 1.0 per-life cap (8 a life). More are needed than in 1.0, to cover the two extra eggs and the lore they imply.
-- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden (like Ghost in 1.0), so 5 egg pages per egg and 15 in all. Any member of the egg can find its form pages. They count toward Rogue's gate. They do not share the story pages' per-life limit; they get their own, to be set with the balance tools. The earlier idea of a page per teen form is discarded.
+- **Egg pages:** specific to one egg, one per adult form. Each egg has 5 adult forms, one of them hidden, so 5 egg pages per egg and 15 in all, all new. Any member of the egg can find its form pages. They count toward Rogue's gate. They do not share the story pages' per-life limit; they get their own, to be set with the balance tools. The earlier idea of a page per teen form is discarded.
 
 ### The six form-bound 1.0 pages
 
-| Page | Form it names | Decision |
+All six become shared story pages (decided). The first four describe Standing and Temper, which exist in every egg, so they are not tied to a role form.
+
+| Page | 1.0 meaning | Decision |
 |---|---|---|
-| `corp-4` | Chrome (adult) | Program egg page |
-| `corp-5` | Daemon (adult) | Program egg page |
-| `bazaar-5` | Firewall (adult) | Program egg page |
-| `bazaar-4` | Glitch (adult) | Program egg page |
-| `bazaar-1` | Firewall | Shared story page, reworded "Netlings don't sell. They pick you, or they don't." |
-| `deep-3` | Ghost (adult) | Shared story page (NL-0's voice). The hidden Program form still needs its own egg page. |
+| `corp-4` | Chrome-class: corp-loyal | Shared story page about Standing, reworded to hint at v1.0 as an alpha |
+| `corp-5` | Daemon-class: orderly, never stopped the original job | Shared story page about Temper, reworded the same way |
+| `bazaar-5` | Firewall: street-minded, distrusts upstream | Shared story page about Standing, reworded the same way |
+| `bazaar-4` | Glitch: volatile, "a choice" | Shared story page about Temper, reworded the same way |
+| `bazaar-1` | Firewall | Shared, reworded "Netlings don't sell. They pick you, or they don't." |
+| `deep-3` | Ghost (NL-0's voice) | Shared, unchanged |
+
+### Rewording the four pages (proposal)
+
+Lore frame: v1.0 was an alpha of a larger plan. This reconciles two things already decided. The corp's plan is the roadmap, and NL-0 differentiating to escape the purge is it finishing that roadmap. The FDA glossary supports the framing: alpha testing happens "in a controlled environment at the developer's site" (the quarantined host sectors of `corp-3`), while beta is "in a live application ... in an environment not controlled by the developer" (the wild). `ruins-3` already treats v1.0 as a version number.
+
+Drafts, keeping the original lines and adding a light hint. For the maintainer to edit:
+
+- `corp-4` (asset register): "Build v1.0 (alpha). Chrome-class: KERNEL descendants loyal to corp credentials. Re-licensed as mascots. Profitable. Class definitions to be revised for later builds."
+- `corp-5` (asset register, cont.): "Daemon-class: KERNEL descendants that never stopped doing the original job. Unlicensed, unpaid, still patching our servers at 3 a.m. Recommendation: do not interrupt. Alpha cohort only; later builds not yet observed."
+- `bazaar-5` (runner's journal): "Mine turned Firewall the week the corp traced me. Now every probe bounces off. It doesn't trust anything upstream. It took a month to decide it trusted me. Old build, they say. A first draft."
+- `bazaar-4` (graffiti in a dead market): "GLITCH IS NOT A BUG. GLITCH IS A CHOICE. v1.0 WAS ONLY THE ALPHA."
+
+The class names (Chrome, Daemon, Firewall, Glitch) remain as the corp's and the runners' own words from the alpha, even though no 2.0 form uses them. That helps the hint: the old classes are out of date. The lore stays implied; none of the lines names the other eggs.
 
 ### Page counts
 
 Arithmetic from the 1.0 tables, not a simulation.
 
-- Program egg: 5 adult pages. Four exist (Chrome, Daemon, Firewall, Glitch); one is new, for the hidden form (Ghost in 1.0 terms).
-- Iron and Wetware: 5 new egg pages each. So 11 new egg pages in total.
-- Story set: the original 22 Root pages minus `corp-4`, `corp-5`, `bazaar-5` and `bazaar-4` is 18 pages (public 4, corp 3, bazaar 3, ruins 4, deep 4). Beyond Root: `deep-5` and `source-1` to `source-4`, 5 pages, unchanged. At 8 a life, 18 story pages still takes 3 lives, so the "at least 3 lives" goal holds, and new story pages only add to this.
-- The Corp Grid and the Bazaar now have 3 story pages each, against 5 each in 1.0. Restoring that parity would be about 2 new story pages each, 4 in all, more if the lore needs it.
+- Story set: the original 22 Root pages are unchanged in count (public 4, corp 5, bazaar 5, ruins 4, deep 4). Beyond Root: `deep-5` and `source-1` to `source-4`, 5 pages. At 8 a life, 22 story pages takes 3 lives, as in 1.0. New story pages for the two extra eggs add to this.
+- Egg pages: 15, all new (5 per egg).
 
 ### What follows
 
-- Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only.
+- Unlocks default to story pages, so tint unlocks like "All Corp Grid fragments" count story pages only. The Corp Grid and the Bazaar keep their five pages each.
 - Corp deletion failing differently per egg should be told in the Iron and Wetware egg pages, not by editing `corp-3`, which stays shared.
-- In-world version numbering: `ruins-3` ("back to v1.0"), `source-1` ("last write: before v1.0") and the intro script `netling.v1.0.sh` use "v1.0" as lore. The 2.0 product name does not have to change that, but the two should not be confused.
+- In-world version numbering: `ruins-3` ("back to v1.0"), `source-1` ("last write: before v1.0") and the intro script `netling.v1.0.sh` use "v1.0" as lore. With the alpha framing, v1.0 now has a meaning in the story: the first build of a plan that later builds continue. The 2.0 product name should not be confused with it.
 - The word "fragment" is used in-world for lineage records (`bazaar-2`, `bazaar-3`, `ruins-3`, `deep-2`, `deep-4`), so renaming only the codex side to "pages" keeps the lore consistent.
-- The five adult forms per egg are one per mini-game plus a hidden master; names are proposed in Adult forms and names. Whether four existing pages stay egg pages depends on the first open questions.
 
 ## Hidden egg
 
@@ -204,15 +212,15 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. **Names:** approve or change the 15 form names above. Elder and teen forms still need names.
-1a. **The four existing pages:** keep them as Program egg pages (reworded) or make them shared story pages about Standing and Temper (recommended)? This changes the counts: 11 new egg pages become 15, and the story set stays at 22.
-2. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. NL-0's differentiation pages are still planned for the Ruins (Iron) and the Bazaar (Wetware).
-3. What per-life limit do egg pages get, and should it be tuned with the balance tools?
-4. Do elder (mainframe-stage) forms get pages? The rule so far covers adult forms only.
-5. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
-6. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
-7. Text is unwritten for: the new Program hidden-form page, the Iron set, the Wetware set, the Source page per egg, and the new story pages.
-8. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
+1. **Names:** approve the 15 form names above. Elder and teen forms still need names.
+2. **The alpha framing:** is "the plan" the corp's roadmap that NL-0 finished (the proposal above), or another plan? Approve or edit the four drafted rewordings.
+3. Where do form pages drop: the egg's home region, or any region? Any member of the egg can find them. NL-0's differentiation pages are still planned for the Ruins (Iron) and the Bazaar (Wetware).
+4. What per-life limit do egg pages get, and should it be tuned with the balance tools?
+5. Do elder (mainframe-stage) forms get pages? The rule so far covers adult forms only.
+6. Rogue's gate: all 15 egg pages, or a subset such as all of one egg?
+7. Is the one extra Source page per egg an egg page (so more than 15) or a story page?
+8. Text is unwritten for: all 15 egg pages, the Source page per egg, and the new story pages for the two extra eggs.
+9. Temper hints come after the codex pages. A hint should name a behavior to look for, not a temper value.
 
 ## Not done
 
