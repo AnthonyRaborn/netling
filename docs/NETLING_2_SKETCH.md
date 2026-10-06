@@ -8,7 +8,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 
 **Next steps, in the maintainer's order.**
 1. Review and edit the page drafts in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md): 15 egg form pages, twelve new story pages and three Source pages. The four approved rewordings of 1.0 pages are in this file, under Rewording the four pages.
-2. Write the temper hints: a hint should name a behavior to look for, not a temper value.
+2. Settle Evolution (adult form count and the open rules in the Evolution section), then write the temper hints: a hint should name a behavior to look for, not a temper value.
 3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
 
 **Document map.** This file holds the decisions, the architecture and the open questions. [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) holds all page text. [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) is the reference review that started this, partly superseded.
@@ -66,6 +66,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The intro script drops its version: it is `netling.sh`, not `netling.v1.0.sh`. A versioned file name does not belong on a script that is properly versioned. The version shows only in the compile output and the UI label, as in 1.0.
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
+- Evolution direction (see Evolution): Standing and the mini-game roles are the levers; faults feed temper; temper is personality and does not choose forms; teens depend on Standing only, except the hidden path, which also needs the games played.
 - The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
 - Root Access and the twelve new story pages: only `public-4` (classified ad) and `corp-2` (release schedule) count toward Root, which then needs 24 pages. The other ten carry the `late` flag and never count toward Root. `late` pages drop only once the line holds Root, are required by the ending, are ignored by regional unlocks, and replace 1.0's `mainframe` flag. Ids match drop position, so some 1.0 ids move (mapping in the drafts file). Ids in this sketch's older text are 1.0 ids unless noted.
 - In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Wired, Gibson, Leech, Blank) stay as they are.
@@ -75,7 +76,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 | Layer | Decided by | Replaces in 1.0 |
 |---|---|---|
 | Egg (substrate) | The player's choice at the prompt | The single fixed software egg |
-| Temper (body) | One hidden axis, orderly to volatile, shown by behavior and sprite tells | Stability axis, Daemon and Glitch |
+| Temper (body) | One hidden axis, orderly to volatile, fed by faults and handling, shown by behavior and sprite tells. It shapes personality, not the form (decided; see Evolution) | Stability axis and its pull on Daemon and Glitch |
 | Role | What it specialized in, from the four mini-games | Netrun abilities tied to form |
 | Standing | Visible reputation that carries across lives | Allegiance axis, Chrome and Firewall |
 
@@ -86,6 +87,62 @@ Proposal: roles map to the four games. Breach to a Cracker, Dodge to an Evader, 
 Proposal: traits act on abstract drives (Upkeep, Exposure, Reward, Risk). Each egg maps the drives to its own meters, so lineage and traits are shared across eggs.
 
 Proposal: all three bodies share anchor rows (head, face, body, float) so the 41 wearables work unchanged.
+
+## Evolution
+
+Sketch from the maintainer's direction on 2026-10-06, prompted by [issue 28](https://github.com/AnthonyRaborn/netling/issues/28) on 1.0 (a player who met the games requirement and kept allegiance neutral still guessed wrong on the hidden stability axis). Items marked decided come from the maintainer; the rest is a proposal.
+
+### Decided
+
+- Allegiance becomes Standing. Stability becomes Temper.
+- Forms tie to the mini-games, at least in style, through the four roles.
+- Evolution should be fairly predictable to an observant player. 1.0's problem was continuous hidden axes that nothing shows. Other virtual pets route on a few countable levers: Digimon uses one lever on some devices (effort or training) and more on others (level, condition); 1.0's issue also cites care mistakes and discipline mistakes for Tamagotchi. I did not check any device beyond what the issue says.
+- Standing is at least one of the levers.
+- Faults (care mistakes) feed Temper. Temper is mostly personality: how the netling interacts, talks and idles, and possibly its care preferences. It does not choose a form.
+- Teens depend on Standing only, except the hidden path, which also needs the games played, as 1.0's Shell does (3 wins in each of the four games).
+
+### Does Standing as a lever force more forms?
+
+Yes, if Standing is supposed to change the adult form. For one role (say Breach), Standing has to produce at least two different outcomes, or it is not a lever at that stage. With two Standing leans (corp ahead of street, or street ahead of corp) and four roles, that is 8 role forms per egg plus the hidden form, 9 in all. Three ways to pay for it:
+
+| Option | Adult forms | Egg form pages | Cost |
+|---|---|---|---|
+| A. Two named forms per role | 27 (9 per egg; 12 new names) | 27 form pages + 3 Source = 30 | Most Digimon-like and most readable, but 12 more names and 12 more pages, which pushes against the wish to keep the codex from growing |
+| B. One named form per role, Standing as a visible variant | 15 (as now) | 15 + 3 = 18 | Cheapest. The sketch already allows composed forms, so the lean is a look and a small perk, not a new form |
+| C. Two named forms per role, one page per role | 27 | 15 + 3 = 18 (a page covers both forms of a role) | Keeps page count, but a page then cannot be one form's own document |
+
+Recommendation: A or C if the forms should feel like real branches; B if the codex and name count matter most. Not decided. Note the Rogue gate is all egg pages, so A changes it from 18 to 30 pages.
+
+### Levers by stage (proposal)
+
+| Stage | Lever | Notes |
+|---|---|---|
+| Baby to teen | Standing only: which track leads (corp or street) | Three teen types per egg: corp-leaning, street-leaning, and the hidden path. The hidden-path teen also needs wins in each of the four games (the number is a balance question) and low Standing on both tracks. Faults are not required (not decided) |
+| Teen to adult | Role (the game with the most wins this life) and Standing lean at that time | The teen is a preview of the Standing lean, as a checkpoint the player can read. The lean is recomputed at adulthood, so it can still change |
+| Hidden adult | All four games mastered, low Standing on both tracks | Needs a threshold for mastery, as 1.0's Ghost does (4 wins each and 29 in all) |
+| Failure form | None yet | Faults no longer pick a teen form (1.0's Stub). Whether neglect still has a visible consequence for form is open |
+
+What the player can see (proposal, resolves issue 28 for 2.0 without an item):
+
+- **Standing:** visible, two tracks.
+- **Wins per game:** a visible tally per life, like effort or training counts.
+- **Faults:** already visible in 1.0 (faults x/max in the HUD), and the cap can end a life. They stay visible by default; whether they should become hidden is an open question below.
+- **Temper:** hidden, shown only by tells. Because it does not choose a form, guessing it wrong costs nothing, which is the point.
+- An item like issue 28's "sysmonitor" is no longer needed for form routing. It could still exist as flavor that reads temper.
+
+### Temper (proposal)
+
+- **Accrual:** reuse 1.0's stability table as a starting point (faults push volatile, calm uptime pushes orderly, overheating pushes volatile, a fast PATCH pushes orderly). Numbers go to the balance tools.
+- **Effects:** the three tells already decided (sprite motion, idle behavior, chatter tone) plus mild care preferences. For example an orderly netling likes a steady routine and a volatile one likes novelty, and a match makes care slightly easier. Keep this small. Preferences change care values, and faults feed temper, so there is a loop; check it with the balance tools so it does not snowball.
+- **Perks:** 1.0's Daemon and Glitch perks were tied to forms. In 2.0 temper could carry small perks, or none. Open.
+- **Consequence for the layered model:** the "temper variant" in composed forms (egg body, temper variant, role overlay) becomes an animation and idle skin, not a separate sprite identity. The temper hints stay on the list, but they are now personality hints, so they can be vaguer and lower stakes.
+
+### Risks to check
+
+- **Standing carries across lives (decided), and it picks the teen.** A line can then repeat the same teen and adult lean every life. 1.0 handles this for forms with a small weight for forms the player has never raised (`newFormWeight`); something similar, or a Standing decay, may be needed. Not designed.
+- **Ties.** Corp equal to street, or both high, needs a rule. Using the teen's lean is one option.
+- **Role ties.** Two games with equal wins needs a rule (latest played, or the teen's, or random as in 1.0's tie band; random near neutral is what makes a form hard to learn).
+- **Nothing here was simulated.** The counts are arithmetic from the docs.
 
 ## The eggs
 
@@ -294,14 +351,15 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 5. Decided: Rogue's gate is all 18 egg pages (15 form pages and 3 Source pages), so a player must raise all three eggs and find every egg page. It is a secret egg and should be hard to get. Consequence to tune: at about 2 lives per egg for a consistent player, that is about 6 lives at the least, and a Source page needs Root and the Source descent in each egg.
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
-8. Wording of the temper hints (next in order).
+8. Wording of the temper hints (next in order, now personality hints; after the Evolution questions below).
+9. Evolution: adult form count (options A, B or C in Evolution), whether neglect still has a visible form consequence, whether faults stay visible, how Standing and role ties are broken, and what Standing does across lives.
 
 ## Not designed yet
 
 The backlog. None of this has been decided or drafted.
 
 - Per-egg meters and care buttons: Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
-- How temper accrues and the exact tells per egg; how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions (mastering all four games, and perhaps low Standing on both tracks).
+- The exact tells per egg and the numbers for temper accrual (see Evolution); how the two Standing tracks move and what they change (markets, checkpoints, traces); the hidden form's conditions (mastering all four games, and perhaps low Standing on both tracks).
 - Baby and teen stages and forms per egg; the elder stage rules (1.0's Mainframe gating replaced); Source access rules.
 - Netrun abilities per form, regions per egg, events per egg, and the tutorial run per egg.
 - The Rogue egg beyond the merge idea and its gate.
