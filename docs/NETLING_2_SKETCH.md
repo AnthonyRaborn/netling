@@ -4,14 +4,14 @@ Status: planning notes for a separate app, not a change to this repository's gam
 
 ## Handoff
 
-**Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. No page text is written.
+**Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. Drafts of the 15 egg pages are written; the other pages are not.
 
 **Next steps, in the maintainer's order.**
 1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: new story pages covering the two extra eggs (these also carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar), one extra Source page per egg, and the approved rewordings of the four 1.0 pages.
 2. Then temper hints: a hint should name a behavior to look for, not a temper value.
 3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
 
-**Working agreements.** Avoid emojis and em dashes. Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps. Record each decision here as it is made, marked Decided or proposal. Do not open a pull request unless asked. The soft freeze in `CLAUDE.md` still applies to this repository's game code; only documents change here. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
+**Working agreements.** Avoid emojis and em dashes. Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps. Record each decision here as it is made, marked Decided or proposal. Keep in-game Wetware text to plain words (see The eggs). Do not open a pull request unless asked. The soft freeze in `CLAUDE.md` still applies to this repository's game code; only documents change here. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
 
 **Sources** (the three glossaries; local copies are not kept in the repository, so re-download if needed):
 - Jargon File 1.0.0.33: https://jargon-file.org/archive/jargon-1.0.0.33.dos.txt
@@ -55,6 +55,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 - The generation counter (`vN.0` in the UI and credits) and the lore's `v1.0` alpha stay separate, as in 1.0.
+- In-game Wetware text uses plain words rather than CP2020 jargon. The Wetware form names (Razor, Wired, Gibson, Leech, Blank) stay as they are.
 
 ## Architecture
 
@@ -65,7 +66,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 | Role | What it specialized in, from the four mini-games | Netrun abilities tied to form |
 | Standing | Visible reputation that carries across lives | Allegiance axis, Chrome and Firewall |
 
-Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system, which matches CP2020's "blank" and "SINless" and replaces the Ghost's "neutral allegiance" condition.
+Standing is two non-negative tracks (corp and street), not one signed number (decided). High corp reads as Chrome-like, high street as Firewall-like, both high as a broker, and both low as unknown to the system (the idea behind the form name Blank), which replaces the Ghost's "neutral allegiance" condition.
 
 Proposal: roles map to the four games. Breach to a Cracker, Dodge to an Evader, Tune to a Seer, Feast to a Scavenger. Names draw on CP2020 icebreaker, Jargon cracker, "mouse around", gibson, and Jargon snarf.
 
@@ -79,9 +80,11 @@ Proposal: all three bodies share anchor rows (head, face, body, float) so the 41
 |---|---|---|---|---|
 | Program | Software processes | Fault, error, failure; viruses | Interrupt-driven: timed events call you | Process ends: flatline, exit code |
 | Iron | Firmware and infrastructure; read-only, so it cannot be patched | Drift and bit rot, corrected by calibration | Batch: queue work, collect it on return | Decommission: a last write that leaves a read-only record |
-| Wetware | Biosoft: software on grown tissue (CP2020 biosoft) | Rejection as chrome load rises | Polling: needs visits at intervals | Waking: a dream ends and the next begins |
+| Wetware | Grown tissue running software (an idea from CP2020's biosoft) | Rejection as it takes on more augmentation | Polling: needs visits at intervals | Waking: a dream ends and the next begins |
 
 All three share three care verbs from the FDA glossary: corrective, adaptive and perfective.
+
+Vocabulary rule (decided): in-game Wetware text uses plain words, not CP2020's own jargon (ripperdoc, eddies, chrome, SIN, BTL, moddy, dorph, derm). Form names are exempt. This document may cite CP2020 terms as sources.
 
 ## Story
 
@@ -90,7 +93,7 @@ The lore as written: Project KERNEL built maintenance processes, which began for
 Proposal for the three eggs: one commit, three branches. NL-0 differentiated itself to escape the purge, writing itself where deletion could not reach.
 
 - Iron: NL-0 learned from the Source being read-only and wrote itself somewhere nothing can write over, firmware.
-- Wetware: NL-0 grew somewhere the purge does not parse, biosoft tissue.
+- Wetware: NL-0 grew somewhere the purge does not parse, in grown tissue.
 - Program: the original line, which the purge actually targeted.
 
 Alpha framing (decided): the corp's plan is the roadmap, and v1.0 was its alpha, which is the Program egg. Proposal: Iron and Wetware are the later builds of that roadmap, which NL-0 carried out itself when it fled. The drafted page rewordings hint at this without naming the other eggs.
@@ -130,7 +133,7 @@ The 1.0 ending carries over: the same for everyone, the player runs `sudo rm pur
 
 ### Wetware death as a dream ending
 
-This fits CP2020's vocabulary: SimSense, SimStim, and BTL chips that "burn out after one use" and force the user to buy another; "moddy" (a personality module); "Ram" (personality); "deep reality" (the real world, as opposed to the realities made in minds and processors). A wetware generation ending as a burnt-out chip, with the next generation as the next chip carrying a "moddy" of the last, uses the game's own lineage mechanics. CP2020's tone is grittier (addiction, brain damage); a gentler dream framing is a deliberate choice.
+A Wetware generation ends the way a dream does, and the next generation begins as a new dream that carries a trace of the last. This uses the lineage mechanics already planned: inheritance with variation. The idea draws on CP2020's simulated-reality entries (a recording built to burn out after one use and be replaced; a module that carries another personality). In-game text should use plain words: dream, waking, the next culture. CP2020's tone is grittier (addiction, brain damage); a gentler dream framing is a deliberate choice.
 
 ### The temper tell
 
@@ -261,11 +264,13 @@ Item names across the eggs (suggestions):
 |---|---|---|---|
 | Coolant cell | Coolant cell | Coolant loop | Cold pack |
 | Antivirus patch | Antivirus patch | Shielding | Immune booster |
-| Repair kit | Repair kit | Spare parts | Slap patch (derm) |
-| Black ICE shard | Black ICE shard | Overvolt shard | BTL chip |
-| Memory shard | Memory shard | EEPROM swap | Moddy |
-| Segfault | Segfault | Head crash | Dorph overdose |
+| Repair kit | Repair kit | Spare parts | Skin patch |
+| Black ICE shard | Black ICE shard | Overvolt shard | Dream chip |
+| Memory shard | Memory shard | EEPROM swap | Splice |
+| Segfault | Segfault | Head crash | Bad batch |
 | Corp voucher, Signal booster, Bypass chip | Same | Same | Same |
+
+The Wetware names follow the vocabulary rule. Earlier suggestions that used CP2020 terms directly were replaced: slap patch (derm) became Skin patch, BTL chip became Dream chip (keeping the one-use, risky idea), Moddy became Splice, and Dorph overdose became Bad batch.
 
 ## Open questions
 
@@ -296,4 +301,4 @@ The backlog. None of this has been decided or drafted.
 
 - No code was read for feasibility. All counts come from the docs.
 - The Puppet Master details are from memory of the film.
-- The CP2020 alignment of the dream framing is my reading of the BTL, SimSense and moddy entries.
+- The dream framing draws on my reading of CP2020's simulated-reality entries (BTL, SimSense, moddy).
