@@ -321,15 +321,15 @@ What to watch:
 - **Perks:** 1.0's Daemon and Glitch perks were tied to forms. In 2.0 temper could carry small perks, or none. Open.
 - **Consequence for the layered model:** the "temper variant" in composed forms (egg body, temper variant, role overlay) becomes an animation and idle skin, not a separate sprite identity. The temper hints stay on the list, but they are now personality hints, so they can be vaguer and lower stakes.
 
-### Temper scale (proposal, measured on the 1.0 simulator)
+### Temper scale (starting values, measured on the 1.0 simulator)
 
-Temper is one number per netling, hidden, read only through the tells. It starts at 0 each life (my assumption; not stated). The measurements below use 1.0's stability axis as the stand-in for temper, with the bug prototype switched on (30% chance, clearing at 15 scrip) and the fault cap removed. 300 lives per archetype. The 2.0 sources for temper are not built, so this is a rough guide.
+Temper is one number per netling, hidden, read only through the tells. **It resets each life, and drifts back toward 0 with a 24-hour half-life (both decided).** The measurements below use 1.0's stability axis as the stand-in for temper, with the bug prototype switched on (30% chance, clearing at 15 scrip), the fault cap removed and flow raised to +0.5 an hour. 300 lives per archetype. The 2.0 sources for temper are not built, so this is a rough guide.
 
-**Sources (starting values, taken from 1.0's stability table)**
+**Sources**
 
 | Effect on temper | Source |
 |---|---|
-| +0.2 an hour | Awake, in flow, no alert |
+| +0.5 an hour | Awake, in flow, no alert (decided; 1.0 had 0.2. Overclocking is much easier to reach than flow, so flow pays more) |
 | -0.2 an hour | Awake and overclocked (Heat 65 to 84) |
 | -1 an hour | Heat 85 or more |
 | -1 | Each fault |
@@ -342,7 +342,7 @@ Temper is one number per netling, hidden, read only through the tells. It starts
 
 Bugs raise Heat gain, so they push temper unsteady through the Heat rows, with no row of their own.
 
-**Decay (proposed): temper drifts back toward 0 with a half-life of 24 hours.** In 1.0, stability only accumulates, so by the end of a life it is wide and permanent (attentive +10.6, daredevil -33, overclocker -36, median at end of life). A decayed temper reflects recent habits, stays bounded, and can recover (a netling that was run hot can settle down), which supports the countable-rhythm tells being readable. With a 24-hour half-life a netling in flow all day would settle near +7, calm care sits at about +2 to +4 and sustained overheating goes past -10.
+**Why decay.** In 1.0, stability only accumulates, so by the end of a life it is wide and permanent (attentive +10.6, daredevil -33, overclocker -36, median at end of life, cumulative). A decayed temper reflects recent habits, stays bounded, and can recover, which supports the countable-rhythm tells being readable. With a 24-hour half-life and flow at +0.5, a netling in flow all day would settle near +17, though real play (alerts, sleep, care gaps) lands far below that. Calm care sits at about +3 to +4 and sustained overheating goes past -10.
 
 **Levels (proposed): asymmetric, because the steady side is slow and the unsteady side is fast.**
 
@@ -351,32 +351,77 @@ Bugs raise Heat gain, so they push temper unsteady through the Heat rows, with n
 | Strongly unsteady | -6 or lower | strongest unsteady tell |
 | Unsteady | -6 to -2 | mild unsteady tell |
 | Middle | -2 to +2 | little or no tell |
-| Steady | +2 to +4 | steady tell |
-| Strongly steady | +4 or higher | strongest steady tell (clearest countable rhythm and ritual) |
+| Steady | +2 to +5 | steady tell |
+| Strongly steady | +5 or higher | strongest steady tell (clearest countable rhythm and ritual) |
 
-The steady thresholds are closer to 0 because steady play earns temper slowly and cannot go as far; symmetric thresholds of 2 and 5 with the 24-hour decay left strong steady at only 2% to 3% of lives even for the attentive and balance-seeking archetypes at adulthood. Share of lives at each level, with decay at 24 hours (percent: strongly unsteady / unsteady / middle / steady / strongly steady):
+Share of lives at each level with flow at +0.5 (percent: strongly unsteady / unsteady / middle / steady / strongly steady):
 
 | Archetype | At teen | At adulthood | At end of life |
 |---|---|---|---|
 | Casual | 0/4/88/8/0 | 1/33/65/0/0 | 2/40/55/2/0 |
 | Worker | 0/4/91/5/0 | 0/34/65/0/0 | 3/49/47/0/0 |
-| Attentive | 0/0/49/42/9 | 0/0/50/43/7 | 0/0/39/45/15 |
-| Sysadmin (very attentive) | 0/0/47/47/5 | 0/0/42/49/9 | 0/0/19/49/32 |
-| Steer-daemon (aims for calm) | 0/0/30/54/16 | 0/1/25/54/20 | 0/0/9/38/53 |
-| Balance seeker | 0/1/43/49/7 | 0/0/36/53/11 | 0/0/17/49/34 |
-| Steer-glitch (runs warm) | 1/47/51/1/0 | 12/79/9/0/0 | 42/56/2/0/0 |
+| Attentive | 0/0/29/58/13 | 0/0/29/58/13 | 0/0/15/55/30 |
+| Sysadmin (very attentive) | 0/0/24/65/12 | 0/0/17/65/19 | 0/0/8/41/51 |
+| Steer-daemon (aims for calm) | 0/0/16/65/20 | 0/0/11/62/26 | 0/0/2/32/66 |
+| Balance seeker | 0/1/22/64/13 | 0/0/14/65/21 | 0/0/6/37/57 |
+| Steer-glitch (runs warm) | 1/47/52/1/0 | 12/78/10/0/0 | 41/57/3/0/0 |
 | Daredevil (runs hot) | 17/70/14/0/0 | 62/37/1/0/0 | 84/16/0/0/0 |
-| Overclocker | 38/60/2/0/0 | 83/17/0/0/0 | 93/7/0/0/0 |
+| Overclocker | 38/60/2/0/0 | 83/17/0/0/0 | 92/8/0/0/0 |
 | Neglectful | 11/63/26/0/0 | 37/63/0/0/0 | 19/56/25/0/0 |
 
 What it means:
 
-- **Tells appear where behavior is clear.** Casual and worker netlings are mostly middle at the teen check (88% to 91%) and drift mildly unsteady by adulthood (about a third), mostly from faults and Heat. Careful players are steady about half the time. Hot players are unsteady, and strongly so over time.
-- **Strong steady takes dedicated play.** The attentive archetype is strongly steady in 7% to 15% of lives, a calm-seeking player in 16% to 53%. That is the intended reward for the steady rhythm tell.
-- **Strong unsteady is easy to reach by running hot** (62% to 93% of daredevil and overclocker lives by adulthood or the end).
+- **Flow at +0.5 fixes the steady side.** With flow at +0.2 and a strong-steady threshold of +4, attentive reached strongly steady in 7% of lives at adulthood; at +0.5 and a threshold of +5 it reaches 13%, and 58% are steady. With symmetric thresholds of 2 and 5 at flow +0.2 it was only 2% to 3%. Casual and worker netlings barely change, because they rarely reach flow.
+- **Tells appear where behavior is clear.** Casual and worker netlings are mostly middle at the teen check (88% to 91%) and drift mildly unsteady by adulthood (about a third), mostly from faults and Heat. Careful players are steady most of the time.
+- **Strong steady takes sustained calm.** Attentive reaches it in 13% of lives at adulthood and 30% by the end; players who aim for calm reach 19% to 26% at adulthood and 51% to 66% by the end.
+- **Strong unsteady is easy to reach by running hot** (62% to 92% of daredevil and overclocker lives by adulthood or the end).
 - **Hot play dominates temper.** A casual player's drift toward unsteady is mostly faults; a hot player's is Heat. Both read as the same tell, which is fine because temper is personality, not a form lever.
 - **Without decay the numbers are not usable.** At the end of life, 1.0's cumulative stability spans about -44 to +22 (the 10th to 90th percentile across archetypes), and the strong levels would be permanent.
-- **Not modeled or not measured:** the 2.0 temper sources as built, any difference between the baby stage and later, how fast the tell should change when temper crosses a level (hysteresis, to avoid flicker at a threshold), the effect of temper on care preferences, and decay in minutes versus per check-in. A 48-hour half-life was also run (with the symmetric 2 and 5 thresholds): it widens the spread (casual's end of life 17% strongly unsteady, attentive 39% strongly steady), so 24 hours keeps temper closer to recent habits. Which half-life feels right is a design call.
+- **Not measured:** the 2.0 temper sources as built, how often a player is in flow against overclocked (the maintainer's observation that overclocking is easier is taken as given; the simulator does not log it), a flicker guard (hysteresis) so a tell does not flip at a threshold, the effect of temper on care preferences, and decay per minute against per check-in. A 48-hour half-life was also run at flow +0.2: it widens the spread (casual's end of life 17% strongly unsteady), so 24 hours stays closer to recent habits.
+
+### Catalogue: what affects temper (1.0 code and docs)
+
+Checked against `src/sim.js`, `src/netrun/run.js`, `src/netrun/anomalies.js` and `docs/CONTENT_CATALOG.md`. In 1.0 these change the stability axis, which 2.0's temper replaces. Items that touch temper directly are few, as remembered: only the Segfault and the Black ICE shard.
+
+**Items (nine in 1.0)**
+
+| Item | Effect on temper | How |
+|---|---|---|
+| Segfault | Direct, strong | +2 faults; -1 each in 1.0. 2.0 proposal: -4 at once and a 60/15/25 chance of 1, 2 or no bugs |
+| Black ICE shard | Direct, mild | -1, plus +20 Heat (which can push toward the Heat rows) and street Standing |
+| Coolant cell | Indirect | Vents 50 Heat, so it prevents the Heat 85+ and overclocking rows |
+| Antivirus patch | Indirect | Cures or prevents a virus, so it avoids the slow PATCH (-1) |
+| Corp voucher, Signal booster, Memory shard, Repair kit, Bypass chip | None | A voucher moves corp Standing only; the rest touch other stats |
+
+**Actions and care**
+
+| Source | Effect |
+|---|---|
+| PATCH | +1 within 30 minutes of a virus, -1 later |
+| PURGE | +0.5 (a cache purge or an overflow) |
+| Repelling an intrusion | +1 (`attackRepelledStability`) |
+| A mini-game leaving Heat above 70 | -0.5 |
+| Each fault | -1 (`faultStability`) |
+| Overclocked, Heat 65 to 84 | -0.2 an hour (`overclockStabilityPerHour`) |
+| Heat 85 or more | -1 an hour |
+| In flow | +0.2 an hour in 1.0, +0.5 proposed here |
+| Plain awake time | 0 (`uptimeStabilityPerHour`) |
+| COMPLY, HIDE, voucher, market purchases | None; Standing only |
+
+**Netrun**
+
+| Source | Effect |
+|---|---|
+| Disconnect | -1 (it also logs a fault when below the cap, which in 1.0 adds no second -1 here, but in 2.0 would roll a bug) |
+| Corrupted sector: REPAIR / SALVAGE | +1 / -1 |
+| Overclock rig: PLUG IN | -1, plus Charge +25 and Heat +25 |
+| The purge order (the Source only): LEAVE IT | +1, plus Sync +15 |
+| Corp honeypot, Stray signal, Echo | None (the honeypot moves Standing only) |
+| Market, checkpoint | None (Standing only) |
+
+The debug station anomaly proposed for clearing bugs has no temper effect set.
+
+Two things the catalogue shows. First, almost nothing besides faults, Heat and PATCH and PURGE moves temper, so temper is mostly an echo of how the netling is cared for and how hot it runs. Second, no item raises temper directly. If the steady side should be reachable by an item, that would be new content; not decided.
 
 ### Risks to check
 
