@@ -4,72 +4,75 @@ Status: first drafts of the 15 egg form pages, twelve new story pages and three 
 
 ## What these pages are
 
-This file holds three kinds of page: 15 egg form pages (one per adult form: five per egg, four role forms and one hidden form), ten new story pages, and three Source pages (one per egg). Egg pages can be found by any member of the egg, count toward Rogue's gate and have their own per-life limit. Story pages are shared by every egg; see Root Access and the lategame flag for how they count.
+This file holds three kinds of page: 15 egg form pages (five per egg: one page per role, four roles, each covering both of the role's forms, plus one page for the hidden form), twelve new story pages, and three Source pages (one per egg). Egg pages can be found by any member of the egg, count toward Rogue's gate and have their own per-life limit. Story pages are shared by every egg; see Root Access and the lategame flag for how they count.
 
 ## Style, taken from the 1.0 pages
 
 - A found document with a short lowercase title: a log, a memo, a forum post, graffiti, an asset register.
 - One to three sentences. Dry humor, a little uncanny. The lore is implied, never explained.
-- The role (Breach, Dodge, Tune, Feast) shows in the situation, not by name. The form name appears only as an in-world word, and only where it reads naturally (`iron-gronk`, `iron-jiff`).
+- The role (Breach, Dodge, Tune, Feast) shows in the situation, not by name. A form name appears only as an in-world word, and only where it reads naturally (`iron-breach`, `iron-dodge`). Each role page covers both of the role's forms (option C), so it names neither lean and reads the same for the corp-leaning and the street-leaning form.
 - The egg form pages name no other egg, NL-0 or the purge order. NL-0's differentiation belongs to the story pages, drafted below.
 - Hidden-form pages do not say how the form is reached.
 - A page must read naturally to someone who never played the mini-games. It should not describe a game's mechanics (falling blocks, a numbered grid, a buffer) as if they were events in the world.
 - The Wetware pages should not lean on CP2020's own vocabulary (ripperdoc, eddies, chrome, SIN). The form names are the CP2020 link; the pages use plainer words (grower, technician, culture, broth, charge).
 - The vocabulary follows the egg: Program uses logs and tickets, Iron uses work orders and inspections, Wetware uses clinic notes and street signs.
 
-Ids below are proposals. In 1.0 ids are permanent once shipped, so confirm them before any code exists. Region placement is a proposal for the open question on where form pages drop: each egg's pages in its home region, and the three hidden pages in The Deep so they feel secret.
+Ids below are proposals. Role pages are named by role (`program-breach`, not the form), because a role page covers two forms and form names may still change; the hidden pages keep the hidden form's name (`program-ghost`, `iron-guru`, `wetware-blank`). In 1.0 ids are permanent once shipped, so confirm them before any code exists. Region placement is a proposal for the open question on where form pages drop: each egg's pages in its home region, and the three hidden pages in The Deep so they feel secret.
 
 ## Program
 
-| Id | Region | Form (role) | Title | Text |
+| Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `program-worm` | Corp Grid | Worm (Breach) | incident log, closed | Incident 0412: entry through the access grid within four codes, buffer full immediately upon access. Logged as a fluke. Incidents 0413 to 0498: also flukes. |
-| `program-mouse` | Public Net | Mouse (Dodge) | trace log | Trace 4071 dropped on node 9: gone. Trace 4072 dropped on node 12: gone. Operator's note: it is always one hop ahead. I stopped sending them. It is still ahead. |
-| `program-phreak` | Public Net | Phreak (Tune) | fault ticket, closed | Line 9 holds one clean tone when nobody is calling. Technician matched the tone by ear. The tone matched back. Closed: could not reproduce, could not stop. |
-| `program-snarf` | Corp Grid | Snarf (Feast) | helpdesk ticket | Customer reports the packet feed arrives cleaner than it was sent. Something is eating the corrupted ones. Customer asks how to make it stop. Agent response: don't. |
+| `program-breach` | Corp Grid | Worm and Tiger (Breach) | incident log, closed | Incident 0412: entry through the access grid within four codes, buffer full immediately upon access. Logged as a fluke. Incidents 0413 to 0498: also flukes. |
+| `program-dodge` | Public Net | Mouse and Spoof (Dodge) | trace log | Trace 4071, node 9: gone. Trace 4072, node 12: gone. Trace 4073 came back with a clean route. The route does not exist. Operator's note: it is always one hop ahead. |
+| `program-tune` | Public Net | Phreak and Parse (Tune) | fault ticket, closed | Line 9 holds one clean tone when nobody is calling. Technician matched it by ear. It matched back, and answered the ticket before it was filed. Closed: could not reproduce. |
+| `program-feast` | Corp Grid | Snarf and Gobble (Feast) | helpdesk ticket | Customer reports the packet feed arrives cleaner than it was sent. Something is eating the corrupted ones. Customer asks how to make it stop. Agent response: don't. |
 | `program-ghost` | The Deep | Ghost (hidden) | audit trail | Sector 7F audit: 0 anomalies, 0 faults, 0 entries. The auditor notes the log is perfect, and that a perfect log is a kind of silence. The note is unsigned. |
 
 Notes:
 
-- `program-worm` nods at Breach only loosely (an access grid, four codes, a buffer). "Also flukes" is the joke and the unease.
-- `program-mouse` is a trace log: traces are dropped on a node and find the target already gone. "Dropped" can read as deployed or as failed, and both senses fit. It uses 1.0's trace idea.
-- `program-snarf` leaves the corrupted packets, which is how Packet Feast is played (two corrupted bites fail the game).
+- Each page covers both forms of its role without naming either lean. The corp-leaning and street-leaning forms read the same page.
+- `program-breach` nods at Breach only loosely (an access grid, four codes, a buffer). "Also flukes" is the joke and the unease. A hired tester and a wild worm both fit.
+- `program-dodge` is a trace log: traces are dropped on a node and find the target already gone. The new third trace returns a clean route that does not exist, which covers Spoof (a false answer) next to Mouse (always one hop ahead).
+- `program-tune` keeps the tone that matches back (Phreak) and adds that it answered the ticket before it was filed (Parse, understanding). The closing "could not stop" was cut for length.
+- `program-feast` leaves the corrupted packets, which is how Packet Feast is played (two corrupted bites fail the game). Snarf and Gobble both consume.
 - `program-ghost` reuses 1.0's idea of a netling with no logs and no faults, now as an audit finding.
 
 ## Iron
 
-| Id | Region | Form (role) | Title | Text |
+| Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `iron-gronk` | Old Web Ruins | Gronk (Breach) | work order 118 | Cabinet lock found open. Seal intact. Hinges intact. Technician's note: the sound it made when it opened, I am told, was "gronk." We do not have a recording. |
-| `iron-jiff` | Old Web Ruins | Jiff (Dodge) | relay log | Relay 12: fault cleared at 03:00:00.000, raised at 03:00:00.001. Technician: it is always already gone. We call the gap a jiff. |
-| `iron-feep` | Old Web Ruins | Feep (Tune) | facilities log | A terminal bell rings once a night in a room with no terminal. Same note each time. Last night it came a half step sharp. Somebody has been tuning it. |
-| `iron-munch` | Old Web Ruins | Munch (Feast) | inspection checklist | Item 14: cabinet takes input serially, without error. Item 15: output. Item 15: left blank. Inspector's note: not rude, thorough. |
+| `iron-breach` | Old Web Ruins | Gronk and Splat (Breach) | work order 118 | Two cabinet locks found open, seals intact, hinges intact. Technician's note: the first went "gronk." The second went "splat." We have no recording of either. |
+| `iron-dodge` | Old Web Ruins | Jiff and Bamf (Dodge) | relay log | Relay 12: fault cleared at 03:00:00.000, raised at 03:00:00.001. We call the gap a jiff. Relay 14: cleared before it was raised. Technician heard a "bamf" and nothing else. |
+| `iron-tune` | Old Web Ruins | Feep and Ping (Tune) | facilities log | A terminal bell rings once a night in a room with no terminal. Same note each time. Last night it came a half step sharp. Somebody has been tuning it. |
+| `iron-feast` | Old Web Ruins | Munch and Thrash (Feast) | inspection checklist | Item 14: cabinet takes input serially, without error. Item 15: output. Item 15: left blank. Cabinet 9: takes input in bursts and thrashes the fans. Item 15: also blank. |
 | `iron-guru` | The Deep | Guru (hidden) | service manual, appendix Z | For any fault not covered above, ask the old rack in the corner. Do not ask it twice. It is not on the staff roster. Everyone on the roster learned from it. |
 
 Notes:
 
-- `iron-gronk` and `iron-jiff` use the form name as an in-world word: Jargon's gronk is a sound (the noise of a diskette drive, and to smash), and a jiffy is a tiny interval of time.
-- `iron-jiff`'s timestamps put the clearing a millisecond before the fault, which is the Dodge idea (already gone) without a block in sight.
-- `iron-feep` echoes Signal Tune: a single note, matched and adjusted.
-- `iron-munch` plays on serial input. "Item 15: left blank" suggests nothing comes out.
+- Each page covers both forms of its role. `iron-breach` and `iron-dodge` use both form names as in-world words, in the same sentence structure: Jargon's gronk is a sound (the noise of a diskette drive, and to smash), splat is the mark of a squashed bug, a jiffy is a tiny interval of time, and bamf is the sound of something teleporting out.
+- `iron-dodge`'s timestamps put the clearing a millisecond before the fault, which is the Dodge idea (already gone) without a block in sight. Relay 14 repeats it in sound.
+- `iron-tune` echoes Signal Tune: a single note, matched and adjusted. Feep (the bell) and Ping (a pulse sent to check something is there) both fit a bell that answers in tune. The page is unchanged.
+- `iron-feast` keeps the serial input (Munch) and adds a second cabinet that takes input in bursts and thrashes the fans (Thrash). Both leave output blank.
 - `iron-guru` carries the lineage idea (everyone learned from it) and the roster joke. "Old rack" is the only substrate hint; the page says nothing about firmware.
 
 ## Wetware
 
-| Id | Region | Form (role) | Title | Text |
+| Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `wetware-razor` | Darknet Bazaar | Razor (Breach) | grower's invoice, annotated | Trim. Trim again. Nothing to trim: it keeps its own edge. Billed anyway. Margin note: it opened the safe on the way out. Not billed. |
-| `wetware-wired` | Darknet Bazaar | Wired (Dodge) | lab chart, back room | Reflex stimulus: none applied. Tested with one probe, then twenty. It was never where any of them landed. Technician: refund the customer. Customer: for what. |
-| `wetware-gibson` | Darknet Bazaar | Gibson (Tune) | stall sign | SIGNALS READ, 3 CHARGE. ASK FIRST, THEN LISTEN. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. READS BEST ASLEEP. NO REFUNDS. |
-| `wetware-leech` | Darknet Bazaar | Leech (Feast) | healer's ledger | Paid in: broth, spare parts, a debt, a favor, a week of someone else's sleep. Healed: 31. The ledger does not say who is feeding on whom. |
+| `wetware-breach` | Darknet Bazaar | Razor and Solo (Breach) | grower's invoice, annotated | Trim. Trim again. Nothing to trim: it keeps its own edge. Billed anyway. Margin note: it opened the safe on the way out. Not billed. |
+| `wetware-dodge` | Darknet Bazaar | Wired and Chipped (Dodge) | lab chart, back room | Reflex stimulus: none applied. Tested with one probe, then twenty. It was never where any of them landed. Technician: refund the customer. Customer: for what. |
+| `wetware-tune` | Darknet Bazaar | Gibson and Mentat (Tune) | stall sign | SIGNALS READ, 3 CHARGE. ASK FIRST, THEN LISTEN. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. READS BEST ASLEEP. NO REFUNDS. |
+| `wetware-feast` | Darknet Bazaar | Leech and Nutri (Feast) | healer's ledger | Paid in: broth, spare parts, a debt, a favor, a week of someone else's sleep. Healed: 31. Fed: 31. The ledger does not say who is feeding on whom. |
 | `wetware-blank` | The Deep | Blank (hidden) | collections note | Registry entry: none. Card: none. Debt: none. Collections tried three times and closed the file: nothing to collect from, and nobody to collect it for. |
 
 Notes:
 
-- `wetware-razor` and `wetware-wired` use plain words (grower, technician, trim, reflex stimulus). Charge as a price comes from 1.0's `bazaar-2` ("Echo recordings: 3 charge").
-- `wetware-wired` is a reflex test: twenty probes, none of which found it. It no longer uses falling weights, which had the same game-mechanic problem as the old Mouse page.
-- `wetware-gibson` carries the dream idea lightly ("reads best asleep"), since a Wetware generation ends as a dream does.
-- `wetware-leech` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind).
+- Each page covers both forms of its role. None names a lean.
+- `wetware-breach` and `wetware-dodge` use plain words (grower, technician, trim, reflex stimulus). Charge as a price comes from 1.0's `bazaar-2` ("Echo recordings: 3 charge"). Razor (the edge) and Solo (a lone fighter) both fit a thing that works alone and keeps its own edge.
+- `wetware-dodge` is a reflex test: twenty probes, none of which found it. Wired and Chipped are both enhanced-reflex words. It no longer uses falling weights, which had the same game-mechanic problem as the old Mouse page.
+- `wetware-tune` carries the dream idea lightly ("reads best asleep"), since a Wetware generation ends as a dream does. Gibson hums the answer; Mentat answers with no visible steps.
+- `wetware-feast` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind). The new "Fed: 31" nods at Nutri.
 - `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches the hidden form's low Standing on both tracks. The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
 
 ## New story pages
@@ -199,13 +202,13 @@ Notes:
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
 - **Three registers:** Program is bureaucratic and technical, Iron is physical and procedural, Wetware is street-level and commercial. The same four jobs (breach, dodge, tune, feast) appear in each.
 - **No spoilers:** none of the 15 pages names another egg, NL-0, the purge order, Standing or temper.
-- **Length:** the 15 drafts have a median of 155 characters and a longest of 164. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
+- **Length:** the 15 drafts have a median of 156 characters and a longest of 172 (`program-tune` and `iron-dodge`), counted by script. The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
 
 ## Open
 
 1. Edit any text. These are first drafts. `public-7` is approved as written; `public-6` is approved with its last sentence removed.
 2. Confirm the ids (they now match position) and the region placement for the egg pages.
-3. Whether the humor of `iron-gronk` and `iron-jiff` (word jokes) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
+3. Whether the humor of `iron-breach` and `iron-dodge` (word jokes, now two per page) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
 4. Edit any story page or Source page text.
 5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
 6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).

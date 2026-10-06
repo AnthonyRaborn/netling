@@ -115,7 +115,7 @@ Yes, if Standing is supposed to change the adult form. For one role (say Breach)
 | B. One named form per role, Standing as a visible variant | 15 (as now) | 15 + 3 = 18 | Cheapest. The sketch already allows composed forms, so the lean is a look and a small perk, not a new form |
 | C. Two named forms per role, one page per role | 27 | 15 + 3 = 18 (a page covers both forms of a role) | Keeps page count, but a page then cannot be one form's own document |
 
-Decided: try C first, with B as the fallback (B needs a visible Standing indicator on each form). A is not chosen, since it would raise the Rogue gate from 18 to 30 pages. Under C the egg pages stay at 18: 5 per egg (four role pages, each covering both forms of that role, and one hidden form page) and 3 Source pages. Consequence for the drafts: the 12 role form pages already written describe one form each. They need rewording so one page fits both a corp-leaning and a street-leaning form, or a second page per role (which is A). Option C also needs 12 new form names (a second named form for each of the 12 role slots across the eggs), which are not chosen. Not done yet.
+Decided: try C first, with B as the fallback (B needs a visible Standing indicator on each form). A is not chosen, since it would raise the Rogue gate from 18 to 30 pages. Under C the egg pages stay at 18: 5 per egg (four role pages, each covering both forms of that role, and one hidden form page) and 3 Source pages. Consequence for the drafts: the 12 role form pages were reworded so one page fits both forms, and renamed by role (done; see the drafts file). Option C also needed 12 new form names (see Second form names).
 
 ### Levers by stage (proposal)
 
@@ -336,7 +336,7 @@ Option C gives each role two named forms, one leaning corp and one leaning stree
 | Wetware | Breach | Razor | **Solo** | CP2020: a mercenary who works the streets |
 | Wetware | Dodge | Wired | **Chipped** | CP2020: senses, skills and reflexes enhanced by cyberware |
 | Wetware | Tune | **Mentat** | Gibson | CP2020: someone who stares at a problem and answers without visible steps |
-| Wetware | Feast | **Nutri** | Leech | A clipping of CP2020's Nutrisoy (cheap processed food). Wirehead was dropped as too close to Wired. Proposed, not confirmed; candidates below |
+| Wetware | Feast | **Nutri** | Leech | A clipping of CP2020's Nutrisoy (cheap processed food). Decided. Wirehead was dropped as too close to Wired |
 
 New names are in bold. The hidden forms (Ghost, Guru, Blank) are unchanged.
 
@@ -349,9 +349,9 @@ Notes:
   - **Nutrisoy:** CP2020 (cheap processed food product). Corp-flavored and unmistakably about eating, but three syllables, longer than the other Wetware names.
   - **Chunking:** CP2020 (eating on the run, or as a secondary activity). Short, directly about eating, but it is a gerund and reads street, not corp.
   - If Batch is chosen anyway, the Bad batch item would need another name.
-  - **Nutri:** a clipping of Nutrisoy, proposed by the maintainer as the shorter option. The glossary has only the full word, but clipping has a precedent (Phreak is a clipping of the Jargon term phreaking). Two syllables, like Razor and Gibson. It reads like a brand prefix, which suits the corp lean, and plainly points at food and nourishment. Risk: it can sound cute next to the other Wetware names. Currently the proposed name; not confirmed.
+  - **Nutri:** a clipping of Nutrisoy, proposed by the maintainer as the shorter option. The glossary has only the full word, but clipping has a precedent (Phreak is a clipping of the Jargon term phreaking). Two syllables, like Razor and Gibson. It reads like a brand prefix, which suits the corp lean, and plainly points at food and nourishment. Risk: it can sound cute next to the other Wetware names. Decided by the maintainer.
 - **Weak links.** Spoof (deception reads outlaw, now on the street lean) and Splat (smashing, close to Gronk). Thrash and Gronk are both violent street names in Iron, which is acceptable since the roles differ (Breach and Feast). Alternates: Program Breach Sneaker (also verified, a hired breaker); Iron Breach Gib (Jargon: destroy utterly) or Scag; Iron Feast Hog (Jargon: eats more than its share); Wetware Breach Blade (CP2020: a fighter with edged weapons, or a surgeon), Wetware Dodge Edge (the fringe of society).
-- **Form-bound pages.** Under option C one page covers both forms of a role, so a page must read right for both. The existing role pages use the street-lean names as in-world words in two places (`iron-gronk`, `iron-jiff`); a page could use either name or neither.
+- **Form-bound pages (done).** Under option C one page covers both forms of a role. The drafts file now has one page per role, named by role (`iron-breach`, not `iron-gronk`), with `iron-breach` and `iron-dodge` using both form names as in-world words and the others naming neither lean.
 - **Not checked:** how the names read in the UI, or whether any collides with a 1.0 form name. None of them is a 1.0 form (Chrome, Firewall, Daemon, Glitch, Ghost, Stub, Shell, Kernel and the mainframe names).
 
 Alternates: Program Breach Trojan or Cowboy; Dodge Snark or Boojum (Snark was dropped as too close to Snarf); Tune Phantom or Dragon; hidden Wheel. Iron Feast Slurp; hidden Wizard or Wheel. Wetware Breach Cowboy; Feast Exotic (graceful but no feeding link); Dodge Ace. Wabbit was dropped (too close to Elmer Fudd).
@@ -463,7 +463,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 9. Evolution: the size of a Standing point and the wins that make a role (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
 11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
-12. The 12 second form names (see Second form names): confirm or replace them, and the lean each name takes.
+12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
 
 ## Not designed yet
 
