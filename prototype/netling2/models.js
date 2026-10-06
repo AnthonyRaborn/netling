@@ -1,13 +1,36 @@
 // The two ways to build the Iron line, behind one interface so the page, the tests and the audit treat them alike.
-//   Model A, composed: one adult body, five role overlays merged onto it.
-//   Model B, authored: five adults drawn in full.
-// Baby, teen and elder are the same art in both (they have no role).
-import { BABY, TEEN, ELDER, ADULT_BODY, OVERLAYS, ADULTS, ANCHORS } from './art.js';
+//   Model A, composed: a body per stage, with overlays merged onto it (a role overlay and a lean overlay for an adult, a lean
+//                      overlay for a teen).
+//   Model B, authored: every teen and adult drawn in full.
+// Baby and elder are the same art in both (one each per egg, no role or lean).
+//
+// The 14 forms follow docs/NETLING_2_SKETCH.md: baby; three teens (corp lean, street lean, and the hidden path); nine adults
+// (four roles with two named forms each, one corp-leaning and one street-leaning, plus the hidden one); one elder.
+import { BABY, ELDER, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
 export const ROLES = ['breach', 'dodge', 'tune', 'feast', 'hidden'];
-// Role to the adult's name and to the key of its art in each model.
-export const ROLE_FORM = { breach: 'gronk', dodge: 'jiff', tune: 'feep', feast: 'munch', hidden: 'guru' };
-export const SHARED = { baby: BABY, teen: TEEN, elder: ELDER };
+// Form id -> what it is. Iron's names: the corp lean takes the tidier word, the street lean the wilder one.
+export const FORMS = {
+  baby: { stage: 'baby' },
+  teenCorp: { stage: 'teen', lean: 'corp' },
+  teenStreet: { stage: 'teen', lean: 'street' },
+  teenHidden: { stage: 'teen', lean: 'hidden' },
+  splat: { stage: 'adult', role: 'breach', lean: 'corp' },
+  gronk: { stage: 'adult', role: 'breach', lean: 'street' },
+  jiff: { stage: 'adult', role: 'dodge', lean: 'corp' },
+  bamf: { stage: 'adult', role: 'dodge', lean: 'street' },
+  ping: { stage: 'adult', role: 'tune', lean: 'corp' },
+  feep: { stage: 'adult', role: 'tune', lean: 'street' },
+  munch: { stage: 'adult', role: 'feast', lean: 'corp' },
+  thrash: { stage: 'adult', role: 'feast', lean: 'street' },
+  guru: { stage: 'adult', role: 'hidden' },
+  elder: { stage: 'elder' },
+};
+export const ids = (stage) => Object.keys(FORMS).filter((id) => FORMS[id].stage === stage);
+export const ADULT_IDS = ids('adult');
+export const TEEN_IDS = ids('teen');
+// The forms of a role: corp lean then street lean (just the one for the hidden role).
+export const roleForms = (role) => ADULT_IDS.filter((id) => FORMS[id].role === role);
 
 // Merge an overlay onto a body: '_' erases, any other non-'.' replaces.
 export function compose(body, overlay) {
@@ -46,7 +69,7 @@ function eyeGroups(rows, eyeRow) {
 export function pose(a, eyeRow, kind) {
   const g = a.map((r) => [...r]);
   const groups = eyeGroups(a, eyeRow);
-  // Any other accent cell on the head above the eyes (the hidden form's third eye) goes dark in both poses.
+  // Any other accent cell on the head above the eyes (a hidden form's third eye) goes dark in both poses.
   a.forEach((row, y) => y < eyeRow && y >= eyeRow - 2 && [...row].forEach((ch, x) => ch === 'o' && (g[y][x] = '#')));
   for (const cells of groups) for (const [x, y] of cells) g[y][x] = '#';
   for (const cells of groups) {
@@ -62,27 +85,35 @@ export function pose(a, eyeRow, kind) {
   return g.map((r) => r.join(''));
 }
 
-// forms(model) -> { id: { stage, role?, a, b, sleep, dead, anchors: { a, b, sleep } } }
-// Sleep and dead take the A frame's anchors, with the eyes a row lower asleep as in 1.0 (the slit sits on the eye's bottom row).
-function build(id, stage, frames, anchors, extra = {}) {
+// Sleep and dead take the A frame's anchors (the eyes shut or crossed on the same row).
+function build(id, frames, anchors) {
   const sleep = pose(frames.a, anchors.a.eyeRow, 'sleep');
   const dead = pose(frames.a, anchors.a.eyeRow, 'dead');
-  return { id, stage, ...extra, a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: anchors.b, sleep: anchors.a } };
+  return { id, ...FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: anchors.b, sleep: anchors.a } };
+}
+
+function framesA(id) {
+  const { stage, role, lean } = FORMS[id];
+  const both = (body, ...overlays) => Object.fromEntries(['a', 'b'].map((f) => [f, overlays.reduce((rows, o) => compose(rows, o[f]), body[f])]));
+  if (stage === 'baby') return BABY;
+  if (stage === 'elder') return ELDER;
+  if (stage === 'teen') return both(TEEN_BODY, TEEN_OVERLAYS[lean]);
+  return role === 'hidden' ? both(ADULT_BODY, OVERLAYS.hidden) : both(ADULT_BODY, OVERLAYS[role], LEAN_OVERLAYS[lean]);
+}
+function framesB(id) {
+  const { stage } = FORMS[id];
+  if (stage === 'baby') return BABY;
+  if (stage === 'elder') return ELDER;
+  return stage === 'teen' ? TEENS[id] : ADULTS[id];
+}
+// Model A's forms share the body's anchors (that is its premise); model B authors each form's own.
+function anchorsA(id) {
+  const { stage } = FORMS[id];
+  return stage === 'teen' ? ANCHORS.teenBody : stage === 'adult' ? ANCHORS.adultBody : ANCHORS[id];
 }
 
 const cache = {};
 // Memoized: the same arrays every call, because src/accessories.js keys its anchor table on array identity (register.js).
 export function forms(model) {
-  return (cache[model] ??= buildForms(model));
-}
-function buildForms(model) {
-  const out = {};
-  for (const [stage, frames] of Object.entries(SHARED)) out[stage] = build(stage, stage, frames, ANCHORS[stage]);
-  for (const role of ROLES) {
-    const name = ROLE_FORM[role];
-    const frames = model === 'A' ? { a: compose(ADULT_BODY.a, OVERLAYS[role].a), b: compose(ADULT_BODY.b, OVERLAYS[role].b) } : ADULTS[name];
-    // Model A's roles share the body's anchors (that is its premise); model B authors each form's own.
-    out[name] = build(name, 'adult', frames, model === 'A' ? ANCHORS.adultBody : ANCHORS[name], { role });
-  }
-  return out;
+  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id])])));
 }

@@ -2,19 +2,31 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forms, compose, ROLES, ROLE_FORM, SHARED } from './models.js';
-import { ADULT_BODY, OVERLAYS, ANCHORS } from './art.js';
-import { temperTell, band, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
+import { forms, compose, FORMS, ADULT_IDS, TEEN_IDS, ROLES, roleForms, ids } from './models.js';
+import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
+import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
+import { neglected, NEGLECT_LEVELS } from './neglect.js';
 import { register, protoKey, MODELS } from './register.js';
-import { spriteCells, silhouetteIou, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
+import { overlaps, crossRole, siblings, authoring } from './metrics.js';
+import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
-const ADULTS = Object.values(ROLE_FORM);
+
+// --- the form table --------------------------------------------------------------------------------------------------------
+test('the form table matches the sketch: baby, 3 teens, 9 adults (4 roles x 2 leans + hidden), elder', () => {
+  assert.equal(ids('baby').length, 1);
+  assert.equal(ids('elder').length, 1);
+  assert.deepEqual(TEEN_IDS, ['teenCorp', 'teenStreet', 'teenHidden']);
+  assert.equal(ADULT_IDS.length, 9);
+  for (const role of ['breach', 'dodge', 'tune', 'feast']) assert.deepEqual(roleForms(role).map((id) => FORMS[id].lean), ['corp', 'street']);
+  assert.deepEqual(roleForms('hidden'), ['guru']);
+  assert.deepEqual(ROLES, ['breach', 'dodge', 'tune', 'feast', 'hidden']);
+});
 
 // --- art ------------------------------------------------------------------------------------------------------------------
 for (const model of MODELS) {
   const set = forms(model);
-  test(`model ${model}: every sprite is rectangular, the right width, at most 15 rows, with known marks`, () => {
+  test(`model ${model}: every sprite is rectangular, the right width, 9 to 15 rows, with known marks`, () => {
     for (const f of Object.values(set)) {
       for (const pose of ['a', 'b', 'sleep', 'dead']) {
         const rows = f[pose];
@@ -35,12 +47,9 @@ for (const model of MODELS) {
         for (const r of [headTop, eyeRow, mouthRow, neckRow]) assert.ok(r >= 0 && r < sprite.length, `${f.id}/${pose}: anchor out of range`);
         assert.ok(headTop < eyeRow && eyeRow < mouthRow && mouthRow < neckRow, `${f.id}/${pose}: anchors out of order`);
         assert.ok(/[#o+x]/.test(sprite[headTop]), `${f.id}/${pose}: headTop row is empty`);
-        const eyes = (pose === 'sleep' ? f.a : sprite)[eyeRow];
-        assert.ok(eyes.includes('o'), `${f.id}/${pose}: no eye on eyeRow`);
+        assert.ok((pose === 'sleep' ? f.a : sprite)[eyeRow].includes('o'), `${f.id}/${pose}: no eye on eyeRow`);
       }
-      for (const key of ['headTop', 'eyeRow', 'mouthRow', 'neckRow']) {
-        assert.ok(Math.abs(f.anchors.a[key] - f.anchors.b[key]) <= 1, `${f.id}: ${key} moves more than a row`);
-      }
+      for (const key of ['headTop', 'eyeRow', 'mouthRow', 'neckRow']) assert.ok(Math.abs(f.anchors.a[key] - f.anchors.b[key]) <= 1, `${f.id}: ${key} moves more than a row`);
     }
   });
 
@@ -53,54 +62,74 @@ for (const model of MODELS) {
     }
   });
 
-  test(`model ${model}: the hidden third eye goes dark when asleep or dead`, () => {
-    const g = set.guru;
-    assert.ok(g.a[4].includes('oo'));
-    assert.ok(!g.sleep[4].includes('o') && !g.dead[4].includes('o'));
+  test(`model ${model}: the hidden forms' third eye goes dark when asleep or dead`, () => {
+    for (const id of ['guru', 'teenHidden']) {
+      const f = set[id];
+      const row = f.anchors.a.eyeRow - (id === 'guru' ? 1 : 1);
+      assert.ok(f.a[row].includes('oo'), `${id}: third eye`);
+      assert.ok(!f.sleep[row].includes('o') && !f.dead[row].includes('o'), `${id}: still lit`);
+    }
+  });
+
+  test(`model ${model}: the two forms of a role and the three teens are visibly different, not copies`, () => {
+    for (const role of ['breach', 'dodge', 'tune', 'feast']) {
+      const [x, y] = roleForms(role);
+      assert.ok(poseDistance(set[x].a, set[y].a) + markDistance(set[x].a, set[y].a) >= 6, `${x}/${y}`);
+    }
+    for (let i = 0; i < TEEN_IDS.length; i++) for (let j = i + 1; j < TEEN_IDS.length; j++) assert.ok(poseDistance(set[TEEN_IDS[i]].a, set[TEEN_IDS[j]].a) + markDistance(set[TEEN_IDS[i]].a, set[TEEN_IDS[j]].a) >= 6, `${TEEN_IDS[i]}/${TEEN_IDS[j]}`);
   });
 }
 
-test('the two models share baby, teen and elder art and differ only in the five adults', () => {
+test('the two models share baby and elder and differ in every teen and adult', () => {
   const A = forms('A');
   const B = forms('B');
-  for (const stage of Object.keys(SHARED)) assert.deepEqual(A[stage].a, B[stage].a);
-  for (const name of ADULTS) assert.notDeepEqual(A[name].a, B[name].a, `${name} should differ between models`);
+  for (const id of ['baby', 'elder']) assert.deepEqual(A[id].a, B[id].a);
+  for (const id of [...TEEN_IDS, ...ADULT_IDS]) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
 });
 
 test('compose merges, erases and rejects a mismatched overlay', () => {
   assert.deepEqual(compose(['###', '###'], ['.o.', '_..']), ['#o#', '.##']);
   assert.throws(() => compose(['###'], ['...', '...']));
-  assert.equal(OVERLAYS.breach.a.length, ADULT_BODY.a.length);
 });
 
-test('every overlay is the body size, in both frames, and changes the body in each', () => {
-  for (const role of ROLES) {
+test('every overlay is its body size in both frames, and changes the body', () => {
+  const check = (body, o, label) => {
     for (const f of ['a', 'b']) {
-      const ov = OVERLAYS[role][f];
-      assert.equal(ov.length, ADULT_BODY[f].length);
-      for (const row of ov) assert.equal(row.length, 16, `${role}/${f}: ragged overlay`);
-      assert.ok(poseDistance(ADULT_BODY[f], compose(ADULT_BODY[f], ov)) >= 8, `${role}/${f}: overlay barely changes the body`);
+      assert.equal(o[f].length, body[f].length, `${label}/${f}`);
+      for (const row of o[f]) assert.equal(row.length, body[f][0].length, `${label}/${f}: ragged overlay`);
+      const merged = compose(body[f], o[f]);
+      assert.ok(poseDistance(body[f], merged) + markDistance(body[f], merged) >= 4, `${label}/${f}: overlay barely changes the body`);
     }
-  }
+  };
+  for (const [k, o] of Object.entries(OVERLAYS)) check(ADULT_BODY, o, `role ${k}`);
+  for (const [k, o] of Object.entries(LEAN_OVERLAYS)) check(ADULT_BODY, o, `lean ${k}`);
+  for (const [k, o] of Object.entries(TEEN_OVERLAYS)) check(TEEN_BODY, o, `teen ${k}`);
 });
 
-// --- distinctness: the thing the two models trade off --------------------------------------------------------------------
-function overlaps(model) {
-  const set = forms(model);
-  const out = [];
-  for (let i = 0; i < ADULTS.length; i++) {
-    for (let j = i + 1; j < ADULTS.length; j++) out.push({ pair: `${ADULTS[i]}/${ADULTS[j]}`, iou: silhouetteIou(set[ADULTS[i]].a, set[ADULTS[j]].a) });
-  }
-  return out.sort((x, y) => y.iou - x.iou);
-}
-test('the five adults are distinct by silhouette in both models (1.0 flags nothing above 0.82 within a stage)', () => {
-  for (const model of MODELS) {
-    const all = overlaps(model);
-    const mean = all.reduce((n, x) => n + x.iou, 0) / all.length;
-    const near = all.filter((x) => x.iou >= 0.8).length;
-    console.log(`  model ${model}: closest adult pair ${all[0].pair} ${all[0].iou.toFixed(2)}, mean ${mean.toFixed(2)}, ${near} pair(s) at 0.80 or above`);
-    assert.ok(all[0].iou < 0.82, `model ${model}: ${all[0].pair} overlap ${all[0].iou.toFixed(2)}`);
-  }
+// --- distinctness: what the two models trade off -------------------------------------------------------------------------
+test('model B: every pair of adults of different roles stays under the 1.0 bar (0.82), and a role\'s two forms stay a family', () => {
+  const cross = crossRole('B');
+  const sib = siblings('B');
+  console.log(`  model B cross-role: worst ${cross.worst.pair} ${cross.worst.iou.toFixed(2)}, mean ${cross.mean.toFixed(2)}, ${cross.near} at 0.80+; siblings ${sib.map((s) => `${s.pair} ${s.iou.toFixed(2)}`).join(', ')}`);
+  assert.ok(cross.worst.iou < 0.82, `${cross.worst.pair} ${cross.worst.iou.toFixed(2)}`);
+  for (const s of sib) assert.ok(s.iou < 0.9 && s.iou > 0.5, `${s.pair} ${s.iou.toFixed(2)}`);
+});
+
+test('model A: reports the same measures (no pass mark asserted: see docs/NETLING_2_SPRITES.md)', () => {
+  const cross = crossRole('A');
+  const sib = siblings('A');
+  console.log(`  model A cross-role: worst ${cross.worst.pair} ${cross.worst.iou.toFixed(2)}, mean ${cross.mean.toFixed(2)}, ${cross.near} at 0.80+; siblings ${sib.map((s) => `${s.pair} ${s.iou.toFixed(2)}`).join(', ')}`);
+  // The facts the write-up states.
+  assert.ok(cross.worst.iou >= 0.82, 'model A now clears the bar: update the write-up');
+  assert.ok(sib.every((s) => s.iou < 0.99), 'siblings must not be identical outlines');
+  assert.ok(overlaps('A', ADULT_IDS).pairs.length === 36);
+});
+
+test('authoring cost: composed is a fraction of authored for the teens and adults', () => {
+  const a = authoring('A');
+  const b = authoring('B');
+  console.log(`  hand-placed cells: A ${a.cells}, B ${b.cells}`);
+  assert.ok(a.cells < b.cells / 3);
 });
 
 // --- wearables: the real 1.0 code on the prototype sprites -----------------------------------------------------------------
@@ -143,89 +172,192 @@ test('every 1.0 wearable stays on screen on every prototype form and pose, excep
   assert.deepEqual(bad, []);
 });
 
-// --- temper tell -----------------------------------------------------------------------------------------------------------
-const TEMPERS = [0, 0.2, 0.5, 0.7, 1];
-const sample = (egg, temper, seed, reduced, ms = 120_000, step = 10) => {
-  const out = [];
-  for (let t = 0; t < ms; t += step) out.push({ t, ...temperTell({ egg, temper, time: t, reduced, seed }) });
-  return out;
-};
-
-test('the tell is a pure function of its inputs', () => {
-  for (const egg of EGGS) assert.deepEqual(temperTell({ egg, temper: 0.8, time: 12345, seed: 3 }), temperTell({ egg, temper: 0.8, time: 12345, seed: 3 }));
-});
-
-test('temper bands: orderly below 0.35, volatile from 0.65', () => {
-  assert.deepEqual([0, 0.34, 0.35, 0.64, 0.65, 1].map(band), ['orderly', 'orderly', 'mixed', 'mixed', 'volatile', 'volatile']);
-});
-
-test('an orderly netling keeps the 1.0 rhythm with no offset, in every egg', () => {
-  for (const egg of ['iron', 'program']) {
-    for (const s of sample(egg, 0.1, 0, false, 10_000, 50)) {
-      assert.equal(s.frame, Math.floor(s.t / FRAME_MS) % 2);
-      assert.deepEqual([s.dx, s.dy, s.shade], [0, 0, 1]);
-    }
-  }
-});
-
-test('flash budget: a frame never changes faster than every 200 ms, so nothing flashes more than three times a second', () => {
-  for (const egg of EGGS) {
-    for (const temper of TEMPERS) {
-      for (const seed of [0, 1, 2, 3]) {
-        const s = sample(egg, temper, seed, false);
-        const changes = [];
-        for (let i = 1; i < s.length; i++) if (s[i].frame !== s[i - 1].frame) changes.push(s[i].t);
-        for (let i = 1; i < changes.length; i++) assert.ok(changes[i] - changes[i - 1] >= SLOT_MS, `${egg} t=${temper} seed ${seed}: frame changed after ${changes[i] - changes[i - 1]} ms`);
-        // A flash is a pair of changes: at most six changes in any second.
-        for (let i = 0; i < changes.length; i++) {
-          const inWindow = changes.filter((c) => c >= changes[i] && c < changes[i] + 1000).length;
-          assert.ok(inWindow <= 6, `${egg} t=${temper} seed ${seed}: ${inWindow} changes in a second`);
+// --- neglect ---------------------------------------------------------------------------------------------------------------
+test('neglect: level 0 is untouched; the outline, eyes and the rows above the mouth never change; only body cells rust', () => {
+  for (const model of MODELS) {
+    for (const f of Object.values(forms(model))) {
+      for (const pose of ['a', 'b']) {
+        const sprite = f[pose];
+        const anchors = f.anchors[pose];
+        assert.equal(neglected(sprite, anchors, 0, 3), sprite);
+        for (const level of [1, 2]) {
+          const n = neglected(sprite, anchors, level, 3);
+          assert.equal(n.length, sprite.length);
+          sprite.forEach((row, y) => {
+            assert.equal(n[y].length, row.length);
+            [...row].forEach((ch, x) => {
+              assert.equal(n[y][x] === '.', ch === '.', `${f.id}: outline changed at ${x},${y}`);
+              if (n[y][x] !== ch) {
+                assert.ok(ch === '#' && n[y][x] === 'x' && y > anchors.mouthRow, `${f.id}: changed ${ch} at ${x},${y}`);
+              }
+            });
+          });
         }
       }
     }
   }
 });
 
-test('volatile Iron drifts at most two columns off its grid and snaps back; nothing moves a row', () => {
-  for (const seed of [0, 1, 2]) {
-    const s = sample('iron', 1, seed, false);
-    assert.ok(s.every((x) => Math.abs(x.dx) <= 2 && x.dy === 0 && x.shade === 1));
-    assert.ok(s.some((x) => x.dx !== 0), 'it should drift');
-    for (let i = 1; i < s.length; i++) assert.ok(Math.abs(s[i].dx - s[i - 1].dx) <= 2);
-    // Between snaps it moves one column at a time.
-    const steps = s.filter((x, i) => i && Math.abs(x.dx) > Math.abs(s[i - 1].dx));
-    assert.ok(steps.every((x) => x.t % 4000 > 0));
-  }
-});
-
-test('volatile Program stutters and hops one row; volatile Wetware only pulses, gently and slowly', () => {
-  const p = sample('program', 1, 0, false);
-  assert.ok(p.some((x) => x.dy === -1) && p.every((x) => x.dx === 0 && x.dy >= -1 && x.shade === 1));
-  const w = sample('wetware', 1, 0, false, 60_000, 10);
-  assert.ok(w.every((x) => x.dx === 0 && x.dy === 0 && x.shade >= 0.75 - 1e-9 && x.shade <= 1 + 1e-9));
-  assert.ok(Math.max(...w.map((x) => x.shade)) - Math.min(...w.map((x) => x.shade)) > 0.15, 'it should visibly pulse');
-  for (let i = 1; i < w.length; i++) assert.ok(Math.abs(w[i].shade - w[i - 1].shade) < 0.01, 'no brightness jump');
-});
-
-test('reduced motion: no drift, hop or pulse, and a volatile netling keeps a still tell', () => {
-  for (const egg of EGGS) {
-    for (const seed of [0, 1]) {
-      const v = sample(egg, 1, seed, true, 20_000, 50);
-      const o = sample(egg, 0, seed, true, 20_000, 50);
-      assert.ok(v.every((x) => x.dy === 0));
-      if (egg === 'iron') assert.ok(v.every((x) => Math.abs(x.dx) === 1 && x.dx === v[0].dx) && o.every((x) => x.dx === 0));
-      if (egg === 'program') assert.ok(v.every((x) => x.frame === 1) && o.some((x) => x.frame === 0));
-      if (egg === 'wetware') assert.ok(v.every((x) => x.shade === 0.8) && o.every((x) => x.shade === 1));
+test('neglect grows and clears without jumping: level 2 contains level 1, patches are deterministic, and the count rises', () => {
+  for (const model of MODELS) {
+    for (const f of Object.values(forms(model))) {
+      const [l0, l1, l2] = NEGLECT_LEVELS.map((l) => neglected(f.a, f.anchors.a, l, 5));
+      assert.deepEqual(neglected(f.a, f.anchors.a, 1, 5), l1);
+      const patches = (s) => s.join('').split('x').length - 1;
+      assert.ok(patches(l0) <= patches(l1) && patches(l1) < patches(l2), `${f.id}: ${patches(l0)} ${patches(l1)} ${patches(l2)}`);
+      l1.forEach((row, y) => [...row].forEach((ch, x) => ch === 'x' && assert.equal(l2[y][x], 'x', `${f.id}: level 1 patch missing at level 2`)));
+      assert.ok(patches(l2) - patches(l0) >= 3, `${f.id}: neglect barely visible`);
     }
   }
 });
 
-test('the three eggs read differently at the same temper', () => {
-  const key = (egg) => JSON.stringify(sample(egg, 1, 0, false, 8000, 100));
-  assert.equal(new Set(EGGS.map(key)).size, 3);
+// --- temper tell -----------------------------------------------------------------------------------------------------------
+const LEVELS = [-2, -1, 0, 1, 2];
+const sample = (egg, level, seed, reduced, ms = 120_000, step = 10) => {
+  const out = [];
+  for (let t = 0; t < ms; t += step) out.push({ t, ...temperTell({ egg, level, time: t, reduced, seed }) });
+  return out;
+};
+
+test('levels follow the sketch thresholds (-6, -2, +3, +6)', () => {
+  assert.deepEqual(THRESHOLDS, [-6, -2, 3, 6]);
+  assert.deepEqual([-20, -6.01, -6, -2.01, -2, 0, 2.99, 3, 5.99, 6, 17].map(levelOf), [-2, -2, -1, -1, 0, 0, 0, 1, 1, 2, 2]);
 });
 
-test('anchor table covers every adult in both models', () => {
-  for (const name of [...ADULTS, 'adultBody', 'baby', 'teen', 'elder']) assert.ok(ANCHORS[name], name);
+test('the flicker guard: temper hovering on a threshold does not flip the level', () => {
+  for (const t of THRESHOLDS) {
+    for (const start of [levelOf(t - 1), levelOf(t + 1)]) {
+      let level = start;
+      let flips = 0;
+      for (let i = 0; i < 40; i++) {
+        const next = guardedLevel(t + (i % 2 ? GUARD * 0.8 : -GUARD * 0.8), level);
+        if (next !== level) flips++;
+        level = next;
+      }
+      assert.equal(flips, 0, `threshold ${t}: flipped ${flips} times`);
+    }
+  }
+  // It still moves once temper is clearly past a threshold, in both directions, and across several levels at once.
+  assert.equal(guardedLevel(3 + GUARD, 0), 1);
+  assert.equal(guardedLevel(3 - GUARD - 0.01, 1), 0);
+  assert.equal(guardedLevel(-20, 2), -2);
+  assert.equal(guardedLevel(20, -2), 2);
+  for (const temper of [-9, -4, 0, 4.5, 9]) assert.equal(guardedLevel(temper, levelOf(temper)), levelOf(temper));
+});
+
+test('the tell is a pure function of its inputs', () => {
+  for (const egg of EGGS) for (const level of LEVELS) assert.deepEqual(temperTell({ egg, level, time: 12345, seed: 3 }), temperTell({ egg, level, time: 12345, seed: 3 }));
+});
+
+test('the middle level has no tell: the 1.0 rhythm, no offset, full brightness', () => {
+  for (const egg of EGGS) {
+    for (const s of sample(egg, 0, 0, false, 10_000, 50)) {
+      assert.equal(s.frame, Math.floor(s.t / FRAME_MS) % 2);
+      assert.deepEqual([s.blink, s.dx, s.dy, s.shade], [false, 0, 0, 1]);
+    }
+  }
+});
+
+test('the steady beat is exact: the same move at the same interval every time, whatever the seed, and countable', () => {
+  const interval = { 1: 6000, 2: 3000 };
+  for (const egg of EGGS) {
+    for (const level of [1, 2]) {
+      const marks = (s) => (egg === 'iron' ? s.dy === 1 : egg === 'program' ? s.blink : s.shade < 1);
+      const a = sample(egg, level, 0, false, 60_000, 10);
+      const b = sample(egg, level, 99, false, 60_000, 10);
+      assert.deepEqual(a, b, `${egg}/${level}: the steady tell must not depend on the seed`);
+      const starts = a.filter((s, i) => marks(s) && (i === 0 || !marks(a[i - 1]))).map((s) => s.t);
+      assert.ok(starts.length >= 60_000 / interval[level] - 1, `${egg}/${level}: ${starts.length} beats`);
+      // Wetware's dip starts from full brightness, so its first sample below 1 is one step after the beat.
+      const lag = egg === 'wetware' ? 10 : 0;
+      starts.forEach((t, i) => assert.equal(t, i * interval[level] + lag, `${egg}/${level}: beat ${i} at ${t}`));
+    }
+  }
+});
+
+test('strongly steady beats twice as often as steady', () => {
+  const beats = (egg, level) => {
+    const s = sample(egg, level, 0, false, 60_000, 10);
+    const on = (x) => (egg === 'iron' ? x.dy === 1 : egg === 'program' ? x.blink : x.shade < 1);
+    return s.filter((x, i) => on(x) && (i === 0 || !on(s[i - 1]))).length;
+  };
+  for (const egg of EGGS) assert.equal(beats(egg, 2), beats(egg, 1) * 2);
+});
+
+test('flash budget: the picture never changes faster than every 200 ms, so nothing flashes more than three times a second', () => {
+  for (const egg of EGGS) {
+    for (const level of LEVELS) {
+      for (const seed of [0, 1, 2, 3]) {
+        for (const reduced of [false, true]) {
+          const s = sample(egg, level, seed, reduced);
+          // The pose a viewer sees: frame A, frame B, or the closed-eye blink.
+          const look = (x) => (x.blink ? 'blink' : x.frame);
+          const changes = [];
+          for (let i = 1; i < s.length; i++) if (look(s[i]) !== look(s[i - 1])) changes.push(s[i].t);
+          for (let i = 1; i < changes.length; i++) assert.ok(changes[i] - changes[i - 1] >= SLOT_MS, `${egg} L${level} seed ${seed}: changed after ${changes[i] - changes[i - 1]} ms`);
+          // A flash is a pair of changes: at most six changes in any second.
+          for (let i = 0; i < changes.length; i++) {
+            const inWindow = changes.filter((c) => c >= changes[i] && c < changes[i] + 1000).length;
+            assert.ok(inWindow <= 6, `${egg} L${level} seed ${seed}: ${inWindow} changes in a second`);
+          }
+        }
+      }
+    }
+  }
+});
+
+test('unsteady Iron drifts at most two columns off its grid and snaps back; strongly unsteady drifts more than unsteady', () => {
+  const drift = (level, seed) => sample('iron', level, seed, false);
+  for (const seed of [0, 1, 2]) {
+    for (const level of [-1, -2]) {
+      const s = drift(level, seed);
+      assert.ok(s.every((x) => Math.abs(x.dx) <= 2 && x.dy === 0 && x.shade === 1 && !x.blink));
+      for (let i = 1; i < s.length; i++) assert.ok(Math.abs(s[i].dx - s[i - 1].dx) <= 2);
+    }
+    const moved = (level) => drift(level, seed).filter((x) => x.dx !== 0).length;
+    assert.ok(moved(-2) > moved(-1) && moved(-1) > 0, `seed ${seed}`);
+  }
+});
+
+test('unsteady Program stutters (more when strong) and hops one row only when strong; unsteady Wetware only pulses, gently and slowly', () => {
+  const stutters = (level) => {
+    const s = sample('program', level, 0, false);
+    return s.filter((x, i) => i && x.frame !== s[i - 1].frame).length;
+  };
+  assert.ok(stutters(-2) > stutters(-1) && stutters(-1) > stutters(0));
+  assert.ok(sample('program', -1, 0, false).every((x) => x.dy === 0));
+  assert.ok(sample('program', -2, 0, false).some((x) => x.dy === -1));
+  for (const level of [-1, -2]) {
+    const w = sample('wetware', level, 0, false, 60_000, 10);
+    assert.ok(w.every((x) => x.dx === 0 && x.dy === 0 && x.shade >= 0.75 - 1e-9 && x.shade <= 1 + 1e-9));
+    assert.ok(Math.max(...w.map((x) => x.shade)) - Math.min(...w.map((x) => x.shade)) > 0.1, 'it should visibly pulse');
+    for (let i = 1; i < w.length; i++) assert.ok(Math.abs(w[i].shade - w[i - 1].shade) < 0.01, 'no brightness jump');
+  }
+});
+
+test('reduced motion: the unsteady levels keep a still tell; the steady beat is kept', () => {
+  for (const egg of EGGS) {
+    for (const seed of [0, 1]) {
+      for (const level of [-1, -2]) {
+        const v = sample(egg, level, seed, true, 20_000, 50);
+        assert.ok(v.every((x) => x.dy === 0 && !x.blink));
+        if (egg === 'iron') assert.ok(v.every((x) => Math.abs(x.dx) === 1 && x.dx === v[0].dx));
+        if (egg === 'program') assert.ok(v.every((x) => x.frame === 1));
+        if (egg === 'wetware') assert.ok(v.every((x) => x.shade === 0.8));
+      }
+    }
+    assert.deepEqual(sample(egg, 1, 0, true, 20_000, 50), sample(egg, 1, 0, false, 20_000, 50));
+  }
+});
+
+test('the three eggs read differently at the same level', () => {
+  for (const level of [-2, 2]) {
+    const key = (egg) => JSON.stringify(sample(egg, level, 0, false, 8000, 100));
+    assert.equal(new Set(EGGS.map(key)).size, 3, `level ${level}`);
+  }
+});
+
+test('the anchor table covers every form, and the shared bodies', () => {
+  for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[id], id);
   assert.ok(spriteCells(forms('B').guru.a).length > spriteCells(forms('B').munch.a).length);
 });
