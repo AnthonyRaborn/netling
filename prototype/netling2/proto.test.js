@@ -2,7 +2,7 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL, ADULTS_ALL, ELDER_OF } from './models.js';
+import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL, ADULTS_ALL, ELDER_OF, pose, ironMarks } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
@@ -280,6 +280,36 @@ test('neglect grows and clears without jumping: level 2 contains level 1, patche
   }
 });
 
+
+// --- Iron's asleep and dead poses -------------------------------------------------------------------------------------------------
+test('Iron poses: asleep shows a queue of dots on the chest, dead a read-only record, on every form in both models', () => {
+  for (const model of MODELS) {
+    for (const f of Object.values(forms(model))) {
+      const a = f.anchors.a;
+      const changed = (pose) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === 'o' && f.a[y][x] === '#' ? [x, y] : null)).filter(Boolean));
+      const queue = changed('sleep').filter(([, y]) => y > a.mouthRow);
+      const record = changed('dead').filter(([, y]) => y >= a.neckRow);
+      assert.ok(queue.length >= 3 && new Set(queue.map(([, y]) => y)).size === 1, `${f.id}: queue ${queue.length} dots`);
+      assert.ok(record.length >= 4 && new Set(record.map(([, y]) => y)).size === 1, `${f.id}: record ${record.length} cells`);
+      // Marks only: the outline is the awake outline, and below the eyes only '#' cells become marks.
+      assert.equal(poseDistance(f.a, f.sleep), 0);
+      assert.equal(poseDistance(f.a, f.dead), 0);
+    }
+  }
+});
+
+test('Iron poses add only the chest mark to the generic pose: the eyes are the 1.0 slit and X', () => {
+  for (const f of Object.values(forms('B'))) {
+    const a = f.anchors.a;
+    for (const kind of ['sleep', 'dead']) {
+      const generic = pose(f.a, a.eyeRow, kind);
+      assert.deepEqual(ironMarks(generic, a, kind), f[kind]);
+      generic.forEach((row, y) => y <= a.mouthRow && assert.equal(f[kind][y], row, `${f.id}/${kind}: row ${y} above the chest changed`));
+    }
+    assert.notDeepEqual(f.sleep, pose(f.a, a.eyeRow, 'sleep'));
+    assert.notDeepEqual(f.dead, pose(f.a, a.eyeRow, 'dead'));
+  }
+});
 
 // --- what drives neglect: unmet needs (transient) ----------------------------------------------------------------------------
 const OK = { charge: 70, sync: 70, integrity: 100, heat: 20 };

@@ -8,6 +8,7 @@
     "serve": "python3 -m http.server 5174",
     "balance": "node tools/balance.mjs",
     "smoke": "node tools/smoke.mjs",
-    "proto:test": "TZ=UTC node --test --test-timeout=60000 'prototype/netling2/*.test.js'"
+    "proto:test": "TZ=UTC node --test --test-timeout=60000 'prototype/netling2/*.test.js'",
+    "proto:audit": "node prototype/netling2/audit.mjs"
   }
 }

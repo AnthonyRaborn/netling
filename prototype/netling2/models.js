@@ -99,10 +99,29 @@ export function pose(a, eyeRow, kind) {
   return g.map((r) => r.join(''));
 }
 
+// Iron's own marks on the generic poses (the sketch's death register: Iron is decommissioned, a last write that leaves a
+// read-only record; its rhythm is batch: work is queued and collected on return).
+//   asleep: a QUEUE, four accent dots in a row on the chest, work waiting for the next batch.
+//   dead:   a READ-ONLY RECORD, a dark barcode stamped across the chest, the last write.
+// Marks only: they replace '#' body cells, never touch the eyes or the outline, and sit at the same columns on every form.
+const QUEUE = 'o.o..o.o';
+const RECORD = 'oo.o..o.oo'; // symmetric: read the same from either end
+function stamp(rows, from, pattern) {
+  const w = rows[0].length;
+  const start = (w - pattern.length) / 2;
+  const hits = (y) => [...pattern].filter((c, i) => c === 'o' && rows[y][start + i] === '#').length;
+  const want = [...pattern].filter((c) => c === 'o').length;
+  let best = -1;
+  for (let y = from; y < rows.length; y++) if (hits(y) > (best < 0 ? 2 : hits(best))) best = y;
+  if (best < 0) return rows;
+  return rows.map((row, y) => (y === best ? [...row].map((c, x) => (c === '#' && pattern[x - start] === 'o' ? 'o' : c)).join('') : row));
+}
+export const ironMarks = (rows, anchors, kind) => (kind === 'sleep' ? stamp(rows, anchors.mouthRow + 1, QUEUE) : stamp(rows, anchors.neckRow, RECORD));
+
 // Sleep and dead take the A frame's anchors (the eyes shut or crossed on the same row).
 function build(id, frames, anchors) {
-  const sleep = pose(frames.a, anchors.a.eyeRow, 'sleep');
-  const dead = pose(frames.a, anchors.a.eyeRow, 'dead');
+  const sleep = ironMarks(pose(frames.a, anchors.a.eyeRow, 'sleep'), anchors.a, 'sleep');
+  const dead = ironMarks(pose(frames.a, anchors.a.eyeRow, 'dead'), anchors.a, 'dead');
   return { id, ...FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: anchors.b, sleep: anchors.a } };
 }
 

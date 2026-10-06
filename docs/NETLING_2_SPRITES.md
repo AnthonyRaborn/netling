@@ -38,12 +38,12 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 - **Neglect look** (`neglect.js`, level from `needs.js`). Iron's skin is rust: dim patches that spread from the bottom up in two levels, never over the eyes or above the mouth, never changing the outline. It does not move, so it is a different channel from temper, and reduced motion needs no variant. Anchors, poses and wearables are unaffected.
 - **Bug glitch** (`glitch.js`). Each bug (0 to 5) tears one body row a column sideways; see What drives neglect and bugs.
 - **Review page:** `npm run serve`, then `http://localhost:5174/prototype/netling2/`. Both lines side by side, controls for palette, tell skin, temper, neglect, reduced motion, pose, any 1.0 wearable and the anchor rows, how the composed forms are built, the timeline of the tell, and the metrics.
-- **Poses.** Sleep and dead are generated from the A frame, as in 1.0 (X eyes when dead, slits asleep).
+- **Poses** (`ironMarks` in `models.js`). Sleep and dead start from the generated 1.0 poses (slit eyes asleep, X eyes dead; a hidden form's third eye goes dark) and add Iron's own mark on the chest, from the sketch's Iron register (batch work, and a decommission that leaves a read-only record): **asleep shows a queue**, four accent dots in a row (work waiting for the next batch); **dead shows a read-only record**, a dark barcode stamped across the chest (the last write). Marks only: they replace body cells, never touch the eyes or the outline. Every form has both, and a test checks it.
 - **Real wearables.** `register.js` adds the prototype sprites to the game's own `SPRITES` and `ANCHOR_ROWS` tables before `src/accessories.js` loads, so the 1.0 wearable code places items on them unchanged. This only happens in the prototype page and its tests.
 
 ## Results for the line
 
-Measured by `npm run proto:test` (42 tests) and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
+Measured by `npm run proto:test` (44 tests) and `npm run proto:audit` and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
 
 | | Model A, composed | Model B, authored |
 |---|---|---|
@@ -111,6 +111,26 @@ Drawn, authored: one elder per adult, each its adult grown to 18 columns (agains
 - **Wearables.** 3198 cases across all 22 forms; 16 clip a pixel above the screen, all the holologo on 15 row sprites, as 1.0's own 15 row forms do.
 - **Not drawn:** the elders of Program and Wetware, and the Program and Wetware babies and teens.
 
+## Iron through the real 1.0 sprite audit
+
+`npm run proto:audit` runs the unchanged `tools/sprite-audit.mjs` on Iron's 22 forms: `prototype/netling2/audit.mjs` registers the prototype sprites in the game's own tables, replaces `SPECIES` with Iron's forms (the elders as the `mainframe` stage the game draws for a grown form) and imports the audit. Forms show as `protoB_<id>`. It checks wearable clipping, icon slots, contrast, occlusion, worn combinations, silhouette overlap, poses and props. The run takes about 15 seconds. 1.0's own forms are not in it; the comparison below is the same tool run on 1.0 (`node tools/sprite-audit.mjs`).
+
+| Check | 1.0 (13 forms) | Iron (22 forms) |
+|---|---|---|
+| Wearables that clip the top of the screen | holologo on all 13 forms (39 cases), 1 px | holologo on 15 of 22 forms (45 cases), 1 px; nothing else |
+| Contrast, awake and lit: wearables losing half or more of their pixels | 5 combinations of 84 (crown, necktie, spiked collar, earpiece x2) | 1 combination of 132 (necktie) |
+| Contrast, asleep with the lights off | 0 | 0 |
+| Worst worn combination (upper slot hiding the lower) | Chrome jaw over gold chain 0.86; Data aura over blush 1.00 for a moment | Chrome jaw over gold chain 0.90; Data aura over blush 1.00 for a moment |
+| Plush prop covers the pet | up to 42% (46% with a visitor) | up to 33% (45% with a visitor) |
+| Highest same-stage silhouette overlap | Firewall and Ghost 0.81 | Gronk and Splat 0.85, the two Gronk and Splat elders 0.83, Gronk's elder and Guru's elder 0.82, Munch and Thrash 0.81 |
+| Asleep and dead poses | n/a | 8 to 10 cells differ asleep, 14 to 18 dead |
+
+- **Wearables hold up.** Iron's forms are no worse than 1.0's on clipping and contrast, and better on contrast, with no wearable losing half its pixels in the dark.
+- **The silhouette overlap is the one result that is worse.** Three same-stage pairs sit above 1.0's highest (0.81): Gronk and Splat (0.85) and their elders (0.83) are the two forms of the Breach role, and Gronk's elder and Guru's elder are 0.82. Munch and Thrash (the Feast pair) tie 1.0's highest at 0.81. The sibling pairs are meant to be a family, but the audit does not know that, and Gronk and Splat is the clearest candidate for a redraw if the maintainer wants it nearer 0.80.
+- **The audit's cross-stage pairs** (an elder against its own adult, for example Feep's elder and Feep at 0.86) are expected and not a problem: 1.0 only reads same-stage pairs.
+- **A discrepancy in 1.0's own doc, found on the way.** `docs/SPRITES.md` lists "Off-screen wearable cases: 0", but the current audit reports 39 holologo cases on 1.0's forms, 1 px above the screen. I did not change it; it is a separate fix (suggested separately).
+- **`gallery.html` is not extended.** The audit is; the gallery's by-eye review for Iron is the review page here.
+
 ## What the wider run showed (commit 580db88, not reproducible from this tree)
 
 Before the scope was narrowed I built the full option C tree (3 teens and 9 adults) in both models. These figures were measured then with the same checks; the code that produced them is in that commit only.
@@ -161,6 +181,6 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - Not looked at on a phone or by anyone but me, and not at motion speed beyond screenshots of single frames. Whether the Iron art reads as firmware, whether the rust reads as neglect and not as part of the design, and whether the tells are legible are human calls.
 - Program and Wetware have tell code and tests but no body art and no neglect skin, so their tells have only been checked as numbers, not seen.
 - Idle behavior and chatter tone, the other two temper channels, are not prototyped. Nothing about Standing visuals beyond the street lean marks.
-- `tools/sprite-audit.mjs` and `gallery.html` were not extended to the prototype forms; the checks above are the prototype's own tests plus the audit's shared pure helpers.
+- `gallery.html` was not extended to the prototype forms (the audit was, through a wrapper; see Iron through the real 1.0 sprite audit). The review page here shows the same forms.
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
 - Nothing in `src/` was changed.
