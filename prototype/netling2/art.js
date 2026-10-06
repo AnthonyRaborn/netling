@@ -1,14 +1,15 @@
-// Netling 2.0 sprite prototype: Iron egg art. Same string-row format as src/sprites.js ('#' main, 'o' accent, '+' highlight,
-// 'x' dim fill, '.' empty). Not shipped and not imported by the game; see docs/NETLING_2_SPRITES.md.
+// Netling 2.0 sprite prototype: one Iron line, baby to elder (four forms). Same string-row format as src/sprites.js ('#' main,
+// 'o' accent, '+' highlight, 'x' dim fill, '.' empty). Not shipped and not imported by the game; see docs/NETLING_2_SPRITES.md.
 //
 // Iron is firmware and infrastructure: blocky, rigid, read-only. Its marks: a write-protect notch in the top edge, square
 // shoulders, vent bays, pin feet.
 //
-// Stages shared by both composition models (they have no role, so there is nothing to compose): baby, teen, elder.
-// The five adults are where the two models differ (model-a.js builds them from one body plus overlays, model-b.js
-// authors each in full).
+// The line is Baby, a street-leaning Teen, Gronk (Breach, street lean) and the Elder. Baby and Elder are the same in both
+// composition models. The Teen and Gronk are where the models differ: model A (composed) builds them from a body plus
+// overlays, model B (authored) draws each in full. An earlier, wider version of this prototype (every teen and adult of the
+// egg) is in git history at commit 580db88.
 
-// --- shared stages -----------------------------------------------------------------------------------------------------
+// --- shared stages -------------------------------------------------------------------------------------------------------
 export const BABY = {
   a: [
     '............',
@@ -38,40 +39,8 @@ export const BABY = {
   ],
 };
 
-// The teen body model A builds its three teens from (the teens are not shared between the models).
-export const TEEN_BODY = {
-  a: [
-    '..............',
-    '..####..####..',
-    '..##########..',
-    '..##########..',
-    '..##oo##oo##..',
-    '..##oo##oo##..',
-    '..##########..',
-    '..###+##+###..',
-    '.############.',
-    '.##xx####xx##.',
-    '.############.',
-    '..##.####.##..',
-  ],
-  b: [
-    '..............',
-    '..............',
-    '..####..####..',
-    '..##########..',
-    '..##oo##oo##..',
-    '..##oo##oo##..',
-    '..##########..',
-    '..###+##+###..',
-    '.############.',
-    '.##xx####xx##.',
-    '.############.',
-    '.###..##..###.',
-  ],
-};
-
-// The elder (mainframe stage): the adult grown wider (18 columns) and no taller than 15 rows, like 1.0's mainframes. One
-// per egg, so it is authored whole in both models.
+// The elder (mainframe stage): the adult grown wider (18 columns) and no taller than 15 rows, like 1.0's mainframes. One per
+// egg, so it is authored whole in both models.
 export const ELDER = {
   a: [
     '.......####.......',
@@ -109,9 +78,39 @@ export const ELDER = {
   ],
 };
 
-// --- adults, model A: one shared body and five overlays ------------------------------------------------------------------
-// The body is 16 x 14 and every overlay is the same size. Overlay characters: '#', 'o', '+', 'x' replace the body cell,
-// '_' erases it, '.' leaves it alone. The head moves down a row in the B frame, so overlay parts on the head do too.
+// --- model A: bodies and overlays ----------------------------------------------------------------------------------------------
+// Overlay characters: '#', 'o', '+', 'x' replace the body cell, '_' erases it, '.' leaves it alone. The head moves down a row
+// in the B frame, so overlay parts on the head do too.
+export const TEEN_BODY = {
+  a: [
+    '..............',
+    '..####..####..',
+    '..##########..',
+    '..##########..',
+    '..##oo##oo##..',
+    '..##oo##oo##..',
+    '..##########..',
+    '..###+##+###..',
+    '.############.',
+    '.##xx####xx##.',
+    '.############.',
+    '..##.####.##..',
+  ],
+  b: [
+    '..............',
+    '..............',
+    '..####..####..',
+    '..##########..',
+    '..##oo##oo##..',
+    '..##oo##oo##..',
+    '..##########..',
+    '..###+##+###..',
+    '.############.',
+    '.##xx####xx##.',
+    '.############.',
+    '.###..##..###.',
+  ],
+};
 export const ADULT_BODY = {
   a: [
     '................',
@@ -148,40 +147,66 @@ export const ADULT_BODY = {
 };
 
 const BLANK = '.'.repeat(16);
-// Sparse rows ({ rowIndex: string }) to a full 14 row overlay.
 const grid = (rows) => Array.from({ length: 14 }, (_, y) => rows[y] ?? BLANK);
+const teenGrid = (rows) => Array.from({ length: 12 }, (_, y) => rows[y] ?? '.'.repeat(14));
 
+// Role overlay: Breach adds horn studs, a toothed grille and heavy shoulders.
 export const OVERLAYS = {
-  // Breach: horn studs, a toothed grille and heavy shoulders.
   breach: {
     a: grid({ 0: '.#............#.', 1: '.##..........##.', 8: '...+.+.++.+.+...', 9: '##............##', 10: '#..............#', 11: '#..............#' }),
     b: grid({ 1: '.#............#.', 2: '.##..........##.', 8: '...+.+.++.+.+...', 9: '##............##', 10: '#..............#', 11: '#..............#' }),
   },
-  // Dodge: wing fins at the eyes, a body trimmed to the head's width, thin legs.
-  dodge: {
-    a: grid({ 5: '##............##', 6: '#..............#', 9: '._............_.', 10: '._............_.', 11: '._............_.', 12: '._............_.', 13: '.._.........._..' }),
-    b: grid({ 5: '##............##', 6: '#..............#', 9: '._............_.', 10: '._............_.', 11: '._............_.', 12: '._............_.', 13: '.._.........._..' }),
+};
+// Lean overlay (the Standing lean, option C in the sketch): the street lean is lopsided, a single antenna, a notched head
+// corner and a taped patch. It does not use 'x', which is the neglect look's mark.
+export const LEAN_OVERLAYS = {
+  street: {
+    a: grid({ 0: '............#...', 1: '............#...', 2: '__..............', 7: '...+o...........' }),
+    b: grid({ 1: '............#...', 2: '............#...', 3: '__..............', 7: '...+o...........' }),
   },
-  // Tune: two antennae, big ear plates, a body narrowed to a stem and a speaker grille.
-  tune: {
-    a: grid({ 0: '....+......+....', 1: '....#......#....', 4: '##............##', 5: '##............##', 6: '##............##', 9: '.__..........__.', 10: '.__..........__.', 11: '.__.+.+..+.+.__.', 12: '.__..........__.' }),
-    b: grid({ 1: '....+......+....', 2: '....#......#....', 4: '##............##', 5: '##............##', 6: '##............##', 9: '.__..........__.', 10: '.__..........__.', 11: '.__.+.+..+.+.__.', 12: '.__..........__.' }),
-  },
-  // Feast: an intake slot in the chin, a belly bulge and a wide stance.
-  feast: {
-    a: grid({ 8: '.....______.....', 9: '.....xxxxxx.....', 10: '#..............#', 11: '#..............#', 12: '#..............#', 13: '.#............#.' }),
-    b: grid({ 8: '.....______.....', 9: '.....xxxxxx.....', 10: '#..............#', 11: '#..............#', 12: '#..............#', 13: '.#............#.' }),
-  },
-  // Hidden (Guru): a wide crown, a third eye, lit seams and a flared hem.
-  hidden: {
-    a: grid({ 0: '...#.#.##.#.#...', 1: '...##########...', 4: '.......oo.......', 10: '...o........o...', 11: '...o........o...', 12: '#..............#', 13: '##............##' }),
-    b: grid({ 1: '...#.#.##.#.#...', 2: '...##########...', 4: '.......oo.......', 10: '...o........o...', 11: '...o........o...', 12: '#..............#', 13: '##............##' }),
+};
+export const TEEN_OVERLAYS = {
+  street: {
+    a: teenGrid({ 0: '..........#...', 6: '...+o.........', 9: '............_.' }),
+    b: teenGrid({ 1: '..........#...', 6: '...+o.........', 9: '............_.' }),
   },
 };
 
-// --- adults, model B: five authored in full ----------------------------------------------------------------------------
+// --- model B: authored in full -------------------------------------------------------------------------------------------------
+export const TEENS = {
+  teenStreet: {
+    a: [
+      '..........#...',
+      '..####..####..',
+      '..##########..',
+      '..##########..',
+      '..##oo##oo##..',
+      '..##oo##oo##..',
+      '..##########..',
+      '..###+##+###..',
+      '.############.',
+      '.##xx####xx#..',
+      '.############.',
+      '..##.####.##..',
+    ],
+    b: [
+      '..............',
+      '..........#...',
+      '..####..####..',
+      '..##########..',
+      '..##oo##oo##..',
+      '..##oo##oo##..',
+      '..##########..',
+      '..###+##+###..',
+      '.############.',
+      '.##xx####xx#..',
+      '.############.',
+      '.###..##..###.',
+    ],
+  },
+};
 export const ADULTS = {
-  // Breach: broad and low, horned, angry brow, toothed jaw, full-width shoulders.
+  // Gronk (Breach, street lean): broad and low, horned, angry brow, toothed jaw, full-width shoulders.
   gronk: {
     a: [
       '.#............#.',
@@ -216,428 +241,17 @@ export const ADULTS = {
       '.##..######..##.',
     ],
   },
-  // Dodge: narrow and tall, a blade crest, wing fins low on the body, thin legs.
-  jiff: {
-    a: [
-      '.......##.......',
-      '......####......',
-      '.....######.....',
-      '....########....',
-      '....########....',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '....##+##+##....',
-      '#...########...#',
-      '##..########..##',
-      '.##.##xxxx##.##.',
-      '..#..######..#..',
-      '.....##..##.....',
-    ],
-    b: [
-      '................',
-      '.......##.......',
-      '......####......',
-      '.....######.....',
-      '....########....',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '....##+##+##....',
-      '#...########...#',
-      '##..########..##',
-      '.##.##xxxx##.##.',
-      '..#..######..#..',
-      '....##....##....',
-    ],
-  },
-  // Tune: top heavy, big ear dishes, a mast, a speaker grille in a narrow body.
-  feep: {
-    a: [
-      '.......++.......',
-      '.......##.......',
-      '...##########...',
-      '..############..',
-      '.##############.',
-      '###oo######oo###',
-      '###oo######oo###',
-      '.##############.',
-      '..###+####+###..',
-      '...##########...',
-      '...#xxxxxxxx#...',
-      '...#x+x+x+x+#...',
-      '...##########...',
-      '....##....##....',
-    ],
-    b: [
-      '................',
-      '.......++.......',
-      '.......##.......',
-      '...##########...',
-      '.##############.',
-      '###oo######oo###',
-      '###oo######oo###',
-      '.##############.',
-      '..###+####+###..',
-      '...##########...',
-      '...#xxxxxxxx#...',
-      '...#x+x+x+x+#...',
-      '...##########...',
-      '.....##..##.....',
-    ],
-  },
-  // Feast: short and round, a wide mouth full of teeth, a heavy lower body. 13 rows.
-  munch: {
-    a: [
-      '................',
-      '................',
-      '...##########...',
-      '..############..',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#xxxxxxxxxxxx#.',
-      '.#+x+x+x+x+x+x#.',
-      '.##############.',
-      '.##############.',
-      '..###......###..',
-    ],
-    b: [
-      '................',
-      '................',
-      '................',
-      '...##########...',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#xxxxxxxxxxxx#.',
-      '.#x+x+x+x+x+x+#.',
-      '.##############.',
-      '.##############.',
-      '...###....###...',
-    ],
-  },
-  // Option C: the other lean of each role. Iron's corp lean is the tidier word (Splat, Jiff, Ping, Munch), the street lean the
-  // wilder one (Gronk, Bamf, Feep, Thrash).
-  // Splat (Breach, corp): a flat press, squared off and heavy, with a piston on top.
-  splat: {
-    a: [
-      '......####......',
-      '......####......',
-      '.##############.',
-      '.##############.',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#+##########+#.',
-      '################',
-      '##xxxx####xxxx##',
-      '##xxxx####xxxx##',
-      '################',
-      '################',
-    ],
-    b: [
-      '................',
-      '......####......',
-      '......####......',
-      '.##############.',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#+##########+#.',
-      '################',
-      '##xxxx####xxxx##',
-      '##xxxx####xxxx##',
-      '################',
-      '.##############.',
-    ],
-  },
-  // Bamf (Dodge, street): a column that disperses into dots at the foot, as if it were leaving.
-  bamf: {
-    a: [
-      '................',
-      '......####......',
-      '.....######.....',
-      '....########....',
-      '....########....',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '....##+##+##....',
-      '....########....',
-      '...##########...',
-      '..####xxxx####..',
-      '.#.####..####.#.',
-      '#..#........#..#',
-    ],
-    b: [
-      '................',
-      '................',
-      '......####......',
-      '.....######.....',
-      '....########....',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '....##+##+##....',
-      '....########....',
-      '...##########...',
-      '..####xxxx####..',
-      '.#.####..####.#.',
-      '.#..#......#..#.',
-    ],
-  },
-  // Ping (Tune, corp): a clean mast with a signal ring over a narrow, tidy body.
-  ping: {
-    a: [
-      '......#..#......',
-      '.......##.......',
-      '....########....',
-      '...##########...',
-      '...##########...',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '...###+##+###...',
-      '....########....',
-      '...##########...',
-      '...##xx##xx##...',
-      '...##########...',
-      '...##......##...',
-    ],
-    b: [
-      '................',
-      '......#..#......',
-      '.......##.......',
-      '....########....',
-      '...##########...',
-      '...##oo##oo##...',
-      '...##oo##oo##...',
-      '...##########...',
-      '...###+##+###...',
-      '....########....',
-      '...##########...',
-      '...##xx##xx##...',
-      '...##########...',
-      '....##....##....',
-    ],
-  },
-  // Thrash (Feast, street): a ragged ovoid with spikes on top and a jagged mouth. 13 rows.
-  thrash: {
-    a: [
-      '................',
-      '..#..#....#..#..',
-      '...##########...',
-      '..############..',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#x#x#x#x#x#x#x.',
-      '.#+x+x+x+x+x+x#.',
-      '.##############.',
-      '..############..',
-      '.#.##.####.##.#.',
-    ],
-    b: [
-      '................',
-      '................',
-      '..#..#....#..#..',
-      '..############..',
-      '.##############.',
-      '.##oo######oo##.',
-      '.##oo######oo##.',
-      '.##############.',
-      '.#x#x#x#x#x#x#x.',
-      '.#x+x+x+x+x+x+#.',
-      '.##############.',
-      '..############..',
-      '#..##..##..##..#',
-    ],
-  },
-  // Hidden (Guru): tallest, crowned, a third eye and lit seams. 15 rows, the tallest an adult may be.
-  guru: {
-    a: [
-      '....#.#..#.#....',
-      '....########....',
-      '...##########...',
-      '..############..',
-      '..#####oo#####..',
-      '..##oo####oo##..',
-      '..##oo####oo##..',
-      '..############..',
-      '...###+##+###...',
-      '....########....',
-      '.##############.',
-      '.##o########o##.',
-      '.##o########o##.',
-      '.##############.',
-      '..##..####..##..',
-    ],
-    b: [
-      '................',
-      '....#.#..#.#....',
-      '....########....',
-      '...##########...',
-      '..#####oo#####..',
-      '..##oo####oo##..',
-      '..##oo####oo##..',
-      '..############..',
-      '...###+##+###...',
-      '....########....',
-      '.##############.',
-      '.##o########o##.',
-      '.##o########o##.',
-      '.##############.',
-      '..##.######.##..',
-    ],
-  },
-};
-
-// --- option C: the Standing lean ----------------------------------------------------------------------------------------------
-// Each role has a corp-leaning and a street-leaning form (docs/NETLING_2_SKETCH.md, Second form names). Model A applies a lean
-// overlay after the role overlay: the corp lean is symmetric and tidy (a cap bar, an under-eye strip and shoulder studs), the street lean
-// is lopsided (a single antenna, a notched head corner and a taped patch). Neither uses 'x', which is the neglect look's mark.
-export const LEAN_OVERLAYS = {
-  corp: {
-    a: grid({ 1: '...##########...', 7: '....++++++++....', 9: '+..............+' }),
-    b: grid({ 2: '...##########...', 7: '....++++++++....', 9: '+..............+' }),
-  },
-  street: {
-    a: grid({ 0: '............#...', 1: '............#...', 2: '__..............', 7: '...+o...........' }),
-    b: grid({ 1: '............#...', 2: '............#...', 3: '__..............', 7: '...+o...........' }),
-  },
-};
-
-// --- teens: three per egg (corp lean, street lean, and the hidden path), 14 x 12 ------------------------------------------
-const teenGrid = (rows) => Array.from({ length: 12 }, (_, y) => rows[y] ?? '.'.repeat(14));
-export const TEEN_OVERLAYS = {
-  corp: { a: teenGrid({ 7: '...++++++++...', 8: '+............+' }), b: teenGrid({ 7: '...++++++++...', 8: '+............+' }) },
-  street: {
-    a: teenGrid({ 0: '..........#...', 6: '...+o.........', 9: '............_.' }),
-    b: teenGrid({ 1: '..........#...', 6: '...+o.........', 9: '............_.' }),
-  },
-  hidden: {
-    a: teenGrid({ 0: '...#.#..#.#...', 3: '......oo......', 9: '...o......o...' }),
-    b: teenGrid({ 1: '...#.#..#.#...', 3: '......oo......', 9: '...o......o...' }),
-  },
-};
-export const TEENS = {
-  teenCorp: {
-    a: [
-      '..............',
-      '..####..####..',
-      '.############.',
-      '.############.',
-      '.##oo####oo##.',
-      '.##oo####oo##.',
-      '.############.',
-      '.##++++++++##.',
-      '.############.',
-      '.##xx####xx##.',
-      '.############.',
-      '..##.####.##..',
-    ],
-    b: [
-      '..............',
-      '..............',
-      '..####..####..',
-      '.############.',
-      '.##oo####oo##.',
-      '.##oo####oo##.',
-      '.############.',
-      '.##++++++++##.',
-      '.############.',
-      '.##xx####xx##.',
-      '.############.',
-      '.###..##..###.',
-    ],
-  },
-  teenStreet: {
-    a: [
-      '..........#...',
-      '..####..####..',
-      '..##########..',
-      '..##########..',
-      '..##oo##oo##..',
-      '..##oo##oo##..',
-      '..##########..',
-      '..###+##+###..',
-      '.############.',
-      '.##xx####xx#..',
-      '.############.',
-      '..##.####.##..',
-    ],
-    b: [
-      '..............',
-      '..........#...',
-      '..####..####..',
-      '..##########..',
-      '..##oo##oo##..',
-      '..##oo##oo##..',
-      '..##########..',
-      '..###+##+###..',
-      '.############.',
-      '.##xx####xx#..',
-      '.############.',
-      '.###..##..###.',
-    ],
-  },
-  teenHidden: {
-    a: [
-      '...#.#..#.#...',
-      '..##########..',
-      '..##########..',
-      '..####oo####..',
-      '..##oo##oo##..',
-      '..##oo##oo##..',
-      '..##########..',
-      '..###+##+###..',
-      '.############.',
-      '.##oo####oo##.',
-      '.############.',
-      '..##.####.##..',
-    ],
-    b: [
-      '..............',
-      '...#.#..#.#...',
-      '..##########..',
-      '..####oo####..',
-      '..##oo##oo##..',
-      '..##oo##oo##..',
-      '..##########..',
-      '..###+##+###..',
-      '.############.',
-      '.##oo####oo##.',
-      '.############.',
-      '.###..##..###.',
-    ],
-  },
 };
 
 // Anchor rows for wearables, per sprite and frame (see ANCHOR_ROWS in src/sprites.js). headTop is the first row of the head
 // proper, eyeRow the eyes, mouthRow where a mouthpiece sits, neckRow where a scarf goes.
 export const ANCHORS = {
-  baby: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  teen: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  elder: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  teenBody: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  // Model A: every role shares the body's anchors.
-  adultBody: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  gronk: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  jiff: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  feep: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  munch: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 10 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 10 } },
-  guru: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  splat: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  bamf: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  ping: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 } },
-  thrash: { a: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 10 }, b: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 10 } },
-  teenCorp: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  teenStreet: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
-  teenHidden: { a: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 }, b: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 } },
+  baby: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
+  elder: {a: {headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9}, b: {headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9}},
+  // Model A: every form of a stage shares the body's anchors (its premise).
+  teenBody: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
+  adultBody: {a: {headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9}, b: {headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9}},
+  // Model B: each authored form's own.
+  teenStreet: {a: {headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8}, b: {headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8}},
+  gronk: {a: {headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9}, b: {headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9}},
 };

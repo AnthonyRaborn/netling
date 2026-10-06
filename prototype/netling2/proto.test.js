@@ -2,25 +2,22 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { forms, compose, FORMS, ADULT_IDS, TEEN_IDS, ROLES, roleForms, ids } from './models.js';
+import { forms, compose, FORMS, LINE } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
 import { neglected, NEGLECT_LEVELS } from './neglect.js';
 import { register, protoKey, MODELS } from './register.js';
-import { overlaps, crossRole, siblings, authoring } from './metrics.js';
+import { lineOverlaps, authoring, modelGap } from './metrics.js';
 import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
 
-// --- the form table --------------------------------------------------------------------------------------------------------
-test('the form table matches the sketch: baby, 3 teens, 9 adults (4 roles x 2 leans + hidden), elder', () => {
-  assert.equal(ids('baby').length, 1);
-  assert.equal(ids('elder').length, 1);
-  assert.deepEqual(TEEN_IDS, ['teenCorp', 'teenStreet', 'teenHidden']);
-  assert.equal(ADULT_IDS.length, 9);
-  for (const role of ['breach', 'dodge', 'tune', 'feast']) assert.deepEqual(roleForms(role).map((id) => FORMS[id].lean), ['corp', 'street']);
-  assert.deepEqual(roleForms('hidden'), ['guru']);
-  assert.deepEqual(ROLES, ['breach', 'dodge', 'tune', 'feast', 'hidden']);
+// --- the line ---------------------------------------------------------------------------------------------------------------
+test('the line is four forms in life order: baby, a street-leaning teen, Gronk (Breach, street) and the elder', () => {
+  assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'elder']);
+  assert.deepEqual(LINE.map((id) => FORMS[id].stage), ['baby', 'teen', 'adult', 'elder']);
+  assert.deepEqual(Object.keys(forms('A')), LINE);
+  assert.deepEqual(Object.keys(forms('B')), LINE);
 });
 
 // --- art ------------------------------------------------------------------------------------------------------------------
@@ -62,29 +59,13 @@ for (const model of MODELS) {
     }
   });
 
-  test(`model ${model}: the hidden forms' third eye goes dark when asleep or dead`, () => {
-    for (const id of ['guru', 'teenHidden']) {
-      const f = set[id];
-      const row = f.anchors.a.eyeRow - (id === 'guru' ? 1 : 1);
-      assert.ok(f.a[row].includes('oo'), `${id}: third eye`);
-      assert.ok(!f.sleep[row].includes('o') && !f.dead[row].includes('o'), `${id}: still lit`);
-    }
-  });
-
-  test(`model ${model}: the two forms of a role and the three teens are visibly different, not copies`, () => {
-    for (const role of ['breach', 'dodge', 'tune', 'feast']) {
-      const [x, y] = roleForms(role);
-      assert.ok(poseDistance(set[x].a, set[y].a) + markDistance(set[x].a, set[y].a) >= 6, `${x}/${y}`);
-    }
-    for (let i = 0; i < TEEN_IDS.length; i++) for (let j = i + 1; j < TEEN_IDS.length; j++) assert.ok(poseDistance(set[TEEN_IDS[i]].a, set[TEEN_IDS[j]].a) + markDistance(set[TEEN_IDS[i]].a, set[TEEN_IDS[j]].a) >= 6, `${TEEN_IDS[i]}/${TEEN_IDS[j]}`);
-  });
 }
 
-test('the two models share baby and elder and differ in every teen and adult', () => {
+test('the two models share baby and elder, and build the teen and Gronk differently', () => {
   const A = forms('A');
   const B = forms('B');
   for (const id of ['baby', 'elder']) assert.deepEqual(A[id].a, B[id].a);
-  for (const id of [...TEEN_IDS, ...ADULT_IDS]) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
+  for (const id of ['teenStreet', 'gronk']) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
 });
 
 test('compose merges, erases and rejects a mismatched overlay', () => {
@@ -106,30 +87,28 @@ test('every overlay is its body size in both frames, and changes the body', () =
   for (const [k, o] of Object.entries(TEEN_OVERLAYS)) check(TEEN_BODY, o, `teen ${k}`);
 });
 
-// --- distinctness: what the two models trade off -------------------------------------------------------------------------
-test('model B: every pair of adults of different roles stays under the 1.0 bar (0.82), and a role\'s two forms stay a family', () => {
-  const cross = crossRole('B');
-  const sib = siblings('B');
-  console.log(`  model B cross-role: worst ${cross.worst.pair} ${cross.worst.iou.toFixed(2)}, mean ${cross.mean.toFixed(2)}, ${cross.near} at 0.80+; siblings ${sib.map((s) => `${s.pair} ${s.iou.toFixed(2)}`).join(', ')}`);
-  assert.ok(cross.worst.iou < 0.82, `${cross.worst.pair} ${cross.worst.iou.toFixed(2)}`);
-  for (const s of sib) assert.ok(s.iou < 0.9 && s.iou > 0.5, `${s.pair} ${s.iou.toFixed(2)}`);
+// --- the line and the two models -----------------------------------------------------------------------------------------------
+test('the four stages are distinct by silhouette yet read as one line (1.0 flags nothing above 0.82 within a stage)', () => {
+  for (const model of MODELS) {
+    const pairs = lineOverlaps(model);
+    console.log(`  model ${model}: ${pairs.map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+    for (const p of pairs) assert.ok(p.iou < 0.82 && p.iou > 0.3, `model ${model}: ${p.pair} ${p.iou.toFixed(2)}`);
+  }
 });
 
-test('model A: reports the same measures (no pass mark asserted: see docs/NETLING_2_SPRITES.md)', () => {
-  const cross = crossRole('A');
-  const sib = siblings('A');
-  console.log(`  model A cross-role: worst ${cross.worst.pair} ${cross.worst.iou.toFixed(2)}, mean ${cross.mean.toFixed(2)}, ${cross.near} at 0.80+; siblings ${sib.map((s) => `${s.pair} ${s.iou.toFixed(2)}`).join(', ')}`);
-  // The facts the write-up states.
-  assert.ok(cross.worst.iou >= 0.82, 'model A now clears the bar: update the write-up');
-  assert.ok(sib.every((s) => s.iou < 0.99), 'siblings must not be identical outlines');
-  assert.ok(overlaps('A', ADULT_IDS).pairs.length === 36);
-});
-
-test('authoring cost: composed is a fraction of authored for the teens and adults', () => {
+test('for one line the models cost about the same: composing only pays once bodies are reused across forms', () => {
   const a = authoring('A');
   const b = authoring('B');
-  console.log(`  hand-placed cells: A ${a.cells}, B ${b.cells}`);
-  assert.ok(a.cells < b.cells / 3);
+  console.log(`  hand-placed cells for the teen and adult: A ${a.cells}, B ${b.cells}`);
+  assert.ok(Math.abs(a.cells - b.cells) / b.cells < 0.2, `A ${a.cells}, B ${b.cells}`);
+});
+
+test('where the models differ: the teen is the same outline, Gronk differs by a visible number of cells', () => {
+  const teen = modelGap('teenStreet');
+  const gronk = modelGap('gronk');
+  console.log(`  composed against authored: teen ${teen.outline} outline and ${teen.marks} mark cells, Gronk ${gronk.outline} outline and ${gronk.marks} mark cells, overlap ${gronk.iou.toFixed(2)}`);
+  assert.equal(teen.outline, 0);
+  assert.ok(gronk.outline >= 8 && gronk.iou < 1);
 });
 
 // --- wearables: the real 1.0 code on the prototype sprites -----------------------------------------------------------------
@@ -359,5 +338,5 @@ test('the three eggs read differently at the same level', () => {
 
 test('the anchor table covers every form, and the shared bodies', () => {
   for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[id], id);
-  assert.ok(spriteCells(forms('B').guru.a).length > spriteCells(forms('B').munch.a).length);
+  assert.ok(spriteCells(forms('B').elder.a).length > spriteCells(forms('B').gronk.a).length);
 });

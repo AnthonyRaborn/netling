@@ -29,18 +29,12 @@
   <body>
     <h1>NETLING 2.0 SPRITE PROTOTYPE</h1>
     <div id="fail" role="alert"></div>
-    <p class="note"><span class="warn">Development only; spoilers.</span> Iron egg, every stage, the teens and adults built two ways: model A composes bodies with role and lean overlays, model B authors each form in full. Wearables are the real 1.0 ones. See docs/NETLING_2_SPRITES.md. Serve with <code>npm run serve</code> and open <code>/prototype/netling2/</code>.</p>
+    <p class="note"><span class="warn">Development only; spoilers.</span> One Iron line, baby to elder (four forms), built two ways: model A composes the teen and the adult from bodies and overlays, model B authors them in full. Wearables are the real 1.0 ones. See docs/NETLING_2_SPRITES.md. Serve with <code>npm run serve</code> and open <code>/prototype/netling2/</code>.</p>
     <div id="bar"></div>
-    <h2>BABY AND ELDER (identical in both models)</h2>
-    <div id="shared" class="row"></div>
-    <h2>TEENS: CORP, STREET, HIDDEN PATH</h2>
-    <p class="note">Model A on the first line, model B on the second.</p>
-    <div id="teensA" class="row"></div>
-    <div id="teensB" class="row"></div>
-    <h2>ADULTS, MODEL A: BODY + ROLE OVERLAY + LEAN OVERLAY</h2>
-    <p class="note">Four roles with a corp-leaning and a street-leaning form each (splat/gronk, jiff/bamf, ping/feep, munch/thrash), then the hidden form.</p>
+    <h2>THE LINE, MODEL A: COMPOSED</h2>
+    <p class="note">Baby, street-leaning teen, Gronk (Breach, street lean), elder. The teen is a body plus an overlay; Gronk is the adult body plus a role overlay plus a lean overlay. Baby and elder are the same art as in model B.</p>
     <div id="rowA" class="row"></div>
-    <h2>ADULTS, MODEL B: AUTHORED IN FULL</h2>
+    <h2>THE LINE, MODEL B: AUTHORED</h2>
     <div id="rowB" class="row"></div>
     <h2>HOW MODEL A IS BUILT</h2>
     <p class="note">Body (grey), role overlay (pink), lean overlay (yellow; erased cells dark red) and the result, in the A frame.</p>
@@ -58,11 +52,11 @@
       import { SPRITES, ANCHOR_ROWS, drawSprite, paletteColors, DEAD_COLORS } from '../../src/sprites.js';
       import { PALETTES } from '../../src/sim.js';
       import { register } from './register.js';
-      import { forms, FORMS, ADULT_IDS, TEEN_IDS, ROLES, roleForms, compose } from './models.js';
-      import { ADULT_BODY, OVERLAYS, LEAN_OVERLAYS } from './art.js';
+      import { forms, FORMS, LINE } from './models.js';
+      import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { neglected } from './neglect.js';
-      import { authoring, sharedCells, overlaps, crossRole, siblings, matrix } from './metrics.js';
+      import { authoring, sharedCells, lineOverlaps, modelGap } from './metrics.js';
 
       const fail = (e) => {
         const box = document.getElementById('fail');
@@ -131,16 +125,11 @@
           return c.getContext('2d');
         };
         const make = (host, caption, f, fixed = null) => cells.push({ ctx: canvasFor(host, caption), f, fixed });
-        for (const id of ['baby', 'elder']) make(document.getElementById('shared'), id, A[id]);
-        for (const id of TEEN_IDS) {
-          make(document.getElementById('teensA'), `A ${id}`, A[id]);
-          make(document.getElementById('teensB'), `B ${id}`, B[id]);
-        }
-        for (const id of ADULT_IDS) {
-          const role = FORMS[id].role;
-          const lean = FORMS[id].lean ?? 'hidden path';
-          make(document.getElementById('rowA'), `${id} (${role}, ${lean})`, A[id]);
-          make(document.getElementById('rowB'), `${id} (${role}, ${lean})`, B[id]);
+        for (const id of LINE) {
+          const f = FORMS[id];
+          const what = `${id} (${f.stage}${f.role ? `, ${f.role}` : ''}${f.lean ? `, ${f.lean}` : ''})`;
+          make(document.getElementById('rowA'), what, A[id]);
+          make(document.getElementById('rowB'), what, B[id]);
         }
 
         function drawCell({ ctx, f, fixed }, time) {
@@ -176,32 +165,34 @@
 
         // Neglect strip: three levels on one form of each stage, model B's art.
         const nr = document.getElementById('neglectRow');
-        for (const id of ['baby', 'teenCorp', 'gronk', 'elder']) for (const level of [0, 1, 2]) cells.push({ ctx: canvasFor(nr, `${id}, level ${level}`, 4), f: B[id], fixed: { neglect: level } });
+        for (const id of LINE) for (const level of [0, 1, 2]) cells.push({ ctx: canvasFor(nr, `${id}, level ${level}`, 4), f: B[id], fixed: { neglect: level } });
 
         // Model A layers: body, role overlay, lean overlay, result.
         const layers = document.getElementById('layers');
         const PANEL = { body: { '#': '#4a5a5d', o: '#6f8185', '+': '#6f8185', x: '#33403f' }, role: { '#': '#ff2a6d', o: '#ff2a6d', '+': '#ff2a6d', x: '#ff2a6d', e: '#5a1020' }, lean: { '#': '#f9f002', o: '#f9f002', '+': '#f9f002', x: '#f9f002', e: '#5a1020' } };
         const showErase = (rows) => rows.map((r) => r.replaceAll('_', 'e'));
-        for (const id of ADULT_IDS) {
-          const { role, lean } = FORMS[id];
+        const layer = (label, body, role, lean, result, bodyW, bodyH) => {
           const fig = document.createElement('figure');
           const c = document.createElement('canvas');
-          c.width = 16 * 4 + 12;
-          c.height = 14;
-          c.style.width = `${c.width * 3}px`;
-          c.style.height = `${c.height * 3}px`;
+          c.width = bodyW * 4 + 12;
+          c.height = bodyH;
+          c.style.width = `${c.width * 4}px`;
+          c.style.height = `${c.height * 4}px`;
           const g = c.getContext('2d');
           g.fillStyle = BG;
           g.fillRect(0, 0, c.width, c.height);
-          drawSprite(g, ADULT_BODY.a, 0, 0, PANEL.body);
-          drawSprite(g, showErase(OVERLAYS[role].a), 20, 0, PANEL.role);
-          if (lean) drawSprite(g, showErase(LEAN_OVERLAYS[lean].a), 40, 0, PANEL.lean);
-          drawSprite(g, A[id].a, 60, 0, paletteColors(PALETTES[0]));
+          const step = bodyW + 4;
+          drawSprite(g, body, 0, 0, PANEL.body);
+          if (role) drawSprite(g, showErase(role), step, 0, PANEL.role);
+          if (lean) drawSprite(g, showErase(lean), step * 2, 0, PANEL.lean);
+          drawSprite(g, result, step * 3, 0, paletteColors(PALETTES[0]));
           const cap = document.createElement('figcaption');
-          cap.textContent = `${id} = body + ${role}${lean ? ' + ' + lean : ''}`;
+          cap.textContent = label;
           fig.append(c, cap);
           layers.append(fig);
-        }
+        };
+        layer('teenStreet = teen body + street lean', TEEN_BODY.a, null, TEEN_OVERLAYS.street.a, A.teenStreet.a, 14, 12);
+        layer('gronk = adult body + breach + street lean', ADULT_BODY.a, OVERLAYS.breach.a, LEAN_OVERLAYS.street.a, A.gronk.a, 16, 14);
 
         // Timeline.
         const tl = document.getElementById('timeline');
@@ -236,30 +227,25 @@
         const m = document.getElementById('metrics');
         const aA = authoring('A');
         const aB = authoring('B');
-        const cA = crossRole('A');
-        const cB = crossRole('B');
-        const tA = overlaps('A', TEEN_IDS);
-        const tB = overlaps('B', TEEN_IDS);
-        const sA = siblings('A');
-        const sB = siblings('B');
-        const hot = (v) => (v >= 0.82 ? ' class="hot"' : '');
-        const sib = (list) => list.map((s) => `${s.pair} <span${hot(s.iou) ? ' class="hot"' : ''}>${s.iou.toFixed(2)}</span>`).join(', ');
-        const grid = (model) =>
-          `<table><tr><th></th>${ADULT_IDS.map((n) => `<th>${n}</th>`).join('')}</tr>${matrix(model, ADULT_IDS).map((row, i) => `<tr><td>${ADULT_IDS[i]}</td>${row.map((v, j) => (i === j ? '<td>-</td>' : `<td${v >= 0.8 ? ' class="hot"' : ''}>${v.toFixed(2)}</td>`)).join('')}</tr>`).join('')}</table>`;
+        const lA = lineOverlaps('A');
+        const lB = lineOverlaps('B');
+        const gap = ['teenStreet', 'gronk'].map(modelGap);
         m.innerHTML = `
           <table>
-            <tr><th>3 teens + 9 adults</th><th>model A (composed)</th><th>model B (authored)</th></tr>
+            <tr><th>teen + adult</th><th>model A (composed)</th><th>model B (authored)</th></tr>
             <tr><td>hand-placed cells</td><td>${aA.cells}</td><td>${aB.cells}</td></tr>
             <tr><td>sprites drawn</td><td>${aA.sprites}: ${aA.note}</td><td>${aB.sprites}: ${aB.note}</td></tr>
-            <tr><td>adults of different roles: closest pair</td><td>${cA.worst.pair} ${cA.worst.iou.toFixed(2)}</td><td>${cB.worst.pair} ${cB.worst.iou.toFixed(2)}</td></tr>
-            <tr><td>adults of different roles: mean overlap</td><td>${cA.mean.toFixed(2)}</td><td>${cB.mean.toFixed(2)}</td></tr>
-            <tr><td>adults of different roles: pairs at 0.80 or above</td><td>${cA.near}</td><td>${cB.near}</td></tr>
-            <tr><td>a role's two forms (corp/street)</td><td>${sib(sA)}</td><td>${sib(sB)}</td></tr>
-            <tr><td>teens: closest pair</td><td>${tA.worst.pair} ${tA.worst.iou.toFixed(2)}</td><td>${tB.worst.pair} ${tB.worst.iou.toFixed(2)}</td></tr>
           </table>
-          <p class="note">Baby and elder (${sharedCells()} hand-placed cells) are the same in both models. Silhouette overlap is the 1.0 audit's screen (tools/lib/sprite-checks.mjs): lower is more distinct, 1.0 flags nothing above 0.82 within a stage (yellow here), and a person judges the rest.</p>
-          <h3 style="color:#05d9e8;font-weight:normal">Model A overlaps, 9 adults</h3>${grid('A')}
-          <h3 style="color:#05d9e8;font-weight:normal">Model B overlaps, 9 adults</h3>${grid('B')}`;
+          <p class="note">Baby and elder (${sharedCells()} hand-placed cells) are the same in both models. For one line the models cost about the same: composing pays only when the bodies are reused across many forms.</p>
+          <table>
+            <tr><th>silhouette overlap, stage against stage</th><th>model A</th><th>model B</th></tr>
+            ${lA.map((p, i) => `<tr><td>${p.pair}</td><td>${p.iou.toFixed(2)}</td><td>${lB[i].iou.toFixed(2)}</td></tr>`).join('')}
+          </table>
+          <p class="note">The 1.0 audit's screen (tools/lib/sprite-checks.mjs): lower is more distinct; 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.</p>
+          <table>
+            <tr><th>composed against authored</th><th>outline cells that differ</th><th>mark cells that differ</th><th>outline overlap</th></tr>
+            ${gap.map((g) => `<tr><td>${g.id}</td><td>${g.outline}</td><td>${g.marks}</td><td>${g.iou.toFixed(2)}</td></tr>`).join('')}
+          </table>`;
 
         function frame(now) {
           if (!state.paused) clock = now;

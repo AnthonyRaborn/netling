@@ -1,36 +1,21 @@
 // The two ways to build the Iron line, behind one interface so the page, the tests and the audit treat them alike.
-//   Model A, composed: a body per stage, with overlays merged onto it (a role overlay and a lean overlay for an adult, a lean
-//                      overlay for a teen).
-//   Model B, authored: every teen and adult drawn in full.
+//   Model A, composed: a body per stage, with overlays merged onto it (a role overlay and a lean overlay for the adult, a lean
+//                      overlay for the teen).
+//   Model B, authored: the teen and the adult drawn in full.
 // Baby and elder are the same art in both (one each per egg, no role or lean).
 //
-// The 14 forms follow docs/NETLING_2_SKETCH.md: baby; three teens (corp lean, street lean, and the hidden path); nine adults
-// (four roles with two named forms each, one corp-leaning and one street-leaning, plus the hidden one); one elder.
+// The line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and the Elder. The sketch's
+// full tree (3 teens and 9 adults per egg) was prototyped earlier and is in git history at commit 580db88.
 import { BABY, ELDER, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
-export const ROLES = ['breach', 'dodge', 'tune', 'feast', 'hidden'];
-// Form id -> what it is. Iron's names: the corp lean takes the tidier word, the street lean the wilder one.
+// Form id -> what it is, in life order.
 export const FORMS = {
   baby: { stage: 'baby' },
-  teenCorp: { stage: 'teen', lean: 'corp' },
   teenStreet: { stage: 'teen', lean: 'street' },
-  teenHidden: { stage: 'teen', lean: 'hidden' },
-  splat: { stage: 'adult', role: 'breach', lean: 'corp' },
   gronk: { stage: 'adult', role: 'breach', lean: 'street' },
-  jiff: { stage: 'adult', role: 'dodge', lean: 'corp' },
-  bamf: { stage: 'adult', role: 'dodge', lean: 'street' },
-  ping: { stage: 'adult', role: 'tune', lean: 'corp' },
-  feep: { stage: 'adult', role: 'tune', lean: 'street' },
-  munch: { stage: 'adult', role: 'feast', lean: 'corp' },
-  thrash: { stage: 'adult', role: 'feast', lean: 'street' },
-  guru: { stage: 'adult', role: 'hidden' },
   elder: { stage: 'elder' },
 };
-export const ids = (stage) => Object.keys(FORMS).filter((id) => FORMS[id].stage === stage);
-export const ADULT_IDS = ids('adult');
-export const TEEN_IDS = ids('teen');
-// The forms of a role: corp lean then street lean (just the one for the hidden role).
-export const roleForms = (role) => ADULT_IDS.filter((id) => FORMS[id].role === role);
+export const LINE = Object.keys(FORMS);
 
 // Merge an overlay onto a body: '_' erases, any other non-'.' replaces.
 export function compose(body, overlay) {
@@ -98,7 +83,7 @@ function framesA(id) {
   if (stage === 'baby') return BABY;
   if (stage === 'elder') return ELDER;
   if (stage === 'teen') return both(TEEN_BODY, TEEN_OVERLAYS[lean]);
-  return role === 'hidden' ? both(ADULT_BODY, OVERLAYS.hidden) : both(ADULT_BODY, OVERLAYS[role], LEAN_OVERLAYS[lean]);
+  return both(ADULT_BODY, OVERLAYS[role], LEAN_OVERLAYS[lean]);
 }
 function framesB(id) {
   const { stage } = FORMS[id];
