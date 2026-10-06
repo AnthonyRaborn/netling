@@ -42,16 +42,17 @@ Notes:
 
 | Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `iron-breach` | Old Web Ruins | Gronk and Splat (Breach) | work order 118 | Two cabinet locks found open, seals intact, hinges intact. Technician's note: the first went "gronk." The second went "splat." We have no recording of either. |
-| `iron-dodge` | Old Web Ruins | Jiff and Bamf (Dodge) | relay log | Relay 12: fault cleared at 03:00:00.000, raised at 03:00:00.001. We call the gap a jiff. Relay 14: cleared before it was raised. Technician heard a "bamf" and nothing else. |
+| `iron-breach` | Old Web Ruins | Gronk and Splat (Breach) | work order 118 | Work order 118: cabinet locks found open, seals and hinges intact. One low "gronk," then quiet. In cabinet 4, a flat dark mark where something small had been. |
+| `iron-dodge` | Old Web Ruins | Jiff and Bamf (Dodge) | relay log | Relay 12: cleared at 03:00:00.000, raised at 03:00:00.001. We call the gap a jiff. Once I heard a soft "bamf," like a pilot light going out. The log says: already gone. |
 | `iron-tune` | Old Web Ruins | Feep and Ping (Tune) | facilities log | A terminal bell rings once a night in a room with no terminal. Same note each time. Last night it came a half step sharp. Somebody has been tuning it. |
 | `iron-feast` | Old Web Ruins | Munch and Thrash (Feast) | inspection checklist | Item 14: cabinet takes input serially, without error. Item 15: output. Item 15: left blank. Cabinet 9: takes input in bursts and thrashes the fans. Item 15: also blank. |
 | `iron-guru` | The Deep | Guru (hidden) | service manual, appendix Z | For any fault not covered above, ask the old rack in the corner. Do not ask it twice. It is not on the staff roster. Everyone on the roster learned from it. |
 
 Notes:
 
-- Each page covers both forms of its role. `iron-breach` and `iron-dodge` use both form names as in-world words, in the same sentence structure: Jargon's gronk is a sound (the noise of a diskette drive, and to smash), splat is the mark of a squashed bug, a jiffy is a tiny interval of time, and bamf is the sound of something teleporting out.
-- `iron-dodge`'s timestamps put the clearing a millisecond before the fault, which is the Dodge idea (already gone) without a block in sight. Relay 14 repeats it in sound.
+- Each page covers both forms of its role. `iron-breach` and `iron-dodge` were reworked to match Iron's elegiac tone (a worn, emptied building and a long-serving technician). `iron-breach` uses the word gronk (the noise of a diskette drive, and to smash) and, without naming it, splat (a flat dark mark, as of a squashed bug). `iron-dodge` uses both words: a jiffy is a tiny interval of time, and bamf is the sound of something teleporting out, here a pilot light going out.
+- **Alternates without form names**, if the word jokes still feel out of place: `iron-breach`: "Work order 118, closed. The cabinets were sealed when the building was emptied. The seals are intact. The cabinets are open. I did not ask how. It seemed unkind." `iron-dodge`: "Relay 12: fault cleared at 03:00:00.000, raised at 03:00:00.001. Eleven years of entries, each one gone before I arrived. I keep the log anyway."
+- `iron-dodge`'s timestamps put the clearing a millisecond before the fault, which is the Dodge idea (already gone) without a block in sight. The narrator is a technician who has watched it for years.
 - `iron-tune` echoes Signal Tune: a single note, matched and adjusted. Feep (the bell) and Ping (a pulse sent to check something is there) both fit a bell that answers in tune. The page is unchanged.
 - `iron-feast` keeps the serial input (Munch) and adds a second cabinet that takes input in bursts and thrashes the fans (Thrash). Both leave output blank.
 - `iron-guru` carries the lineage idea (everyone learned from it) and the roster joke. "Old rack" is the only substrate hint; the page says nothing about firmware.
@@ -208,7 +209,7 @@ Notes:
 
 1. Edit any text. These are first drafts. `public-7` is approved as written; `public-6` is approved with its last sentence removed.
 2. Confirm the ids (they now match position) and the region placement for the egg pages.
-3. Whether the humor of `iron-breach` and `iron-dodge` (word jokes, now two per page) fits Iron, which is otherwise elegiac. If not, they can be replaced with a plainer fault report.
+3. `iron-breach` and `iron-dodge` were reworked in an elegiac tone; confirm, or use the alternates without form names (see the Iron notes).
 4. Edit any story page or Source page text.
 5. Decided: Source pages are egg pages (18 in all); egg pages are rare drops with no per-life limit; elder forms get no pages.
 6. Decided: Rogue's gate is all 18 egg pages. Still open: the egg page drop rate (about 2 lives for a consistent player to find every page, to be tuned with the balance tools).
