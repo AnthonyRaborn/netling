@@ -157,11 +157,30 @@ Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 s
 | Netruns per life | 17.9 | 24.3 | about 24 |
 | Faults per life | 4.6 | 0.16 | 0.1 to 0.2 |
 
-**Standing point (the size of one point)**
+**Standing sources and size (decided as a starting point)**
 
-- Keep 1.0's magnitudes, rounded to integers: a decision (COMPLY, HIDE, voucher, checkpoint) is 1 point and a packet is 1 point (1.0: 0.75). A market purchase is 1 point per two purchases (1.0: 0.5 each).
-- With those sizes the 1.0 data predicts how the gap rule behaves. A casual netling has a gap of about 2.6 at the teen check and about 4.3 at adulthood, so it lands on the weighted coin (roughly 60% to 80% for the leader). A player who commits reaches a gap of 5 early and is certain. So randomness lands on players who have not chosen a side, which is where it belongs. This is a read of 1.0's allegiance, which was one signed number; 2.0's two non-negative tracks can differ, and the gap is the closest equivalent.
-- **A dependency, not a number:** the list of actions that add Standing in 2.0 is not designed. The hidden form needs low Standing on both tracks, and in 1.0 almost every feed moves allegiance. If every feed adds to a track, "low on both" is impossible. Either some feeds and actions must add nothing, or "low" must be defined relative to activity. This needs deciding before the thresholds mean anything.
+- A corp or scavenged packet adds 0.1 to its track. COMPLY or HIDE adds 0.5. A market purchase adds 0.5. Plain care and mini-games add nothing, so a player can stay at zero on both tracks (my suggestion, accepted as part of "a good start").
+- The sources the maintainer did not name are open: a Corp voucher, a Black ICE shard, an ignored trace, checkpoint choices, and anomaly choices. My test below gave the ones that were 1 in 1.0 a value of 0.5.
+- Standing now has fractions, so the gap thresholds (a tie within 1, certain at 5) are in these units unless Standing is rounded for display and decisions. Which is meant is open.
+
+What those sizes do (measured, with limits). I ran 1.0's balance tool on a scratch copy with feeds at 0.1, the 1.0 one-point decisions halved to 0.5, and the netrun one-point leans halved. 150 simulated lives per archetype. The gap is approximated by the absolute value of 1.0's single signed allegiance, which is the closest 1.0 equivalent of the corp-minus-street gap; 2.0's two tracks were not simulated.
+
+| Archetype | Gap at teen, 1.0 values | Gap at teen, feed 0.1 | Gap at adult, 1.0 values | Gap at adult, feed 0.1 | Gap at adult, feed 0.25 |
+|---|---|---|---|---|---|
+| Casual | 2.6 | 0.65 | 4.3 | 1.4 | 1.8 |
+| Attentive | 3.1 | 0.79 | 5.1 | 1.6 | not run |
+| Steered Chrome (feeds and chooses corp) | 16.1 | 3.2 | 42 | 9.0 | 15.9 |
+| Steered Firewall | 18.9 | 3.4 | 52.6 | 11.5 | not run |
+| Corp-only feeding, no netruns | 11.2 | 1.8 | 27.6 | 4.3 | 9.5 |
+| Street-only feeding, no netruns | 12.8 | 2.0 | 33.0 | 5.4 | 11.5 |
+
+What it means with the tie rule (a gap of 5 or more is certain, 0 to 1 is a coin flip, about 80% at 4):
+
+- **Casual and attentive players** stay near a coin flip at both checks (gap about 0.7 at the teen, about 1.5 at adulthood). That is the intent: a player who has not chosen gets a random lean.
+- **A committed steerer** is certain by adulthood (gap 9 to 11.5) but not at the teen check (gap about 3.2 to 3.4, about 67% to 70% for the leader). So the teen is only a weak preview of the lean, even for a player who is steering.
+- **A player who only feeds one packet type** ends adulthood at about 4.3 to 5.4, right at the edge of certain. Decisions and netrun choices are what carry a lean at these sizes.
+- **If the teen preview should be reliable for a steerer**, two levers fit: raise the packet value to about 0.25 (steerers reach about 5.8 at the teen, feed-only about 9.5 to 11.5 at adulthood, casual still near a coin flip at 1.8), or lower the "certain" gap from 5 to about 3. Not decided; the starting values stay as the maintainer set them.
+- **Caveats:** one signed number stands in for two tracks, 150 lives is small, and the unnamed sources were set to 0.5 by me. The hidden path's "low on both" is not tested here.
 
 **Wins that make a role**
 
@@ -193,12 +212,12 @@ Anchors are from the committed 1.0 baseline (`tools/baseline/lives.json`, 1000 s
 | 0.12 | 15% | 70% | 94% | 44% | 79% | 94% |
 | 0.15 | 29% | 87% | 99% | 65% | 92% | 99% |
 
-- Recommendation: `p = 0.10` per run. A very consistent player has a 9% chance of all five in one life and a median near 2 lives, which matches the intent. A casual player takes about 3 lives. At 0.15 a consistent player finishes in one life 29% of the time, which is more than "might".
+- Egg page drop rate: `p = 0.10` per run is accepted as the starting value (decided). A very consistent player has a 9% chance of all five in one life and a median near 2 lives, which matches the intent. A casual player takes about 3 lives. At 0.15 a consistent player finishes in one life 29% of the time, which is more than "might".
 - For Rogue's gate (all 18 pages), a consistent player needs about 2 lives per egg for the form pages, so about 6 lives, plus a trip through Root and the Source for each Source page. A casual player needs closer to 9 or more.
 
 **Bug anomaly:** it is one entry in the anomaly pool, so its frequency is its share of the pool times the anomaly share of nodes. Not set.
 
-**Scrip and Standing prices** are above. **Segfault effects** are not set: it should add 2 faults (as in 1.0), push temper noticeably volatile, and carry a higher chance of adding a bug than a plain fault (for example 60%).
+**Scrip and Standing prices** are above. **Segfault (decided):** it adds 2 faults (as in 1.0), pushes temper noticeably volatile, and has a 60% chance of adding a bug. I read the 60% as one roll for the whole use, adding at most one bug. For comparison, two plain faults at 30% each add at least one bug 51% of the time (the 49% figure is the chance of none) and can add two. The size of the temper push is not set.
 
 ### Tie breaks (decided)
 
@@ -517,7 +536,7 @@ The Wetware names follow the vocabulary rule. Earlier suggestions that used CP20
 6. Decided: the three Source pages are egg pages.
 7. Purge order details. Recommended, not confirmed: leave accident or deliberate unsettled, and have NL-0 learn the order was dead only when the player shows it.
 8. Wording of the temper hints: first drafts exist (see the drafts file); where they appear is open.
-9. Evolution: starting numbers are proposed (see Starting numbers); open is the list of actions that add Standing, which the hidden form depends on (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen; no wins threshold is needed for a role); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
+9. Evolution: Standing sources are set as a starting point (see Starting numbers); open are the unnamed sources (voucher, Black ICE, ignored trace, checkpoints, anomalies), whether Standing is rounded for decisions, and whether the teen preview should be made more reliable (tie breaks are decided, see Tie breaks; a netling with no lead is then just a tie, so there is no separate default teen; no wins threshold is needed for a role); whether sustained neglect also marks the form (or only shows on the sprite); the number of wins that makes a role; and how the 12 role form pages are reworded for option C.
 10. The Segfault item (decided in part): it still causes a fault and pushes temper noticeably toward volatile, and it now has an increased chance of adding a bug. The size of those effects is not set. Other items can be retooled to affect temper less intensely than Segfault, which items and by how much is open.
 11. Bugs: the scrip price, the Standing price, how often the anomaly appears, the names per egg, the ceiling values, and the chance a fault adds a bug.
 12. The 12 second form names (see Second form names): Nutri is decided; the rest are proposals, with Spoof and Mouse swapped and Thrash proposed over Hog.
