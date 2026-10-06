@@ -7,7 +7,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 **Where it stands.** The overall shape is decided: a separate app, three launch eggs (Program, Iron, Wetware), a layered form model, a naming scheme with 15 adult form names, a story frame, and a codex page model. Much of the mechanical design is not done; see Not designed yet. No page text is written.
 
 **Next steps, in the maintainer's order.**
-1. Write the codex pages: 15 egg pages (5 per egg, one per adult form), one extra Source page per egg, and new story pages covering the two extra eggs. Apply the approved rewordings of the four pages.
+1. Write the codex pages. Drafts of the 15 egg pages (5 per egg, one per adult form) are in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) for review. Still to write: new story pages covering the two extra eggs (these also carry NL-0's differentiation for Iron in the Old Web Ruins and Wetware in the Darknet Bazaar), one extra Source page per egg, and the approved rewordings of the four 1.0 pages.
 2. Then temper hints: a hint should name a behavior to look for, not a temper value.
 3. After that, the maintainer has not set an order. The list under Not designed yet is the backlog.
 
