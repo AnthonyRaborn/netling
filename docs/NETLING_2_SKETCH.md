@@ -15,6 +15,10 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - Standing is two tracks (corp and street), not one signed number.
 - The ending does not show NL-0's differentiation. It is told only through codex fragments.
 - The hidden temper shows through sprite motion, idle behavior and chatter tone together, in all three eggs.
+- The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and fragments from all three eggs in the archive.
+- Each egg's elder stage has its own form.
+- New codex fragments are allowed. NL-0's differentiation is carried by fragments in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
+- Temper tells should be somewhat mysterious but clearly differentiated between bodies. Hints (DEX or similar) are wanted.
 - The earlier "easy unlock" idea was about 1.0 and no longer applies to the three launch eggs.
 
 ## Architecture
@@ -116,10 +120,14 @@ Item names across the eggs (suggestions):
 
 ## Open questions
 
-1. Hidden egg: Rogue with the merge ending, or another? Is the gate (ending played and fragments from all three eggs) right?
-2. Does each egg's elder stage have its own form, and does the Source change per egg?
-3. Which codex fragments carry NL-0's differentiation, and in which regions? (Ruins for Iron and the Bazaar or Corp Grid for Wetware are the natural fits.)
-4. How readable should the temper tell be to a new player, and is a per-egg DEX hint needed to teach it?
+1. **Source per egg.** Undecided. Options:
+   - A. One Source, one text, with the descent drawn in each egg's own style (read, burned in, dreamed).
+   - B. One Source plus one extra fragment per egg found there, so each line learns something the others do not. Matches the decision that NL-0 stays the single original and that fragments carry the story.
+   - C. Three separate Sources. Costly, and it splits the one-commit story.
+   Suggestion: B, with a light touch of A in presentation.
+2. Which fragments count toward Root Access in 2.0? In 1.0 only the original 22 count and later additions never revoke it. With fragments per egg, decide whether the unlock needs all of them, or the shared set plus any one egg's set.
+3. Hint wording for temper that stays mysterious: a hint should name the behavior to look for, not the temper value. Exact lines are unwritten.
+4. Fragment text for the Ruins (Iron) and the Bazaar (Wetware) is unwritten.
 
 ## Not done
 
