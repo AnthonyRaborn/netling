@@ -67,6 +67,38 @@ Jargon people-types: `hacker`, `wizard` (knows how a complex system works, can f
 
 CP2020 people-types: `edgerunner`, `solo`, `fixer`, `netrunner/deckjockey/cowboy`, `rigger`, `ripperdoc`, `razor/samurai`, `ronin`, `blank/SINless`, `ghost` (a deckjockey who assists a physical entry team), `flea` (non-netrunner riding along on a run), `Obi-Wan` and `Padawan` (older runner helping a young one on first runs), `gibson` (unexplained Net phenomenon, or a psychic), `rogue` and `rogue hunter`, `Mr. Johnson`, `sarariman`, `suit`, `shirt`, `wageslave`, `fossil` (also in CP2020), `Fred`, `NetFet`, `wirehead`, `brain potato`, `reality junkie`, `vidiot`.
 
+## Decisions so far
+
+Recorded from the maintainer, not yet designed in detail.
+
+1. **Access:** the second egg is an unlocked choice, and the unlock should be easy, for example raising two different adult forms. The game already tracks which adult forms the player has raised (`newForms` in the evolution tie-break), which may be a starting point. Not checked against the save format yet.
+2. **Lineage:** shared across both eggs, while the forms stay separate. Fragments, traits and the codex carry over; each egg has its own forms.
+
+Consequence to design for: the current traits (Licensed, Hardened, Persistent, Volatile, Untraceable) are effects on the first egg's meters (Charge, virus chance, play rewards, corp traces). If lineage is shared, the second egg either reuses those meters or needs trait equivalents that translate between the eggs. A candidate with new meters (Wetware: rejection, Replicator: population) makes this the main design question. Raising it before choosing the egg is worth doing.
+
+## How the current forms fit the references
+
+Judged from form names, mechanics and the docs read. Lore text in `CONTENT_CATALOG.md`, sprites and music were not reviewed.
+
+| Form | Fit | Why |
+|---|---|---|
+| Daemon, Init | Very strong | Jargon: a daemon "lies dormant waiting for some condition(s) to occur", which matches the slower drain while resting. Jargon also defines an orphan as a process whose parent died and that init(1) inherits, which is close to the lineage mechanic. |
+| Glitch, Panic | Strong | Jargon 1.0: glitch is "a sudden interruption in electric service, sanity, or program function. Sometimes recoverable." Matches the gambling play and the volatile trait. |
+| Ghost, Whisper | Good, with a catch | CP2020: a ghost is a deckjockey who assists an entry team; "ghost in the machine" means unexplained Net phenomena. The unlock (29 wins across four games) is a mastery requirement, which in the sources is the wizard or guru archetype, not the ghost. |
+| Firewall, Airgap | Partial | In both sources ICE and firewalls are the corp's tools and the indie tool is the icebreaker, so Firewall as the indie form is slightly inverted. Airgap fits the isolation theme. |
+| Chrome, Plat | Partial | CP2020: chrome is flash and cyberware, and chromers are street gangs. Corp types are suit, shirt, sarariman, keiretsu and badge. The corp-loving behavior only loosely fits. A flesh-and-cyberware egg would want the word "chrome". |
+| Bitling, Kernel, Stub, Shell | Neutral | Not contradicted. Shell also echoes shellcode, which Jargon calls an egg. |
+
+Mechanics and world that fit: PURGE and cache files (Jargon prowler and reaper, cruft, CP2020 gomi), the memory overflow event (Jargon's egg is a buffer-overflow payload), virus and trace events, corpo scrip (CP2020 valuta), Root Access (Jargon wheel, a privilege bit), Packet Feast (Jargon chomp is explicitly Pac-Man), Darknet Bazaar (fixers, ponies, paydata), Old Web Ruins (fossil, dusty deck, Stone Age), and The Source (Jargon's guru entry cross-references "source of all good bits"; only the cross-reference was seen, not that entry).
+
+Unused in the game: the bug taxonomy, bit rot, night-mode sleep beyond the stored `zone`, a code-of-honor axis (CP2020 bushi, giri, ronin, samurai), and people archetypes (fixer, rigger, ripperdoc, wizard, guru, Real Programmer, the Obi-Wan and Padawan mentor pairing).
+
+Implications for the egg choice:
+
+- **Iron overlaps the Mainframe stage.** Jargon treats mainframe, big iron and dinosaur as one family, and the Mainframe stage already sits in that pole. An Iron egg would partly duplicate it unless it is deliberately a whole life lived as a mainframe.
+- **Heat is already a hardware meter.** Heat, Coolant cell and "Heat 85+" are the magic-smoke and fry idea, so the first egg is not purely software.
+- **Chrome is spoken for.** A Wetware egg needs a different word for its augmented lines.
+
 ## Candidate second eggs
 
 Each candidate gets its own hidden axes and its own failure model, so it is not a recolor. Adult names are suggestions only. I checked that none of the words below already appear in `src/` or `docs/`.
@@ -118,10 +150,12 @@ If the first egg should also gain differentiation from these sources without new
 
 ## Open questions for the maintainer
 
-1. Should the second egg be a separate game track (own dex, codex, lineage) or share the current lineage and Source?
-2. Is it a choice at the start of a new life, or an unlock (Root Access, the Source)?
-3. Should the two eggs be able to interact (flea, mentor, shared netruns), or stay separate?
-4. Which of the four poles above (flesh, old iron, replicator, rogue AI) fits the intended tone?
+Answered: access (unlocked choice, easy unlock) and lineage (shared, forms separate); see Decisions so far.
+
+1. Should the two eggs interact (flea, mentor, shared netruns), or only share lineage?
+2. Which pole fits the intended tone: flesh, old iron, replicator or rogue AI? (See the fit notes: Iron overlaps the Mainframe stage.)
+3. Shared lineage and traits: reuse the first egg's meters in the second egg, or translate traits between the two?
+4. Exactly what counts as the easy unlock (two different adult forms, or something else)?
 5. Expected scope: new meters and items only, or new netrun regions and mini-games per egg?
 6. More references are coming. Which themes should I weight when they arrive?
 
