@@ -49,6 +49,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - NL-0 stays the original. It differentiates itself to escape the purge order, loosely like the Puppet Master in Ghost in the Shell.
 - Wetware death can read as a dream ending and a new one beginning.
 - Composed forms (egg body, temper variant, role overlay) are acceptable if the current test and balance tools can still drive them.
+- Sprites (decided): every teen and adult form is authored in full, with its own silhouette and its own anchor rows, as in 1.0. Composing a form from a shared body plus role and lean overlays was prototyped and rejected for the current plan of forms (option C, two named forms per role); see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md). Temper stays an animation skin, not a separate sprite, and neglect stays a mark layer drawn over any authored sprite.
 - A hidden, unlockable egg is welcome.
 - Standing is two tracks (corp and street), not one signed number.
 - The ending does not show NL-0's differentiation. It is told only through codex pages.
@@ -102,7 +103,7 @@ Proposal: roles map to the four games. Breach to a Cracker, Dodge to an Evader, 
 
 Proposal: traits act on abstract drives (Upkeep, Exposure, Reward, Risk). Each egg maps the drives to its own meters, so lineage and traits are shared across eggs.
 
-Proposal: all three bodies share anchor rows (head, face, body, float) so the 41 wearables work unchanged.
+Proposal: all three bodies share anchor rows (head, face, body, float) so the 41 wearables work unchanged. With forms authored in full (decided), each form carries its own anchor rows, as in 1.0, and the prototype ran the 1.0 wearables on them unchanged.
 
 ## Evolution
 
@@ -810,7 +811,7 @@ Settled items are listed under Decided. What is still open:
 
 The backlog. None of this has been decided or drafted.
 
-- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, the composed-form sprite spec, and how the test and balance tools drive composed forms. A prototype of two composition approaches for the Iron egg, with results, is in [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md); the choice between them is open.
+- **Sprites:** the three bodies, the neglected look, the temper tells in motion, the flicker guard, how the test and balance tools drive the new forms, and the art itself: the Iron line was prototyped (see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)); Program, Wetware and the rest of Iron's 14 forms are not drawn. Forms are authored in full (decided).
 - **Per-egg meters and care buttons:** Iron's drift and calibration, Wetware's rejection, and how corrective, adaptive and perfective care map to actions. The abstract drives (Upkeep, Exposure, Reward, Risk) are a proposal only.
 - **Baby and teen stages and forms per egg;** the elder stage rules (1.0's Mainframe gating replaced by the `late` flag); Source access rules.
 - **Netrun abilities per form,** regions per egg, events per egg, the debug station's options, and the tutorial run per egg.

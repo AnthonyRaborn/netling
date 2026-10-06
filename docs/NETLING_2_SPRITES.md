@@ -1,6 +1,15 @@
 # Netling 2.0 sprite prototype
 
-Status: prototype and comparison for the maintainer's decision. Nothing here is wired into the game. The code is in `prototype/netling2/`; it is not part of `npm test`, it is not deployed, and it only reads the game's modules. Items marked proposal are mine; the decision between the two models is the maintainer's. It answers part of the sketch's "Sprite redesign" step: the Iron body at every stage of one line, the temper tell, the flicker guard and a neglected look. Companion to [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (see Neglect and the sprites, The temper tell, Making the steady end legible, Temper scale).
+Status: prototype and comparison. **Decided (maintainer): forms are authored in full, not composed.** The composed model below was prototyped and is kept only as the rejected alternative. Nothing here is wired into the game. The code is in `prototype/netling2/`; it is not part of `npm test`, it is not deployed, and it only reads the game's modules. Items marked proposal are mine; the decision between the two models is the maintainer's. It answers part of the sketch's "Sprite redesign" step: the Iron body at every stage of one line, the temper tell, the flicker guard and a neglected look. Companion to [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (see Neglect and the sprites, The temper tell, Making the steady end legible, Temper scale).
+
+## Decision
+
+Authored, for the current plan of forms (option C: two named forms per role, three teens, one hidden form). The reasons the numbers gave: with nine adults the composed forms missed the 1.0 silhouette bar and a role's two forms came out as near-identical outlines, which defeats having two named forms; the cost advantage of composing only appears at many forms per body, and the authored forms cleared the bar after a small redraw. Consequences:
+
+- Each form is drawn in full and carries its own anchor rows, as in 1.0. The prototype ran every 1.0 wearable on the authored forms unchanged.
+- The sprite audit and gallery will need the new forms added; the temper tell and neglect look are independent of how a form is built, so they carry over.
+- Cost, an extrapolation from the Iron figures and not a measurement: the wider run was 3146 hand-placed cells for 3 teens and 9 adults, plus 512 for baby and elder, so roughly 3700 cells per egg and about 11000 for three, before any rework after review.
+- The composed code (`OVERLAYS`, `LEAN_OVERLAYS`, `TEEN_OVERLAYS`, `compose`, model A in `models.js`) stays in the prototype for reference and can be deleted; it is in git history either way.
 
 ## Scope
 
@@ -69,14 +78,15 @@ Three conclusions, which the one-line prototype cannot show:
 - **Model A did not clear the 1.0 bar at 9 adults** (0.89, after a second pass on the lean overlays), and its two forms of a role were near-identical outlines. Model B cleared it after redrawing two forms.
 - **This maps onto the sketch's option B against C.** Model A is, in effect, option B (one named form per role, the Standing lean as a visible variant); model B is option C (two genuinely different named forms per role). If option C stands, B is the safer fit for the adults; if the fallback to option B is used, A is the natural build.
 
-## Open questions for the decision
+## Open questions
 
-1. The wider run pointed to authored adults under option C and composed adults under the option B fallback. Do you want the comparison redone on a second line, for example a corp-lean form from another role, to see how far the composed forms drift from the authored ones?
-2. Teens: both models read them as marks over one outline. Is that enough of a preview of the lean?
-3. Elder: one authored form per egg, as built, or grown from the adult body?
-4. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
-5. Neglect: reversible and tied to unmet needs, as the sketch asks, or does a mark persist to the next stage? The prototype only draws the reversible look.
-6. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
+The composition question is closed (see Decision).
+
+1. Teens: both models read them as marks over one outline. Is that enough of a preview of the lean?
+2. Elder: one authored form per egg, as built, or grown from the adult body?
+3. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
+4. Neglect: reversible and tied to unmet needs, as the sketch asks, or does a mark persist to the next stage? The prototype only draws the reversible look.
+5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
 
 ## Not done
 
