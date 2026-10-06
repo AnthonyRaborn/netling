@@ -336,7 +336,7 @@ Option C gives each role two named forms, one leaning corp and one leaning stree
 | Wetware | Breach | Razor | **Solo** | CP2020: a mercenary who works the streets |
 | Wetware | Dodge | Wired | **Chipped** | CP2020: senses, skills and reflexes enhanced by cyberware |
 | Wetware | Tune | **Mentat** | Gibson | CP2020: someone who stares at a problem and answers without visible steps |
-| Wetware | Feast | **(open)** | Leech | Wirehead dropped as too close to Wired. Candidates below |
+| Wetware | Feast | **Nutri** | Leech | A clipping of CP2020's Nutrisoy (cheap processed food). Wirehead was dropped as too close to Wired. Proposed, not confirmed; candidates below |
 
 New names are in bold. The hidden forms (Ghost, Guru, Blank) are unchanged.
 
@@ -349,7 +349,7 @@ Notes:
   - **Nutrisoy:** CP2020 (cheap processed food product). Corp-flavored and unmistakably about eating, but three syllables, longer than the other Wetware names.
   - **Chunking:** CP2020 (eating on the run, or as a secondary activity). Short, directly about eating, but it is a gerund and reads street, not corp.
   - If Batch is chosen anyway, the Bad batch item would need another name.
-  My lean is Nutrisoy for the corp lean, since it fits the vocabulary and the corp flavor. Not decided.
+  - **Nutri:** a clipping of Nutrisoy, proposed by the maintainer as the shorter option. The glossary has only the full word, but clipping has a precedent (Phreak is a clipping of the Jargon term phreaking). Two syllables, like Razor and Gibson. It reads like a brand prefix, which suits the corp lean, and plainly points at food and nourishment. Risk: it can sound cute next to the other Wetware names. Currently the proposed name; not confirmed.
 - **Weak links.** Spoof (deception reads outlaw, now on the street lean) and Splat (smashing, close to Gronk). Thrash and Gronk are both violent street names in Iron, which is acceptable since the roles differ (Breach and Feast). Alternates: Program Breach Sneaker (also verified, a hired breaker); Iron Breach Gib (Jargon: destroy utterly) or Scag; Iron Feast Hog (Jargon: eats more than its share); Wetware Breach Blade (CP2020: a fighter with edged weapons, or a surgeon), Wetware Dodge Edge (the fringe of society).
 - **Form-bound pages.** Under option C one page covers both forms of a role, so a page must read right for both. The existing role pages use the street-lean names as in-world words in two places (`iron-gronk`, `iron-jiff`); a page could use either name or neither.
 - **Not checked:** how the names read in the UI, or whether any collides with a 1.0 form name. None of them is a 1.0 form (Chrome, Firewall, Daemon, Glitch, Ghost, Stub, Shell, Kernel and the mainframe names).
