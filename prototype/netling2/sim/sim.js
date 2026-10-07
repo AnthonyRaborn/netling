@@ -473,7 +473,9 @@ function attachAxes(s) {
 
 // --- 2.0 bugs, Standing and temper helpers ---------------------------------------------------------
 
-export const BUG_CFG = { chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
+// homeClear: whether a bug can be cleared away from a netrun (maintainer: it cannot; bugs are cleared at a clinic node, see netrun/run.js).
+// BUGS='{"homeClear":true}' brings back the earlier home-clearing rules for comparison.
+export const BUG_CFG = { homeClear: false, chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
 if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
 
 export function rollBug(s, rng, chance = BUG_CFG.chance) {
@@ -482,8 +484,9 @@ export function rollBug(s, rng, chance = BUG_CFG.chance) {
 
 // Clear one bug. `pay` is 'scrip' (15) or 'standing' (2 points taken from the tracks, `corp` of them from corp and the rest from
 // street; both stay at zero or above). Returns whether a bug was cleared.
-export function clearBug(s, { pay = 'scrip', corp = 1 } = {}) {
+export function clearBug(s, { pay = 'scrip', corp = 1, where = 'home' } = {}) {
   if (!(s.bugs > 0)) return false;
+  if (where === 'home' && !BUG_CFG.homeClear) return false;
   if (pay === 'scrip') {
     if ((s.scrip ?? 0) < BUG_CFG.clearScrip) return false;
     s.scrip -= BUG_CFG.clearScrip;
@@ -496,6 +499,9 @@ export function clearBug(s, { pay = 'scrip', corp = 1 } = {}) {
   s.bugs--;
   return true;
 }
+
+// Clearing a bug at a clinic node: the same prices (15 scrip, or 2 Standing in the split `corp` picks), allowed on a netrun.
+export const clearBugAt = (s, o = {}) => clearBug(s, { ...o, where: 'clinic' });
 
 // Standing as the player sees it: the floor of each track. Decisions read the fractions (maintainer: a little extra randomness in
 // evolution), against whole-number cutpoints: see gapIndex.

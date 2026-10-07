@@ -29,6 +29,18 @@ export const ANOMALY_PREFS = {
   indie: ['raid', 'repair', 'leave', 'follow', 'listen'],
 };
 
+// The clinic fix a bot picks: scrip if the policy allows it and it has the scrip, else a Standing payment by the policy's split.
+export function pickFix(pet, fix = {}, has) {
+  const mode = fix.mode ?? 'both';
+  if ((mode === 'scrip' || mode === 'both') && has('fixscrip')) return 'fixscrip';
+  if (mode === 'scrip') return null;
+  const { corp, street } = pet.standing;
+  const order = fix.split === 'leader' ? [corp >= street ? 'fix2corp' : 'fix2street']
+    : fix.split === 'trailer' ? [corp >= street ? 'fix2street' : 'fix2corp']
+    : ['fix1each', corp >= street ? 'fix2corp' : 'fix2street'];
+  return order.find(has) ?? null;
+}
+
 function decide(pet, style, rng) {
   const p = pet.run.pending;
   const has = (id) => p.options.some((o) => o.id === id && !o.disabled);
@@ -43,11 +55,16 @@ function decide(pet, style, rng) {
   }
   // Buying leans indie, so a player steering corp may walk past. It only buys what it has room to keep.
   if (p.kind === 'market') {
+    // At a clinic it fixes bugs first, paying as `style.fix` says (default: scrip, then Standing).
+    if (p.flavor === 'clinic' && pet.bugs > 0 && style.fix?.mode !== 'none') {
+      const fix = pickFix(pet, style.fix, has);
+      if (fix) return fix;
+    }
     const room = pet.inventory.length + pet.run.loot.length < INVENTORY_SLOTS;
     const wanted = p.options.find((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled && (!style.keep || style.keep.includes(p.offers[Number(o.id.slice(3))])));
     // Each kind of market leans its own way: a player steering one way only shops on that side.
     const side = p.flavor === 'corp' ? 'corp' : 'indie';
-    const fits = style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (leanSeen(pet, style.shown) > 0) === (side === 'indie') : true;
+    const fits = p.flavor === 'clinic' || (style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (leanSeen(pet, style.shown) > 0) === (side === 'indie') : true);
     const bare = pet.run.challenge === 'baremetal' && !pet.run.challengeVoid; // keeps Bare metal: no items bought
     return style.shop !== false && !bare && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
   }
@@ -59,26 +76,27 @@ function decide(pet, style, rng) {
 
 // How much a node is worth to the bot. Unseen nodes are worth nothing either way, so seeing
 // further (a form's sight, revealed layers) is the only thing planning gains.
-function nodeValue(type, hurt) {
+function nodeValue(type, hurt, node, seek) {
+  if (type === 'market' && seek && node.flavor === 'clinic') return 6; // bugged: a clinic is worth a detour
   if (type === 'ice') return hurt ? -6 : -0.5;
   if (type === 'relay') return hurt ? 4 : 0.5;
   return { cache: 2, exit: 1, market: 0.5, anomaly: 0.5, checkpoint: -0.5 }[type] ?? 0;
 }
 
-function pathValue(map, id, visible, depth, hurt) {
+function pathValue(map, id, visible, depth, hurt, seek) {
   const node = nodeById(map, id);
-  const here = visible.has(id) ? nodeValue(node.type, hurt) : 0;
+  const here = visible.has(id) ? nodeValue(node.type, hurt, node, seek) : 0;
   if (depth === 0 || !node.edges.length) return here;
-  return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt)));
+  return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt, seek)));
 }
 
 // Picks the next node by the best path up to `depth` steps, judged only on `visible` node ids.
 // Ties go to the first option, as the one-step bot does.
-export function planMove(map, options, visible, hurt, depth = 3) {
+export function planMove(map, options, visible, hurt, depth = 3, seek = false) {
   let best = options[0];
   let bestValue = -Infinity;
   for (const node of options) {
-    const value = pathValue(map, node.id, visible, depth, hurt);
+    const value = pathValue(map, node.id, visible, depth, hurt, seek);
     if (value > bestValue) {
       bestValue = value;
       best = node;
@@ -117,11 +135,12 @@ export function sellAtMarket(pet, keep = null) {
 export function playRun(pet, style, region, rng, codex = []) {
   startRun(pet, region, rng, codex, [], { challenge: style.challenge ?? null, day: style.day });
   let steps = 0;
-  while (pet.run.phase !== 'done' && steps++ < 40) {
+  while (pet.run.phase !== 'done' && steps++ < 60) {
     const run = pet.run;
     if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, style.winRate), rng);
     else if (run.phase === 'choice') {
-      if (run.pending.kind === 'market') {
+      if (run.pending.kind === 'market' && !run.pending.counted) {
+        run.pending.counted = true; // a clinic stays open after a fix: count and sell once
         if (style.sell !== false) run.sold = (run.sold ?? 0) + sellAtMarket(pet, style.keep);
         // Whether it could afford any item here, after selling (the "a purchase every second run" target).
         run.markets = (run.markets ?? 0) + 1;
@@ -132,9 +151,11 @@ export function playRun(pet, style, region, rng, codex = []) {
     else {
       const opts = runOptions(run);
       const hurt = pet.stats.integrity < style.avoidIceBelow;
+      const seek = pet.bugs > 0 && style.seekClinic !== false && style.fix?.mode !== 'none'; // bugged, and willing to pay for a fix
       const pick = style.plan
-        ? planMove(run.map, opts, visibleNodeIds(pet), hurt)
-        : (opts.find((n) => hurt && n.type === 'relay') ??
+        ? planMove(run.map, opts, visibleNodeIds(pet), hurt, 3, seek)
+        : ((seek ? opts.find((n) => n.type === 'market' && n.flavor === 'clinic') : undefined) ??
+          opts.find((n) => hurt && n.type === 'relay') ??
           opts.find((n) => !(hurt && n.type === 'ice') && n.type === 'cache') ??
           opts.find((n) => !(hurt && n.type === 'ice')) ??
           opts[0]);

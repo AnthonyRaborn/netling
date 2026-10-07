@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {
   createScript, tick, act, mulberry32, CFG, BUG_CFG, SPECIES, FORMS, MAINFRAME_OF, ROLES, LEANS, GAME_IDS, MIN,
   clearBug, pushGame, standingInt, gapIndex, teenCandidates, teenForm, adultCandidates, adultForm, hiddenTeenMet, hiddenAdultMet,
-  temperDecayFactor, temperLevel, roleForm, leanSeen,
+  temperDecayFactor, temperLevel, roleForm, leanSeen, clearBugAt,
 } from './sim/sim.js';
 import { guardedLevel } from './tell.js';
 
@@ -143,7 +143,9 @@ test('bugs raise the drains and Heat gain and stop at the ceiling of 5', () => {
   assert.equal(full.bugs, BUG_CFG.max);
 });
 
-test('clearing a bug costs 15 scrip, or 2 Standing in any split, and neither goes below zero', () => {
+test('clearing a bug costs 15 scrip, or 2 Standing in any split, and neither goes below zero (where clearing is allowed)', (t) => {
+  BUG_CFG.homeClear = true;
+  t.after(() => { BUG_CFG.homeClear = false; });
   const s = fresh();
   s.bugs = 3;
   s.scrip = 14;
@@ -424,8 +426,10 @@ test('temper seekers reach their strong level and hold it for 12 hours; the firs
   assert.ok(unsteady >= 5, `unsteady holds ${unsteady} of ${n}`);
 });
 
-test('bug policies: when a bot clears and what it pays with', async () => {
+test('bug policies: when a bot clears and what it pays with', async (t) => {
   const { fixBugs } = await import('./sim/balance.mjs');
+  BUG_CFG.homeClear = true;
+  t.after(() => { BUG_CFG.homeClear = false; });
   const bot = (fix, { bugs = 3, scrip = 30, standing = { corp: 4, street: 1.5 } } = {}) => {
     const s = fresh();
     Object.assign(s, { bugs, scrip, standing: { ...standing } });
@@ -487,4 +491,108 @@ test('a keen human-like player lives longer than a casual one, and both are dete
     casual += simulate(ARCHETYPES['human-casual'], seed).ageMin;
   }
   assert.ok(keen > casual, `keen ${keen} against casual ${casual} minutes lived`);
+});
+
+test('a bug cannot be cleared away from a clinic by default', () => {
+  const s = fresh();
+  Object.assign(s, { bugs: 2, scrip: 50, standing: { corp: 5, street: 5 } });
+  assert.equal(clearBug(s), false);
+  assert.equal(clearBug(s, { pay: 'standing', corp: 1 }), false);
+  assert.deepEqual([s.bugs, s.scrip], [2, 50]);
+  assert.equal(clearBugAt(s), true);
+  assert.deepEqual([s.bugs, s.scrip], [1, 35]);
+  assert.equal(clearBugAt(s, { pay: 'standing', corp: 2 }), true);
+  assert.deepEqual([s.bugs, s.standing.corp], [0, 3]);
+  assert.equal(clearBugAt(s), false, 'no bugs left');
+});
+
+test('a quarter of market nodes become clinics, each rolled once', async () => {
+  const { clinicKinds, RUN_CFG } = await import('./sim/netrun/run.js');
+  const map = { nodes: Array.from({ length: 4000 }, (_, i) => ({ id: i, type: i % 5 === 0 ? 'ice' : 'market', flavor: i % 2 ? 'corp' : 'black' })) };
+  clinicKinds(map, mulberry32(8));
+  const markets = map.nodes.filter((n) => n.type === 'market');
+  const share = markets.filter((n) => n.flavor === 'clinic').length / markets.length;
+  assert.ok(Math.abs(share - RUN_CFG.clinicShare) < 0.03, `clinic share ${share}`);
+  assert.ok(map.nodes.filter((n) => n.type === 'ice').every((n) => n.flavor !== 'clinic'));
+  const before = map.nodes.map((n) => n.flavor);
+  clinicKinds(map, () => 0); // everything already rolled: nothing changes
+  assert.deepEqual(map.nodes.map((n) => n.flavor), before);
+  map.nodes.push({ id: 9999, type: 'market', flavor: 'black' });
+  clinicKinds(map, () => 0);
+  assert.equal(map.nodes.at(-1).flavor, 'clinic', 'a node added later is rolled when it appears');
+});
+
+test('the healing items are sold only at clinics, and a clinic sells nothing else', async (t) => {
+  const { marketStock, HEALING, RUN_CFG } = await import('./sim/netrun/run.js');
+  const { REGIONS } = await import('../../src/netrun/regions.js');
+  assert.deepEqual(HEALING, ['coolant', 'repair', 'antivirus']);
+  for (const region of Object.values(REGIONS)) {
+    for (const flavor of ['black', 'corp']) assert.ok(Object.keys(marketStock(flavor, region)).every((id) => !HEALING.includes(id)), `${flavor} in ${region.name ?? ''}`);
+    assert.deepEqual(Object.keys(marketStock('clinic', region)).sort(), [...HEALING].sort());
+  }
+  assert.ok(Object.keys(marketStock('black', REGIONS.bazaar)).length >= 4, 'the bazaar keeps its other stock');
+  RUN_CFG.healingOnlyAtClinic = false;
+  t.after(() => { RUN_CFG.healingOnlyAtClinic = true; });
+  assert.ok('coolant' in marketStock('corp', REGIONS.public), 'switched off: the 1.0 stock');
+  RUN_CFG.healingOnlyAtClinic = true;
+});
+
+test('a clinic fixes bugs for scrip or Standing plus Charge, stays open for more, and has no lean', async () => {
+  const { startRun, moveTo, choose, runOptions } = await import('./sim/netrun/run.js');
+  const rng = mulberry32(21);
+  const s = fresh();
+  s.stats.charge = 90;
+  Object.assign(s, { bugs: 2, scrip: 40, standing: { corp: 3, street: 0.5 } });
+  startRun(s, 'bazaar', rng, []);
+  const node = runOptions(s.run)[0];
+  Object.assign(node, { type: 'market', flavor: 'clinic', clinicRolled: true });
+  const standing0 = { ...s.standing };
+  assert.equal(moveTo(s, node.id, rng).kind, 'market');
+  const p = s.run.pending;
+  assert.equal(p.flavor, 'clinic');
+  assert.equal(p.title, 'CLINIC');
+  assert.deepEqual(p.options.filter((o) => o.id.startsWith('fix')).map((o) => o.id), ['fixscrip', 'fix2corp', 'fix1each', 'fix2street']);
+  const dis = Object.fromEntries(p.options.filter((o) => o.id.startsWith('fix')).map((o) => [o.id, o.disabled]));
+  assert.deepEqual(dis, { fixscrip: false, fix2corp: false, fix1each: true, fix2street: true }, '0.5 street cannot pay 1 or 2');
+  const charge = s.stats.charge;
+  assert.equal(choose(s, 'fixscrip', rng).ok, true);
+  assert.deepEqual([s.bugs, s.scrip, s.run.phase], [1, 25, 'choice'], 'one bug fixed and the clinic is still open');
+  assert.ok(Math.abs(charge - s.stats.charge - 12) < 1e-9, 'a fix costs the clinic charge fee');
+  assert.equal(choose(s, 'fix2street', rng).ok, false, 'cannot pay what it does not have');
+  assert.equal(choose(s, 'fix2corp', rng).ok, true);
+  assert.deepEqual([s.bugs, s.standing.corp], [0, 1]);
+  assert.ok(!s.run.pending.options.some((o) => o.id.startsWith('fix')), 'no bugs left, no fix offered');
+  assert.equal(s.run.tally.fixed, 2);
+  assert.deepEqual([s.run.tally.fixScrip, s.run.tally.fixStanding], [1, 1]);
+  // an item ends the visit; neither a fix nor a purchase leans Standing beyond what the fix spent
+  const buy = s.run.pending.options.find((o) => o.id.startsWith('buy'));
+  s.scrip = 40;
+  assert.equal(choose(s, buy.id, rng).ok, true);
+  assert.equal(s.run.phase, 'map');
+  assert.equal(s.standing.street, standing0.street);
+  assert.equal(s.standing.corp, standing0.corp - 2);
+});
+
+test('a bot fixes bugs at a clinic with scrip first, then Standing by its split, and seeks one when bugged', async () => {
+  const { pickFix } = await import('./sim/netrun-bot.mjs');
+  const pet = { standing: { corp: 4, street: 1 } };
+  const all = () => true;
+  const only = (...ids) => (id) => ids.includes(id);
+  assert.equal(pickFix(pet, undefined, all), 'fixscrip');
+  assert.equal(pickFix(pet, { mode: 'both' }, only('fix1each', 'fix2corp')), 'fix1each');
+  assert.equal(pickFix(pet, { mode: 'both', split: 'leader' }, only('fix2corp', 'fix2street', 'fix1each')), 'fix2corp');
+  assert.equal(pickFix(pet, { mode: 'both', split: 'trailer' }, only('fix2corp', 'fix2street', 'fix1each')), 'fix2street');
+  assert.equal(pickFix(pet, { mode: 'scrip' }, only('fix1each')), null, 'a scrip-only bot waits for scrip');
+  assert.equal(pickFix(pet, { mode: 'standing' }, only('fixscrip')), null);
+  // end to end: casual players with bugs pass clinics and fix some
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  let visits = 0;
+  let fixed = 0;
+  for (let seed = 1; seed <= 12; seed++) {
+    const r = simulate(ARCHETYPES.casual, seed);
+    visits += r.clinicVisits;
+    fixed += r.bugsFixed;
+  }
+  assert.ok(visits >= 10, `clinic visits ${visits}`);
+  assert.ok(fixed >= 3, `bugs fixed ${fixed}`);
 });

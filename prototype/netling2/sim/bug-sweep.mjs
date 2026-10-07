@@ -1,10 +1,15 @@
 // How should a player handle bugs, and what does each way cost? Runs a base archetype under different bug policies (when to clear and what to
 // pay with) and reports survival, faults, how many bugs it carried and for how long, what the clearing cost in scrip and Standing, and what
 // that did to its Standing lean (a Standing payment erodes the lean a steerer is building).
+// (Home clearing is switched on here; see the note below.)
 // Usage: node prototype/netling2/sim/bug-sweep.mjs [lives=300] [bases=casual,worker] [policies=all]
 // Use BUGS='{"chance":0.5,"max":8}' for a harsher bug rule.
 process.env.TZ = 'UTC';
 const { ARCHETYPES, simulate, stats } = await import('./balance.mjs');
+const { BUG_CFG } = await import('./sim.js');
+// This sweep is about clearing bugs at a check-in, which the rules no longer allow by default (bugs are cleared at clinic nodes on netruns): it
+// switches home clearing on to compare the policies. clinic-sweep.mjs measures the clinic.
+BUG_CFG.homeClear = true;
 const lives = Number(process.argv[2] ?? 300);
 const bases = (process.argv[3] ?? 'casual,worker').split(',');
 export const POLICIES = {

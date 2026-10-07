@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment, fragmentById } from '../../../../src/netrun/codex.js';
@@ -46,6 +46,14 @@ export const RUN_CFG = {
   exchangeLean: 0.5,
   blackStock: { blackice: 3, booster: 2, overclock: 2, memory: 2, segfault: 1, coolant: 1 },
   exchangeStock: { voucher: 3, coolant: 2, repair: 2, antivirus: 2, memory: 1 },
+  // 2.0 clinic (a third kind of market, unaligned: no Standing lean). It fixes bugs (the only place that can), and it is the only market
+  // that sells the healing items, which the black market and the corp exchange no longer stock (HEALING). A quarter of market nodes.
+  // A fix costs the market's Charge fee plus 15 scrip, or 2 Standing in a split the player picks; fixes keep the visit open, a purchase
+  // or leaving ends it.
+  clinicShare: 0.25,
+  healingOnlyAtClinic: true, // false: the black market and corp exchange keep selling the healing items (the 1.0 stock)
+  clinicPrice: 12, // Charge per purchase and per fix
+  clinicStock: { coolant: 3, repair: 3, antivirus: 2 },
   cacheFragmentChance: 0.15,
   // A netling's memory holds this many new codex fragments; the rest wait for the next generation.
   codexPerLife: 8,
@@ -143,6 +151,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
   const daily = Boolean(REGIONS[region].daily);
   const day = daily ? opts.day ?? DAILY.epoch : null;
   const map = generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
+  if (!daily) clinicKinds(map, rng);
   pet.run = {
     region,
     map,
@@ -162,7 +171,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     softLosses: 0, // lost ICE fights that barely scratched an Airgap
     known: [...codex], // codex at jack-in, so fragments never repeat
     startStats: { ...pet.stats },
-    tally: { nodes: 0, iceWon: 0, iceLost: 0, icePhased: 0, caches: 0, bought: 0 },
+    tally: { nodes: 0, iceWon: 0, iceLost: 0, icePhased: 0, caches: 0, bought: 0, clinics: 0, fixed: 0, fixScrip: 0, fixStanding: 0 },
     fragments: [], // found this run; banked on jack-out like loot
     knownAcc: [...ownedAccessories],
     accessories: [], // found or bought this run; banked on jack-out like loot
@@ -184,11 +193,37 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     const need = CONTRACT_ROUTES[c.kind]?.(c, map);
     if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
     marketKinds(map, rng);
+    if (!daily) clinicKinds(map, rng);
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
   return pet.run;
 }
+
+// The healing items: sold only at clinics (they are still found as loot and dropped).
+export const HEALING = ['coolant', 'repair', 'antivirus'];
+const withoutHealing = (t) => Object.fromEntries(Object.entries(t).filter(([id]) => !HEALING.includes(id)));
+// What a market of this flavor ('black' | 'corp' | 'clinic') stocks in this region.
+export function marketStock(flavor, region) {
+  if (flavor === 'clinic') return RUN_CFG.clinicStock;
+  const table = flavor === 'corp' ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
+  return RUN_CFG.healingOnlyAtClinic ? withoutHealing(table) : table;
+}
+// Turns a share of the map's market nodes into clinics, once each (a node a contract adds later is rolled when it appears).
+export function clinicKinds(map, rng) {
+  for (const n of map.nodes) {
+    if (n.type !== 'market' || n.clinicRolled) continue;
+    n.clinicRolled = true;
+    if (rng() < RUN_CFG.clinicShare) n.flavor = 'clinic';
+  }
+}
+// The ways to pay for a fix, offered only while the netling has bugs.
+const fixOptions = (pet) => (pet.bugs > 0 ? [
+  { id: 'fixscrip', label: `FIX A BUG ${BUG_CFG.clearScrip}$` },
+  { id: 'fix2corp', label: 'FIX A BUG 2 CORP' },
+  { id: 'fix1each', label: 'FIX A BUG 1+1 STANDING' },
+  { id: 'fix2street', label: 'FIX A BUG 2 STREET' },
+] : []);
 
 export const runOptions = (run) => nodeById(run.map, run.pos).edges.map((id) => nodeById(run.map, id));
 
@@ -363,7 +398,8 @@ function moveToNode(pet, nodeId, rng) {
     }
     case 'market': {
       const corp = node.flavor === 'corp';
-      const table = corp ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
+      const clinic = node.flavor === 'clinic';
+      const table = marketStock(node.flavor, region);
       // Under a market contract, the first offer is always one of the cheapest items.
       const cheap = run.contract?.kind === 'market' ? cheapestOf(table) : null;
       const offers = [weighted(cheap ?? table, rng)];
@@ -371,17 +407,19 @@ function moveToNode(pet, nodeId, rng) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
       }
-      const price = corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
-      const accOffer = !region.noStyleDrops && rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
+      const price = clinic ? RUN_CFG.clinicPrice : corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
+      if (clinic) run.tally.clinics++;
+      const accOffer = !clinic && !region.noStyleDrops && rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
       openChoice(run, {
         kind: 'market',
-        flavor: corp ? 'corp' : 'black',
-        title: corp ? 'CORP EXCHANGE' : 'BLACK MARKET',
-        text: `a vendor process. scrip, plus ${price} charge.`,
+        flavor: clinic ? 'clinic' : corp ? 'corp' : 'black',
+        title: clinic ? 'CLINIC' : corp ? 'CORP EXCHANGE' : 'BLACK MARKET',
+        text: clinic ? `bugs fixed and repairs sold, no questions. ${price} charge a go.` : `a vendor process. scrip, plus ${price} charge.`,
         offers,
         price,
         accOffer,
         options: [
+          ...(clinic ? fixOptions(pet) : []),
           ...offers.map((id, i) => ({ id: `buy${i}`, label: `${ITEMS[id].name.toUpperCase()} ${SCRIP.price[id]}$` })),
           ...(accOffer ? [{ id: 'buyacc', label: `${accessoryById(accOffer).name.toUpperCase()} ${accScrip(accOffer)}$` }] : []),
           { id: 'leave', label: 'LEAVE', hint: 'buy nothing. sell from the inventory first.' },
@@ -505,6 +543,17 @@ export function refreshMarket(pet) {
   const charge = pet.stats.charge;
   for (const o of p.options) {
     if (o.id === 'leave') continue;
+    if (o.id.startsWith('fix')) {
+      const { corp, street } = pet.standing;
+      const short = charge <= p.price + 5 ? `needs ${p.price + 5}+ charge`
+        : o.id === 'fixscrip' ? (scrip < BUG_CFG.clearScrip ? `needs ${BUG_CFG.clearScrip} scrip, has ${scrip}` : null)
+        : o.id === 'fix2corp' ? (corp < 2 ? 'needs 2 corp standing' : null)
+        : o.id === 'fix2street' ? (street < 2 ? 'needs 2 street standing' : null)
+        : corp < 1 || street < 1 ? 'needs 1 of each standing' : null;
+      o.disabled = Boolean(short);
+      o.hint = short ?? `-${p.price} chg`;
+      continue;
+    }
     const acc = o.id === 'buyacc';
     const cost = acc ? accScrip(p.accOffer) : SCRIP.price[p.offers[Number(o.id.slice(3))]];
     const chg = acc ? RUN_CFG.accPrice : p.price;
@@ -603,7 +652,20 @@ function chooseOption(pet, optionId, rng) {
       msg = 'voucher accepted. waved through.';
     }
   } else if (p.kind === 'market') {
-    if (optionId === 'leave') {
+    if (optionId.startsWith('fix')) {
+      st.charge = clamp(st.charge - p.price);
+      const corp = optionId === 'fix2corp' ? 2 : optionId === 'fix1each' ? 1 : 0;
+      const how = optionId === 'fixscrip' ? { pay: 'scrip' } : { pay: 'standing', corp };
+      if (!clearBugAt(pet, how)) return { ok: false, msg: 'could not pay.' };
+      run.tally.fixed++;
+      if (how.pay === 'scrip') run.tally.fixScrip++;
+      else run.tally.fixStanding++;
+      msg = `a bug fixed (${pet.bugs} left).`;
+      // The clinic stays open for more fixes or one purchase.
+      p.options = [...fixOptions(pet), ...p.options.filter((o) => !o.id.startsWith('fix'))].filter((o, i, all) => all.findIndex((x) => x.id === o.id) === i);
+      openChoice(run, p);
+      refreshMarket(pet);
+    } else if (optionId === 'leave') {
       msg = 'left the market.';
     } else if (optionId === 'buyacc') {
       st.charge = clamp(st.charge - RUN_CFG.accPrice);
@@ -617,7 +679,7 @@ function chooseOption(pet, optionId, rng) {
       pet.scrip -= SCRIP.price[item];
       run.loot.push(item);
       run.tally.bought++;
-      lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
+      if (p.flavor !== 'clinic') lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
       boughtItem = true;
     }

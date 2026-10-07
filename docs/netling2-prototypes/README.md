@@ -9,8 +9,9 @@
 | `sim/sim.js` | Fork of `src/sim.js`. Standing as two tracks, temper with a 24 hour half-life and the five levels (the flicker guard is `tell.js`'s), bugs, no fault cap, teen and adult evolution with the tie-break weights, care preferences, 22 generic forms per egg |
 | `sim/netrun/run.js` | Fork of `src/netrun/run.js`: ICE games enter the preference history; a disconnect fault owes a bug roll |
 | `sim/netrun-bot.mjs`, `sim/balance.mjs` | Forks of the scripted netrun player and `tools/balance.mjs` (same archetypes, same settings, new report lines) |
-| `sim.test.js` | 28 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
+| `sim.test.js` | 33 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
 | `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
+| `sim/clinic-sweep.mjs` | The clinic against no clearing and home clearing, by share of market nodes (see The clinic) |
 | `sim/gap-sweep.mjs`, `sim/human-sweep.mjs` | Survival against the longest gap between check-ins, and against irregular schedules (see Noisy players) |
 | `sim/bug-sweep.mjs` | How a player should handle bugs and what each way costs (see Bug policies) |
 | `sim/temper-sweep.mjs` | How much play the Metronome's 12 hour hold takes (see Temper seekers) |
@@ -18,22 +19,45 @@
 
 Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs unless the archetype sets its own `fix`: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 36 archetypes take about 3.5 minutes.
 
-**Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, clearing for 15 scrip or 2 Standing (Bugs); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by fractional Standing against whole-number cutpoints (the gap's whole part sets the weight; decided by the maintainer) and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
+**The clinic (maintainer's design, first pass).** Bugs cannot be cleared away from a netrun; the only way is a **clinic**, a third kind of market node (`flavor: 'clinic'`, rolled once per market node at `clinicShare` 0.25, so black and corp markets keep three quarters between them). A clinic is unaligned (no Standing lean), fixes one bug for the market Charge fee (12) plus 15 scrip, or 2 Standing in a split the player picks (2 corp, 1 and 1, or 2 street), and stays open after a fix, so several can be bought in a visit; a purchase or leaving ends it. It is also the only market that sells the healing items, Coolant cell, Repair kit and Antivirus patch (`HEALING`; the black market's and the corp exchange's stock no longer contain them; the corp exchange is to be revisited), 12 Charge plus the item's scrip price, with no accessory offer. Healing items are still found as loot and dropped by wins and events. Bots with bugs prefer a clinic when one is in sight (`seekClinic`) and pay by their `fix` policy (default scrip first, then Standing). `CLINIC='{"clinicShare":0.5,"healingOnlyAtClinic":false}'` overrides the settings; `BUGS='{"homeClear":true}'` allows clearing at a check-in as before. What the maintainer did not specify and I chose: the share, the fee, the stock weights (coolant 3, repair 3, antivirus 2), one fix at a time with the visit staying open, and clinic nodes in daily traces (none).
 
-**Not modeled:** the debug station anomaly and any bug-clearing node (undecided); 2.0 perks, traits, keepsakes and netrun abilities (undesigned, so the 22 forms differ only in how they are reached and the three eggs behave the same); Root Access granted at once and the elder tiers (progression layer, use the drivers below); egg pages and the Rogue gate; neglect's look; the sprite. The 1.0 archetypes cycle games in a fixed order, so for them the role is never certain (the top two games stay within 5 wins); the role steerers below are the only ones that choose a game. No bot reacts to a glitching sprite; the Standing display (floors) is not modeled.
+`clinic-sweep.mjs [lives] [bases]` compares ways of handling bugs. 300 lives, full-life rate, bugs carried on average, bugs at the end, lives that reached the ceiling, clinic visits and bugs cleared a life:
+
+| Base | Case | Full life | Bugs average / end | Ceiling | Visits / cleared |
+|---|---|---|---|---|---|
+| casual | no way to clear | 94% | 0.91 / 2.16 | 14% | 0 / 0 |
+| casual | home clearing (earlier rules) | 94% | 0.11 / 0.10 | 1% | 0 / 1.8 |
+| casual | clinic 10% | 92% | 0.48 / 0.97 | 6% | 1.5 / 1.1 |
+| casual | **clinic 25%** | 95% | 0.28 / 0.41 | 3% | 3.4 / 1.5 |
+| casual | clinic 50% | 95% | 0.16 / 0.25 | 0% | 7.0 / 1.6 |
+| casual | clinic 25%, healing also in the markets | 93% | 0.26 / 0.40 | 1% | 3.5 / 1.4 |
+| worker | no way to clear | 88% | 0.88 / 2.08 | 15% | 0 / 0 |
+| worker | home clearing (earlier rules) | 88% | 0.62 / 1.24 | 8% | 0 / 0.7 |
+| worker | **clinic 25%** | 88% | 0.64 / 1.43 | 9% | 0.7 / 0.6 |
+| worker | clinic 50% | 87% | 0.53 / 1.08 | 6% | 1.4 / 0.9 |
+| attentive | **clinic 25%** | 100% | 0.02 / 0.03 | 0% | 6.1 / 0.1 |
+| overclocker | clinic 25% (any share) | 96% | 0.22 / 0.45 | 0% | 0 / 0 |
+| human-regular | no way to clear | 33% | 0.55 / 1.56 | 4% | 0 / 0 |
+| human-regular | **clinic 25%** | 35% | 0.40 / 1.07 | 1% | 0.9 / 0.4 |
+
+Reading it. A player who netruns often (casual makes 17 runs a life) meets a clinic 3.4 times and ends with 0.4 bugs, nearly as good as clearing at home; the survival cost of losing home clearing is small for them (95% against 94%). **A player who rarely or never netruns cannot clear bugs at all**: the careful worker (2.5 runs a life, runs only when healthy and soon back) meets 0.7 clinics and is only a little better off than with no way to clear (0.64 against 0.88 bugs on average, a bug ceiling in 9% of lives against 15%), the overclocker (no runs) and the noisy players (3 runs) the same. That removes the Standing price's use for exactly the players the sketch said it was for ("the Standing price helps those who do not run"): the Standing payment now needs a netrun too. Removing the healing items from the other markets changes little at this scale (casual buys 5.0 items a life against 6.2 when the markets still stock them, and ends alive 95% of the time against 93%, which is within noise). Limits: bots detour to a clinic only when it is one step ahead or within three steps and visible; a player who plans for it might do better; the clinic's share, fee and stock are guesses; the bots carry on running at their usual rates, so a bugged player is not driven to run more; bugs do not carry between lives.
+
+**Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, cleared at a clinic node for 15 scrip or 2 Standing plus Charge (Bugs, and The clinic above); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by fractional Standing against whole-number cutpoints (the gap's whole part sets the weight; decided by the maintainer) and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
+
+**Not modeled:** the sketch's debug station anomaly (the clinic replaces it for now), the clinic's look on the map, and a corp exchange without healing items beyond what the stock table shows; 2.0 perks, traits, keepsakes and netrun abilities (undesigned, so the 22 forms differ only in how they are reached and the three eggs behave the same); Root Access granted at once and the elder tiers (progression layer, use the drivers below); egg pages and the Rogue gate; neglect's look; the sprite. The 1.0 archetypes cycle games in a fixed order, so for them the role is never certain (the top two games stay within 5 wins); the role steerers below are the only ones that choose a game. No bot reacts to a glitching sprite; the Standing display (floors) is not modeled.
 
 **Fidelity checks** (300 lives, share of lives ending at each shown temper level, strongly unsteady / unsteady / middle / steady / strongly steady; the sketch's figures came from the scratch patch):
 
 | Archetype | Sketch | This simulator |
 |---|---|---|
-| Casual | 0/20/76/4/0 | 0/21/74/4/0 |
-| Worker | 2/37/60/0/0 | 3/40/56/1/0 |
-| Attentive | 0/0/10/46/43 | 0/0/14/38/48 |
-| Steer-daemon | 0/0/1/25/74 | 0/0/2/22/76 |
-| Steer-glitch | 6/49/45/0/0 | 4/50/46/0/0 |
-| Daredevil | 24/53/22/0/0 | 32/55/12/0/0 |
-| Overclocker | 72/27/0/0/0 | 83/17/0/0/0 |
-| Neglectful | 18/56/25/0/0 | 14/43/43/0/0 |
+| Casual | 0/20/76/4/0 | 0/21/74/4/0 (clinic only: 0/31/67/2/0) |
+| Worker | 2/37/60/0/0 | 3/40/56/1/0 (3/43/54/0/0) |
+| Attentive | 0/0/10/46/43 | 0/0/14/38/48 (0/0/10/49/41) |
+| Steer-daemon | 0/0/1/25/74 | 0/0/2/22/76 (0/0/2/22/77) |
+| Steer-glitch | 6/49/45/0/0 | 4/50/46/0/0 (6/52/42/0/0) |
+| Daredevil | 24/53/22/0/0 | 32/55/12/0/0 (38/51/11/0/0) |
+| Overclocker | 72/27/0/0/0 | 83/17/0/0/0 (84/16/0/0/0) |
+| Neglectful | 18/56/25/0/0 | 14/43/43/0/0 (14/43/43/0/0) |
 
 Also in line: casual Standing by adulthood about 9.4 and 8.9 (the sketch: about 10 and 8); a worker without clearing 7.7 faults and 14% at the bug ceiling (the sketch: 7.7 and 17%); the 12 hour hold reach with neglect level 2 paused: attentive 48% (52%), steer-daemon 80% (87%), daredevil 35% (34%), steer-glitch 5% (5%), overclocker 80% (90%). Casual full-life rate 94% (the sketch: 95.7% without the cap). **The hot end does not reproduce** (daredevil and overclocker end more unsteady), and the gap is not explained: it does not come from bugs (switching them off changes nothing), and switching care preferences off widens it (overclocker 91% strongly unsteady, daredevil 35%), so preferences narrow it without closing it.
 
@@ -84,7 +108,7 @@ So the Standing condition is not the hurdle even when the player sees only floor
 
 Gaps of 4 hours or less are survivable, 5 hours costs a quarter of lives, and 6 hours or more (a work day away) kills most netlings, in 1.0 as well as in this simulator. Six check-ins a day at random times survive in only 40% of lives (`human-sweep.mjs`: 4 a day 11%, 6 40%, 8 68%, 10 82%, 12 87%, 16 95%), against 95% when they are evenly spaced; adding lapses lowers each by 3 to 20 points; adding busy and off days (a quarter of days with 1 or 2 check-ins, a tenth with 0 or 1) caps survival near 25% however many check-ins the other days have (6 a day: 6%, 16 a day: 22%), because one day with at most two check-ins is usually fatal. Topping up before a long gap made no consistent difference (runs with and without `prepare` were within about 10 points of each other, in both directions). For the deaths, at 8-hour gaps a life takes about 3.9 Charge faults and 3.4 Sync faults and dies by integrity collapse at a median of day 1.3; the exact drain that kills it was not traced. **This contradicts the comment on `drainCurve` in `src/sim.js` ("long gaps (a work day, the night) still cost faults without being fatal") and `docs/BALANCE.md`'s picture of a casual player.** It is a 1.0 property carried into 2.0 (the fault cap's removal helps a little: 1.0's neglect deaths became collapses or survivals), so it is a question for the maintainer, not a simulator fault: whether a work-day gap should be survivable (a gentler drain when it is far from full, a floor on Integrity loss while Charge is at 0, or the sketch's hibernation made easier to reach). Limits: bots top up to 85 or 94, not 100; a real player may cool, patch and play more cleverly before leaving; the bots do not carry items for a long gap beyond an Antivirus patch; 200 to 300 lives a cell.
 
-**Bug policies.** An archetype's `fix` sets how it handles bugs: `mode` (`scrip`, `standing`, `both` or `none`), `at` (clear once it carries this many) and `split` (how a Standing payment is taken: `even`, 1 from each track; `leader`, 2 from the larger; `trailer`, 2 from the smaller). The report now gives the average bugs carried, the share of time at the ceiling and what clearing cost in scrip and Standing. `bug-sweep.mjs [lives] [bases] [policies]` runs a base archetype under eight policies. 300 lives, the default rule (30% a fault, ceiling 5), faults by the end of life, average bugs carried, lives that reached the ceiling, adult Standing gap:
+**Bug policies (home clearing; the rules no longer allow it, so these tables used `BUGS='{"homeClear":true}'`, which `bug-sweep.mjs` sets).** An archetype's `fix` sets how it handles bugs (at a clinic only `mode` and `split` apply): `mode` (`scrip`, `standing`, `both` or `none`), `at` (clear once it carries this many) and `split` (how a Standing payment is taken: `even`, 1 from each track; `leader`, 2 from the larger; `trailer`, 2 from the smaller). The report now gives the average bugs carried, the share of time at the ceiling and what clearing cost in scrip and Standing. `bug-sweep.mjs [lives] [bases] [policies]` runs a base archetype under eight policies. 300 lives, the default rule (30% a fault, ceiling 5), faults by the end of life, average bugs carried, lives that reached the ceiling, adult Standing gap:
 
 | Policy | casual: full life, faults, bugs, ceiling, gap | worker: full life, faults, bugs, ceiling, gap |
 |---|---|---|

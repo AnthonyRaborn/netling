@@ -236,7 +236,12 @@ export function checkIn(s, p, now, rng, ctx) {
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
       const flowAtJackIn = inFlow(s);
-      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown }, region, rng, ctx.codex);
+      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
+      // Bugs fixed at a clinic this run, and what they cost.
+      ctx.bugsFixed = (ctx.bugsFixed ?? 0) + (run.tally.fixed ?? 0);
+      ctx.scripSpent = (ctx.scripSpent ?? 0) + (run.tally.fixScrip ?? 0) * BUG_CFG.clearScrip;
+      ctx.standingSpent = (ctx.standingSpent ?? 0) + (run.tally.fixStanding ?? 0) * BUG_CFG.clearStanding;
+      ctx.clinicVisits = (ctx.clinicVisits ?? 0) + (run.tally.clinics ?? 0);
       ctx.runs = (ctx.runs ?? 0) + 1;
       ctx.regionRuns[region] = (ctx.regionRuns[region] ?? 0) + 1;
       ctx.bought = (ctx.bought ?? 0) + run.messages.filter((m) => m.startsWith('bought')).length;
@@ -416,6 +421,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     bugCeilingShare: ctx.ceilMin / Math.max(1, s.ageMin),
     scripSpent: ctx.scripSpent ?? 0,
     standingSpent: ctx.standingSpent ?? 0,
+    clinicVisits: ctx.clinicVisits ?? 0,
     prefActions: s.prefActions ?? 0,
     prefMatches: s.prefMatches ?? 0,
     prefBonus: s.prefBonus ?? 0,
@@ -584,7 +590,7 @@ export function stats(results) {
     })),
     hold24h: { strongSteady: rate((r) => r.hold['2'] >= 1440), strongUnsteady: rate((r) => r.hold['-2'] >= 1440) },
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
-    bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1) },
+    bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1), clinicVisits: round(avg(results.map((r) => r.clinicVisits)), 2) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {
@@ -711,7 +717,7 @@ function printLife(st, detail) {
   console.log(`  standing at the end: corp ${st.standing.corp.toFixed(1)}, street ${st.standing.street.toFixed(1)} · temper ${st.temper.toFixed(1)} · level at the end (strongly unsteady/unsteady/middle/steady/strongly steady, %): ${lv(st.levelAtEnd)} · awake time at each: ${lv(st.levelTime)}`);
   if (t) console.log(`  at teen: corp ${t.corp.toFixed(1)}, street ${t.street.toFixed(1)}, gap ${t.gap.toFixed(1)} (certain ${pct(t.leanCertain)}, tied ${pct(t.tied)}), temper ${t.temper.toFixed(1)}, levels ${lv(t.level)}, mistakes ${t.mistakes.toFixed(1)}, wins ${t.wins.toFixed(1)} (fewest in a game ${t.minWins.toFixed(1)})`);
   if (a) console.log(`  at adult: corp ${a.corp.toFixed(1)}, street ${a.street.toFixed(1)}, gap ${a.gap.toFixed(1)} (lean certain ${pct(a.leanCertain)}, role certain ${pct(a.roleCertain)}), temper ${a.temper.toFixed(1)}, levels ${lv(a.level)}, bugs ${a.bugs.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored)`);
-  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end (${st.bugs.avg.toFixed(2)} on average), peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared (${st.bugs.scripSpent.toFixed(0)} scrip, ${st.bugs.standingSpent.toFixed(0)} Standing), reached the ceiling ${pct(st.bugs.atCeiling)} (${pct(st.bugs.ceilingTime)} of the time) · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} (median day ${st.holdDay.strongSteady ?? "-"} / ${st.holdDay.strongUnsteady ?? "-"}), 24h: ${pct(st.hold24h.strongSteady)} / ${pct(st.hold24h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
+  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end (${st.bugs.avg.toFixed(2)} on average), peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared (${st.bugs.scripSpent.toFixed(0)} scrip, ${st.bugs.standingSpent.toFixed(0)} Standing; ${st.bugs.clinicVisits.toFixed(1)} clinic visits), reached the ceiling ${pct(st.bugs.atCeiling)} (${pct(st.bugs.ceilingTime)} of the time) · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} (median day ${st.holdDay.strongSteady ?? "-"} / ${st.holdDay.strongUnsteady ?? "-"}), 24h: ${pct(st.hold24h.strongSteady)} / ${pct(st.hold24h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
   const at = st.attention;
   console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.hotHours.toFixed(1)}h overclocked, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
@@ -727,6 +733,8 @@ function printGate(g) {
   console.log(`  harder feats: ${Object.entries(g.feats).map(([k, f]) => `${k} ${pct(f.met)} (${hours(f.leftMedianHours)} left)`).join(', ')}`);
 }
 
+// CLINIC='{"clinicShare":0.5}' overrides the clinic settings in netrun/run.js (RUN_CFG), for example healingOnlyAtClinic.
+if (process.env.CLINIC) Object.assign(RUN_CFG, JSON.parse(process.env.CLINIC));
 // Try settings without editing sim.js: CFG='{"drainPerHour":{"charge":14},"teenAtMin":1200}' npm run balance
 if (process.env.CFG) {
   const over = JSON.parse(process.env.CFG);
