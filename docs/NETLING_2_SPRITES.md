@@ -233,6 +233,9 @@ The composition question is closed (see Decision).
 3. Not drawn: everything for Program and Wetware (each egg gets its own baby, eventually, then its teens, adults and elders).
 4. Elder names, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
+6. The holologo clip in 1.0 (a persistent 1 px, about a third of the time): four options laid out in The holologo clip, none chosen.
+7. Ice's white marks are 1.59:1 by luminance (acid, toxic and origin were fixed): leave, or give ice a mark color too?
+8. Headphones plus visor merge into one band on every form, 1.0's included: change the shared wearable layout, or accept?
 
 ## What drives neglect and bugs
 
@@ -258,6 +261,6 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - Not looked at on a phone or by anyone but me, and not at motion speed beyond screenshots of single frames. Whether the Iron art reads as firmware, whether the rust reads as neglect and not as part of the design, and whether the tells are legible are human calls.
 - Program and Wetware have tell code and tests but no body art and no neglect skin, so their tells have only been checked as numbers, not seen.
 - Idle behavior and chatter tone, the other two temper channels, are not prototyped. Nothing about Standing visuals beyond the street lean marks.
-- `gallery.html` was not extended to the prototype forms (the audit was, through a wrapper; see Iron through the real 1.0 sprite audit). The review page here shows the same forms.
+- `gallery.html` itself is unchanged. `npm run proto:gallery` generates a copy that runs it on Iron's forms (see Reviewing the sprites), and the audit runs on them through a wrapper. Both depend on `ready.js` being imported first; see the trap in NETLING_2_SKETCH.md (Handoff).
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
-- Nothing in `src/` was changed.
+- **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
