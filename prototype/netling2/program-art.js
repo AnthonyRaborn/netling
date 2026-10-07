@@ -19,35 +19,36 @@ const KERNEL = frozen(SPRITES.kernelA, SPRITES.kernelB, 9);
 export const PROGRAM_BABY = frozen(SPRITES.bitlingA, SPRITES.bitlingB, 10);
 export const PROGRAM_TEENS = {
   teenCorp: KERNEL,
-  // The street lean: a horned scrapper. Horns at the corners and a spiked crest, angry brows over the eyes, arms that are elongated
-  // exclamation points (a bar and a dot, set off from the body), a patch on the chin and wide boots. Everything is added to Kernel's
-  // body, nothing cut away (the earlier passes, 0.94 and two with parts missing, read as broken). The head top still covers both eyes.
+  // The street lean: Kernel's blocky body, kept whole, with a spiked mohawk, a dark unibrow across the forehead, arms that are elongated
+  // exclamation points (a bar and a dot, set off from the body) and wide boots. This is the second candidate of the fifth pass, which the
+  // maintainer preferred to the horned one: the earlier passes (0.94, and two with parts cut away, then a horned one) read as
+  // broken or as a different creature. The head top still covers both eyes.
   teenStreet: {
     a: [
-      '.#..........#.',
-      '.##...##...##.',
+      '...#.#..#.#...',
+      '...####o####..',
       '..##########..',
-      '#.##########.#',
-      '#.xxoo##ooxx.#',
+      '#x##xxxxxx##x#',
+      '#.##oo##oo##.#',
       '#.##oo##oo##.#',
       '..##########..',
       '#.####++####.#',
-      '..####xx####..',
-      '...##....##...',
-      '.####....####.',
+      '..##########..',
+      '....#....#....',
+      '..###....###..',
     ],
     b: [
-      '.#..........#.',
-      '.##...##...##.',
+      '...#.#..#.#...',
+      '...####o####..',
       '..##########..',
-      '#.##########.#',
-      '#.xxoo##ooxx.#',
+      '#x##xxxxxx##x#',
+      '#.##oo##oo##.#',
       '#.##oo##oo##.#',
       '..##########..',
       '#.####++####.#',
-      '..####xx####..',
-      '..##......##..',
-      '..###....###..',
+      '..##########..',
+      '....#....#....',
+      '.###......###.',
     ],
   },
   // 1.0's own B frame swaps the last two rows, which leaves a last row too thin (4 of 14 cells, under the 0.4 the wearable code needs
