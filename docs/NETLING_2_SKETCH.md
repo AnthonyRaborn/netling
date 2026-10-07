@@ -57,6 +57,7 @@ The design record, grouped by topic. Marked "proposal" means not confirmed. This
 - In-game Wetware text uses plain words, not CP2020 jargon; the Wetware form names are exempt.
 
 **Forms**
+- Hidden forms are hidden from the Dex (decided): the hidden-path teen and the hidden adult are not listed, not even as a `???` slot, until raised or revealed by a late page (`public-6` and `public-7`; see the drafts, Open item 9). Visible per egg: 1 baby, 2 teens, 8 adults (11); with the hidden teen and adult and nine elders, 22 forms.
 - Option C: each of four roles (Breach, Dodge, Tune, Feast) has two named forms, corp-leaning and street-leaning, plus one hidden form that masters all four: 9 adults an egg, 27 in all. The role is a descriptor for the Dex and hints, not the name. Names are in Adult forms and names.
 - Three teens an egg: corp-leaning, street-leaning, hidden-path. The two main teens may differ only slightly; the hidden path must be distinct in outline.
 - One elder per adult, each a variant of its adult (18 columns against 16, up to 15 rows). Elders get no pages. Each egg has its own baby. Hidden forms may break the form rules. Frame and wearable rules are in [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md).
@@ -378,7 +379,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 6. Care preferences: whether the steady lock-in for players who never netrun is acceptable; the base-rate difference under fixed-order play; log line wording.
 7. Second form names: Nutri is decided; the other 11 are proposals and the lean each takes is a guess.
 8. Pages: idle and chatter temper hints (flagged), the length of the longer drafts, retesting the egg page rates once 2.0 exists (see item 10).
-9. UI: the Dex structure for hints, the floor display of Standing, how bugs and neglect show.
+9. UI: the Dex structure for hints (hidden forms are unlisted until raised or revealed, decided; elders show as corrupted records, see the drafts, Open item 10), the floor display of Standing, how bugs and neglect show.
 10. Retest in 2.0: egg page drop rate (0.10 a run) and the bug values.
 
 **Not designed yet**
