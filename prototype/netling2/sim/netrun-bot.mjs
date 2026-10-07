@@ -1,6 +1,6 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
 import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem } from './netrun/run.js';
-import { INVENTORY_SLOTS, SCRIP } from './sim.js';
+import { INVENTORY_SLOTS, SCRIP, leanSeen } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
 
 // An assumption, not a measurement: how much likelier a player is to win a mini-game or ICE fight that runs
@@ -38,7 +38,7 @@ function decide(pet, style, rng) {
     if (has('voucher') && style.lean !== 'indie') return 'voucher';
     if (style.lean === 'corp') return 'comply';
     if (style.lean === 'mix') return rng() < 0.5 ? 'hide' : 'comply';
-    if (style.lean === 'balance') return pet.axes.allegiance > 0 ? 'hide' : 'comply';
+    if (style.lean === 'balance') return leanSeen(pet, style.shown) > 0 ? 'hide' : 'comply';
     return pet.stats.integrity > 40 || style.lean === 'indie' ? 'hide' : 'comply';
   }
   // Buying leans indie, so a player steering corp may walk past. It only buys what it has room to keep.
@@ -47,7 +47,7 @@ function decide(pet, style, rng) {
     const wanted = p.options.find((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled && (!style.keep || style.keep.includes(p.offers[Number(o.id.slice(3))])));
     // Each kind of market leans its own way: a player steering one way only shops on that side.
     const side = p.flavor === 'corp' ? 'corp' : 'indie';
-    const fits = style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (pet.axes.allegiance > 0) === (side === 'indie') : true;
+    const fits = style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (leanSeen(pet, style.shown) > 0) === (side === 'indie') : true;
     const bare = pet.run.challenge === 'baremetal' && !pet.run.challengeVoid; // keeps Bare metal: no items bought
     return style.shop !== false && !bare && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
   }

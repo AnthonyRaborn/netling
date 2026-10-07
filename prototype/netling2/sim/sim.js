@@ -500,6 +500,8 @@ export function clearBug(s, { pay = 'scrip', corp = 1 } = {}) {
 // Standing as the player sees it: the floor of each track. Decisions read the fractions (maintainer: a little extra randomness in
 // evolution), against whole-number cutpoints: see gapIndex.
 export const standingInt = (s, track) => Math.floor(s.standing[track] + 1e-9);
+// The corp lead (negative: street leads) a bot acts on: the true fractions, or with `shown` only what the HUD shows, the floors.
+export const leanSeen = (s, shown = false) => (shown ? standingInt(s, 'corp') - standingInt(s, 'street') : s.standing.corp - s.standing.street);
 // The gap between two scores as a tie-weight index: its whole part, so a true gap of 3.75 (shown as 4) weighs as a gap of 3.
 export const gapIndex = (gap) => Math.min(Math.floor(gap + 1e-9), CFG.tieWeights.length - 1);
 

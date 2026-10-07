@@ -13,7 +13,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, temperLevel, clearBug } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, temperLevel, clearBug, leanSeen } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -68,6 +68,15 @@ export const ARCHETYPES = {
     [`steer-${role}-corp`, { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', focus: role, focusShare: 0.8 }],
     [`steer-${role}-street`, { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie', focus: role, focusShare: 0.8 }],
   ])),
+  // 2.0 hidden-path hunters (the hidden teen needs 3 wins in every game and the tracks within 1 at the teen check, 17 hours in; the hidden
+  // adult 4 each, 29 in all and the tracks within 1 at 51 hours). Like ghosthunter they balance packets and trace answers and play for
+  // Sync; unlike it they also play whichever game they have won least (`balanceGames`) and answer requests only for games that are not
+  // ahead. `shown`: they see only the HUD's floors of Standing (and alternate packets on a tie) instead of the true fractions.
+  'hunter-exact': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, balanceGames: true },
+  'hunter-shown': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, balanceGames: true, shown: true },
+  // The same aim on a casual schedule and skill: how little play still reaches the hidden forms.
+  'hunter-casual': { checks: [at(7, 30), at(10), at(13), at(16), at(19), at(22, 30)], jitter: 30, diet: 'balance', trace: 'balance', winRate: 0.6, gamer: true, coolAt: 45, balanceGames: true, shown: true },
+  'hunter-shown-rotation': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, shown: true },
   // The middle the sketch did not measure: a player who commits a little (half their plays in one game, packets and traces leaning corp).
   'nudge-breach': { checks: ATTENTIVE, jitter: 15, diet: 0.7, trace: 'comply', winRate: 0.7, runs: 'careful', focus: 'breach', focusShare: 0.5 },
   'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
@@ -84,6 +93,8 @@ export const CODEX_PRESETS = {
 
 // Bots clear bugs at check-ins: with scrip (15) if they have it; with CLEAR=both, otherwise with 2 Standing, 1 from each track when
 // both have one (the gap stays) and 2 from the larger track when not.
+const minWins = (s) => Math.min(...GAME_IDS.map((id) => s.games[id].won));
+const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games[best].won ? id : best), GAME_IDS[0]);
 const CLEAR = process.env.CLEAR ?? 'scrip';
 function fixBugs(s, p, ctx) {
   if (CLEAR === 'none' || p.noFix) return;
@@ -140,7 +151,9 @@ export function checkIn(s, p, now, rng, ctx) {
   const mayPlay = !holdBack || s.flagged.sync;
   const feed = () => {
     for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
-      let corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
+      // `shown` bots see only the HUD's floors; on a shown tie they alternate packets (a lone tie rule would drift one way).
+      const lean = leanSeen(s, p.shown);
+      let corp = p.diet === 'balance' ? (p.shown && lean === 0 ? s.lastPacket !== 'corp' : lean <= 0) : rng() < p.diet;
       if (process.env.PREFBOT === 'follow' && PREF.on && s.lastPacket) {
         const lv = temperLevel(s);
         if (lv > 0) corp = s.lastPacket === 'corp';
@@ -164,7 +177,7 @@ export function checkIn(s, p, now, rng, ctx) {
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
       const flowAtJackIn = inFlow(s);
-      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep }, region, rng, ctx.codex);
+      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown }, region, rng, ctx.codex);
       ctx.runs = (ctx.runs ?? 0) + 1;
       ctx.regionRuns[region] = (ctx.regionRuns[region] ?? 0) + 1;
       ctx.bought = (ctx.bought ?? 0) + run.messages.filter((m) => m.startsWith('bought')).length;
@@ -192,7 +205,7 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.event?.type === 'trace') {
     let choice = p.trace;
     if (choice === 'mix') choice = rng() < 0.5 ? 'hide' : 'comply';
-    if (choice === 'balance') choice = s.axes.allegiance > 0 ? 'hide' : 'comply';
+    if (choice === 'balance') choice = leanSeen(s, p.shown) > 0 ? 'hide' : 'comply';
     doAct(choice);
   }
   if (s.event?.type === 'attack') doAct('defend', { won: rng() < winChance(overclocked(s), p.winRate) });
@@ -209,13 +222,14 @@ export function checkIn(s, p, now, rng, ctx) {
     ctx.chatterSeen.add(s.chatter.id);
   }
   if (s.request?.kind === 'cool' && doAct('cool').requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
-  if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
+  if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.balanceGames || s.games[s.request.game].won <= minWins(s) + 1) && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), p.winRate) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
+    if (p.balanceGames) game = leastWon(s); // plays whichever game it has won least (ties: the first)
     if (process.env.PREFBOT === 'follow' && PREF.on) {
       const lv = temperLevel(s);
       const last = s.lastGames ?? [];
@@ -246,6 +260,8 @@ const snap = (s) => ({
   temper: s.temper,
   level: s.tLevel,
   bugs: s.bugs,
+  minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)),
+  total: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
 });
 
 export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [] } = {}) {

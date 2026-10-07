@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {
   createScript, tick, act, mulberry32, CFG, BUG_CFG, SPECIES, FORMS, MAINFRAME_OF, ROLES, LEANS, GAME_IDS, MIN,
   clearBug, pushGame, standingInt, gapIndex, teenCandidates, teenForm, adultCandidates, adultForm, hiddenTeenMet, hiddenAdultMet,
-  temperDecayFactor, temperLevel, roleForm,
+  temperDecayFactor, temperLevel, roleForm, leanSeen,
 } from './sim/sim.js';
 import { guardedLevel } from './tell.js';
 
@@ -376,4 +376,33 @@ test('a role steerer reaches its role and lean: the focus game leads by 5 or mor
       assert.ok(r.atAdult.roleGap >= 5 && r.atAdult.gap >= 5);
     }
   }
+});
+
+test('a bot that sees the HUD sees floors; one that sees the truth sees the fractions', () => {
+  const s = fresh();
+  s.standing = { corp: 10.25, street: 6.5 };
+  assert.equal(leanSeen(s), 3.75);
+  assert.equal(leanSeen(s, true), 4);
+  s.standing = { corp: 5.9, street: 5.1 };
+  assert.ok(Math.abs(leanSeen(s) - 0.8) < 1e-9);
+  assert.equal(leanSeen(s, true), 0, 'floors hide a true lead of 0.8');
+});
+
+test('a hidden-path hunter that plays its least-won game reaches the hidden teen and adult', async () => {
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  let teens = 0;
+  let adults = 0;
+  const n = 12;
+  for (let seed = 1; seed <= n; seed++) {
+    const r = simulate(ARCHETYPES['hunter-shown'], seed);
+    if (r.teenForm === 'teenHidden') teens++;
+    if (r.adultForm === 'hidden') adults++;
+    assert.ok(r.atAdult.gap <= 1 + 1e-9 || r.adultForm !== 'hidden');
+  }
+  assert.ok(adults >= 9, `hidden adults ${adults} of ${n}`);
+  assert.ok(teens >= 6, `hidden teens ${teens} of ${n}`);
+  // The plain rotation of ghosthunter mostly misses the teen's 3 wins in every game.
+  let rot = 0;
+  for (let seed = 1; seed <= n; seed++) if (simulate(ARCHETYPES.ghosthunter, seed).teenForm === 'teenHidden') rot++;
+  assert.ok(rot < teens, `rotation ${rot} against targeted ${teens}`);
 });
