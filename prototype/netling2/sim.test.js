@@ -682,3 +682,27 @@ test('a bugged player who can be nudged runs more, and reaches clinics', async (
   assert.ok(pushed > calm, `pushed ${pushed} runs against ${calm}`);
   assert.ok(visits >= 5, `clinic visits ${visits}`);
 });
+
+test('each bug also costs Integrity an hour, whatever else is going on (the chosen lethality)', () => {
+  assert.equal(BUG_CFG.integrityFlat, 0.5);
+  assert.equal(BUG_CFG.charge, 0.16);
+  const calmHour = (bugs) => {
+    const s = fresh({ now: NIGHT });
+    s.stats.integrity = 50;
+    s.bugs = bugs;
+    advance(s, 60);
+    return s.stats.integrity;
+  };
+  const gap = calmHour(0) - calmHour(2);
+  assert.ok(Math.abs(gap - 1) < 0.05, `two bugs cost ${gap} Integrity an hour`);
+  // damage is multiplied too: a virus hurts more with bugs
+  const virus = (bugs) => {
+    const s = fresh();
+    s.virus = true;
+    s.virusMin = 1;
+    s.bugs = bugs;
+    advance(s, 60);
+    return 100 - s.stats.integrity;
+  };
+  assert.ok(virus(5) > virus(0) * 1.3, 'five bugs add 40% damage and 2.5 an hour');
+});

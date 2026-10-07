@@ -476,7 +476,9 @@ function attachAxes(s) {
 
 // homeClear: whether a bug can be cleared away from a netrun (maintainer: it cannot; bugs are cleared at a clinic node, see netrun/run.js).
 // BUGS='{"homeClear":true}' brings back the earlier home-clearing rules for comparison.
-export const BUG_CFG = { homeClear: false, regenCut: 0, integrityFlat: 0, chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
+// Effects per bug (maintainer, after measuring that the first values barely killed): Charge and Sync drain +16%, Heat gain +20%, damage to Integrity +8%,
+// and 0.5 Integrity an hour lost whatever else is going on. The first values were 8%, 8%, 10%, 4% and 0.
+export const BUG_CFG = { homeClear: false, regenCut: 0, integrityFlat: 0.5, chance: 0.3, max: 5, charge: 0.16, sync: 0.16, heat: 0.2, integrity: 0.08, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
 if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
 
 export function rollBug(s, rng, chance = BUG_CFG.chance) {
