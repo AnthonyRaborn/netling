@@ -29,6 +29,8 @@ When code and a doc disagree, the code is right: fix the doc.
 | Continue the Netling 2.0 sprites (all 66 forms, rules the tests enforce, commands, the next phase; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
 | Trace why a Netling 2.0 sprite decision was made (drafts, rejected options, measurements; archive) | [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) |
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
+| Read or edit the Netling 2.0 care wording (meters, buttons, events, items, alerts, clinic and bug statements) | [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) |
+| Run or read the Netling 2.0 balance simulator (core rules, archetypes, sweeps, every measured table and its limits) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 | Re-run or inspect the Netling 2.0 rule prototypes (bugs, temper, Standing, care preferences, egg page pace, elder stage and Rogue gate pace) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 
 ## The project in one paragraph
