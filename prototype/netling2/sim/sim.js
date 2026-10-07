@@ -579,12 +579,15 @@ function eventAnswered(s, t) {
 // share of wear lost a minute (times restMult while resting); floor and slope: the base hourly hazard at no wear and the extra at
 // wear 100; lock: the extra Sync (LOCK) drain at wear 100, as a share (0 = none, the notes' first version); line: the wear at which it
 // logs a warning.
-export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 0, line: 50 };
+// cold: Heat under this while awake also builds wear (0 = off), at coldRate per minute per Heat point under it; restFloor: nap and sleep cool
+// no lower than this (0 = no floor, 1.0's behaviour: rest cools to about 0).
+export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 0, cold: 0, coldRate: 0.12, restFloor: 0, line: 50 };
 if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
 function stepWear(s, t, rest) {
   const before = s.wear ?? 0;
   const excess = Math.max(0, s.stats.heat - IRON.heat);
-  let w = before * (1 - IRON.decay * (rest ? IRON.restMult : 1)) + (rest ? 0 : IRON.rate * excess);
+  const chill = IRON.cold ? Math.max(0, IRON.cold - s.stats.heat) : 0;
+  let w = before * (1 - IRON.decay * (rest ? IRON.restMult : 1)) + (rest ? 0 : IRON.rate * excess + IRON.coldRate * chill);
   w = Math.min(100, Math.max(0, w));
   s.wear = w;
   s.wearMax = Math.max(s.wearMax ?? 0, w);
@@ -722,9 +725,12 @@ function step(s, t, rng) {
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
+  const heatBefore = st.heat;
   st.heat = clamp(
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
+  // Iron's cooling floor: nap and sleep cool it no further than `restFloor` (a stat already below the floor stays where it is).
+  if (IRON.on && rest && IRON.restFloor > 0 && st.heat < IRON.restFloor) st.heat = Math.min(heatBefore, IRON.restFloor);
 
   if (IRON.on) stepWear(s, t, rest);
   if (WET.on) stepShock(s);

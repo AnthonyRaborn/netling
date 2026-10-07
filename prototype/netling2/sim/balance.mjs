@@ -292,6 +292,8 @@ export function checkIn(s, p, now, rng, ctx) {
   let coolAt = p.coolAt ?? (p.hot ? 80 : 50);
   // IRONBOT=avoid: a player who sees Iron's drift coming and cools earlier once wear is building.
   if (process.env.IRONBOT === 'avoid' && IRON.on && (s.wear ?? 0) >= IRON.line * 0.6) coolAt = Math.min(coolAt, IRON.heat - 5);
+  // IRONBOT=chill: a player who keeps it cold (cools at 30 and over) whatever the wear.
+  if (process.env.IRONBOT === 'chill' && IRON.on) coolAt = Math.min(coolAt, 30);
   if (s.stats.heat > coolAt && !lapse()) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
   // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
@@ -376,6 +378,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     minute++;
     const integrityBefore = s.stats.integrity;
     tick(s, t0 + minute * MIN, rng);
+    globalThis.__sample?.(s, minute);
     ctx.bugMin += s.bugs;
     if (s.bugs >= BUG_CFG.max) ctx.ceilMin++;
     for (const k of Object.keys(s.flagged)) {
