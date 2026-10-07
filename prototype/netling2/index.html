@@ -44,6 +44,11 @@
     <p class="note">Iron's nine adults on the first line and each one's elder below: the adult grown wider (18 columns against 16) and no taller than 15 rows, keeping its own marks. Splat, Gronk, Jiff, Bamf, Ping, Feep, Munch, Thrash, Guru. Names are not decided.</p>
     <div id="adultsRow" class="row"></div>
     <div id="eldersRow" class="row"></div>
+    <h2>PROGRAM: BABY, TEENS, ADULTS AND ELDERS (authored from 1.0's art)</h2>
+    <p class="note">The Program egg. First row: baby (1.0's Bitling), the corp teen (1.0's Kernel), the street teen (new), the hidden teen (1.0's Shell). Second row: the nine adults, corp then street within a role (Tiger and Worm, Mouse and Spoof, Parse and Phreak, Gobble and Snarf), then Ghost (1.0's). Third row: each adult's elder, the adult stretched to 18 columns and one row taller with a mark of its own. Names of the teens and elders are not decided. The controls above apply (pose, wearable, anchors, neglect, bugs; the tell skin can be set to program).</p>
+    <div id="progTeensRow" class="row"></div>
+    <div id="progAdultsRow" class="row"></div>
+    <div id="progEldersRow" class="row"></div>
     <h2>HOW MODEL A IS BUILT</h2>
     <p class="note">Body (grey), role overlay (pink), lean overlay (yellow; erased cells dark red) and the result, in the A frame.</p>
     <div id="layers" class="row"></div>
@@ -64,6 +69,7 @@
       import { SPRITES, drawSprite, paletteColors, DEAD_COLORS } from '../../src/sprites.js';
       import { PALETTES } from '../../src/sim.js';
       import { forms, FORMS, LINE, TEENS_ALL, HIDDEN_BRANCH, ADULTS_ALL, ELDER_OF } from './models.js';
+      import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_ELDER_OF } from './program-models.js';
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { neglected } from './neglect.js';
@@ -157,6 +163,16 @@
         for (const id of ADULTS_ALL) {
           cells.push({ ctx: canvasFor(document.getElementById('adultsRow'), id, 3), f: B[id], fixed: null });
           cells.push({ ctx: canvasFor(document.getElementById('eldersRow'), ELDER_OF(id), 3), f: B[ELDER_OF(id)], fixed: null });
+        }
+
+        // Program: the same controls, on its own forms (registered with the wearable code by ready.js).
+        const P = programForms();
+        make(document.getElementById('progTeensRow'), 'baby (1.0 Bitling)', P.baby);
+        for (const id of PROGRAM_TEENS_ALL) make(document.getElementById('progTeensRow'), `${id} (teen, ${PROGRAM_FORMS[id].lean})`, P[id]);
+        for (const id of PROGRAM_ADULTS_ALL) {
+          const f = PROGRAM_FORMS[id];
+          cells.push({ ctx: canvasFor(document.getElementById('progAdultsRow'), `${id} (${f.role}${f.lean ? `, ${f.lean}` : ''})`, 3), f: P[id], fixed: null });
+          cells.push({ ctx: canvasFor(document.getElementById('progEldersRow'), PROGRAM_ELDER_OF(id), 3), f: P[PROGRAM_ELDER_OF(id)], fixed: null });
         }
 
         function drawCell({ ctx, f, fixed }, time) {
