@@ -46,6 +46,20 @@ Also in line: casual Standing by adulthood about 9.4 and 8.9 (the sketch: about 
 
 So role is cheap to steer: a player who gives one game twice the plays of each other game (a share of 0.2 is 40% of plays against 20% each) already ends in that role two times in three, and a share of 0.5 is nearly certain. This is the middle the sketch said it had not measured. It is one bot design (the focus game is chosen at random each play, wins are at the archetype's win rate for every game, and the play count is fixed by Sync need), and it ignores care preferences (`PREFBOT` unset), which pull a steady netling toward its last two games and an unsteady one away from them.
 
+**Role steerers following their netling's preference** (`PREFBOT=follow`, 300 lives). The follow bot replaces whatever game it would play with the preference's (a steady netling repeats its last game, an unsteady one plays the least-played game not among its last two), so for a steerer it is a conflict between the steering and the preference, not a combination. The steerers are steady most of the time (the 29% to 70% shares in their level lines), so mostly the routine wins:
+
+| Archetype | Role and lean ignoring the preference | Following it |
+|---|---|---|
+| `steer-breach-corp` | breachCorp 100%, role certain 100% | breachCorp 76%, role certain 59% |
+| `steer-breach-street` | breachStreet 100%, 100% | breachStreet 85%, 73% |
+| `steer-tune-corp` | tuneCorp 100%, 100% | tuneCorp 77%, 60% |
+| `steer-tune-street` | tuneStreet 100%, 100% | tuneStreet 84%, 69% |
+| `nudge-breach` | a breach form 98%, role certain 95% | breachCorp 71% (a breach form 76%), role certain 55% |
+| No focus (share 0) | role certain 0%, in the role 28% | role certain 17%, in the role 30% |
+| Share 0.2 / 0.5 | certain 32% / 93%, in the role 68% / 97% | certain 25% / 59%, in the role 50% / 77% |
+
+Following costs a steerer its role (a lead of 5 wins is no longer reached in 27% to 41% of lives) and the Standing lean stays certain. With no steering at all it locks a steady netling into whichever game came last, so the role is certain in 17% of lives against 0%. That agrees with the sketch's earlier finding that following the routine makes a role likely (59% to 71% certain) where ignoring it leaves it near 5% to 8%, and it adds that the lock-in is on the game played last, not on the one the player prefers. Limits: one bot, the steady lock-in is on the last game only (the rule allows either of the last two), and no real player is this consistent.
+
 **New findings:** care preferences pull the unsteady end back. A matched action gives Sync, so a hot player plays less. With preferences off the overclocker's 12 hour unsteady hold reaches 89% of lives against 80% with them, the daredevil's 45% against 35%, and overclockers ending strongly unsteady 91% against 83%. The sketch measured the preference and the Metronome separately, so their interaction was not seen. Clearing bugs with Standing as a fallback (`CLEAR=both`) cuts a worker's final bugs from 1.24 to 0.04 and the bug ceiling from 7% to 0 at the cost of a few Standing points; with no clearing a worker ends with 2.1 bugs and 14% at the ceiling.
 
 Not verified: `npm run smoke`, any device check, and the temper-level differences above beyond the sample noise (about 1.5 points a share at 300 lives).
