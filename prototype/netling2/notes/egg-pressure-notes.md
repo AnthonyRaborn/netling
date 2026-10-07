@@ -124,3 +124,19 @@ times a life (not the 6 to 10 a day I assumed), so a per-switch value of 10 satu
   pressure lands at the same faint size. To make any of them felt, the lever is what shock or wear also touches
   (Sync drain, a bug chance), not the threshold. IRON defaults are now the calibrated ones (heat 80, floor 0.014,
   slope 0.3).
+
+## Result 6: widening Iron's wear (IRON lock, prototype/netling2/sim/iron-sweep.mjs)
+Widening was tried by touching more (LOCK, Sync drain up to x(1+lock) at wear 100) and by lowering the Heat threshold. 400 lives per
+archetype, wear off against seven settings; IRONBOT=avoid cools earlier once wear builds.
+- Ordinary players are not touched by any setting: attentive, casual, worker, human-regular and human-bursty stay within noise on full-life,
+  infections, temper (wear high share 0 to 2.8% of awake time even at threshold 70). The widening cannot reach them, because they do not run hot.
+- Hot players feel it, and LOCK adds a second cost: overclocker Sync mistakes 0.56 to 1.46 a life and temper -7.7 to -9.3 at (80, lock 1)
+  (a feedback: hot play, wear, Sync drain, faults, unsteady). Daredevil 80/lock 1: infections 7.3 to 7.9, Sync mistakes 0.02 to 0.05.
+- Threshold 75 with lock 1: wear high share daredevil 1.6% to 10%, overclocker 9% to 18%. A non-avoider pays infections 7.3 to 9.3 and
+  temper -4.8 to -5.9; the AVOIDER pays infections 8.9 but keeps temper (-4.72 against off -4.77) and the unsteady 12h hold (0.415 against
+  0.445), so the Restraint worry (Iron pushes toward steady) does not appear: the cost is real and avoidable without flattening.
+- Threshold 70 with lock 1 is too low: the avoider flattens temper (daredevil -3.91, unsteady hold 0.23 against 0.445 off) and non-avoiders pay
+  11 to 13.5 infections and 0.43 to 2.7 Sync mistakes.
+- Reading: (75, lock 1) is the widened setting that is felt by the players it is aimed at without distorting temper or touching anyone else.
+  Not adopted as the default yet (IRON.lock defaults to 0, heat 80). Not modelled: a human's response to the warning line, wear from netruns
+  (runs are instant in the sim and the 2 to 3 hour cooldown lets wear decay between them), Black ICE shard.
