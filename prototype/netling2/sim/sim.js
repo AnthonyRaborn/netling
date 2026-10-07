@@ -1003,6 +1003,9 @@ function stepHold(s, rest) {
   if (Math.abs(h.level) === 2) {
     h.min++;
     h.best[h.level] = Math.max(h.best[h.level], h.min);
+    // The age (netling minutes) at which a 12 hour hold was first reached at each strong level.
+    s.holdFirst ??= {};
+    if (h.min === 720 && s.holdFirst[h.level] === undefined) s.holdFirst[h.level] = s.ageMin;
   }
 }
 

@@ -6,7 +6,7 @@ Read this first for any sprite work. It is the current state only. The log of ev
 
 - All three eggs have all 22 forms drawn, in `prototype/netling2/` (not shipped, not in `sw.js`, not in `npm test`): baby, 3 teens (corp, street, hidden), 9 adults (4 roles x corp/street, plus hidden), 9 elders (one per adult).
 - Authored in full, not composed (maintainer). Everything is a first draft judged only from screenshots; **nothing has been seen on a device or in the real renderer.** `npm run smoke` has not been run.
-- Verified by machine: `npm test` 503 pass, `npm run proto:test` 143 pass (99 sprite and tell tests plus 14 in `voice.test.js` for idle and chatter, 6 in `metronome.test.js` and 24 in `sim.test.js` for the 2.0 simulator), the unchanged 1.0 sprite audit on each egg (nothing new flagged), review page and three galleries load in headless Chromium.
+- Verified by machine: `npm test` 503 pass, `npm run proto:test` 144 pass (99 sprite and tell tests plus 14 in `voice.test.js` for idle and chatter, 6 in `metronome.test.js` and 25 in `sim.test.js` for the 2.0 simulator), the unchanged 1.0 sprite audit on each egg (nothing new flagged), review page and three galleries load in headless Chromium.
 - Wearables: all 41 1.0 wearables are placed by the game's own code on every form; none leave the screen (except the 1 px holologo clip that 1.0's own 15 row forms have) and none move between frames.
 
 | | Iron (firmware) | Program (software) | Wetware (grown tissue) |

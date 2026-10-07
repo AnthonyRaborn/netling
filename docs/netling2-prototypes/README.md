@@ -9,11 +9,12 @@
 | `sim/sim.js` | Fork of `src/sim.js`. Standing as two tracks, temper with a 24 hour half-life and the five levels (the flicker guard is `tell.js`'s), bugs, no fault cap, teen and adult evolution with the tie-break weights, care preferences, 22 generic forms per egg |
 | `sim/netrun/run.js` | Fork of `src/netrun/run.js`: ICE games enter the preference history; a disconnect fault owes a bug roll |
 | `sim/netrun-bot.mjs`, `sim/balance.mjs` | Forks of the scripted netrun player and `tools/balance.mjs` (same archetypes, same settings, new report lines) |
-| `sim.test.js` | 24 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
+| `sim.test.js` | 25 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
 | `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
+| `sim/temper-sweep.mjs` | How much play the Metronome's 12 hour hold takes (see Temper seekers) |
 | `sim/hunter-sweep.mjs` | How much play the hidden forms take (see Hidden-path hunters) |
 
-Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 29 archetypes take about 2.5 minutes.
+Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 32 archetypes take about 3 minutes.
 
 **Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, clearing for 15 scrip or 2 Standing (Bugs); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by fractional Standing against whole-number cutpoints (the gap's whole part sets the weight; decided by the maintainer) and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
 
@@ -58,6 +59,36 @@ So role is cheap to steer: a player who gives one game twice the plays of each o
 | `hunter-casual` | 0% | 0% | 0% | 96% |
 
 So the Standing condition is not the hurdle even when the player sees only floors: the tracks stay within 1 of each other in 96% to 100% of lives, because a player who balances keeps the gap small and fractions only add a quarter point either way. The hurdle is wins: 3 in every game by 17 hours (plain rotation reaches it in 36%, aiming at the least-won game in 82% to 86%) and, for the adult, 29 wins in all by 51 hours (96% to 98% for these gamers). `hunter-sweep.mjs [lives] [gaps] [winRates]` varies play: with `hunter-shown`, hourly check-ins (17 a day) give a hidden teen in 85% and a hidden adult in 97%; every two hours (9 a day) 45% and 44%; every three (6 a day) 5% and 1%; fewer, nothing. Win rate matters at nine check-ins a day (60%: 24% and 10%; 75%: 45% and 44%; 90%: 71% and 82%). These bots are gamers (they play toward a Sync of 90 and up to four games a check-in), so they play far more than the other archetypes (about 75 wins a life against 50 for `attentive`). Read it as: the hidden forms need an attentive, game-focused player who also balances packets; the sketch's aim that they be hard to reach by accident holds, and the wins requirement, not the Standing one, is what makes it hard. Limits: bots that decide perfectly from the floors; no real player counts wins per game without a tally, and the sketch's wins-per-game tally per life is what would make this possible.
+
+**Hidden-path hunters following their netling's preference** (`PREFBOT=follow`, 300 lives; as for the steerers, following replaces the bot's game and packet choices with the preference's):
+
+| Archetype | Hidden teen, ignoring | Following | Hidden adult, ignoring | Following |
+|---|---|---|---|---|
+| `ghosthunter` | 36% | 24% | 96% | 19% |
+| `hunter-exact` | 82% | 62% | 95% | 22% |
+| `hunter-shown` | 85% | 66% | 98% | 22% |
+| `hunter-shown-rotation` | 39% | 24% | 97% | 19% |
+
+Following costs the hidden adult almost entirely, for two reasons seen in `hunter-shown`: the tracks end within 1 point in only 24% of lives (the mean gap is 3.4, against 0.25) because a steady netling repeats its last packet and the balancing is gone, and 4 wins in every game falls from 100% to 63%. The hidden teen suffers less (24% to 66% reach it) because it asks for less. That agrees with the sketch's earlier finding that a balance seeker that followed would fall from 100% to 3% within a point. So a steady netling's pull toward routine works against the hidden path, and the player has to ignore it, as the sketch noted; a hunter's temper is mostly steady (`ghosthunter` ends steady or strongly steady in 97% of lives), so the pull is nearly always on.
+
+**Temper seekers.** Three archetypes aim at a strong temper level for the Metronome's 12 hour hold (neglect level 2 paused): `seek-steady` (cools early, balances, orderly anomaly choices), `seek-unsteady` (plays warm, up to Heat 80, risky anomaly choices) and `seek-unsteady-segfault` (the same, and uses every Segfault it finds: temper -4, two faults, bugs). The report now gives the median day of the first 12 hour hold and the share that held 24 hours (`holdDay`, `hold24h`). 300 lives, hourly check-ins:
+
+| Archetype | Held 12 hours | Median day | Held 24 hours | Faults a life | Bugs at the ceiling |
+|---|---|---|---|---|---|
+| `seek-steady` | 87% | 2.4 | 67% | 0.2 | 0% |
+| `seek-unsteady` | 32% | 3.4 | 9% | 1.6 | 0% |
+| `seek-unsteady-segfault` | 90% | 2 | 71% | 12.6 | 5% |
+
+`temper-sweep.mjs [lives] [gaps] [archetypes]` varies check-ins (200 lives; run it with `PREF='{"on":false}'` for the same without care preferences). Share that held 12 hours, preferences on (off in brackets):
+
+| Check-ins a day | `seek-steady` | `seek-unsteady` | `seek-unsteady-segfault` |
+|---|---|---|---|
+| 17 | 88% (85%) | 32% (43%) | 90% (97%) |
+| 9 | 24% (37%) | 29% (33%) | 82% (88%) |
+| 6 | 1% (0%) | 25% (32%) | 50% (55%) |
+| 3 | 0% (0%) | 6% (7%) | 11% (8%) |
+
+Reading it: the steady end takes near hourly attention (an unattended netling does not reach flow); the unsteady end is open to a player who checks in 6 to 9 times a day, and a Segfault is what makes it cheap, because warm play alone only reaches 25% to 32% of lives. The Segfault route costs a lot: 11 to 13 faults a life, a bug ceiling reached by 5% to 8% of lives and a worse full-life rate at 6 check-ins a day (92% to 96% against 99% to 100%). So the two ends are not symmetric in effort, which the sketch said it wanted ("neither end is the good one"): steady is the high-attention reward, unsteady the cheaper and riskier one. Preferences matter less here than in the earlier archetypes (the unsteady warm-play seeker loses 1 to 11 points to them, as the overclocker did); the steady seeker's 13 point loss at 9 check-ins is unexplained and may be partly noise (200 lives, about 3 points a share). Limits: bots that use every Segfault they find (a real player may keep them), one fixed heat policy for the warm seekers, and no tuning of the 12 hour length or the neglect rule, which the sketch measured separately on 1.0's simulator.
 
 **Role steerers following their netling's preference** (`PREFBOT=follow`, 300 lives). The follow bot replaces whatever game it would play with the preference's (a steady netling repeats its last game, an unsteady one plays the least-played game not among its last two), so for a steerer it is a conflict between the steering and the preference, not a combination. The steerers are steady most of the time (the 29% to 70% shares in their level lines), so mostly the routine wins:
 

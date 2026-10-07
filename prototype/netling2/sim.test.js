@@ -406,3 +406,20 @@ test('a hidden-path hunter that plays its least-won game reaches the hidden teen
   for (let seed = 1; seed <= n; seed++) if (simulate(ARCHETYPES.ghosthunter, seed).teenForm === 'teenHidden') rot++;
   assert.ok(rot < teens, `rotation ${rot} against targeted ${teens}`);
 });
+
+test('temper seekers reach their strong level and hold it for 12 hours; the first hold is recorded', async () => {
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  const n = 8;
+  let steady = 0;
+  let unsteady = 0;
+  for (let seed = 1; seed <= n; seed++) {
+    const a = simulate(ARCHETYPES['seek-steady'], seed);
+    if (a.hold['2'] >= 720) {
+      steady++;
+      assert.ok(a.holdFirst['2'] > 0 && a.holdFirst['2'] <= a.ageMin, 'the age of the first hold is kept');
+    }
+    if (simulate(ARCHETYPES['seek-unsteady-segfault'], seed).hold['-2'] >= 720) unsteady++;
+  }
+  assert.ok(steady >= 5, `steady holds ${steady} of ${n}`);
+  assert.ok(unsteady >= 5, `unsteady holds ${unsteady} of ${n}`);
+});

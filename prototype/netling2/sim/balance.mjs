@@ -68,6 +68,12 @@ export const ARCHETYPES = {
     [`steer-${role}-corp`, { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', focus: role, focusShare: 0.8 }],
     [`steer-${role}-street`, { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie', focus: role, focusShare: 0.8 }],
   ])),
+  // 2.0 temper seekers: players who aim at a strong temper level for the Metronome's 12 hour hold. The steady seeker cools early and plays
+  // for calm (flow); the unsteady ones play warm (they keep playing up to Heat 80, `hot`), and the last also uses every Segfault it finds
+  // (`useSegfault`: temper -4, two faults, and bugs).
+  'seek-steady': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, runs: 'careful', coolAt: 45, anomaly: 'orderly' },
+  'seek-unsteady': { checks: ATTENTIVE, jitter: 10, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', hot: true, coolAt: 80, anomaly: 'risky' },
+  'seek-unsteady-segfault': { checks: ATTENTIVE, jitter: 10, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', hot: true, coolAt: 80, anomaly: 'risky', useSegfault: true },
   // 2.0 hidden-path hunters (the hidden teen needs 3 wins in every game and the tracks within 1 at the teen check, 17 hours in; the hidden
   // adult 4 each, 29 in all and the tracks within 1 at 51 hours). Like ghosthunter they balance packets and trace answers and play for
   // Sync; unlike it they also play whichever game they have won least (`balanceGames`) and answer requests only for games that are not
@@ -122,8 +128,8 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.inventory.length >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
   // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else scraps it.
   const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
-  for (let i = s.inventory.length - 1; i >= 0 && !wantsFaults; i--) if (s.inventory[i] === 'segfault') doAct('discard', { slot: i });
-  if (wantsFaults) useItem('segfault');
+  for (let i = s.inventory.length - 1; i >= 0 && !wantsFaults && !p.useSegfault; i--) if (s.inventory[i] === 'segfault') doAct('discard', { slot: i });
+  if (wantsFaults || (p.useSegfault && !s.asleep)) useItem('segfault');
   // What this player has a use for; the rest is surplus, sold at markets or scrapped when full.
   const keep = ['coolant', 'antivirus', 'repair', 'overclock', 'blackice'];
   if (p.trace !== 'hide') keep.push('voucher');
@@ -352,6 +358,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     levelMin: { ...(s.levelMin ?? {}) },
     hold: s.hold?.best ?? { '-2': 0, 2: 0 },
     neglect2Min: s.neglect2Min ?? 0,
+    holdFirst: { ...(s.holdFirst ?? {}) },
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
     atTeen: ctx.atTeen ?? null,
@@ -505,6 +512,13 @@ export function stats(results) {
     levelTime: Object.fromEntries(LEVELS.map((l) => [l, round(avg(results.map((r) => { const t = Object.values(r.levelMin).reduce((a, b) => a + b, 0); return t ? (r.levelMin[l] ?? 0) / t : 0; })))])),
     // The Metronome unlock test: an unbroken awake hold of 12 hours at a strong level, neglect level 2 not counted (paused).
     hold12h: { strongSteady: rate((r) => r.hold['2'] >= 720), strongUnsteady: rate((r) => r.hold['-2'] >= 720) },
+    // The same, in a day count: the median age (in days) at which the first 12 hour hold was reached, among the lives that reached one,
+    // and the share that held 24 hours.
+    holdDay: Object.fromEntries([['strongSteady', 2], ['strongUnsteady', -2]].map(([k, l]) => {
+      const ds = results.filter((r) => r.holdFirst[l] !== undefined).map((r) => r.holdFirst[l] / DAY).sort((a, b) => a - b);
+      return [k, ds.length ? round(ds[Math.floor(ds.length / 2)], 1) : null];
+    })),
+    hold24h: { strongSteady: rate((r) => r.hold['2'] >= 1440), strongUnsteady: rate((r) => r.hold['-2'] >= 1440) },
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
     bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
@@ -633,7 +647,7 @@ function printLife(st, detail) {
   console.log(`  standing at the end: corp ${st.standing.corp.toFixed(1)}, street ${st.standing.street.toFixed(1)} · temper ${st.temper.toFixed(1)} · level at the end (strongly unsteady/unsteady/middle/steady/strongly steady, %): ${lv(st.levelAtEnd)} · awake time at each: ${lv(st.levelTime)}`);
   if (t) console.log(`  at teen: corp ${t.corp.toFixed(1)}, street ${t.street.toFixed(1)}, gap ${t.gap.toFixed(1)} (certain ${pct(t.leanCertain)}, tied ${pct(t.tied)}), temper ${t.temper.toFixed(1)}, levels ${lv(t.level)}, mistakes ${t.mistakes.toFixed(1)}, wins ${t.wins.toFixed(1)} (fewest in a game ${t.minWins.toFixed(1)})`);
   if (a) console.log(`  at adult: corp ${a.corp.toFixed(1)}, street ${a.street.toFixed(1)}, gap ${a.gap.toFixed(1)} (lean certain ${pct(a.leanCertain)}, role certain ${pct(a.roleCertain)}), temper ${a.temper.toFixed(1)}, levels ${lv(a.level)}, bugs ${a.bugs.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored)`);
-  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end, peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared, at the ceiling ${pct(st.bugs.atCeiling)} · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
+  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end, peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared, at the ceiling ${pct(st.bugs.atCeiling)} · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} (median day ${st.holdDay.strongSteady ?? "-"} / ${st.holdDay.strongUnsteady ?? "-"}), 24h: ${pct(st.hold24h.strongSteady)} / ${pct(st.hold24h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
   const at = st.attention;
   console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.hotHours.toFixed(1)}h overclocked, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
