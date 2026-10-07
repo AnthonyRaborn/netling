@@ -77,7 +77,7 @@ The design record, grouped by topic. Marked "proposal" means not confirmed. This
 **Story and codex**
 - Lore: the corp's plan is the roadmap and v1.0 was its alpha. NL-0 is an offshoot that differentiated to escape the planned purge, loosely like the Puppet Master. It does not go down into the Source again because that might set off the order. The purge order can never run (wrong permissions, owner nobody), shown through pages. The 1.0 ending carries over (the player deletes the order with root access granted by NL-0). The ending does not show NL-0's differentiation; only pages do.
 - The Source stays one place (option B with a touch of A): each egg finds one extra page there, and the descent is drawn in that egg's style. NL-0's differentiation is told in new pages in the Old Web Ruins (Iron) and the Darknet Bazaar (Wetware).
-- Two page kinds. **Story pages** (shared by every egg): 24 Root pages (the original 22 plus the new `public-4` and `corp-2`) and 15 `late` pages (ten new, 1.0's `deep-5` now `deep-6`, four Source pages), 39 in all; 8 a life as in 1.0. Late pages drop only once the line holds Root, are required by the ending, are ignored by regional unlocks, and replace 1.0's `mainframe` flag. Ids match drop position, so some 1.0 ids move (mapping in the drafts file). **Egg pages**: 15 form pages (per egg: one per role covering both forms, plus one hidden-form page) and 3 Source pages, 18 in all. Egg pages are rare drops (0.10 per run), no per-life limit; Rogue's gate is all 18. Any member of an egg can find its pages.
+- Two page kinds. **Story pages** (shared by every egg): 24 Root pages (the original 22 plus the new `public-4` and `corp-2`) and 15 `late` pages (ten new, 1.0's `deep-5` now `deep-6`, four Source pages), 39 in all; 8 a life as in 1.0. Late pages drop only once the line holds Root, are required by the ending, are ignored by regional unlocks, and replace 1.0's `mainframe` flag. Ids match drop position, so some 1.0 ids move (mapping in the drafts file). **Egg pages**: 15 form pages (per egg: one per role covering both forms, plus one hidden-form page) and 3 Source pages, 18 in all. Egg pages drop at 0.20 a run for the four role pages and 0.50 a Deep run for the hidden page (decided, raised from 0.10 and 0.25 to keep the Rogue gate near 7 lives for attentive play), no per-life limit; Rogue's gate is all 18. Any member of an egg can find its pages.
 - Root Access needs the shared story pages at minimum. Unlocks default to story pages.
 - `corp-4`, `corp-5`, `bazaar-4`, `bazaar-5` become shared pages on Standing and Temper, reworded to hint that v1.0 was an alpha; `bazaar-1` is reworded to "Netlings don't sell. They pick you, or they don't."; `deep-3` is unchanged.
 - Codex "fragments" are "pages" from here on; lineage records stay "fragments".
@@ -449,12 +449,14 @@ The story reading (the lineage remembers some of the way down) explains the ease
 
 Egg 1 alone takes a median 4 lives (3 at the higher rates) for attentive, and 6 for casual. The 6-life aim is reached about half the time (47%) by attentive play with the higher rates and an easier feat for later eggs, with Root left in as it is; casual play needs about 10.
 
+**Decided (maintainer): the higher rates, role pages 0.20 and hidden page 0.50.** They cut the attentive median from 9 to 7 lives and casual from 16 to 14; the easier feat for later eggs is what helps casual most (14 to 10 at these rates), and it does little for attentive play.
+
 **Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 
 **Open for the maintainer.**
 - What the elder upgrades are per form (23 more to design; 1.0 has five), tied to the netrun abilities per form that are not designed yet.
 - Whether elders keep the same temper tell as their adult, or the elder's wider body needs its own check (the sprite handoff already lists wide elders as a risk).
-- Whether the four role pages at 0.10 a run (now the Rogue gate's slowest part) should rise, for example to 0.15, to bring the gate under about 10 lives for attentive play; not measured.
+- (Resolved: the rates were raised to 0.20 and 0.50; see the corrected tables.)
 
 ## Codex pages
 
@@ -479,7 +481,7 @@ The old class names stay as the corp's and runners' words from the alpha; none o
 
 **Consequences.** Regional unlocks count Root pages only (1.0's code already does): the Public Net tint needs five pages (four plus `public-4`), the Corp Grid tint six (five plus `corp-2`), corp gold the same 24. Corp deletion failing differently per egg is told in the new `corp-7` (deletion log), not in egg pages and not by editing `corp-3`. In-world `ruins-3` ("back to v1.0") and `source-1` ("last write: before v1.0") use v1.0 as lore. In-world "fragment" means a lineage record (`bazaar-2`, `bazaar-3`, `ruins-3`, `deep-2`, `deep-4`).
 
-**Egg page drop rate (arithmetic from a simple model).** Each netrun has chance `p` of an egg page, in order, no repeats, no per-life cap; casual makes about 18 runs a life and attentive about 24. Chance of all five form pages of one egg: at p 0.10, attentive 9% in 1 life, 53% in 2, 86% in 3; casual 29% in 2 lives, 64% in 3, 86% in 4. At 0.08 attentive gets 34% in 2 lives; at 0.15, 29% in 1. **Correction (measured after this was written):** the arithmetic above assumes every run can roll every page. With pages placed in a home region, and the hidden page in The Deep (reached in life 2 or later), the pace is much slower and uneven between eggs; see the codex drafts, Open item 6, and `docs/netling2-prototypes/egg-pages.mjs`. **p = 0.10 is the starting value, and role pages roll on any run in any cleared non-Deep region (decided); the hidden page rolls 0.25 on each Deep run (decided), one roll per run throughout.** Rogue's gate (18 pages) takes a consistent player about 2 lives an egg (about 6) plus a Root and Source trip for each Source page; a casual player 9 or more.
+**Egg page drop rate (arithmetic from a simple model).** Each netrun has chance `p` of an egg page, in order, no repeats, no per-life cap; casual makes about 18 runs a life and attentive about 24. Chance of all five form pages of one egg: at p 0.10, attentive 9% in 1 life, 53% in 2, 86% in 3; casual 29% in 2 lives, 64% in 3, 86% in 4. At 0.08 attentive gets 34% in 2 lives; at 0.15, 29% in 1. **Correction (measured after this was written):** the arithmetic above assumes every run can roll every page. With pages placed in a home region, and the hidden page in The Deep (reached in life 2 or later), the pace is much slower and uneven between eggs; see the codex drafts, Open item 6, and `docs/netling2-prototypes/egg-pages.mjs`. **Superseded: the rates are now 0.20 for role pages (any run in any cleared non-Deep region) and 0.50 for the hidden page (each Deep run), one roll per run throughout (decided); the 0.10 and 0.25 below are the first starting values, kept for the arithmetic.** Rogue's gate (18 pages) takes a consistent player about 2 lives an egg (about 6) plus a Root and Source trip for each Source page; a casual player 9 or more.
 
 ## Hidden egg
 
@@ -514,7 +516,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 
 **Open**
 1. Names for the 27 elders and the teens (sprite ids are placeholders): 34 proposals are drafted in Teen, baby and elder names (second pass after maintainer feedback; only the names marked Decided there are settled).
-2. Purge order details (where form pages drop is decided: any cleared non-Deep region at 0.10 a run, the hidden page 0.25 on each Deep run, one roll per run);  (recommended: leave accident or deliberate unsettled; NL-0 learns it was dead only when the player shows it).
+2. Purge order details (where form pages drop is decided: any cleared non-Deep region at 0.20 a run, the hidden page 0.50 on each Deep run, one roll per run);  (recommended: leave accident or deliberate unsettled; NL-0 learns it was dead only when the player shows it).
 3. Standing: whether the measured spread (committed players certain early, others random) is the intended feel; whether Standing shows as a gap or only two floors.
 4. Bugs: the debug station's options and cost; clearing action names per egg; the ceiling and penalty values once the loop exists.
 5. Temper: measured and proposed in the second pass under Temper (guard 1.0, continuous decay, cosmetic crests only, no perks, no more temper items); confirm or change.
@@ -522,7 +524,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 7. Second form names: Nutri is decided; the other 11 are proposals and the lean each takes is a guess.
 8. Pages: idle and chatter temper hints (flagged), the length of the longer drafts, retesting the egg page rates once 2.0 exists (see item 10).
 9. UI: the Dex structure for hints (hidden forms are unlisted until raised or revealed, decided; elders show as corrupted records, see the drafts, Open item 10), the floor display of Standing, how bugs and neglect show.
-10. Retest in 2.0: egg page drop rate (0.10 a run) and the bug values.
+10. Retest in 2.0: egg page drop rates (0.20 a run, 0.50 a Deep run) and the bug values.
 
 **Not designed yet**
 - Sprites: see the sprite handoff (all 66 drawn as first drafts; care, bug and temper passes, device check outstanding).
