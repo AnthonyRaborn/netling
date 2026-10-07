@@ -65,7 +65,7 @@ export const PROGRAM_TEENS = {
 // 1.0 slot (1.0's hidden adult, which the hidden teen Shell grows into); the eight role forms are new, drawn on 1.0's language
 // (rounded bodies, antennae, 2x2 accent eyes), the corp lean tidy and symmetric and the street lean ragged, as with the teens.
 //
-// Rules each one follows (see NETLING_2_SPRITES.md, Fit and frame stability): 16 columns, no more than 14 rows; rows 0 to neckRow are
+// Rules each one follows (see NETLING_2_SPRITES.md, Rules the tests enforce): 16 columns, no more than 14 rows; rows 0 to neckRow are
 // identical in A and B (only the lower body animates); the last row with 0.4 of the width painted is the same row in both frames.
 export const PROGRAM_ADULTS = {
   // Tiger (Breach, corp): a tiger team, striped: broad shoulders, arms apart, fangs, cheek and flank stripes.

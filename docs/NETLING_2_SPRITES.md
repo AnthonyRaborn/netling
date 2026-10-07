@@ -1,362 +1,84 @@
-# Netling 2.0 sprite prototype
+# Netling 2.0 sprites: handoff
 
-Status: prototype and comparison. **Decided (maintainer): forms are authored in full, not composed.** The composed model below was prototyped and is kept only as the rejected alternative. Nothing here is wired into the game. The code is in `prototype/netling2/`; it is not part of `npm test`, it is not deployed, and it only reads the game's modules. Items marked proposal are mine; the decision between the two models is the maintainer's. It answers part of the sketch's "Sprite redesign" step: the Iron body at every stage of one line, the temper tell, the flicker guard and a neglected look. Companion to [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (see Neglect and the sprites, The temper tell, Making the steady end legible, Temper scale).
+Read this first for any sprite work. It is the current state only. The log of every draft and measurement is in [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) (archive; not needed to continue). Game design (eggs, forms, Standing, temper, bugs, codex) is in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md). Spoilers throughout.
 
-## Decision
+## Status
 
-Authored, for the current plan of forms (option C: two named forms per role, three teens, one hidden form). The reasons the numbers gave: with nine adults the composed forms missed the 1.0 silhouette bar and a role's two forms came out as near-identical outlines, which defeats having two named forms; the cost advantage of composing only appears at many forms per body, and the authored forms cleared the bar after a small redraw. Consequences:
+- All three eggs have all 22 forms drawn, in `prototype/netling2/` (not shipped, not in `sw.js`, not in `npm test`): baby, 3 teens (corp, street, hidden), 9 adults (4 roles x corp/street, plus hidden), 9 elders (one per adult).
+- Authored in full, not composed (maintainer). Everything is a first draft judged only from screenshots; **nothing has been seen on a device or in the real renderer.** `npm run smoke` has not been run.
+- Verified by machine: `npm test` 500 pass, `npm run proto:test` 99 pass, the unchanged 1.0 sprite audit on each egg (nothing new flagged), review page and three galleries load in headless Chromium.
+- Wearables: all 41 1.0 wearables are placed by the game's own code on every form; none leave the screen (except the 1 px holologo clip that 1.0's own 15 row forms have) and none move between frames.
 
-- Each form is drawn in full and carries its own anchor rows, as in 1.0. The prototype ran every 1.0 wearable on the authored forms unchanged.
-- The sprite audit and gallery will need the new forms added; the temper tell and neglect look are independent of how a form is built, so they carry over.
-- Cost: Iron's whole tree is now drawn and measured, 22 forms and 6306 hand-placed cells counting both frames (baby 154, three teens 626, nine adults 2470, nine elders 3056). If Program and Wetware cost the same, three eggs come to about 19000 cells (an extrapolation, not a measurement), before any rework after review. The elders are about half of it.
-- The composed code (`OVERLAYS`, `LEAN_OVERLAYS`, `TEEN_OVERLAYS`, `compose`, model A in `models.js`) stays in the prototype for reference and can be deleted; it is in git history either way.
-
-### Decided since (maintainer)
-
-- **Elders: one per adult**, each a variant of the adult it grows from (9 per egg, 27 in all). All nine of Iron's are drawn.
-- **Babies:** eventually each egg gets its own baby. Iron's is the only one drawn; Program and Wetware babies are not.
-- **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which did not meet this. Iron's hidden-path teen is now drawn with its own outline (see The hidden path, below). The hidden adult (Guru) was already distinct (closest overlap 0.77).
-- **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
-
-## Program (baby, teens, adults and elders)
-
-Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 sprites directly where they fit). Code: `program-art.js`, `program-models.js`, `program.test.js`, registered by `register.js` under the key `protoP_<id>`. In the audit wrapper (`npm run proto:audit:program`, or `EGG=program` / `EGG=all` with `proto:audit`; the default stays Iron so its numbers remain comparable). Also in the generated gallery (`prototype/netling2/gallery-program.html`) and the review page (its own section, with the same controls).
-
-| Form | Source | Size |
-|---|---|---|
-| Baby | 1.0's Bitling | 12 x 12 |
-| Teen, corp lean | 1.0's Kernel | 14 x 11 |
-| Teen, street lean | new: Kernel's blocky body kept whole, with a spiked mohawk, a dark unibrow, arms like elongated exclamation points and wide boots | 14 x 11 |
-| Teen, hidden path | 1.0's Shell (1.0's hidden teen, which grows into the Ghost) | 14 x 12 |
-
-- **Stub has no slot.** 1.0's Stub was the teen that faults picked, and faults no longer choose a teen form.
-- **What the 2.0 rules changed.** The A frames are 1.0's, unchanged (a test checks it). The B frames are not: 1.0's Bitling, Kernel and Shell move the head, eyes or both between frames, which makes wearables bob, so each B frame keeps the head and takes only the legs. The Shell's own B frame swaps its last two rows, leaving a last row too thin for the wearable code to find the body's bottom, so its feet widen outward instead. A and B differ by only 4 to 8 cells (the audit floor is 4), so these forms animate quietly.
-- **Poses.** Sleep and dead are the generic 1.0 poses (slit eyes, X eyes) plus Program's own chest mark, from the sketch's Program register (interrupt-driven, a process that ends): asleep is a block cursor waiting for an interrupt, dead is a flatline run across the chest. A pair of marks for asleep read as a second pair of eyes, hence one block. The marks are a proposal.
-- **Teens.** Corp and street overlap 0.82 (0.816; 19 outline cells and 6 marks differ), at 1.0's 0.82 bar and closer than Iron's 0.74 because Kernel is a compact shape. The street teen took six passes: the first (0.94, 5 cells differ) failed the audit; the second (0.81) cut the right side away and read as a broken robot; the third (0.81, hunched and lopsided) still read as broken; the fourth added horns, brows and wide boots and read as a different creature; the fifth added exclamation-point arms to the horned body, which was not what the maintainer meant; the sixth (current) is the blocky Kernel body with a mohawk, a unibrow and bar-and-dot arms, which the maintainer had liked in an earlier candidate. Lesson recorded: for the street lean, add rather than remove, and keep the body blocky. The hidden teen is 0.63 from corp and 0.72 from street, so the test that the hidden teen is further from each main teen than the main pair are from each other by 0.1 holds only just (0.72 against 0.816), and its absolute ceiling is now 0.72 (it was 0.7). The main-teen outline test allows up to 24 differing cells. Whether the lean reads on a phone is a by-eye call.
-- **Wearables.** All 41 non-prop wearables on every Program form and pose (492 cases): none leave the screen, and none move between frames (164 cases).
-- **Audit (Program's 4 forms, `npm run proto:audit:program`).** The first run flagged corp and street teens at 0.94, above 1.0's 0.82 bar; after the street teen's redraw the highest same-stage pair is 0.81 and nothing else is flagged. Everything is at or inside 1.0: the holologo clips 1 px on the baby and the hidden teen (as on 1.0's forms), the necktie loses half its pixels on the corp teen on the ice palette (0.60), and the worst worn combinations are the usual ones (Chrome jaw over Gold chain 0.83, over Necktie 0.80, worst on the baby). 
-- **The nine adults** (option C: corp then street within a role, then the hidden form). Only Ghost has a 1.0 slot (1.0's hidden adult, which the hidden teen Shell grows into); the other eight are new, on 1.0's language (rounded bodies, antennae, 2x2 accent eyes), the corp lean tidy and symmetric and the street lean ragged, as with the teens. All 16 columns, 13 to 14 rows (Mouse is 13), with their own anchor rows.
-
-  | Role | Corp | Street | Motif |
-  |---|---|---|---|
-  | Breach | Tiger | Worm | Tiger: broad shoulders, arms apart, fangs, stripes. Worm: a head with jaws on a narrower column striped down the body |
-  | Dodge | Mouse | Spoof | Mouse: small, big round ears, a flicking tail. Spoof: hooded, half masked (the left half of the face is dim), ragged cape |
-  | Tune | Parse | Phreak | Parse: a screen head with bracket antennae and a line of text for a mouth, on a slim stand. Phreak: a narrow head between huge headphone cups, a swaying cable |
-  | Feast | Gobble | Snarf | Gobble: a small head on a big round belly, a wide mouth right under the eyes (teeth over a dark maw). Snarf: almost all jaw, a dark maw with teeth above and below |
-  | Hidden | Ghost (1.0's) | | |
-
-- **Distinctness.** The closest same-stage pairs are Tiger and Snarf 0.78, Snarf and Ghost 0.78, then Mouse and Snarf 0.76; every pair is under 1.0's 0.82 and Iron's highest (0.81). Each role's two forms overlap under 0.8 and differ by 20 or more outline cells (a test checks it).
-- **Frames.** Rows 0 to the neck row are identical in A and B and the body's bottom is the same row in both. A and B differ by 4 to 14 cells: Phreak's cables sway (7 in the adult), Ghost's hem shifts (8), Worm's tail swishes (6) and its stripes step between frames, the rest move their feet, tail or belly (4 to 8). Ghost's B frame is 1.0's with the head frozen and the hem's last row kept, because 1.0's B moves the mouth and thins the last row, which would move the bottom.
-- **Audit (the nine adults added, 13 forms).** Nothing new flagged. The highest same-stage pair is still the teens at 0.81. The holologo clips 1 px on 11 of the 13 forms (all but the corp and street teens, as on 1.0's forms), and no wearable loses half its pixels in the dark. All 41 wearables on all 13 forms: none move between frames (533 cases) and none leave the screen (1599 cases).
-- **The nine elders** (ids `<adult>Elder`, names undecided). Hand-drawn the way Iron's were (the maintainer chose this over stretching each adult mechanically, which was tried first and compared side by side): 18 columns against 16, 14 to 15 rows, keeping the adult's own marks and growing a feature of its own (Tiger's bigger ears and bolder stripes, Worm's longer crown, Mouse's torn, tagged ear against a whole tall one, whiskers and a tail, Spoof's longer hood and cape, Parse's doubled brackets, Phreak's hooked cables, Gobble's navel and heavier belly, Snarf's tusks). Rows 0 to the neck row are identical in A and B, and anchors follow each drawing. **Ghost's elder is 1.0's Whisper** (the maintainer's call), which keeps 1.0's size (14 columns, smaller than the Ghost, its body thinning to a wisp): a hidden form may differ from the other forms' rules, so the elder width, height and closest-to-its-adult rules skip it. Its B frame keeps the head and mouth still, as 1.0's moves the mouth.
-- **Elder numbers.** Each role elder is closest, after scaling its adult to the elder's size, to its own adult among all nine (the 1.0 raw score misleads for a form that has grown; see The nine elders). Margins over the nearest other adult: Parse 0.02 (Snarf), Phreak 0.08 (Ghost), Gobble 0.08, Tiger 0.06, Mouse 0.05, Worm 0.07, Spoof 0.13, Snarf 0.08. The closest elder pairs are Tiger's and Snarf's, Worm's and Ghost's, and Mouse's and Snarf's, all 0.81 and under 0.82.
-- **Audit (all 22 forms, elders as mainframes).** Nothing new flagged. The holologo clips 1 px on the 20 forms that are not the corp and street teens, the same 15 row clip as 1.0's forms (a test accepts it only where 1.0 already clips). All 41 wearables on all 22 forms: none move between frames (902 cases) and none leave the screen except that clip.
-- **Not drawn:** names for the teens and the elders.
-
-## Scope
-
-One line, four forms, as the maintainer asked: Iron, baby to elder. The line is **Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder**. The sketch's full tree (3 teens and 9 adults per egg under option C) is not in this prototype. An earlier, wider version that drew all of it is in git history at commit `580db88`; its measured numbers are quoted below, marked as such, because the code that produced them is no longer in the tree. The line is a table (`FORMS` in `models.js`), so another can be swapped in.
-
-## What was built
-
-| Stage | Form | Size | Built in model A | Built in model B |
-|---|---|---|---|---|
-| Baby | Baby | 12 x 11 | authored, shared | authored, shared |
-| Teen | Teen (street lean) | 14 x 12 | teen body + street overlay | authored in full |
-| Adult | Gronk (Breach, street) | 16 x 14 | adult body + Breach overlay + street lean overlay | authored in full |
-| Elder | Gronk's Elder | 18 x 15 | authored, a variant of Gronk, shared | authored, a variant of Gronk, shared |
-
-- **Model A, composed.** A body per stage with overlays merged onto it. An overlay is a layer the size of the body: a mark replaces the body cell, `_` erases it, `.` leaves it. The street lean is lopsided (one antenna, a notched head corner, a taped patch); Breach adds horn studs, a toothed grille and heavy shoulders. All forms of a stage share the body's anchor rows.
-- **Model B, authored.** The teen and Gronk drawn in full, each with its own anchor rows.
-- **Temper tell** (`tell.js`), the same for both, on the sketch's five levels (strongly unsteady at -6 or lower, unsteady, middle, steady from +3, strongly steady from +6). Steady is a countable beat, the same move on an exact interval (every 6 s, every 3 s when strongly steady, independent of any seed). Unsteady is growing chaos: a stuttering frame and a drift, more of both when strong. Skins per egg: Iron settles a row on the beat and drifts a column at a time; Program blinks, stutters and hops; Wetware has a clean beat that goes irregular. Reduced motion keeps the steady beat (calm, tiny, predictable) and gives the unsteady levels a still variant (Iron one column off its grid, Program holding its alternate frame, Wetware a dimmer steady shade).
-- **Flicker guard.** `guardedLevel(temper, currentLevel)` only moves the shown level once temper is 0.5 beyond a threshold, so a value hovering on one does not flip the tell. The 0.5 is a placeholder.
-- **Neglect look** (`neglect.js`, level from `needs.js`). Iron's skin is rust: dim patches that spread from the bottom up in two levels, never over the eyes or above the mouth, never changing the outline. It does not move, so it is a different channel from temper, and reduced motion needs no variant. Anchors, poses and wearables are unaffected.
-- **Bug glitch** (`glitch.js`). Each bug (0 to 5) tears one body row a column sideways; see What drives neglect and bugs.
-- **Review page:** `npm run serve`, then `http://localhost:5174/prototype/netling2/`. Both lines side by side, controls for palette, tell skin, temper, neglect, reduced motion, pose, any 1.0 wearable and the anchor rows, how the composed forms are built, the timeline of the tell, and the metrics.
-- **Poses** (`ironMarks` in `models.js`). Sleep and dead start from the generated 1.0 poses (slit eyes asleep, X eyes dead; a hidden form's third eye goes dark) and add Iron's own mark on the chest, from the sketch's Iron register (batch work, and a decommission that leaves a read-only record): **asleep shows a queue**, four accent dots in a row (work waiting for the next batch); **dead shows a read-only record**, a dark barcode stamped across the chest (the last write). Marks only: they replace body cells, never touch the eyes or the outline. Every form has both, and a test checks it.
-- **Real wearables.** `register.js` adds the prototype sprites to the game's own `SPRITES` and `ANCHOR_ROWS` tables before `src/accessories.js` loads, so the 1.0 wearable code places items on them unchanged. This only happens in the prototype page and its tests.
-
-## Results for the line
-
-Measured by `npm run proto:test` (44 tests at the time; it now also holds Program's) and `npm run proto:audit` and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
-
-| | Model A, composed | Model B, authored |
-|---|---|---|
-| Hand-placed cells, teen and adult | 556 | 548 |
-| Sprites drawn | 10 | 4 |
-
-Baby and the elder are 584 hand-placed cells in both (154 and 430).
-
-| Stage against stage (outline overlap) | A | B |
-|---|---|---|
-| Baby and Teen | 0.73 | 0.73 |
-| Baby and Gronk | 0.51 | 0.48 |
-| Baby and Elder | 0.37 | 0.37 |
-| Teen and Gronk | 0.69 | 0.64 |
-| Teen and Elder | 0.50 | 0.50 |
-| Gronk and Elder | 0.70 | 0.77 |
-
-- **Both read as one line.** Every pair is under 0.82 and over 0.3, in both models.
-- **The elder is a variant of its adult.** It keeps Gronk's horns, slanted brow, toothed jaw and broad shoulders, grown to 18 columns and 15 rows. Against the authored Gronk it overlaps 0.77, the closest of any form in the line and inside the 0.77 to 0.82 that 1.0's mainframes sit at against their adult line; a test checks it. Against the composed Gronk it is 0.70, a small extra reason the authored adult suits a derived elder.
-- **For one line the models cost the same.** A needs two bodies and three overlays to make two forms, so it has nothing to amortize. Composing only pays when the bodies are reused across many forms.
-- **Where they differ.** The composed teen has the same outline as the authored one and differs by 2 mark cells. Composed Gronk differs from authored Gronk by 20 outline cells and 22 mark cells (outline overlap 0.89): the authored Gronk has a rounder brow, angry eyes and a ragged hem that an overlay on the shared body does not give.
-- **Wearables.** Re-measured on the whole tree after the anchor fix below; see Fit and frame stability. (An earlier figure here was taken with guessed anchors.)
-- **Flash budget.** Over 120 seconds at 10 ms steps, for every egg, level and four seeds, with and without reduced motion, the picture (frame A, frame B or the blink) never changed less than 200 ms after the last and never more than six times in a second. Wetware's brightness swings at most 0.25 and moves at under 1 Hz. The flicker guard holds the level steady while temper alternates 0.4 either side of any threshold (0.8 of the guard width).
-- **Steady beat.** Exactly on its interval, identical for any seed, and twice as often when strongly steady, for all three eggs.
-- **Neglect.** Level 2 contains level 1's patches (the look grows and clears without jumping), only body cells below the mouth row change, and the outline is identical in every form and frame, in both models.
-- **Anchors.** Every form's head, eye, mouth and neck rows are in range and in order, point at painted cells, and move at most one row between frames (the 1.0 rule).
-
-## The hidden path (Iron)
-
-Drawn, authored: the **hidden-path teen**, which grows into **Guru** (the hidden adult, restored from the wider run). The other main teen (corp lean) is back too, so the three teens can be compared. Both are in the authored model only. Guru's elder is not drawn.
-
-| Teen pair (outline overlap) | Overlap | Outline cells that differ |
-|---|---|---|
-| Corp and Street (the two main teens) | 0.74 | 14 |
-| Hidden and Corp | 0.59 | 56 |
-| Hidden and Street | 0.61 | 44 |
-
-- **It stands clear of both.** The hidden teen is further from each main teen (0.59 and 0.61) than they are from each other (0.74), by tens of outline cells and not by marks. A test enforces both: more than 0.1 lower overlap than the main pair, and at least 20 outline cells different.
-- **How it is built.** Slimmer than the others (a 10 column body against 12), a narrow neck, a crown, a third eye, and two detached side orbs, 13 rows against 12. It shares Guru's crown and third eye.
-- **First try failed.** My first draw kept the blocky body and only added the crown and third eye; it overlapped the street teen at 0.80, less distinct than the main teens are from each other. I redrew it. This is the same marks-over-an-outline problem the wider run had.
-- **Against the adult it grows into.** By outline the hidden teen is further from Guru (0.56) than the street teen is (0.66). What carries the lineage is the crown and the third eye, not the silhouette. Whether that is enough of a preview is a judgment; a person should look at it.
-- **Not drawn:** the hidden-path teens of Program and Wetware, Guru's elder, and the elders of the other eight adults.
-
-## The nine elders (Iron)
-
-Drawn, authored: one elder per adult, each its adult grown to 18 columns (against 16) and no taller than 15 rows, keeping that adult's own marks. The other seven adults (Splat, Jiff, Bamf, Ping, Feep, Munch, Thrash) are restored from the wider run, authored only, so Iron's whole tree is now in the prototype: baby, three teens, nine adults, nine elders. Elder names are not decided; ids follow the adult (`splatElder`, ...).
-
-**The 1.0 overlap score misleads for a form that has grown.** It centres two sprites without scaling, so a wider elder scores lower against its own adult than against a big filled slab (Splat, a full rectangle, attracts every blocky elder). By that raw score five elders are closer to another adult than to their own (Gronk's to Splat 0.81, Jiff's to Ping 0.76, Ping's to Guru 0.81, Thrash's to Splat 0.83, Guru's to Splat 0.84). A plain stretch of an adult shows the same effect, so it is the measure and not the drawing. I therefore also measure the overlap after scaling the adult to the elder's size (nearest neighbour) and require that: each elder must be closest to its own adult among all nine.
-
-| Elder | Overlap with its own adult (scaled) | Closest other adult |
-|---|---|---|
-| Splat's | 0.95 | Gronk 0.79 |
-| Gronk's | 0.84 | Splat 0.82 |
-| Jiff's | 0.82 | Ping 0.70 |
-| Bamf's | 0.81 | Ping 0.76 |
-| Ping's | 0.82 | Munch 0.80 |
-| Feep's | 0.92 | Munch 0.81 |
-| Munch's | 0.84 | Splat 0.81 |
-| Thrash's | 0.81 | Splat 0.80 |
-| Guru's | 0.87 | Splat 0.79 |
-
-- **Margins are thin** for Gronk (0.02 over its sibling Splat), Ping (0.02), Munch (0.03) and Thrash (0.01). A redraw that loses one is caught by a test, but these are the ones to look at by eye.
-- **First pass failed on three.** My first Bamf, Munch and Thrash elders were drawn from scratch and read as generic bigger blobs: each was closer to another adult (Bamf's to Guru, Munch's to Splat, Thrash's to Splat). I rebuilt those three from their own adult widened and one row taller, with a small mark (a brow mark for Bamf and Munch, a second row of spikes for Thrash). The other six were drawn by hand and passed.
-- **The nine elders are distinct from each other.** Elders of different roles overlap at most 0.82 (Gronk's and Guru's, 0.817, just under the 1.0 bar); the two elders of one role overlap 0.83 (Splat's and Gronk's), 0.71, 0.73 and 0.80.
-- **Wearables.** 3198 cases across all 22 forms and both frames and the asleep pose; 24 clip a pixel above the screen, all the holologo on 15 row sprites, as 1.0's own 15 row forms do (the audit also finds a 1 px drone clip on Splat's elder).
-- **Not drawn:** the elders of Program and Wetware, and the Program and Wetware babies and teens.
-
-## Iron through the real 1.0 sprite audit
-
-`npm run proto:audit` runs the unchanged `tools/sprite-audit.mjs` on Iron's 22 forms: `prototype/netling2/audit.mjs` registers the prototype sprites in the game's own tables, replaces `SPECIES` with Iron's forms (the elders as the `mainframe` stage the game draws for a grown form) and imports the audit. Forms show as `protoB_<id>`. It checks wearable clipping, icon slots, contrast, occlusion, worn combinations, silhouette overlap, poses and props. The run takes about 15 seconds. 1.0's own forms are not in it; the comparison below is the same tool run on 1.0 (`node tools/sprite-audit.mjs`).
-
-| Check | 1.0 (13 forms) | Iron (22 forms) |
-|---|---|---|
-| Wearables that clip the top of the screen | holologo on all 13 forms (39 cases), 1 px | holologo on 15 of 22 forms, 1 px, and the drone on Splat's elder, 1 px (47 cases) |
-| Contrast, awake and lit: wearables losing half or more of their pixels | 5 combinations of 84 (crown, necktie, spiked collar, earpiece x2) | 1 combination of 132 (necktie) |
-| Contrast, asleep with the lights off | 0 | 0 |
-| Worst worn combination (upper slot hiding the lower) | Chrome jaw over gold chain 0.86; Data aura over blush 1.00 for a moment | Drone over sat dish 0.86; Chrome jaw over necktie 0.80 |
-| Plush prop covers the pet | up to 42% (46% with a visitor) | up to 33% (45% with a visitor) |
-| Highest same-stage silhouette overlap | Firewall and Ghost 0.81 | Munch and Thrash 0.81, then a group at 0.80 (after the Gronk and Splat redraw; before it, Gronk and Splat were 0.85 and their elders 0.83) |
-| Asleep and dead poses | n/a | 8 to 10 cells differ asleep, 14 to 18 dead |
-
-- **Wearables hold up.** Iron's forms are no worse than 1.0's on clipping and contrast, and better on contrast, with no wearable losing half its pixels in the dark.
-- **The silhouette overlap was the one result that was worse, and the redraw fixed it** (see The Gronk and Splat redraw). Munch and Thrash (the Feast pair) now tie 1.0's highest at 0.81.
-- **The audit's cross-stage pairs** (an elder against its own adult, for example Feep's elder and Feep at 0.86) are expected and not a problem: 1.0 only reads same-stage pairs.
-- **A discrepancy in 1.0's own doc, found on the way.** `docs/SPRITES.md` lists "Off-screen wearable cases: 0", but the current audit reports 39 holologo cases on 1.0's forms, 1 px above the screen. I did not change it; it is a separate fix (suggested separately).
-- **`gallery.html` is not extended (the generated copies are).** The audit is; the gallery's by-eye review for Iron is the review page here.
-
-## Fit and frame stability (found in review)
-
-Review of the gallery found five things; one was a bug in my tooling that had also skewed the audit, and two were requirements for the new forms.
-
-**1. A bug in my tooling: the wearable code was guessing the Iron anchors.** `src/accessories.js` builds its table of authored anchor rows once, when it first loads, and `src/sim.js` imports it. My gallery prelude, audit wrapper, review page and one test all imported `sim.js` before registering Iron's forms, so every wearable was placed from anchors guessed from pixels (the first row with an accent pixel as the eye row, the first wide row as the head). Where the guess is wrong:
-- the hidden teen and Guru: the guessed eye row is the **third eye**, so the visor sat one row too high with the real eyes showing below it, and shades and the monocle were drawn on the third eye;
-- Gronk and its elder: the guessed head is the **horn row**, so the visor ran wider than the body and the headphone cups floated a column away from the head.
-
-Fix: `prototype/netling2/ready.js` registers the forms and then checks the wearable code is using them, throwing if it is not. It is the first import everywhere (tests, audit, gallery prelude, review page). Two new tests pin it: the anchors the wearable code uses equal the authored ones for every form, pose and model, and the head width it uses is the authored head. I confirmed the guard fires when `sim.js` is imported first. **The audit figures earlier in this document were taken with the guessed anchors**; the table above is the corrected run. With the real anchors the hidden forms' visor covers both real eyes (10 of 12 and 10 of 14 eye cells covered, against 6 before) and the monocle rings the left eye, and Gronk's visor spans exactly its head and its headphone cups touch the head.
-
-**2. Headphones plus visor merge into one band on Gronk, and that is not Gronk's fault.** The headphone cups sit at the eye rows and the visor spans the head, so together they read as one band with a cup at each end. Rendering the same pair on 1.0's own forms shows the identical effect on Bitling, Kernel, Chrome, Daemon, Firewall and Glitch. It is the wearable layout shared by every form. If it should change, the place is the headphones (for example cups one row above the visor), which touches 1.0 art; I did not.
-
-**3. No wearable moves between frames (the Bitling problem).** The complaint about 1.0's smallest forms: the Bitling's ears move between frames, so the headphones slide sideways and every head wearable (flower, bow, mohawk, antenna) bobs a row. I measured how far each wearable moves between the A and B frames, holding the wearable's own animation fixed so any shift is the body. On 1.0 the number of wearables that move is: Bitling 21, Kernel 19, Stub 27, Shell 12, Firewall 18, Airgap 22, Ghost 2, Whisper 2, Glitch 41 and Panic 41 (up to 5 columns), and none on Chrome, Daemon, Plat and Init. All 22 Iron forms had the same fault by my own design (the B frame dropped the head one row, so every head wearable bobbed 1 row, 17 or more of them per form). They now have none. The rule for new forms, applied to every Iron form:
-- the head, eyes, mouth and neck rows are **identical** in A and B;
-- only the lower body animates: the feet step and the vent slots close;
-- the A and B anchors are the same;
-- the foot row keeps enough cells (at least 0.4 of the width) that the wearable code's idea of the body's bottom does not move either (Thrash's elder had missed this and moved four chest wearables a row).
-
-A test checks it on every form and every wearable through the real `placeWorn` (902 cases, none move) and that the A and B frames still differ by at least 4 cells (the audit's floor). The cost: the frames now look quieter (rigid, as Iron should), and a held head means the holologo is drawn at its higher position in both frames, which is why more 15 row cases clip than before.
-
-**4. Palette colors (a 1.0 change).** The yellow-looking marks are the sprite's highlight cells ('+', near-white `#f5f5f5`: nose, cheeks, teeth). I had judged them by CIE76, which is dominated by hue; by luminance contrast white is 1.10:1 on acid, 1.11:1 on origin and 1.24:1 on toxic, and 2.1 to 3.3 on the palettes that read fine. Toxic's eyes (cyan on bright green) were 1.28:1 against 2.1 to 3.0 elsewhere. Changes in `src/sim.js`: acid, toxic and origin get a `mark` color, a dark indigo `#2b1b5a` (11:1 or better against all three), and `paletteColors` uses it; toxic's accent goes from `#05d9e8` to the deeper teal `#0891b2` (2.7:1 on its body, 4.5:1 on the dark screen, so the HUD still reads). `tools/lib/sprite-checks.mjs` uses the same color, and `src/wearable-colors.js` was regenerated (three default colors changed). A near-black first try (`#0a1214`) made the Corp barcode half-blend into the marks on Daemon in three palettes in the audit's own screen; the indigo does not. Both audits are at their baselines, and `npm test` passes (500). **Not changed:** ice, whose white marks are 1.59:1; borderline, and not flagged in review.
-
-**5. Everything else** in the review (the other sprites) looked fine.
-
-## The Gronk and Splat redraw
-
-The audit flagged Gronk and Splat (the two forms of the Breach role) at 0.85, above anything in 1.0, and their elders at 0.83. Both were near-rectangles (16 wide, 14 rows). I redrew them with opposite proportions and let the elders follow:
-
-- **Splat** (corp): a wide hammer-head slab, 16 across, over a narrower 12 column body, with its piston on top and its eyes a row higher.
-- **Gronk** (street): a narrower head (12) over broad shoulders (16), the arms apart from the torso with a gap column, horns and teeth kept. Its elder's arms run down to the hem so its fists reach the floor.
-- **Elders:** each is its adult stretched to 18 columns and one row taller, with a brow mark, as before.
-
-| | Before | After |
-|---|---|---|
-| Gronk and Splat | 0.85 | 0.61 |
-| Their elders | 0.83 | 0.63 |
-| Gronk's elder and Guru's elder | 0.82 | 0.81 |
-| Each elder closest to its own adult, scaled | yes | yes (Gronk's 0.79 against Guru's 0.73, Splat's 0.90 against Munch's 0.72) |
-
-- **First try on the elder missed.** After the redraw, Gronk's elder overlapped Guru's elder at 0.821, just over the 1.0 bar of 0.82. Extending its arms down to the hem brought it to 0.806, still closest to Gronk. The test is the 1.0 bar (0.82), not looser.
-- **A test that hard-coded the old Gronk's rows failed and was updated** to check the marks instead (horns, teeth, arms apart).
-- **Judge by eye.** The numbers are a screen; the redrawn pair should be looked at in the gallery (see Reviewing the sprites).
-
-## The holologo clip (1.0), and the options
-
-The one wearable that clips (the holologo, 1 px above the screen) clips on 1.0's forms too. The audit only says it leaves the screen at some point of the idle motion; I measured how much of the time, over 60 to 200 seconds of each idle (bounce, sway, hover), on 1.0's 14 forms:
-
-| Idle | Forms with any clip | Share of time clipped (mean, worst form) | Longest unbroken run |
+| | Iron (firmware) | Program (software) | Wetware (grown tissue) |
 |---|---|---|---|
-| bounce | 13 of 14 | 32%, 62% | 5.7 s |
-| sway | 13 of 14 | 30%, 48% | 7.3 s |
-| hover | 13 of 14 | 45%, 77% | 2.9 s |
+| Key / files | `protoB_<id>`; `art.js`, `models.js`, `proto.test.js` | `protoP_<id>`; `program-art.js`, `program-models.js`, `program.test.js` | `protoW_<id>`; `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `blank-motion.js` |
+| Baby | own (blocky) | 1.0's Bitling | organoid (cortex folds, tendrils) |
+| Teens corp / street / hidden | corp, street, hidden (own) | 1.0's Kernel / new (mohawk, unibrow, bar-and-dot arms) / 1.0's Shell | blobs: baby grown / + spikes, unibrow, boots / cloaked blob |
+| Breach corp, street | Splat, Gronk | Tiger, Worm | Razor, Solo (after Batou) |
+| Dodge | Jiff, Bamf | Mouse, Spoof | Wired (1.0's Chrome), Chipped |
+| Tune | Ping, Feep | Parse, Phreak | Mentat, Gibson |
+| Feast | Munch, Thrash | Gobble, Snarf | Nutri, Leech |
+| Hidden adult | Guru | Ghost (1.0's) | Blank (hooded, camouflaged) |
+| Elders | `<adult>Elder`, hand-drawn | same; `ghostElder` is 1.0's Whisper | same; `wiredElder` is 1.0's Plat; `blankElder` has a motion layer |
+| Asleep / dead mark | queue of dots / dark barcode | block cursor / bright flatline | none / dim trace |
 
-It is **not a brief artifact of the top of a bounce**: on most forms it is cut about a third of the time, in runs of several seconds, and always the same single tip pixel (the diamond's top). Cause: the holologo sits 6 rows above the head (`a.top - 4`, with the tip 2 above that) while the idle motion reserves 5 rows (sized for the halo), and a 15 row form has only 5 rows of room even at rest.
+Names of teens and elders are undecided (ids are `teenCorp`, `tigerElder` and so on). Ids are permanent once the app uses them.
 
-Options, none applied (a 1.0 art or layout change is the maintainer's call):
+## Commands
 
-| Option | Effect | Cost |
-|---|---|---|
-| Draw the holologo one row lower (`a.top - 3`) | Fits the 5 rows the idle already reserves, fixes every form including the 15 row ones | The diamond's bottom tip touches the head top (no gap row). Smallest change |
-| Move the sprite space down one pixel (floor 20 to 21) | Gives every form and the halo one more row | Touches the whole layout: the prop floor (row 21), the flatline (row 23) and the cache icons below. Largest |
-| Resize the viewscreen | Same, by adding a row at the top | Also changes the HUD slots at the top (virus, trace, bang, Z); every row-based number moves |
-| Leave it | A single tip pixel is lost about a third of the time; the diamond stays recognisable | None, but it is not the temporary flicker it might seem |
+```bash
+npm run proto:test                 # all prototype tests
+npm run proto:audit                # 1.0 sprite audit on Iron; EGG=program|wetware|all or proto:audit:program, proto:audit:wetware
+npm run proto:gallery              # writes gallery-iron.html, gallery-program.html, gallery-wetware.html (generated, gitignored)
+npm run serve                      # http://localhost:5174 ; review page /prototype/netling2/ ; galleries /prototype/netling2/gallery-<egg>.html
+```
 
-My lean is the first (one row lower), or leaving it if the touching tip looks worse than the clipped one. Check both in the gallery before choosing.
+- The review page (`index.html`) has a section per egg and controls that apply to every form shown: palette, tell skin, temper, care sliders (neglect), bugs, reduced motion, pose, any wearable, anchor rows. Dedicated strips exist only for neglect on Iron's four-form line and bugs on Gronk.
+- The galleries are 1.0's real `gallery.html` run on one egg's forms (every wearable, state, palette, tint, prop, visitor).
+- To judge art, screenshot the pages in headless Chromium (Playwright; browsers are in `/opt/pw-browsers`) and look; draw options side by side before committing when a form is contested. The maintainer reviews from screenshots and prefers options shown together.
+- **Trap:** `src/accessories.js` builds its anchor table once on first load, and `src/sim.js` imports it. Any script, test or page that draws wearables on prototype forms must import `prototype/netling2/ready.js` **first**, or the wearable code silently guesses anchors (it throws if it did not take).
 
-## Reviewing the sprites
+## Rules the tests enforce (apply to every new or redrawn form)
 
-Three places, from broad to specific.
+- **Size.** Baby 12 wide. Teens 14 wide, 11 to 12 rows. Adults 16 wide, 13 to 15 rows. Elders 18 wide, no more than 15 rows, never shorter than the adult. Marks only `. # o + x` (main, accent/eyes, highlight, dim).
+- **Frames.** Rows 0 to the neck row are identical in A and B (only the lower body animates). The body's bottom (the last row with at least 0.4 of the width painted, as the wearable code reads it) is the same row in both. A and B differ by at least 4 outline cells. Anchors (`headTop`, `eyeRow`, `mouthRow`, `neckRow`) are in range, in order, point at painted cells and are the same in A and B. Most frame bugs came from the bottom-row rule.
+- **Eyes** are 2x2 groups of `o` on `eyeRow` and the row below (the generic poses find them there). Head width for eyewear comes from the `headTop` row, so that row must cover the eyes.
+- **Silhouette** (1.0 audit screen, centred overlap): no same-stage pair above 0.82. The two main teens are close (0.7 to 0.82); the hidden-path teen is at least 0.1 further from each (and under 0.72) and at least 20 outline cells different. Hidden-path forms must be distinct in outline.
+- **Elders.** Each role elder is closest, after scaling its adult to the elder's size, to its own adult among all nine and at least 0.75 (the unscaled score misleads for grown forms); elder pairs under 0.82. Hand-drawn, not stretched.
+- **Hidden forms may break the form rules** (maintainer): Ghost's elder is 1.0's Whisper (14 wide, smaller); Blank's elder has a motion layer that changes its outline.
+- **Poses.** Asleep and dead keep the awake outline; the dead X is symmetric on two-cell eyes (Wetware rounds toward the middle; Iron and Program still use 1.0's rounding, see Open).
+- **Flash budget** (project rule 7): nothing flashes more than three times a second; no picture change faster than 200 ms; motion layers use 400 ms steps.
 
-1. **Every form, with the real game's code (the gallery).** `npm run proto:gallery` writes `prototype/netling2/gallery-iron.html` and `gallery-program.html` (Program; same sections, forms named `protoP_<id>`, starts on Tiger), which is the unchanged `gallery.html` with Iron's 22 forms (and 1.0's Chrome and Bitling as its reference bodies) instead of 1.0's; it is generated, not committed. Then `npm run serve` and open `http://localhost:5174/prototype/netling2/gallery-iron.html`. It is the real gallery: raw A, B, sleep and dead sprites at 10x, silhouettes, the real LCD in every state, every wearable alone and worn together, every palette and tint, props, visitors. The `form` control picks one form for the scene, wearable and combination views; the section buttons (forms, silhouettes, scenes, wearables, matrix, combos, props and so on) jump to a part, and the link keeps the view (`#sec=forms&form=protoB_gronk`). Pink outlines mark a wearable that blends into the pet; hover a cell for the reason. Forms appear as `protoB_<id>`.
-2. **A specific problem, from the audit.** `npm run proto:audit` runs the real audit on Iron's forms and names each candidate (for example `protoB_gronk / protoB_splat`). `--check=forms` (silhouette pairs), `--check=clip`, `--check=combos`, `--check=poses` and so on run one part, and `--json` gives the raw rows. Then open the gallery on that form (`#form=protoB_gronk`) and look. The audit flags candidates; a person judges them.
-3. **The prototype review page, for what the gallery does not have.** `http://localhost:5174/prototype/netling2/`: the whole Iron tree in rows (the line, the three teens and the hidden branch, all nine adults and elders), the temper tell at any level, the neglect and bug looks driven by sliders, and a pose, wearable and anchor-row control. `bugs-and-neglect` and the tell are only here.
+Design lessons: the street lean adds to the corp body and keeps it blocky (cutting pieces away read as broken); a hidden form's lineage can ride on marks (hood peak, shimmer, crown) not outline; a pair of marks under the mouth reads as stray pixels or extra eyes; reuse 1.0's A frame and re-time only its B frame.
 
-`npm run proto:test` runs the prototype's own tests; `npm test` is the game's. Whichever you use, say what was not run on a device: nothing here has been looked at on a phone.
+## Layers over the sprites (not part of the registered frames)
 
-## What the wider run showed (commit 580db88, not reproducible from this tree)
+All are pure functions, applied by the review page; the real renderer and the galleries do not run them.
 
-Before the scope was narrowed I built the full option C tree (3 teens and 9 adults) in both models. These figures were measured then with the same checks; the code that produced them is in that commit only.
+| Layer | File | What it does | Tested | Not done |
+|---|---|---|---|---|
+| Temper tell | `tell.js` | five levels (-6, -2, +3, +6 edges, 0.5 flicker guard); steady = countable beat (every 6 s, 3 s strongly), unsteady = stutter and drift; skin per egg (Iron settles and drifts, Program blinks and hops, Wetware pulses brightness); reduced motion keeps the beat and gives unsteady a still variant | numbers only: levels, guard, exact beat, 200 ms floor, reduced motion, skins differ (`proto.test.js`) | never reviewed on every form; the review page's tell skin is a manual control, not tied to the form's egg; interaction with the 1.0 idle quirk (bounce, sway, hover), wearables and Blank's layer unchecked; thresholds are placeholders |
+| Neglect | `neglect.js`, `needs.js` | Iron's rust: dim `x` on `#` body cells below the mouth row, two levels, bottom first, never over eyes or outline; level from the four care stats with soft and alert lines (soft 40, alert 20, heat 65 and 80, Integrity 60 and 30, 3 point guard) | unit tests on all 22 Iron forms only | Program and Wetware have no tests and no skin of their own (header says corruption and pallor were intended); `x` already means dim fill, shimmer, void or stripes on many forms, so rust may be invisible or confusing there; spot check with the existing function: Program's baby gets 1 rust patch at level 2 (nearly invisible); stat lines unmeasured against play |
+| Bugs | `glitch.js` | 0 to 5 bugs each tear one body row a column sideways in a fixed order; persistent; twitch one more row for 400 ms every 3 s (not under reduced motion) | unit tests on all 22 Iron forms only | needs at least 5 rows with free edge columns; spot check: Wetware's street teen has only 4, so it cannot take 5 bugs, and at 5 bugs the overlap with the original falls under the 0.8 the Iron test requires on Wetware's baby (0.63) and Wired (0.77) and Program's spoofElder (0.79), with Program's Mouse borderline (0.80); readability of 5 bugs on small forms; combined with rust |
+| Blank elder motion | `blank-motion.js` | camouflage scan band sweeps hood to feet and back, plus a dim ghost dub sliding 3 cells either way; 12 steps of 400 ms; 24 columns wide; registered A and B frames still obey the rules; reduced motion parks it | 5 tests in `wetware.test.js` | real renderer and gallery do not run it; how wearables sit on the moving figure unchecked; device flicker check owed |
 
-| 3 teens and 9 adults | Model A, composed | Model B, authored |
-|---|---|---|
-| Hand-placed cells | 832 | 3146 |
-| Closest pair of adults of different roles | Gronk and Thrash 0.89 | Feep and Thrash 0.80 |
-| Pairs of different roles at 0.80 or above | 10 | 1 |
-| A role's corp and street forms | 0.94, 0.75, 0.94, 0.70 | 0.85, 0.67, 0.75, 0.81 |
+Neglect and bugs are meant to appear together (neglect leads to faults, faults roll bugs). Bugs are cleared with scrip, Standing or a netrun debug station (see the sketch).
 
-Three conclusions, which the one-line prototype cannot show:
-- **Cost flips with the number of forms.** A was about a quarter of B's cells at 12 forms, and equal at 2. The break-even is a handful of forms per body.
-- **Model A did not clear the 1.0 bar at 9 adults** (0.89, after a second pass on the lean overlays), and its two forms of a role were near-identical outlines. Model B cleared it after redrawing two forms.
-- **This maps onto the sketch's option B against C.** Model A is, in effect, option B (one named form per role, the Standing lean as a visible variant); model B is option C (two genuinely different named forms per role). If option C stands, B is the safer fit for the adults; if the fallback to option B is used, A is the natural build.
+## Next phase
 
-## Open questions
+The maintainer sets the order. Suggested sequence:
 
-The composition question is closed (see Decision).
+1. **Maintainer review (not an AI task).** Program and Wetware in `gallery-program.html` and `gallery-wetware.html` and on the review page, for oddities. Known suspects: Program's Gobble and Worm (weakest reads), the street teen (six passes), Spoof's half mask, Tiger, Parse and Snarf (4 cell frame changes, near-frozen); Wetware's Chipped (its cyber lens is the highlight colour, which the wearable code does not count as an eye, so eyewear finds one eye), Leech's one cell tube, Solo against Nutri (0.81), Blank's shimmer and hood, and the nine Wetware elders (first drafts, mostly wider adults with one feature). Record findings in the sketch handoff, then fix.
+2. **Care and bug effects, enacted and checked on all 66 forms.** Extend the neglect and bug tests to Program and Wetware (loop all three eggs, both frames, asleep and dead); look at every form with each level and each bug count on the review page (sliders apply to every form) and in the galleries; decide whether Program and Wetware get their own neglect skin (corruption, pallor) and a bug look that fits their edges; check the combined look and small forms; check poses; then confirm the stat lines with the balance tools once 2.0 rules exist. Known from a spot check: Wetware's street teen (4 tearable rows), Wetware's baby and Wired and Program's spoofElder (outline lost at 5 bugs), Program's baby (rust nearly invisible). Fix forms where the effect is invisible or breaks (for example shimmer or `x` heavy forms), or change the layer's rules.
+3. **Temper pass on every form.** Only part of Iron was used for feasibility. Run each egg's skin on every form of that egg at every level, with reduced motion, with wearables on, with the idle quirk, with Blank's layer, and look for forms where the move reads wrong (drift off the screen edge, a hop through a wearable, a wide elder). Bind the skin to the form's egg on the review page. Tune thresholds and the guard with the balance tools once temper accrues. Idle behavior and chatter tone (the other two tell channels) are not prototyped.
+4. **Smaller items:** names for teens and elders (all eggs); Chipped's accessory placement; Plat or a hand-drawn Wired elder (a hand-drawn one overlaps Plat 0.96, so Plat is in); put Blank's motion layer in the real renderer and gallery; the Laughing Man ring (a bright dash chase around the face opening, saved as an eye accessory idea); Iron's and Program's asleep chest marks (queue, cursor) sit under the mouth and read as stray pixels (Wetware dropped its mark); Iron's and Program's dead X rounding; thin elder margins (Iron's Gronk, Ping, Munch, Thrash 0.01 to 0.03; Program's Parse 0.02).
 
-0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
-1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
-2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
-3. Wetware's 22 forms are drawn (first drafts of the nine elders; see Wetware elders). Program's 22 forms are drawn.
-3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
-4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
-5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
-6. The holologo clip in 1.0 (a persistent 1 px, about a third of the time): four options laid out in The holologo clip, none chosen.
-7. Ice's white marks are 1.59:1 by luminance (acid, toxic and origin were fixed): leave, or give ice a mark color too?
-8. Headphones plus visor merge into one band on every form, 1.0's included: change the shared wearable layout, or accept?
+## Open decisions for the maintainer
 
-## What drives neglect and bugs
+- 1.0 art problems found on the way, none changed: the holologo clips 1 px about a third of the time on every form (options in the history file; leaning to draw it one row lower); headphones plus visor merge into one band on every form; ice's white marks are 1.59:1; 1.0's Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic move wearables between frames (Program reuses their A frames with re-timed B frames).
+- 1.0 code changed once, with the maintainer's agreement: acid, toxic and origin got a `mark` colour and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Regenerate with `node tools/wearable-colors.mjs --write` after any palette or sprite change that affects it.
+- Whether the temper tell for Iron (drift off a grid) is distinct enough from 1.0's idle sway.
 
-Decided to try (maintainer): **neglect comes from unmet needs and is transient; bugs are the persistent layer and show as glitches.** Two looks on two channels, so the player reads each at a glance.
+## Not run, not known
 
-| | Neglect | Bugs |
-|---|---|---|
-| Input | The four care stats (Charge, Sync, Integrity, Heat, 0 to 100), read now | The bug count, 0 to 5 (the sketch's ceiling) |
-| Persistence | Transient: a function of the stats now, so it clears as soon as the needs are met | Persistent: stays until the bugs are cleared (scrip, Standing or a netrun debug station) |
-| Look | Rust: dim patches on the body from the bottom up, in two levels. Marks only, never moves, never changes the outline | Glitch: each bug tears one more body row a column sideways, in a fixed order, so the count reads at a glance |
-| Motion | None, so reduced motion needs no variant | A bugged netling also twitches one more row for 400 ms every 3 s; reduced motion drops the twitch and keeps the still tears |
-| Code | `needs.js`, `neglect.js` | `glitch.js` |
-
-- **Neglect lines.** 1.0's own alert lines (Charge or Sync under 20, Heat over 80, from `needsAttention` in `src/sim.js`) are the alert line. A soft line sits earlier (40, 40, and Heat at 1.0's overclock line of 65). Integrity has no alert line in 1.0 (a virus is the alert), so its lines (60 and 30) are mine, to tune. Level 1 (worn) is one need past its soft line; level 2 (neglected) is one need past its alert line or two past soft.
-- **Flicker guard.** A need has to clear a line by 3 points before the look changes back, so a stat hovering on a line does not flicker it. Placeholder, like the temper guard.
-- **Tests (37 in all):** neglect lines and the transient behavior, the guard, one torn row per bug and never an eye row or a lost cell, persistence under reduced motion, a new bug adding exactly one tear, the outline staying within 0.8 overlap at five bugs, the twitch timing and its 200 ms floor, and the two looks combining without interfering.
-- **Both looks together is intended (maintainer).** Neglect leads to faults and faults roll bugs, so the rust and the glitches are meant to appear together, and bugs do not suppress the rust. A test checks the two combine without interfering (rust never changes which cells are painted or where rows tear).
-- **Not measured:** how often needs sit past a line in real play (the balance tools have not been run on this), and whether the combined look is readable on a small screen; I have not judged it by eye on a device.
-- **Open:** whether five bugs on a small form read as five distinct states or as a smear; the Dex and log wording for either look; the Iron, Wetware and Program skins other than rust and torn rows.
-
-## Not done
-
-- Not looked at on a phone or by anyone but me, and not at motion speed beyond screenshots of single frames. Whether the Iron art reads as firmware, whether the rust reads as neglect and not as part of the design, and whether the tells are legible are human calls.
-- Wetware has tell code and tests but no body art and no neglect skin, so its tell has only been checked as numbers, not seen. Program has body art but no skin of its own for neglect or bugs.
-- Idle behavior and chatter tone, the other two temper channels, are not prototyped. Nothing about Standing visuals beyond the street lean marks.
-- `gallery.html` itself is unchanged. `npm run proto:gallery` generates copies that run it on Iron's and Program's forms (see Reviewing the sprites), and the audit runs on them through a wrapper. Both depend on `ready.js` being imported first; see the trap in NETLING_2_SKETCH.md (Handoff).
-- The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
-- **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
-
-## Wetware (baby, teens and adults)
-
-Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude-wetware.js`; forms register under `protoW_<id>`. Run `npm run proto:audit:wetware` (or `EGG=wetware`, `EGG=all`) and `npm run proto:gallery`.
-
-- **The baby is an organoid** (maintainer's pick of three candidates: a round cell, an organoid, a tadpole): 12 x 11, a lump of cultured tissue with a folded cortex (dim cells across the top of the head), the standard face, and four root-like tendrils. Head, eyes, mouth and neck are identical in A and B; only the two tendril rows move (14 cells differ). The folds are meant as the egg's mark for later forms, and give the pallor skin and the pulse tell somewhere to show.
-- **Silhouette.** The first draft overlapped Iron's baby at 0.84, over 1.0's 0.82 same-stage bar (a cross-egg pair, but kept under it anyway); rounding the top and narrowing the row under the eyes brought it to 0.77 against Iron's and 0.75 against Program's.
-- **Poses (a proposal, easy to change).** Asleep: no mark at all, only 1.0's slit eyes (a first draft put a two cell pulse under the mouth, which read as stray pixels; the maintainer dropped it). Dead: a run of dim cells across the chest (a pale trace, the colour going out of the tissue; the opposite of Program's bright flatline). The dead mark is from the sketch's Wetware register (a dream ends and the next begins). Neither has been judged by eye on a device.
-- **Verified:** the prototype tests (79, including 9 new), the real 1.0 audit on the baby (0 wearables move between frames, 0 leave the screen, no contrast losses), and `npm test` (500). **Not done:** a by-eye or device check, the Wetware neglect (pallor) and bug skins, and the tell seen on art.
-
-**Teens (maintainer's directions: blobs for now, humanoid bodies come at the adult stage; 11 rows like Iron's and Program's; Blank's line may keep a Ghost in the Shell reference as long as it is a different take on Program's).** Ids `teenCorp`, `teenStreet`, `teenHidden` (names undecided). 14 columns, 11 rows, head, eyes, mouth and neck identical in A and B, only the last row animates.
-- **Corp:** the baby grown: the same folded cortex, a wider body, four tendril feet.
-- **Street:** the corp body kept whole plus added parts (the rule from Program): spikes over the cortex, a dark unibrow, ear stubs by the eyes, arms held off the body and wide boots.
-- **Hidden (Blank's line):** a cloaked blob. A hood peak, slit eyes, no mouth, a body of alternating dim and bright cells (the shimmer of the thermoptic camouflage in Ghost in the Shell, where Program's hidden path takes the Shell as a hollow casing and the Ghost as the thing inside) and a scalloped hem. A first draft was a humanoid ninja at 13 rows; both were set aside by the maintainer's directions.
-- **Measured (the 1.0 silhouette overlap, centred):** corp and street 0.81 (under 1.0's 0.82 bar; the first draft was 0.93, then 0.86, 0.83 and 0.82 as parts were added), hidden against corp 0.67 and against street 0.62; baby against each teen 0.58 to 0.66. Outline cells differing: corp/street 24, hidden against either 36 and 48.
-- **Verified:** 83 prototype tests, the real audit on the four forms (no clips, no frame movement, no contrast losses), `npm test`. **Not done:** by-eye or device review; the corp and street pair is the closest (0.81) and the street's unibrow reads as a headband at small size; the hidden teen's shimmer and the 4 dim cells of its eye row read small.
-
-**Corp adults** (`WETWARE_ADULTS`; maintainer: Chrome for Wired; humanoid is a hunch, not a directive). 16 columns, up to 15 rows, humanoid (a neck, shoulders, arms, legs), the baby's cortex kept on the head. Names are the sketch's.
-- **Razor** (Breach), 14 rows: a narrow jaw, shoulders, a crest of folds, and arms that hang beside the torso each ending in a blade ('+' strip) down the outside of the forearm. Its first draft was a wide dome like Chrome's (0.85 against Wired); the second fixed that with a narrow jaw but held the arms out in a T with detached blades, which the maintainer rejected; this third draft keeps the narrow head and hangs the arms (Razor against Wired 0.65).
-- **Wired** (Dodge), 15 rows: **1.0's Chrome**. The A frame is 1.0's, unchanged (a test). 1.0's B frame moves the visor's lights and eyes, so B keeps A down to the neck row and takes only 1.0's arm and leg rows (6 cells differ). It has no cortex and no Wetware look yet; the generic sleep and dead poses put one X on the whole visor band.
-- **Mentat** (Tune), 14 rows: an oversized cortex on a narrow body in a robe with a scalloped hem.
-- **Nutri** (Feast), 14 rows: a round, wide body, a wide mouth and a dark belly band; the legs are the only moving part (4 cells).
-- **Measured:** the closest pair is Wired and Nutri at 0.80 (Razor and Wired was 0.85 on the first Razor, a wide dome like Chrome's; the redraw as a narrow jaw on full shoulders brought it to 0.70); every adult is under 0.67 against every teen and the baby. The audit reports no new problems: the holologo clips 1 px on all four, as it does on all 13 of 1.0's forms; no contrast losses; wearables do not move between frames (86 prototype tests pass).
-- **Weak spots to check by eye:** Razor's blades read as separate pink strips and its shoulders as one bar; Wired has no Wetware mark; Mentat and Nutri share a wide base (0.79); Razor's A and B frames differ by only 4 cells, Nutri's by 4.
-- **Not drawn at this point:** the street adults (since drawn), Blank (since drawn), and the nine elders.
-
-**Dead X placement fix (Wetware).** Review found the dead X's awkward on Wired and Razor. Three causes, three fixes: (1) Razor had a dark brow row above its eyes and eyes two rows lower than the other forms, so the X's landed on the brow and the jaw; the brow is gone and the eyes sit on rows 4 and 5 like the other forms (Razor's eye row is now 4). (2) Wired is 1.0's Chrome, whose eyes are one wide visor band, so 1.0's generic pose put one X in the middle of it; Wired now has its own dead pose as in 1.0: the visor goes dark and an X sits at each end (columns 5 and 10). (3) 1.0's X is 3x3 and rounds a half-cell centre to the right, so on every two-cell eye (all Wetware forms but the hidden teen and Wired) the pair sat 2.5 columns in from the left and 3.5 from the right. A Wetware dead pose rounds a half-cell centre toward the middle of the sprite, so the pair is symmetric. Tried and dropped: a 4x4 X for two-cell eyes read as a block with corner dots. Iron's and Program's dead poses are unchanged and still have the right-rounding; whether to fix those too is a question for the maintainer. The review page and gallery already default to the ice palette (palette 0); the previews I make now use it too.
-
-Razor's arms were redrawn after review (see the Razor entry above); no other form changed.
-
-**Sleep poses.** The maintainer found the extra pixels on the asleep poses odd, on every egg: they sit right under the mouth. Wetware's asleep pose now has no mark, only the slit eyes. **Iron's (a queue of four dots) and Program's (a block cursor) still add a chest mark under the mouth** and are saved for later review, together with the dead X rounding above.
-
-**Street adults** (`solo`, `chipped`, `gibson`, `leech`; the sketch's street names). 16 columns, 14 or 15 rows, humanoid. Each echoes the street teen's added parts. **Second drafts after the maintainer's review of the first** (Solo needed more Batou, Chipped's larger eye read weird and its arms were disjointed, Gibson needed a full second attempt, Leech had no visible feeding tube and its eyes were too close).
-- **Solo** (Breach), 14 rows: after Batou in Ghost in the Shell: a bristle crop over cortex folds, a square jaw behind a wide dark ocular band with a lens at each end, a thick neck, huge shoulders, heavy arms with fists and a plain chest (the dim strap lines under the armpits were removed after review). The first draft was spikes, a unibrow and arms that read as hollow loops.
-- **Chipped** (Dodge), 15 rows: slim and springy: an antenna and chip port at the temple, **both eyes the same size, the right one a different colour** (the highlight mark, a cyber lens), arms that run unbroken from shoulders to hands, long legs. The lens is posed through `chippedPose` in `wetware-models.js` (asleep, its slit keeps the lens colour; dead, both X's are accent). The wearable code reads only accent cells as eyes, so eyewear and the cyber eye wearable find the left eye only: not checked by eye.
-- **Gibson** (Tune), 15 rows, full second attempt: a psychic receiver: cortex folds, broadcast arcs on both sides of the head, a slim body with arms hanging, and no legs: the body thins into scattered cells, as if dissolving into the Net, that shift between frames. The first draft was a hovering teardrop with orbiting marks.
-- **Leech** (Feast), 15 rows: tall and thin, eyes set wide apart (four cells between them against two), a round sucker mouth and a **feeding tube**, one bright line from the mouth down the chest to a dark pump at the belly, long arms that start at the shoulders and end in hands well clear of the legs, and a stoop. The arms were disjointed and ran into the legs in the second draft (they began a cell off the shoulders and the hands met the hips); the shoulder row now reaches them, and the legs step in and out below. A first redraw made the tube a two-cell wide block that read as a napkin; it is one cell now.
-- **Measured:** each street form against its corp sibling: Solo/Razor 0.68, Chipped/Wired 0.68, Gibson/Mentat 0.60, Leech/Nutri 0.59, all under the 0.8 the Program test uses and 20 or more outline cells apart. The closest of the eight is Solo and Nutri at 0.81 (1.0's bar is 0.82), then Wired/Nutri 0.80 and Mentat/Nutri 0.79. 88 prototype tests, the real audit (the 1 px holologo clip on all eight, as in 1.0; no contrast losses; no wearable moves between frames or leaves the screen), `npm test` (500).
-- **Review so far:** the maintainer called Chipped and Gibson good (Chipped pending accessories, since the wearable code reads only accent cells as eyes), asked for Solo's armpit lines to go and for Leech's arms to stop running into its legs; both are done and not yet reviewed again.
-- **Known weak spots, by eye:** Solo is the closest form to Nutri (a cross-sibling pair); Leech's hands step outward at the bottom of its arms; the tube is one cell wide and may be thin at phone size; Solo's and Leech's frames differ by 4 cells.
-
-**Blank** (the hidden adult, `blank`, role `hidden`). 16 columns, 15 rows, no lean. The hidden teen grown, with the same hood peak: **a hooded figure** with a pointed hood around a dark face opening where only two lens eyes glow (no mouth, nothing on the face to say who it is, the CP2020 sense of a person without a SIN), a cloak that slopes from the shoulders to a flat hem, and two feet below it. The camouflage (cells alternating bright and dim, after the thermoptic suit in Ghost in the Shell, a different take on Program's Shell and Ghost, which are a hollow casing and the thing inside) covers the hood below its peak, the chin and the whole cloak. Anchors: head top row 3, eyes row 5, mouth row 8 (the chin, no mouth, kept for mouthwear), neck row 9.
-- **Drafts.** (1) A smooth round head over a checkered skirt with a scalloped hem read as a squid; the maintainer asked for the camouflage to cover more and a hem less like tentacles. (2) A solid hood, camouflage only from the shoulders down. (3) A hybrid with a solid hood rim and camouflage over the hood top, chin and cloak. (4) **The one kept:** camouflage over the hood below its peak, including the rim around the face opening, plus the chin and the whole cloak. I had passed over it as murky; the maintainer preferred it, from a screenshot of that draft, and the committed version had been (3) in the meantime.
-- **Frames.** The shimmer **is** the animation: its phase swaps between A and B over the hood as well as the cloak, and the feet step together and apart. The outline of the hood, its eyes and the neck do not move between frames, only the bright and dim marks, so no wearable moves (the generic frame test reads the shimmer as body colour for Blank, and a Blank test checks the outline and eyes row by row). The swap changes about half the cells of the hood and cloak at each frame change, at the idle frame rate (the tell's 200 ms floor and six a second cap apply); **a device check for flicker is owed**, since this is the largest pattern change on any form.
-- **Poses.** Asleep and dead use Blank's own fill: the eyes close or cross back into the dark opening, not into a bright cell (`FILLS` in `wetware-models.js`, as the Shell does in Program). The dead trace lands on the neck row.
-- **Measured:** it overlaps its own teen 0.59, the corp teen 0.69, the street teen 0.65 (the lineage is carried by the hood peak and the shimmer, not the outline; the same is true of Iron's hidden pair), and the eight role adults at most 0.78 (Mentat). The closest of the nine adults is still Solo and Nutri at 0.81. The audit shows nothing new (the 1 px holologo clip, as on every form); 90 prototype tests, `npm test` (500).
-- **By eye:** reviewed by the maintainer in screenshots only; the pointed hood is the closest thing left to the squid look, and the shimmer's flicker is untested on a device.
-
-**Wetware elders** (ids `<adult>Elder`; names undecided). Nine, hand-drawn under the same rules as Program's and Iron's: 18 columns, 15 rows or fewer (never fewer than the adult's), the adult's marks kept and one feature of its own grown, the head, eyes, mouth and neck the same in A and B (Blank's shimmer, as marks only), the body's bottom the same row in both frames, each elder closest after scaling to its own adult among all nine, no pair over 0.82. Razor's: a bigger crest, a wider jaw and shoulders, longer blades. Solo's: a taller bristle crop, a wider ocular band and jaw, heavier arms. Chipped's: a wider head with the lens farther out, a bigger antenna, longer legs. Mentat's: a four row cortex and a longer robe. Gibson's: a wider head with the arcs kept and more scattered cells. Nutri's: a wider mouth and a heavier belly with its band. Leech's: a longer tube to a bigger pump, eyes farther apart. Blank's: a taller hood, a wider face opening, a longer cloak, and a motion layer (below).
-- **Wired's elder is 1.0's Plat** (the mainframe of Chrome, which Wired is; the maintainer's suggestion), with Plat's head frozen like Chrome's (1.0's B frame moves the visor lights) and its feet stepping, since the frozen B frame differed from A by only 2 cells (the floor is 4). Its dead pose has an X at each end of Plat's wider visor band.
-- **Plat against the current drawing rules (asked for by the maintainer).** A Wired elder was also drawn by hand under the rules: Chrome grown to 18 columns, with shoulder spurs. It overlaps Plat **0.96**: the rules, applied to Chrome, reproduce Plat almost exactly (a wider visor band, wider shoulders, the same legs), so the choice is between 1.0's art and nearly the same art with spurs. Against Wired: Plat 0.78, hand-drawn 0.80. Against the nearest other adult after scaling: Plat 0.83 over Nutri's 0.81, hand-drawn 0.83 over 0.82; both margins are thin. Plat is in; swapping is a few rows in `wetware-art.js`. The comparison image is in the session, not the repository.
-- **Measured:** own adult (scaled) against the best other: Razor 0.77 against Solo 0.74, Solo 0.87 against Nutri 0.78, Wired 0.83 against Nutri 0.81, Chipped 0.85 against Leech 0.75, Mentat 0.78 against Nutri 0.74, Gibson 0.79 against Wired 0.73, Nutri 0.87 against Solo 0.78, Leech 0.82 against Mentat 0.75, Blank 0.90 against Mentat 0.74. The closest elder pairs: Wired's and Nutri's 0.81, Mentat's and Nutri's 0.80, Razor's and Leech's 0.80. The audit shows nothing new (the 1 px holologo clip, as on every form); 94 prototype tests, `npm test` (500).
-- **Poses.** Chipped's elder keeps the lens colour asleep (lens columns 12 and 13); Blank's closes its eyes into the dark opening; the dead trace goes through Leech's tube and darkens it.
-- **By eye:** first drafts, not reviewed. Like Program's, most are wider adults with one grown feature; Razor's and Leech's read most clearly as a different, older form.
-
-**Blank's elder in motion (the Ghost in the Shell motif; `blank-motion.js`).** The maintainer asked how to continue the GitS motif for Blank, which may ignore the elder rules. Five options were rendered side by side and in motion: a Laughing Man ring around the face opening, the ring with nape cables, a camouflage activation, a ghost dub, and combinations. Decided: **camouflage activation over the whole hood and body plus a stronger dim ghost dub, with a frame-rule exception.** The ring was clear once its lit dashes used the highlight colour (they had been the hood's colour and vanished) but is **not sufficient alone and is saved as an eye accessory idea**; the camouflage-only and dub-only versions were too quiet on their own.
-- **What it does.** A dim scan band sweeps from the hood peak to the feet and back (rows 1, 3, 5, 7, 9, 11, 13 and back): above it the body is solid, below it see-through checker holes, like the thermoptic suit taking hold. The face opening and both eyes never change. A dim copy of the whole upper body slides three cells either way behind the figure (a ghost dub) and passes behind it in the middle. 12 steps of 400 ms, a 4.8 s loop, so no picture change faster than 400 ms (the flash floor is 200 ms). Reduced motion stops everything: the camouflage as drawn and the dub parked two cells out. A dim checker dub was tried against the solid dim one; the dim one is cleaner and is the pick.
-- **The exception, and what it does not cover.** The layer changes the outline on purpose, so it is exempt from the frame rule and the 18 column width (the result is 24 columns wide so the dub has room). **The registered A and B frames still obey every rule** (head and eyes identical, camouflage as marks, 18 columns), so wearables are placed on them as on any form and do not move. The layer is a pure function of (sprite, anchors, time) in the same way as the neglect and bug looks, attached to the form as `motion` in `wetware-models.js`; the review page draws it, the real renderer and the gallery do not yet, so in the gallery Blank's elder shows its static frames. A game would call the layer where it draws the form.
-- **Tests (5 new, 99 in all):** the frames still obey the rules; the layer is 12 steps of 400 ms, loops, is pure and changes every step; the face opening and eyes are whole at every step, the width is 24, the height is unchanged and only body marks change; the band reaches the hood peak and the feet and the dub reaches both sides; reduced motion is still and leaves the sprite untouched.
-- **Not done:** a device check (the band and dub are the largest moving pattern on any form; the loop and each step are inside the flicker budget on paper); the real renderer and the gallery do not run the layer; how a wearable sits on a figure whose outline moves under it (wearables use the static frames, so a hat will sit on the hood peak while the hood fades and the dub slides) has not been looked at.
+No device or phone check of any sprite, motion, flicker, legibility at small size or the real renderer. No balance run on neglect lines or temper edges. The audit's silhouette score is a screen, not a judgment. Rule prototypes behind the design numbers ran on scratch copies of 1.0's simulator (see `docs/netling2-prototypes/README.md`).

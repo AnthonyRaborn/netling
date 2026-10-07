@@ -26,7 +26,8 @@ When code and a doc disagree, the code is right: fix the doc.
 | Read how the Mainframe stage and the Source were decided, built and measured | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
 | Read the second-egg reference review (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
-| Review or continue the Netling 2.0 sprites (Iron's and Program's 22 forms each, the audit, the galleries, how to run it; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
+| Continue the Netling 2.0 sprites (all 66 forms, rules the tests enforce, commands, the next phase; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
+| Trace why a Netling 2.0 sprite decision was made (drafts, rejected options, measurements; archive) | [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) |
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
 | Re-run or inspect the Netling 2.0 rule prototypes (bugs, temper, Standing, care preferences) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 

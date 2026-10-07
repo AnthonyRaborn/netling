@@ -423,7 +423,7 @@ export const WETWARE_ADULT_ANCHORS = {
 // One elder per adult, hand-drawn as Program's and Iron's were: 18 columns against 16, keeping the adult's own marks and growing a
 // feature of its own. Rows 0 to the neck row are the same in A and B and the body's bottom is the same row in both. Wired's is 1.0's
 // Plat (the mainframe of Chrome, which Wired is), as the maintainer suggested; its B frame keeps Plat's head still and steps the feet.
-// A hand-drawn Wired elder was drawn for comparison and came out 0.96 like Plat (see NETLING_2_SPRITES.md).
+// A hand-drawn Wired elder was drawn for comparison and came out 0.96 like Plat (see NETLING_2_SPRITES_HISTORY.md, Wetware elders).
 export const WETWARE_ELDERS = {
   // Razor's elder: a bigger crest, a wider jaw and shoulders, longer blades down both forearms.
   razorElder: {
