@@ -122,7 +122,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 
 ## Open
 
-1. Whether Iron and Wetware get a real extra pressure (a drift or rejection mechanism) or stay pure reskins. Wetware's rejection is the one most tied to wearables, and that is a content choice.
+1. Iron's extra pressure is decided (drift: a Heat band of about 20 to 75; see the sketch, Next steps). Wetware's rejection and Program's are still open, tried as one managed meter each (Charge, Sync); Wetware's rejection is the one most tied to wearables, and that is a content choice.
 2. Bug clearing in netruns: the maintainer's direction is a clinic, a third unaligned kind of market that fixes bugs and sells the healing items (see the prototypes README, The clinic); names for it per egg are not drafted (Program clinic or repair shop, Iron workshop, Wetware clinic).
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.

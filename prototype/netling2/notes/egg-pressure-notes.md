@@ -160,3 +160,25 @@ hot side is the Result 6 setting (75, lock 1). IRONBOT=chill cools at 30 and ove
   floor's effect on flow and overclock timing beyond temper.
 - Ideas for the other two, untested: Wetware's opposite end is monotony (one packet type for too long), but that taxes committed Standing
   steering (the corpo player), which Result 5 already flagged; Program's rattle has no natural opposite end yet.
+
+## Decision (maintainer): Iron's pressure is adopted
+Restraint: Heat band 20 to 75 (hot line 75 with the Sync (LOCK) effect x1, cold line 20, nap and sleep cool no lower than 20). Defaults in
+`IRON` (sim.js); still switched on with IRON='{"on":true}'. Idea from the maintainer: each egg manages one meter, Iron Heat, Wetware Charge,
+Program Sync.
+
+## Result 8: a band on Charge (Wetware) or Sync (Program) (BANDS, prototype/netling2/sim/band-sweep.mjs, stat-profile.mjs)
+Strain builds above `hi` and under `lo` while awake and replaces the base infection hazard (floor 0.014, slope 0.3, as Iron's). 400 lives per
+archetype. Charge and Sync behave almost the same.
+- Profile (stat-profile.mjs): the bots keep an attentive player's Charge and Sync at 80 and over for about half of awake time (they top up to 85
+  and play to 80 to 90 at each check), while the worker spends 23% of awake time under Charge 10 and the casual and human players spread across
+  the whole range. Heat is different: its level follows choices (play, overclock), so a Heat band was neutral; Charge and Sync follow check-in
+  cadence.
+- High end: hi 85 hits the present players (attentive infections 7.6 to 11.7, sysadmin 7.5 to 12.4, daredevil 7.3 to 10.9; Sync: 12.5, 14.5,
+  11.9) and leaves casual, worker and human players near their baseline (+0.1 to +0.8); hi 90 is about half that; hi 95 is nothing. So it taxes
+  attention, not skill.
+- Low end: lo 25 and lo 15 hit the sparse check-in players: worker full-life 84.5% to 53% (lo 25) or 58% (lo 15), casual 92.5 to 88.8%,
+  human-regular infections 4.1 to 5.7. That is a gap penalty, the same finding as Program's rattle window cut.
+- Reading: a band on the meter's level is not a neutral egg pressure for Charge or Sync, because those levels are set by when the player
+  checks in. Next idea, not built: put the strain on what the player does, not where the meter sits (Wetware: a feed that lands above a
+  line, Program: a play when Sync is already high), with a free allowance, as the shock does for switching; or give Wetware and Program a
+  second axis that is a choice, not a level.
