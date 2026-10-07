@@ -423,3 +423,31 @@ test('temper seekers reach their strong level and hold it for 12 hours; the firs
   assert.ok(steady >= 5, `steady holds ${steady} of ${n}`);
   assert.ok(unsteady >= 5, `unsteady holds ${unsteady} of ${n}`);
 });
+
+test('bug policies: when a bot clears and what it pays with', async () => {
+  const { fixBugs } = await import('./sim/balance.mjs');
+  const bot = (fix, { bugs = 3, scrip = 30, standing = { corp: 4, street: 1.5 } } = {}) => {
+    const s = fresh();
+    Object.assign(s, { bugs, scrip, standing: { ...standing } });
+    const ctx = {};
+    fixBugs(s, { fix }, ctx);
+    return { s, ctx };
+  };
+  assert.equal(bot({ mode: 'none' }).s.bugs, 3, 'ignoring leaves them');
+  assert.equal(bot({ mode: 'scrip', at: 4 }).s.bugs, 3, 'waits for 4 bugs');
+  const once = bot({ mode: 'scrip', at: 1 });
+  assert.deepEqual([once.s.bugs, once.s.scrip, once.ctx.scripSpent], [1, 0, 30], '30 scrip clears two of three');
+  const even = bot({ mode: 'standing', split: 'even' });
+  assert.equal(even.s.bugs, 1, 'even split: 1 each, then the street track is empty so 2 come from the leader');
+  assert.equal(even.s.scrip, 30, 'Standing is paid even with scrip in hand');
+  assert.ok(even.s.standing.corp >= 0 && even.s.standing.street >= 0);
+  assert.equal(even.ctx.standingSpent, 4);
+  const leader = bot({ mode: 'standing', split: 'leader' });
+  assert.equal(leader.s.standing.street, 1.5, 'the leader pays');
+  assert.equal(leader.s.standing.corp, 0);
+  const trailer = bot({ mode: 'standing', split: 'trailer' });
+  assert.equal(trailer.s.bugs, 3, 'the trailer has under 2, so it cannot pay and waits');
+  const both = bot({ mode: 'both' }, { scrip: 15 });
+  assert.deepEqual([both.s.scrip, both.ctx.scripSpent, both.ctx.standingSpent], [0, 15, 4], 'scrip first, then Standing for the other two');
+  assert.equal(both.s.bugs, 0);
+});

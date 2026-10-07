@@ -1,6 +1,7 @@
 // Netling 2.0 headless balance harness: a fork of tools/balance.mjs that drives the 2.0 core rules (./sim.js).
 // Usage: node prototype/netling2/sim/balance.mjs [runsPerArchetype=300] [archetype filter]
-// New settings: CLEAR=scrip|both|none how bots clear bugs (scrip at check-ins; 'both' falls back to 2 Standing, 1 from each track);
+// New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
+// 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
 // BUGS='{"chance":0.5,"max":8}' overrides the bug rules. The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
@@ -97,23 +98,38 @@ export const CODEX_PRESETS = {
   ruins: FRAGMENTS.slice(0, FRAGMENTS.findIndex((f) => f.id === 'ruins-4') + 1).map((f) => f.id),
 };
 
-// Bots clear bugs at check-ins: with scrip (15) if they have it; with CLEAR=both, otherwise with 2 Standing, 1 from each track when
-// both have one (the gap stays) and 2 from the larger track when not.
-const minWins = (s) => Math.min(...GAME_IDS.map((id) => s.games[id].won));
-const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games[best].won ? id : best), GAME_IDS[0]);
-const CLEAR = process.env.CLEAR ?? 'scrip';
-function fixBugs(s, p, ctx) {
-  if (CLEAR === 'none' || p.noFix) return;
+// Bots clear bugs at check-ins. An archetype's `fix` sets its policy, otherwise CLEAR does (default 'scrip'):
+//   { mode: 'scrip' | 'standing' | 'both' | 'none',  at: bugs it tolerates before clearing (clears once it has this many; default 1),
+//     split: how a Standing payment is taken, 'even' (1 from each track when both have one), 'leader' (2 from the larger track) or
+//            'trailer' (2 from the smaller) }
+// 'both' pays scrip first and Standing when it has none; 'standing' pays Standing even when it has scrip. A bot that cannot pay waits.
+const clearMode = process.env.CLEAR ?? 'scrip';
+function standingCorp(s, split) {
+  const { corp, street } = s.standing;
+  if (split === 'leader') return corp >= street ? 2 : 0;
+  if (split === 'trailer') return corp >= street ? 0 : 2;
+  return corp >= 1 && street >= 1 ? 1 : corp >= street ? 2 : 0;
+}
+export function fixBugs(s, p, ctx) {
+  const f = p.fix ?? { mode: clearMode };
+  if (f.mode === 'none' || p.noFix || s.bugs < (f.at ?? 1)) return;
   while (s.bugs > 0) {
-    let paid = clearBug(s, { pay: 'scrip' });
-    if (!paid && CLEAR === 'both') {
-      const { corp, street } = s.standing;
-      paid = clearBug(s, { pay: 'standing', corp: corp >= 1 && street >= 1 ? 1 : corp >= street ? 2 : 0 });
+    let paid = false;
+    if (f.mode === 'scrip' || f.mode === 'both') {
+      paid = clearBug(s, { pay: 'scrip' });
+      if (paid) ctx.scripSpent = (ctx.scripSpent ?? 0) + BUG_CFG.clearScrip;
+    }
+    if (!paid && (f.mode === 'standing' || f.mode === 'both')) {
+      paid = clearBug(s, { pay: 'standing', corp: standingCorp(s, f.split) });
+      if (paid) ctx.standingSpent = (ctx.standingSpent ?? 0) + BUG_CFG.clearStanding;
     }
     if (!paid) break;
     ctx.bugsFixed = (ctx.bugsFixed ?? 0) + 1;
   }
 }
+
+const minWins = (s) => Math.min(...GAME_IDS.map((id) => s.games[id].won));
+const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games[best].won ? id : best), GAME_IDS[0]);
 
 export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
@@ -274,7 +290,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
-  const ctx = { games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
+  const ctx = { bugMin: 0, ceilMin: 0, games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
   const codexAtStart = ctx.codex.length;
   const lastCheck = Math.max(...p.checks);
   let minute = 0;
@@ -300,6 +316,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     minute++;
     const integrityBefore = s.stats.integrity;
     tick(s, t0 + minute * MIN, rng);
+    ctx.bugMin += s.bugs;
+    if (s.bugs >= BUG_CFG.max) ctx.ceilMin++;
     for (const k of Object.keys(s.flagged)) {
       if (s.flagged[k] && !prevFlags[k]) {
         mistakeKinds[k] = (mistakeKinds[k] ?? 0) + 1;
@@ -352,6 +370,10 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     bugsEnd: s.bugs,
     bugPeak: Math.max(ctx.bugPeak ?? 0, s.bugs),
     bugsFixed: ctx.bugsFixed ?? 0,
+    bugAvg: ctx.bugMin / Math.max(1, s.ageMin),
+    bugCeilingShare: ctx.ceilMin / Math.max(1, s.ageMin),
+    scripSpent: ctx.scripSpent ?? 0,
+    standingSpent: ctx.standingSpent ?? 0,
     prefActions: s.prefActions ?? 0,
     prefMatches: s.prefMatches ?? 0,
     prefBonus: s.prefBonus ?? 0,
@@ -520,7 +542,7 @@ export function stats(results) {
     })),
     hold24h: { strongSteady: rate((r) => r.hold['2'] >= 1440), strongUnsteady: rate((r) => r.hold['-2'] >= 1440) },
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
-    bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max) },
+    bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {
@@ -647,7 +669,7 @@ function printLife(st, detail) {
   console.log(`  standing at the end: corp ${st.standing.corp.toFixed(1)}, street ${st.standing.street.toFixed(1)} · temper ${st.temper.toFixed(1)} · level at the end (strongly unsteady/unsteady/middle/steady/strongly steady, %): ${lv(st.levelAtEnd)} · awake time at each: ${lv(st.levelTime)}`);
   if (t) console.log(`  at teen: corp ${t.corp.toFixed(1)}, street ${t.street.toFixed(1)}, gap ${t.gap.toFixed(1)} (certain ${pct(t.leanCertain)}, tied ${pct(t.tied)}), temper ${t.temper.toFixed(1)}, levels ${lv(t.level)}, mistakes ${t.mistakes.toFixed(1)}, wins ${t.wins.toFixed(1)} (fewest in a game ${t.minWins.toFixed(1)})`);
   if (a) console.log(`  at adult: corp ${a.corp.toFixed(1)}, street ${a.street.toFixed(1)}, gap ${a.gap.toFixed(1)} (lean certain ${pct(a.leanCertain)}, role certain ${pct(a.roleCertain)}), temper ${a.temper.toFixed(1)}, levels ${lv(a.level)}, bugs ${a.bugs.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored)`);
-  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end, peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared, at the ceiling ${pct(st.bugs.atCeiling)} · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} (median day ${st.holdDay.strongSteady ?? "-"} / ${st.holdDay.strongUnsteady ?? "-"}), 24h: ${pct(st.hold24h.strongSteady)} / ${pct(st.hold24h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
+  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end (${st.bugs.avg.toFixed(2)} on average), peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared (${st.bugs.scripSpent.toFixed(0)} scrip, ${st.bugs.standingSpent.toFixed(0)} Standing), reached the ceiling ${pct(st.bugs.atCeiling)} (${pct(st.bugs.ceilingTime)} of the time) · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} (median day ${st.holdDay.strongSteady ?? "-"} / ${st.holdDay.strongUnsteady ?? "-"}), 24h: ${pct(st.hold24h.strongSteady)} / ${pct(st.hold24h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
   const at = st.attention;
   console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.hotHours.toFixed(1)}h overclocked, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);
