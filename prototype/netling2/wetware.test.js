@@ -62,21 +62,20 @@ test('the organoid has its folded cortex (dim cells across the top of the head) 
   assert.ok(!baby.a[baby.anchors.a.eyeRow].includes('x') && !baby.a[baby.anchors.a.mouthRow].includes('x'));
 });
 
-test('the asleep and dead poses keep the awake outline; the eyes are the 1.0 slit and X, plus one Wetware mark on the chest', () => {
+test('the asleep and dead poses keep the awake outline; the eyes are the 1.0 slit and X, plus no mark when asleep and one on the chest when dead', () => {
   for (const f of forms) {
   const a = f.anchors.a;
   assert.equal(poseDistance(f.a, f.sleep), 0, `${f.id}: asleep outline`);
   assert.equal(poseDistance(f.a, f.dead), 0, `${f.id}: dead outline`);
   assert.ok(markDistance(f.a, f.sleep) > 0 && markDistance(f.a, f.dead) > 0);
   for (const kind of ['sleep', 'dead']) assert.deepEqual(wetwarePose(f.a, a, kind, f.id), f[kind]);
-  // Asleep: two accent beats on one row under the mouth. Dead: a run of dim cells on one row at or below the neck, longer than the pulse.
+  // Asleep: the 1.0 slit eyes and nothing else (no cell added around the mouth or chest). Dead: a run of dim cells on one row at or below the neck.
   const added = (pose, ch) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === ch && f.a[y][x] !== ch && y > a.mouthRow ? [x, y] : null)).filter(Boolean));
-  const pulse = added('sleep', 'o');
+  const slits = f.sleep.flatMap((row, y) => [...row].map((c, x) => (c !== f.a[y][x] ? y : null)).filter((y) => y !== null));
   const trace = added('dead', 'x').filter(([, y]) => y >= a.neckRow);
-  assert.equal(pulse.length, 2, `${f.id}: pulse`);
-  assert.equal(new Set(pulse.map(([, y]) => y)).size, 1, `${f.id}: pulse on one row`);
+  assert.ok(slits.length > 0 && slits.every((y) => y >= a.eyeRow && y <= a.eyeRow + 1), `${f.id}: asleep changes only the eyes`);
   assert.ok(trace.length >= 4 && new Set(trace.map(([, y]) => y)).size === 1, `${f.id}: trace ${trace.length} cells`);
-  assert.ok(trace.length > pulse.length);
+  assert.ok(!added('sleep', 'o').length, `${f.id}: no mark under the mouth when asleep`);
   }
 });
 

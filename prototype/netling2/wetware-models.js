@@ -3,7 +3,8 @@
 //
 // Wetware's marks come from the sketch's Wetware register (polling, and a death that is a dream ending and the next one beginning).
 // This is a proposal, easy to change:
-//   asleep: a slow PULSE, two accent cells with a gap on the first chest row under the mouth: the beat a resting body keeps between visits.
+//   asleep: no mark, only 1.0's slit eyes. (A first draft put a slow pulse, two accent cells, on the chest row under the mouth; under the
+//           mouth it read as stray pixels, and the maintainer dropped it.)
 //   dead:   a PALE trace, a run of dim cells across the chest: the pulse that stops and the colour going out of the tissue (the
 //           opposite of Program's bright flatline; the dream ends, and the next one starts as a new culture).
 // Marks only: they replace body cells (never the eyes or the outline).
@@ -28,7 +29,6 @@ export const WETWARE_ADULTS_ALL = ['razor', 'wired', 'mentat', 'nutri'];
 const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS, ...WETWARE_ADULTS };
 const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS, ...WETWARE_ADULT_ANCHORS };
 
-const PULSE = 'o..o';
 const TRACES = ['xxxxxx', 'xxxx']; // the longest that fits the chest
 // Stamp `mark` (centred, `ch` where it paints) onto the first row from `from` down where every painted cell lands on a '#' cell.
 function stamp(rows, from, mark, ch) {
@@ -39,7 +39,7 @@ function stamp(rows, from, mark, ch) {
   return rows.map((row, i) => (i === y ? [...row].map((c, x) => (mark[x - start] !== undefined && mark[x - start] !== '.' ? ch : c)).join('') : row));
 }
 export function wetwareMarks(rows, anchors, kind) {
-  if (kind === 'sleep') return stamp(rows, anchors.mouthRow + 1, PULSE, 'o');
+  if (kind === 'sleep') return rows;
   for (const trace of TRACES) {
     try {
       return stamp(rows, anchors.neckRow, trace, 'x');
