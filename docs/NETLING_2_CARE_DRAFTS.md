@@ -30,7 +30,7 @@ The 1.0 name is the rule; the egg name is only the label. Verb is the FDA kind t
 | CORP PKT (Charge, corp Standing) | CORP PKT | MAINS | VAT MIX | upkeep |
 | SCAV DATA (Charge, street Standing, 12% infection) | SCAV DATA | SALVAGE | SCRAPS | upkeep |
 | PLAY | PLAY | PLAY | PLAY | perfective |
-| PATCH (cure) | PATCH | RECAL | TREAT | corrective |
+| PATCH (cure) | PATCH | ALIGN | TREAT | corrective |
 | COOL | COOL | VENT | CHILL | corrective |
 | PURGE (cache, overflow) | PURGE | SCRUB | FLUSH | corrective |
 | NETRUN | NETRUN | NETRUN | NETRUN | perfective |
@@ -39,7 +39,7 @@ The 1.0 name is the rule; the egg name is only the label. Verb is the FDA kind t
 
 Notes:
 - The two feeds keep the corp and street flavor because they carry Standing (0.25). MAINS is clean supplied power and SALVAGE is scavenged; VAT MIX is corp-grown and SCRAPS is street.
-- Iron is read-only and cannot be patched, so its cure is a recalibration, which fits its failure model. The rule (cure the infection, Integrity +10, temper +1 within 30 minutes, -1 later) is unchanged.
+- Iron is read-only and cannot be patched, so its cure is an alignment (calibration), which fits its failure model. The rule (cure the infection, Integrity +10, temper +1 within 30 minutes, -1 later) is unchanged.
 - The mini-game picker stays BREACH, DODGE, TUNE, FEAST in every egg: the roles are the Dex descriptors. Mini-game text is re-skinned elsewhere (sketch, Impact).
 
 ## Event bar
@@ -70,7 +70,7 @@ Notes:
 Notes:
 - Program's death register, Iron's and Wetware's are the sketch's. "Care mistake" is internal and shown only in log text.
 - Wetware's rejection is the sketch's failure model used as the name of the virus. It is not yet a mechanism that grows with augmentation (open).
-- **Unresolved UI:** the button count is fixed, so bug clearing (15 scrip, or 2 Standing in any split) needs a home that is not a new control button, for example the readout or the inventory area. Not designed.
+- **Bug clearing goes through netruns (maintainer, first pass).** The control bar stays fixed. How is undecided: either a new node type in the existing netrun (the debug station anomaly in the sketch is one entry in the anomaly pool, which would grow into a node that needs rebalancing), or netruns split into a dive (JACK IN, the current expedition) and a market-like open mode. Scrip (15) and Standing (2, any split) remain the prices. Both options touch `netrun/` and its balance tools, so they come after the balance-bot update.
 
 ## Items
 
@@ -95,7 +95,7 @@ Replaces `alertReason` text (1.0 line in the first column). The key and the thre
 | trace | Corp trace incoming. Nm to respond. | Field audit under way. Nm to answer. | Corp scan under way. Nm to answer. |
 | attack | Intrusion attempt. DEFEND within Nm. | Tamper alarm. LOCK DOWN within Nm. | Something is getting in. FIGHT within Nm. |
 | overflow | Memory overflow. PURGE within Nm. | Buffer full. SCRUB within Nm. | Waste is backing up. FLUSH within Nm. |
-| virus | Virus detected. Patch it before Integrity collapses. | Drift detected. Recalibrate before it wears through. | Rejection setting in. Treat it before Health collapses. |
+| virus | Virus detected. Patch it before Integrity collapses. | Drift detected. Align it before it wears through. | Rejection setting in. Treat it before Health collapses. |
 | charge | Charge is running low. | Power is running low. | It is hungry. |
 | sync | Sync is fading. It wants to play. | Lock is slipping. It wants to play. | It is drifting away. It wants to play. |
 | heat | Running hot. Flush the coolant. | Running hot. Vent it. | Running a fever. Cool it down. |
@@ -115,7 +115,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 | Moment | Program | Iron | Wetware |
 |---|---|---|---|
 | Feed (corp) | > packet received. charge up. | > mains connected. charge up. | > vat mix down. it eats. |
-| Cure within 30 min | > patch applied. clean. | > recalibrated. drift gone. | > treated early. it settles. |
+| Cure within 30 min | > patch applied. clean. | > aligned. drift gone. | > treated early. it settles. |
 | Cool | > coolant flushed. | > vented. fans spin down. | > chilled. the fever breaks. |
 | Purge | > cache cleared. | > scrubbed. sectors good. | > flushed. it breathes easier. |
 | Nap | > nap over. back online. | > idle ended. back online. | > it wakes from a doze. |
@@ -123,7 +123,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 ## Open
 
 1. Whether Iron and Wetware get a real extra pressure (a drift or rejection mechanism) or stay pure reskins. Wetware's rejection is the one most tied to wearables, and that is a content choice.
-2. Where bug clearing lives with a fixed button count.
+2. Bug clearing in netruns: a new node type, or a split into a dive and an open market (see Failures).
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.
 5. Everything here is untested: label widths on the real control bar, the readout line length, the field manual (generated from `CFG`, so it needs egg-aware text).
