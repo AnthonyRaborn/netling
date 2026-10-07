@@ -1,6 +1,6 @@
 # Netling 2.0 sketch
 
-Status: planning notes for a separate app, plus a sprite prototype for all three eggs in `prototype/netling2/` (not shipped; see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)). The rules, pages and the app are not implemented; all 66 sprites are drawn as first drafts. Items marked Decided come from the maintainer; everything else is a proposal. Companions: [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (all page text) and [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) (the reference review; its candidate analysis was written for fitting a second egg into 1.0 and is partly superseded by this doc).
+Status: planning notes for a separate app, plus a sprite prototype for all three eggs in `prototype/netling2/` (not shipped; see [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md)). The rules, pages and the app are not implemented; all 66 sprites are drawn as first drafts. Items marked Decided come from the maintainer; everything else is a proposal. Companions: [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (all page text) and [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) (source vocabulary and unused ideas; reference only).
 
 ## Handoff
 
