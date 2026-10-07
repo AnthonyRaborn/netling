@@ -8,20 +8,25 @@
 //           opposite of Program's bright flatline; the dream ends, and the next one starts as a new culture).
 // Marks only: they replace body cells (never the eyes or the outline).
 import { pose } from './models.js';
-import { WETWARE_BABY, WETWARE_BABY_ANCHORS, WETWARE_TEENS, WETWARE_TEEN_ANCHORS } from './wetware-art.js';
+import { WETWARE_BABY, WETWARE_BABY_ANCHORS, WETWARE_TEENS, WETWARE_TEEN_ANCHORS, WETWARE_ADULTS, WETWARE_ADULT_ANCHORS } from './wetware-art.js';
 
 export const WETWARE_FORMS = {
   baby: { stage: 'baby' },
   teenCorp: { stage: 'teen', lean: 'corp' },
   teenStreet: { stage: 'teen', lean: 'street' },
   teenHidden: { stage: 'teen', lean: 'hidden' }, // Blank's line
+  // Option C, corp then street within a role; so far the corp forms. The street forms and Blank come later.
+  razor: { stage: 'adult', role: 'breach', lean: 'corp' },
+  wired: { stage: 'adult', role: 'dodge', lean: 'corp', from: 'chrome' }, // 1.0's Chrome
+  mentat: { stage: 'adult', role: 'tune', lean: 'corp' },
+  nutri: { stage: 'adult', role: 'feast', lean: 'corp' },
 };
 export const WETWARE_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
 export const WETWARE_HIDDEN_BRANCH = ['baby', 'teenHidden'];
-export const WETWARE_ADULTS_ALL = [];
+export const WETWARE_ADULTS_ALL = ['razor', 'wired', 'mentat', 'nutri'];
 
-const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS };
-const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS };
+const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS, ...WETWARE_ADULTS };
+const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS, ...WETWARE_ADULT_ANCHORS };
 
 const PULSE = 'o..o';
 const TRACES = ['xxxxxx', 'xxxx']; // the longest that fits the chest

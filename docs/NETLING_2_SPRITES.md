@@ -265,7 +265,7 @@ The composition question is closed (see Decision).
 0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
-3. Not drawn: Wetware's nine adults and nine elders (its baby and three teens are drawn). Program's 22 forms are drawn.
+3. Not drawn: Wetware's four street adults, Blank and nine elders (its baby, three teens and four corp adults are drawn). Program's 22 forms are drawn.
 3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
 4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
@@ -301,7 +301,7 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
 - **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
 
-## Wetware (baby and teens)
+## Wetware (baby, teens and corp adults)
 
 Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude-wetware.js`; forms register under `protoW_<id>`. Run `npm run proto:audit:wetware` (or `EGG=wetware`, `EGG=all`) and `npm run proto:gallery`.
 
@@ -316,3 +316,12 @@ Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude
 - **Hidden (Blank's line):** a cloaked blob. A hood peak, slit eyes, no mouth, a body of alternating dim and bright cells (the shimmer of the thermoptic camouflage in Ghost in the Shell, where Program's hidden path takes the Shell as a hollow casing and the Ghost as the thing inside) and a scalloped hem. A first draft was a humanoid ninja at 13 rows; both were set aside by the maintainer's directions.
 - **Measured (the 1.0 silhouette overlap, centred):** corp and street 0.81 (under 1.0's 0.82 bar; the first draft was 0.93, then 0.86, 0.83 and 0.82 as parts were added), hidden against corp 0.67 and against street 0.62; baby against each teen 0.58 to 0.66. Outline cells differing: corp/street 24, hidden against either 36 and 48.
 - **Verified:** 83 prototype tests, the real audit on the four forms (no clips, no frame movement, no contrast losses), `npm test`. **Not done:** by-eye or device review; the corp and street pair is the closest (0.81) and the street's unibrow reads as a headband at small size; the hidden teen's shimmer and the 4 dim cells of its eye row read small.
+
+**Corp adults** (`WETWARE_ADULTS`; maintainer: Chrome for Wired; humanoid is a hunch, not a directive). 16 columns, up to 15 rows, humanoid (a neck, shoulders, arms, legs), the baby's cortex kept on the head. Names are the sketch's.
+- **Razor** (Breach), 14 rows: a narrow jaw on full-width shoulders, a brow, a crest of folds, blade forearms ('+' strips).
+- **Wired** (Dodge), 15 rows: **1.0's Chrome**. The A frame is 1.0's, unchanged (a test). 1.0's B frame moves the visor's lights and eyes, so B keeps A down to the neck row and takes only 1.0's arm and leg rows (6 cells differ). It has no cortex and no Wetware look yet; the generic sleep and dead poses put one X on the whole visor band.
+- **Mentat** (Tune), 14 rows: an oversized cortex on a narrow body in a robe with a scalloped hem.
+- **Nutri** (Feast), 14 rows: a round, wide body, a wide mouth and a dark belly band; the legs are the only moving part (4 cells).
+- **Measured:** the closest pair is Wired and Nutri at 0.80 (Razor and Wired was 0.85 on the first Razor, a wide dome like Chrome's; the redraw as a narrow jaw on full shoulders brought it to 0.70); every adult is under 0.67 against every teen and the baby. The audit reports no new problems: the holologo clips 1 px on all four, as it does on all 13 of 1.0's forms; no contrast losses; wearables do not move between frames (86 prototype tests pass).
+- **Weak spots to check by eye:** Razor's blades read as separate pink strips and its shoulders as one bar; Wired has no Wetware mark; Mentat and Nutri share a wide base (0.79); Razor's A and B frames differ by only 4 cells, Nutri's by 4.
+- **Not drawn:** the street adults (Solo, Chipped, Gibson, Leech), Blank, and the nine elders.

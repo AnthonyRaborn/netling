@@ -9,6 +9,11 @@
 // Baby rules (the same as Iron's and Program's): 12 columns, the head, eyes, mouth and neck identical in A and B, only the lowest
 // two rows (the tendrils) move.
 
+import { SPRITES, ANCHOR_ROWS } from '../../src/sprites.js';
+
+// A with its rows from `fromRow` down replaced by B's (the head and eyes stay A's).
+const frozen = (a, b, fromRow) => ({ a, b: a.map((row, y) => (y >= fromRow ? b[y] : row)) });
+
 export const WETWARE_BABY = {
   a: [
     '............',
@@ -95,4 +100,128 @@ export const WETWARE_TEEN_ANCHORS = {
   teenCorp: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 },
   teenStreet: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 },
   teenHidden: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+};
+
+// --- corp adults (16 wide, up to 15 rows) -----------------------------------------------------------------------------------------
+// The four corp-lean role forms (the street forms and the hidden Blank come later). Maintainer's hunch: Wetware reads more humanoid
+// than Iron and Program, so these are people-shaped (a neck, shoulders, arms, legs) and keep the baby's folded cortex on the head.
+//   Razor (Breach): heavily cybered muscle; a narrow jaw on full-width shoulders, with blade forearms ('+' strips).
+//   Wired (Dodge): 1.0's Chrome as it is (the maintainer's suggestion), its visor and reflexes; the B frame is Chrome's with the head and
+//           eyes frozen, as Program's reused forms are.
+//   Mentat (Tune): an oversized cortex on a narrow body in a robe: someone who stares at a problem and answers.
+//   Nutri (Feast): a round, wide body with a big mouth and a dark feeding band across the belly.
+export const WETWARE_ADULTS = {
+  // Razor
+  razor: {
+    a: [
+      '.....#xxxx#.....',
+      '....#x#xx#x#....',
+      '...##########...',
+      '...##########...',
+      '...#xx####xx#...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '....########....',
+      '.....#+##+#.....',
+      '......####......',
+      '################',
+      '.+.##########.+.',
+      '.+..########..+.',
+      '....##....##....',
+    ],
+    b: [
+      '.....#xxxx#.....',
+      '....#x#xx#x#....',
+      '...##########...',
+      '...##########...',
+      '...#xx####xx#...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '....########....',
+      '.....#+##+#.....',
+      '......####......',
+      '################',
+      '.+.##########.+.',
+      '.+..########..+.',
+      '...##......##...',
+    ],
+  },
+  // Wired: 1.0's Chrome, head frozen (1.0's B frame moves the visor's lights and eyes; only its arms are taken from B).
+  wired: frozen(SPRITES.chromeA, SPRITES.chromeB, 9),
+  // Mentat
+  mentat: {
+    a: [
+      '....#x#xx#x#....',
+      '...#x#x##x#x#...',
+      '..#x#x#xx#x#x#..',
+      '.##############.',
+      '.##oo######oo##.',
+      '.##oo######oo##.',
+      '..############..',
+      '...####++####...',
+      '.....######.....',
+      '...##########...',
+      '.#.##########.#.',
+      '.#.##########.#.',
+      '.##############.',
+      '.##.##.##.##.##.',
+    ],
+    b: [
+      '....#x#xx#x#....',
+      '...#x#x##x#x#...',
+      '..#x#x#xx#x#x#..',
+      '.##############.',
+      '.##oo######oo##.',
+      '.##oo######oo##.',
+      '..############..',
+      '...####++####...',
+      '.....######.....',
+      '...##########...',
+      '.#.##########.#.',
+      '.#.##########.#.',
+      '.##############.',
+      '..##.##.##.##.#.',
+    ],
+  },
+  // Nutri
+  nutri: {
+    a: [
+      '.....#x##x#.....',
+      '...##x#xx#x##...',
+      '..############..',
+      '..############..',
+      '..##oo####oo##..',
+      '..##oo####oo##..',
+      '..############..',
+      '..##+x++++x+##..',
+      '..############..',
+      '.##############.',
+      '################',
+      '##xxxxxxxxxxxx##',
+      '.##############.',
+      '..##..####..##..',
+    ],
+    b: [
+      '.....#x##x#.....',
+      '...##x#xx#x##...',
+      '..############..',
+      '..############..',
+      '..##oo####oo##..',
+      '..##oo####oo##..',
+      '..############..',
+      '..##+x++++x+##..',
+      '..############..',
+      '.##############.',
+      '################',
+      '##xxxxxxxxxxxx##',
+      '.##############.',
+      '...##.####.##...',
+    ],
+  },
+};
+export const WETWARE_ADULT_ANCHORS = {
+  razor: { headTop: 2, eyeRow: 5, mouthRow: 8, neckRow: 9 },
+  wired: { ...ANCHOR_ROWS.chrome.a },
+  mentat: { headTop: 3, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  nutri: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
 };

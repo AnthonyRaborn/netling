@@ -1,8 +1,8 @@
-// Tests for the Wetware egg's sprites (so far the baby and the three teens). Run with `npm run proto:test`. Deterministic.
+// Tests for the Wetware egg's sprites (so far the baby, the three teens and the four corp adults). Run with `npm run proto:test`. Deterministic.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
-import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
+import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_ADULTS_ALL, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
 import { wetwareKey } from './register.js';
 import { forms as ironForms } from './models.js';
 import { programForms } from './program-models.js';
@@ -12,11 +12,11 @@ import { silhouetteIou, poseDistance, markDistance, offScreen } from '../../tool
 const set = wetwareForms();
 const baby = set.baby;
 const forms = Object.values(set);
-const WIDTH = { baby: 12, teen: 14 };
+const WIDTH = { baby: 12, teen: 14, adult: 16 };
 const key = (f, pose) => `${wetwareKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
 test('Wetware has a baby and three teens (corp, street, hidden), in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
+  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden', ...WETWARE_ADULTS_ALL]);
   assert.deepEqual(WETWARE_TEENS_ALL.map((id) => WETWARE_FORMS[id].lean), ['corp', 'street', 'hidden']);
   assert.deepEqual(WETWARE_HIDDEN_BRANCH, ['baby', 'teenHidden']);
 });
@@ -25,7 +25,8 @@ test('every sprite is rectangular, the stage\'s width, 11 rows like Iron\'s and 
   for (const f of forms) {
     for (const pose of ['a', 'b', 'sleep', 'dead']) {
       const rows = f[pose];
-      assert.equal(rows.length, 11, `${f.id}/${pose}: ${rows.length} rows`);
+      assert.ok(f.stage === 'adult' ? rows.length >= 9 && rows.length <= 15 : rows.length === 11, `${f.id}/${pose}: ${rows.length} rows`);
+      assert.equal(rows.length, f.a.length, `${f.id}/${pose}: same height as A`);
       assert.equal(new Set(rows.map((r) => r.length)).size, 1, `${f.id}/${pose}: ragged`);
       assert.equal(rows[0].length, WIDTH[f.stage], `${f.id}/${pose}: width`);
       assert.match(rows.join(''), /^[.#o+x]+$/, `${f.id}/${pose}: marks`);
@@ -104,11 +105,20 @@ test('the wearable code sees every Wetware form\'s authored anchors, and the rea
   }
 });
 
-test('no wearable moves between the A and B frames on any Wetware form, and every wearable stays on screen', async () => {
+test('no wearable moves between the A and B frames on any Wetware form, and every wearable stays on screen (but the 1.0 clip on a 15 row form)', async () => {
   const { ACCESSORIES, placeWorn } = await import('../../src/accessories.js');
   const pal = { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' };
   const box = (pts) => ({ x0: Math.min(...pts.map((p) => p.x)), x1: Math.max(...pts.map((p) => p.x)), y0: Math.min(...pts.map((p) => p.y)), y1: Math.max(...pts.map((p) => p.y)) });
+  const { SPECIES } = await import('../../src/sim.js');
   const wearables = ACCESSORIES.filter((x) => x.slot !== 'prop');
+  const clips = (sprite, w, pose) => {
+    const ox = Math.floor((40 - sprite[0].length) / 2);
+    const oy = 20 - sprite.length;
+    const placed = placeWorn([{ id: w.id }], sprite, { frame: pose === 'b' ? 1 : 0, time: 0, pal, minRow: -oy });
+    return offScreen(placed.flatMap((p) => p.pts.map((q) => ({ x: ox + q.x, y: oy + q.y })))).length > 0;
+  };
+  const known = new Set(); // wearables that clip on a 1.0 form of 15 rows (the holologo, 1 px), which a 15 row form here may do too
+  for (const id of Object.keys(SPECIES).filter((k) => SPRITES[`${k}A`]?.length === 15)) for (const w of wearables) if (clips(SPRITES[`${id}A`], w, 'a')) known.add(w.id);
   const moved = [];
   const clipped = [];
   for (const f of forms) {
@@ -120,10 +130,7 @@ test('no wearable moves between the A and B frames on any Wetware form, and ever
       if (a.length && JSON.stringify(box(a)) !== JSON.stringify(box(b))) moved.push(`${f.id}/${w.id}`);
       for (const pose of ['a', 'b', 'sleep']) {
         const sprite = SPRITES[key(f, pose)];
-        const ox = Math.floor((40 - sprite[0].length) / 2);
-        const oy = 20 - sprite.length;
-        const placed = placeWorn([{ id: w.id }], sprite, { frame: pose === 'b' ? 1 : 0, time: 0, pal, minRow: -oy });
-        if (offScreen(placed.flatMap((p) => p.pts.map((q) => ({ x: ox + q.x, y: oy + q.y })))).length) clipped.push(`${f.id}/${pose}/${w.id}`);
+        if (clips(sprite, w, pose) && (sprite.length < 15 || !known.has(w.id))) clipped.push(`${f.id}/${pose}/${w.id}`);
       }
     }
   }
@@ -164,4 +171,34 @@ test('the hidden-path teen is Blank\'s cloaked blob: a hood peak, slit eyes, a s
   assert.ok(!h.a.join('').includes('+'), 'no mouth');
   assert.ok(h.a.at(-1).includes('.##') || h.a.at(-1).includes('##.'), 'a scalloped hem');
   assert.ok(!h.dead.join('').includes('+'));
+});
+
+// --- corp adults -----------------------------------------------------------------------------------------------------------------
+test('the four corp adults, one per role, all corp; Wired is 1.0\'s Chrome', () => {
+  assert.deepEqual(WETWARE_ADULTS_ALL.map((id) => WETWARE_FORMS[id].role), ['breach', 'dodge', 'tune', 'feast']);
+  assert.ok(WETWARE_ADULTS_ALL.every((id) => WETWARE_FORMS[id].lean === 'corp'));
+  assert.deepEqual(set.wired.a, SPRITES.chromeA, 'the A frame is 1.0\'s, unchanged');
+  assert.notDeepEqual(set.wired.b, SPRITES.chromeB, '1.0\'s B frame moves the visor lights, so only its arms are used');
+  assert.deepEqual(set.wired.b.slice(0, 9), SPRITES.chromeA.slice(0, 9));
+  assert.deepEqual(set.wired.b.slice(9), SPRITES.chromeB.slice(9));
+});
+
+test('the corp adults are distinct from one another (under 1.0\'s 0.82 for a same-stage pair) and from every teen and the baby', () => {
+  const pairs = [];
+  for (let i = 0; i < WETWARE_ADULTS_ALL.length; i++) {
+    for (let j = i + 1; j < WETWARE_ADULTS_ALL.length; j++) pairs.push({ pair: `${WETWARE_ADULTS_ALL[i]}/${WETWARE_ADULTS_ALL[j]}`, iou: silhouetteIou(set[WETWARE_ADULTS_ALL[i]].a, set[WETWARE_ADULTS_ALL[j]].a) });
+  }
+  pairs.sort((p, q) => q.iou - p.iou);
+  console.log(`  closest Wetware corp adults: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  for (const p of pairs) assert.ok(p.iou <= 0.82, `${p.pair}: ${p.iou.toFixed(2)}`);
+  for (const id of WETWARE_ADULTS_ALL) for (const other of ['baby', ...WETWARE_TEENS_ALL]) assert.ok(silhouetteIou(set[id].a, set[other].a) < 0.82, `${id}/${other}`);
+});
+
+test('each corp adult carries its motif: Razor blade forearms, Wired a visor, Mentat an oversized cortex, Nutri a wide mouth and a dark belly band', () => {
+  const cells = (rows, re) => rows.join('').split('').filter((c) => re.test(c)).length;
+  assert.ok(set.razor.a.slice(10).join('').split('+').length - 1 >= 4, 'Razor: blade strips by the body');
+  assert.ok(set.wired.a[set.wired.anchors.a.eyeRow].replace(/[.#]/g, '').length >= 8, 'Wired: one wide visor band');
+  assert.ok(cells(set.mentat.a.slice(0, 3), /x/) > cells(set.nutri.a.slice(0, 3), /x/) && cells(set.mentat.a.slice(0, 3), /x/) >= 8, 'Mentat: the biggest cortex');
+  assert.ok(set.nutri.a[set.nutri.anchors.a.mouthRow].split('+').length - 1 >= 6, 'Nutri: a wide mouth');
+  assert.ok(set.nutri.a.some((r) => r.includes('xxxxxxxx')), 'Nutri: a dark belly band');
 });
