@@ -19,19 +19,20 @@ const KERNEL = frozen(SPRITES.kernelA, SPRITES.kernelB, 9);
 export const PROGRAM_BABY = frozen(SPRITES.bitlingA, SPRITES.bitlingB, 10);
 export const PROGRAM_TEENS = {
   teenCorp: KERNEL,
-  // The street lean: one antenna, a notched head corner, an arm gone on the right and a taped patch at the neck. Slightly different
-  // from the corp teen only (decided: the two main teens may differ slightly).
+  // The street lean: Kernel worn down on one side. One antenna, the right side of the body cut away in a slanted bite (the head top
+  // still covers both eyes, so eyewear spans them), a long left arm, and a taped patch on the neck. Redrawn after the first version
+  // (one antenna, a notched corner, 5 cells different, 0.94 overlap) went over 1.0's 0.82 bar against the corp teen.
   teenStreet: frozen(
     [
       '....#.........',
       '....o.........',
-      '..#########...',
-      '#.##########..',
-      '..##oo##oo##..',
+      '..########....',
+      '#.########....',
+      '#.##oo##oo##..',
       '#.##oo##oo##.#',
-      '..##########..',
-      '#.####++####..',
-      '..####xx####..',
+      '#.########....',
+      '#.####++##....',
+      '..#####xx.....',
       '....#....#....',
       '...##....##...',
     ],
