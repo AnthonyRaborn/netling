@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {
   createScript, tick, act, mulberry32, CFG, BUG_CFG, SPECIES, FORMS, MAINFRAME_OF, ROLES, LEANS, GAME_IDS, MIN,
   clearBug, pushGame, standingInt, gapIndex, teenCandidates, teenForm, adultCandidates, adultForm, hiddenTeenMet, hiddenAdultMet,
-  temperDecayFactor, temperLevel,
+  temperDecayFactor, temperLevel, roleForm,
 } from './sim/sim.js';
 import { guardedLevel } from './tell.js';
 
@@ -364,4 +364,16 @@ test('a netrun disconnect fault owes a bug roll that the next step settles', asy
   advance(s, 1, () => 0.1);
   assert.equal(s.faultRolls, 0);
   assert.equal(s.bugs, 1);
+});
+
+test('a role steerer reaches its role and lean: the focus game leads by 5 or more and the adult is that role', async () => {
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  for (const name of ['steer-tune-corp', 'steer-feast-street']) {
+    const [, role, lean] = name.split('-');
+    for (const seed of [1, 2]) {
+      const r = simulate(ARCHETYPES[name], seed);
+      assert.equal(r.adultForm, roleForm(role, lean), `${name} seed ${seed}: ${r.adultForm}`);
+      assert.ok(r.atAdult.roleGap >= 5 && r.atAdult.gap >= 5);
+    }
+  }
 });

@@ -32,6 +32,7 @@ const at = (h, m = 0) => h * 60 + m;
 // shop: false to walk past markets. babyFaults: let this many faults happen as a baby, on purpose.
 const ATTENTIVE = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h));
 
+const ROLES = GAME_IDS; // the four games are the four roles
 export const ARCHETYPES = {
   attentive: {
     checks: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((h) => at(h)),
@@ -60,6 +61,15 @@ export const ARCHETYPES = {
   'steer-glitch': { checks: ATTENTIVE, jitter: 15, diet: 'balance', trace: 'balance', winRate: 0.7, runs: 'careful', coolAt: 72, anomaly: 'risky' },
   // Attentive, but takes three faults as a baby for a Stub teen: a Segfault (2) if it finds one,
 // then lets Charge or Sync run out for the rest.
+  // 2.0 role steerers: attentive players who play one game far more than the others (`focus`, chosen for `focusShare` of their
+  // plays, the rest rotate) and steer a Standing lean as steer-chrome and steer-firewall do. They show whether a role and a lean
+  // can be made certain, and how fast. Requests for another game are mostly declined (a steerer does not detour).
+  ...Object.fromEntries(ROLES.flatMap((role) => [
+    [`steer-${role}-corp`, { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', focus: role, focusShare: 0.8 }],
+    [`steer-${role}-street`, { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie', focus: role, focusShare: 0.8 }],
+  ])),
+  // The middle the sketch did not measure: a player who commits a little (half their plays in one game, packets and traces leaning corp).
+  'nudge-breach': { checks: ATTENTIVE, jitter: 15, diet: 0.7, trace: 'comply', winRate: 0.7, runs: 'careful', focus: 'breach', focusShare: 0.5 },
   'steer-stub': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', babyFaults: 3 },
   // Attentive, playing careful runs, but jacking in at every chance (eager: any time it is fairly healthy, not
   // only when it will be back soon) to reach The Deep's exit as an adult: the Mainframe gate's best case.
@@ -199,12 +209,13 @@ export function checkIn(s, p, now, rng, ctx) {
     ctx.chatterSeen.add(s.chatter.id);
   }
   if (s.request?.kind === 'cool' && doAct('cool').requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
-  if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play')) {
+  if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), p.winRate) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
+    if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
     if (process.env.PREFBOT === 'follow' && PREF.on) {
       const lv = temperLevel(s);
       const last = s.lastGames ?? [];
