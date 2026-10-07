@@ -21,8 +21,8 @@ npm run serve     # http://localhost:5174
 
 # Netling 2.0 sprite prototype (prototype/netling2/, not shipped; see docs/NETLING_2_SPRITES.md)
 npm run proto:test     # its tests
-npm run proto:audit    # the real sprite audit on Iron's forms (EGG=program or EGG=all for Program; proto:audit:program)
-npm run proto:gallery  # generates prototype/netling2/gallery-iron.html and gallery-program.html (the real gallery on Iron's and Program's forms)
+npm run proto:audit    # the real sprite audit on Iron's forms (EGG=program, EGG=wetware or EGG=all; proto:audit:program, proto:audit:wetware)
+npm run proto:gallery  # generates prototype/netling2/gallery-iron.html, gallery-program.html and gallery-wetware.html (the real gallery on each egg's forms)
 ```
 
 ## Map

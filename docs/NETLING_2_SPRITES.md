@@ -265,7 +265,7 @@ The composition question is closed (see Decision).
 0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
-3. Not drawn: everything for Wetware (baby, three teens, nine adults, nine elders). Program's 22 forms are drawn.
+3. Not drawn: Wetware's three teens, nine adults and nine elders (the baby is drawn). Program's 22 forms are drawn.
 3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
 4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
@@ -300,3 +300,12 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - `gallery.html` itself is unchanged. `npm run proto:gallery` generates copies that run it on Iron's and Program's forms (see Reviewing the sprites), and the audit runs on them through a wrapper. Both depend on `ready.js` being imported first; see the trap in NETLING_2_SKETCH.md (Handoff).
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
 - **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
+
+## Wetware (baby)
+
+Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude-wetware.js`; forms register under `protoW_<id>`. Run `npm run proto:audit:wetware` (or `EGG=wetware`, `EGG=all`) and `npm run proto:gallery`.
+
+- **The baby is an organoid** (maintainer's pick of three candidates: a round cell, an organoid, a tadpole): 12 x 11, a lump of cultured tissue with a folded cortex (dim cells across the top of the head), the standard face, and four root-like tendrils. Head, eyes, mouth and neck are identical in A and B; only the two tendril rows move (14 cells differ). The folds are meant as the egg's mark for later forms, and give the pallor skin and the pulse tell somewhere to show.
+- **Silhouette.** The first draft overlapped Iron's baby at 0.84, over 1.0's 0.82 same-stage bar (a cross-egg pair, but kept under it anyway); rounding the top and narrowing the row under the eyes brought it to 0.77 against Iron's and 0.75 against Program's.
+- **Poses (a proposal, easy to change).** Asleep: two accent cells with a gap (a slow pulse) on the first chest row under the mouth. Dead: a run of dim cells across the chest (a pale trace, the colour going out of the tissue; the opposite of Program's bright flatline). Both from the sketch's Wetware register (polling; a dream ends and the next begins). Neither has been judged by eye on a device.
+- **Verified:** the prototype tests (79, including 9 new), the real 1.0 audit on the baby (0 wearables move between frames, 0 leave the screen, no contrast losses), and `npm test` (500). **Not done:** a by-eye or device check, the Wetware neglect (pallor) and bug skins, and the tell seen on art.
