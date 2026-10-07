@@ -248,50 +248,46 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 
 **Method.** Iron from Jargon machine sounds and timings, Program from software and network folklore, Wetware from plain words with a light CP2020 nod where one fits (second pass: heavy glossary terms and Star Wars terms are out). Elders are "the same idea after long service". Chosen after printing every unnamed form's art as text, not from a rendered gallery.
 
-**Decided so far (maintainer feedback on the first pass).**
-- Iron: Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap stay. Baby Bump is too cute. Core, Drum and Crack are held back as terms too useful to spend on a form (Drum is also an instrument, and instruments are easy accessories to add).
-- Program: Hack and Null are out (Bot does not work either; Null reads as "none, missing"). Pen, Fork, Mask, Tone, Leak and Dump stay. The maintainer wants Daemon, Init, Firewall and Airgap (1.0 form names) used somewhere in the revamp.
-- Wetware: a full second pass. Pod (baby), Observer (Gibson's elder) and Zero (teen, growing into Blank) are the strongest and stay. Star Wars terms are out. Twitch needs an alternative.
+**Decided so far (maintainer feedback, two rounds).**
+- Iron: Boot (baby), Init (Guru's elder), Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap. Core, Drum and Crack are held back as terms too useful to spend on a form. Bump was too cute. Firewall for Gronk's elder was odd on a Breach line; the maintainer suggested ORC or Mudge instead.
+- Program: Tree for Parse's elder is preferred to Daemon; Pen, Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
+- Wetware: Pod, Zero, Edge, Lancet, Broth, Observer and Cipher (the line Zero, Blank, Cipher). Star Wars terms are out. Solo's elder should suit a big-gun fighter; Chipped's should nod to heavy boosterware; Helminth was suggested for Leech's elder.
+- Names not commented on (Graft, Savant, Pen, Tone, Fork, Mask, Leak, Dump, Thunk and so on) are taken as accepted unless the maintainer says otherwise.
 
 **Reserved terms (do not spend on a form):** Core, Crack, Drum, Null, Bot, Hack. Colour words (Red, Blue) are avoided because tints and shells use them.
 
-**Checked.** The Jargon File 4.4.7 and the CP2020 slang page were downloaded in this session and each Jargon name was found as a headword (tick, thunk, buzz, gweep, brick, hop, peek, ding, crunch, swap, boot, flame, daemon, fork, leak, dump). Not Jargon headwords: Init, Firewall and Airgap (the 1.0 names; Jargon only mentions an "air gap" inside another entry), Pen, Mask, Tone, and every Wetware name except Zero, Observer and Pod, which are CP2020 headwords (Pods). The other Wetware names are plain English words with no glossary entry, on purpose. All 34 names are unique and none matches an adult name.
+**Checked.** The Jargon File 4.4.7 and the CP2020 slang page were downloaded in this session. Found as Jargon headwords: tick, thunk, buzz, gweep, brick, hop, peek, ding, crunch, swap, boot, daemon, fork, leak, dump. Found as CP2020 headwords: Zero, Observer, Pod (inside Pods), Edge, Poppers, Smudge. Not headwords in either: Init, Mal, Pen, Mask, Tone, Tree, and the plain-English Wetware names (Graft, Lancet, Savant, Blur, Broth, Helminth, Cipher). ORC was checked against Wikipedia's Old Red Cracker page (an anonymous reverser, founder of the High Cracking University); the Kerenzikov and Sandevistan references rest on the maintainer's message, not on a source I read. All 34 names are unique and none matches an adult name.
 
-**Placing the four 1.0 names.** Because 2.0 already reuses 1.0's Mainframe forms as elders (Plat for Wired, Whisper for Ghost), the four fit best as elders, matched to meaning:
-- **Airgap** for Mouse's elder: unreachable, one hop ahead. It replaces Null.
-- **Daemon** for Parse's elder: the process that listens and never stops its original job. It replaces Tree.
-- **Firewall** for Gronk's elder: a wall of arms, 1.0's street-minded form, and Iron is infrastructure. It replaces Crack.
-- **Init** for Guru's elder: the first process, everything else was started from it; the Guru page says everyone on the roster learned from it. It replaces Core.
-Cost: they are two syllables (Init is arguably two), so the "non-hidden Iron and all Program names are monosyllabic" rule has to apply to adults only. Nothing was found against that rule for teens and elders, but it is the maintainer's call. A 1.0 player will also read Daemon and Firewall as the old forms, which may or may not be wanted. Chrome, Glitch, Stub and Panic are still unused.
+**The four 1.0 names (Daemon, Init, Firewall, Airgap).** Init is placed (Guru's elder). Daemon is proposed for Mouse's elder (Parse's elder is Tree). Firewall and Airgap have no form: both already exist in 1.0 as shells (`brick`, "Firewall brick"; `airgap`, "Air gap") and Firewall's trait is `hardened`, and the sketch already says 10 shells need new unlock conditions. The simplest place for them is those shells with new conditions, which keeps the names without forcing a weak form link. Airgap could return as a form name if the Mouse elder's sprite is redrawn with a visible gap (a sprite change, so not decided here). Daemon and Init are two syllables, so the monosyllable rule applies to adults only.
 
 ### Iron
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `baby` | Boot | Jargon: to start up, the first thing a machine does; plain, not cute. Alternates: Byte, Flash. (Tick is the Jiff elder and means the same as Jiff, so it is not used for the baby.) | medium |
+| `baby` | Boot | Jargon: to start up, the first thing a machine does. Decided (maintainer). Alternates: Byte, Flash. | strong |
 | `teenCorp` | Thunk | Jargon: a small piece of code that binds a call; the sound of something heavy dropped. | medium |
 | `teenStreet` | Buzz | Jargon: to run a tight loop with no sign of progress; the spiked top and restless feet. | medium |
 | `teenHidden` | Gweep | Jargon: to hack, usually at night, and one who does; an apprentice of Guru. Alternate: Frob. | strong |
 | `splatElder` | Brick | Jargon: a device configured into an unusable state; the elder is a flat slab. | strong |
-| `gronkElder` | Firewall | A wall; the elder's arms are a wall on both sides. 1.0's street-minded form. Alternate if the 1.0 names are not wanted here: Slab. | medium |
+| `gronkElder` | ORC | Old Red Cracker (+ORC), an anonymous reverse engineer who published some of the first cracking lessons online and founded the High Cracking University. "Old" is the elder, "Cracker" is Breach, and an orc is a big brute, which fits the wall of arms. An anonymous handle, so no living person is named. Alternate: Mudge (Peiter Zatko of L0pht; a named, living person, so the maintainer should decide whether that is wanted). Firewall (first pass) was dropped as a defender on a Breach line. | medium |
 | `jiffElder` | Tick | Jargon defines a tick as a jiffy: the formal word for what Jiff is the casual word for. | strong |
 | `bamfElder` | Hop | Jargon: one transmission in a store-and-forward chain; Bamf teleports. | strong |
 | `pingElder` | Peek | Jargon: read a memory location without changing it; Ping checks something is there, Peek looks in. | medium |
 | `feepElder` | Ding | Jargon: a synonym for feep. | strong |
 | `munchElder` | Crunch | Jargon: to process, usually slowly and painfully. | strong |
 | `thrashElder` | Swap | Jargon: moving data between fast and slow memory; the cause of thrashing. | strong |
-| `guruElder` | Init | The first process; everything else was started from it. 1.0's Mainframe form. Alternate: Dinosaur (Jargon: old hardware that needs a raised floor). | strong |
+| `guruElder` | Init | The first process; everything else was started from it. 1.0's Mainframe form. Decided (maintainer). | strong |
 
 ### Program
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `teenStreet` | Flame | Jargon: to rant, a flamer; loud and hot-headed, which suits the mohawk and unibrow. Alternates: Troll (Jargon, fits the unibrow, reads as fantasy), Spam, Flood. | medium |
+| `teenStreet` | Mal | The bad-software prefix (malware, malspam); short, a street teen that is the malware of the line. Alternates: Malware, Malspam, Spam (Jargon). Flame was dropped as an action, not a program. Mal is also a common given name. | medium |
 | `tigerElder` | Pen | Short for penetration tester: Tiger's team grown up. | medium |
 | `wormElder` | Fork | Jargon: a project splitting into diverging copies (the process-spawning sense is not in Jargon); a worm copies itself and the fork bomb is its grown form. | strong |
-| `mouseElder` | Airgap | Unreachable from the network; Mouse is always one hop ahead. 1.0's Mainframe form. | strong |
+| `mouseElder` | Daemon | A process that runs unseen in the background and is never found where you look; Mouse is always one hop ahead. Jargon headword; 1.0's orderly adult. Moved here from Parse. (Airgap was dropped as a weak link unless the sprite is revisited, for instance with a visible gap.) | medium |
 | `spoofElder` | Mask | To present a false identity; the elder's art carries a half mask. | strong |
-| `parseElder` | Daemon | The background process that listens and parses, never stopping its original job. Jargon headword; 1.0's orderly adult. Alternate: Tree. | medium |
+| `parseElder` | Tree | A parse produces a tree; the elder's antennae read as branches. | medium |
 | `phreakElder` | Tone | The phone network's control tones; the side bars read as tone bars. | medium |
 | `gobbleElder` | Leak | Jargon: memory that is taken and never given back. | strong |
 | `snarfElder` | Dump | Jargon: to output everything at once; Snarf grabs a large file, Dump writes it all out. | medium |
@@ -302,18 +298,18 @@ Cost: they are two syllables (Init is arguably two), so the "non-hidden Iron and
 |---|---|---|---|
 | `baby` | Pod | CP2020: Pods are people very alike in thought; Podlings are immature ones. An organoid in a dish. Decided (maintainer: strongest). | strong |
 | `teenCorp` | Graft | Tissue grafted on and grown; the baby, grown and unmarked. Alternate: Culture (ties to the pages' cultures). | medium |
-| `teenStreet` | Thorn | The spikes and the unibrow; plain and organic. Alternates: Edge (CP2020, but too near Razor's edge), Burr. | medium |
+| `teenStreet` | Edge | CP2020: the fringe of society, and a sharp edge; the spikes and the unibrow. Decided (maintainer). | strong |
 | `teenHidden` | Zero | CP2020: Zero is another word for Blank, so it grows into Blank. Decided (maintainer). | strong |
-| `razorElder` | Scalpel | A blade grown more exact; plain clinic word. Alternate: Lancet. | medium |
-| `soloElder` | Shiv | An improvised street blade; works alone. Alternate: Cleaver. | medium |
-| `chippedElder` | Reflex | Nods to CP2020's Reflex Chip; Chipped is the enhanced dodger. Alternate: Hive (a rejection reaction, a skin rash). | medium |
+| `razorElder` | Lancet | A surgical blade grown more exact. Decided (maintainer). | strong |
+| `soloElder` | Poppers | CP2020: pop-up weaponry concealed in a cyberlimb; the maintainer notes the model for these forms (Batou) prefers big guns to blades. Alternates: Smudge (CP2020: a submachine gun), Hardsuit (powered armour), Shiv (a blade; first pass). Poppers is also a slang word for a drug. | medium |
+| `chippedElder` | Blur | A body so boosted it blurs; a light nod to the heavy speed implants the maintainer named (Kerenzikov, Sandevistan; neither is in the glossary page I checked, so this rests on the maintainer's reference). Alternates: Overdrive, Zikov (a clipping of Kerenzikov, as Nutri clips Nutrisoy). | medium |
 | `mentatElder` | Savant | Answers without visible steps. Alternate: Oracle. | medium |
 | `gibsonElder` | Observer | CP2020: an AI in the Net, also the Watcher in the Dark; Gibson is the unexplained thing there. Decided (maintainer: strongest). | strong |
-| `nutriElder` | Ration | Government-issued food (a light nod to CP2020's Kibble Card); Nutri's elder. Alternate: Broth (the pages are paid in broth). | medium |
-| `leechElder` | Sawbones | Old slang for a surgeon; the street doctor grown old. Alternate: Healer. | medium |
-| `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Plain, one word. | strong |
+| `nutriElder` | Broth | The pages are paid in broth. Decided (maintainer). | strong |
+| `leechElder` | Helminth | A parasitic worm, the technical word for what feeds on a host (the maintainer's suggestion). Plain science word, not CP2020. Alternates: Sawbones, Healer. | strong |
+| `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Decided (maintainer). | strong |
 
-**Weakest links.** Gronk's Firewall (a 1.0 name and a defender's word for a Breach form, and two syllables), Boot (a boot is also footwear, and the baby has small feet), Flame (loud, a little dated), Thorn (a plain word with no CP2020 tie) and Reflex (very generic). Ration is a deliberately flat name for Nutri's elder.
+**Weakest links.** ORC (reads as the fantasy monster to most players, which is a fair joke for a brute but hides the source), Mal (also a given name), Daemon for Mouse's elder (a bigger idea than the sprite shows), Poppers (a drug nickname) and Blur (generic; the Kerenzikov and Sandevistan link is faint).
 
 **Not done.** No name has been tested on a screen, in the Dex or against the chatter group names. The elder names are not final until the elder art is.
 
