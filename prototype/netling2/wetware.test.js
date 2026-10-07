@@ -211,13 +211,20 @@ test('the two forms of a role are not look-alikes', () => {
   }
 });
 
-test('each street adult carries its motif: Solo spikes and a unibrow, Chipped an antenna and a larger cyber eye, Gibson orbiting dim marks and no legs, Leech a feeding tube', () => {
+test('each street adult carries its motif: Solo a Batou-style ocular band and square jaw, Chipped a cyber lens of another colour, Gibson broadcast arcs and no legs, Leech a feeding tube', () => {
   const eyes = (id) => set[id].a[set[id].anchors.a.eyeRow];
-  assert.ok(set.solo.a[0].split('#').length - 1 >= 5 && set.solo.a[3].includes('xxxxxxxx'), 'Solo: spikes and a unibrow');
+  assert.ok(eyes('solo').includes('xooxxxxoox'), 'Solo: a wide dark band with a lens at each end');
+  assert.ok(set.solo.a[0].split('#').length - 1 >= 5, 'Solo: a bristle crop');
+  assert.ok(set.solo.a[9] === '#'.repeat(16) && set.solo.a[8].replace(/\./g, '').length === 8, 'Solo: a thick neck and huge shoulders');
   assert.ok(set.chipped.a[0].endsWith('#..') || set.chipped.a[0].includes('#..#'), 'Chipped: an antenna');
-  const groups = (row) => row.split(/[^o]+/).filter(Boolean).map((g) => g.length);
-  assert.ok(Math.max(...groups(eyes('chipped'))) > Math.min(...groups(eyes('chipped'))), 'Chipped: one eye larger than the other');
-  assert.ok(set.gibson.a.slice(9).some((r) => r.includes('x.') || r.includes('.x')), 'Gibson: dim orbit marks beside the body');
-  assert.ok(set.gibson.a.at(-1).replace(/\./g, '').length <= 4, 'Gibson: a wisp, no legs');
-  assert.ok(set.leech.a[set.leech.anchors.a.mouthRow + 1].includes('+'), 'Leech: a second mouth row, the tube');
+  const e = set.chipped.a[set.chipped.anchors.a.eyeRow];
+  assert.ok(e.includes('oo') && e.includes('++'), 'Chipped: one accent eye and one highlight lens');
+  assert.equal([...e].filter((c) => c === 'o').length, [...e].filter((c) => c === '+').length, 'Chipped: both eyes the same size');
+  assert.ok(set.gibson.a.slice(3, 7).every((r) => r[0] !== r[1] || r[0] === '.') && set.gibson.a[4].startsWith('#..#') && set.gibson.a[4].endsWith('#..#'), 'Gibson: broadcast arcs beside the head');
+  assert.ok(set.gibson.a.at(-1).replace(/\./g, '').length <= 4 && set.gibson.a[13].replace(/\./g, '').length <= 4, 'Gibson: no legs, the body dissolves');
+  const tube = set.leech.a.slice(set.leech.anchors.a.mouthRow + 1, set.leech.anchors.a.mouthRow + 5).map((r) => r.indexOf('+'));
+  assert.ok(tube.every((x) => x === 8), 'Leech: a feeding tube, one bright column running down from the mouth');
+  const apart = set.leech.a[4].indexOf('oo', 8) - set.leech.a[4].indexOf('oo') - 2;
+  assert.ok(apart >= 4, 'Leech: eyes set wide apart');
+  assert.ok(set.leech.a[12].includes('xx'), 'Leech: a dark pump at the end of the tube');
 });

@@ -79,7 +79,16 @@ function wetwareDead(a, eyeRow) {
   }
   return g.map((row) => row.join(''));
 }
-export const wetwarePose = (a, anchors, kind, id) => wetwareMarks(id === 'wired' && kind === 'dead' ? wiredDead(a) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow) : pose(a, anchors.eyeRow, kind), anchors, kind);
+// Chipped's right eye is a cyber lens in the highlight colour ('+'), not the accent. The generic pose only knows accent eyes, so it is
+// posed as two accent eyes and, asleep, the right lens's slit is given back its highlight colour. (Dead, both X's are accent, as in 1.0.)
+const LENS = { id: 'chipped', cols: [10, 11] };
+function chippedPose(a, anchors, kind) {
+  const pair = a.map((row, y) => (y === anchors.eyeRow || y === anchors.eyeRow + 1 ? row.replace(/\+/g, 'o') : row));
+  const posed = kind === 'dead' ? wetwareDead(pair, anchors.eyeRow) : pose(pair, anchors.eyeRow, kind);
+  if (kind !== 'sleep') return posed;
+  return posed.map((row, y) => ((y === anchors.eyeRow || y === anchors.eyeRow + 1) ? [...row].map((c, x) => (c === 'o' && LENS.cols.includes(x) ? '+' : c)).join('') : row));
+}
+export const wetwarePose = (a, anchors, kind, id) => wetwareMarks(id === LENS.id ? chippedPose(a, anchors, kind) : id === 'wired' && kind === 'dead' ? wiredDead(a) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow) : pose(a, anchors.eyeRow, kind), anchors, kind);
 
 function build(id) {
   const frames = FRAMES[id];
