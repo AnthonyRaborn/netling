@@ -615,9 +615,33 @@ function stepBand(s, key, rest) {
   s.strainMax[key] = Math.max(s.strainMax[key] ?? 0, w);
   if (w >= c.line) s.strainHighMin = (s.strainHighMin ?? 0) + 1;
 }
+// 2.0 egg pressure as a choice (maintainer: each egg manages one meter; action-based because a level band taxes check-in cadence). A feed taken
+// with Charge already at or over `line` (charge) or a game played with Sync already at or over `line` (sync) adds `add` hidden strain, which
+// halves every `halfLifeMin` and drives the base infection hazard (floor + slope * strain / 100). Off by default;
+// ACTS='{"charge":{"on":true,"line":60}}' switches one on. count: how many such actions a life, for the reports.
+export const ACTS = {
+  charge: { on: false, line: 60, add: 3, halfLifeMin: 1440, floor: 0.014, slope: 0.3, line_hi: 50 },
+  sync: { on: false, line: 75, add: 3, halfLifeMin: 1440, floor: 0.014, slope: 0.3, line_hi: 50 },
+};
+if (process.env.ACTS) for (const [k, v] of Object.entries(JSON.parse(process.env.ACTS))) Object.assign(ACTS[k], v);
+function actEarly(s, key) {
+  const c = ACTS[key];
+  if (!c.on || s.stats[key] < c.line) return;
+  s.act ??= { charge: 0, sync: 0, count: { charge: 0, sync: 0 }, max: { charge: 0, sync: 0 } };
+  s.act[key] = Math.min(100, s.act[key] + c.add);
+  s.act.count[key]++;
+  s.act.max[key] = Math.max(s.act.max[key], s.act[key]);
+}
+function stepActs(s) {
+  if (!s.act) return;
+  for (const k of Object.keys(ACTS)) if (ACTS[k].on) s.act[k] *= 0.5 ** (1 / ACTS[k].halfLifeMin);
+}
+const actOn = () => (ACTS.charge.on ? 'charge' : ACTS.sync.on ? 'sync' : null);
 const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null);
 const baseVirusPerHour = (s) => {
   const b = bandOn();
+  const a = actOn();
+  if (a && !IRON.on && !WET.on && !b) return ACTS[a].floor + (ACTS[a].slope * (s.act?.[a] ?? 0)) / 100;
   if (b && !IRON.on && !WET.on) return BANDS[b].floor + (BANDS[b].slope * (s.strain?.[b] ?? 0)) / 100;
   return IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
 };
@@ -760,6 +784,7 @@ function step(s, t, rng) {
   if (IRON.on) stepWear(s, t, rest);
   for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
   if (WET.on) stepShock(s);
+  stepActs(s);
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
     s.cache++;
@@ -1426,6 +1451,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'corp':
     case 'scav': {
       if (st.charge >= 95) return fail('buffer full. refused.');
+      actEarly(s, 'charge');
       let gain = action === 'corp' ? 30 : 25;
       if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
       st.charge = clamp(st.charge + gain);
@@ -1461,6 +1487,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       const { game, won = false } = opts;
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       const hot = overclocked(s); // it played at this Heat, before this game's own
+      actEarly(s, 'sync');
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       gain *= 1 + traitEffect(s, 'volatile');
       // A lost game while overclocked costs instead of consoling.

@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, temperLevel, clearBug, leanSeen } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, temperLevel, clearBug, leanSeen } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -210,7 +210,7 @@ export function checkIn(s, p, now, rng, ctx) {
   // A player who knows a long absence is coming (`prepare`, 4 hours or more to the next check) tops up Charge and Sync first.
   const topUp = Boolean(p.prepare) && ctx.gapToNext >= 240;
   const feed = () => {
-    for (let i = 0; i < 4 && s.stats.charge < (topUp ? 94 : 85) && !blockReason(s, 'corp'); i++) {
+    for (let i = 0; i < 4 && s.stats.charge < (topUp ? 94 : 85) && !blockReason(s, 'corp') && !(process.env.ACTBOT === 'budget' && ACTS.charge.on && s.stats.charge >= ACTS.charge.line); i++) {
       // `shown` bots see only the HUD's floors; on a shown tie they alternate packets (a lone tie rule would drift one way).
       const lean = leanSeen(s, p.shown);
       let corp = p.diet === 'balance' ? (p.shown && lean === 0 ? s.lastPacket !== 'corp' : lean <= 0) : rng() < p.diet;
@@ -307,7 +307,7 @@ export function checkIn(s, p, now, rng, ctx) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), skill()) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
   const syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
-  for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
+  for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play') && !(process.env.ACTBOT === 'budget' && ACTS.sync.on && s.stats.sync >= ACTS.sync.line); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
     if (p.balanceGames) game = leastWon(s); // plays whichever game it has won least (ties: the first)
