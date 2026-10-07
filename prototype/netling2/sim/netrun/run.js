@@ -1,5 +1,8 @@
+// Netling 2.0 fork of src/netrun/run.js (prototype/netling2/sim): the same netrun rules on the 2.0 simulator. Changes: ICE games enter the
+// care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
+// `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame } from '../sim.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment, fragmentById } from '../../../../src/netrun/codex.js';
@@ -439,6 +442,7 @@ function resolveIceFight(pet, won, rng) {
   const run = pet.run;
   if (run.phase !== 'ice') return { ok: false };
   if (run.daily) rng = laneRng(run, run.pos, LANE.ice);
+  if (PREF.on && PREF.ice && run.pending?.game) pushGame(pet, run.pending.game);
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
@@ -725,7 +729,10 @@ export function disconnect(pet, why) {
   pet.axes.stability -= 1;
   // A care mistake, but never the fatal one.
   const mistake = !run.daily && pet.careMistakes < CFG.maxMistakes - 1;
-  if (mistake) pet.careMistakes++;
+  if (mistake) {
+    pet.careMistakes++;
+    pet.faultRolls = (pet.faultRolls ?? 0) + 1; // 2.0: a bug roll, settled by sim.js on the next step
+  }
   settleContract(pet, 'disconnected');
   note(run, run.daily ? `DISCONNECTED: ${why} trace over. nothing lost: what it cost is given back.` : `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];

@@ -1,5 +1,10 @@
-// Headless balance harness: simulates full lifetimes under scripted player archetypes.
-// Usage: node tools/balance.mjs [runsPerArchetype=300] [archetype filter]
+// Netling 2.0 headless balance harness: a fork of tools/balance.mjs that drives the 2.0 core rules (./sim.js).
+// Usage: node prototype/netling2/sim/balance.mjs [runsPerArchetype=300] [archetype filter]
+// New settings: CLEAR=scrip|both|none how bots clear bugs (scrip at check-ins; 'both' falls back to 2 Standing, 1 from each track);
+// PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
+// BUGS='{"chance":0.5,"max":8}' overrides the bug rules. The archetypes keep their 1.0 names; the steer-* ones now aim at a
+// Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
+// carries a trait). The remaining text below is 1.0's.
 // Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
 // tools/balance-diff.mjs); CFG='{...}' override CFG; NO_ITEMS=1, NO_RUNS=1; ROOT=1 Root Access;
 // TRAIT=<adult form> start as the child of that form (TRAIT_LEVEL=<1-3> its level, HISTORY=<adult form>
@@ -8,7 +13,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, temperLevel, clearBug } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -67,6 +72,22 @@ export const CODEX_PRESETS = {
   ruins: FRAGMENTS.slice(0, FRAGMENTS.findIndex((f) => f.id === 'ruins-4') + 1).map((f) => f.id),
 };
 
+// Bots clear bugs at check-ins: with scrip (15) if they have it; with CLEAR=both, otherwise with 2 Standing, 1 from each track when
+// both have one (the gap stays) and 2 from the larger track when not.
+const CLEAR = process.env.CLEAR ?? 'scrip';
+function fixBugs(s, p, ctx) {
+  if (CLEAR === 'none' || p.noFix) return;
+  while (s.bugs > 0) {
+    let paid = clearBug(s, { pay: 'scrip' });
+    if (!paid && CLEAR === 'both') {
+      const { corp, street } = s.standing;
+      paid = clearBug(s, { pay: 'standing', corp: corp >= 1 && street >= 1 ? 1 : corp >= street ? 2 : 0 });
+    }
+    if (!paid) break;
+    ctx.bugsFixed = (ctx.bugsFixed ?? 0) + 1;
+  }
+}
+
 export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
   const useItem = (id) => {
@@ -75,6 +96,8 @@ export function checkIn(s, p, now, rng, ctx) {
     return doAct('use', { slot }).ok;
   };
   ctx.checkIns = (ctx.checkIns ?? 0) + 1;
+  ctx.bugPeak = Math.max(ctx.bugPeak ?? 0, s.bugs);
+  fixBugs(s, p, ctx);
   if (s.inventory.length >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
   // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else scraps it.
   const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
@@ -107,7 +130,12 @@ export function checkIn(s, p, now, rng, ctx) {
   const mayPlay = !holdBack || s.flagged.sync;
   const feed = () => {
     for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
-      const corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
+      let corp = p.diet === 'balance' ? s.axes.allegiance <= 0 : rng() < p.diet;
+      if (process.env.PREFBOT === 'follow' && PREF.on && s.lastPacket) {
+        const lv = temperLevel(s);
+        if (lv > 0) corp = s.lastPacket === 'corp';
+        else if (lv < 0) corp = s.lastPacket !== 'corp';
+      }
       doAct(corp ? 'corp' : 'scav');
     }
   };
@@ -176,7 +204,13 @@ export function checkIn(s, p, now, rng, ctx) {
   }
   const syncTarget = p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
-    const game = GAME_IDS[ctx.games++ % GAME_IDS.length];
+    let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
+    if (process.env.PREFBOT === 'follow' && PREF.on) {
+      const lv = temperLevel(s);
+      const last = s.lastGames ?? [];
+      if (lv > 0 && last.length) game = last[0];
+      else if (lv < 0 && last.length) game = GAME_IDS.filter((g) => !last.includes(g)).sort((x, y) => s.games[x].played - s.games[y].played)[0] ?? game;
+    }
     doAct('play', { game, won: rng() < winChance(overclocked(s), p.winRate) });
     if (s.stats.heat > coolAt + 10) doAct('cool');
   }
@@ -193,6 +227,16 @@ export function checkIn(s, p, now, rng, ctx) {
 
 // One life. fragment: the parent's (as flatline() leaves it), for a later generation. codex: the
 // fragments already found, carried along a lineage.
+// Standing, temper and the shown level at a stage change; the gap is in whole points as the evolution rules read it.
+const snap = (s) => ({
+  standing: { ...s.standing },
+  gap: Math.abs(Math.floor(s.standing.corp + 1e-9) - Math.floor(s.standing.street + 1e-9)),
+  roleGap: (() => { const w = GAME_IDS.map((id) => s.games[id].won).sort((a, b) => b - a); return w[0] - w[1]; })(),
+  temper: s.temper,
+  level: s.tLevel,
+  bugs: s.bugs,
+});
+
 export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [] } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
@@ -245,12 +289,12 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     if (s.stage === 'teen' && teenAt === null) {
       teenAt = minute;
       teenForm = s.form;
-      ctx.atTeen = { axes: { ...s.axes }, mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
+      ctx.atTeen = { ...snap(s), mistakes: s.careMistakes, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), minWins: Math.min(...GAME_IDS.map((id) => s.games[id].won)) };
     }
     if (s.stage === 'mainframe' && mainframeStart === null) mainframeStart = minute;
     if (s.stage === 'adult' && adultAt === null) {
       adultAt = minute;
-      ctx.atAdult = { axes: { ...s.axes }, wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), mistakes: s.careMistakes };
+      ctx.atAdult = { ...snap(s), wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0), mistakes: s.careMistakes };
     }
     const due = schedule.find((x) => x.t === (at(8) + minute) % DAY);
     if (due && s.stage !== 'dead') {
@@ -269,7 +313,18 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     mistakes: s.careMistakes,
     teenForm,
     adultForm: adultAt ? s.form : null,
-    axes: { ...s.axes },
+    standing: { ...s.standing },
+    temper: s.temper,
+    level: s.tLevel,
+    bugsEnd: s.bugs,
+    bugPeak: Math.max(ctx.bugPeak ?? 0, s.bugs),
+    bugsFixed: ctx.bugsFixed ?? 0,
+    prefActions: s.prefActions ?? 0,
+    prefMatches: s.prefMatches ?? 0,
+    prefBonus: s.prefBonus ?? 0,
+    levelMin: { ...(s.levelMin ?? {}) },
+    hold: s.hold?.best ?? { '-2': 0, 2: 0 },
+    neglect2Min: s.neglect2Min ?? 0,
     wins: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
     atAdult: ctx.atAdult ?? null,
     atTeen: ctx.atTeen ?? null,
@@ -389,7 +444,8 @@ function shares(results, key) {
   return Object.fromEntries(Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, round(v / results.length)]));
 }
 
-const BALANCE_BANDS = [1, 1.5, 2, 3];
+const LEVELS = [-2, -1, 0, 1, 2];
+const levelShares = (xs) => Object.fromEntries(LEVELS.map((l) => [l, round(xs.filter((x) => x === l).length / Math.max(1, xs.length))]));
 
 // Everything the report says, as numbers (rates are fractions). JSON=1 prints this.
 export function stats(results) {
@@ -414,35 +470,43 @@ export function stats(results) {
     adults: shares(results, 'adultForm'),
     mistakeKinds: Object.fromEntries(Object.entries(kinds).map(([k, v]) => [k, round(v / n, 2)])),
     stageDays: Object.fromEntries(['baby', 'teen', 'adult', 'mainframe'].map((k) => [k, round(avg(results.map((r) => r.stageDays[k])), 2)])),
-    axes: { allegiance: round(avg(results.map((r) => r.axes.allegiance)), 2), stability: round(avg(results.map((r) => r.axes.stability)), 2) },
+    // 2.0: Standing tracks, temper and the shown level at the end of the life (or death).
+    standing: { corp: round(avg(results.map((r) => r.standing.corp)), 2), street: round(avg(results.map((r) => r.standing.street)), 2) },
+    temper: round(avg(results.map((r) => r.temper)), 2),
+    levelAtEnd: levelShares(results.map((r) => r.level)),
+    // Awake time at each shown level, as a share of awake time (averaged over lives).
+    levelTime: Object.fromEntries(LEVELS.map((l) => [l, round(avg(results.map((r) => { const t = Object.values(r.levelMin).reduce((a, b) => a + b, 0); return t ? (r.levelMin[l] ?? 0) / t : 0; })))])),
+    // The Metronome unlock test: an unbroken awake hold of 12 hours at a strong level, neglect level 2 not counted (paused).
+    hold12h: { strongSteady: rate((r) => r.hold['2'] >= 720), strongUnsteady: rate((r) => r.hold['-2'] >= 720) },
+    neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
+    bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max) },
+    pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {
-          allegiance: round(avg(adults.map((x) => x.axes.allegiance)), 2),
-          absAllegiance: round(avg(adults.map((x) => Math.abs(x.axes.allegiance))), 2),
-          stability: round(avg(adults.map((x) => x.axes.stability)), 2),
+          corp: round(avg(adults.map((x) => x.standing.corp)), 2),
+          street: round(avg(adults.map((x) => x.standing.street)), 2),
+          gap: round(avg(adults.map((x) => x.gap)), 2),
+          leanCertain: round(adults.filter((x) => x.gap >= 5).length / adults.length),
+          roleCertain: round(adults.filter((x) => x.roleGap >= 5).length / adults.length),
+          temper: round(avg(adults.map((x) => x.temper)), 2),
+          level: levelShares(adults.map((x) => x.level)),
+          bugs: round(avg(adults.map((x) => x.bugs)), 2),
           wins: round(avg(adults.map((x) => x.wins)), 2),
           mistakes: round(avg(adults.map((x) => x.mistakes)), 2),
         }
       : null,
-    // The axes when it became a teen, and how often both were within k of zero (a balanced netling).
     atTeen: teens.length
       ? {
-          allegiance: round(avg(teens.map((x) => x.axes.allegiance)), 2),
-          absAllegiance: round(avg(teens.map((x) => Math.abs(x.axes.allegiance))), 2),
-          stability: round(avg(teens.map((x) => x.axes.stability)), 2),
-          absStability: round(avg(teens.map((x) => Math.abs(x.axes.stability))), 2),
+          corp: round(avg(teens.map((x) => x.standing.corp)), 2),
+          street: round(avg(teens.map((x) => x.standing.street)), 2),
+          gap: round(avg(teens.map((x) => x.gap)), 2),
+          leanCertain: round(teens.filter((x) => x.gap >= 5).length / teens.length),
+          tied: round(teens.filter((x) => x.gap <= 1).length / teens.length),
+          temper: round(avg(teens.map((x) => x.temper)), 2),
+          level: levelShares(teens.map((x) => x.level)),
           mistakes: round(avg(teens.map((x) => x.mistakes)), 2),
-          // Keys are strings so they keep this order (1.5 would otherwise sort after 3).
-          balancedWithin: Object.fromEntries(
-            BALANCE_BANDS.map((k) => [`w${k}`, round(teens.filter((x) => Math.abs(x.axes.allegiance) <= k && Math.abs(x.axes.stability) <= k && x.mistakes <= 2).length / n)]),
-          ),
-          // On Ghost's own path at 24 hours: its allegiance and stability rules, and at most 1 fault.
           wins: round(avg(teens.map((x) => x.wins)), 2),
           minWins: round(avg(teens.map((x) => x.minWins)), 2),
-          // Ghost's path plus every game won at least twice (or once): narrower hints.
-          ghostPathPlay: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1 && x.minWins >= 2).length / n),
-          ghostPathPlayOnce: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1 && x.minWins >= 1).length / n),
-          ghostPath: round(teens.filter((x) => Math.abs(x.axes.allegiance) < 2 && x.axes.stability >= 0 && x.mistakes <= 1).length / n),
         }
       : null,
     wins: round(avg(results.map((r) => r.wins)), 2),
@@ -538,8 +602,11 @@ function printLife(st, detail) {
   console.log(`  mistakes/run: ${Object.entries(st.mistakeKinds).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(', ')}`);
   console.log(`  days as: baby ${st.stageDays.baby.toFixed(1)}, teen ${st.stageDays.teen.toFixed(1)}, adult ${st.stageDays.adult.toFixed(1)}${st.stageDays.mainframe ? `, mainframe ${st.stageDays.mainframe.toFixed(1)}` : ''}`);
   const t = st.atTeen;
-  if (t) console.log(`  at teen: allegiance ${t.allegiance.toFixed(1)} (|${t.absAllegiance.toFixed(1)}|), stability ${t.stability.toFixed(1)} (|${t.absStability.toFixed(1)}|), mistakes ${t.mistakes.toFixed(1)} · both axes within 1/1.5/2/3: ${Object.values(t.balancedWithin).map(pct).join(' / ')} · on Ghost's path ${pct(t.ghostPath)} (${pct(t.ghostPathPlay)} with every game won twice, ${pct(t.ghostPathPlayOnce)} once) · wins ${t.wins.toFixed(1)}, fewest in one game ${t.minWins.toFixed(1)}`);
-  if (a) console.log(`  at adult: allegiance ${a.allegiance.toFixed(1)} (|${a.absAllegiance.toFixed(1)}|), stability ${a.stability.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored) · peak items held ${st.itemsHeld.toFixed(1)}`);
+  const lv = (m) => LEVELS.map((l) => Math.round(m[l] * 100)).join('/');
+  console.log(`  standing at the end: corp ${st.standing.corp.toFixed(1)}, street ${st.standing.street.toFixed(1)} · temper ${st.temper.toFixed(1)} · level at the end (strongly unsteady/unsteady/middle/steady/strongly steady, %): ${lv(st.levelAtEnd)} · awake time at each: ${lv(st.levelTime)}`);
+  if (t) console.log(`  at teen: corp ${t.corp.toFixed(1)}, street ${t.street.toFixed(1)}, gap ${t.gap.toFixed(1)} (certain ${pct(t.leanCertain)}, tied ${pct(t.tied)}), temper ${t.temper.toFixed(1)}, levels ${lv(t.level)}, mistakes ${t.mistakes.toFixed(1)}, wins ${t.wins.toFixed(1)} (fewest in a game ${t.minWins.toFixed(1)})`);
+  if (a) console.log(`  at adult: corp ${a.corp.toFixed(1)}, street ${a.street.toFixed(1)}, gap ${a.gap.toFixed(1)} (lean certain ${pct(a.leanCertain)}, role certain ${pct(a.roleCertain)}), temper ${a.temper.toFixed(1)}, levels ${lv(a.level)}, bugs ${a.bugs.toFixed(1)}, wins ${a.wins.toFixed(1)}, mistakes ${a.mistakes.toFixed(1)} · events ${st.events.toFixed(1)}, traces ${st.traces.toFixed(1)} (${st.tracesIgnored.toFixed(1)} ignored)`);
+  console.log(`  bugs: ${st.bugs.end.toFixed(2)} at the end, peak ${st.bugs.peak.toFixed(2)}, ${st.bugs.fixed.toFixed(1)} cleared, at the ceiling ${pct(st.bugs.atCeiling)} · care preference: ${st.pref.actions.toFixed(0)} actions, ${st.pref.matches.toFixed(0)} matched, +${st.pref.bonus.toFixed(0)} Sync · held 12h (neglect 2 paused): strongly steady ${pct(st.hold12h.strongSteady)}, strongly unsteady ${pct(st.hold12h.strongUnsteady)} · awake at neglect 2: ${st.neglect2Hours.toFixed(1)}h`);
   const at = st.attention;
   console.log(`  attention: ${at.requestsMet.toFixed(1)} requests answered, ${at.greeted.toFixed(1)} visitors greeted, ${at.flowHours.toFixed(1)}h in flow, ${at.hotHours.toFixed(1)}h overclocked, ${at.chatterSeen.toFixed(1)} chatter lines seen`);
   console.log(`  segfault found before the teen stage: ${pct(st.segfaultBeforeTeen)}`);

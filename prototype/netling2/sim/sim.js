@@ -1,10 +1,21 @@
-// Netling simulation core. Pure-ish: every function takes the state, a time
-// (ms epoch) and an rng, so tests can drive it deterministically.
+// Netling 2.0 simulation core: a fork of src/sim.js carrying the 2.0 core life rules from docs/NETLING_2_SKETCH.md. It is a
+// prototype (not shipped, not in sw.js); src/sim.js is untouched. Differences from 1.0, each marked `2.0` below:
+//   Standing   two non-negative tracks (s.standing) replace the signed allegiance.
+//   Temper     s.temper replaces stability: 24 hour half-life decay, five levels with the flicker guard (s.tLevel),
+//              flow +0.5 an hour, items +1, Segfault -4.
+//   Bugs       a fault rolls a bug (ceiling 5) that raises the drains; cleared with scrip or Standing (clearBug).
+//   Faults     no cap and no neglect death; integrity collapse and the end of the cycle remain.
+//   Evolution  teen and adult forms follow Standing and the games with the sketch's tie-break weights.
+//   Care preferences  a steady temper likes routine, an unsteady one novelty (a small Sync bonus).
+// Netrun code (netrun/run.js here) still writes the signed `axes` pair; `axes` is an adapter onto standing and temper.
+// Pure-ish: every function takes the state, a time (ms epoch) and an rng, so tests can drive it deterministically.
 import { accessoryById, rollWornAccessory } from '../../../src/accessories.js';
 import { weighted } from '../../../src/random.js';
 import { clearedForStage } from '../../../src/netrun/regions.js';
 import { challengeOn, voidChallenge } from '../../../src/netrun/challenges.js';
 import { chatterPool, visitorLines } from '../../../src/chatter.js';
+import { guardedLevel } from '../tell.js';
+import { neglectLevel } from '../needs.js';
 
 export const MIN = 60_000;
 export const SAVE_VERSION = 2;
@@ -35,9 +46,9 @@ export const CFG = {
   darkAwakeSyncMult: 2, // lights off while it's awake: bored in the dark
   // Stability moves on choices, not the clock: plain awake time adds nothing (it once added 0.1/hr, which handed
   // careful players Daemon by default). Flow, overclocking, quick fixes and faults move it.
-  uptimeStabilityPerHour: 0,
-  faultStability: 1, // each care mistake leans it unstable this much (was 2: Glitch came mostly from neglect)
-  feedAllegiance: 0.75, // CORP PKT and SCAV DATA lean it this much each (was 1: allegiance outweighed stability)
+  uptimeTemperPerHour: 0,
+  faultTemper: 1, // each care mistake leans it unstable this much (was 2: Glitch came mostly from neglect)
+  feedStanding: 0.25, // 2.0: CORP PKT adds this to corp Standing and SCAV DATA to street (1.0: 0.75 of allegiance)
   // Overclocked: Heat at or above this. Mini-games and ICE run slower, wins drop items more often, but a lost
   // game costs Sync and Integrity, lost ICE bites harder and events come more often. Awake time overclocked
   // leans it unstable (Glitch); time in flow leans it stable (Daemon). 85+ keeps its own harms on top.
@@ -48,14 +59,14 @@ export const CFG = {
   overclockLoseIntegrity: 4,
   overclockIceDamageMult: 1.5,
   overclockEventMult: 1.25,
-  overclockStabilityPerHour: -0.2,
-  flowStabilityPerHour: 0.2,
+  overclockTemperPerHour: -0.2,
+  flowTemperPerHour: 0.5, // 2.0: 1.0 had 0.2; overclocking is far easier to reach than flow, so flow pays more
   flowEventMult: 0.75, // calm: in flow, trouble comes less often (the mirror of overclockEventMult)
   // Either state draws visitors: a hot netling is fun to play with, a calm one is good company. This also
   // makes up for the visit rolls an open event blocks.
   overclockVisitMult: 1.25,
   flowVisitMult: 1.25,
-  maxMistakes: 10,
+  maxMistakes: Infinity, // 2.0: no fault cap and no neglect death (1.0: 10)
   flatlineIntegrityMin: 120,
   // A five-day life. Each netling keeps the lengths it compiled with (s.life), so a change here
   // never shortens one that is already alive.
@@ -72,23 +83,25 @@ export const CFG = {
   mainframeExits: 3,
   mainframeCleanExits: 2,
   mainframeTraitLevel: 2,
-  teenGoodCareMaxMistakes: 2,
-  // The Shell: a teen on Ghost's path (Ghost's allegiance band, no chaos, few faults, and every
-  // game won at least this often).
-  shellMaxMistakes: 1,
+  // 2.0 evolution. The hidden-path teen needs this many wins in every game and the two Standing tracks within
+  // hiddenBand (whole points). Choices (Standing lean, role) are weighted by the gap to the leader: tieWeights[gap],
+  // the last entry for any larger gap. A form never raised weighs newFormWeight more.
   shellMinWinsEach: 3,
-  // Adult evolution: axes within this of each other (or of zero) are a tie, broken at random,
-  // with forms the player has never raised weighted up.
-  tieBand: 0.5,
+  hiddenBand: 1,
+  tieWeights: [4, 4, 3, 2, 1, 0],
   newFormWeight: 1.2,
+  // 2.0 temper: one hidden number with a 24 hour half-life, shown as five levels (../tell.js).
+  temperHalfLifeMin: 24 * 60,
+  // 2.0 care preferences (hidden): a match on feed or play gives Sync.
+  prefMild: 2,
+  prefStrong: 4,
   // Hibernation: a long pause that freezes the clock. Minimum stay and cooldown keep it for
   // vacations, not for skipping a work day.
   hibernateMinMin: 24 * 60,
   hibernateCooldownMin: 3 * 24 * 60,
   sleepStart: 22,
   sleepEnd: 7,
-  ghostBand: 2, // |allegiance| must stay under this, and stability can't be negative
-  ghostMinGameWins: 29,
+  ghostMinGameWins: 29, // the hidden adult: this many wins in all (a boosted win counts 2) and ghostMinWinsEach in every game
   ghostMinWinsEach: 4,
   playWinSync: 25,
   playLoseSync: 8,
@@ -98,7 +111,7 @@ export const CFG = {
   traceChancePerHour: 0.08,
   traceWindowMin: 120,
   traceIgnoredIntegrity: 15,
-  traceIgnoredAllegiance: 1,
+  traceIgnoredStanding: 1, // corp
   // COMPLY costs Sync only: it used to cost Integrity too, so a player protecting Integrity always hid and leaned indie.
   // HIDE costs Charge and Heat, so each answer costs about as much, in a different stat.
   complySync: 10,
@@ -107,7 +120,7 @@ export const CFG = {
   attackChancePerHour: 0.04,
   attackWindowMin: 60,
   attackLandedIntegrity: 10,
-  attackRepelledStability: 1,
+  attackRepelledTemper: 1,
   // Memory overflow: PURGE before the buffers burst, or it crashes and reboots.
   overflowChancePerHour: 0.02,
   overflowPerCachePerHour: 0.02, // each cache file makes it likelier
@@ -219,56 +232,36 @@ const DROPS = {
   visit: { coolant: 2, booster: 2, repair: 2, memory: 1, overclock: 1 },
 };
 
-// What each adult form leaves behind for the next generation.
-export const KEEPSAKES = {
-  chrome: 'voucher',
-  firewall: 'antivirus',
-  daemon: 'coolant',
-  glitch: 'blackice',
-  ghost: 'memory',
-};
-
-export const FORMS = {
-  chrome: { name: 'Chrome', trait: 'licensed' },
-  firewall: { name: 'Firewall', trait: 'hardened' },
-  daemon: { name: 'Daemon', trait: 'persistent' },
-  glitch: { name: 'Glitch', trait: 'volatile' },
-  ghost: { name: 'Ghost', trait: 'untraceable' },
-};
+// 2.0: the adult forms are role x lean plus the hidden form (ids are placeholders: names depend on the egg, and the
+// dynamics here are the same for all three). Traits, keepsakes, perks and run abilities of 2.0 forms are undesigned,
+// so they are empty: the forms differ only in how they are reached.
+export const ROLES = ['breach', 'dodge', 'tune', 'feast'];
+export const LEANS = ['corp', 'street'];
+const cap1 = (x) => x[0].toUpperCase() + x.slice(1);
+export const roleForm = (role, lean) => `${role}${cap1(lean)}`;
+const ADULTS = ROLES.flatMap((r) => LEANS.map((l) => roleForm(r, l)));
+export const KEEPSAKES = {};
+export const FORMS = Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), trait: null }]));
 
 // Every body a netling can have. Adult forms also appear in FORMS.
 export const SPECIES = {
-  bitling: { name: 'Bitling', stage: 'baby' },
-  kernel: { name: 'Kernel', stage: 'teen' },
-  stub: { name: 'Stub', stage: 'teen' },
-  shell: { name: 'Shell', stage: 'teen' },
-  chrome: { name: 'Chrome', stage: 'adult' },
-  firewall: { name: 'Firewall', stage: 'adult' },
-  daemon: { name: 'Daemon', stage: 'adult' },
-  glitch: { name: 'Glitch', stage: 'adult' },
-  ghost: { name: 'Ghost', stage: 'adult' },
-  // Mainframe forms: each grows from one adult form (its line) and keeps that line's trait, keepsake, perk and ability.
-  plat: { name: 'Plat', stage: 'mainframe', line: 'chrome' },
-  airgap: { name: 'Airgap', stage: 'mainframe', line: 'firewall' },
-  init: { name: 'Init', stage: 'mainframe', line: 'daemon' },
-  panic: { name: 'Panic', stage: 'mainframe', line: 'glitch' },
-  whisper: { name: 'Whisper', stage: 'mainframe', line: 'ghost' },
+  baby: { name: 'Baby', stage: 'baby' },
+  teenCorp: { name: 'TeenCorp', stage: 'teen' },
+  teenStreet: { name: 'TeenStreet', stage: 'teen' },
+  teenHidden: { name: 'TeenHidden', stage: 'teen' },
+  ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), stage: 'adult' }])),
+  // Elders (the Mainframe stage of 1.0): one per adult, same gate as 1.0.
+  ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [`${f}Elder`, { name: `${cap1(f)}Elder`, stage: 'mainframe', line: f }])),
 };
 
-// The adult form a body belongs to: itself for an adult, its line for a mainframe (and itself for anything else).
+// The adult form a body belongs to: itself for an adult, its line for an elder (and itself for anything else).
 export const lineOf = (form) => SPECIES[form]?.line ?? form;
-// Each adult form's mainframe form.
+// Each adult form's elder.
 export const MAINFRAME_OF = Object.fromEntries(Object.entries(SPECIES).filter(([, x]) => x.line).map(([id, x]) => [x.line, id]));
 export const isMainframeForm = (form) => SPECIES[form]?.stage === 'mainframe';
 
-// In-life perks of each adult form (separate from inherited traits).
-export const FORM_MODS = {
-  chrome: { desc: 'Loves corp packets, sulks at scavenged data' },
-  firewall: { desc: '-30% virus chance', virusMult: 0.7 },
-  daemon: { desc: 'Charge drains 20% slower', chargeDrainMult: 0.8 },
-  glitch: { desc: 'Play is a gamble: +10 to +40 Sync' },
-  ghost: { desc: 'All drains 15% slower', chargeDrainMult: 0.85, syncDrainMult: 0.85 },
-};
+// In-life perks of each adult form (separate from inherited traits): none in 2.0 until they are designed.
+export const FORM_MODS = {};
 
 const mod = (s, key, fallback = 1) => FORM_MODS[lineOf(s.form)]?.[key] ?? fallback;
 
@@ -284,30 +277,18 @@ export const TRAITS = {
   untraceable: { name: 'Untraceable', desc: 'Corp traces find it less often' },
 };
 
-// Trait strength. The parent's trait applies at level strength (1, then +levelStep for each
-// generation in a row that ended as the same form, up to maxLevel); the grandparent's trait comes
-// back as its history at half strength, and adds to the trait when they match. Each trait is capped.
-// `full` is each effect at strength 1.
+// Trait strength (unchanged from 1.0; no 2.0 form carries a trait yet, so these are all zero unless a test sets one).
 export const TRAIT_CFG = {
   history: 0.5,
   levelStep: 0.25,
   maxLevel: 3,
-  full: {
-    licensed: 0.25, // corp packets restore +25% Charge
-    hardened: 0.5, // -50% virus chance
-    persistent: 0.3, // drains 30% slower while resting
-    volatile: 0.5, // play rewards x1.5; costs volatileIntegrity per hour
-    untraceable: 0.6, // corp traces 60% less often
-  },
-  volatileIntegrity: 0.75, // Integrity per hour at strength 1
-  // Caps, from measurement (balance pass 3): Persistent's fewer faults shift adult forms, Volatile's
-  // Integrity cost hurts casual players, and Untraceable would be an immunity again above 1.25.
+  full: { licensed: 0.25, hardened: 0.5, persistent: 0.3, volatile: 0.5, untraceable: 0.6 },
+  volatileIntegrity: 0.75,
   cap: { licensed: 1.5, hardened: 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25 },
 };
 
 export const levelStrength = (level) => 1 + TRAIT_CFG.levelStep * (Math.min(Math.max(level ?? 1, 1), TRAIT_CFG.maxLevel) - 1);
 
-// How strongly trait `id` applies to this netling: 0 if it has neither the trait nor its history.
 export function traitStrength(s, id) {
   let st = 0;
   if (s.trait === id) st += levelStrength(s.traitLevel);
@@ -315,10 +296,8 @@ export function traitStrength(s, id) {
   return Math.min(st, TRAIT_CFG.cap[id] ?? st);
 }
 
-// "Persistent", or "Persistent II" for a trait held two generations in a row.
 export const traitLabel = (id, level = 1) => (id ? `${TRAITS[id].name}${level > 1 ? ` ${['', 'I', 'II', 'III', 'IV', 'V'][level] ?? level}` : ''}` : null);
 
-// The effect size of trait `id` for this netling (TRAIT_CFG.full times its strength).
 const traitEffect = (s, id) => TRAIT_CFG.full[id] * traitStrength(s, id);
 
 export const PALETTES = [
@@ -393,13 +372,13 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     inheritedQuirk = pick(QUIRK_KEYS, rng);
     quirk[inheritedQuirk] = fragment.quirk[inheritedQuirk];
   }
-  return {
+  const s = {
     saveVersion: SAVE_VERSION,
     generation,
     life: lifeFromCfg(),
     newForms: newForms.filter((f) => FORMS[f]),
     stage: 'script',
-    form: 'bitling',
+    form: 'baby',
     teenForm: null,
     evolvedAt: null,
     bornAt: now,
@@ -416,10 +395,16 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     rebootUntilAge: null,
     lightsOn: true,
     careMistakes: 0,
+    bugs: 0, // 2.0: persistent glitches, raised by faults, cleared with scrip or Standing
+    faultRolls: 0, // 2.0: bug rolls owed for faults outside tick (netrun disconnects); settled on the next step
+    standing: { corp: 0, street: 0 }, // 2.0
+    temper: 0, // 2.0
+    tLevel: 0, // 2.0: the shown temper level (-2..2) after the flicker guard
+    lastGames: [], // 2.0 care preferences: the last two distinct games
+    lastPacket: null,
     zeroMin: { charge: 0, sync: 0, heat: 0, lights: 0 },
     flagged: { charge: false, sync: false, heat: false, lights: false },
     integrityZeroMin: 0,
-    axes: { allegiance: 0, stability: 0 },
     games: freshGames(),
     event: null,
     lastSurgeAt: null,
@@ -464,6 +449,79 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     diedAt: null,
     fragment: null,
   };
+  attachAxes(s);
+  return s;
+}
+
+// 2.0: netrun code (netrun/run.js) still writes the signed pair `axes.allegiance` and `axes.stability`. This adapter turns a
+// signed lean into Standing (a rise adds to corp, a fall to street) and stability into temper. Nothing in this file uses it.
+function attachAxes(s) {
+  const axes = {};
+  Object.defineProperty(axes, 'allegiance', {
+    enumerable: true,
+    get: () => s.standing.corp - s.standing.street,
+    set(v) {
+      const d = v - (s.standing.corp - s.standing.street);
+      if (d > 0) s.standing.corp += d;
+      else s.standing.street -= d;
+    },
+  });
+  Object.defineProperty(axes, 'stability', { enumerable: true, get: () => s.temper, set: (v) => { s.temper = v; } });
+  Object.defineProperty(s, 'axes', { value: axes, enumerable: false, configurable: true, writable: true });
+}
+
+// --- 2.0 bugs, Standing and temper helpers ---------------------------------------------------------
+
+export const BUG_CFG = { chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
+if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
+
+export function rollBug(s, rng, chance = BUG_CFG.chance) {
+  if ((s.bugs ?? 0) < BUG_CFG.max && rng() < chance) s.bugs = (s.bugs ?? 0) + 1;
+}
+
+// Clear one bug. `pay` is 'scrip' (15) or 'standing' (2 points taken from the tracks, `corp` of them from corp and the rest from
+// street; both stay at zero or above). Returns whether a bug was cleared.
+export function clearBug(s, { pay = 'scrip', corp = 1 } = {}) {
+  if (!(s.bugs > 0)) return false;
+  if (pay === 'scrip') {
+    if ((s.scrip ?? 0) < BUG_CFG.clearScrip) return false;
+    s.scrip -= BUG_CFG.clearScrip;
+  } else {
+    const street = BUG_CFG.clearStanding - corp;
+    if (corp < 0 || street < 0 || s.standing.corp < corp || s.standing.street < street) return false;
+    s.standing.corp -= corp;
+    s.standing.street -= street;
+  }
+  s.bugs--;
+  return true;
+}
+
+// Standing as the decisions read it: whole points (the tie-break rules count integers; the HUD would show the same floor).
+export const standingInt = (s, track) => Math.floor(s.standing[track] + 1e-9);
+
+// The temper level the sprite shows (-2 strongly unsteady .. +2 strongly steady), with the flicker guard.
+export const temperLevel = (s) => s.tLevel ?? 0;
+const SEGFAULT_TEMPER = 4;
+export const temperDecayFactor = () => 0.5 ** (1 / CFG.temperHalfLifeMin);
+const TEMPER_DECAY = temperDecayFactor;
+
+// 2.0 care preferences. Hidden: a steady netling likes routine (the same packet, a game among its last two), an unsteady one
+// novelty (the other packet, a game not among them). A match is a small Sync bonus, once per action, no penalty for a miss.
+export const PREF = { on: true, distinct: true, reqbias: true, ice: true };
+if (process.env.PREF) Object.assign(PREF, JSON.parse(process.env.PREF));
+export const pushGame = (s, game) => {
+  const last = s.lastGames ?? [];
+  s.lastGames = PREF.distinct ? [game, ...last.filter((g) => g !== game)].slice(0, 2) : [game, ...last].slice(0, 2);
+};
+function prefApply(s, match) {
+  const lv = temperLevel(s);
+  s.prefActions = (s.prefActions ?? 0) + (lv ? 1 : 0);
+  if (!PREF.on || !lv || !match) return '';
+  const b = Math.abs(lv) === 2 ? CFG.prefStrong : CFG.prefMild;
+  s.stats.sync = clamp(s.stats.sync + b);
+  s.prefBonus = (s.prefBonus ?? 0) + b;
+  s.prefMatches = (s.prefMatches ?? 0) + 1;
+  return lv > 0 ? ' it settles into the routine.' : ' something new. it perks up.';
 }
 
 const freshGames = () => Object.fromEntries(GAME_IDS.map((id) => [id, { played: 0, won: 0 }]));
@@ -527,9 +585,9 @@ function step(s, t, rng) {
   }
 
   if (s.stage === 'baby' && s.ageMin >= s.life.teenAt) {
-    evolve(s, t, 'teen', teenForm(s));
+    evolve(s, t, 'teen', teenForm(s, rng));
   } else if (s.stage === 'teen' && s.ageMin >= s.life.adultAt) {
-    evolve(s, t, 'adult', leaningForm(s, rng));
+    evolve(s, t, 'adult', adultForm(s, rng));
   } else if (CFG.mainframe && mainframeDue(s)) {
     evolve(s, t, 'mainframe', MAINFRAME_OF[s.form]);
     s.lifeBonus = CFG.mainframeBonusMin;
@@ -559,11 +617,11 @@ function step(s, t, rng) {
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult'));
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult'));
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs));
   st.heat = clamp(
-    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour) / 60,
+    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
@@ -594,12 +652,20 @@ function step(s, t, rng) {
   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
   const deepRest = s.nap || (s.asleep && !s.lightsOn);
   if (dInt === 0) dInt = deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour;
+  if (dInt < 0) dInt *= 1 + BUG_CFG.integrity * s.bugs; // 2.0: damage only, not regeneration
   dInt -= TRAIT_CFG.volatileIntegrity * traitStrength(s, 'volatile');
   st.integrity = clamp(st.integrity + dInt / 60);
 
-  if (st.heat >= 85) s.axes.stability -= 1 / 60;
-  else if (!rest && overclocked(s)) s.axes.stability += CFG.overclockStabilityPerHour / 60;
-  else if (!rest && !alertReason(s)) s.axes.stability += (inFlow(s) ? CFG.flowStabilityPerHour : CFG.uptimeStabilityPerHour) / 60;
+  if (st.heat >= 85) s.temper -= 1 / 60;
+  else if (!rest && overclocked(s)) s.temper += CFG.overclockTemperPerHour / 60;
+  else if (!rest && !alertReason(s)) s.temper += (inFlow(s) ? CFG.flowTemperPerHour : CFG.uptimeTemperPerHour) / 60;
+  s.temper *= TEMPER_DECAY();
+  s.tLevel = guardedLevel(s.temper, s.tLevel ?? 0);
+  while (s.faultRolls > 0) {
+    s.faultRolls--;
+    rollBug(s, rng);
+  }
+  stepHold(s, rest);
 
   stepVisit(s, t, rng);
   stepFriends(s, t, rng);
@@ -636,7 +702,7 @@ function stepEvents(s, t, rng) {
     s.event = null;
     if (type === 'trace') {
       st.integrity = clamp(st.integrity - CFG.traceIgnoredIntegrity);
-      s.axes.allegiance += CFG.traceIgnoredAllegiance;
+      s.standing.corp += CFG.traceIgnoredStanding;
       log(s, t, '> !! trace completed. corp harvested its data.');
     } else if (type === 'attack') {
       infect(s, CFG.attackLandedIntegrity);
@@ -799,7 +865,14 @@ function stepRequest(s, t, rng) {
     s.request = { kind: 'cool', startedAge: s.ageMin };
     log(s, t, '> it is fanning itself. it wants a COOL.');
   } else {
-    const game = pick(GAME_IDS, rng);
+    let game = pick(GAME_IDS, rng);
+    if (PREF.on && PREF.reqbias) {
+      // 2.0: a steady netling asks for one of its last two distinct plays, an unsteady one for a game not among them.
+      const lv = temperLevel(s);
+      const last = s.lastGames ?? [];
+      if (lv > 0 && last.length) game = pick(last, rng);
+      else if (lv < 0 && last.length) game = pick(GAME_IDS.filter((g) => !last.includes(g)), rng);
+    }
     s.request = { kind: 'game', game, startedAge: s.ageMin };
     log(s, t, `> it wants to play ${game.toUpperCase()}.`);
   }
@@ -904,6 +977,29 @@ export function traceMinutesLeft(s) {
   return s.event?.type === 'trace' ? eventMinutesLeft(s) : 0;
 }
 
+// 2.0 measurements kept on the state: awake minutes at each shown temper level, and the longest unbroken awake hold at each
+// strong level (the Metronome's unlock test, docs/NETLING_2_SKETCH.md). Sleep pauses a hold, a change of shown level ends it, and
+// an awake minute at neglect level 2 is not counted (the clock pauses, it does not reset).
+function stepHold(s, rest) {
+  if (rest) return;
+  s.levelMin ??= { '-2': 0, '-1': 0, 0: 0, 1: 0, 2: 0 };
+  s.levelMin[s.tLevel]++;
+  const h = (s.hold ??= { level: 0, min: 0, best: { '-2': 0, 2: 0 } });
+  if (h.level !== s.tLevel) {
+    h.level = s.tLevel;
+    h.min = 0;
+  }
+  s.neglect2Min ??= 0;
+  if (neglectLevel(s.stats) >= 2) {
+    s.neglect2Min++;
+    return;
+  }
+  if (Math.abs(h.level) === 2) {
+    h.min++;
+    h.best[h.level] = Math.max(h.best[h.level], h.min);
+  }
+}
+
 function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   if (!cond) {
     s.zeroMin[key] = 0;
@@ -914,53 +1010,65 @@ function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   if (s.zeroMin[key] >= grace && !s.flagged[key]) {
     s.flagged[key] = true;
     s.careMistakes++;
-    s.axes.stability -= CFG.faultStability;
-    log(s, t, `> care mistake: ${label}. [${s.careMistakes}/${CFG.maxMistakes}]`);
+    s.temper -= CFG.faultTemper;
+    s.faultRolls++; // a bug roll, settled in step() with its rng
+    log(s, t, `> care mistake: ${label}. [${s.careMistakes}]`);
   }
 }
 
-// The teen form: Stub after a rough first stretch, the Shell on Ghost's path, else Kernel.
-export function teenForm(s) {
-  if (s.careMistakes > CFG.teenGoodCareMaxMistakes) return 'stub';
-  const { allegiance: a, stability: b } = s.axes;
-  const played = GAME_IDS.every((id) => (s.games?.[id]?.won ?? 0) >= CFG.shellMinWinsEach);
-  if (Math.abs(a) < CFG.ghostBand && b >= 0 && s.careMistakes <= CFG.shellMaxMistakes && played) return 'shell';
-  return 'kernel';
-}
+// --- 2.0 evolution (docs/NETLING_2_SKETCH.md, Evolution) ---------------------------------------------------
 
-// The adult forms the axes point to, with their weights. Usually one; within CFG.tieBand it is a
-// tie: allegiance and stability about as strong as each other, or an axis about zero (both of its
-// forms). Forms the player has never raised (s.newForms) weigh a little more.
-export function leaningCandidates(s) {
-  const { allegiance: a, stability: b } = s.axes;
-  const band = CFG.tieBand;
-  const side = (v, pos, neg) => (Math.abs(v) < band ? [pos, neg] : [v >= 0 ? pos : neg]);
-  const byAllegiance = side(a, 'chrome', 'firewall');
-  const byStability = side(b, 'daemon', 'glitch');
-  const gap = Math.abs(a) - Math.abs(b);
-  const forms = Math.abs(gap) < band ? [...byAllegiance, ...byStability] : gap > 0 ? byAllegiance : byStability;
+// A choice among options with whole-number scores: each option's weight falls with its gap to the leader (CFG.tieWeights).
+const gapWeights = (scores) => {
+  const top = Math.max(...Object.values(scores));
+  return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, CFG.tieWeights[Math.min(top - v, CFG.tieWeights.length - 1)]]));
+};
+const tracksWithin = (s, band) => Math.abs(standingInt(s, 'corp') - standingInt(s, 'street')) <= band;
+const winsOf = (s) => GAME_IDS.map((id) => s.games?.[id]?.won ?? 0);
+
+// The hidden-path teen: every game won shellMinWinsEach times and the two tracks within a point.
+export const hiddenTeenMet = (s) => winsOf(s).every((w) => w >= CFG.shellMinWinsEach) && tracksWithin(s, CFG.hiddenBand);
+// The hidden adult: ghostMinWinsEach in every game, ghostMinGameWins in all, and the tracks within a point.
+export const hiddenAdultMet = (s) => {
+  const w = winsOf(s);
+  return w.every((x) => x >= CFG.ghostMinWinsEach) && w.reduce((a, b) => a + b, 0) >= CFG.ghostMinGameWins && tracksWithin(s, CFG.hiddenBand);
+};
+export const ghostWinsMet = hiddenAdultMet;
+
+// Forms the player has never raised (s.newForms) weigh newFormWeight more, after the gap weights.
+const withFresh = (s, pool) => {
   const fresh = new Set(s.newForms ?? []);
-  return Object.fromEntries(forms.map((f) => [f, fresh.has(f) ? CFG.newFormWeight : 1]));
-}
+  return Object.fromEntries(Object.entries(pool).map(([f, w]) => [f, fresh.has(f) ? w * CFG.newFormWeight : w]));
+};
 
-// Which adult form the current axes lean toward. Ties are broken with rng; without one (a save
-// being repaired), the heaviest candidate wins, then the first.
-export function leaningForm(s, rng = null) {
-  const { allegiance: a, stability: b } = s.axes;
-  if (Math.abs(a) < CFG.ghostBand && b >= 0 && s.careMistakes <= 1 && ghostWinsMet(s)) {
-    return 'ghost';
-  }
-  const pool = leaningCandidates(s);
-  const forms = Object.keys(pool);
-  if (forms.length === 1) return forms[0];
+// The teen's candidates and weights: the leading Standing track, or both when the gap is a tie. Never empty when a track is
+// ahead by 5 or more: the other weighs 0.
+export function teenCandidates(s) {
+  const lean = gapWeights({ corp: standingInt(s, 'corp'), street: standingInt(s, 'street') });
+  return withFresh(s, { teenCorp: lean.corp, teenStreet: lean.street });
+}
+export function teenForm(s, rng = null) {
+  if (hiddenTeenMet(s)) return 'teenHidden';
+  const pool = teenCandidates(s);
   if (rng) return weighted(pool, rng);
-  return forms.reduce((best, f) => (pool[f] > pool[best] ? f : best));
+  return pool.teenCorp >= pool.teenStreet ? 'teenCorp' : 'teenStreet';
 }
 
-export function ghostWinsMet(s) {
-  const wins = GAME_IDS.map((id) => s.games?.[id]?.won ?? 0);
-  return wins.every((w) => w >= CFG.ghostMinWinsEach) && wins.reduce((a, b) => a + b, 0) >= CFG.ghostMinGameWins;
+// The adult's candidates: role (the game with the most wins) and Standing lean are weighted by their gaps and rolled together.
+export function adultCandidates(s) {
+  const lean = gapWeights({ corp: standingInt(s, 'corp'), street: standingInt(s, 'street') });
+  const role = gapWeights(Object.fromEntries(ROLES.map((r) => [r, s.games?.[r]?.won ?? 0])));
+  const pool = {};
+  for (const r of ROLES) for (const l of LEANS) pool[roleForm(r, l)] = role[r] * lean[l];
+  return withFresh(s, Object.fromEntries(Object.entries(pool).filter(([, w]) => w > 0)));
 }
+export function adultForm(s, rng = null) {
+  if (hiddenAdultMet(s)) return 'hidden';
+  const pool = adultCandidates(s);
+  if (rng) return weighted(pool, rng);
+  return Object.keys(pool).reduce((best, f) => (pool[f] > pool[best] ? f : best));
+}
+export const leaningForm = adultForm;
 
 function evolve(s, t, stage, form) {
   s.stage = stage;
@@ -972,7 +1080,7 @@ function evolve(s, t, stage, form) {
 
 // Older saves predate evolution fields.
 export function migrate(s) {
-  s.form ??= 'bitling';
+  s.form ??= 'baby';
   s.evolvedAt ??= null;
   s.games ??= freshGames();
   for (const id of GAME_IDS) s.games[id] ??= { played: 0, won: 0 }; // games added since it was saved
@@ -1025,7 +1133,7 @@ export const inheritedScrip = (s) => Math.floor((s.scrip ?? 0) * SCRIP.inherit);
 // child's history; if it ended as the same form as its parent, the trait's level goes up (a streak).
 // A mainframe passes its trait on at level II or higher (CFG.mainframeTraitLevel).
 export function fragmentOf(s, form) {
-  const trait = FORMS[form].trait;
+  const trait = FORMS[form]?.trait ?? null;
   const streak = s.trait === trait ? Math.min((s.traitLevel ?? 1) + 1, TRAIT_CFG.maxLevel) : 1;
   const level = isMainframeForm(s.form) ? Math.max(streak, Math.min(CFG.mainframeTraitLevel, TRAIT_CFG.maxLevel)) : streak;
   return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, history: s.trait ?? null };
@@ -1054,9 +1162,9 @@ function flatline(s, t, cause, rng = null) {
   // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
-  const form = FORMS[lineOf(s.form)] ? lineOf(s.form) : leaningForm(s, rng);
+  const form = FORMS[lineOf(s.form)] ? lineOf(s.form) : adultForm(s, rng);
   s.fragment = fragmentOf(s, form);
-  log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${TRAITS[s.fragment.trait].name}.`);
+  log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${s.fragment.trait ? TRAITS[s.fragment.trait].name : 'none'}.`);
 }
 
 // --- naps ---------------------------------------------------------------------------------
@@ -1168,16 +1276,18 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
-      s.axes.allegiance += action === 'corp' ? CFG.feedAllegiance : -CFG.feedAllegiance;
+      s.standing[action === 'corp' ? 'corp' : 'street'] += CFG.feedStanding;
       s.sinceFed = 0;
       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
+      {
+        const lv = temperLevel(s);
+        const match = lv > 0 ? s.lastPacket === action : lv < 0 ? Boolean(s.lastPacket) && s.lastPacket !== action : false;
+        msg += prefApply(s, match);
+        s.lastPacket = action;
+      }
       if (s.quirk.favPacket === action) {
         st.sync = clamp(st.sync + 8);
         msg += ' it loves these.';
-      }
-      if (lineOf(s.form) === 'chrome') {
-        st.sync = clamp(st.sync + (action === 'corp' ? 5 : -5));
-        if (action === 'scav') msg += ' it looks disgusted.';
       }
       if (action === 'scav' && !s.virus && !shielded(s)) {
         const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult');
@@ -1195,7 +1305,6 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       const hot = overclocked(s); // it played at this Heat, before this game's own
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
-      if (lineOf(s.form) === 'glitch') gain = 10 + Math.floor(rng() * 31);
       gain *= 1 + traitEffect(s, 'volatile');
       // A lost game while overclocked costs instead of consoling.
       if (hot && !won) {
@@ -1210,7 +1319,14 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       st.sync = clamp(st.sync + gain);
       st.charge = clamp(st.charge - 6 + (game === 'feast' ? (won ? CFG.feastWinCharge : CFG.feastLoseCharge) : 0));
       st.heat = clamp(st.heat + 12);
-      if (st.heat > 70) s.axes.stability -= 0.5;
+      if (st.heat > 70) s.temper -= 0.5;
+      {
+        const lv = temperLevel(s);
+        const last = s.lastGames ?? [];
+        const match = lv > 0 ? last.includes(game) : lv < 0 ? last.length > 0 && !last.includes(game) : false;
+        prefApply(s, match);
+        pushGame(s, game);
+      }
       s.games[game].played++;
       if (won) s.games[game].won += boosted ? 2 : 1;
       let msg = won
@@ -1228,14 +1344,14 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.event = null;
       st.charge = clamp(st.charge - 10);
       st.heat = clamp(st.heat + 10);
-      s.axes.allegiance -= 1;
+      s.standing.street += 1;
       res = ok(`rerouted through proxies. trace lost.${maybeDrop(s, 'hide', ITEM_CFG.hideDropChance, rng)}`, 'patch');
       break;
     }
     case 'comply': {
       s.event = null;
       st.sync = clamp(st.sync - CFG.complySync);
-      s.axes.allegiance += 1;
+      s.standing.corp += 1;
       res = ok(`handshake accepted. corp scan complete.${maybeDrop(s, 'comply', ITEM_CFG.complyDropChance, rng)}`, 'feed');
       break;
     }
@@ -1265,7 +1381,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (!s.virus) return fail('scan complete. no threats.');
       s.virus = false;
       st.integrity = clamp(st.integrity + 10);
-      s.axes.stability += s.virusMin <= 30 ? 1 : -1;
+      s.temper += s.virusMin <= 30 ? 1 : -1;
       res = ok('virus quarantined.', 'patch');
       break;
     }
@@ -1291,14 +1407,14 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (s.event?.type === 'overflow') {
         s.event = null;
         s.cache = 0;
-        s.axes.stability += 0.5;
+        s.temper += 0.5;
         st.integrity = clamp(st.integrity + CFG.careIntegrity);
         res = ok(`buffers flushed. overflow contained.${segfaultDrop(s, rng)}`, 'purge');
         break;
       }
       if (s.cache === 0) return fail('cache is clean.');
       s.cache = 0;
-      s.axes.stability += 0.5;
+      s.temper += 0.5;
       st.integrity = clamp(st.integrity + CFG.careIntegrity);
       res = ok('cache purged.', 'purge');
       break;
@@ -1307,7 +1423,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       // The DEFEND mini-game's result, like 'play' but for an intrusion.
       s.event = null;
       if (opts.won) {
-        s.axes.stability += CFG.attackRepelledStability;
+        s.temper += CFG.attackRepelledTemper;
         res = ok(`intrusion repelled.${segfaultDrop(s, rng)}`, 'win');
       } else {
         infect(s, CFG.attackLandedIntegrity);
@@ -1346,16 +1462,18 @@ function useItem(s, id, rng) {
   switch (id) {
     case 'coolant':
       st.heat = clamp(st.heat - 50);
+      s.temper += 1; // 2.0
       return `${name} vented. heat down.`;
     case 'antivirus': {
       const cured = s.virus;
+      s.temper += 1; // 2.0
       s.virus = false;
       s.buffs.shieldUntilAge = s.ageMin + ITEM_CFG.shieldMinutes;
       return `${name} applied.${cured ? ' virus purged.' : ''} shielded for 6h.`;
     }
     case 'voucher':
       st.charge = 100;
-      s.axes.allegiance += 1;
+      s.standing.corp += 1;
       if (s.event?.type === 'trace') {
         s.event = null;
         return `${name} redeemed. charge full. trace waved off.`;
@@ -1365,8 +1483,8 @@ function useItem(s, id, rng) {
     case 'blackice': {
       st.sync = clamp(st.sync + 40);
       st.heat = clamp(st.heat + 20);
-      s.axes.allegiance -= 1;
-      s.axes.stability -= 1;
+      s.standing.street += 1;
+      s.temper -= 1;
       if (!s.virus && !shielded(s) && rng() < ITEM_CFG.blackIceVirusChance) {
         s.virus = true;
         s.virusMin = 0;
@@ -1381,10 +1499,13 @@ function useItem(s, id, rng) {
       st.integrity = clamp(st.integrity + 40);
       return `${name} applied. integrity restored.`;
     case 'segfault': {
-      // Deliberate faults count like any other: the same stability cost, the same limit.
+      // 2.0: two faults on purpose, temper -4 (two faults at -1 and -2 more; a proposal), and bugs: 25% none, 60% one, 15% two.
       s.careMistakes += ITEM_CFG.segfaultFaults;
-      s.axes.stability -= CFG.faultStability * ITEM_CFG.segfaultFaults;
-      return `${name} triggered. care mistakes on purpose. [${s.careMistakes}/${CFG.maxMistakes}]`;
+      s.temper -= SEGFAULT_TEMPER;
+      const u = rng();
+      const n = u < BUG_CFG.segfault[0] ? 0 : u < BUG_CFG.segfault[0] + BUG_CFG.segfault[1] ? 1 : 2;
+      for (let i = 0; i < n; i++) rollBug(s, rng, 1);
+      return `${name} triggered. care mistakes on purpose. [${s.careMistakes}]`;
     }
     case 'overclock': {
       const before = runCooldownLeft(s);
