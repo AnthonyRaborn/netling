@@ -364,6 +364,45 @@ export const WETWARE_ADULTS = {
       '......####......',
     ],
   },
+  // Blank (hidden): the hidden teen grown. A person the system does not know: a pointed hood over a blank face, slit lens eyes and no mouth,
+  // a long coat whose cells alternate bright and dim (the shimmer of Ghost in the Shell's thermoptic camouflage, here a take on the hidden
+  // teen's cloak, not Program's Shell and Ghost), and a scalloped hem. The shimmer's phase swaps between frames and the hem steps.
+  blank: {
+    a: [
+      '.......##.......',
+      '......####......',
+      '.....######.....',
+      '....########....',
+      '...##########...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '...##########...',
+      '....########....',
+      '.....######.....',
+      '..############..',
+      '.##############.',
+      '.#x#x#x#x#x#x#x.',
+      '.x#x#x#x#x#x#x#.',
+      '.##.##.##.##.##.',
+    ],
+    b: [
+      '.......##.......',
+      '......####......',
+      '.....######.....',
+      '....########....',
+      '...##########...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '...##########...',
+      '....########....',
+      '.....######.....',
+      '..############..',
+      '.##############.',
+      '.x#x#x#x#x#x#x#.',
+      '.#x#x#x#x#x#x#x.',
+      '..##.##.##.##.##',
+    ],
+  },
 };
 export const WETWARE_ADULT_ANCHORS = {
   razor: { headTop: 2, eyeRow: 4, mouthRow: 8, neckRow: 9 },
@@ -374,4 +413,5 @@ export const WETWARE_ADULT_ANCHORS = {
   chipped: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
   gibson: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
   leech: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 9 },
+  blank: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 },
 };

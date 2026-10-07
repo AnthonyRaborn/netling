@@ -25,10 +25,13 @@ export const WETWARE_FORMS = {
   gibson: { stage: 'adult', role: 'tune', lean: 'street' },
   nutri: { stage: 'adult', role: 'feast', lean: 'corp' },
   leech: { stage: 'adult', role: 'feast', lean: 'street' },
+  blank: { stage: 'adult', role: 'hidden' }, // the hidden adult, Blank's line
 };
 export const WETWARE_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
-export const WETWARE_HIDDEN_BRANCH = ['baby', 'teenHidden'];
+export const WETWARE_HIDDEN_BRANCH = ['baby', 'teenHidden', 'blank'];
 export const WETWARE_ADULTS_ALL = ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech'];
+// The eight role forms plus the hidden adult (option C: nine adults an egg).
+export const WETWARE_NINE = [...WETWARE_ADULTS_ALL, 'blank'];
 
 const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS, ...WETWARE_ADULTS };
 const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS, ...WETWARE_ADULT_ANCHORS };

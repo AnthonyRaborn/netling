@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
-import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_ADULTS_ALL, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
+import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_ADULTS_ALL, WETWARE_NINE, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
 import { wetwareKey } from './register.js';
 import { forms as ironForms } from './models.js';
 import { programForms } from './program-models.js';
@@ -16,9 +16,9 @@ const WIDTH = { baby: 12, teen: 14, adult: 16 };
 const key = (f, pose) => `${wetwareKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
 test('Wetware has a baby and three teens (corp, street, hidden), in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden', ...WETWARE_ADULTS_ALL]);
+  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden', ...WETWARE_NINE]);
   assert.deepEqual(WETWARE_TEENS_ALL.map((id) => WETWARE_FORMS[id].lean), ['corp', 'street', 'hidden']);
-  assert.deepEqual(WETWARE_HIDDEN_BRANCH, ['baby', 'teenHidden']);
+  assert.deepEqual(WETWARE_HIDDEN_BRANCH, ['baby', 'teenHidden', 'blank']);
 });
 
 test('every sprite is rectangular, the stage\'s width, 11 rows like Iron\'s and Program\'s babies and teens, with known marks', () => {
@@ -182,15 +182,15 @@ test('option C: each of the four roles has a corp and a street form (Blank, the 
   assert.deepEqual(set.wired.b.slice(9), SPRITES.chromeB.slice(9));
 });
 
-test('the eight role adults are distinct from one another (under 1.0\'s 0.82 for a same-stage pair) and from every teen and the baby', () => {
+test('the nine adults are distinct from one another (under 1.0\'s 0.82 for a same-stage pair) and from every teen and the baby', () => {
   const pairs = [];
-  for (let i = 0; i < WETWARE_ADULTS_ALL.length; i++) {
-    for (let j = i + 1; j < WETWARE_ADULTS_ALL.length; j++) pairs.push({ pair: `${WETWARE_ADULTS_ALL[i]}/${WETWARE_ADULTS_ALL[j]}`, iou: silhouetteIou(set[WETWARE_ADULTS_ALL[i]].a, set[WETWARE_ADULTS_ALL[j]].a) });
+  for (let i = 0; i < WETWARE_NINE.length; i++) {
+    for (let j = i + 1; j < WETWARE_NINE.length; j++) pairs.push({ pair: `${WETWARE_NINE[i]}/${WETWARE_NINE[j]}`, iou: silhouetteIou(set[WETWARE_NINE[i]].a, set[WETWARE_NINE[j]].a) });
   }
   pairs.sort((p, q) => q.iou - p.iou);
   console.log(`  closest Wetware adults: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
   for (const p of pairs) assert.ok(p.iou <= 0.82, `${p.pair}: ${p.iou.toFixed(2)}`);
-  for (const id of WETWARE_ADULTS_ALL) for (const other of ['baby', ...WETWARE_TEENS_ALL]) assert.ok(silhouetteIou(set[id].a, set[other].a) < 0.82, `${id}/${other}`);
+  for (const id of WETWARE_NINE) for (const other of ['baby', ...WETWARE_TEENS_ALL]) assert.ok(silhouetteIou(set[id].a, set[other].a) < 0.82, `${id}/${other}`);
 });
 
 test('each corp adult carries its motif: Razor blade forearms, Wired a visor, Mentat an oversized cortex, Nutri a wide mouth and a dark belly band', () => {
@@ -227,4 +227,28 @@ test('each street adult carries its motif: Solo a Batou-style ocular band and sq
   const apart = set.leech.a[4].indexOf('oo', 8) - set.leech.a[4].indexOf('oo') - 2;
   assert.ok(apart >= 4, 'Leech: eyes set wide apart');
   assert.ok(set.leech.a[12].includes('xx'), 'Leech: a dark pump at the end of the tube');
+});
+
+// --- Blank, the hidden adult ----------------------------------------------------------------------------------------------------
+test('Blank is the hidden teen grown: a pointed hood over a blank face (slit lens eyes, no mouth), a shimmering coat and a scalloped hem', () => {
+  const b = set.blank;
+  assert.equal(WETWARE_FORMS.blank.role, 'hidden');
+  assert.equal(b.a.length, 15);
+  assert.equal(b.a[0].replace(/\./g, '').length, 2, 'a hood peak');
+  assert.ok(b.a[0].replace(/\./g, '').length < b.a[3].replace(/\./g, '').length, 'the hood widens');
+  assert.ok(!b.a.join('').includes('+'), 'no mouth: a blank face');
+  assert.ok(b.a.slice(12, 14).every((r) => r.includes('#x#x#x')), 'the coat alternates bright and dim cells');
+  assert.ok(b.a.at(-1).includes('.##.##'), 'a scalloped hem');
+  // The shimmer's phase swaps between frames and the hem steps, but the hood and face do not move.
+  for (let y = 0; y <= b.anchors.a.neckRow; y++) assert.equal(b.b[y], b.a[y], `row ${y}`);
+  assert.notEqual(b.a[12], b.b[12]);
+  assert.ok(poseDistance(b.a, b.b) >= 4);
+});
+
+test('Blank grows from the hidden teen (the hood peak and the shimmer carry the lineage, not the outline) and is clear of the eight role adults', () => {
+  const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
+  console.log(`  Blank against its teen ${iou('blank', 'teenHidden').toFixed(2)}, corp teen ${iou('blank', 'teenCorp').toFixed(2)}, street teen ${iou('blank', 'teenStreet').toFixed(2)}; closest role adult ${Math.max(...WETWARE_ADULTS_ALL.map((id) => iou('blank', id))).toFixed(2)}`);
+  assert.ok(set.blank.a.join('').includes('x') && set.teenHidden.a.join('').includes('x#x'), 'both shimmer');
+  assert.equal(set.blank.a[0].replace(/\./g, '').length, set.teenHidden.a[0].replace(/\./g, '').length, 'the same hood peak');
+  for (const id of WETWARE_ADULTS_ALL) assert.ok(iou('blank', id) < 0.8, `blank/${id}`);
 });
