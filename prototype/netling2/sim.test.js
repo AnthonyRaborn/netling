@@ -722,6 +722,7 @@ test('rattle: off by default, and then events keep their 1.0 windows', async () 
 test('rattle: a late answer sets the timer, an early one does not, and the next event opens shorter', async () => {
   const sim = await import('./sim/sim.js');
   sim.RATTLE.on = true;
+  sim.RATTLE.mode = 'late';
   try {
     const late = fresh();
     late.event = { type: 'trace', startedAge: late.ageMin - Math.ceil(CFG.traceWindowMin * 0.7) };
@@ -755,6 +756,7 @@ test('rattle: a late answer sets the timer, an early one does not, and the next 
     assert.equal(calmDown.event.window, CFG.traceWindowMin);
   } finally {
     sim.RATTLE.on = false;
+    sim.RATTLE.mode = 'pileup';
   }
 });
 
@@ -778,4 +780,56 @@ test('rattle: infections are counted in every route, with or without the timer',
   s.event = { type: 'attack', startedAge: s.ageMin - 1 };
   act(s, 'defend', T0, calm, { won: false });
   assert.equal(s.virusCount, 1);
+});
+
+test('rattle (pileup): an event opening soon after another ended opens shorter, answered or not; later it does not', async () => {
+  const sim = await import('./sim/sim.js');
+  sim.RATTLE.on = true;
+  try {
+    const rng = () => 0; // a certain trace
+    // Previous event answered 30 minutes ago.
+    const a = fresh();
+    a.event = { type: 'trace', startedAge: a.ageMin };
+    act(a, 'comply', T0, calm);
+    assert.equal(a.lastEventEnd, a.ageMin);
+    advance(a, 30, calm);
+    advance(a, 1, rng);
+    assert.equal(a.event?.type, 'trace');
+    assert.equal(a.event.window, Math.round(CFG.traceWindowMin * 0.75));
+    assert.equal(a.rattledEvents, 1);
+
+    // Previous event timed out 30 minutes ago: counts unless answeredOnly.
+    const b = fresh();
+    b.event = { type: 'trace', startedAge: b.ageMin - CFG.traceWindowMin - 1 };
+    advance(b, 1, calm);
+    assert.equal(b.event, null);
+    assert.equal(b.lastEventAnswered, false);
+    advance(b, 30, calm);
+    advance(b, 1, rng);
+    assert.equal(b.event.window, Math.round(CFG.traceWindowMin * 0.75));
+    sim.RATTLE.answeredOnly = true;
+    const c = fresh();
+    c.event = { type: 'trace', startedAge: c.ageMin - CFG.traceWindowMin - 1 };
+    advance(c, 1, calm);
+    advance(c, 30, calm);
+    advance(c, 1, rng);
+    assert.equal(c.event.window, CFG.traceWindowMin);
+    sim.RATTLE.answeredOnly = false;
+
+    // Previous event ended 90 minutes ago: back to the full window.
+    const d = fresh();
+    d.event = { type: 'trace', startedAge: d.ageMin };
+    act(d, 'comply', T0, calm);
+    advance(d, 90, calm);
+    advance(d, 1, rng);
+    assert.equal(d.event.window, CFG.traceWindowMin);
+
+    // The very first event of a life is never rattled.
+    const e = fresh();
+    advance(e, 1, rng);
+    assert.equal(e.event.window, CFG.traceWindowMin);
+  } finally {
+    sim.RATTLE.on = false;
+    sim.RATTLE.answeredOnly = false;
+  }
 });

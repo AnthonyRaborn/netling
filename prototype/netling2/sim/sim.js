@@ -528,22 +528,38 @@ const TEMPER_DECAY = temperDecayFactor;
 // novelty (the other packet, a game not among them). A match is a small Sync bonus, once per action, no penalty for a miss.
 export const PREF = { on: true, distinct: true, reqbias: true, ice: true };
 if (process.env.PREF) Object.assign(PREF, JSON.parse(process.env.PREF));
-// 2.0 egg pressure, Program (triage): answering a timed event late leaves the netling rattled, and while it is rattled the
-// next event opens with a shorter window. Off by default; RATTLE='{"on":true}' switches it on (see docs/netling2-prototypes).
-// late: the share of the window already used that counts as late; cut: the share of the window taken off; minutes: how long it lasts.
-export const RATTLE = { on: false, late: 2 / 3, cut: 0.25, minutes: 120 };
+// 2.0 egg pressure, Program (triage): a rattled netling opens its next event with a shorter window. Off by default;
+// RATTLE='{"on":true}' switches it on (see docs/netling2-prototypes). Two triggers (`mode`):
+//   'pileup' (default): an event opens within `gap` minutes of the previous event ending (answered or timed out; with
+//     answeredOnly, only answered). It depends on how events arrive, not on when the player checks in.
+//   'late': answering an event after `late` of its window set a timer of `minutes` (the first version; it falls hardest
+//     on players who check in rarely, see the scratchpad notes).
+// cut: the share of the window taken off.
+export const RATTLE = { on: false, mode: 'pileup', gap: 60, answeredOnly: false, late: 2 / 3, cut: 0.25, minutes: 120 };
 if (process.env.RATTLE) Object.assign(RATTLE, JSON.parse(process.env.RATTLE));
-export const rattled = (s) => RATTLE.on && (s.rattleUntil ?? -1) > s.ageMin;
+export const rattled = (s) => {
+  if (!RATTLE.on) return false;
+  if (RATTLE.mode === 'late') return (s.rattleUntil ?? -1) > s.ageMin;
+  if (s.lastEventEnd === undefined || s.ageMin - s.lastEventEnd >= RATTLE.gap) return false;
+  return !RATTLE.answeredOnly || Boolean(s.lastEventAnswered);
+};
 const eventWindow = (s, type) => {
   const w = CFG[EVENTS[type].window];
   return rattled(s) ? Math.max(1, Math.round(w * (1 - RATTLE.cut))) : w;
 };
+function rattleNote(s, t) {
+  s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+  if (RATTLE.mode === 'pileup') s.rattleCount = (s.rattleCount ?? 0) + 1;
+  log(s, t, '> it flinches. another alarm so soon.');
+}
 // Called where the player answers an event in time (not where it times out).
 function eventAnswered(s, t) {
   if (!s.event) return;
   const used = (s.ageMin - s.event.startedAge) / (s.event.window ?? CFG[EVENTS[s.event.type].window]);
   s.eventsAnswered = (s.eventsAnswered ?? 0) + 1;
-  if (RATTLE.on && used >= RATTLE.late) {
+  s.lastEventEnd = s.ageMin;
+  s.lastEventAnswered = true;
+  if (RATTLE.on && RATTLE.mode === 'late' && used >= RATTLE.late) {
     s.rattleUntil = s.ageMin + RATTLE.minutes;
     s.rattleCount = (s.rattleCount ?? 0) + 1;
     if (t !== undefined) log(s, t, '> it flinches at the next alarm.');
@@ -746,6 +762,8 @@ function stepEvents(s, t, rng) {
     if (eventMinutesLeft(s) > 0) return;
     const type = s.event.type;
     s.event = null;
+    s.lastEventEnd = s.ageMin;
+    s.lastEventAnswered = false;
     if (type === 'trace') {
       st.integrity = clamp(st.integrity - CFG.traceIgnoredIntegrity);
       s.standing.corp += CFG.traceIgnoredStanding;
@@ -769,7 +787,7 @@ function stepEvents(s, t, rng) {
       return;
     }
     s.event = { type: 'trace', startedAge: s.ageMin, window: eventWindow(s, 'trace') };
-    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! corp trace incoming. ${s.event.window}m to respond.`);
   } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour) / 60) {
     if (shielded(s)) {
@@ -777,11 +795,11 @@ function stepEvents(s, t, rng) {
       return;
     }
     s.event = { type: 'attack', startedAge: s.ageMin, window: eventWindow(s, 'attack') };
-    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! intrusion attempt. DEFEND within ${s.event.window}m.`);
   } else if (rng() < (hot * (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache)) / 60) {
     s.event = { type: 'overflow', startedAge: s.ageMin, window: eventWindow(s, 'overflow') };
-    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! memory overflow. PURGE within ${s.event.window}m.`);
   } else if (rng() < (hot * CFG.surgeChancePerHour) / 60) {
     st.heat = clamp(st.heat + 25);
