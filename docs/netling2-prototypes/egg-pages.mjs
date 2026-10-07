@@ -56,4 +56,4 @@ function simDeep(a,pDeep,lineages=20000){
   const cdf=n=>Math.round(100*done.filter(v=>v<=n).length/done.length);
   return [2,3,4,6].map(cdf).join('/');
 }
-for(const a of ['attentive','casual','daredevil']) console.log(a,'hidden page by life 2/3/4/6 (%):',[0.10,0.20,0.30].map(p=>'p'+p+' '+simDeep(a,p)).join('  |  '));
+for(const a of ['attentive','casual','daredevil']) console.log(a,'hidden page by life 2/3/4/6 (%):',[0.10,0.20,0.25,0.30].map(p=>'p'+p+' '+simDeep(a,p)).join('  |  '));
