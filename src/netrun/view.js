@@ -146,7 +146,10 @@ export class RunView {
     } else if (key === 'a') {
       const res = moveTo(this.pet, opts[this.cursor].id, this.rng);
       if (!res.ok) return;
-      if (res.kind === 'ice') {
+      if (res.kind === 'ice' && res.phased) {
+        // Glitch, Ghost and Panic slipped past: there is no fight to start (run.pending is empty).
+        this.sound('select');
+      } else if (res.kind === 'ice') {
         this.sound('alert');
         this.startIce();
       } else if (res.result === 'disconnected') {
