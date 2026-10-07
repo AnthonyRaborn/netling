@@ -140,3 +140,23 @@ archetype, wear off against seven settings; IRONBOT=avoid cools earlier once wea
 - Reading: (75, lock 1) is the widened setting that is felt by the players it is aimed at without distorting temper or touching anyone else.
   Not adopted as the default yet (IRON.lock defaults to 0, heat 80). Not modelled: a human's response to the warning line, wear from netruns
   (runs are instant in the sim and the 2 to 3 hour cooldown lets wear decay between them), Black ICE shard.
+
+## Result 7: Iron pushed from both ends (IRON cold and restFloor; prototype/netling2/sim/iron-cold-sweep.mjs, heat-profile.mjs)
+Wear also builds while Heat is under `cold` (awake only), and `restFloor` stops nap and sleep cooling below it. 400 lives per archetype; the
+hot side is the Result 6 setting (75, lock 1). IRONBOT=chill cools at 30 and over, whatever the wear.
+- Heat profile (heat-profile.mjs): rest cools Heat to about 0 (median Heat on waking 0.05), and awake ordinary play spends 6 to 10% of its
+  time under 10 and 8 to 15% under 20, mostly the warm-up after a rest (awake Heat then drifts up 3 an hour). So a cold line with no rest floor
+  taxes everyone: cold 20 without a floor takes the worker's full-life rate from 84% to 53%, attentive infections 7.6 to 9.8, casual 7.2 to 9.5.
+- A floor equal to the cold line removes that: cold 20, floor 20 leaves attentive (7.61 against 7.61 off), sysadmin, casual, worker and
+  human-regular within noise of "hot only" on full-life, infections and temper. Cold 15, floor 15 is gentler still; cold 25, floor 25
+  starts to touch ordinary play (attentive 8.63, casual full-life 0.898).
+- The cold side catches the over-cooler and nobody else: chiller infections hot-only to two-sided (cold 20, floor 20): attentive 7.4 to 14.5,
+  sysadmin 7.2 to 17.3, casual 7.2 to 10.7 (full-life 0.958 to 0.853), daredevil 7.3 to 14.1. Their temper falls back toward the middle
+  (attentive 5.3 to 3.3, steady 12h hold 0.54 to 0.16), so cooling hard to dodge the hot side is no longer free.
+- The floor has a cost for hot players: waking at 20, not 0, leaves less headroom (overclocker hot-only temper -10.2 to -11.3, infections 12.0 to
+  12.4). Daredevil about the same (9.26 to 9.50). Worker temper moves -0.3.
+- Reading: a push from both ends works with floor = cold line = 20 (a comfortable band of about 20 to 75): ordinary play is unaffected, the
+  hot and the over-cooling pay. Not adopted as defaults (IRON.cold 0, restFloor 0). Not modelled: how a human reads the cold warning, and the
+  floor's effect on flow and overclock timing beyond temper.
+- Ideas for the other two, untested: Wetware's opposite end is monotony (one packet type for too long), but that taxes committed Standing
+  steering (the corpo player), which Result 5 already flagged; Program's rattle has no natural opposite end yet.
