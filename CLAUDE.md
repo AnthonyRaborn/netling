@@ -14,7 +14,7 @@ Exception: the branch `claude/game-egg-differentiation-xkl6x2` (the Netling 2.0 
 ## Commands
 
 ```bash
-npm test          # 500 unit tests, Node 22
+npm test          # 503 unit tests, Node 22
 npm run smoke     # browser test; needs: npm install --no-save playwright && npx playwright install chromium
 npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174
