@@ -9,8 +9,9 @@
 | `sim/sim.js` | Fork of `src/sim.js`. Standing as two tracks, temper with a 24 hour half-life and the five levels (the flicker guard is `tell.js`'s), bugs, no fault cap, teen and adult evolution with the tie-break weights, care preferences, 22 generic forms per egg |
 | `sim/netrun/run.js` | Fork of `src/netrun/run.js`: ICE games enter the preference history; a disconnect fault owes a bug roll |
 | `sim/netrun-bot.mjs`, `sim/balance.mjs` | Forks of the scripted netrun player and `tools/balance.mjs` (same archetypes, same settings, new report lines) |
-| `sim.test.js` | 33 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
+| `sim.test.js` | 37 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
 | `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
+| `sim/push-sweep.mjs` | Whether the soft push gets a bugged player to a clinic (see Soft push to run) |
 | `sim/clinic-sweep.mjs` | The clinic against no clearing and home clearing, by share of market nodes (see The clinic) |
 | `sim/gap-sweep.mjs`, `sim/human-sweep.mjs` | Survival against the longest gap between check-ins, and against irregular schedules (see Noisy players) |
 | `sim/bug-sweep.mjs` | How a player should handle bugs and what each way costs (see Bug policies) |
@@ -41,6 +42,40 @@ Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report,
 | human-regular | **clinic 25%** | 35% | 0.40 / 1.07 | 1% | 0.9 / 0.4 |
 
 Reading it. A player who netruns often (casual makes 17 runs a life) meets a clinic 3.4 times and ends with 0.4 bugs, nearly as good as clearing at home; the survival cost of losing home clearing is small for them (95% against 94%). **A player who rarely or never netruns cannot clear bugs at all**: the careful worker (2.5 runs a life, runs only when healthy and soon back) meets 0.7 clinics and is only a little better off than with no way to clear (0.64 against 0.88 bugs on average, a bug ceiling in 9% of lives against 15%), the overclocker (no runs) and the noisy players (3 runs) the same. That removes the Standing price's use for exactly the players the sketch said it was for ("the Standing price helps those who do not run"): the Standing payment now needs a netrun too. Removing the healing items from the other markets changes little at this scale (casual buys 5.0 items a life against 6.2 when the markets still stock them, and ends alive 95% of the time against 93%, which is within noise). Limits: bots detour to a clinic only when it is one step ahead or within three steps and visible; a player who plans for it might do better; the clinic's share, fee and stock are guesses; the bots carry on running at their usual rates, so a bugged player is not driven to run more; bugs do not carry between lives.
+
+**Soft push to run (maintainer's request).** A bugged netling should be nudged to a clinic without being forced. Two nudges are modeled; neither is a penalty.
+- **The netling says so.** It logs a line when a bug settles in (a different one at 3 or more bugs) and now and then while it is idle and bugged (`bugNagPerHour` 0.15, the chatter rate), each pointing at the clinics out on the net. Text only: no rule depends on it. The bots cannot read it, so `pushRuns` stands for how likely a player is to act on it.
+- **A clinic job.** A new contract kind, `clinic` ("get a bug fixed at a clinic"): posted only while the netling has bugs (70% of the jobs it is offered, `clinicContractChance`), at twice the usual rate (`contractBuggedMult`), pays 15 scrip (a fix's price) and nothing else, and when it is taken along every market early enough in the map is a clinic, so every route passes one. It lapses after 6 hours as any job does. Bots read the board at each check-in only if they set `contracts`; a posted job takes the bot to its region. `pushRuns` is the chance a bugged (or job-holding) player goes for a netrun despite their usual reluctance (a player who does not run goes carefully; a player who does ignores `runChance` and the 'back soon' rule).
+
+`push-sweep.mjs [lives] [bases]` compares: no push; the statements alone (the player goes 50% of the time when bugged); statements and the job board (goes 50%); the job board alone; and a player who always goes. 300 lives; bugs on average, lives at the bug ceiling, clinic visits and runs a life, full-life rate:
+
+| Base | Case | Bugs average | Ceiling | Visits | Runs | Full life |
+|---|---|---|---|---|---|---|
+| worker | no push | 0.69 | 12% | 0.7 | 2.4 | 88% |
+| worker | statements, goes 50% | 0.40 | 4% | 1.1 | 3.8 | 84% |
+| worker | statements + job board, 50% | 0.23 | 1% | 2.4 | 4.8 | 93% |
+| worker | job board only | 0.54 | 6% | 1.2 | 2.2 | 93% |
+| worker | statements + job board, always | 0.12 | 1% | 3.1 | 6.9 | 92% |
+| human-regular | no push | 0.41 | 3% | 0.8 | 3.1 | 27% |
+| human-regular | statements + job board, 50% | 0.24 | 1% | 1.8 | 5.0 | 34% |
+| human-casual | no push | 0.46 | 3% | 0.4 | 2.2 | 6% |
+| human-casual | statements + job board, always | 0.33 | 2% | 1.1 | 2.9 | 9% |
+| overclocker (no runs) | no push | 0.20 | 1% | 0 | 0 | 96% |
+| overclocker | statements, goes 50% | 0.08 | 0% | 0.3 | 0.9 | 96% |
+| overclocker | statements + job board, 50% | 0.08 | 0% | 2.3 | 7.5 | 96% |
+
+Reading it. The nudges work for players who can run: the worker's bugs fall from 0.69 to 0.23 on average and the ceiling from 12% to 1% with both nudges at 50%, the overclocker (who never ran) clears its bugs once it is nudged. The statements alone move a worker less (0.40, with a lower survival, 84%: a nudged run ignores the 'be back soon' rule and costs a few disconnects), and the job board alone helps the worker (0.54 and 93% full life, mostly because a job pays scrip and leads to the region). A noisy player who is rarely around (`human-casual`, 6% full life) gains little because they do not live to see a clinic. **Side effects to know:** bots that read the board accept every kind of job, not only the clinic one, so their scrip rises (a worker ends with 46 against 20), which is an economy effect of using contracts at all (1.0's bots never did) and not part of the push. The statements consume random numbers, so runs with bugs differ slightly from before they existed.
+
+**Do bugs kill?** The maintainer's thought: neglect or inconsistent care leads to bugs, bugs push toward death, not necessarily a spiral. Measured now, **they hardly do**. Holding a fixed number of bugs from birth (no new ones, 300 lives, full-life rate):
+
+| Bugs held | casual | worker | attentive |
+|---|---|---|---|
+| 0 | 95% | 90% | 100% |
+| 2 | 91% | 89% | 100% |
+| 3 | 92% | 87% | 99% |
+| 5 | 94% | 85% | 100% |
+
+and the full-life rate of the same players with bugs on against bugs off (the bug-attributable deaths) is -3 to 1 points for casual, worker, human-regular and human-keen at the current effects (-3 to 1 points, which is noise). Only a player who cannot clear (the careful worker) carries more than a bug or so, and what dominates deaths is the long gap, not the bug (see Noisy players). Candidate changes, in points of full life lost to bugs (chance of a bug per fault 0.3 / 0.5; casual, worker, human-regular, human-keen): current effects -3 to 1 / -1 to 1 (nothing); a flat Integrity loss of 0.75 an hour a bug: -1, 4, 1, 2 / -1, 7, 3, 1; doubling every multiplier: 1, 1, 3, 0 / 3, 10, 5, 5; doubling and a flat 0.5: 1, 8, 6, 4 / 3, 22, 5, 8; tripling: 1, 14, 6, 3 / 5, 31, 10, 7, with a worker at the bug ceiling in 27% to 56% of lives, which is the spiral the maintainer did not want. Holding five bugs from birth costs a worker 85%, 66% (flat 0.5), 42% (flat 0.75), 12% (tripled) and a casual netling 94%, 89%, 87%, 74%. The knobs are `BUGS='{"integrityFlat":0.75,"regenCut":0.15,"charge":0.16,...}'` (`regenCut` cuts Integrity regeneration by that share a bug); `startBugs` starts a life with that many (experiments only). No default has been changed.
 
 **Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, cleared at a clinic node for 15 scrip or 2 Standing plus Charge (Bugs, and The clinic above); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by fractional Standing against whole-number cutpoints (the gap's whole part sets the weight; decided by the maintainer) and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
 

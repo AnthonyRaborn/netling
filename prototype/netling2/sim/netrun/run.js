@@ -89,9 +89,13 @@ export const RUN_CFG = {
   whisperSlipChance: 0.5, // Whisper: chance an ICE never notices it (Ghost: ghostSlipChance)
   // Contracts (docs/ATTENTION.md): a job posted while the uplink is ready and the app is open.
   contractChancePerHour: 0.5,
+  // 2.0: a bugged netling is offered a clinic job (fix a bug at a clinic in a region with markets) more often: the contract chance is multiplied by
+  // contractBuggedMult and the job is a clinic job with probability clinicContractChance. It pays the scrip of a fix and nothing else.
+  contractBuggedMult: 2,
+  clinicContractChance: 0.7,
   contractOpenMin: 360, // open until the next jack-in into its region, or 6 hours
   contractCatchUpMin: 60, // after a long gap, only the last hour counts toward posting one
-  contractScrip: { exit: 15, clean: 20, ice: 20, caches: 15, market: 15, fragment: 25 },
+  contractScrip: { exit: 15, clean: 20, ice: 20, caches: 15, market: 15, fragment: 25, clinic: 15 },
   contractItemChance: 0.25, // and sometimes one of the cheapest items too
   contractIce: [2, 3], // get past this many ICE...
   contractIceSpare: 1, // ...with every route holding this many more, so one lost fight doesn't sink it
@@ -194,6 +198,8 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     if (need) ensureOnEveryRoute(map, need.type, need.count, rng, { maxLayer: need.maxLayer, avoid: ['relay'] });
     marketKinds(map, rng);
     if (!daily) clinicKinds(map, rng);
+    // A clinic job: every market early enough on the map is a clinic, so every route passes one.
+    if (need?.clinic) for (const n of map.nodes) if (n.type === 'market' && n.layer <= need.maxLayer) Object.assign(n, { flavor: 'clinic', clinicRolled: true });
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
@@ -834,7 +840,7 @@ export function closeRun(pet, t) {
 // (startRun fixes the map): a lost ICE fight or a missed cache on the way never makes one impossible. Missing one costs
 // nothing. Posting needs the codex (for fragment jobs), so the UI calls updateContract; the sim never posts one.
 
-export const CONTRACT_KINDS = ['exit', 'clean', 'ice', 'caches', 'market', 'fragment'];
+export const CONTRACT_KINDS = ['exit', 'clean', 'ice', 'caches', 'market', 'fragment', 'clinic'];
 
 // What each kind needs on every route: { type, count, maxLayer } for the map fix, or null.
 const middleLayers = (map) => map.layerCount - 2;
@@ -842,6 +848,7 @@ const CONTRACT_ROUTES = {
   ice: (c) => ({ type: 'ice', count: c.n + RUN_CFG.contractIceSpare }),
   caches: (c) => ({ type: 'cache', count: c.n }),
   market: (c, map) => ({ type: 'market', count: 1, maxLayer: Math.ceil(middleLayers(map) * RUN_CFG.contractMarketBy) }),
+  clinic: (c, map) => ({ type: 'market', count: 1, maxLayer: Math.ceil(middleLayers(map) * RUN_CFG.contractMarketBy), clinic: true }),
 };
 
 // The cheapest items in a weights table (a table of just them), or null.
@@ -864,6 +871,7 @@ function contractKinds(pet, region, codex) {
   return CONTRACT_KINDS.filter((kind) => {
     if (kind === 'market') return (REGIONS[region].nodes.market ?? 0) > 0 && (pet.scrip ?? 0) >= Math.min(...CHEAPEST.map((id) => SCRIP.price[id]));
     if (kind === 'fragment') return codexRoom(pet) > 0 && nextFragment(region, codex) !== null;
+    if (kind === 'clinic') return pet.bugs > 0 && (REGIONS[region].nodes.market ?? 0) > 0;
     return true;
   });
 }
@@ -880,13 +888,16 @@ export function updateContract(pet, rng, codex = [], t = Date.now()) {
   }
   if (pet.contract || !contractReady(pet)) return null;
   let roll = false;
-  for (let i = 0; i < since && !roll; i++) roll = rng() < RUN_CFG.contractChancePerHour / 60;
+  const perHour = RUN_CFG.contractChancePerHour * (pet.bugs > 0 ? RUN_CFG.contractBuggedMult : 1);
+  for (let i = 0; i < since && !roll; i++) roll = rng() < perHour / 60;
   if (!roll) return null;
   const regions = REGION_ORDER.filter((r) => regionOpen(r, pet.stage, codex, pet.cleared ?? []));
   if (!regions.length) return null;
   const region = regions[Math.floor(rng() * regions.length)];
   const kinds = contractKinds(pet, region, codex);
-  const kind = kinds[Math.floor(rng() * kinds.length)];
+  // A bugged netling is mostly offered the clinic job; otherwise (or when no clinic job fits) any other kind.
+  const others = kinds.filter((k) => k !== 'clinic');
+  const kind = kinds.includes('clinic') && rng() < RUN_CFG.clinicContractChance ? 'clinic' : others[Math.floor(rng() * others.length)];
   const range = kind === 'ice' ? RUN_CFG.contractIce : kind === 'caches' ? RUN_CFG.contractCaches : null;
   const n = range ? range[0] + Math.floor(rng() * (range[1] - range[0] + 1)) : undefined;
   const item = rng() < RUN_CFG.contractItemChance ? CHEAPEST[Math.floor(rng() * CHEAPEST.length)] : null;
@@ -908,6 +919,8 @@ export function contractText(c) {
       return `crack ${c.n} caches in the ${where}`;
     case 'market':
       return `buy something at a ${where} market`;
+    case 'clinic':
+      return `get a bug fixed at a ${where} clinic`;
     default:
       return `bring back a codex fragment from the ${where}`;
   }
@@ -927,6 +940,8 @@ export function contractProgress(run) {
       return { have: t.caches ?? 0, need: c.n };
     case 'market':
       return { have: t.bought ?? 0, need: 1 };
+    case 'clinic':
+      return { have: t.fixed ?? 0, need: 1 };
     case 'fragment':
       return { have: run.fragments.length, need: 1 };
     case 'clean':
@@ -941,7 +956,7 @@ export function contractShort(run) {
   const p = contractProgress(run);
   if (!p) return null;
   const c = run.contract;
-  const label = { ice: 'PAST ICE', caches: 'CACHES', market: 'BUY', fragment: 'FRAGMENT' }[c.kind];
+  const label = { ice: 'PAST ICE', caches: 'CACHES', market: 'BUY', fragment: 'FRAGMENT', clinic: 'FIX A BUG' }[c.kind];
   if (label) return `JOB ${label} ${Math.min(p.have, p.need)}/${p.need}`;
   if (p.broken) return 'JOB LOST: ICE';
   return c.kind === 'clean' ? 'JOB EXIT, NO ICE LOST' : 'JOB REACH EXIT';

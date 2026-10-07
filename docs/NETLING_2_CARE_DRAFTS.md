@@ -128,3 +128,18 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.
 5. Everything here is untested: label widths on the real control bar, the readout line length, the field manual (generated from `CFG`, so it needs egg-aware text).
 6. The balance tools model 1.0 only and need updating for the current rules before they can check any of this (maintainer, this session).
+
+## Clinic and bug statements (drafts, first pass)
+
+The maintainer's direction: bugs are cleared at a clinic node on a netrun (a third, unaligned market kind that also sells the healing items), and a bugged netling softly pushes its player to go: it says so, and a clinic job is offered (see the prototypes README, The clinic and Soft push to run). Names per egg follow the registers above; the simulator uses the generic wording. All lines are the Wetware-plain or Iron-physical or Program-technical voice and have not been read in context.
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| The node | repair shop | workshop | clinic |
+| A bug settles in | > a bug has crept in. a repair shop out on the net can patch it. | > out of true. a workshop out on the net can rework it. | > something is wrong under the skin. a clinic out on the net can stitch it. |
+| Three or more bugs | > it is riddled with bugs. find a repair shop. | > badly out of true. find a workshop. | > it is badly scarred. find a clinic. |
+| A reminder, now and then | > still buggy. repair shops are out there. | > still out of true. there are workshops out there. | > still sore. there are clinics out there. |
+| The job (contract text) | get a bug fixed at a Public Net repair shop | get a bug reworked at a Public Net workshop | get a bug stitched at a Public Net clinic |
+| Fix button | FIX A BUG | REWORK | STITCH |
+
+Open: whether the three healing items keep their egg names there (Coolant cell / Coolant loop / Cold pack; Repair kit / Spare parts / Skin patch; Antivirus patch / Shielding / Immune booster); the clinic's look on the map; whether the corp exchange should stock something in place of the healing items (the maintainer will revisit it).

@@ -151,6 +151,7 @@ export const CFG = {
   friendWaitMaxMin: 60,
   // Attention rewards (see docs/ATTENTION.md): nothing here costs a fault when missed.
   // Requests: now and then it asks for one game, or for COOL when warm.
+  bugNagPerHour: 0.15, // 2.0: while it has bugs and is idle, now and then it says so (the chatter rate)
   requestChancePerHour: 0.25,
   requestWindowMin: 45,
   requestMinCharge: 20, // it only asks for a game it has the Charge to play
@@ -396,7 +397,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     rebootUntilAge: null,
     lightsOn: true,
     careMistakes: 0,
-    bugs: 0, // 2.0: persistent glitches, raised by faults, cleared with scrip or Standing
+    bugs: BUG_CFG.startBugs ?? 0, // 2.0: persistent glitches, raised by faults, cleared at a clinic (startBugs: an experiment knob)
     faultRolls: 0, // 2.0: bug rolls owed for faults outside tick (netrun disconnects); settled on the next step
     standing: { corp: 0, street: 0 }, // 2.0
     temper: 0, // 2.0
@@ -475,11 +476,15 @@ function attachAxes(s) {
 
 // homeClear: whether a bug can be cleared away from a netrun (maintainer: it cannot; bugs are cleared at a clinic node, see netrun/run.js).
 // BUGS='{"homeClear":true}' brings back the earlier home-clearing rules for comparison.
-export const BUG_CFG = { homeClear: false, chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
+export const BUG_CFG = { homeClear: false, regenCut: 0, integrityFlat: 0, chance: 0.3, max: 5, charge: 0.08, sync: 0.08, heat: 0.1, integrity: 0.04, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
 if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
 
 export function rollBug(s, rng, chance = BUG_CFG.chance) {
-  if ((s.bugs ?? 0) < BUG_CFG.max && rng() < chance) s.bugs = (s.bugs ?? 0) + 1;
+  if ((s.bugs ?? 0) < BUG_CFG.max && rng() < chance) {
+    s.bugs = (s.bugs ?? 0) + 1;
+    return true;
+  }
+  return false;
 }
 
 // Clear one bug. `pay` is 'scrip' (15) or 'standing' (2 points taken from the tracks, `corp` of them from corp and the rest from
@@ -663,8 +668,11 @@ function step(s, t, rng) {
   if (st.charge <= 0) dInt -= 6;
   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
   const deepRest = s.nap || (s.asleep && !s.lightsOn);
-  if (dInt === 0) dInt = deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour;
-  if (dInt < 0) dInt *= 1 + BUG_CFG.integrity * s.bugs; // 2.0: damage only, not regeneration
+  // 2.0 bugs: regeneration is cut by regenCut a bug (0 until chosen), damage is multiplied by (1 + integrity a bug), and integrityFlat an
+  // hour is lost for each bug whatever else is going on (0 until chosen).
+  if (dInt === 0) dInt = (deepRest ? CFG.integrityRestRegenPerHour : CFG.integrityRegenPerHour) * (1 - Math.min(0.95, BUG_CFG.regenCut * s.bugs));
+  if (dInt < 0) dInt *= 1 + BUG_CFG.integrity * s.bugs;
+  dInt -= BUG_CFG.integrityFlat * s.bugs;
   dInt -= TRAIT_CFG.volatileIntegrity * traitStrength(s, 'volatile');
   st.integrity = clamp(st.integrity + dInt / 60);
 
@@ -675,8 +683,10 @@ function step(s, t, rng) {
   s.tLevel = guardedLevel(s.temper, s.tLevel ?? 0);
   while (s.faultRolls > 0) {
     s.faultRolls--;
-    rollBug(s, rng);
+    // The netling says so, and points to the way out (a clinic on a netrun).
+    if (rollBug(s, rng)) log(s, t, s.bugs >= 3 ? '> it is badly glitched. a clinic out on the net could fix it.' : '> a glitch has settled in. a clinic out on the net could fix it.');
   }
+  if (s.bugs > 0 && !rest && !s.run && rng() < CFG.bugNagPerHour / 60) log(s, t, '> still glitching. there are clinics out on the net.');
   stepHold(s, rest);
 
   stepVisit(s, t, rng);

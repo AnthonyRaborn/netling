@@ -15,7 +15,7 @@
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
 const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, temperLevel, clearBug, leanSeen } = await import('./sim.js');
-const { RUN_CFG, runCooldownLeft } = await import('./netrun/run.js');
+const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
 const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../../../src/netrun/codex.js');
@@ -221,22 +221,28 @@ export function checkIn(s, p, now, rng, ctx) {
       doAct(corp ? 'corp' : 'scav');
     }
   };
+  // 2.0 soft push: a bugged netling, or one with a job posted, nudges a player who can be nudged (`pushRuns`, the chance they go despite their
+  // usual reluctance; a player without runs of their own goes carefully). `contracts`: the player reads the job board at each check-in.
+  if (p.contracts && !s.run) updateContract(s, rng, ctx.codex, now);
+  const pushed = Boolean(p.pushRuns) && (s.bugs > 0 || Boolean(s.contract)) && rng() < p.pushRuns;
+  const runStyle = p.runs ?? (pushed ? 'careful' : null);
   // A runner feeds before deciding to jack in, as a player would.
-  if (p.runs && !p.noRuns && mayFeed && s.stats.charge <= 60) feed();
+  if ((p.runs || pushed) && !p.noRuns && mayFeed && s.stats.charge <= 60) feed();
   // Netrun when healthy. Until the deepest open region is cleared it heads there (the way down);
   // after that, any open region.
   // Careful runners only jack in healthy, and only when they'll be back soon to patch things up.
-  const careful = p.runs === 'careful' && !p.eager;
+  const careful = runStyle === 'careful' && !p.eager && !pushed;
   const healthy = s.stats.integrity > (careful ? 80 : 60) && s.stats.charge > 60;
   const aroundAfter = !careful || ctx.gapToNext <= 120;
-  if (p.runs && !p.noRuns && healthy && aroundAfter && (!p.runChance || rng() < p.runChance)) {
+  if (runStyle && !p.noRuns && healthy && aroundAfter && (pushed || !p.runChance || rng() < p.runChance)) {
     const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex, s.cleared));
     const frontier = open.at(-1);
-    const region = frontier && !s.cleared.includes(frontier) ? frontier : open[Math.floor(rng() * open.length)];
+    let region = frontier && !s.cleared.includes(frontier) ? frontier : open[Math.floor(rng() * open.length)];
+    if (s.contract && open.includes(s.contract.region)) region = s.contract.region; // a posted job takes it to its region
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
       const flowAtJackIn = inFlow(s);
-      const run = playRun(s, { ...RUN_STYLES[p.runs], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
+      const run = playRun(s, { ...RUN_STYLES[runStyle], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
       // Bugs fixed at a clinic this run, and what they cost.
       ctx.bugsFixed = (ctx.bugsFixed ?? 0) + (run.tally.fixed ?? 0);
       ctx.scripSpent = (ctx.scripSpent ?? 0) + (run.tally.fixScrip ?? 0) * BUG_CFG.clearScrip;

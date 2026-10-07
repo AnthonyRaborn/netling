@@ -596,3 +596,89 @@ test('a bot fixes bugs at a clinic with scrip first, then Standing by its split,
   assert.ok(visits >= 10, `clinic visits ${visits}`);
   assert.ok(fixed >= 3, `bugs fixed ${fixed}`);
 });
+
+test('a bugged netling is offered a clinic job, an unbugged one is not', async () => {
+  const { updateContract, contractText, contractProgress, contractShort, RUN_CFG } = await import('./sim/netrun/run.js');
+  const bugged = (bugs) => {
+    const s = fresh();
+    s.ageMin = 1000;
+    s.contractCheckAge = 940;
+    s.bugs = bugs;
+    return s;
+  };
+  const a = bugged(1);
+  assert.equal(updateContract(a, () => 0, [], T0), 'posted');
+  assert.equal(a.contract.kind, 'clinic');
+  assert.equal(a.contract.scrip, RUN_CFG.contractScrip.clinic);
+  assert.match(contractText(a.contract), /get a bug fixed at a .* clinic/);
+  const b = bugged(0);
+  assert.equal(updateContract(b, () => 0, [], T0), 'posted');
+  assert.notEqual(b.contract.kind, 'clinic', 'no bugs, no clinic job');
+  // the chance of any job doubles while bugged (a roll that misses at the usual rate lands)
+  const miss = () => (RUN_CFG.contractChancePerHour * 1.5) / 60;
+  const c = bugged(2);
+  c.contractCheckAge = 999;
+  assert.equal(updateContract(c, miss, [], T0), 'posted');
+  const d = bugged(0);
+  d.contractCheckAge = 999;
+  assert.equal(updateContract(d, miss, [], T0), null);
+  // progress counts bugs fixed at a clinic
+  const run = { contract: { kind: 'clinic' }, tally: { fixed: 0 }, map: { nodes: [{ id: 0, type: 'entry' }] }, pos: 0 };
+  assert.deepEqual(contractProgress(run), { have: 0, need: 1 });
+  run.tally.fixed = 1;
+  assert.deepEqual(contractProgress(run), { have: 1, need: 1 });
+  assert.equal(contractShort(run), 'JOB FIX A BUG 1/1');
+});
+
+test('a clinic job puts a clinic on every route through the map', async () => {
+  const { startRun } = await import('./sim/netrun/run.js');
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const s = fresh();
+    s.contract = { kind: 'clinic', region: 'public', scrip: 15, item: null, postedAge: s.ageMin };
+    startRun(s, 'public', mulberry32(seed), []);
+    const { nodes } = s.run.map;
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    const exit = nodes.find((n) => n.type === 'exit');
+    // every path from the entry to the exit passes a clinic
+    const bad = (id, seen) => {
+      const n = byId.get(id);
+      const here = seen || (n.type === 'market' && n.flavor === 'clinic');
+      return n.id === exit.id ? !here : n.edges.some((e) => bad(e, here));
+    };
+    assert.equal(bad(nodes[0].id, false), false, `seed ${seed}`);
+  }
+});
+
+test('the netling says so when a bug settles in, and now and then while it has one', () => {
+  const s = fresh();
+  s.faultRolls = 1;
+  advance(s, 1, () => 0.1); // 0.1 rolls a bug (and is under no other chance)
+  assert.equal(s.bugs, 1);
+  assert.ok(s.log.some((l) => l.msg.includes('a glitch has settled in')), 'first bug');
+  s.bugs = 3;
+  s.faultRolls = 1;
+  advance(s, 1, () => 0.1);
+  assert.ok(s.log.some((l) => l.msg.includes('badly glitched')), 'many bugs');
+  const n = fresh();
+  n.bugs = 1;
+  advance(n, 1, () => 0); // 0 is under the reminder chance
+  assert.ok(n.log.some((l) => l.msg.includes('still glitching')), 'a reminder while it has bugs');
+  const q = fresh();
+  advance(q, 1, () => 0);
+  assert.ok(!q.log.some((l) => l.msg.includes('still glitching')), 'no reminder without bugs');
+});
+
+test('a bugged player who can be nudged runs more, and reaches clinics', async () => {
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  let calm = 0;
+  let pushed = 0;
+  let visits = 0;
+  for (let seed = 1; seed <= 10; seed++) {
+    calm += simulate(ARCHETYPES.worker, seed).runs;
+    const r = simulate({ ...ARCHETYPES.worker, pushRuns: 1, contracts: true }, seed);
+    pushed += r.runs;
+    visits += r.clinicVisits;
+  }
+  assert.ok(pushed > calm, `pushed ${pushed} runs against ${calm}`);
+  assert.ok(visits >= 5, `clinic visits ${visits}`);
+});
