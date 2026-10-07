@@ -1,7 +1,7 @@
 // The temper tell: how a netling's hidden temper shows in its sprite motion. A pure function of (egg, level, time, seed), like
 // the 1.0 idle in render.js, so it needs no state and survives reloads. Nothing here touches the DOM or storage.
 //
-// Levels follow docs/NETLING_2_SKETCH.md (Temper scale, Making the steady end legible): temper is one hidden number, and the
+// Levels follow docs/NETLING_2_SKETCH.md (Temper, The temper tell): temper is one hidden number, and the
 // tell reads its level:
 //     -2 strongly unsteady (temper <= -6)    -1 unsteady (-6 to -2)    0 middle (-2 to +3), no tell
 //     +1 steady (+3 to +6)                   +2 strongly steady (+6 or more)

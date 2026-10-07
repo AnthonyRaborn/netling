@@ -31,7 +31,7 @@ npm run proto:gallery  # generates prototype/netling2/gallery-iron.html, gallery
 - `src/netrun/`: expeditions (`run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js`).
 - `src/ui/`: DOM code; `ui/app.js` holds the shared `app` object, the write gate and `loadAll`.
 - `src/storage.js`, `src/sanitize.js`, `src/transfer.js`: everything about persistence and moving saves.
-- `prototype/netling2/`: the Netling 2.0 sprite prototype. Not shipped, not in `sw.js`. Import `ready.js` first in any script that draws wearables on its forms (see the trap in `docs/NETLING_2_SKETCH.md`, Handoff).
+- `prototype/netling2/`: the Netling 2.0 sprite prototype. Not shipped, not in `sw.js`. Import `ready.js` first in any script that draws wearables on its forms (see the trap in `docs/NETLING_2_SPRITES.md`, Commands).
 - `sw.js`: network-first service worker with a hand-written `SHELL` file list. Its `CACHE` name must equal `VERSION` in `src/version.js`; bump both per release so open pages are offered the update.
 
 ## Rules that are easy to break

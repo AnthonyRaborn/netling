@@ -1,4 +1,4 @@
-// The neglected look (docs/NETLING_2_SKETCH.md, Neglect and the sprites): a reversible state tied to needs left unmet (the level
+// The neglected look (docs/NETLING_2_SKETCH.md, Evolution: neglect and bugs on the sprite; docs/NETLING_2_SPRITES.md, Layers): a reversible state tied to needs left unmet (the level
 // comes from needs.js; bugs have their own persistent look in glitch.js), readable at a glance, on a different channel from temper (temper is motion; neglect is marks and color, and it does not move).
 // Iron's skin is rust: dim 'x' patches spread over the body from the bottom up, never over the eyes and never changing the
 // outline, so the anchors, the poses and the wearables are unaffected. Level 0 is untouched, 1 is worn, 2 is neglected.
