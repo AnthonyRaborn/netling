@@ -451,3 +451,40 @@ test('bug policies: when a bot clears and what it pays with', async () => {
   assert.deepEqual([both.s.scrip, both.ctx.scripSpent, both.ctx.standingSpent], [0, 15, 4], 'scrip first, then Standing for the other two');
   assert.equal(both.s.bugs, 0);
 });
+
+test('a human day is random but bounded: times in waking hours, 15 minutes apart, counts as asked', async () => {
+  const { humanDay } = await import('./sim/balance.mjs');
+  const rng = mulberry32(11);
+  const counts = [];
+  for (let d = 0; d < 400; d++) {
+    const day = humanDay({ perDay: 8, busyDay: 0.25, offDay: 0.1 }, rng, d % 5);
+    counts.push(day.length);
+    for (let i = 0; i < day.length; i++) {
+      assert.ok(day[i].c >= 7 * 60 && day[i].c <= 23.5 * 60, `time ${day[i].c}`);
+      assert.equal(day[i].c, day[i].t, 'no jitter on a human day');
+      if (i) assert.ok(day[i].c - day[i - 1].c >= 15);
+    }
+  }
+  const share = (f) => counts.filter(f).length / counts.length;
+  assert.ok(Math.abs(share((n) => n <= 1) - (0.1 + 0.25 * 0.5)) < 0.05, 'every off day and half the busy days have at most one check-in');
+  assert.ok(Math.max(...counts) <= 11 && Math.max(...counts) >= 8);
+  // dayCounts sets the count day by day (bursty play), within the 1.5 noise
+  const bursty = { dayCounts: [14, 1, 10, 0, 12] };
+  assert.ok(humanDay(bursty, mulberry32(2), 1).length <= 3);
+  assert.ok(humanDay(bursty, mulberry32(2), 0).length >= 10);
+  // the same seed gives the same day
+  assert.deepEqual(humanDay({ perDay: 6 }, mulberry32(5), 0), humanDay({ perDay: 6 }, mulberry32(5), 0));
+});
+
+test('a keen human-like player lives longer than a casual one, and both are deterministic', async () => {
+  const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
+  const a = simulate(ARCHETYPES['human-keen'], 4);
+  assert.deepEqual(simulate(ARCHETYPES['human-keen'], 4).ageMin, a.ageMin);
+  let keen = 0;
+  let casual = 0;
+  for (let seed = 1; seed <= 6; seed++) {
+    keen += simulate(ARCHETYPES['human-keen'], seed).ageMin;
+    casual += simulate(ARCHETYPES['human-casual'], seed).ageMin;
+  }
+  assert.ok(keen > casual, `keen ${keen} against casual ${casual} minutes lived`);
+});

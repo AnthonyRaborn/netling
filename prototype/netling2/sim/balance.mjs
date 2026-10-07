@@ -69,6 +69,13 @@ export const ARCHETYPES = {
     [`steer-${role}-corp`, { checks: ATTENTIVE, jitter: 15, diet: 1, trace: 'comply', winRate: 0.7, runs: 'careful', anomaly: 'corp', focus: role, focusShare: 0.8 }],
     [`steer-${role}-street`, { checks: ATTENTIVE, jitter: 15, diet: 0, trace: 'hide', winRate: 0.7, runs: 'careful', anomaly: 'indie', focus: role, focusShare: 0.8 }],
   ])),
+  // 2.0 noisy players: schedules that vary by day (perDay check-ins, scaled each day, with busy and off days; or dayCounts for bursty
+  // play), chores skipped now and then (`lapse`), a mood that moves the win rate, a favorite game (`favorite`: the share of plays) and
+  // netruns only some of the time (`runChance`). Packets and traces are random; there is no steering. Nothing here aims at a form.
+  'human-casual': { checks: [], prepare: true, perDay: 6, busyDay: 0.25, offDay: 0.1, lapse: 0.2, mood: 0.12, favorite: 0.5, diet: 0.5, trace: 'mix', winRate: 0.6, runs: 'greedy', runChance: 0.5 },
+  'human-regular': { checks: [], prepare: true, perDay: 9, busyDay: 0.15, offDay: 0.05, lapse: 0.1, mood: 0.1, favorite: 0.35, diet: 0.5, trace: 'mix', winRate: 0.65, runs: 'careful', runChance: 0.6 },
+  'human-keen': { checks: [], prepare: true, perDay: 14, busyDay: 0.1, offDay: 0, lapse: 0.05, mood: 0.08, favorite: 0.3, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', runChance: 0.7 },
+  'human-bursty': { checks: [], prepare: true, dayCounts: [14, 1, 10, 0, 12], lapse: 0.1, mood: 0.1, favorite: 0.35, diet: 0.5, trace: 'mix', winRate: 0.65, runs: 'careful', runChance: 0.6 },
   // 2.0 temper seekers: players who aim at a strong temper level for the Metronome's 12 hour hold. The steady seeker cools early and plays
   // for calm (flow); the unsteady ones play warm (they keep playing up to Heat 80, `hot`), and the last also uses every Segfault it finds
   // (`useSegfault`: temper -4, two faults, and bugs).
@@ -91,6 +98,30 @@ export const ARCHETYPES = {
   // only when it will be back soon) to reach The Deep's exit as an adult: the Mainframe gate's best case.
   'steer-mainframe': { checks: ATTENTIVE, jitter: 15, diet: 0.5, trace: 'mix', winRate: 0.7, runs: 'careful', eager: true },
 };
+
+// A human day: how many check-ins and when. perDay is the usual count (scaled 0.7 to 1.3 a day); a busyDay share of days has 1 or 2, an
+// offDay share 0 or 1; dayCounts replaces all of it with a count per day of the life (bursty play). Times cluster in the morning, around
+// midday and in the evening, at least 15 minutes apart.
+export function humanDay(p, rng, day) {
+  let n;
+  if (p.dayCounts) n = Math.max(0, p.dayCounts[day % p.dayCounts.length] + Math.round((rng() * 2 - 1) * 1.5));
+  else {
+    const roll = rng();
+    if (roll < (p.offDay ?? 0)) n = rng() < 0.5 ? 0 : 1;
+    else if (roll < (p.offDay ?? 0) + (p.busyDay ?? 0)) n = 1 + Math.floor(rng() * 2);
+    else n = Math.max(1, Math.round(p.perDay * (0.7 + rng() * 0.6)));
+  }
+  const times = [];
+  for (let i = 0; i < n; i++) {
+    const u = rng();
+    const [lo, hi] = u < 0.25 ? [7 * 60, 9.5 * 60] : u < 0.5 ? [11.5 * 60, 14 * 60] : [16.5 * 60, 23.5 * 60];
+    times.push(Math.round(lo + rng() * (hi - lo)));
+  }
+  times.sort((a, b) => a - b);
+  const out = [];
+  for (const t of times) if (!out.length || t - out.at(-1).c >= 15) out.push({ c: t, t });
+  return out;
+}
 
 // Codex presets for CODEX=<name>: what every single life starts knowing.
 export const CODEX_PRESETS = {
@@ -133,6 +164,10 @@ const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games
 
 export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
+  // Human-like noise (only for archetypes that set these; the others consume no extra rng): a lapse is a chore skipped this time, the
+  // mood moves the mini-game win rate a little each check-in, and a favorite game is played more than the others.
+  const lapse = () => Boolean(p.lapse) && rng() < p.lapse;
+  const skill = () => (p.mood ? Math.min(0.95, Math.max(0.2, p.winRate + (rng() * 2 - 1) * p.mood)) : p.winRate);
   const useItem = (id) => {
     const slot = s.inventory.indexOf(id);
     if (slot < 0 || p.noItems) return false;
@@ -171,8 +206,10 @@ export function checkIn(s, p, now, rng, ctx) {
   const holdBack = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
   const mayFeed = !holdBack || s.flagged.charge;
   const mayPlay = !holdBack || s.flagged.sync;
+  // A player who knows a long absence is coming (`prepare`, 4 hours or more to the next check) tops up Charge and Sync first.
+  const topUp = Boolean(p.prepare) && ctx.gapToNext >= 240;
   const feed = () => {
-    for (let i = 0; i < 4 && s.stats.charge < 85 && !blockReason(s, 'corp'); i++) {
+    for (let i = 0; i < 4 && s.stats.charge < (topUp ? 94 : 85) && !blockReason(s, 'corp'); i++) {
       // `shown` bots see only the HUD's floors; on a shown tie they alternate packets (a lone tie rule would drift one way).
       const lean = leanSeen(s, p.shown);
       let corp = p.diet === 'balance' ? (p.shown && lean === 0 ? s.lastPacket !== 'corp' : lean <= 0) : rng() < p.diet;
@@ -192,7 +229,7 @@ export function checkIn(s, p, now, rng, ctx) {
   const careful = p.runs === 'careful' && !p.eager;
   const healthy = s.stats.integrity > (careful ? 80 : 60) && s.stats.charge > 60;
   const aroundAfter = !careful || ctx.gapToNext <= 120;
-  if (p.runs && !p.noRuns && healthy && aroundAfter) {
+  if (p.runs && !p.noRuns && healthy && aroundAfter && (!p.runChance || rng() < p.runChance)) {
     const open = REGION_ORDER.filter((r) => !regionLock(r, s.stage, ctx.codex, s.cleared));
     const frontier = open.at(-1);
     const region = frontier && !s.cleared.includes(frontier) ? frontier : open[Math.floor(rng() * open.length)];
@@ -228,14 +265,14 @@ export function checkIn(s, p, now, rng, ctx) {
     let choice = p.trace;
     if (choice === 'mix') choice = rng() < 0.5 ? 'hide' : 'comply';
     if (choice === 'balance') choice = leanSeen(s, p.shown) > 0 ? 'hide' : 'comply';
-    doAct(choice);
+    if (!lapse()) doAct(choice);
   }
-  if (s.event?.type === 'attack') doAct('defend', { won: rng() < winChance(overclocked(s), p.winRate) });
-  if (s.event?.type === 'overflow') doAct('purge');
-  if (s.virus) doAct('patch');
-  if (s.cache > 0 && !(p.sloppy && s.cache < 3)) doAct('purge');
+  if (s.event?.type === 'attack' && !lapse()) doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
+  if (s.event?.type === 'overflow' && !lapse()) doAct('purge');
+  if (s.virus && !lapse()) doAct('patch');
+  if (s.cache > 0 && !(p.sloppy && s.cache < 3) && !lapse()) doAct('purge');
   const coolAt = p.coolAt ?? (p.hot ? 80 : 50);
-  if (s.stats.heat > coolAt) doAct('cool');
+  if (s.stats.heat > coolAt && !lapse()) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
   // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
   if (s.chatter) ctx.chatterSeen.add(s.chatter.id);
@@ -245,20 +282,24 @@ export function checkIn(s, p, now, rng, ctx) {
   }
   if (s.request?.kind === 'cool' && doAct('cool').requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.balanceGames || s.games[s.request.game].won <= minWins(s) + 1) && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
-    if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), p.winRate) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
+    if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), skill()) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
-  const syncTarget = p.gamer ? 90 : 80;
+  const syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play'); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
     if (p.balanceGames) game = leastWon(s); // plays whichever game it has won least (ties: the first)
+    if (p.favorite) {
+      ctx.favorite ??= GAME_IDS[Math.floor(rng() * GAME_IDS.length)]; // a favorite per life, played `favorite` of the time, else any game
+      game = rng() < p.favorite ? ctx.favorite : GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
+    }
     if (process.env.PREFBOT === 'follow' && PREF.on) {
       const lv = temperLevel(s);
       const last = s.lastGames ?? [];
       if (lv > 0 && last.length) game = last[0];
       else if (lv < 0 && last.length) game = GAME_IDS.filter((g) => !last.includes(g)).sort((x, y) => s.games[x].played - s.games[y].played)[0] ?? game;
     }
-    doAct('play', { game, won: rng() < winChance(overclocked(s), p.winRate) });
+    doAct('play', { game, won: rng() < winChance(overclocked(s), skill()) });
     if (s.stats.heat > coolAt + 10) doAct('cool');
   }
   if (s.stats.heat > coolAt) doAct('cool');
@@ -269,7 +310,7 @@ export function checkIn(s, p, now, rng, ctx) {
   const bedSoon = untilBed > 0 && untilBed <= ctx.gapToNext;
   // Lights off if it's asleep, bedtime lands before the next check, or this is the player's last check.
   const wantDark = s.asleep || bedSoon || ctx.lastOfDay;
-  if (wantDark === s.lightsOn) doAct('lights');
+  if (wantDark === s.lightsOn && !lapse()) doAct('lights');
 }
 
 // One life. fragment: the parent's (as flatline() leaves it), for a later generation. codex: the
@@ -292,7 +333,6 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
   const ctx = { bugMin: 0, ceilMin: 0, games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
   const codexAtStart = ctx.codex.length;
-  const lastCheck = Math.max(...p.checks);
   let minute = 0;
   let schedule = [];
   let teenAt = null;
@@ -311,7 +351,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
   while (s.stage !== 'dead' && minute < lifeEnd(s) + 60) {
     const dayMin = (at(8) + minute) % DAY;
     if (dayMin === 0 || minute === 0) {
-      schedule = p.checks.map((c) => ({ c, t: c + Math.round((rng() * 2 - 1) * p.jitter) }));
+      schedule = p.perDay || p.dayCounts ? humanDay(p, rng, Math.floor((at(8) + minute) / DAY)) : p.checks.map((c) => ({ c, t: c + Math.round((rng() * 2 - 1) * p.jitter) }));
     }
     minute++;
     const integrityBefore = s.stats.integrity;
@@ -349,9 +389,11 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     }
     const due = schedule.find((x) => x.t === (at(8) + minute) % DAY);
     if (due && s.stage !== 'dead') {
-      ctx.lastOfDay = due.c === lastCheck;
-      const sorted = [...p.checks].sort((a, b) => a - b);
-      const next = sorted.find((c) => c > due.c) ?? sorted[0] + 24 * 60;
+      const today = [...new Set(schedule.map((x) => x.c))].sort((a, b) => a - b);
+      ctx.lastOfDay = due.c === today.at(-1);
+      // Fixed schedules repeat daily; a human day does not, so the next day's first check is a guess (07:30).
+      const sorted = p.perDay || p.dayCounts ? today : [...p.checks].sort((a, b) => a - b);
+      const next = sorted.find((c) => c > due.c) ?? (p.perDay || p.dayCounts ? 24 * 60 + 7 * 60 + 30 : sorted[0] + 24 * 60);
       ctx.gapToNext = next - due.c;
       checkIn(s, p, t0 + minute * MIN, rng, ctx);
       prevFlags = { ...s.flagged };
