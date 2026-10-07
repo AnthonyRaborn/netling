@@ -419,6 +419,27 @@ Lighter feat after the first elder, measured (lineages of 10 lives from an empty
 - **A lighter feat after the first elder does not shorten the Rogue gate** when it is per lineage: an egg's pages are complete at its first Source exit, which is its first elder, so the eased feat never gets used before the egg is done (10 lives either way). Per account it helps the second and third eggs a little (their first lives are easy), by about one life for casual and none for attentive at the current rates. It does help what comes after the first elder: a lineage's later elder lives (the Source story pages the ending needs, power), where it was measured to lift the share of lives that reach an elder from 60% to 84% for attentive and from 27% to 49% for casual. So it is a good rule for repeat elders, not a lever for the 6-life aim. Not measured: how many elder lives the ending's four Source pages need.
 - With cap 12 alone the attentive median is 10 lives (from 11); with role 0.20 and hidden 0.50 it is 8; lightening the first feat (as measured before: 2 or 1 clean from the start) and taking the Deep's four pages out of Root were what reached 6.
 
+**The feat gets easier with every elder the player has (decided in principle, maintainer).** Each tier of memory makes the next elder easier, the first ever being the hardest; the age gate (96 hours old), Root Access and the extra day do not change. The numbers below are proposals chosen from the feats 1.0 measured, as the share of post-Root lives (Root held, codex full) that meet the feat, attentive (casual), 300 lineages, cap 12:
+
+| Tier | When it applies | Feat | Lives that meet it |
+|---|---|---|---|
+| 1 | the first elder of the account | 3 Deep exits, or 2 without losing an ICE fight (1.0's feat) | 63% (28%) |
+| 2 | any elder already in the Dex ("somewhat easier") | 2 Deep exits | 86% (60%) |
+| 3 | an elder of this egg already in the Dex ("fairly easy") | 2 Deep exits, or 1 clean | 91% (71%) |
+| 4 | this very elder is already in the Dex ("basically guaranteed") | 1 Deep exit | 100% (98%) |
+
+The story reading (the lineage remembers some of the way down) explains the ease. Note that 1.0's own "feat" ladder has few steps (1 exit 99%, 2 exits 83%, 1 clean 69%, 2 exits or 1 clean 91%, 3 or 2 clean 58%), so tiers 2 and 3 are close; a custom feat could separate them. These tiers do not shorten the Rogue gate (an egg's pages are complete at its first elder, measured above); they make repeat elders reliable, which matters for the Source story pages the ending needs.
+
+**When the first elder of an account tends to be reached** (egg 1, cap 12, tier 1 feat, 300 lineages; one life is about 5 real days, and the elder gate opens at 96 hours, so an elder arrives on day 4 or later of its life):
+
+| Archetype | Root arrives | First elder, life (median, p10 to p90) | By life 4 / 5 / 6 / 8 | Real days (median, p10 to p90) |
+|---|---|---|---|---|
+| Attentive | life 3 | 4 (4 to 7) | 51% / 76% / 87% / 99% | about day 19 (19 to 34) |
+| Daredevil | life 3 | 5 (3 to 6) | 49% / 78% / 95% / 100% | about day 24 (14 to 29) |
+| Casual | life 4 | 7 (4 to never) | 12% / 29% / 46% / 70% (86% by life 10; 14% never) | about day 29 (19 to 44) |
+
+So the first elder lands in the life after Root for about half of attentive lines (Root in life 3, elder in life 4) and comes a few weeks into play; for a casual line it is often six or more weeks away, and one in seven has not reached it after 10 lives.
+
 **Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 
 **Open for the maintainer.**
