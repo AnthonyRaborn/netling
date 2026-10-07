@@ -180,7 +180,35 @@ Share of lives per level (strongly unsteady / unsteady / middle / steady / stron
 - **Bugs and temper.** Bugs push temper unsteady through faults, not Heat, and mostly for players who run little: worker unsteady (not strongly) at the end of life 20% with no bugs, 43% with bugs never cleared, 37% with clearing; casual 17%, 29%, 20%; attentive, daredevil and steer-glitch do not move.
 - **Prototype gap.** The scratch copy's Segfault costs temper 2, not the 4 the table above specifies (two faults at 1 plus 2); the bots use Segfault rarely, so no result moves, but fix it when the rules are built.
 
-**Strong steady, strong unsteady and perks (proposals).** Strongly steady is reachable only by calm, attentive play (about half of attentive lives hold it 12 hours at once) and strongly unsteady by hot play; the middle is where casual play lives. Proposed: no mechanical perk and no new temper item beyond Coolant cell and Antivirus patch (+1), Black ICE shard (-1) and Segfault (-4), since temper is personality and the +1 items already cut strongly unsteady at adulthood from 62% to 17% of daredevil lives and from 83% to 66% of overclocker lives (first-pass measurement above). Reward the two ends with cosmetics only, and symmetrically so that neither end is "the good one": a crest unlocked by holding a strong level for 12 awake hours at once (steady and unsteady each get their own), plus a Dex line. Those would be reachable by about half of attentive lives and, for the unsteady one, by 39% of daredevil and 91% of overclocker lives. Not decided.
+**Strong steady, strong unsteady and perks (proposals).** Strongly steady is reachable only by calm, attentive play (about half of attentive lives hold it 12 hours at once) and strongly unsteady by hot play; the middle is where casual play lives. Proposed: no mechanical perk and no new temper item beyond Coolant cell and Antivirus patch (+1), Black ICE shard (-1) and Segfault (-4), since temper is personality and the +1 items already cut strongly unsteady at adulthood from 62% to 17% of daredevil lives and from 83% to 66% of overclocker lives (first-pass measurement above). Reward the two ends with cosmetics only, and symmetrically so that neither end is "the good one": see Temper cosmetics (proposal) below. Not decided.
+
+### Temper cosmetics (proposal)
+
+Cosmetic-only rewards for the two strong temper levels (maintainer: fine if a draft works). 1.0 already rewards the matching play with effects: Aurora (24 hours in flow, across lives) and Heatwave (40 hours overclocked while awake, across lives), both counted in total across lives. Temper rewards should test something different, so they count one unbroken stretch at a strong level (quality and persistence), not total time, and they are crests, which in 1.0 are the "legacy" cosmetics, and static (nothing animates, so nothing can flash).
+
+| Id | Name | Unlock | Hint (draft) |
+|---|---|---|---|
+| `metronome` | Metronome | Hold strongly steady for 12 awake hours without the shown level changing, once, in any life. Sleep pauses the clock; the level is the shown one (with the 1.0 guard), so one flicker cannot reset it. | "keep it so even you could set a clock by it." |
+| `jitter` | Jitter | The same for strongly unsteady. | "let it run so wild nothing could keep time with it." |
+
+Emblems (9x9, `#` lit; five equal ticks on a baseline, against uneven ticks with a broken baseline, the countable beat and the stutter of the tell):
+
+```
+Metronome    Jitter
+.........    .........
+.........    .........
+.........    ..#......
+#.#.#.#.#    ..#.....#
+#.#.#.#.#    ..#..#..#
+#.#.#.#.#    #.#..#..#
+#.#.#.#.#    #.#..##.#
+#########    ###..#.##
+.........    .........
+```
+
+Reach, measured on 1.0's simulator at one life per try (200 lives): Metronome by attentive 54%, steer-daemon 89%, casual and daredevil 0%; Jitter by overclocker 91%, daredevil 39%, steer-glitch 6%, casual 0%. A casual or worker player earns neither, as with Aurora ("casual players rarely reach flow"); a hold of 24 hours would be rarer (Metronome 31% of attentive and 60% of steer-daemon lives; Jitter 82% of overclocker, 20% of daredevil and 1% of steer-glitch).
+
+2.0 would store the best awake hold for each end in `progress` (and clean it in `sanitize.js`; a new field needs a default in `createScript`, `migrate` and `cleanSave` only). Not yet decided: 12 or 24 hours; whether the Jitter hold should count only while no care alert is active, so neglecting the netling cannot earn it (not measured: the neglectful archetype rarely reaches adulthood); a second tier (a shell or a sound pack per end) and whether sound packs, which have no flash risk, are a better home for a "tick" and a "stutter". The two crests would also need entries in the Dex-style cosmetic hints and the unlock list in the content catalog.
 
 ### Care preferences
 
