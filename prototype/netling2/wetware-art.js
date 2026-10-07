@@ -364,22 +364,22 @@ export const WETWARE_ADULTS = {
       '......####......',
     ],
   },
-  // Blank (hidden): the hidden teen grown. A person the system does not know, in a hooded cloak: a pointed hood whose top is camouflaged, a
-  // solid rim around a dark face opening where only two lens eyes show (no mouth, nothing to say who it is: the CP2020 sense of a person without
-  // a SIN), and a cloak that slopes from the shoulders to a flat hem with feet showing. The camouflage (cells alternating bright and dim,
-  // after the thermoptic suit in Ghost in the Shell, a different take on Program's Shell and Ghost) covers the hood top, the chin and the
-  // whole cloak. The hood is the same in both frames; the cloak's shimmer swaps phase and the feet step. Rejected drafts: a smooth round
-  // head over a checkered skirt read as a squid, and shimmer over the rim as well made the face opening murky.
+  // Blank (hidden): the hidden teen grown. A person the system does not know, in a hooded cloak: a pointed hood around a dark face opening
+  // where only two lens eyes show (no mouth, nothing to say who it is: the CP2020 sense of a person without a SIN), and a cloak that
+  // slopes from the shoulders to a flat hem with feet showing. The camouflage (cells alternating bright and dim, after the thermoptic suit
+  // in Ghost in the Shell, a different take on Program's Shell and Ghost) covers the hood below its peak, the chin and the whole cloak,
+  // and its phase swaps between the two frames, so the shimmer is the animation (the outline of the hood does not move: marks only).
+  // The maintainer chose this over a version with a solid hood rim. Rejected: a smooth round head over a checkered skirt (read as a squid).
   blank: {
     a: [
       '.......##.......',
       '......####......',
-      '.....x#x#x#.....',
-      '....x#x#x#x#....',
+      '.....######.....',
+      '....########....',
       '...x#x#x#x#x#...',
-      '..##xooxxoox##..',
-      '..##xooxxoox##..',
-      '..##xxxxxxxx##..',
+      '..x#xooxxooxx#..',
+      '..#xxooxxoox#x..',
+      '..x#xxxxxxxxx#..',
       '...x#x#x#x#x#...',
       '....########....',
       '...x#x#x#x#x#...',
@@ -391,13 +391,13 @@ export const WETWARE_ADULTS = {
     b: [
       '.......##.......',
       '......####......',
-      '.....x#x#x#.....',
-      '....x#x#x#x#....',
-      '...x#x#x#x#x#...',
-      '..##xooxxoox##..',
-      '..##xooxxoox##..',
-      '..##xxxxxxxx##..',
-      '...x#x#x#x#x#...',
+      '.....######.....',
+      '....########....',
+      '...#x#x#x#x#x...',
+      '..#xxooxxoox#x..',
+      '..x#xooxxooxx#..',
+      '..#xxxxxxxxx#x..',
+      '...#x#x#x#x#x...',
       '....########....',
       '...#x#x#x#x#x...',
       '..#x#x#x#x#x#x..',

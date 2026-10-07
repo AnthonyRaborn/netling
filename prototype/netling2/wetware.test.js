@@ -50,7 +50,10 @@ test('anchors point at the head, the eyes and the body, in order, and are the sa
 
 test('the head, eyes, mouth and neck are identical in A and B; only the lower body animates, and the frames still differ', () => {
   for (const f of forms) {
-    for (let y = 0; y <= f.anchors.a.neckRow; y++) assert.equal(f.b[y], f.a[y], `${f.id}: row ${y} differs between frames`);
+    // Blank's camouflage is the animation: its shimmer cells ('x' against '#') swap between frames over the hood too, as marks only, so
+    // the head is compared with the shimmer read as body colour; the outline and the eyes still must not move.
+    const read = (row) => (f.id === 'blank' ? row.replace(/x/g, '#') : row);
+    for (let y = 0; y <= f.anchors.a.neckRow; y++) assert.equal(read(f.b[y]), read(f.a[y]), `${f.id}: row ${y} differs between frames`);
     assert.ok(poseDistance(f.a, f.b) >= 4, `${f.id}: A and B nearly identical`);
     const bottom = (s) => s.findLastIndex((r) => [...r].filter((c) => c !== '.').length >= s[0].length * 0.4);
     assert.equal(bottom(f.a), bottom(f.b), `${f.id}: the body's bottom moves between frames`);
@@ -230,7 +233,7 @@ test('each street adult carries its motif: Solo a Batou-style ocular band and sq
 });
 
 // --- Blank, the hidden adult ----------------------------------------------------------------------------------------------------
-test('Blank is the hidden teen grown, in a hooded cloak: a pointed hood, a dark face opening with two lens eyes and no mouth, camouflage over the hood top and the whole cloak, a flat hem and feet', () => {
+test('Blank is the hidden teen grown, in a hooded cloak: a pointed hood, a dark face opening with two lens eyes and no mouth, camouflage over the hood below its peak and the whole cloak, a flat hem and feet', () => {
   const b = set.blank;
   const camo = /(#x){3}|(x#){3}/;
   assert.equal(WETWARE_FORMS.blank.role, 'hidden');
@@ -239,12 +242,16 @@ test('Blank is the hidden teen grown, in a hooded cloak: a pointed hood, a dark 
   assert.ok(b.a[0].replace(/\./g, '').length < b.a[3].replace(/\./g, '').length, 'the hood widens');
   assert.ok(!b.a.join('').includes('+'), 'no mouth: a blank face');
   assert.ok(b.a.slice(5, 8).every((r) => r.includes('xx')) && b.a[5].includes('oo'), 'a dark face opening with the eyes in it');
-  assert.ok(b.a.slice(5, 8).every((r) => r.startsWith('..##') && r.endsWith('##..')), 'a solid hood rim around it');
-  assert.ok([2, 3, 4, 8, 10, 11, 12, 13].every((y) => camo.test(b.a[y])), 'camouflage over the hood top, the chin and the whole cloak');
+  assert.ok([4, 8, 10, 11, 12, 13].every((y) => camo.test(b.a[y])), 'camouflage over the hood below its peak, the chin and the whole cloak');
   assert.ok(b.a[13].replace(/\./g, '').length === 14 && b.a[12].replace(/\./g, '').length === 14, 'a flat hem, no scallops');
   assert.ok(b.a.at(-1).replace(/\./g, '').length === 4, 'feet below the hem');
-  // The hood does not move between frames; the cloak's shimmer swaps phase and the feet step.
-  for (let y = 0; y <= b.anchors.a.neckRow; y++) assert.equal(b.b[y], b.a[y], `row ${y}`);
+  // The shimmer is the animation: its phase swaps between frames, over the hood as well, but only as marks. The outline and the eyes
+  // do not move, so nothing a wearable is placed by changes (the generic frame test below treats the shimmer as the body colour).
+  const plain = (rows) => rows.map((r) => r.replace(/x/g, '#'));
+  const eyeCells = (rows) => rows.map((r) => r.replace(/[^o]/g, '.'));
+  for (let y = 0; y <= b.anchors.a.neckRow; y++) assert.equal(plain(b.b)[y].replace(/#/g, '.'), plain(b.a)[y].replace(/#/g, '.'), `outline row ${y}`);
+  assert.deepEqual(eyeCells(b.b), eyeCells(b.a));
+  assert.notEqual(b.a[5], b.b[5]);
   assert.notEqual(b.a[11], b.b[11]);
   assert.ok(poseDistance(b.a, b.b) >= 4);
 });
