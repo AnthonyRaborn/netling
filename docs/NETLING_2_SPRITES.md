@@ -78,7 +78,7 @@ One line, four forms, as the maintainer asked: Iron, baby to elder. The line is 
 
 ## Results for the line
 
-Measured by `npm run proto:test` (44 tests) and `npm run proto:audit` and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
+Measured by `npm run proto:test` (44 tests at the time; it now also holds Program's) and `npm run proto:audit` and shown on the page. Silhouette overlap is the 1.0 audit's screen (`tools/lib/sprite-checks.mjs`); 1.0 flags nothing above 0.82 within a stage, and a person judges the rest.
 
 | | Model A, composed | Model B, authored |
 |---|---|---|
@@ -264,9 +264,10 @@ The composition question is closed (see Decision).
 
 0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
-2. Neglect and bugs: the thresholds, the bug look and whether two looks are readable together on a device are untested; see What drives neglect and bugs.
-3. Not drawn: everything for Program and Wetware (each egg gets its own baby, eventually, then its teens, adults and elders).
-4. Elder names, and whether the thin elder margins (above) read right by eye.
+2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
+3. Not drawn: everything for Wetware (baby, three teens, nine adults, nine elders). Program's 22 forms are drawn.
+3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
+4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
 6. The holologo clip in 1.0 (a persistent 1 px, about a third of the time): four options laid out in The holologo clip, none chosen.
 7. Ice's white marks are 1.59:1 by luminance (acid, toxic and origin were fixed): leave, or give ice a mark color too?
@@ -294,7 +295,7 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 ## Not done
 
 - Not looked at on a phone or by anyone but me, and not at motion speed beyond screenshots of single frames. Whether the Iron art reads as firmware, whether the rust reads as neglect and not as part of the design, and whether the tells are legible are human calls.
-- Program and Wetware have tell code and tests but no body art and no neglect skin, so their tells have only been checked as numbers, not seen.
+- Wetware has tell code and tests but no body art and no neglect skin, so its tell has only been checked as numbers, not seen. Program has body art but no skin of its own for neglect or bugs.
 - Idle behavior and chatter tone, the other two temper channels, are not prototyped. Nothing about Standing visuals beyond the street lean marks.
 - `gallery.html` itself is unchanged. `npm run proto:gallery` generates copies that run it on Iron's and Program's forms (see Reviewing the sprites), and the audit runs on them through a wrapper. Both depend on `ready.js` being imported first; see the trap in NETLING_2_SKETCH.md (Handoff).
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
