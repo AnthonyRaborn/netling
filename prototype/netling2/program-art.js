@@ -19,35 +19,35 @@ const KERNEL = frozen(SPRITES.kernelA, SPRITES.kernelB, 9);
 export const PROGRAM_BABY = frozen(SPRITES.bitlingA, SPRITES.bitlingB, 10);
 export const PROGRAM_TEENS = {
   teenCorp: KERNEL,
-  // The street lean: a horned scrapper. Horns at the corners and a spiked crest, angry brows over the eyes, hunched shoulders with the
-  // arms out, a patch on the chin and wide boots. Everything is added to Kernel's body, nothing cut away (the two earlier passes, 0.94
-  // and a lopsided one with parts missing, read as broken). The head top still covers both eyes, so eyewear spans them.
+  // The street lean: a horned scrapper. Horns at the corners and a spiked crest, angry brows over the eyes, arms that are elongated
+  // exclamation points (a bar and a dot, set off from the body), a patch on the chin and wide boots. Everything is added to Kernel's
+  // body, nothing cut away (the earlier passes, 0.94 and two with parts missing, read as broken). The head top still covers both eyes.
   teenStreet: {
     a: [
       '.#..........#.',
       '.##...##...##.',
       '..##########..',
       '#.##########.#',
-      '##xxoo##ooxx##',
+      '#.xxoo##ooxx.#',
       '#.##oo##oo##.#',
       '..##########..',
       '#.####++####.#',
       '..####xx####..',
       '...##....##...',
-      '..###....###..',
+      '.####....####.',
     ],
     b: [
       '.#..........#.',
       '.##...##...##.',
       '..##########..',
       '#.##########.#',
-      '##xxoo##ooxx##',
+      '#.xxoo##ooxx.#',
       '#.##oo##oo##.#',
       '..##########..',
       '#.####++####.#',
       '..####xx####..',
-      '...##....##...',
-      '.###......###.',
+      '..##......##..',
+      '..###....###..',
     ],
   },
   // 1.0's own B frame swaps the last two rows, which leaves a last row too thin (4 of 14 cells, under the 0.4 the wearable code needs
