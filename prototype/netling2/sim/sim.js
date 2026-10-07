@@ -646,7 +646,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDES = {
-  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false,
+  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
   charge: { hi: 85, lo: 30, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   sync: { hi: 85, lo: 30, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
@@ -1101,7 +1101,8 @@ export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 function stepFlow(s) {
   const st = s.stats;
   const good = !s.asleep && !s.nap && !s.run && !s.event && !s.virus && s.cache < 3 && rebootMinutesLeft(s) === 0 &&
-    st.charge >= CFG.flowMinStat && st.sync >= CFG.flowMinStat && st.integrity >= CFG.flowMinIntegrity && st.heat < CFG.flowMaxHeat;
+    st.charge >= CFG.flowMinStat && st.sync >= CFG.flowMinStat && st.integrity >= CFG.flowMinIntegrity && st.heat < CFG.flowMaxHeat &&
+    !(SIDES.on && SIDES.flowShared && (sideOf(s, 'charge') === 'hi' || sideOf(s, 'sync') === 'hi'));
   s.flowMin = good ? s.flowMin + 1 : 0;
   if (inFlow(s)) s.flowTotalMin++;
 }
