@@ -16,15 +16,19 @@ export const WETWARE_FORMS = {
   teenCorp: { stage: 'teen', lean: 'corp' },
   teenStreet: { stage: 'teen', lean: 'street' },
   teenHidden: { stage: 'teen', lean: 'hidden' }, // Blank's line
-  // Option C, corp then street within a role; so far the corp forms. The street forms and Blank come later.
+  // Option C, corp then street within a role. Blank, the hidden adult, comes later.
   razor: { stage: 'adult', role: 'breach', lean: 'corp' },
+  solo: { stage: 'adult', role: 'breach', lean: 'street' },
   wired: { stage: 'adult', role: 'dodge', lean: 'corp', from: 'chrome' }, // 1.0's Chrome
+  chipped: { stage: 'adult', role: 'dodge', lean: 'street' },
   mentat: { stage: 'adult', role: 'tune', lean: 'corp' },
+  gibson: { stage: 'adult', role: 'tune', lean: 'street' },
   nutri: { stage: 'adult', role: 'feast', lean: 'corp' },
+  leech: { stage: 'adult', role: 'feast', lean: 'street' },
 };
 export const WETWARE_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
 export const WETWARE_HIDDEN_BRANCH = ['baby', 'teenHidden'];
-export const WETWARE_ADULTS_ALL = ['razor', 'wired', 'mentat', 'nutri'];
+export const WETWARE_ADULTS_ALL = ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech'];
 
 const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS, ...WETWARE_ADULTS };
 const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS, ...WETWARE_ADULT_ANCHORS };

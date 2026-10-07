@@ -265,7 +265,7 @@ The composition question is closed (see Decision).
 0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
-3. Not drawn: Wetware's four street adults, Blank and nine elders (its baby, three teens and four corp adults are drawn). Program's 22 forms are drawn.
+3. Not drawn: Wetware's Blank and nine elders (its baby, three teens and eight role adults are drawn). Program's 22 forms are drawn.
 3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
 4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
@@ -301,7 +301,7 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
 - **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
 
-## Wetware (baby, teens and corp adults)
+## Wetware (baby, teens and adults)
 
 Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude-wetware.js`; forms register under `protoW_<id>`. Run `npm run proto:audit:wetware` (or `EGG=wetware`, `EGG=all`) and `npm run proto:gallery`.
 
@@ -331,3 +331,11 @@ Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude
 Razor's arms were redrawn after review (see the Razor entry above); no other form changed.
 
 **Sleep poses.** The maintainer found the extra pixels on the asleep poses odd, on every egg: they sit right under the mouth. Wetware's asleep pose now has no mark, only the slit eyes. **Iron's (a queue of four dots) and Program's (a block cursor) still add a chest mark under the mouth** and are saved for later review, together with the dead X rounding above.
+
+**Street adults** (`solo`, `chipped`, `gibson`, `leech`; the sketch's street names). 16 columns, 14 or 15 rows, humanoid, no brow row over the eyes except Solo's unibrow, each echoing the street teen's added parts (spikes, a unibrow, parts held off the body). First drafts, not yet reviewed by the maintainer.
+- **Solo** (Breach), 14 rows: a stocky mercenary: spikes over the cortex, a dark unibrow, gritted teeth, thick arms with fists and a bandolier of dim cells across the chest.
+- **Chipped** (Dodge), 15 rows: slim and springy: an antenna and chip port at the temple, one cyber eye larger than the other (3 cells against 2), thin arms, long legs.
+- **Gibson** (Tune), 15 rows: a psychic: wild spikes around the cortex, a teardrop body ending in a wisp (no legs) and four dim marks orbiting the body, which swap sides between frames.
+- **Leech** (Feast), 15 rows: tall and thin, a second mouth row for a feeding tube, long arms, a stoop.
+- **Measured:** each street form against its corp sibling: Solo/Razor 0.71, Chipped/Wired 0.69, Gibson/Mentat 0.69, Leech/Nutri 0.59, all under the 0.8 the Program test uses, and 34 or more outline cells apart. The closest of the eight is still Wired/Nutri 0.80, then Mentat/Nutri and Solo/Mentat 0.79 (1.0's bar is 0.82). 88 prototype tests, the real audit (the 1 px holologo clip on all eight, as in 1.0; no contrast losses), `npm test` (500).
+- **Known weak spots, by eye:** Solo's arms read as hollow loops; Chipped's hands are odd stubs; Gibson reads more as a hovering blob than a person, and its orbit marks are dim on dark backgrounds; Leech's lower body is the least resolved; Leech's frames differ by 4 cells, Solo's by 4.

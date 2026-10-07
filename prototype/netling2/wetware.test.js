@@ -173,22 +173,22 @@ test('the hidden-path teen is Blank\'s cloaked blob: a hood peak, slit eyes, a s
 });
 
 // --- corp adults -----------------------------------------------------------------------------------------------------------------
-test('the four corp adults, one per role, all corp; Wired is 1.0\'s Chrome', () => {
-  assert.deepEqual(WETWARE_ADULTS_ALL.map((id) => WETWARE_FORMS[id].role), ['breach', 'dodge', 'tune', 'feast']);
-  assert.ok(WETWARE_ADULTS_ALL.every((id) => WETWARE_FORMS[id].lean === 'corp'));
+test('option C: each of the four roles has a corp and a street form (Blank, the hidden adult, comes later); Wired is 1.0\'s Chrome', () => {
+  for (const role of ['breach', 'dodge', 'tune', 'feast']) assert.deepEqual(WETWARE_ADULTS_ALL.map((id) => WETWARE_FORMS[id]).filter((f) => f.role === role).map((f) => f.lean), ['corp', 'street'], role);
+  assert.equal(WETWARE_ADULTS_ALL.length, 8);
   assert.deepEqual(set.wired.a, SPRITES.chromeA, 'the A frame is 1.0\'s, unchanged');
   assert.notDeepEqual(set.wired.b, SPRITES.chromeB, '1.0\'s B frame moves the visor lights, so only its arms are used');
   assert.deepEqual(set.wired.b.slice(0, 9), SPRITES.chromeA.slice(0, 9));
   assert.deepEqual(set.wired.b.slice(9), SPRITES.chromeB.slice(9));
 });
 
-test('the corp adults are distinct from one another (under 1.0\'s 0.82 for a same-stage pair) and from every teen and the baby', () => {
+test('the eight role adults are distinct from one another (under 1.0\'s 0.82 for a same-stage pair) and from every teen and the baby', () => {
   const pairs = [];
   for (let i = 0; i < WETWARE_ADULTS_ALL.length; i++) {
     for (let j = i + 1; j < WETWARE_ADULTS_ALL.length; j++) pairs.push({ pair: `${WETWARE_ADULTS_ALL[i]}/${WETWARE_ADULTS_ALL[j]}`, iou: silhouetteIou(set[WETWARE_ADULTS_ALL[i]].a, set[WETWARE_ADULTS_ALL[j]].a) });
   }
   pairs.sort((p, q) => q.iou - p.iou);
-  console.log(`  closest Wetware corp adults: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  console.log(`  closest Wetware adults: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
   for (const p of pairs) assert.ok(p.iou <= 0.82, `${p.pair}: ${p.iou.toFixed(2)}`);
   for (const id of WETWARE_ADULTS_ALL) for (const other of ['baby', ...WETWARE_TEENS_ALL]) assert.ok(silhouetteIou(set[id].a, set[other].a) < 0.82, `${id}/${other}`);
 });
@@ -200,4 +200,24 @@ test('each corp adult carries its motif: Razor blade forearms, Wired a visor, Me
   assert.ok(cells(set.mentat.a.slice(0, 3), /x/) > cells(set.nutri.a.slice(0, 3), /x/) && cells(set.mentat.a.slice(0, 3), /x/) >= 8, 'Mentat: the biggest cortex');
   assert.ok(set.nutri.a[set.nutri.anchors.a.mouthRow].split('+').length - 1 >= 6, 'Nutri: a wide mouth');
   assert.ok(set.nutri.a.some((r) => r.includes('xxxxxxxx')), 'Nutri: a dark belly band');
+});
+
+// --- street adults -------------------------------------------------------------------------------------------------------------
+test('the two forms of a role are not look-alikes', () => {
+  for (const [corp, street] of [['razor', 'solo'], ['wired', 'chipped'], ['mentat', 'gibson'], ['nutri', 'leech']]) {
+    const iou = silhouetteIou(set[corp].a, set[street].a);
+    assert.ok(iou < 0.8, `${corp}/${street}: ${iou.toFixed(2)}`);
+    assert.ok(poseDistance(set[corp].a, set[street].a) >= 20, `${corp}/${street}: outline`);
+  }
+});
+
+test('each street adult carries its motif: Solo spikes and a unibrow, Chipped an antenna and a larger cyber eye, Gibson orbiting dim marks and no legs, Leech a feeding tube', () => {
+  const eyes = (id) => set[id].a[set[id].anchors.a.eyeRow];
+  assert.ok(set.solo.a[0].split('#').length - 1 >= 5 && set.solo.a[3].includes('xxxxxxxx'), 'Solo: spikes and a unibrow');
+  assert.ok(set.chipped.a[0].endsWith('#..') || set.chipped.a[0].includes('#..#'), 'Chipped: an antenna');
+  const groups = (row) => row.split(/[^o]+/).filter(Boolean).map((g) => g.length);
+  assert.ok(Math.max(...groups(eyes('chipped'))) > Math.min(...groups(eyes('chipped'))), 'Chipped: one eye larger than the other');
+  assert.ok(set.gibson.a.slice(9).some((r) => r.includes('x.') || r.includes('.x')), 'Gibson: dim orbit marks beside the body');
+  assert.ok(set.gibson.a.at(-1).replace(/\./g, '').length <= 4, 'Gibson: a wisp, no legs');
+  assert.ok(set.leech.a[set.leech.anchors.a.mouthRow + 1].includes('+'), 'Leech: a second mouth row, the tube');
 });
