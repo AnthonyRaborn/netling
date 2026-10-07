@@ -12,7 +12,7 @@ const trace = (level, seed, ms = 300_000, step = 25, reduced = false) => {
 const changes = (rows) => rows.filter((r, i) => i && r.pos !== rows[i - 1].pos).map((r) => r.t);
 
 test('the middle is upright and still, and the function is pure', () => {
-  for (const t of [0, 4321, 999_999]) assert.deepEqual(metronome({ level: 0, time: t, seed: 4 }), { pos: 0, tick: false });
+  for (const t of [0, 4321, 999_999]) assert.deepEqual(metronome({ level: 0, time: t, seed: 4 }), { pos: 0 });
   for (const level of [-2, -1, 1, 2]) assert.deepEqual(metronome({ level, time: 12345, seed: 3 }), metronome({ level, time: 12345, seed: 3 }));
 });
 
@@ -30,14 +30,8 @@ test('steady: it swings on exactly the tell beat, alternating sides, whatever th
   }
 });
 
-test('strongly steady beats twice as fast as steady, and ticks once a swing for one slot', () => {
+test('strongly steady beats twice as fast as steady', () => {
   assert.equal(BEAT_MS[1], 2 * BEAT_MS[2]);
-  for (const level of [1, 2]) {
-    const rows = trace(level, 0, BEAT_MS[level] * 6, 25);
-    const ticks = rows.filter((r) => r.tick);
-    assert.equal(new Set(ticks.map((r) => Math.floor(r.t / BEAT_MS[level]))).size, 6, 'one tick group a beat');
-    assert.ok(ticks.length <= 6 * Math.ceil(SLOT_MS / 25));
-  }
 });
 
 test('unsteady: swings at irregular moments, differently by seed, strongly more often', () => {
@@ -62,11 +56,10 @@ test('flash budget: it never changes side within FLASH_TOGGLE_MS, in any level, 
   }
 });
 
-test('reduced motion: the steady beat is kept; the unsteady pendulum parks on one side with no tick', () => {
+test('reduced motion: the steady beat is kept; the unsteady pendulum parks on one side', () => {
   for (const level of [1, 2]) assert.deepEqual(trace(level, 3, 40_000, 25, true), trace(level, 3, 40_000, 25, false));
   for (const level of [-1, -2]) {
     const rows = trace(level, 3, 60_000, 25, true);
     assert.equal(new Set(rows.map((r) => r.pos)).size, 1);
-    assert.ok(rows.every((r) => !r.tick));
   }
 });
