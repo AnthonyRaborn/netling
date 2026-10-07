@@ -430,15 +430,24 @@ Lighter feat after the first elder, measured (lineages of 10 lives from an empty
 
 The story reading (the lineage remembers some of the way down) explains the ease. Note that 1.0's own "feat" ladder has few steps (1 exit 99%, 2 exits 83%, 1 clean 69%, 2 exits or 1 clean 91%, 3 or 2 clean 58%), so tiers 2 and 3 are close; a custom feat could separate them. These tiers do not shorten the Rogue gate (an egg's pages are complete at its first elder, measured above); they make repeat elders reliable, which matters for the Source story pages the ending needs.
 
-**When the first elder of an account tends to be reached** (egg 1, cap 12, tier 1 feat, 300 lineages; one life is about 5 real days, and the elder gate opens at 96 hours, so an elder arrives on day 4 or later of its life):
+**When the first elder of an account tends to be reached** (egg 1, cap 12, tier 1 feat, 300 lineages; one life is about 5 real days, and the elder gate opens at 96 hours, so an elder arrives on day 4 or later of its life). **Corrected:** the first version of this table used the balance tool's rule that Root reaches only the next netling after the codex completes. The game grants it at once (`drainCodexInbox` gives the current netling Root the moment the codex is complete, `docs/SIMULATION.md`), so a netling that finishes the Root pages in life 3 can already become an elder in life 3. Measured with the game's rule (`MID=1`):
 
-| Archetype | Root arrives | First elder, life (median, p10 to p90) | By life 4 / 5 / 6 / 8 | Real days (median, p10 to p90) |
+| Archetype | Root completes | First elder life, median (p10 to p90) | By life 3 / 4 / 5 / 6 | Real days, median |
 |---|---|---|---|---|
-| Attentive | life 3 | 4 (4 to 7) | 51% / 76% / 87% / 99% | about day 19 (19 to 34) |
-| Daredevil | life 3 | 5 (3 to 6) | 49% / 78% / 95% / 100% | about day 24 (14 to 29) |
-| Casual | life 4 | 7 (4 to never) | 12% / 29% / 46% / 70% (86% by life 10; 14% never) | about day 29 (19 to 44) |
+| Attentive | life 3 | 3 (3 to 5) | 60% / 83% / 94% / 96% | about day 14 |
+| Daredevil | life 3 | 3 (2 to 5) | 58% / 86% / 94% / 98% | about day 14 |
+| Casual | life 4 | 5 (3 to 10) | 16% / 38% / 55% / 69% | about day 24 |
 
-So the first elder lands in the life after Root for about half of attentive lines (Root in life 3, elder in life 4) and comes a few weeks into play; for a casual line it is often six or more weeks away, and one in seven has not reached it after 10 lives.
+(With the old rule: attentive life 4, day 19; daredevil life 5, day 24; casual life 7, day 29.) So the maintainer's aim, a first elder in life 3, is already met by keen players, and the cost of a casual line is Root, not the elder.
+
+**The earlier Rogue-gate tables above also used the old rule and ran egg 1 about a life too long.** Corrected (Root mid-life, cap 12, guaranteed first-exit Source page, feat tier 1 for egg 1; median lives for three eggs, attentive (casual); share done within 6 and 8 lives for attentive):
+
+| Rates | Feat 3/2 always | Easier feat for eggs 2 and 3 (tier 2, account-level) |
+|---|---|---|
+| Role 0.10, hidden 0.25 | 9 (16); by 6: 4%, by 8: 36% | 9 (13); 6%, 44% |
+| Role 0.20, hidden 0.50 | 7 (14); by 6: 34%, by 8: 77% | 7 (10); 47%, 87% |
+
+Egg 1 alone takes a median 4 lives (3 at the higher rates) for attentive, and 6 for casual. The 6-life aim is reached about half the time (47%) by attentive play with the higher rates and an easier feat for later eggs, with Root left in as it is; casual play needs about 10.
 
 **Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 

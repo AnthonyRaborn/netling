@@ -5,6 +5,7 @@ import { ARCHETYPES, simulate } from './tools/balance.mjs';
 import { RUN_CFG } from './src/netrun/run.js';
 import { CFG } from './src/sim.js';
 import { ROOT_FRAGMENT_IDS } from './src/netrun/codex.js';
+globalThis.__rootMid = process.env.MID === '1';
 const [name, n, lives] = [process.argv[2], Number(process.argv[3] ?? 300), Number(process.argv[4] ?? 10)];
 const MODE = process.env.MODE ?? 'e1', TAG = process.env.TAG ?? '';
 RUN_CFG.codexPerLife = Number(process.env.CAP ?? 12);
