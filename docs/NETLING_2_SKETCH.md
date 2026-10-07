@@ -249,8 +249,8 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 **Method.** Iron from Jargon machine sounds and timings, Program from software and network folklore, Wetware from plain words with a light CP2020 nod where one fits (second pass: heavy glossary terms and Star Wars terms are out). Elders are "the same idea after long service". Chosen after printing every unnamed form's art as text, not from a rendered gallery.
 
 **Decided so far (maintainer feedback, two rounds).**
-- Iron: Boot (baby), Init (Guru's elder), Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap. Core, Drum and Crack are held back as terms too useful to spend on a form. Bump was too cute. Firewall for Gronk's elder was odd on a Breach line; the maintainer suggested ORC or Mudge instead.
-- Program: Tree for Parse's elder is preferred to Daemon; Pen, Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
+- Iron: Boot (baby), Init (Guru's elder), Ram (Gronk's elder), Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap. Core, Drum and Crack are held back as terms too useful to spend on a form. Bump was too cute. Firewall for Gronk's elder was odd on a Breach line; the maintainer suggested ORC or Mudge instead.
+- Program: Rat (street teen) and Daemon (Mouse's elder) are decided; Tree for Parse's elder is preferred to Daemon; Pen, Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
 - Wetware: Pod, Zero, Edge, Lancet, Broth, Observer and Cipher (the line Zero, Blank, Cipher). Star Wars terms are out. Solo's elder should suit a big-gun fighter; Chipped's should nod to heavy boosterware; Helminth was suggested for Leech's elder.
 - Names not commented on (Graft, Savant, Pen, Tone, Fork, Mask, Leak, Dump, Thunk and so on) are taken as accepted unless the maintainer says otherwise.
 
@@ -269,7 +269,7 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 | `teenStreet` | Buzz | Jargon: to run a tight loop with no sign of progress; the spiked top and restless feet. | medium |
 | `teenHidden` | Gweep | Jargon: to hack, usually at night, and one who does; an apprentice of Guru. Alternate: Frob. | strong |
 | `splatElder` | Brick | Jargon: a device configured into an unusable state; the elder is a flat slab. | strong |
-| `gronkElder` | ORC | Old Red Cracker (+ORC), an anonymous reverse engineer who published some of the first cracking lessons online and founded the High Cracking University. "Old" is the elder, "Cracker" is Breach, and an orc is a big brute, which fits the wall of arms. An anonymous handle, so no living person is named. Alternate: Mudge (Peiter Zatko of L0pht; a named, living person, so the maintainer should decide whether that is wanted). Firewall (first pass) was dropped as a defender on a Breach line. | medium |
+| `gronkElder` | Ram | A battering ram, which fits a breacher, and RAM, memory, which suits Iron. Monosyllabic, no monster read. Decided (maintainer). ORC (Old Red Cracker, an anonymous reverse engineer) and Mudge were the earlier options. | strong |
 | `jiffElder` | Tick | Jargon defines a tick as a jiffy: the formal word for what Jiff is the casual word for. | strong |
 | `bamfElder` | Hop | Jargon: one transmission in a store-and-forward chain; Bamf teleports. | strong |
 | `pingElder` | Peek | Jargon: read a memory location without changing it; Ping checks something is there, Peek looks in. | medium |
@@ -282,10 +282,10 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `teenStreet` | Mal | The bad-software prefix (malware, malspam); short, a street teen that is the malware of the line. Alternates: Malware, Malspam, Spam (Jargon). Flame was dropped as an action, not a program. Mal is also a common given name. | medium |
+| `teenStreet` | Rat | A remote-access trojan: a malware program. Decided (maintainer). It shares a rodent family with the adult Mouse; a street teen does not grow into Mouse (corp lean), so the pairing is a light echo. Rat is also an everyday insult for an informer. Mal, Virus and Bomb were the other options. | medium |
 | `tigerElder` | Pen | Short for penetration tester: Tiger's team grown up. | medium |
 | `wormElder` | Fork | Jargon: a project splitting into diverging copies (the process-spawning sense is not in Jargon); a worm copies itself and the fork bomb is its grown form. | strong |
-| `mouseElder` | Daemon | A process that runs unseen in the background and is never found where you look; Mouse is always one hop ahead. Jargon headword; 1.0's orderly adult. Moved here from Parse. (Airgap was dropped as a weak link unless the sprite is revisited, for instance with a visible gap.) | medium |
+| `mouseElder` | Daemon | A process that runs unseen in the background and is never found where you look; Mouse is always one hop ahead. Jargon headword; 1.0's orderly adult. Decided (maintainer); two syllables, which the trend allows. Proxy was the alternative. | medium |
 | `spoofElder` | Mask | To present a false identity; the elder's art carries a half mask. | strong |
 | `parseElder` | Tree | A parse produces a tree; the elder's antennae read as branches. | medium |
 | `phreakElder` | Tone | The phone network's control tones; the side bars read as tone bars. | medium |
@@ -309,7 +309,9 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 | `leechElder` | Helminth | A parasitic worm, the technical word for what feeds on a host (the maintainer's suggestion). Plain science word, not CP2020. Alternates: Sawbones, Healer. | strong |
 | `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Decided (maintainer). | strong |
 
-**Weakest links.** ORC (reads as the fantasy monster to most players, which is a fair joke for a brute but hides the source), Mal (also a given name), Daemon for Mouse's elder (a bigger idea than the sprite shows), Poppers (a drug nickname) and Blur (generic; the Kerenzikov and Sandevistan link is faint).
+**Open: Solo's elder and Chipped's elder.** Chipped's candidates are Apter (CP2020: Augmented Program Trained Reflex, a reflex chip; a direct nod but a lighter implant than the heavy boosterware, so it is lateral, not an escalation) and Surge. Solo's candidates (a heavily cyberized, tank-like heavy-weapons fighter, Terminator comparison) are Frag (CP2020: a curse word, and to kill with a fragmentation grenade), Skrag, Duster and Dakka; Poppers, Vatjob and Panzer were rejected or set aside. None of Skrag, Duster or Dakka is in the Jargon File or the CP2020 page.
+
+**Weakest links.** Rat (an informer insult), Daemon for Mouse's elder (a bigger idea than the sprite shows), Poppers (a drug nickname) and Blur (generic; the Kerenzikov and Sandevistan link is faint).
 
 **Not done.** No name has been tested on a screen, in the Dex or against the chatter group names. The elder names are not final until the elder art is.
 
