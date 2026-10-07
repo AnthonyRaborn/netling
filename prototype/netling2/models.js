@@ -55,7 +55,7 @@ export function compose(body, overlay) {
 // Dead and asleep poses, generated from the A frame the way src/sprites.js does for 1.0 forms: each eye (a connected group
 // of accent cells on the eye rows) becomes an X when dead and a slit when asleep.
 const NEIGHBOURS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
-function eyeGroups(rows, eyeRow) {
+export function eyeGroups(rows, eyeRow) {
   const seen = new Set();
   const groups = [];
   rows.forEach((row, y) =>

@@ -68,7 +68,7 @@ test('the asleep and dead poses keep the awake outline; the eyes are the 1.0 sli
   assert.equal(poseDistance(f.a, f.sleep), 0, `${f.id}: asleep outline`);
   assert.equal(poseDistance(f.a, f.dead), 0, `${f.id}: dead outline`);
   assert.ok(markDistance(f.a, f.sleep) > 0 && markDistance(f.a, f.dead) > 0);
-  for (const kind of ['sleep', 'dead']) assert.deepEqual(wetwarePose(f.a, a, kind), f[kind]);
+  for (const kind of ['sleep', 'dead']) assert.deepEqual(wetwarePose(f.a, a, kind, f.id), f[kind]);
   // Asleep: two accent beats on one row under the mouth. Dead: a run of dim cells on one row at or below the neck, longer than the pulse.
   const added = (pose, ch) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === ch && f.a[y][x] !== ch && y > a.mouthRow ? [x, y] : null)).filter(Boolean));
   const pulse = added('sleep', 'o');
