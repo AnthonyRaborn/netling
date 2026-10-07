@@ -581,7 +581,8 @@ function eventAnswered(s, t) {
 // logs a warning.
 // cold: Heat under this while awake also builds wear (0 = off), at coldRate per minute per Heat point under it; restFloor: nap and sleep cool
 // no lower than this (0 = no floor, 1.0's behaviour: rest cools to about 0).
-export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 0, cold: 0, coldRate: 0.12, restFloor: 0, line: 50 };
+// Adopted (maintainer): the hot line 75, the Sync effect at x1, the cold line 20 and the nap and sleep cooling floor 20 (a band of about 20 to 75).
+export const IRON = { on: false, heat: 75, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 1, cold: 20, coldRate: 0.12, restFloor: 20, line: 50 };
 if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
 function stepWear(s, t, rest) {
   const before = s.wear ?? 0;
@@ -594,8 +595,32 @@ function stepWear(s, t, rest) {
   if (w >= IRON.line) s.wearHighMin = (s.wearHighMin ?? 0) + 1;
   if (before < IRON.line && w >= IRON.line) log(s, t, '> tolerances are slipping.');
 }
-const baseVirusPerHour = (s) =>
-  IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
+// 2.0 egg pressure as a band on one meter (maintainer: Iron manages Heat, Wetware Charge, Program Sync). Hidden strain builds while the stat is
+// above `hi` (rate per minute per point over) or under `lo` (loRate) while awake, decays (faster at rest) and replaces the flat base infection
+// hazard with floor + slope * strain / 100. Off by default; BANDS='{"charge":{"on":true,"hi":90}}' switches one on. One band at a time with
+// IRON or WET. line: the strain counted as high in the reports.
+export const BANDS = {
+  charge: { on: false, lo: 0, hi: 90, rate: 0.12, loRate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, line: 50 },
+  sync: { on: false, lo: 0, hi: 90, rate: 0.12, loRate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, line: 50 },
+};
+if (process.env.BANDS) for (const [k, v] of Object.entries(JSON.parse(process.env.BANDS))) Object.assign(BANDS[k], v);
+function stepBand(s, key, rest) {
+  const c = BANDS[key];
+  s.strain ??= {};
+  const before = s.strain[key] ?? 0;
+  const v = s.stats[key];
+  const w = Math.min(100, Math.max(0, before * (1 - c.decay * (rest ? c.restMult : 1)) + (rest ? 0 : c.rate * Math.max(0, v - c.hi) + c.loRate * Math.max(0, c.lo - v))));
+  s.strain[key] = w;
+  s.strainMax ??= {};
+  s.strainMax[key] = Math.max(s.strainMax[key] ?? 0, w);
+  if (w >= c.line) s.strainHighMin = (s.strainHighMin ?? 0) + 1;
+}
+const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null);
+const baseVirusPerHour = (s) => {
+  const b = bandOn();
+  if (b && !IRON.on && !WET.on) return BANDS[b].floor + (BANDS[b].slope * (s.strain?.[b] ?? 0)) / 100;
+  return IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
+};
 // 2.0 egg pressure, Wetware (consistency): hidden shock is added whenever a feed is the other packet type from the last feed (a
 // block of one type costs one switch, flip-flopping costs one a feed) and fades with `halfLifeMin`. The base infection hazard (its
 // "rejection") follows shock instead of staying flat. Off by default; WET='{"on":true}' switches it on. Not used together with IRON.
@@ -733,6 +758,7 @@ function step(s, t, rng) {
   if (IRON.on && rest && IRON.restFloor > 0 && st.heat < IRON.restFloor) st.heat = Math.min(heatBefore, IRON.restFloor);
 
   if (IRON.on) stepWear(s, t, rest);
+  for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
   if (WET.on) stepShock(s);
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {

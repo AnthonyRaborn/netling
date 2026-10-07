@@ -141,10 +141,10 @@ archetype, wear off against seven settings; IRONBOT=avoid cools earlier once wea
   Not adopted as the default yet (IRON.lock defaults to 0, heat 80). Not modelled: a human's response to the warning line, wear from netruns
   (runs are instant in the sim and the 2 to 3 hour cooldown lets wear decay between them), Black ICE shard.
 
-## Result 7: Iron pushed from both ends (IRON cold and restFloor; prototype/netling2/sim/iron-cold-sweep.mjs, heat-profile.mjs)
+## Result 7: Iron pushed from both ends (IRON cold and restFloor; prototype/netling2/sim/iron-cold-sweep.mjs, stat-profile.mjs)
 Wear also builds while Heat is under `cold` (awake only), and `restFloor` stops nap and sleep cooling below it. 400 lives per archetype; the
 hot side is the Result 6 setting (75, lock 1). IRONBOT=chill cools at 30 and over, whatever the wear.
-- Heat profile (heat-profile.mjs): rest cools Heat to about 0 (median Heat on waking 0.05), and awake ordinary play spends 6 to 10% of its
+- Heat profile (stat-profile.mjs): rest cools Heat to about 0 (median Heat on waking 0.05), and awake ordinary play spends 6 to 10% of its
   time under 10 and 8 to 15% under 20, mostly the warm-up after a rest (awake Heat then drifts up 3 an hour). So a cold line with no rest floor
   taxes everyone: cold 20 without a floor takes the worker's full-life rate from 84% to 53%, attentive infections 7.6 to 9.8, casual 7.2 to 9.5.
 - A floor equal to the cold line removes that: cold 20, floor 20 leaves attentive (7.61 against 7.61 off), sysadmin, casual, worker and
