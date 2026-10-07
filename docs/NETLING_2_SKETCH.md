@@ -13,7 +13,7 @@ Written for an AI picking up the work. Sprite work has its own handoff: **[NETLI
 
 **Next steps (the maintainer sets the order).**
 1. **Sprite phase** (see the SPRITES handoff): the maintainer's gallery review of Program and Wetware; care (neglect) and bug effects enacted and checked on all sprites; a temper pass on every form (only part of Iron was used for feasibility); then names, accessories and smaller items.
-2. Idle behavior and chatter tone for temper (the other two tell channels): not prototyped.
+2. Idle behavior and chatter tone for temper (the other two tell channels): shapes specified and tested in `prototype/netling2/voice.js` (see the drafts file, Temper hints); not rendered, not player-tested.
 3. Per-egg meters and care buttons, then the elder stage rules and Source access.
 4. Netrun content per egg (abilities, regions, events, tutorial run) and the debug station anomaly's options.
 5. Review and edit all drafted text in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md); idle and chatter temper hints are flagged for revisiting.
@@ -21,7 +21,7 @@ Written for an AI picking up the work. Sprite work has its own handoff: **[NETLI
 
 **Document map.** This file: decisions, architecture, measured numbers, open questions. [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md): sprite handoff; [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md): its archive (drafts, rejected options, measurements). [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md): all page text and temper hints. [netling2-prototypes/README.md](netling2-prototypes/README.md): rule-prototype patch and drivers behind the figures. [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md): source vocabulary (Jargon, CP2020, FDA) and unused ideas; reference only.
 
-**Verified and not.** `npm test` (500) and `npm run proto:test` (99) pass; the prototype pages load in headless Chromium; the 1.0 sprite audit ran on each egg. Not run: `npm run smoke`, any device or phone check, any balance run on 2.0 numbers. No page text has been playtested.
+**Verified and not.** `npm test` (500) and `npm run proto:test` (111) pass; the prototype pages load in headless Chromium; the 1.0 sprite audit ran on each egg. Not run: `npm run smoke`, any device or phone check, any balance run on 2.0 numbers. No page text has been playtested.
 
 **Working agreements.** Avoid emojis and em dashes. Measure before claiming a number and say what a measurement does not cover (the 1.0 overlap score misled for palette marks and for grown elders). Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps; when a form is contested, render options side by side first (the maintainer reviews from screenshots). Record each decision here as it is made, marked Decided or proposal. Keep in-game Wetware text to plain words (see The eggs). Do not open a pull request unless asked. **This branch is not under the 1.0 soft freeze** (maintainer): 1.0 code may change where asked, minimally, with tests, regenerating what depends on it (`node tools/wearable-colors.mjs --write` after palette or sprite changes), and saying so. The prototype lives only in `prototype/netling2/`. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
 
