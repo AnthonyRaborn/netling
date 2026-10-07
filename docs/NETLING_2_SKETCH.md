@@ -250,13 +250,13 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 
 **Decided so far (maintainer feedback, two rounds).**
 - Iron: Boot (baby), Init (Guru's elder), Ram (Gronk's elder), Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap. Core, Drum and Crack are held back as terms too useful to spend on a form. Bump was too cute. Firewall for Gronk's elder was odd on a Breach line; the maintainer suggested ORC or Mudge instead.
-- Program: Rat (street teen) and Daemon (Mouse's elder) are decided; Tree for Parse's elder is preferred to Daemon; Pen, Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
+- Program: Rat (street teen) and Daemon (Mouse's elder) are decided; Tree for Parse's elder is preferred to Daemon; Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
 - Wetware: Pod, Zero, Edge, Lancet, Frag (Solo's elder), Surge (Chipped's elder), Broth, Observer and Cipher (the line Zero, Blank, Cipher). Star Wars terms are out. Helminth (Leech's elder) is confirmed.
-- Names not commented on (Graft, Savant, Pen, Tone, Fork, Mask, Leak, Dump, Thunk and so on) are taken as accepted unless the maintainer says otherwise.
+- Names not commented on (Graft, Savant, Tone, Fork, Mask, Leak, Dump, Thunk and so on) are taken as accepted unless the maintainer says otherwise.
 
 **Reserved terms (do not spend on a form):** Core, Crack, Drum, Null, Bot, Hack. Colour words (Red, Blue) are avoided because tints and shells use them.
 
-**Checked.** The Jargon File 4.4.7 and the CP2020 slang page were downloaded in this session. Found as Jargon headwords: tick, thunk, buzz, gweep, brick, hop, peek, ding, crunch, swap, boot, daemon, fork, leak, dump. Found as CP2020 headwords: Zero, Observer, Pod (inside Pods), Edge, Frag, Apter. Not headwords in either: Init, Mal, Pen, Mask, Tone, Tree, and the plain-English Wetware names (Graft, Lancet, Savant, Surge, Broth, Helminth, Cipher). ORC was checked against Wikipedia's Old Red Cracker page (an anonymous reverser, founder of the High Cracking University); the Kerenzikov and Sandevistan references rest on the maintainer's message, not on a source I read. All 34 names are unique and none matches an adult name.
+**Checked.** The Jargon File 4.4.7 and the CP2020 slang page were downloaded in this session. Found as Jargon headwords: tick, thunk, buzz, gweep, brick, hop, peek, ding, crunch, swap, boot, daemon, fork, leak, dump. Found as CP2020 headwords: Zero, Observer, Pod (inside Pods), Edge, Frag, Apter. Not headwords in either: Init, Lynx, Mask, Tone, Tree, and the plain-English Wetware names (Graft, Lancet, Savant, Surge, Broth, Helminth, Cipher). ORC was checked against Wikipedia's Old Red Cracker page (an anonymous reverser, founder of the High Cracking University); the Kerenzikov and Sandevistan references rest on the maintainer's message, not on a source I read. All 34 names are unique and none matches an adult name.
 
 **The four 1.0 names (Daemon, Init, Firewall, Airgap).** Init is placed (Guru's elder). Daemon is proposed for Mouse's elder (Parse's elder is Tree). Firewall and Airgap have no form: both already exist in 1.0 as shells (`brick`, "Firewall brick"; `airgap`, "Air gap") and Firewall's trait is `hardened`, and the sketch already says 10 shells need new unlock conditions. The simplest place for them is those shells with new conditions, which keeps the names without forcing a weak form link. Airgap could return as a form name if the Mouse elder's sprite is redrawn with a visible gap (a sprite change, so not decided here). Daemon and Init are two syllables, so the monosyllable rule applies to adults only.
 
@@ -283,7 +283,7 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
 | `teenStreet` | Rat | A remote-access trojan: a malware program. Decided (maintainer). It shares a rodent family with the adult Mouse; a street teen does not grow into Mouse (corp lean), so the pairing is a light echo. Rat is also an everyday insult for an informer. Mal, Virus and Bomb were the other options. | medium |
-| `tigerElder` | Pen | Short for penetration tester: Tiger's team grown up. | medium |
+| `tigerElder` | Lynx | A big cat, which fits the striped elder, and a text-mode web browser, which fits Program's software and network vocabulary. Monosyllabic. Decided (maintainer). Pen (penetration tester) was the earlier name, dropped because the art is a cat and Pen has no visual link. | strong |
 | `wormElder` | Fork | Jargon: a project splitting into diverging copies (the process-spawning sense is not in Jargon); a worm copies itself and the fork bomb is its grown form. | strong |
 | `mouseElder` | Daemon | A process that runs unseen in the background and is never found where you look; Mouse is always one hop ahead. Jargon headword; 1.0's orderly adult. Decided (maintainer); two syllables, which the trend allows. Proxy was the alternative. | medium |
 | `spoofElder` | Mask | To present a false identity; the elder's art carries a half mask. | strong |
@@ -309,7 +309,7 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 | `leechElder` | Helminth | A parasitic worm, the technical word for what feeds on a host. Decided (maintainer). Plain science word, not CP2020. Sawbones and Healer were the other options. | strong |
 | `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Decided (maintainer). | strong |
 
-**Weakest links.** Rat (an informer insult), Daemon for Mouse's elder (a bigger idea than the sprite shows), Frag (a curse word, accepted) and Surge (generic).
+**Weakest links.** Rat (an informer insult), Daemon for Mouse's elder (a bigger idea than the sprite shows), Frag (a curse word and no visible weapon, both accepted) and Surge (generic).
 
 **Not done.** No name has been tested on a screen, in the Dex or against the chatter group names. The elder names are not final until the elder art is.
 
