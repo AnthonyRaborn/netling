@@ -31,6 +31,7 @@ Run from the scratch copy with Node 22. Each driver takes an archetype name from
 | Bugs, death rates, clearing | `BUGS='{"clear":true}' NOCAP=1 node bugs.mjs casual 300 S2` | `NOCAP=1` removes the fault cap; scenarios B1 (1.0 as is, `BUGS='{"on":false}'` and no `NOCAP`), B2 (`on:false` with `NOCAP`), S1 (`{}`), S2 (`clear`), S3 (`clear`, `chance` 0.5), S4 (`chance` 0.5, `max` 8) |
 | Temper levels | `ITEMTEMPER=1 FLOW=0.5 S1=3 S2=6 U1=2 U2=6 BUGS='{"clear":true,"tdecay":0.999519}' node temper.mjs attentive 300` | flow +0.5 an hour, 24-hour decay, items +1, thresholds -6, -2, +3, +6 |
 | Care preferences | `ITEMTEMPER=1 PREF='{"on":true,"reqbias":true,"steadyMode":"last2","distinct":true,"ice":true}' PREFBOT=follow BUGS='{"clear":true,"tdecay":0.999519}' node pref.mjs attentive 300 FOLB3I` | follow bot; `PREFBOT=ignore` for the ignore bot; `PREF='{"on":false}'` for off |
+| Egg page pace by placement | `node egg-pages.mjs` | needs only `tools/baseline/lineages.json`; compares home-region placement with any-region at 0.10 a run, and the hidden page's Deep rate |
 | Actions per life | `BUGS='{"on":false}' node acts.mjs casual` | counts feeds, plays, cooling and so on over 100 lives |
 
 Results are printed as one JSON line each. The sketch quotes them with their limits.
