@@ -251,7 +251,7 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 **Decided so far (maintainer feedback, two rounds).**
 - Iron: Boot (baby), Init (Guru's elder), Ram (Gronk's elder), Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap. Core, Drum and Crack are held back as terms too useful to spend on a form. Bump was too cute. Firewall for Gronk's elder was odd on a Breach line; the maintainer suggested ORC or Mudge instead.
 - Program: Rat (street teen) and Daemon (Mouse's elder) are decided; Tree for Parse's elder is preferred to Daemon; Pen, Fork, Mask, Tone, Leak and Dump stand. Hack, Null and Flame are out; Bot does not work. A malware-flavoured street teen is wanted (Mal, Malware or Malspam). Airgap for Mouse's elder was weak unless the sprite is revisited.
-- Wetware: Pod, Zero, Edge, Lancet, Frag (Solo's elder), Surge (Chipped's elder), Broth, Observer and Cipher (the line Zero, Blank, Cipher). Star Wars terms are out. Helminth was suggested for Leech's elder and is proposed, not yet confirmed.
+- Wetware: Pod, Zero, Edge, Lancet, Frag (Solo's elder), Surge (Chipped's elder), Broth, Observer and Cipher (the line Zero, Blank, Cipher). Star Wars terms are out. Helminth (Leech's elder) is confirmed.
 - Names not commented on (Graft, Savant, Pen, Tone, Fork, Mask, Leak, Dump, Thunk and so on) are taken as accepted unless the maintainer says otherwise.
 
 **Reserved terms (do not spend on a form):** Core, Crack, Drum, Null, Bot, Hack. Colour words (Red, Blue) are avoided because tints and shells use them.
@@ -306,7 +306,7 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 | `mentatElder` | Savant | Answers without visible steps. Alternate: Oracle. | medium |
 | `gibsonElder` | Observer | CP2020: an AI in the Net, also the Watcher in the Dark; Gibson is the unexplained thing there. Decided (maintainer: strongest). | strong |
 | `nutriElder` | Broth | The pages are paid in broth. Decided (maintainer). | strong |
-| `leechElder` | Helminth | A parasitic worm, the technical word for what feeds on a host (the maintainer's suggestion). Plain science word, not CP2020. Alternates: Sawbones, Healer. | strong |
+| `leechElder` | Helminth | A parasitic worm, the technical word for what feeds on a host. Decided (maintainer). Plain science word, not CP2020. Sawbones and Healer were the other options. | strong |
 | `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Decided (maintainer). | strong |
 
 **Weakest links.** Rat (an informer insult), Daemon for Mouse's elder (a bigger idea than the sprite shows), Frag (a curse word, accepted) and Surge (generic).
