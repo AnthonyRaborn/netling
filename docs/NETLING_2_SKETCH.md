@@ -358,6 +358,33 @@ Proposed names for the 34 forms that have none: Iron's baby, three teens and nin
 
 **Not done.** No name has been tested on a screen, in the Dex or against the chatter group names. The elder names are not final until the elder art is.
 
+## Elder stage (proposal)
+
+The stage beyond adult. 1.0 already has it under the name Mainframe (`docs/SOURCE_PLAN.md`, `docs/SIMULATION.md`, built and shipped), and the 2.0 decisions already fit it: one elder per adult, each a variant of its adult; Root Access is what unlocks the capability; the elder entries show as `<<RECORD CORRUPTED>>` in the Dex until then; elders get no codex pages; Plat and Whisper are 1.0's Mainframe forms reused as elders. So the proposal is to carry 1.0's rules over and change only what the 2.0 structure forces. Everything below is a proposal except where it repeats a decision.
+
+**Carried over from 1.0 (rules and numbers).**
+- An adult becomes its elder at the first minute that is true all at once: it is home (not on a run); it is at least `lifespan - 24 hours` old (the start of the last ordinary day, 96 hours in a 5-day life); this life it has exited The Deep three times, or twice without losing an ICE fight (relay jack-outs, disconnects and aborts never count); and Root Access is held.
+- Which elder is fixed by the adult (9 an egg, no choice). The hidden adult's elder (Init, Whisper, Cipher) follows the same gate.
+- It gains a day of life (the life ends at `lifespan + 24 hours`), keeps its adult's perk, trait, keepsake and netrun ability and adds an upgrade, passes its trait on at level II or higher, and is the only stage that may enter the Source.
+- 1.0 measured (lineages, attentive): once the line holds Root, 53% to 58% of lives meet the feat and an elder then has about 48 hours left (median); a casual line rarely does (feat met in 8% to 26% of lives). Root itself arrives around life 4 for attentive lines (the codex is complete in 79% of lines by life 4), so a first elder comes around life 5 or later, and "a long goal" (as the sketch says of the ending) holds.
+
+**What 2.0 changes.**
+1. **Root Access is earned once and kept for every later netling, any egg (decided).** So the second and third egg need no second Root: their netlings can reach an elder in their own first life that meets the gate. Each new netling still clears the five regions again (clears belong to a netling), so about 1.8 lives an egg at the 55% feat rate, if the 1.0 numbers hold.
+2. **Per-egg feats are not needed.** The gate is region-based (The Deep), not form-based, so it applies to Program, Iron and Wetware unchanged; the three eggs' abilities and upgrades are the part that still has to be designed (netrun abilities per form).
+3. **The Source needs an elder and `deep-6` in the codex** (`deep-6` is 1.0's `deep-5`, the Deep's last word; the new NL-0 page took `deep-5`). The codex is shared across eggs, so one read serves every egg.
+4. **The egg's Source page.** Each egg finds one extra page there (decided). Proposal: **the first Source exit of an egg always yields that egg's Source page** (the egg's own descent page), not a per-run roll. Reason: elders reach the Source rarely (attentive lines 0.47 Source runs in the first elder life, about 40% of runs reach the exit), so even a 0.25 roll per Source run (the hidden pages' rate) would mean about eight lives an egg for one page; a guaranteed first exit makes the Rogue gate a matter of getting through the Source once with each egg. Not simulated.
+5. **How the descent is drawn per egg (decided that it is; not designed).** Proposal in one line each: Program, it is read (the Source's text scrolls like code being parsed); Iron, it is burned in (the screen fills as a firmware image is written); Wetware, it is dreamed (slow, soft, as in sleep). All are static or slow and must stay under the flash limit; the Source's existing corrupted-name glitch is the model.
+6. **The Dex.** The elder rows are corrupted records until Root, then `???` with a hint, then found (1.0's rule); the hidden adult's elder row stays unlisted until its adult is revealed or raised (decided). No lore page hints at elders (decided).
+
+**Pacing for the Rogue gate (arithmetic, not simulation).** Rogue needs the ending and all 18 egg pages. For a committed player: Root around life 4; a first elder around life 5 or 6; the other two eggs about 2 lives each to an elder; each egg's Source page on its first Source exit (about 40% of Source runs reach the exit, and an elder has about two days); the ending needs all 39 story pages, so the four Source story pages and a Source exit. A rough total is 10 to 20 lives, which is long but of the same order as 1.0's "the codex takes 4 lives" scaled by three eggs. Casual players are effectively locked out, as with Aurora; that is accepted unless the maintainer wants a softer route.
+
+**Open for the maintainer.**
+- Keep 1.0's gate (96 hours old, three Deep exits or two clean) as is, or change the feat per egg (for example Iron by count of clean exits, Wetware by coming home in flow)? 1.0 measured the feats against alternatives (`SOURCE_PLAN.md`, gate test results) and kept this one.
+- Keep the extra day of life, given 2.0 removes the 10-fault death and the fault cap?
+- The guaranteed Source page on an egg's first Source exit (proposal 4).
+- What the elder upgrades are per form (23 more to design; 1.0 has five), tied to the netrun abilities per form that are not designed yet.
+- Whether elders keep the same temper tell as their adult, or the elder's wider body needs its own check (the sprite handoff already lists wide elders as a risk).
+
 ## Codex pages
 
 Two kinds (see Decided). Under option C one page covers both forms of a role, named by role (`iron-breach`); the Iron pages `iron-breach` and `iron-dodge` name no form; other role pages name neither lean. Where form pages drop is decided: role pages drop on any run in any cleared non-Deep region (the home region in the drafts is only the page's setting) and the hidden pages in The Deep (see the drafts, Open item 6).
@@ -429,7 +456,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 **Not designed yet**
 - Sprites: see the sprite handoff (all 66 drawn as first drafts; care, bug and temper passes, device check outstanding).
 - Per-egg meters and care buttons (Iron's drift and calibration, Wetware's rejection; how corrective, adaptive and perfective care map to actions; the abstract drives are a proposal).
-- Baby and teen stages and forms' rules per egg; the elder stage rules (1.0's Mainframe gating replaced by the `late` flag); Source access rules and the descent's presentation per egg (read, burned in, dreamed); how late-page gating by Root interacts with the elder stage.
+- Baby and teen stages and forms' rules per egg; the elder stage rules and Source access are drafted as proposals in Elder stage (proposal), with the upgrades per form still undesigned.
 - Netrun abilities per form, regions per egg, events per egg, the tutorial run per egg; the Rogue egg beyond the merge idea; mini-game modifiers per egg; shells, crests and the Mini device prop; unlocks for late pages; save format and storage keys (migration from 1.0 is not planned).
 
 **Not done.** No 2.0 code exists; 1.0 code was read only for the prototypes. All measured numbers use 1.0's simulator and archetype bots with stand-ins (single signed allegiance for Standing, stability for temper): starting values, not 2.0 results. No bot follows the preference part of the time or adapts to bugs. No page text has been playtested or read in context (drafts run longer than 1.0's pages). Page counts and Root arithmetic are from 1.0's tables. Puppet Master details are from memory of the film; the dream framing is from a reading of CP2020's simulated-reality entries (BTL, SimSense, moddy).
