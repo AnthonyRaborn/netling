@@ -22,7 +22,7 @@ Read this first for any sprite work. It is the current state only. The log of ev
 | Elders | `<adult>Elder`, hand-drawn | same; `ghostElder` is 1.0's Whisper | same; `wiredElder` is 1.0's Plat; `blankElder` has a motion layer |
 | Asleep / dead mark | queue of dots / dark barcode | block cursor / bright flatline | none / dim trace |
 
-Names of teens and elders are undecided (ids are `teenCorp`, `tigerElder` and so on). Ids are permanent once the app uses them.
+Names of teens and elders are undecided; proposals for all 34 unnamed forms are in the sketch (Teen, baby and elder names). Ids are `teenCorp`, `tigerElder` and so on. Ids are permanent once the app uses them.
 
 ## Commands
 
