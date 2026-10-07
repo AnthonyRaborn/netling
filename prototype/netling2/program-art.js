@@ -19,26 +19,37 @@ const KERNEL = frozen(SPRITES.kernelA, SPRITES.kernelB, 9);
 export const PROGRAM_BABY = frozen(SPRITES.bitlingA, SPRITES.bitlingB, 10);
 export const PROGRAM_TEENS = {
   teenCorp: KERNEL,
-  // The street lean: a scrapper, Kernel hunched and lopsided. Uneven, bent antennae (one broken), a long left arm, the jaw pulled right
-  // over a bulked right arm. The head top still covers both eyes, so eyewear spans them. Redrawn twice: the first (0.94 against the corp
-  // teen) failed 1.0's 0.82 bar; the second (0.81) cut the right side away and read as a broken robot; this one keeps the body whole.
-  teenStreet: frozen(
-    [
-      '.#..#....#.#..',
-      '.o..o....o....',
+  // The street lean: a horned scrapper. Horns at the corners and a spiked crest, angry brows over the eyes, hunched shoulders with the
+  // arms out, a patch on the chin and wide boots. Everything is added to Kernel's body, nothing cut away (the two earlier passes, 0.94
+  // and a lopsided one with parts missing, read as broken). The head top still covers both eyes, so eyewear spans them.
+  teenStreet: {
+    a: [
+      '.#..........#.',
+      '.##...##...##.',
       '..##########..',
-      '#.##########..',
-      '#.##oo##oo##..',
-      '#.##oo##oo###.',
-      '#...########.#',
-      '....####++####',
-      '....########.#',
-      '....#....#....',
+      '#.##########.#',
+      '##xxoo##ooxx##',
+      '#.##oo##oo##.#',
+      '..##########..',
+      '#.####++####.#',
+      '..####xx####..',
       '...##....##...',
+      '..###....###..',
     ],
-    SPRITES.kernelB.map((r, y) => (y === 10 ? r : '')),
-    10,
-  ),
+    b: [
+      '.#..........#.',
+      '.##...##...##.',
+      '..##########..',
+      '#.##########.#',
+      '##xxoo##ooxx##',
+      '#.##oo##oo##.#',
+      '..##########..',
+      '#.####++####.#',
+      '..####xx####..',
+      '...##....##...',
+      '.###......###.',
+    ],
+  },
   // 1.0's own B frame swaps the last two rows, which leaves a last row too thin (4 of 14 cells, under the 0.4 the wearable code needs
   // to find the body's bottom), so the wearables would move. Here the two foot rows widen outward instead and the last row stays.
   teenHidden: {
@@ -409,10 +420,11 @@ const wormA = [
   '.....########.....',
   '......######......',
 ];
+// Mouse's elder keeps one ear whole and tall and wears the other torn: a notch bitten out of its top, a tag on it, set lower.
 const mouseA = [
-  '..#####....#####..',
-  '.#######..#######.',
-  '.#######..#######.',
+  '..#####...........',
+  '.#######...#.####.',
+  '.#######..###x###.',
   '..##############..',
   '.################.',
   '.##oo########oo##.',
