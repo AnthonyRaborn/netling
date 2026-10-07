@@ -324,11 +324,14 @@ const traitEffect = (s, id) => TRAIT_CFG.full[id] * traitStrength(s, id);
 export const PALETTES = [
   { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' },
   { name: 'neon', main: '#ff2a6d', accent: '#05d9e8' },
-  { name: 'acid', main: '#f9f002', accent: '#ff2a6d' },
-  { name: 'toxic', main: '#39ff14', accent: '#05d9e8' },
+  // `mark` is the color of the sprite's small highlight marks (nose, cheeks, teeth; '+' in the art), white unless the body is so
+  // light that white disappears: by luminance, white on acid is 1.1:1, on origin 1.1:1 and on toxic 1.2:1 (2 to 3.3 elsewhere).
+  // Toxic's accent (its eyes) was cyan on bright green, 1.3:1; the deeper teal is 2.7:1 and still reads on the dark screen (4.5:1).
+  { name: 'acid', main: '#f9f002', accent: '#ff2a6d', mark: '#2b1b5a' },
+  { name: 'toxic', main: '#39ff14', accent: '#0891b2', mark: '#2b1b5a' },
   { name: 'ultra', main: '#b967ff', accent: '#f9f002' },
   // NL-0's colors: only rolls for netlings compiled with root access.
-  { name: 'origin', main: '#e8e8ff', accent: '#b967ff' },
+  { name: 'origin', main: '#e8e8ff', accent: '#b967ff', mark: '#2b1b5a' },
 ];
 const BASE_PALETTES = PALETTES.length - 1;
 

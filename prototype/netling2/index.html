@@ -60,9 +60,9 @@
     <div id="metrics"></div>
 
     <script type="module">
-      import { SPRITES, ANCHOR_ROWS, drawSprite, paletteColors, DEAD_COLORS } from '../../src/sprites.js';
+      import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
+      import { SPRITES, drawSprite, paletteColors, DEAD_COLORS } from '../../src/sprites.js';
       import { PALETTES } from '../../src/sim.js';
-      import { register } from './register.js';
       import { forms, FORMS, LINE, TEENS_ALL, HIDDEN_BRANCH, ADULTS_ALL, ELDER_OF } from './models.js';
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
@@ -77,7 +77,6 @@
         box.textContent = `The prototype page failed to load: ${e.message ?? e}. Serve the repository root (npm run serve) rather than opening the file.`;
       };
       try {
-        register(SPRITES, ANCHOR_ROWS); // before accessories.js loads, which reads the tables once
         const { ACCESSORIES, drawWorn } = await import('../../src/accessories.js');
 
         // temper is the hidden number; level is what the tell shows (it only moves GUARD past a threshold)

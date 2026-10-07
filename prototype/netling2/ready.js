@@ -1,0 +1,17 @@
+// Import this FIRST in anything that draws wearables on the prototype forms (tests, the audit, the gallery prelude, the review
+// page). src/accessories.js builds its table of authored anchor rows once, when it first loads, from SPRITES and ANCHOR_ROWS; and
+// src/sim.js imports accessories.js. So if anything imports sim.js (directly or through needs.js) before the prototype forms are
+// registered, the wearable code never sees them and silently guesses every anchor from pixels: on the hidden forms it picks the
+// third eye as the eye row, and on Gronk the horn row as the head. Static imports run in order, so this module being first fixes it.
+//
+// It also checks the result and throws if the guess is what the wearable code is using, so a wrong import order cannot go unnoticed.
+import { SPRITES, ANCHOR_ROWS } from '../../src/sprites.js';
+import { register, protoKey } from './register.js';
+import { ANCHORS } from './art.js';
+
+register(SPRITES, ANCHOR_ROWS);
+const { anchorsFor } = await import('../../src/accessories.js');
+const probe = anchorsFor(SPRITES[`${protoKey('B', 'guru')}A`]);
+if (probe.eyeRow !== ANCHORS.guru.a.eyeRow) {
+  throw new Error(`the wearable code is guessing the prototype anchors (Guru eye row ${probe.eyeRow}, authored ${ANCHORS.guru.a.eyeRow}): import prototype/netling2/ready.js before src/sim.js or src/accessories.js`);
+}

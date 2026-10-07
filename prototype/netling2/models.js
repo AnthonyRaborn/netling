@@ -119,10 +119,12 @@ function stamp(rows, from, pattern) {
 export const ironMarks = (rows, anchors, kind) => (kind === 'sleep' ? stamp(rows, anchors.mouthRow + 1, QUEUE) : stamp(rows, anchors.neckRow, RECORD));
 
 // Sleep and dead take the A frame's anchors (the eyes shut or crossed on the same row).
-function build(id, frames, anchors) {
+function build(id, frames, anchors, stable = false) {
   const sleep = ironMarks(pose(frames.a, anchors.a.eyeRow, 'sleep'), anchors.a, 'sleep');
   const dead = ironMarks(pose(frames.a, anchors.a.eyeRow, 'dead'), anchors.a, 'dead');
-  return { id, ...FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: anchors.b, sleep: anchors.a } };
+  // `stable` (the authored model): the B frame keeps the head, eyes, mouth and neck exactly where A has them and animates only the lower
+  // body, so the anchors, and every wearable placed from them, do not move between frames. The composed model squashed the head.
+  return { id, ...FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: stable ? anchors.a : anchors.b, sleep: anchors.a } };
 }
 
 function framesA(id) {
@@ -142,11 +144,14 @@ function framesB(id) {
 // Model A's forms share the body's anchors (that is its premise); model B authors each form's own.
 function anchorsA(id) {
   const { stage } = FORMS[id];
-  return stage === 'teen' ? ANCHORS.teenBody : stage === 'adult' ? ANCHORS.adultBody : ANCHORS[id];
+  if (stage === 'teen') return ANCHORS.teenBody;
+  if (stage === 'adult') return ANCHORS.adultBody;
+  // Baby and elder are shared with the authored model, whose B frame no longer moves the head: same anchors in both frames.
+  return { a: ANCHORS[id].a, b: ANCHORS[id].a };
 }
 
 const cache = {};
 // Memoized: the same arrays every call, because src/accessories.js keys its anchor table on array identity (register.js).
 export function forms(model) {
-  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).filter((id) => model === 'B' || !FORMS[id].authoredOnly).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id])])));
+  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).filter((id) => model === 'B' || !FORMS[id].authoredOnly).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id], model === 'B')])));
 }

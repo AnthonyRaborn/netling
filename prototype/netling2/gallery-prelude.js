@@ -1,11 +1,10 @@
 // Runs before the gallery's own module (see make-gallery.mjs): puts Iron's 22 forms in the game's tables so the real gallery shows
 // them (and 1.0's Chrome and Bitling, its reference bodies) instead of the rest of 1.0's. Module scripts run in document order, so this finishes before accessories.js is first loaded.
-import { SPRITES, ANCHOR_ROWS } from '../../src/sprites.js';
+import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
 import { SPECIES } from '../../src/sim.js';
-import { register, protoKey } from './register.js';
+import { protoKey } from './register.js';
 import { forms } from './models.js';
 
-register(SPRITES, ANCHOR_ROWS);
 // Chrome and Bitling stay: the gallery's wearables and colors sections use them as fixed reference bodies.
 for (const key of Object.keys(SPECIES)) if (key !== 'chrome' && key !== 'bitling') delete SPECIES[key];
 for (const [id, f] of Object.entries(forms('B'))) {

@@ -56,6 +56,7 @@ Status: planning notes for a separate app, not a change to this repository's gam
 - The hidden temper shows through sprite motion, idle behavior and chatter tone together, in all three eggs.
 - The hidden egg is Rogue (the Puppet Master line) with the merge ending, gated on the ending having played and the egg-specific codex pages (the merge itself uses lineage fragments).
 - Each egg's elder stage has its own form. (Refined, see below: one elder per adult.)
+- Frames (decided): a form's A and B frames keep the head, eyes, mouth and neck identical and animate only the lower body, so no wearable moves between frames (1.0's Bitling moves 21 wearables as its ears move, and others are worse). Palettes (done in 1.0 code): acid, toxic and origin get dark marks and toxic a deeper teal accent, after luminance contrast showed the old marks at about 1.1:1.
 - Babies (decided): eventually each egg gets its own baby. Only Iron's is drawn.
 - Elders (decided): one elder per adult, each a variant of the adult it grows from, as 1.0's mainframes are of their lines. That is 9 per egg and 27 in all, each wider than its adult (18 columns against 16) and no taller than 15 rows. Elder forms still get no pages. The names are not decided.
 - Neglect and bugs (decided to try): neglect is a transient look from unmet care needs; bugs are a persistent look, glitches on the sprite, that stay until cleared. Both showing together is intended: neglect leads to faults and faults roll bugs, so the rust and the glitches appear together by design, and bugs do not suppress the rust.

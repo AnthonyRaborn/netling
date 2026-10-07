@@ -65,7 +65,7 @@ Baby and the elder are 584 hand-placed cells in both (154 and 430).
 - **The elder is a variant of its adult.** It keeps Gronk's horns, slanted brow, toothed jaw and broad shoulders, grown to 18 columns and 15 rows. Against the authored Gronk it overlaps 0.77, the closest of any form in the line and inside the 0.77 to 0.82 that 1.0's mainframes sit at against their adult line; a test checks it. Against the composed Gronk it is 0.70, a small extra reason the authored adult suits a derived elder.
 - **For one line the models cost the same.** A needs two bodies and three overlays to make two forms, so it has nothing to amortize. Composing only pays when the bodies are reused across many forms.
 - **Where they differ.** The composed teen has the same outline as the authored one and differs by 2 mark cells. Composed Gronk differs from authored Gronk by 20 outline cells and 22 mark cells (outline overlap 0.89): the authored Gronk has a rounder brow, angry eyes and a ragged hem that an overlay on the shared body does not give.
-- **Wearables.** 984 cases (every 1.0 wearable on all four forms and every pose, both models, through the real `placeWorn`). Four clip one pixel above the screen: the holologo on the 15 row sprites (the elder in both models). 1.0's own 15 row forms (Chrome, Firewall and the mainframes) clip the same way, so this is an existing quirk, not something the prototype adds. I did not change it.
+- **Wearables.** Re-measured on the whole tree after the anchor fix below; see Fit and frame stability. (An earlier figure here was taken with guessed anchors.)
 - **Flash budget.** Over 120 seconds at 10 ms steps, for every egg, level and four seeds, with and without reduced motion, the picture (frame A, frame B or the blink) never changed less than 200 ms after the last and never more than six times in a second. Wetware's brightness swings at most 0.25 and moves at under 1 Hz. The flicker guard holds the level steady while temper alternates 0.4 either side of any threshold (0.8 of the guard width).
 - **Steady beat.** Exactly on its interval, identical for any seed, and twice as often when strongly steady, for all three eggs.
 - **Neglect.** Level 2 contains level 1's patches (the look grows and clears without jumping), only body cells below the mouth row change, and the outline is identical in every form and frame, in both models.
@@ -108,7 +108,7 @@ Drawn, authored: one elder per adult, each its adult grown to 18 columns (agains
 - **Margins are thin** for Gronk (0.02 over its sibling Splat), Ping (0.02), Munch (0.03) and Thrash (0.01). A redraw that loses one is caught by a test, but these are the ones to look at by eye.
 - **First pass failed on three.** My first Bamf, Munch and Thrash elders were drawn from scratch and read as generic bigger blobs: each was closer to another adult (Bamf's to Guru, Munch's to Splat, Thrash's to Splat). I rebuilt those three from their own adult widened and one row taller, with a small mark (a brow mark for Bamf and Munch, a second row of spikes for Thrash). The other six were drawn by hand and passed.
 - **The nine elders are distinct from each other.** Elders of different roles overlap at most 0.82 (Gronk's and Guru's, 0.817, just under the 1.0 bar); the two elders of one role overlap 0.83 (Splat's and Gronk's), 0.71, 0.73 and 0.80.
-- **Wearables.** 3198 cases across all 22 forms; 16 clip a pixel above the screen, all the holologo on 15 row sprites, as 1.0's own 15 row forms do.
+- **Wearables.** 3198 cases across all 22 forms and both frames and the asleep pose; 24 clip a pixel above the screen, all the holologo on 15 row sprites, as 1.0's own 15 row forms do (the audit also finds a 1 px drone clip on Splat's elder).
 - **Not drawn:** the elders of Program and Wetware, and the Program and Wetware babies and teens.
 
 ## Iron through the real 1.0 sprite audit
@@ -117,10 +117,10 @@ Drawn, authored: one elder per adult, each its adult grown to 18 columns (agains
 
 | Check | 1.0 (13 forms) | Iron (22 forms) |
 |---|---|---|
-| Wearables that clip the top of the screen | holologo on all 13 forms (39 cases), 1 px | holologo on 15 of 22 forms (45 cases), 1 px; nothing else |
+| Wearables that clip the top of the screen | holologo on all 13 forms (39 cases), 1 px | holologo on 15 of 22 forms, 1 px, and the drone on Splat's elder, 1 px (47 cases) |
 | Contrast, awake and lit: wearables losing half or more of their pixels | 5 combinations of 84 (crown, necktie, spiked collar, earpiece x2) | 1 combination of 132 (necktie) |
 | Contrast, asleep with the lights off | 0 | 0 |
-| Worst worn combination (upper slot hiding the lower) | Chrome jaw over gold chain 0.86; Data aura over blush 1.00 for a moment | Chrome jaw over gold chain 0.90; Data aura over blush 1.00 for a moment |
+| Worst worn combination (upper slot hiding the lower) | Chrome jaw over gold chain 0.86; Data aura over blush 1.00 for a moment | Drone over sat dish 0.86; Chrome jaw over necktie 0.80 |
 | Plush prop covers the pet | up to 42% (46% with a visitor) | up to 33% (45% with a visitor) |
 | Highest same-stage silhouette overlap | Firewall and Ghost 0.81 | Munch and Thrash 0.81, then a group at 0.80 (after the Gronk and Splat redraw; before it, Gronk and Splat were 0.85 and their elders 0.83) |
 | Asleep and dead poses | n/a | 8 to 10 cells differ asleep, 14 to 18 dead |
@@ -130,6 +130,30 @@ Drawn, authored: one elder per adult, each its adult grown to 18 columns (agains
 - **The audit's cross-stage pairs** (an elder against its own adult, for example Feep's elder and Feep at 0.86) are expected and not a problem: 1.0 only reads same-stage pairs.
 - **A discrepancy in 1.0's own doc, found on the way.** `docs/SPRITES.md` lists "Off-screen wearable cases: 0", but the current audit reports 39 holologo cases on 1.0's forms, 1 px above the screen. I did not change it; it is a separate fix (suggested separately).
 - **`gallery.html` is not extended.** The audit is; the gallery's by-eye review for Iron is the review page here.
+
+## Fit and frame stability (found in review)
+
+Review of the gallery found five things; one was a bug in my tooling that had also skewed the audit, and two were requirements for the new forms.
+
+**1. A bug in my tooling: the wearable code was guessing the Iron anchors.** `src/accessories.js` builds its table of authored anchor rows once, when it first loads, and `src/sim.js` imports it. My gallery prelude, audit wrapper, review page and one test all imported `sim.js` before registering Iron's forms, so every wearable was placed from anchors guessed from pixels (the first row with an accent pixel as the eye row, the first wide row as the head). Where the guess is wrong:
+- the hidden teen and Guru: the guessed eye row is the **third eye**, so the visor sat one row too high with the real eyes showing below it, and shades and the monocle were drawn on the third eye;
+- Gronk and its elder: the guessed head is the **horn row**, so the visor ran wider than the body and the headphone cups floated a column away from the head.
+
+Fix: `prototype/netling2/ready.js` registers the forms and then checks the wearable code is using them, throwing if it is not. It is the first import everywhere (tests, audit, gallery prelude, review page). Two new tests pin it: the anchors the wearable code uses equal the authored ones for every form, pose and model, and the head width it uses is the authored head. I confirmed the guard fires when `sim.js` is imported first. **The audit figures earlier in this document were taken with the guessed anchors**; the table above is the corrected run. With the real anchors the hidden forms' visor covers both real eyes (10 of 12 and 10 of 14 eye cells covered, against 6 before) and the monocle rings the left eye, and Gronk's visor spans exactly its head and its headphone cups touch the head.
+
+**2. Headphones plus visor merge into one band on Gronk, and that is not Gronk's fault.** The headphone cups sit at the eye rows and the visor spans the head, so together they read as one band with a cup at each end. Rendering the same pair on 1.0's own forms shows the identical effect on Bitling, Kernel, Chrome, Daemon, Firewall and Glitch. It is the wearable layout shared by every form. If it should change, the place is the headphones (for example cups one row above the visor), which touches 1.0 art; I did not.
+
+**3. No wearable moves between frames (the Bitling problem).** The complaint about 1.0's smallest forms: the Bitling's ears move between frames, so the headphones slide sideways and every head wearable (flower, bow, mohawk, antenna) bobs a row. I measured how far each wearable moves between the A and B frames, holding the wearable's own animation fixed so any shift is the body. On 1.0 the number of wearables that move is: Bitling 21, Kernel 19, Stub 27, Shell 12, Firewall 18, Airgap 22, Ghost 2, Whisper 2, Glitch 41 and Panic 41 (up to 5 columns), and none on Chrome, Daemon, Plat and Init. All 22 Iron forms had the same fault by my own design (the B frame dropped the head one row, so every head wearable bobbed 1 row, 17 or more of them per form). They now have none. The rule for new forms, applied to every Iron form:
+- the head, eyes, mouth and neck rows are **identical** in A and B;
+- only the lower body animates: the feet step and the vent slots close;
+- the A and B anchors are the same;
+- the foot row keeps enough cells (at least 0.4 of the width) that the wearable code's idea of the body's bottom does not move either (Thrash's elder had missed this and moved four chest wearables a row).
+
+A test checks it on every form and every wearable through the real `placeWorn` (902 cases, none move) and that the A and B frames still differ by at least 4 cells (the audit's floor). The cost: the frames now look quieter (rigid, as Iron should), and a held head means the holologo is drawn at its higher position in both frames, which is why more 15 row cases clip than before.
+
+**4. Palette colors (a 1.0 change).** The yellow-looking marks are the sprite's highlight cells ('+', near-white `#f5f5f5`: nose, cheeks, teeth). I had judged them by CIE76, which is dominated by hue; by luminance contrast white is 1.10:1 on acid, 1.11:1 on origin and 1.24:1 on toxic, and 2.1 to 3.3 on the palettes that read fine. Toxic's eyes (cyan on bright green) were 1.28:1 against 2.1 to 3.0 elsewhere. Changes in `src/sim.js`: acid, toxic and origin get a `mark` color, a dark indigo `#2b1b5a` (11:1 or better against all three), and `paletteColors` uses it; toxic's accent goes from `#05d9e8` to the deeper teal `#0891b2` (2.7:1 on its body, 4.5:1 on the dark screen, so the HUD still reads). `tools/lib/sprite-checks.mjs` uses the same color, and `src/wearable-colors.js` was regenerated (three default colors changed). A near-black first try (`#0a1214`) made the Corp barcode half-blend into the marks on Daemon in three palettes in the audit's own screen; the indigo does not. Both audits are at their baselines, and `npm test` passes (500). **Not changed:** ice, whose white marks are 1.59:1; borderline, and not flagged in review.
+
+**5. Everything else** in the review (the other sprites) looked fine.
 
 ## The Gronk and Splat redraw
 
@@ -203,6 +227,7 @@ Three conclusions, which the one-line prototype cannot show:
 
 The composition question is closed (see Decision).
 
+0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. Neglect and bugs: the thresholds, the bug look and whether two looks are readable together on a device are untested; see What drives neglect and bugs.
 3. Not drawn: everything for Program and Wetware (each egg gets its own baby, eventually, then its teens, adults and elders).

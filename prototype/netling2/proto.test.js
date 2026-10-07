@@ -2,6 +2,7 @@
 // the shipped game). Deterministic: no clock, no randomness.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
 import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL, ADULTS_ALL, ELDER_OF, pose, ironMarks } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
@@ -206,10 +207,9 @@ test('where the models differ: the teen is the same outline, Gronk differs by a 
 // A wearable that clips on a 15 row prototype sprite is only a prototype problem if it does not clip on 1.0's own 15 row
 // forms too (the holologo puts one pixel above the screen on every 15 row form, Chrome and Firewall included).
 test('every 1.0 wearable stays on screen on every prototype form and pose, except where 1.0 already clips', async () => {
-  const { SPRITES, ANCHOR_ROWS } = await import('../../src/sprites.js');
+  const { SPRITES } = await import('../../src/sprites.js');
   const { SPECIES } = await import('../../src/sim.js');
   const tall = Object.keys(SPECIES).filter((f) => SPRITES[`${f}A`].length === 15);
-  register(SPRITES, ANCHOR_ROWS);
   const { ACCESSORIES, placeWorn } = await import('../../src/accessories.js');
   const pal = { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' };
   const wearables = ACCESSORIES.filter((a) => a.slot !== 'prop');
@@ -281,6 +281,66 @@ test('neglect grows and clears without jumping: level 2 contains level 1, patche
   }
 });
 
+
+// --- no wearable moves between frames ----------------------------------------------------------------------------------------------
+// The complaint about 1.0's smallest forms: the bitling's ears move between frames, so headphones slide sideways and every head
+// wearable (flower, bow, mohawk, antenna) bobs a row with them. Measured on 1.0, Bitling moves 21 wearables between frames, Kernel 19,
+// Stub 27, Firewall 18; Chrome, Daemon, Plat and Init move none. The authored Iron forms animate only the lower body, so none move.
+test('no wearable moves between the A and B frames on any authored Iron form: the head, eyes, mouth and neck are identical', async () => {
+  const { SPRITES } = await import('../../src/sprites.js');
+  const { ACCESSORIES, placeWorn } = await import('../../src/accessories.js');
+  const pal = { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' };
+  const box = (pts) => ({ x0: Math.min(...pts.map((p) => p.x)), x1: Math.max(...pts.map((p) => p.x)), y0: Math.min(...pts.map((p) => p.y)), y1: Math.max(...pts.map((p) => p.y)) });
+  const moved = [];
+  let cases = 0;
+  for (const f of Object.values(forms('B'))) {
+    for (let y = 0; y <= f.anchors.a.neckRow; y++) assert.equal(f.b[y], f.a[y], `${f.id}: row ${y} (head or neck) differs between frames`);
+    for (const w of ACCESSORIES.filter((x) => x.slot !== 'prop')) {
+      // The wearable's own animation is held fixed (same frame argument and time), so any shift is the body.
+      const at = (key) => placeWorn([{ id: w.id }], SPRITES[`${protoKey('B', f.id)}${key}`], { frame: 0, time: 0, pal, minRow: -99 })[0].pts;
+      const a = at('A');
+      const b = at('B');
+      cases++;
+      if (!a.length) continue;
+      assert.equal(a.length, b.length, `${f.id}/${w.id}: a different number of pixels`);
+      if (JSON.stringify(box(a)) !== JSON.stringify(box(b))) moved.push(`${f.id}/${w.id}`);
+    }
+  }
+  console.log(`  ${cases} wearable and form cases, ${moved.length} move between frames`);
+  assert.deepEqual(moved, []);
+});
+
+// --- the wearable code uses the authored anchors, not guesses ----------------------------------------------------------------------
+// src/accessories.js reads its anchor table once, when it first loads, and src/sim.js imports it: if the prototype forms are not
+// registered first, the wearable code guesses every anchor from pixels (the hidden forms' eye row becomes the third eye, Gronk's head
+// becomes its horn row). ready.js prevents it; this pins the result for every form, pose and model.
+test('the wearable code sees every form\'s authored anchors: head, eyes, mouth and neck rows', async () => {
+  const { SPRITES } = await import('../../src/sprites.js');
+  const { anchorsFor } = await import('../../src/accessories.js');
+  for (const model of MODELS) {
+    for (const f of Object.values(forms(model))) {
+      for (const [pose, key] of [['a', 'A'], ['b', 'B'], ['sleep', 'Sleep']]) {
+        const used = anchorsFor(SPRITES[`${protoKey(model, f.id)}${key}`]);
+        const want = f.anchors[pose];
+        assert.deepEqual([used.headTop, used.eyeRow, used.mouthRow, used.neckRow], [want.headTop, want.eyeRow, want.mouthRow, want.neckRow], `${model}/${f.id}/${pose}`);
+      }
+    }
+  }
+});
+
+test('the head width the wearable code uses is the authored head, not a horn row or a crown', async () => {
+  const { SPRITES } = await import('../../src/sprites.js');
+  const { anchorsFor } = await import('../../src/accessories.js');
+  for (const f of Object.values(forms('B'))) {
+    const sprite = SPRITES[`${protoKey('B', f.id)}A`];
+    const a = anchorsFor(sprite);
+    const row = sprite[f.anchors.a.headTop];
+    const painted = [...row].map((c, x) => (c !== '.' ? x : -1)).filter((x) => x >= 0);
+    assert.deepEqual([a.headLeft, a.headRight], [painted[0], painted[painted.length - 1]], f.id);
+    // And the eyes it finds are the real eyes: the accent cells on the eye row, not a third eye above.
+    assert.ok(a.eyeCols.every((x) => sprite[f.anchors.a.eyeRow][x] === 'o'), `${f.id}: eye columns`);
+  }
+});
 
 // --- Iron's asleep and dead poses -------------------------------------------------------------------------------------------------
 test('Iron poses: asleep shows a queue of dots on the chest, dead a read-only record, on every form in both models', () => {
