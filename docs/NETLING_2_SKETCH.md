@@ -242,43 +242,57 @@ Sources and reasons (Jargon File, CP2020 glossary, FDA glossary): Worm (program 
 
 Lean assignment is a guess (the corp lean got the tidier or paid word, the street lean the wilder one, after 1.0's Chrome and Firewall); swap any pair. Weak links: Spoof (deception reads outlaw) and Splat (close to Gronk); Thrash and Gronk are both violent street names, acceptable since the roles differ. Rejected or alternate names: Program Breach Trojan, Cowboy or Sneaker; Dodge Snark (too close to Snarf) or Boojum; Tune Phantom or Dragon; hidden Wheel; Iron Feast Slurp or Hog, Breach Gib or Scag, hidden Wizard or Wheel; Wetware Breach Cowboy or Blade, Dodge Ace or Edge, Feast Exotic (no feeding link), Batch (collides with the Bad batch item), Stream, Nutrisoy (three syllables), Chunking (reads street). Wabbit was dropped (Elmer Fudd). None collides with a 1.0 form name. Not named: the elders and the teens.
 
-## Teen, baby and elder names (proposals)
+## Teen, baby and elder names (proposals, second pass)
 
-First draft names for the 34 forms that have none: Iron's baby, three teens and nine elders (13), Program's street teen and eight elders (9; the Bitling, Kernel and Shell keep their 1.0 names and Ghost's elder is 1.0's Whisper) and Wetware's baby, three teens and eight elders (12; Wired's elder is 1.0's Plat). Everything here is a proposal for the maintainer to edit; nothing is decided.
+Proposed names for the 34 forms that have none: Iron's baby, three teens and nine elders (13), Program's street teen and eight elders (9; the Bitling, Kernel and Shell keep their 1.0 names and Ghost's elder is 1.0's Whisper) and Wetware's baby, three teens and eight elders (12; Wired's elder is 1.0's Plat). Marked Decided where the maintainer has said so; everything else is a proposal. The first pass is in the git history of this file; the maintainer's feedback on it is recorded below.
 
-**Method.** The same vocabulary rule as the adults: Iron from Jargon machine sounds and timings, Program from software and network folklore, Wetware from CP2020 slang. Non-hidden Iron and all Program names are monosyllabic (hidden forms and Wetware are exempt). Elders are named as "the same idea after long service": a heavier, older or more formal word in the neighbourhood of the adult's name. Teens follow the lean (corp, street) and the hidden-path teen takes a word for an apprentice of its hidden adult. Chosen after printing every unnamed form's art as text, so the names fit what is drawn (a half mask for Mask, a flat slab for Brick, a hood for Mr. Who), but not after a look at a rendered gallery.
+**Method.** Iron from Jargon machine sounds and timings, Program from software and network folklore, Wetware from plain words with a light CP2020 nod where one fits (second pass: heavy glossary terms and Star Wars terms are out). Elders are "the same idea after long service". Chosen after printing every unnamed form's art as text, not from a rendered gallery.
 
-**Checked.** In this session the Jargon File 4.4.7 and the CP2020 slang page were downloaded and every Iron name and every CP2020 name below was found as a headword, with two exceptions: Kibble appears only inside the entry Kibble Card and Podling only inside the entry Pods. Program's Hack, Fork, Leak and Dump are Jargon headwords as well. **Not Jargon headwords:** Pen, Null, Mask, Tree and Tone are ordinary software or security terms, so they follow "software folklore" loosely. No name repeats and none matches a 1.0 form, a second-form name or an item name; all 34 are unique.
+**Decided so far (maintainer feedback on the first pass).**
+- Iron: Thunk, Buzz, Gweep, Brick, Tick, Hop, Peek, Ding, Crunch and Swap stay. Baby Bump is too cute. Core, Drum and Crack are held back as terms too useful to spend on a form (Drum is also an instrument, and instruments are easy accessories to add).
+- Program: Hack and Null are out (Bot does not work either; Null reads as "none, missing"). Pen, Fork, Mask, Tone, Leak and Dump stay. The maintainer wants Daemon, Init, Firewall and Airgap (1.0 form names) used somewhere in the revamp.
+- Wetware: a full second pass. Pod (baby), Observer (Gibson's elder) and Zero (teen, growing into Blank) are the strongest and stay. Star Wars terms are out. Twitch needs an alternative.
+
+**Reserved terms (do not spend on a form):** Core, Crack, Drum, Null, Bot, Hack. Colour words (Red, Blue) are avoided because tints and shells use them.
+
+**Checked.** The Jargon File 4.4.7 and the CP2020 slang page were downloaded in this session and each Jargon name was found as a headword (tick, thunk, buzz, gweep, brick, hop, peek, ding, crunch, swap, boot, flame, daemon, fork, leak, dump). Not Jargon headwords: Init, Firewall and Airgap (the 1.0 names; Jargon only mentions an "air gap" inside another entry), Pen, Mask, Tone, and every Wetware name except Zero, Observer and Pod, which are CP2020 headwords (Pods). The other Wetware names are plain English words with no glossary entry, on purpose. All 34 names are unique and none matches an adult name.
+
+**Placing the four 1.0 names.** Because 2.0 already reuses 1.0's Mainframe forms as elders (Plat for Wired, Whisper for Ghost), the four fit best as elders, matched to meaning:
+- **Airgap** for Mouse's elder: unreachable, one hop ahead. It replaces Null.
+- **Daemon** for Parse's elder: the process that listens and never stops its original job. It replaces Tree.
+- **Firewall** for Gronk's elder: a wall of arms, 1.0's street-minded form, and Iron is infrastructure. It replaces Crack.
+- **Init** for Guru's elder: the first process, everything else was started from it; the Guru page says everyone on the roster learned from it. It replaces Core.
+Cost: they are two syllables (Init is arguably two), so the "non-hidden Iron and all Program names are monosyllabic" rule has to apply to adults only. Nothing was found against that rule for teens and elders, but it is the maintainer's call. A 1.0 player will also read Daemon and Firewall as the old forms, which may or may not be wanted. Chrome, Glitch, Stub and Panic are still unused.
 
 ### Iron
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `baby` | Bump | Jargon: to increment, the smallest step; the baby has two bumps for ears. Alternate: Dink (Jargon: a machine too small to bother with), dropped because the word is also a slur. | medium |
-| `teenCorp` | Thunk | Jargon: a small piece of code that binds a call; the sound of something heavy dropped. Plain and solid. | medium |
-| `teenStreet` | Buzz | Jargon: to run a tight loop with no sign of progress; the spiked top and the restless feet. | medium |
-| `teenHidden` | Gweep | Jargon: to hack, usually at night, and one who does; an apprentice of Guru. Alternate: Frob (a small thing you fiddle with). | strong |
+| `baby` | Boot | Jargon: to start up, the first thing a machine does; plain, not cute. Alternates: Byte, Flash. (Tick is the Jiff elder and means the same as Jiff, so it is not used for the baby.) | medium |
+| `teenCorp` | Thunk | Jargon: a small piece of code that binds a call; the sound of something heavy dropped. | medium |
+| `teenStreet` | Buzz | Jargon: to run a tight loop with no sign of progress; the spiked top and restless feet. | medium |
+| `teenHidden` | Gweep | Jargon: to hack, usually at night, and one who does; an apprentice of Guru. Alternate: Frob. | strong |
 | `splatElder` | Brick | Jargon: a device configured into an unusable state; the elder is a flat slab. | strong |
-| `gronkElder` | Crack | To break open, and the sound of it; Breach is cracking. | medium |
+| `gronkElder` | Firewall | A wall; the elder's arms are a wall on both sides. 1.0's street-minded form. Alternate if the 1.0 names are not wanted here: Slab. | medium |
 | `jiffElder` | Tick | Jargon defines a tick as a jiffy: the formal word for what Jiff is the casual word for. | strong |
-| `bamfElder` | Hop | Jargon: one transmission in a store-and-forward chain, a jump from node to node; Bamf teleports. | strong |
-| `pingElder` | Peek | Jargon: read a memory location without changing it; Ping checks something is there, Peek looks in. Alternate: Pong (not Jargon). | medium |
+| `bamfElder` | Hop | Jargon: one transmission in a store-and-forward chain; Bamf teleports. | strong |
+| `pingElder` | Peek | Jargon: read a memory location without changing it; Ping checks something is there, Peek looks in. | medium |
 | `feepElder` | Ding | Jargon: a synonym for feep. | strong |
-| `munchElder` | Crunch | Jargon: to process, usually in a slow, painful way; Munch's elder works harder at the same job. | strong |
+| `munchElder` | Crunch | Jargon: to process, usually slowly and painfully. | strong |
 | `thrashElder` | Swap | Jargon: moving data between fast and slow memory; the cause of thrashing. | strong |
-| `guruElder` | Core | Jargon: main storage, the old word; the old rack in the corner is the machine's core. Alternate: Drum (ancient slow media). | medium |
+| `guruElder` | Init | The first process; everything else was started from it. 1.0's Mainframe form. Alternate: Dinosaur (Jargon: old hardware that needs a raised floor). | strong |
 
 ### Program
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `teenStreet` | Hack | Jargon: a quick, clever, rough solution; the mohawk and the unibrow. Alternate: Bot. Hack and Hacker are close if a Hacker ever appears. | medium |
-| `tigerElder` | Pen | Short for penetration tester: Tiger's team grown up. Alternates: Red (red team; reads as a colour). | medium |
-| `wormElder` | Fork | Jargon defines it as a project splitting into diverging copies (the Unix call that spawns a copy of a process is the other sense, which Jargon does not give); a worm copies itself, and the fork bomb is its grown form. | strong |
-| `mouseElder` | Null | The address that points nowhere; always one hop ahead and never there. | medium |
+| `teenStreet` | Flame | Jargon: to rant, a flamer; loud and hot-headed, which suits the mohawk and unibrow. Alternates: Troll (Jargon, fits the unibrow, reads as fantasy), Spam, Flood. | medium |
+| `tigerElder` | Pen | Short for penetration tester: Tiger's team grown up. | medium |
+| `wormElder` | Fork | Jargon: a project splitting into diverging copies (the process-spawning sense is not in Jargon); a worm copies itself and the fork bomb is its grown form. | strong |
+| `mouseElder` | Airgap | Unreachable from the network; Mouse is always one hop ahead. 1.0's Mainframe form. | strong |
 | `spoofElder` | Mask | To present a false identity; the elder's art carries a half mask. | strong |
-| `parseElder` | Tree | A parse produces a tree; the elder's antennae read as branches. | medium |
-| `phreakElder` | Tone | The phone network's control tones; the side bars on the elder read as tone bars. Alternate: Blue (the blue box; reads as a colour). | medium |
+| `parseElder` | Daemon | The background process that listens and parses, never stopping its original job. Jargon headword; 1.0's orderly adult. Alternate: Tree. | medium |
+| `phreakElder` | Tone | The phone network's control tones; the side bars read as tone bars. | medium |
 | `gobbleElder` | Leak | Jargon: memory that is taken and never given back. | strong |
 | `snarfElder` | Dump | Jargon: to output everything at once; Snarf grabs a large file, Dump writes it all out. | medium |
 
@@ -286,22 +300,22 @@ First draft names for the 34 forms that have none: Iron's baby, three teens and 
 
 | Form id | Name | Reason | Strength |
 |---|---|---|---|
-| `baby` | Podling | CP2020: Podlings are immature Pods; an organoid in a dish. | strong |
-| `teenCorp` | Padawan | CP2020: a young netrunner, a learner; the baby grown, unmarked. | medium |
-| `teenStreet` | Twitch | CP2020: a scatterbrained, unreliable person; the spikes and the unibrow. | medium |
-| `teenHidden` | Zero | CP2020: Zero is a synonym for Blank, so it grows into Blank. | strong |
-| `razorElder` | Samurai | CP2020: muscle for hire with a code of honour; the tidier, paid lean. | strong |
-| `soloElder` | Ronin | CP2020: a freelance mercenary, not trusted; the pair with Samurai. | strong |
-| `chippedElder` | Vatjob | CP2020: a person with extensive cyberware replacement; Wetware's failure model is rejection as augmentation grows. Alternate: Hexed (afflicted with cyberpsychosis). | medium |
-| `mentatElder` | Jedi | CP2020: an esteemed netrunner. | medium |
-| `gibsonElder` | Observer | CP2020: an AI in the Net (also the Watcher in the Dark); Gibson is the unexplained thing in the Net. | strong |
-| `nutriElder` | Kibble | From CP2020's Kibble Card, the government ration; Nutri's elder, a pet joke. Alternate: Soykaf. | weak |
-| `leechElder` | Ripperdoc | CP2020: a surgeon of illegal implants; Leech is the street doctor. | medium |
-| `blankElder` | Mr. Who | CP2020: a label for an employer or authority nobody can name; the hooded, camouflaged elder. Two words; no one-word match found in the glossary (a person without records has no entry). | weak |
+| `baby` | Pod | CP2020: Pods are people very alike in thought; Podlings are immature ones. An organoid in a dish. Decided (maintainer: strongest). | strong |
+| `teenCorp` | Graft | Tissue grafted on and grown; the baby, grown and unmarked. Alternate: Culture (ties to the pages' cultures). | medium |
+| `teenStreet` | Thorn | The spikes and the unibrow; plain and organic. Alternates: Edge (CP2020, but too near Razor's edge), Burr. | medium |
+| `teenHidden` | Zero | CP2020: Zero is another word for Blank, so it grows into Blank. Decided (maintainer). | strong |
+| `razorElder` | Scalpel | A blade grown more exact; plain clinic word. Alternate: Lancet. | medium |
+| `soloElder` | Shiv | An improvised street blade; works alone. Alternate: Cleaver. | medium |
+| `chippedElder` | Reflex | Nods to CP2020's Reflex Chip; Chipped is the enhanced dodger. Alternate: Hive (a rejection reaction, a skin rash). | medium |
+| `mentatElder` | Savant | Answers without visible steps. Alternate: Oracle. | medium |
+| `gibsonElder` | Observer | CP2020: an AI in the Net, also the Watcher in the Dark; Gibson is the unexplained thing there. Decided (maintainer: strongest). | strong |
+| `nutriElder` | Ration | Government-issued food (a light nod to CP2020's Kibble Card); Nutri's elder. Alternate: Broth (the pages are paid in broth). | medium |
+| `leechElder` | Sawbones | Old slang for a surgeon; the street doctor grown old. Alternate: Healer. | medium |
+| `blankElder` | Cipher | Cipher once meant zero: Zero, Blank, Cipher. Plain, one word. | strong |
 
-**Weakest links.** Kibble (reads as pet food; the joke may not land), Mr. Who (two words, and "Mr. Who" is a boss in the glossary, not a blank), Null (flat), Hack (near Hacker) and Pen (a pen is also a writing tool). Star Wars terms in the CP2020 glossary (Padawan, Jedi) sit as a pair of ladder steps; the maintainer may prefer to avoid them as it did Wizard for Guru. Nothing else is known to collide.
+**Weakest links.** Gronk's Firewall (a 1.0 name and a defender's word for a Breach form, and two syllables), Boot (a boot is also footwear, and the baby has small feet), Flame (loud, a little dated), Thorn (a plain word with no CP2020 tie) and Reflex (very generic). Ration is a deliberately flat name for Nutri's elder.
 
-**Not done.** No name has been tested on a screen, in the Dex or against the chatter group names; the elder names are not final until the elder art is.
+**Not done.** No name has been tested on a screen, in the Dex or against the chatter group names. The elder names are not final until the elder art is.
 
 ## Codex pages
 
@@ -360,7 +374,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 ## Open questions and backlog
 
 **Open**
-1. Names for the 27 elders and the teens (sprite ids are placeholders): 34 proposals are drafted in Teen, baby and elder names; none is decided.
+1. Names for the 27 elders and the teens (sprite ids are placeholders): 34 proposals are drafted in Teen, baby and elder names (second pass after maintainer feedback; only the names marked Decided there are settled).
 2. Where form pages drop (home region against any); purge order details (recommended: leave accident or deliberate unsettled; NL-0 learns it was dead only when the player shows it).
 3. Standing: whether the measured spread (committed players certain early, others random) is the intended feel; whether Standing shows as a gap or only two floors.
 4. Bugs: the debug station's options and cost; clearing action names per egg; the ceiling and penalty values once the loop exists.
