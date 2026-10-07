@@ -21,7 +21,7 @@ Written for an AI picking up the work. Sprite work has its own handoff: **[NETLI
 
 **Document map.** This file: decisions, architecture, measured numbers, open questions. [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md): sprite handoff; [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md): its archive (drafts, rejected options, measurements). [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md): all page text and temper hints. [netling2-prototypes/README.md](netling2-prototypes/README.md): rule-prototype patch and drivers behind the figures. [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md): source vocabulary (Jargon, CP2020, FDA) and unused ideas; reference only.
 
-**Verified and not.** `npm test` (500) and `npm run proto:test` (113) pass; the prototype pages load in headless Chromium; the 1.0 sprite audit ran on each egg. Not run: `npm run smoke`, any device or phone check, any balance run on 2.0 numbers. No page text has been playtested.
+**Verified and not.** `npm test` (500) and `npm run proto:test` (119) pass; the prototype pages load in headless Chromium; the 1.0 sprite audit ran on each egg. Not run: `npm run smoke`, any device or phone check, any balance run on 2.0 numbers. No page text has been playtested.
 
 **Working agreements.** Avoid emojis and em dashes. Measure before claiming a number and say what a measurement does not cover (the 1.0 overlap score misled for palette marks and for grown elders). Say plainly what was not run or verified. Ask clarifying questions before ambiguous or non-trivial steps; when a form is contested, render options side by side first (the maintainer reviews from screenshots). Record each decision here as it is made, marked Decided or proposal. Keep in-game Wetware text to plain words (see The eggs). Do not open a pull request unless asked. **This branch is not under the 1.0 soft freeze** (maintainer): 1.0 code may change where asked, minimally, with tests, regenerating what depends on it (`node tools/wearable-colors.mjs --write` after palette or sprite changes), and saying so. The prototype lives only in `prototype/netling2/`. Work is on branch `claude/game-egg-differentiation-xkl6x2`.
 
@@ -180,35 +180,41 @@ Share of lives per level (strongly unsteady / unsteady / middle / steady / stron
 - **Bugs and temper.** Bugs push temper unsteady through faults, not Heat, and mostly for players who run little: worker unsteady (not strongly) at the end of life 20% with no bugs, 43% with bugs never cleared, 37% with clearing; casual 17%, 29%, 20%; attentive, daredevil and steer-glitch do not move.
 - **Prototype gap.** The scratch copy's Segfault costs temper 2, not the 4 the table above specifies (two faults at 1 plus 2); the bots use Segfault rarely, so no result moves, but fix it when the rules are built.
 
-**Strong steady, strong unsteady and perks (proposals).** Strongly steady is reachable only by calm, attentive play (about half of attentive lives hold it 12 hours at once) and strongly unsteady by hot play; the middle is where casual play lives. Proposed: no mechanical perk and no new temper item beyond Coolant cell and Antivirus patch (+1), Black ICE shard (-1) and Segfault (-4), since temper is personality and the +1 items already cut strongly unsteady at adulthood from 62% to 17% of daredevil lives and from 83% to 66% of overclocker lives (first-pass measurement above). Reward the two ends with cosmetics only, and symmetrically so that neither end is "the good one": see Temper cosmetics (proposal) below. Not decided.
+**Strong steady, strong unsteady and perks (proposals).** Strongly steady is reachable only by calm, attentive play (about half of attentive lives hold it 12 hours at once) and strongly unsteady by hot play; the middle is where casual play lives. Proposed: no mechanical perk and no new temper item beyond Coolant cell and Antivirus patch (+1), Black ICE shard (-1) and Segfault (-4), since temper is personality and the +1 items already cut strongly unsteady at adulthood from 62% to 17% of daredevil lives and from 83% to 66% of overclocker lives (first-pass measurement above). Reward the two ends with cosmetics only, and symmetrically so that neither end is "the good one": see Temper cosmetics (the Metronome prop) below. Not decided.
 
-### Temper cosmetics (proposal)
+### Temper cosmetics (proposal): the Metronome prop
 
-Cosmetic-only rewards for the two strong temper levels (maintainer: fine if a draft works). 1.0 already rewards the matching play with effects: Aurora (24 hours in flow, across lives) and Heatwave (40 hours overclocked while awake, across lives), both counted in total across lives. Temper rewards should test something different, so they count one unbroken stretch at a strong level (quality and persistence), not total time, and they are crests, which in 1.0 are the "legacy" cosmetics, and static (nothing animates, so nothing can flash).
+Cosmetic-only rewards for the two strong temper levels (maintainer: fine if a draft works; the first draft was two crests, dropped as too many). 1.0 already rewards the matching play with effects: Aurora (24 hours in flow, across lives) and Heatwave (40 hours overclocked while awake, across lives), both totals across lives. A temper reward should test something different, so it counts one unbroken hold at a strong level (quality and persistence), not total time.
 
-| Id | Name | Unlock | Hint (draft) |
-|---|---|---|---|
-| `metronome` | Metronome | Hold strongly steady for 12 awake hours without the shown level changing, once, in any life. Sleep pauses the clock; the level is the shown one (with the 1.0 guard), so one flicker cannot reset it. | "keep it so even you could set a clock by it." |
-| `jitter` | Jitter | The same for strongly unsteady. | "let it run so wild nothing could keep time with it." |
+**One earned prop, no crests, no effects.** Props in 1.0 stand on the floor at the right edge and are drawn with `draw(px, frame, time, extra)`, so they can animate; two are earned-only (Mini device, Plush). The proposed one, **Metronome**, is a small pendulum clock that keeps the sprite's own beat:
 
-Emblems (9x9, `#` lit; five equal ticks on a baseline, against uneven ticks with a broken baseline, the countable beat and the stutter of the tell):
+| Temper level | The pendulum |
+|---|---|
+| Strongly steady | swings every 3 s, left then right, on exactly the tell's beat |
+| Steady | swings every 6 s, on the tell's beat |
+| Middle | upright and still |
+| Unsteady | swings at irregular moments and often sticks on the same side (windows of 3 s, one swing at a random point in the first 60%) |
+| Strongly unsteady | the same, twice as often (windows of 1.5 s) |
+
+So one object serves both ends: a metronome that keeps time, or that cannot. Nothing about it says which end is better. Reduced motion keeps the calm steady beat and parks the unsteady pendulum on one side. It never changes side faster than the 200 ms flash floor (tested on the pure function `metronome()` in `prototype/netling2/metronome.js`; the whole prop is a pure function of level, time and seed, like the tell). An optional tick sound on each swing (`tick` marks the slot) is not designed: it would have to follow the existing sound settings, stay silent asleep and at the middle level, and might be tiring every 3 s.
+
+**Unlock (earned-only, like Mini device and Plush):** hold either strong level for 12 awake hours without the shown level changing, once, in any life. Sleep pauses the clock, and the shown level (with the 1.0 guard) is the one that counts, so one flicker cannot reset it. Hint (draft, in the 1.0 cryptic style): "hold it at an extreme for half a day." Reach on 1.0's simulator (200 lives, one life each): strongly steady attentive 54%, steer-daemon 89%; strongly unsteady overclocker 91%, daredevil 39%, steer-glitch 6%; casual and worker 0% (as with Aurora). A 24-hour hold is rarer (attentive 31%, steer-daemon 60%, overclocker 82%, daredevil 20%, steer-glitch 1%).
+
+Art (5 wide, 8 tall; `#` body, `o` bob; colours to follow the Cyberdeck's, not chosen), three pendulum positions over one body:
 
 ```
-Metronome    Jitter
-.........    .........
-.........    .........
-.........    ..#......
-#.#.#.#.#    ..#.....#
-#.#.#.#.#    ..#..#..#
-#.#.#.#.#    #.#..#..#
-#.#.#.#.#    #.#..##.#
-#########    ###..#.##
-.........    .........
+left     upright   right
+.o...    ..o..     ...o.
+.#...    ..#..     ...#.
+..#..    ..#..     ..#..
+.###.    .###.     .###.
+.###.    .###.     .###.
+.#+#.    .#+#.     .#+#.
+#####    #####     #####
+#####    #####     #####
 ```
 
-Reach, measured on 1.0's simulator at one life per try (200 lives): Metronome by attentive 54%, steer-daemon 89%, casual and daredevil 0%; Jitter by overclocker 91%, daredevil 39%, steer-glitch 6%, casual 0%. A casual or worker player earns neither, as with Aurora ("casual players rarely reach flow"); a hold of 24 hours would be rarer (Metronome 31% of attentive and 60% of steer-daemon lives; Jitter 82% of overclocker, 20% of daredevil and 1% of steer-glitch).
-
-2.0 would store the best awake hold for each end in `progress` (and clean it in `sanitize.js`; a new field needs a default in `createScript`, `migrate` and `cleanSave` only). Not yet decided: 12 or 24 hours; whether the Jitter hold should count only while no care alert is active, so neglecting the netling cannot earn it (not measured: the neglectful archetype rarely reaches adulthood); a second tier (a shell or a sound pack per end) and whether sound packs, which have no flash risk, are a better home for a "tick" and a "stutter". The two crests would also need entries in the Dex-style cosmetic hints and the unlock list in the content catalog.
+2.0 would store the best awake hold at each end in `progress` (a new field needs a default in `createScript`, `migrate` and `cleanSave`, and a `clean*` rule in `sanitize.js`). Not yet decided: 12 or 24 hours; whether the unsteady hold should count only while no care alert is active, so neglect cannot earn it (not measured: the neglectful archetype rarely reaches adulthood); the optional tick sound; and whether a second, separate prop for one end is wanted (none is proposed).
 
 ### Care preferences
 

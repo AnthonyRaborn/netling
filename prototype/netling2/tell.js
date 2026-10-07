@@ -48,7 +48,7 @@ const hash = (n) => {
 };
 
 // Per level: the beat interval (steady), the stutter probability per slot and the drift amplitude (unsteady).
-const BEAT_MS = { 1: 6000, 2: 3000 };
+export const BEAT_MS = { 1: 6000, 2: 3000 };
 const SETTLE_MS = 400;
 const BLINK_MS = SLOT_MS;
 const BEAT_FADE_MS = 600;
