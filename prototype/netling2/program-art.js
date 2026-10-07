@@ -19,20 +19,20 @@ const KERNEL = frozen(SPRITES.kernelA, SPRITES.kernelB, 9);
 export const PROGRAM_BABY = frozen(SPRITES.bitlingA, SPRITES.bitlingB, 10);
 export const PROGRAM_TEENS = {
   teenCorp: KERNEL,
-  // The street lean: Kernel worn down on one side. One antenna, the right side of the body cut away in a slanted bite (the head top
-  // still covers both eyes, so eyewear spans them), a long left arm, and a taped patch on the neck. Redrawn after the first version
-  // (one antenna, a notched corner, 5 cells different, 0.94 overlap) went over 1.0's 0.82 bar against the corp teen.
+  // The street lean: a scrapper, Kernel hunched and lopsided. Uneven, bent antennae (one broken), a long left arm, the jaw pulled right
+  // over a bulked right arm. The head top still covers both eyes, so eyewear spans them. Redrawn twice: the first (0.94 against the corp
+  // teen) failed 1.0's 0.82 bar; the second (0.81) cut the right side away and read as a broken robot; this one keeps the body whole.
   teenStreet: frozen(
     [
-      '....#.........',
-      '....o.........',
-      '..########....',
-      '#.########....',
+      '.#..#....#.#..',
+      '.o..o....o....',
+      '..##########..',
+      '#.##########..',
       '#.##oo##oo##..',
-      '#.##oo##oo##.#',
-      '#.########....',
-      '#.####++##....',
-      '..#####xx.....',
+      '#.##oo##oo###.',
+      '#...########.#',
+      '....####++####',
+      '....########.#',
       '....#....#....',
       '...##....##...',
     ],
@@ -357,43 +357,170 @@ export const PROGRAM_ADULT_ANCHORS = {
 };
 
 // --- elders ---------------------------------------------------------------------------------------------------------------------
-// One elder per adult (decided), each a variant of the adult it grows from: 18 columns against 16 and one row taller (never past 15),
-// keeping the adult's own marks. An elder here is the adult stretched, then given a mark of its own by hand: the two centre columns
-// of every row are repeated (so the eyes stay two cells wide and the face widens between them), and the row after the neck row is
-// repeated (so the head, eyes, mouth and neck rows, and the anchors, are the adult's). The marks are listed per elder as [x, y, mark].
-const stretch = (rows, neckRow) => {
-  const wide = rows.map((r) => r.slice(0, 9) + r.slice(7, 9) + r.slice(9));
-  return [...wide.slice(0, neckRow + 2), ...wide.slice(neckRow + 1)];
+// One elder per adult (decided), drawn by hand the way Iron's were (the maintainer chose this over stretching each adult): 18 columns
+// against 16, one row taller or so (never past 15), keeping the adult's own marks and growing a feature of its own. Rows 0 to the neck row
+// are identical in A and B and the body's bottom is the same row in both. Anchors follow each drawing. `swap(rows, from, tail)` replaces
+// the rows from `from` down, which is how each B frame is the A frame with only its lower body changed.
+const pair = (a, b) => ({ a, b });
+export const PROGRAM_ELDER_ANCHORS = {
+  tigerElder: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  wormElder: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  mouseElder: { headTop: 3, eyeRow: 5, mouthRow: 8, neckRow: 9 },
+  spoofElder: { headTop: 4, eyeRow: 6, mouthRow: 8, neckRow: 10 },
+  parseElder: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  phreakElder: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  gobbleElder: { headTop: 2, eyeRow: 3, mouthRow: 5, neckRow: 7 },
+  snarfElder: { headTop: 1, eyeRow: 3, mouthRow: 6, neckRow: 8 },
+  ghostElder: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 },
 };
-const withMarks = (rows, marks) => rows.map((r, y) => [...r].map((c, x) => marks.find(([mx, my]) => mx === x && my === y)?.[2] ?? c).join(''));
-// `still`: rows down to this index are copied from A into B. The wearable code reads the body at a row about half way down the sprite,
-// and a taller elder moves that row a row lower, so a form that animates its body (Worm's rings) must hold that row still too.
-export const grown = (adult, neckRow, marks = [], still = 0) => {
-  const a = withMarks(stretch(adult.a, neckRow), marks);
-  const b = withMarks(stretch(adult.b, neckRow), marks);
-  return { a, b: b.map((row, y) => (y <= still ? a[y] : row)) };
-};
+const swap = (rows, from, tail) => rows.map((r, y) => tail[y - from] ?? r);
 
-// Marks listed [x, y, mark] in the elder's own coordinates, all on rows the two frames share, so the head and neck stay identical.
-const ELDER_MARKS = {
-  tiger: [[8, 3, 'x'], [9, 3, 'x'], [2, 10, 'x'], [15, 10, 'x']], // a forehead stripe and bolder shoulder stripes
-  worm: [[8, 0, '#'], [9, 0, '#'], [8, 2, 'x'], [9, 2, 'x']], // a third spike and a forehead mark
-  mouse: [[0, 7, '#'], [17, 7, '#'], [8, 4, 'x'], [9, 4, 'x']], // whiskers and a forehead mark
-  spoof: [[8, 9, 'x'], [9, 9, 'x']], // a clasp at the throat
-  parse: [[2, 1, '#'], [15, 1, '#'], [8, 3, 'x'], [9, 3, 'x']], // doubled brackets and a cursor on the screen
-  phreak: [[8, 1, 'x'], [9, 1, 'x']], // a mark on the crown
-  gobble: [[8, 10, 'x'], [9, 10, 'x'], [8, 11, 'x'], [9, 11, 'x']], // a band across the belly
-  snarf: [[0, 9, '#'], [17, 9, '#'], [8, 2, 'x'], [9, 2, 'x']], // tusks at the jaw corners and a brow mark
-  ghost: [[8, 1, 'x'], [9, 1, 'x']], // a mark on the dome
+const tigerA = [
+  '..##..........##..',
+  '..####......####..',
+  '..##############..',
+  '.################.',
+  '.##oo########oo##.',
+  '.##oo########oo##.',
+  '.##x##########x##.',
+  '..###+######+###..',
+  '..##############..',
+  '##################',
+  '#x##############x#',
+  '#.##############.#',
+  '#.##x########x##.#',
+  '#.####......####.#',
+  '..##..........##..',
+];
+const wormA = [
+  '.....#..##..#.....',
+  '.....########.....',
+  '....##########....',
+  '...############...',
+  '...##oo####oo##...',
+  '...##oo####oo##...',
+  '....##########....',
+  '...#+#+####+#+#...',
+  '....##########....',
+  '.....########.....',
+  '.....xxxxxxxx.....',
+  '.....########.....',
+  '.....xxxxxxxx.....',
+  '.....########.....',
+  '......######......',
+];
+const mouseA = [
+  '..#####....#####..',
+  '.#######..#######.',
+  '.#######..#######.',
+  '..##############..',
+  '.################.',
+  '.##oo########oo##.',
+  '.##oo########oo##.',
+  '.################.',
+  '#.######++######.#',
+  '...############...',
+  '..##############..',
+  '..##############..',
+  '..##############.#',
+  '...##........##.#.',
+];
+const spoofA = [
+  '........##........',
+  '.......####.......',
+  '......######......',
+  '.....########.....',
+  '....##########....',
+  '...xxxxx#######...',
+  '...xxoo####oo##...',
+  '...xxoo####oo##...',
+  '...xxxx##++##.....',
+  '....##########....',
+  '.....########.....',
+  '...############...',
+  '..##############..',
+  '.################.',
+  '.##..##..##..##...',
+];
+const parseA = [
+  '##.#..........#.##',
+  '.##............##.',
+  '..##############..',
+  '..##############..',
+  '..##oo######oo##..',
+  '..##oo######oo##..',
+  '..##############..',
+  '..#++++####++++#..',
+  '..##############..',
+  '...############...',
+  '...#x########x#...',
+  '...############...',
+  '...############...',
+  '....###....###....',
+  '....##......##....',
+];
+const phreakA = [
+  '.....########.....',
+  '....##########....',
+  '....##########....',
+  '###.##########.###',
+  '#x#.#oo####oo#.#x#',
+  '#x#.#oo####oo#.#x#',
+  '#x#.##########.#x#',
+  '###.##+####+##.###',
+  '....##########....',
+  '.#..##########..#.',
+  '.#..##########..#.',
+  '.##.##########.##.',
+  '....##########....',
+  '....###....###....',
+  '....##......##....',
+];
+const gobbleA = [
+  '......######......',
+  '....##########....',
+  '...############...',
+  '...##oo####oo##...',
+  '...##oo####oo##...',
+  '...#++++++++++#...',
+  '....#xxxxxxxx#....',
+  '....##########....',
+  '..##############..',
+  '.################.',
+  '##################',
+  '########xx########',
+  '##################',
+  '.################.',
+  '..###........###..',
+];
+const snarfA = [
+  '..###........###..',
+  '..##############..',
+  '.################.',
+  '.##oo########oo##.',
+  '.##oo########oo##.',
+  '##################',
+  '#+#+#+#+##+#+#+#+#',
+  '#xxxxxxxxxxxxxxxx#',
+  '#+#+#+#+##+#+#+#+#',
+  '.################.',
+  '#.##############.#',
+  '..##############..',
+  '...############...',
+  '...####....####...',
+  '...##........##...',
+];
+
+export const PROGRAM_ELDERS = {
+  tigerElder: pair(tigerA, swap(tigerA, 14, ['...##........##...'])),
+  wormElder: pair(wormA, swap(wormA, 10, ['.....########.....', '.....xxxxxxxx.....', '.....########.....', '.....xxxxxxxx.....', '....######........'])),
+  mouseElder: pair(mouseA, swap(mouseA, 12, ['..##############..', '....##......##..##'])),
+  spoofElder: pair(spoofA, swap(spoofA, 14, ['..##..##..##..##..'])),
+  parseElder: pair(parseA, swap(parseA, 14, ['...##........##...'])),
+  phreakElder: pair(phreakA, swap(phreakA, 9, ['.#..##########..#.', '..#.##########.#..', '..##.########.##..', '....##########....', '....###....###....', '...##........##...'])),
+  gobbleElder: pair(gobbleA, swap(gobbleA, 10, ['.################.', '.################.', '.################.', '.################.', '...###......###...'])),
+  snarfElder: pair(snarfA, swap(snarfA, 14, ['..##..........##..'])),
+  // Ghost's elder is 1.0's own (maintainer's call): Whisper, Ghost's mainframe form. A hidden form may differ from the other forms' rules, so it
+  // keeps 1.0's size (14 columns, smaller than the Ghost, its body thinning into a wisp). Its B frame keeps the head and mouth still, as 1.0's moves the mouth.
+  ghostElder: pair(SPRITES.whisperA, SPRITES.whisperA.map((row, y) => (y <= 8 ? row : SPRITES.whisperB[y]))),
 };
-export const PROGRAM_ELDERS = Object.fromEntries(
-  Object.entries(PROGRAM_ADULTS).map(([id, adult]) => [`${id}Elder`, grown(adult, PROGRAM_ADULT_ANCHORS[id].neckRow, ELDER_MARKS[id], id === 'worm' ? 10 : 0)]),
-);
-// The hidden adult's elder is 1.0's own (maintainer's call): Whisper, Ghost's mainframe form. A hidden form may differ from the other
-// forms' rules, so it keeps 1.0's size (14 columns, smaller than the Ghost, its body thinning into a wisp). Its B frame keeps the head
-// and the mouth still, as 1.0's moves the mouth.
-PROGRAM_ELDERS.ghostElder = {
-  a: SPRITES.whisperA,
-  b: SPRITES.whisperA.map((row, y) => (y <= 8 ? row : SPRITES.whisperB[y])),
-};
-export const PROGRAM_ELDER_ANCHORS = Object.fromEntries(Object.entries(PROGRAM_ADULT_ANCHORS).map(([id, a]) => [`${id}Elder`, a])); // the rows added are below the neck

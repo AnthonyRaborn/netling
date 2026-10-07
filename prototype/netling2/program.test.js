@@ -233,8 +233,6 @@ test('every adult has exactly one elder; the role forms\' are variants: 18 colum
     assert.equal(elder.a[0].length, 18, `${elder.id}: width`);
     assert.ok(elder.a.length <= 15 && elder.a.length >= set[adult].a.length, `${elder.id}: ${elder.a.length} rows against ${set[adult].a.length}`);
     for (const ch of new Set(set[adult].a.join('').replace(/[.]/g, ''))) assert.ok(elder.a.join('').includes(ch), `${elder.id}: lost the ${ch} mark`);
-    assert.deepEqual(elder.anchors.a, set[adult].anchors.a, `${elder.id}: the rows added are below the neck, so the anchors are the adult's`);
-    assert.notDeepEqual(elder.a.map((r) => r.replace(/x/g, '#')), set[adult].a.map((r) => r.padEnd(18, '.')), `${elder.id}: not just the adult`);
   }
 });
 
