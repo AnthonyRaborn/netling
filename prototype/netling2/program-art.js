@@ -91,7 +91,7 @@ export const PROGRAM_ADULTS = {
       '...##......##...',
     ],
   },
-  // Worm (Breach, street): a tall segmented column with jaws; the rings undulate between frames.
+  // Worm (Breach, street): a head with jaws on a narrower column, striped down the body (the stripes step between frames) and a tail that swishes.
   worm: {
     a: [
       '......#..#......',
@@ -103,11 +103,11 @@ export const PROGRAM_ADULTS = {
       '....########....',
       '...#+#+##+#+#...',
       '....########....',
-      '..############..',
       '....########....',
-      '..############..',
+      '....xxxxxxxx....',
       '....########....',
-      '......####......',
+      '....xxxxxxxx....',
+      '.....######.....',
     ],
     b: [
       '......#..#......',
@@ -120,10 +120,10 @@ export const PROGRAM_ADULTS = {
       '...#+#+##+#+#...',
       '....########....',
       '....########....',
-      '..############..',
       '....########....',
-      '..############..',
-      '.......##.......',
+      '....xxxxxxxx....',
+      '....########....',
+      '...######.......',
     ],
   },
   // Mouse (Dodge, corp): small and round, big round ears, a nose, thin legs and a tail that flicks.
@@ -264,7 +264,7 @@ export const PROGRAM_ADULTS = {
       '...##......##...',
     ],
   },
-  // Gobble (Feast, corp): a small neat head on a big round belly, a wide mouth, stubby legs.
+  // Gobble (Feast, corp): a small neat head on a big round belly; the wide mouth sits right under the eyes, teeth over a dark maw.
   gobble: {
     a: [
       '.....######.....',
@@ -272,11 +272,11 @@ export const PROGRAM_ADULTS = {
       '...##########...',
       '...##oo##oo##...',
       '...##oo##oo##...',
-      '....########....',
       '...#++++++++#...',
+      '....#xxxxxx#....',
+      '....########....',
       '..############..',
       '.##############.',
-      '################',
       '################',
       '################',
       '.##############.',
@@ -288,11 +288,11 @@ export const PROGRAM_ADULTS = {
       '...##########...',
       '...##oo##oo##...',
       '...##oo##oo##...',
-      '....########....',
       '...#++++++++#...',
+      '....#xxxxxx#....',
+      '....########....',
       '..############..',
       '.##############.',
-      '################',
       '.##############.',
       '.##############.',
       '.##############.',
@@ -351,7 +351,7 @@ export const PROGRAM_ADULT_ANCHORS = {
   spoof: rows4(3, 5, 7, 9),
   parse: rows4(2, 4, 7, 8),
   phreak: rows4(2, 4, 7, 8),
-  gobble: rows4(2, 3, 6, 7),
+  gobble: rows4(2, 3, 5, 7),
   snarf: rows4(1, 3, 6, 8),
   ghost: rows4(1, 4, 7, 8),
 };
@@ -389,4 +389,11 @@ const ELDER_MARKS = {
 export const PROGRAM_ELDERS = Object.fromEntries(
   Object.entries(PROGRAM_ADULTS).map(([id, adult]) => [`${id}Elder`, grown(adult, PROGRAM_ADULT_ANCHORS[id].neckRow, ELDER_MARKS[id], id === 'worm' ? 10 : 0)]),
 );
+// The hidden adult's elder is 1.0's own (maintainer's call): Whisper, Ghost's mainframe form. A hidden form may differ from the other
+// forms' rules, so it keeps 1.0's size (14 columns, smaller than the Ghost, its body thinning into a wisp). Its B frame keeps the head
+// and the mouth still, as 1.0's moves the mouth.
+PROGRAM_ELDERS.ghostElder = {
+  a: SPRITES.whisperA,
+  b: SPRITES.whisperA.map((row, y) => (y <= 8 ? row : SPRITES.whisperB[y])),
+};
 export const PROGRAM_ELDER_ANCHORS = Object.fromEntries(Object.entries(PROGRAM_ADULT_ANCHORS).map(([id, a]) => [`${id}Elder`, a])); // the rows added are below the neck

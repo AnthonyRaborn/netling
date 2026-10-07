@@ -33,7 +33,7 @@ test('every sprite is rectangular, the stage\'s width, 9 to 15 rows, with known 
       const rows = f[pose];
       assert.ok(rows.length >= 9 && rows.length <= 15, `${f.id}/${pose}: ${rows.length} rows`);
       assert.equal(new Set(rows.map((r) => r.length)).size, 1, `${f.id}/${pose}: ragged`);
-      assert.equal(rows[0].length, WIDTH[f.stage], `${f.id}/${pose}: width`);
+      assert.equal(rows[0].length, f.id === 'ghostElder' ? 14 : WIDTH[f.stage], `${f.id}/${pose}: width`); // the hidden elder keeps 1.0's size
       assert.match(rows.join(''), /^[.#o+x]+$/, `${f.id}/${pose}: marks`);
       assert.equal(rows.length, f.a.length, `${f.id}/${pose}: same height as A`);
     }
@@ -224,10 +224,10 @@ test('Ghost is the hidden adult the Shell grows into: 1.0\'s eyes, mouth and dom
 });
 
 // --- elders: one per adult --------------------------------------------------------------------------------------------------------
-test('every adult has exactly one elder, a variant of it: 18 columns, one row taller (never past 15), the adult\'s marks kept', () => {
+test('every adult has exactly one elder; the role forms\' are variants: 18 columns, one row taller (never past 15), the adult\'s marks kept', () => {
   const elders = Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'elder');
   assert.deepEqual(elders.map((id) => PROGRAM_FORMS[id].from).sort(), [...PROGRAM_ADULTS_ALL].sort());
-  for (const adult of PROGRAM_ADULTS_ALL) {
+  for (const adult of PROGRAM_ADULTS_ALL.filter((id) => id !== 'ghost')) {
     const elder = set[PROGRAM_ELDER_OF(adult)];
     assert.equal(PROGRAM_FORMS[elder.id].from, adult);
     assert.equal(elder.a[0].length, 18, `${elder.id}: width`);
@@ -239,7 +239,7 @@ test('every adult has exactly one elder, a variant of it: 18 columns, one row ta
 });
 
 test('each elder is closest, after scaling, to the adult it grows from among all nine adults (the sibling of its role included)', () => {
-  const rows = PROGRAM_ADULTS_ALL.map((adult) => {
+  const rows = PROGRAM_ADULTS_ALL.filter((id) => id !== 'ghost').map((adult) => {
     const elder = set[PROGRAM_ELDER_OF(adult)].a;
     const ranked = PROGRAM_ADULTS_ALL.map((x) => ({ x, v: scaledOverlap(elder, set[x].a) })).sort((p, q) => q.v - p.v);
     const other = ranked.find((r) => r.x !== adult);
@@ -260,4 +260,32 @@ test('the nine Program elders are distinct from one another (under 1.0\'s 0.82 f
   pairs.sort((p, q) => q.iou - p.iou);
   console.log(`  closest Program elders: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
   for (const p of pairs) assert.ok(p.iou < 0.82, `${p.pair} ${p.iou.toFixed(3)}`);
+});
+
+test('Ghost\'s elder is 1.0\'s Whisper (a hidden form keeps 1.0\'s size): smaller than the Ghost, its tail thinning, the head still between frames', () => {
+  const elder = set.ghostElder;
+  assert.equal(PROGRAM_FORMS.ghostElder.from, 'ghost');
+  assert.deepEqual(elder.a, SPRITES.whisperA);
+  assert.equal(elder.a[0].length, 14);
+  const cells = (rows) => rows.join('').replace(/\./g, '').length;
+  assert.ok(cells(elder.a) < cells(set.ghost.a), 'smaller than the Ghost');
+  assert.deepEqual(elder.b.slice(0, 9), elder.a.slice(0, 9), '1.0\'s B frame moves the mouth; here the head is still');
+  assert.ok(elder.a.at(-1).replace(/\./g, '').length < elder.a[10].replace(/\./g, '').length, 'the tail thins');
+});
+
+test('Gobble\'s mouth sits right under its eyes and reads as a mouth: teeth over a dark maw', () => {
+  const g = set.gobble;
+  const { eyeRow, mouthRow } = g.anchors.a;
+  assert.equal(mouthRow, eyeRow + 2, 'the mouth is directly under the eyes');
+  assert.ok(g.a[mouthRow].split('+').length - 1 >= 8, 'a wide row of teeth');
+  assert.ok(g.a[mouthRow + 1].includes('xxxxxx'), 'a dark maw under the teeth');
+});
+
+test('Worm\'s body is a plain column with stripes: the same width all the way down, no side bumps', () => {
+  const w = set.worm;
+  const spans = w.a.slice(9, 13).map((r) => [r.indexOf('#') < 0 ? r.indexOf('x') : Math.min(...['#', 'x'].map((c) => r.indexOf(c)).filter((i) => i >= 0)), r.length - Math.max(r.lastIndexOf('#'), r.lastIndexOf('x')) - 1]);
+  assert.equal(new Set(spans.map((s) => s.join())).size, 1, 'one width for every body row');
+  assert.ok(w.a.slice(9, 13).some((r) => r.includes('xxxxxxxx')), 'stripes');
+  assert.ok(w.a[9].replace(/\./g, '').length < w.a[3].replace(/\./g, '').length, 'the body is narrower than the head');
+  assert.ok(w.b.slice(9, 13).some((r) => r.includes('xxxxxxxx')) && w.b.slice(9, 13).join() !== w.a.slice(9, 13).join(), 'the stripes step between frames');
 });
