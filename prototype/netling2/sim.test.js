@@ -706,3 +706,76 @@ test('each bug also costs Integrity an hour, whatever else is going on (the chos
   };
   assert.ok(virus(5) > virus(0) * 1.3, 'five bugs add 40% damage and 2.5 an hour');
 });
+
+// --- Program's rattle timer (egg pressure, off by default) --------------------------------------
+
+test('rattle: off by default, and then events keep their 1.0 windows', async () => {
+  const { RATTLE } = await import('./sim/sim.js');
+  assert.equal(RATTLE.on, false);
+  const s = fresh();
+  s.event = { type: 'trace', startedAge: s.ageMin - 100 };
+  const before = act(s, 'comply', T0, calm);
+  assert.ok(before.ok);
+  assert.equal(s.rattleUntil, undefined);
+});
+
+test('rattle: a late answer sets the timer, an early one does not, and the next event opens shorter', async () => {
+  const sim = await import('./sim/sim.js');
+  sim.RATTLE.on = true;
+  try {
+    const late = fresh();
+    late.event = { type: 'trace', startedAge: late.ageMin - Math.ceil(CFG.traceWindowMin * 0.7) };
+    act(late, 'comply', T0, calm);
+    assert.equal(late.rattleCount, 1);
+    assert.equal(late.rattleUntil, late.ageMin + sim.RATTLE.minutes);
+    assert.equal(sim.rattled(late), true);
+
+    const early = fresh();
+    early.event = { type: 'trace', startedAge: early.ageMin - Math.floor(CFG.traceWindowMin * 0.5) };
+    act(early, 'comply', T0, calm);
+    assert.equal(early.rattleCount, undefined);
+    assert.equal(sim.rattled(early), false);
+
+    // A new trace while rattled opens 25% shorter; a certain roll starts it.
+    const rng = () => 0;
+    late.event = null;
+    late.stats = { charge: 70, sync: 70, integrity: 100, heat: 20 };
+    advance(late, 1, rng);
+    assert.equal(late.event?.type, 'trace');
+    assert.equal(late.event.window, Math.round(CFG.traceWindowMin * 0.75));
+    assert.equal(late.rattledEvents, 1);
+
+    // The timer runs out: the same trace opens at the full window.
+    const calmDown = fresh();
+    calmDown.rattleUntil = calmDown.ageMin + 5;
+    advance(calmDown, 10, calm);
+    calmDown.event = null;
+    advance(calmDown, 1, rng);
+    assert.equal(calmDown.event?.type, 'trace');
+    assert.equal(calmDown.event.window, CFG.traceWindowMin);
+  } finally {
+    sim.RATTLE.on = false;
+  }
+});
+
+test('rattle: the shortened window is what times the event out', async () => {
+  const sim = await import('./sim/sim.js');
+  sim.RATTLE.on = true;
+  try {
+    const s = fresh();
+    s.event = { type: 'trace', startedAge: s.ageMin, window: 90 };
+    assert.equal(sim.eventMinutesLeft(s), 90);
+    advance(s, 91, calm);
+    assert.equal(s.event, null);
+    assert.ok(s.standing.corp >= CFG.traceIgnoredStanding);
+  } finally {
+    sim.RATTLE.on = false;
+  }
+});
+
+test('rattle: infections are counted in every route, with or without the timer', async () => {
+  const s = fresh();
+  s.event = { type: 'attack', startedAge: s.ageMin - 1 };
+  act(s, 'defend', T0, calm, { won: false });
+  assert.equal(s.virusCount, 1);
+});

@@ -528,6 +528,27 @@ const TEMPER_DECAY = temperDecayFactor;
 // novelty (the other packet, a game not among them). A match is a small Sync bonus, once per action, no penalty for a miss.
 export const PREF = { on: true, distinct: true, reqbias: true, ice: true };
 if (process.env.PREF) Object.assign(PREF, JSON.parse(process.env.PREF));
+// 2.0 egg pressure, Program (triage): answering a timed event late leaves the netling rattled, and while it is rattled the
+// next event opens with a shorter window. Off by default; RATTLE='{"on":true}' switches it on (see docs/netling2-prototypes).
+// late: the share of the window already used that counts as late; cut: the share of the window taken off; minutes: how long it lasts.
+export const RATTLE = { on: false, late: 2 / 3, cut: 0.25, minutes: 120 };
+if (process.env.RATTLE) Object.assign(RATTLE, JSON.parse(process.env.RATTLE));
+export const rattled = (s) => RATTLE.on && (s.rattleUntil ?? -1) > s.ageMin;
+const eventWindow = (s, type) => {
+  const w = CFG[EVENTS[type].window];
+  return rattled(s) ? Math.max(1, Math.round(w * (1 - RATTLE.cut))) : w;
+};
+// Called where the player answers an event in time (not where it times out).
+function eventAnswered(s, t) {
+  if (!s.event) return;
+  const used = (s.ageMin - s.event.startedAge) / (s.event.window ?? CFG[EVENTS[s.event.type].window]);
+  s.eventsAnswered = (s.eventsAnswered ?? 0) + 1;
+  if (RATTLE.on && used >= RATTLE.late) {
+    s.rattleUntil = s.ageMin + RATTLE.minutes;
+    s.rattleCount = (s.rattleCount ?? 0) + 1;
+    if (t !== undefined) log(s, t, '> it flinches at the next alarm.');
+  }
+}
 export const pushGame = (s, game) => {
   const last = s.lastGames ?? [];
   s.lastGames = PREF.distinct ? [game, ...last.filter((g) => g !== game)].slice(0, 2) : [game, ...last].slice(0, 2);
@@ -657,6 +678,7 @@ function step(s, t, rng) {
     if (rng() < perHour / 60) {
       s.virus = true;
       s.virusMin = 0;
+      s.virusCount = (s.virusCount ?? 0) + 1;
       log(s, t, '> !! virus signature detected.');
     }
   } else if (s.virus) {
@@ -746,18 +768,21 @@ function stepEvents(s, t, rng) {
       log(s, t, '> corp trace waved off by voucher.');
       return;
     }
-    s.event = { type: 'trace', startedAge: s.ageMin };
-    log(s, t, `> !! corp trace incoming. ${CFG.traceWindowMin}m to respond.`);
+    s.event = { type: 'trace', startedAge: s.ageMin, window: eventWindow(s, 'trace') };
+    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    log(s, t, `> !! corp trace incoming. ${s.event.window}m to respond.`);
   } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour) / 60) {
     if (shielded(s)) {
       log(s, t, '> intrusion attempt bounced off the antivirus shield.');
       return;
     }
-    s.event = { type: 'attack', startedAge: s.ageMin };
-    log(s, t, `> !! intrusion attempt. DEFEND within ${CFG.attackWindowMin}m.`);
+    s.event = { type: 'attack', startedAge: s.ageMin, window: eventWindow(s, 'attack') };
+    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    log(s, t, `> !! intrusion attempt. DEFEND within ${s.event.window}m.`);
   } else if (rng() < (hot * (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache)) / 60) {
-    s.event = { type: 'overflow', startedAge: s.ageMin };
-    log(s, t, `> !! memory overflow. PURGE within ${CFG.overflowWindowMin}m.`);
+    s.event = { type: 'overflow', startedAge: s.ageMin, window: eventWindow(s, 'overflow') };
+    if (rattled(s)) s.rattledEvents = (s.rattledEvents ?? 0) + 1;
+    log(s, t, `> !! memory overflow. PURGE within ${s.event.window}m.`);
   } else if (rng() < (hot * CFG.surgeChancePerHour) / 60) {
     st.heat = clamp(st.heat + 25);
     st.charge = clamp(st.charge + 10);
@@ -942,6 +967,7 @@ function stepChatter(s, rng) {
 function infect(s, damage) {
   s.virus = true;
   s.virusMin = 0;
+  s.virusCount = (s.virusCount ?? 0) + 1;
   s.stats.integrity = clamp(s.stats.integrity - damage);
 }
 
@@ -994,7 +1020,7 @@ function maybeDrop(s, source, chance, rng) {
 // Minutes left to respond to the current timed event (0 when there is none).
 export function eventMinutesLeft(s) {
   const e = s.event && EVENTS[s.event.type];
-  return e ? CFG[e.window] - (s.ageMin - s.event.startedAge) : 0;
+  return e ? (s.event.window ?? CFG[e.window]) - (s.ageMin - s.event.startedAge) : 0;
 }
 
 export function traceMinutesLeft(s) {
@@ -1323,6 +1349,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         if (rng() < chance) {
           s.virus = true;
           s.virusMin = 0;
+          s.virusCount = (s.virusCount ?? 0) + 1;
           msg += ' !! payload was infected.';
         }
       }
@@ -1370,6 +1397,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       break;
     }
     case 'hide': {
+      eventAnswered(s, now);
       s.event = null;
       st.charge = clamp(st.charge - 10);
       st.heat = clamp(st.heat + 10);
@@ -1378,6 +1406,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       break;
     }
     case 'comply': {
+      eventAnswered(s, now);
       s.event = null;
       st.sync = clamp(st.sync - CFG.complySync);
       s.standing.corp += 1;
@@ -1434,6 +1463,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'purge': {
       if (s.event?.type === 'overflow') {
+        eventAnswered(s, now);
         s.event = null;
         s.cache = 0;
         s.temper += 0.5;
@@ -1450,6 +1480,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'defend': {
       // The DEFEND mini-game's result, like 'play' but for an intrusion.
+      if (opts.won) eventAnswered(s, now);
       s.event = null;
       if (opts.won) {
         s.temper += CFG.attackRepelledTemper;

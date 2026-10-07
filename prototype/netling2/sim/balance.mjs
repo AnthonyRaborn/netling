@@ -3,7 +3,7 @@
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
-// BUGS='{"chance":0.5,"max":8}' overrides the bug rules. The archetypes keep their 1.0 names; the steer-* ones now aim at a
+// BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
 // carries a trait). The remaining text below is 1.0's.
 // Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
@@ -429,6 +429,11 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     standingSpent: ctx.standingSpent ?? 0,
     clinicVisits: ctx.clinicVisits ?? 0,
     prefActions: s.prefActions ?? 0,
+    viruses: s.virusCount ?? 0,
+    rattles: s.rattleCount ?? 0,
+    rattledEvents: s.rattledEvents ?? 0,
+    eventsAnswered: s.eventsAnswered ?? 0,
+    eventsTotal: events,
     prefMatches: s.prefMatches ?? 0,
     prefBonus: s.prefBonus ?? 0,
     levelMin: { ...(s.levelMin ?? {}) },
@@ -597,6 +602,8 @@ export function stats(results) {
     hold24h: { strongSteady: rate((r) => r.hold['2'] >= 1440), strongUnsteady: rate((r) => r.hold['-2'] >= 1440) },
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
     bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1), clinicVisits: round(avg(results.map((r) => r.clinicVisits)), 2) },
+    // Egg pressure (Program's rattle timer, RATTLE='{"on":true}'): infections a life, and how often the timer was set and bit.
+    pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {
