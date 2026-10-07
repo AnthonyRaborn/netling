@@ -182,3 +182,12 @@ archetype. Charge and Sync behave almost the same.
   checks in. Next idea, not built: put the strain on what the player does, not where the meter sits (Wetware: a feed that lands above a
   line, Program: a play when Sync is already high), with a free allowance, as the shock does for switching; or give Wetware and Program a
   second axis that is a choice, not a level.
+
+## Result 9: action-based strain (Program on Charge, Wetware on Sync)
+
+Scripts: `act-sweep.mjs`, `act-calibrate.mjs`. Strain +3 per corp/scav feed (Charge) or play (Sync) while the stat is at or over the line, halving every 24 h; infection hazard rises with strain above a floor. Budgeter bot skips those actions at or over the line. Mean infections a life of the five ordinary archetypes (attentive, casual, worker, sysadmin, human-regular), off = 6.65.
+
+- Charge, line 70: 7.8 at floor 0 (7.96 at 0.004). Floor 0 is the minimum, so the floor is not the lever. Sysadmin and attentive pay most (+2.1, +2.4); worker +0.2. A budgeter pays in infections less (attentive 6.2) but the sparse worker's full-life rate falls from 0.845 to 0.72-0.76. Cadence-sensitive for the worker.
+- Sync, line 65: 8.64 at floor 0. Sysadmin +5.6, attentive +3.8, casual +0.3, worker 0. A budgeter pays about nothing (worker full-life 0.83 vs 0.845). Cadence-neutral.
+- Not equal on average yet: both overshoot by 1.1 to 2.0. Remaining levers: a higher line, a smaller `add`, a longer half-life. Not run.
+- Who pays is wrong for both: the two heaviest feeders/players (sysadmin, attentive) pay, which is the "pay for what you do" intent, but the mean must come back to off before this is adopted.
