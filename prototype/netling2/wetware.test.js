@@ -2,21 +2,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
-import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_ADULTS_ALL, WETWARE_NINE, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
+import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_ADULTS_ALL, WETWARE_NINE, WETWARE_ELDER_OF, WETWARE_HIDDEN_BRANCH, wetwarePose } from './wetware-models.js';
 import { wetwareKey } from './register.js';
 import { forms as ironForms } from './models.js';
 import { programForms } from './program-models.js';
 import { SPRITES } from '../../src/sprites.js';
 import { silhouetteIou, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
+import { scaledOverlap } from './metrics.js';
 
 const set = wetwareForms();
 const baby = set.baby;
 const forms = Object.values(set);
-const WIDTH = { baby: 12, teen: 14, adult: 16 };
+const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
 const key = (f, pose) => `${wetwareKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
 test('Wetware has a baby and three teens (corp, street, hidden), in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden', ...WETWARE_NINE]);
+  assert.deepEqual(Object.keys(WETWARE_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden', ...WETWARE_NINE, ...WETWARE_NINE.map(WETWARE_ELDER_OF)]);
   assert.deepEqual(WETWARE_TEENS_ALL.map((id) => WETWARE_FORMS[id].lean), ['corp', 'street', 'hidden']);
   assert.deepEqual(WETWARE_HIDDEN_BRANCH, ['baby', 'teenHidden', 'blank']);
 });
@@ -25,7 +26,7 @@ test('every sprite is rectangular, the stage\'s width, 11 rows like Iron\'s and 
   for (const f of forms) {
     for (const pose of ['a', 'b', 'sleep', 'dead']) {
       const rows = f[pose];
-      assert.ok(f.stage === 'adult' ? rows.length >= 9 && rows.length <= 15 : rows.length === 11, `${f.id}/${pose}: ${rows.length} rows`);
+      assert.ok(f.stage === 'adult' || f.stage === 'elder' ? rows.length >= 9 && rows.length <= 15 : rows.length === 11, `${f.id}/${pose}: ${rows.length} rows`);
       assert.equal(rows.length, f.a.length, `${f.id}/${pose}: same height as A`);
       assert.equal(new Set(rows.map((r) => r.length)).size, 1, `${f.id}/${pose}: ragged`);
       assert.equal(rows[0].length, WIDTH[f.stage], `${f.id}/${pose}: width`);
@@ -52,7 +53,7 @@ test('the head, eyes, mouth and neck are identical in A and B; only the lower bo
   for (const f of forms) {
     // Blank's camouflage is the animation: its shimmer cells ('x' against '#') swap between frames over the hood too, as marks only, so
     // the head is compared with the shimmer read as body colour; the outline and the eyes still must not move.
-    const read = (row) => (f.id === 'blank' ? row.replace(/x/g, '#') : row);
+    const read = (row) => (f.id.startsWith('blank') ? row.replace(/x/g, '#') : row);
     for (let y = 0; y <= f.anchors.a.neckRow; y++) assert.equal(read(f.b[y]), read(f.a[y]), `${f.id}: row ${y} differs between frames`);
     assert.ok(poseDistance(f.a, f.b) >= 4, `${f.id}: A and B nearly identical`);
     const bottom = (s) => s.findLastIndex((r) => [...r].filter((c) => c !== '.').length >= s[0].length * 0.4);
@@ -262,4 +263,51 @@ test('Blank grows from the hidden teen (the hood peak and the shimmer carry the 
   assert.ok(set.blank.a.join('').includes('x') && set.teenHidden.a.join('').includes('x#x'), 'both shimmer');
   assert.equal(set.blank.a[0].replace(/\./g, '').length, set.teenHidden.a[0].replace(/\./g, '').length, 'the same hood peak');
   for (const id of WETWARE_ADULTS_ALL) assert.ok(iou('blank', id) < 0.8, `blank/${id}`);
+});
+
+// --- elders: one per adult ---------------------------------------------------------------------------------------------------------
+test('every adult has exactly one elder: 18 columns, no taller than 15 rows, never shorter than the adult, the adult\'s marks kept', () => {
+  const elders = Object.keys(WETWARE_FORMS).filter((id) => WETWARE_FORMS[id].stage === 'elder');
+  assert.deepEqual(elders.map((id) => WETWARE_FORMS[id].from).sort(), [...WETWARE_NINE].sort());
+  for (const adult of WETWARE_NINE) {
+    const elder = set[WETWARE_ELDER_OF(adult)];
+    assert.equal(elder.a[0].length, 18, `${elder.id}: width`);
+    assert.ok(elder.a.length <= 15 && elder.a.length >= set[adult].a.length, `${elder.id}: ${elder.a.length} rows against ${set[adult].a.length}`);
+    for (const ch of new Set(set[adult].a.join('').replace(/[.]/g, ''))) assert.ok(elder.a.join('').includes(ch), `${elder.id}: lost the ${ch} mark`);
+  }
+});
+
+test('each elder is closest, after scaling, to the adult it grows from among all nine adults', () => {
+  const rows = WETWARE_NINE.map((adult) => {
+    const elder = set[WETWARE_ELDER_OF(adult)].a;
+    const ranked = WETWARE_NINE.map((x) => ({ x, v: scaledOverlap(elder, set[x].a) })).sort((p, q) => q.v - p.v);
+    const other = ranked.find((r) => r.x !== adult);
+    return { adult, own: scaledOverlap(elder, set[adult].a), other: other.x, otherValue: other.v };
+  });
+  console.log('  Wetware elder against its adult (scaled), best other: ' + rows.map((r) => `${r.adult} ${r.own.toFixed(2)} vs ${r.other} ${r.otherValue.toFixed(2)}`).join(', '));
+  for (const r of rows) assert.ok(r.own > r.otherValue && r.own >= 0.75, `${r.adult}: ${r.own.toFixed(2)} against ${r.other} ${r.otherValue.toFixed(2)}`);
+});
+
+test('the nine Wetware elders are distinct from one another (under 1.0\'s 0.82)', () => {
+  const pairs = [];
+  for (let i = 0; i < WETWARE_NINE.length; i++) {
+    for (let j = i + 1; j < WETWARE_NINE.length; j++) pairs.push({ pair: `${WETWARE_NINE[i]}/${WETWARE_NINE[j]}`, iou: silhouetteIou(set[WETWARE_ELDER_OF(WETWARE_NINE[i])].a, set[WETWARE_ELDER_OF(WETWARE_NINE[j])].a) });
+  }
+  pairs.sort((p, q) => q.iou - p.iou);
+  console.log(`  closest Wetware elders: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  for (const p of pairs) assert.ok(p.iou < 0.82, `${p.pair} ${p.iou.toFixed(3)}`);
+});
+
+test('Wired\'s elder is 1.0\'s Plat with its head still and its feet stepping; Chipped\'s lens, Leech\'s tube and Blank\'s hood carry over', () => {
+  assert.deepEqual(set.wiredElder.a, SPRITES.platA);
+  for (let y = 0; y <= set.wiredElder.anchors.a.neckRow; y++) assert.equal(set.wiredElder.b[y], set.wiredElder.a[y], `Plat row ${y}`);
+  assert.ok(poseDistance(set.wiredElder.a, set.wiredElder.b) >= 4);
+  const e = set.chippedElder.a[set.chippedElder.anchors.a.eyeRow];
+  assert.ok(e.includes('oo') && e.includes('++') && [...e].filter((c) => c === 'o').length === [...e].filter((c) => c === '+').length, 'Chipped: one accent eye and one equal highlight lens');
+  assert.equal(set.chippedElder.sleep[set.chippedElder.anchors.a.eyeRow + 1].includes('+'), true, 'Chipped asleep: the lens keeps its colour');
+  const l = set.leechElder;
+  assert.ok(l.a.slice(l.anchors.a.mouthRow + 1, l.anchors.a.mouthRow + 6).every((r) => r.indexOf('+') === 9), 'Leech: the tube runs down from the mouth');
+  assert.ok(l.a.some((r) => r.includes('xx')), 'Leech: a pump');
+  assert.equal(set.blankElder.a[0].replace(/\./g, '').length, 2, 'Blank: a hood peak');
+  assert.ok(set.blankElder.a.slice(5, 8).every((r) => r.includes('xx')) && !set.blankElder.a.join('').includes('+'), 'Blank: a dark face opening, no mouth');
 });
