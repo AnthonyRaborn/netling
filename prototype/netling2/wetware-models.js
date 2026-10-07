@@ -68,10 +68,10 @@ function wiredDead(a) {
 // pair of X's sit off the face's centre line (2.5 columns in from the left, 3.5 from the right). Here a half-cell centre rounds toward the
 // middle of the sprite, so the pair is symmetric. The eyes clear to the body colour as in 1.0.
 const X3 = [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]];
-function wetwareDead(a, eyeRow) {
+function wetwareDead(a, eyeRow, fill = '#') {
   const g = a.map((row) => [...row]);
   const groups = eyeGroups(a, eyeRow);
-  for (const cells of groups) for (const [x, y] of cells) g[y][x] = '#';
+  for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
   const middle = (a[0].length - 1) / 2;
   for (const cells of groups) {
     const cx = cells.reduce((n, [x]) => n + x, 0) / cells.length;
@@ -91,7 +91,9 @@ function chippedPose(a, anchors, kind) {
   if (kind !== 'sleep') return posed;
   return posed.map((row, y) => ((y === anchors.eyeRow || y === anchors.eyeRow + 1) ? [...row].map((c, x) => (c === 'o' && LENS.cols.includes(x) ? '+' : c)).join('') : row));
 }
-export const wetwarePose = (a, anchors, kind, id) => wetwareMarks(id === LENS.id ? chippedPose(a, anchors, kind) : id === 'wired' && kind === 'dead' ? wiredDead(a) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow) : pose(a, anchors.eyeRow, kind), anchors, kind);
+// Blank's eyes sit in a dark face opening, so when they close or cross they go back into the dark ('x'), as the Shell's do in Program.
+const FILLS = { blank: 'x' };
+export const wetwarePose = (a, anchors, kind, id) => wetwareMarks(id === LENS.id ? chippedPose(a, anchors, kind) : id === 'wired' && kind === 'dead' ? wiredDead(a) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow, FILLS[id] ?? '#') : pose(a, anchors.eyeRow, kind, FILLS[id] ?? '#'), anchors, kind);
 
 function build(id) {
   const frames = FRAMES[id];

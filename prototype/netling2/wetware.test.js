@@ -230,18 +230,22 @@ test('each street adult carries its motif: Solo a Batou-style ocular band and sq
 });
 
 // --- Blank, the hidden adult ----------------------------------------------------------------------------------------------------
-test('Blank is the hidden teen grown: a pointed hood over a blank face (slit lens eyes, no mouth), a shimmering coat and a scalloped hem', () => {
+test('Blank is the hidden teen grown, in a hooded cloak: a pointed hood, a dark face opening with two lens eyes and no mouth, camouflage over the hood top and the whole cloak, a flat hem and feet', () => {
   const b = set.blank;
+  const camo = /(#x){3}|(x#){3}/;
   assert.equal(WETWARE_FORMS.blank.role, 'hidden');
   assert.equal(b.a.length, 15);
   assert.equal(b.a[0].replace(/\./g, '').length, 2, 'a hood peak');
   assert.ok(b.a[0].replace(/\./g, '').length < b.a[3].replace(/\./g, '').length, 'the hood widens');
   assert.ok(!b.a.join('').includes('+'), 'no mouth: a blank face');
-  assert.ok(b.a.slice(12, 14).every((r) => r.includes('#x#x#x')), 'the coat alternates bright and dim cells');
-  assert.ok(b.a.at(-1).includes('.##.##'), 'a scalloped hem');
-  // The shimmer's phase swaps between frames and the hem steps, but the hood and face do not move.
+  assert.ok(b.a.slice(5, 8).every((r) => r.includes('xx')) && b.a[5].includes('oo'), 'a dark face opening with the eyes in it');
+  assert.ok(b.a.slice(5, 8).every((r) => r.startsWith('..##') && r.endsWith('##..')), 'a solid hood rim around it');
+  assert.ok([2, 3, 4, 8, 10, 11, 12, 13].every((y) => camo.test(b.a[y])), 'camouflage over the hood top, the chin and the whole cloak');
+  assert.ok(b.a[13].replace(/\./g, '').length === 14 && b.a[12].replace(/\./g, '').length === 14, 'a flat hem, no scallops');
+  assert.ok(b.a.at(-1).replace(/\./g, '').length === 4, 'feet below the hem');
+  // The hood does not move between frames; the cloak's shimmer swaps phase and the feet step.
   for (let y = 0; y <= b.anchors.a.neckRow; y++) assert.equal(b.b[y], b.a[y], `row ${y}`);
-  assert.notEqual(b.a[12], b.b[12]);
+  assert.notEqual(b.a[11], b.b[11]);
   assert.ok(poseDistance(b.a, b.b) >= 4);
 });
 
