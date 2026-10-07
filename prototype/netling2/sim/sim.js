@@ -638,6 +638,27 @@ function stepActs(s) {
 }
 const actOn = () => (ACTS.charge.on ? 'charge' : ACTS.sync.on ? 'sync' : null);
 const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null);
+// 2.0 egg pressure, two-sided meters: Charge and Sync each get a high side (hi or over) and a low side (lo or under) with a benefit
+// and a cost, for every egg. The owner's meter (Program: charge, Wetware: sync; owner = that key, null for Iron) has every effect
+// scaled by ownerMult. m = 1 for a non-owner, ownerMult for the owner. Off by default; SIDES='{"on":true,"owner":"charge"}' switches it on.
+//   charge hi: play pays more sync (playGain), wins drop more (drop); cost: overflow likelier (overflow), integrity bleeds (bleed per hour).
+//   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
+//   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
+//   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
+export const SIDES = {
+  on: false, owner: null, ownerMult: 2,
+  charge: { hi: 85, lo: 30, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
+  sync: { hi: 85, lo: 30, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, calm: 0.2, dull: 0.3 },
+};
+if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
+  if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
+}
+const sideOf = (s, key) => (!SIDES.on ? null : s.stats[key] >= SIDES[key].hi ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
+const dropSides = (s) =>
+  (sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.drop * sideM('charge') : 1) *
+  (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.drop * sideM('sync') : 1) /
+  (sideOf(s, 'sync') === 'lo' ? 1 + SIDES.sync.dull * sideM('sync') : 1);
+const sideM = (key) => (SIDES.owner === key ? SIDES.ownerMult : 1);
 const baseVirusPerHour = (s) => {
   const b = bandOn();
   const a = actOn();
@@ -771,12 +792,13 @@ function step(s, t, rng) {
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
+  const chargeLo = sideOf(s, 'charge') === 'lo' ? 1 / (1 + SIDES.charge.slow * sideM('charge')) : 1;
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * chargeLo * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
   const heatBefore = st.heat;
   st.heat = clamp(
-    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * s.bugs)) / 60,
+    st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * chargeLo * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
   // Iron's cooling floor: nap and sleep cool it no further than `restFloor` (a stat already below the floor stays where it is).
   if (IRON.on && rest && IRON.restFloor > 0 && st.heat < IRON.restFloor) st.heat = Math.min(heatBefore, IRON.restFloor);
@@ -795,6 +817,7 @@ function step(s, t, rng) {
   // No fresh infections while it rests: it's offline, not browsing.
   if (!s.virus && !shielded(s) && !rest) {
     let perHour = baseVirusPerHour(s) + CFG.virusPerCachePerHour * s.cache;
+    if (sideOf(s, 'sync') === 'hi') perHour *= 1 + SIDES.sync.virus * sideM('sync');
     perHour *= 1 - traitEffect(s, 'hardened');
     perHour *= mod(s, 'virusMult');
     if (rng() < perHour / 60) {
@@ -812,6 +835,7 @@ function step(s, t, rng) {
   if (s.cache >= 3) dInt -= 5;
   if (st.heat >= 85) dInt -= 8;
   if (st.charge <= 0) dInt -= 6;
+  if (sideOf(s, 'charge') === 'hi' && !rest) dInt -= SIDES.charge.bleed * sideM('charge');
   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
   const deepRest = s.nap || (s.asleep && !s.lightsOn);
   // 2.0 bugs: regeneration is cut by regenCut a bug (0 until chosen), damage is multiplied by (1 + integrity a bug), and integrityFlat an
@@ -826,6 +850,7 @@ function step(s, t, rng) {
   else if (!rest && overclocked(s)) s.temper += CFG.overclockTemperPerHour / 60;
   else if (!rest && !alertReason(s)) s.temper += (inFlow(s) ? CFG.flowTemperPerHour : CFG.uptimeTemperPerHour) / 60;
   s.temper *= TEMPER_DECAY();
+  if (!rest && sideOf(s, 'sync') === 'hi') s.temper *= 1 + SIDES.sync.swing * sideM('sync');
   s.tLevel = guardedLevel(s.temper, s.tLevel ?? 0);
   while (s.faultRolls > 0) {
     s.faultRolls--;
@@ -885,7 +910,9 @@ function stepEvents(s, t, rng) {
   }
   if (resting(s)) return;
   // Overclocked draws trouble; flow keeps it away (the two never overlap: flow needs Heat under 60).
-  const hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
+  let hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
+  if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * sideM('sync');
+  const overflowMult = sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * sideM('charge') : 1;
   if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
@@ -903,7 +930,7 @@ function stepEvents(s, t, rng) {
     s.event = { type: 'attack', startedAge: s.ageMin, window: eventWindow(s, 'attack') };
     if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! intrusion attempt. DEFEND within ${s.event.window}m.`);
-  } else if (rng() < (hot * (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache)) / 60) {
+  } else if (rng() < (hot * overflowMult * (CFG.overflowChancePerHour + CFG.overflowPerCachePerHour * s.cache)) / 60) {
     s.event = { type: 'overflow', startedAge: s.ageMin, window: eventWindow(s, 'overflow') };
     if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! memory overflow. PURGE within ${s.event.window}m.`);
@@ -1062,7 +1089,7 @@ function answerRequest(s, action, game) {
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
 export const overclocked = (s) => s.stats.heat >= CFG.overclockHeat;
-const visitMult = (s) => (overclocked(s) ? CFG.overclockVisitMult : inFlow(s) ? CFG.flowVisitMult : 1);
+const visitMult = (s) => (overclocked(s) ? CFG.overclockVisitMult : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
 // How fast mini-games and ICE run: slower while overclocked.
 export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 
@@ -1378,7 +1405,7 @@ export function blockReason(s, action) {
   if (s.stage === 'script' && action !== 'lights') return 'still compiling...';
   if (rebootMinutesLeft(s) > 0 && action !== 'lights') return `rebooting. ${rebootMinutesLeft(s)}m left.`;
   if (resting(s) && ['corp', 'scav', 'play', 'cool'].includes(action)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
-  if (action === 'play' && s.stats.charge < 10) return 'not enough charge to play.';
+  if (action === 'play' && s.stats.charge < 10 + (SIDES.on && s.stats.charge <= SIDES[ 'charge' ].lo ? SIDES.charge.gate * sideM('charge') : 0)) return 'not enough charge to play.';
   if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
   if (action === 'defend' && s.event?.type !== 'attack') return 'no intrusion to defend against.';
   if (action === 'greet' && !s.visit) return 'nobody is here.';
@@ -1490,6 +1517,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       actEarly(s, 'sync');
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       gain *= 1 + traitEffect(s, 'volatile');
+      if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
       // A lost game while overclocked costs instead of consoling.
       if (hot && !won) {
         gain = CFG.overclockLoseSync;
@@ -1518,7 +1546,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         : hot
           ? `${game}: lost, overclocked. it took that hard.`
           : `${game}: lost. it had fun anyway.`;
-      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance * (hot ? CFG.overclockDropMult : 1), rng);
+      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance * (hot ? CFG.overclockDropMult : 1) * dropSides(s), rng);
       const asked = answerRequest(s, 'play', game);
       if (asked) msg += ' just what it asked for.';
       res = { ...ok(msg, won ? 'win' : 'lose'), requestMet: asked };
