@@ -577,8 +577,9 @@ function eventAnswered(s, t) {
 // rest), and the base infection hazard (Iron's "drift") follows wear instead of staying flat. A spike is nearly free; a long redline
 // is not. Off by default; IRON='{"on":true}' switches it on. rate: wear per minute per Heat point over the threshold; decay: the
 // share of wear lost a minute (times restMult while resting); floor and slope: the base hourly hazard at no wear and the extra at
-// wear 100; line: the wear at which it logs a warning.
-export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, line: 50 };
+// wear 100; lock: the extra Sync (LOCK) drain at wear 100, as a share (0 = none, the notes' first version); line: the wear at which it
+// logs a warning.
+export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 0, line: 50 };
 if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
 function stepWear(s, t, rest) {
   const before = s.wear ?? 0;
@@ -720,7 +721,7 @@ function step(s, t, rng) {
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
-  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs));
+  st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
   st.heat = clamp(
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
