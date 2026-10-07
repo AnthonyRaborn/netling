@@ -406,6 +406,19 @@ Reading it: the floor is egg 1, not the other two. Root Access needs a netling t
 
 Levers that touch earlier decisions (not changed here): the elder feat (the gate was kept; its feat count is the lever with the largest effect on elder reach), the Root list (the Deep's four NL-0 pages, `deep-1` to `deep-4`, are where NL-0 speaks to the player and the sketch keeps Root at 24 pages, 3 lives at 8 a life), the page cap (8 a life), and the role and hidden page rates (decided at 0.10 and 0.25).
 
+**Second pass (maintainer: per-life codex cap 12, decided).** What "lives" means in these tables: a fresh playthrough from life 1 of the first egg (empty codex, no Root) to the life in which the last of the 18 egg pages (15 role and hidden pages, 3 Source pages) is in hand, the three eggs played one after another. It excludes the ending itself, the four Source story pages and the rest of the 39 story pages, and the Rogue egg. **A life is a real-time life of about 5 days (6 for an elder), so 10 lives is about 50 days and 6 lives about 30 days of play.** The cap of 12 is applied below (it moved Root only from life 4 to life 3, since Root also waits on The Deep).
+
+Lighter feat after the first elder, measured (lineages of 10 lives from an empty codex for egg 1; fresh Root-holding lineages for eggs 2 and 3; 300 each; guaranteed first-exit Source page; cap 12). Median lives for all three eggs, attentive (casual); share finished within 8 and 10 lives for attentive:
+
+| Feat | Role 0.10, hidden 0.25 | Role 0.20, hidden 0.50 |
+|---|---|---|
+| 3 Deep exits or 2 clean, always | 10 (17); by 8: 17%, by 10: 57% | 8 (15); by 8: 56%, by 10: 87% |
+| Lighter (2 or 1 clean) after the lineage's first elder | 10 (16); 17%, 58% | 8 (15); 55%, 86% |
+| Lighter after the first elder anywhere (the account) | 10 (14); 24%, 66% | 8 (12); 71%, 94% |
+
+- **A lighter feat after the first elder does not shorten the Rogue gate** when it is per lineage: an egg's pages are complete at its first Source exit, which is its first elder, so the eased feat never gets used before the egg is done (10 lives either way). Per account it helps the second and third eggs a little (their first lives are easy), by about one life for casual and none for attentive at the current rates. It does help what comes after the first elder: a lineage's later elder lives (the Source story pages the ending needs, power), where it was measured to lift the share of lives that reach an elder from 60% to 84% for attentive and from 27% to 49% for casual. So it is a good rule for repeat elders, not a lever for the 6-life aim. Not measured: how many elder lives the ending's four Source pages need.
+- With cap 12 alone the attentive median is 10 lives (from 11); with role 0.20 and hidden 0.50 it is 8; lightening the first feat (as measured before: 2 or 1 clean from the start) and taking the Deep's four pages out of Root were what reached 6.
+
 **Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 
 **Open for the maintainer.**
