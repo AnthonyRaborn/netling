@@ -3,7 +3,7 @@
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
-// BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
+// BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
 // carries a trait). The remaining text below is 1.0's.
 // Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, temperLevel, clearBug, leanSeen } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, temperLevel, clearBug, leanSeen } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -282,7 +282,9 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.event?.type === 'overflow' && !lapse()) doAct('purge');
   if (s.virus && !lapse()) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3) && !lapse()) doAct('purge');
-  const coolAt = p.coolAt ?? (p.hot ? 80 : 50);
+  let coolAt = p.coolAt ?? (p.hot ? 80 : 50);
+  // IRONBOT=avoid: a player who sees Iron's drift coming and cools earlier once wear is building.
+  if (process.env.IRONBOT === 'avoid' && IRON.on && (s.wear ?? 0) >= IRON.line * 0.6) coolAt = Math.min(coolAt, IRON.heat - 5);
   if (s.stats.heat > coolAt && !lapse()) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
   // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
@@ -433,6 +435,9 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     rattles: s.rattleCount ?? 0,
     rattledEvents: s.rattledEvents ?? 0,
     rattlePaid: s.rattlePaid ?? 0,
+    wearMax: s.wearMax ?? 0,
+    wearHighMin: s.wearHighMin ?? 0,
+    awakeMin: s.ageMin,
     eventsAnswered: s.eventsAnswered ?? 0,
     eventsTotal: events,
     prefMatches: s.prefMatches ?? 0,
@@ -604,7 +609,7 @@ export function stats(results) {
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
     bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1), clinicVisits: round(avg(results.map((r) => r.clinicVisits)), 2) },
     // Egg pressure (Program's rattle timer, RATTLE='{"on":true}'): infections a life, and how often the timer was set and bit.
-    pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2), rattlePaid: round(avg(results.map((r) => r.rattlePaid)), 2) },
+    pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2), rattlePaid: round(avg(results.map((r) => r.rattlePaid)), 2), wearMax: round(avg(results.map((r) => r.wearMax)), 1), wearHighShare: round(avg(results.map((r) => r.wearHighMin / Math.max(1, r.awakeMin))), 3) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {

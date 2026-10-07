@@ -862,3 +862,64 @@ test('rattle (cost): answering an event that opened rattled costs extra Heat and
     Object.assign(sim.RATTLE, { on: false, cut: 0.25, heat: 0, charge: 0 });
   }
 });
+
+// --- Iron's wear (egg pressure, off by default) --------------------------------------------------
+
+test('wear: off by default; on, it builds only above the Heat threshold, decays faster at rest, and sets the base infection hazard', async () => {
+  const sim = await import('./sim/sim.js');
+  assert.equal(sim.IRON.on, false);
+  const idle = fresh();
+  advance(idle, 30, calm);
+  assert.equal(idle.wear, undefined, 'nothing is tracked while off');
+
+  Object.assign(sim.IRON, { on: true, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.01, slope: 0.3 });
+  try {
+    const cool = fresh();
+    cool.stats.heat = 60;
+    advance(cool, 60, calm);
+    assert.equal(cool.wear, 0, 'Heat under the threshold builds nothing');
+
+    const hot = fresh();
+    for (let i = 0; i < 20; i++) {
+      hot.stats.heat = 90;
+      advance(hot, 1, calm);
+    }
+    assert.ok(hot.wear > 15 && hot.wear < 30, `20 minutes at Heat 90 builds some wear (${hot.wear})`);
+    assert.equal(hot.wearMax, hot.wear);
+
+    const spike = fresh();
+    spike.stats.heat = 90;
+    advance(spike, 1, calm);
+    for (let i = 0; i < 60; i++) {
+      spike.stats.heat = 60;
+      advance(spike, 1, calm);
+    }
+    assert.ok(spike.wearMax < 2, 'a one-minute spike adds almost nothing against the warning line');
+    assert.ok(spike.wear < spike.wearMax, 'and it only shrinks afterwards');
+
+    const awake = fresh();
+    awake.wear = 50;
+    const resting = fresh();
+    resting.wear = 50;
+    resting.nap = { startedAge: resting.ageMin };
+    awake.stats.heat = resting.stats.heat = 20;
+    advance(awake, 30, calm);
+    advance(resting, 30, calm);
+    assert.ok(resting.wear < awake.wear, 'rest sheds wear faster');
+
+    // The base hazard follows wear: at wear 100 with no cache the hourly hazard is floor + slope = 0.31.
+    const worn = fresh();
+    worn.wear = 100;
+    worn.stats.heat = 20;
+    worn.cache = 0;
+    advance(worn, 1, () => 0.005); // 0.005 < 0.31/60 = 0.0052
+    assert.equal(worn.virus, true);
+    const fresh0 = fresh();
+    fresh0.stats.heat = 20;
+    fresh0.cache = 0;
+    advance(fresh0, 1, () => 0.005); // 0.005 < 0.01/60 = 0.00017 is false
+    assert.equal(fresh0.virus, false);
+  } finally {
+    Object.assign(sim.IRON, { on: false, heat: 70, floor: 0.01, slope: 0.06 });
+  }
+});

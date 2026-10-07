@@ -573,6 +573,24 @@ function eventAnswered(s, t) {
     if (t !== undefined) log(s, t, '> it flinches at the next alarm.');
   }
 }
+// 2.0 egg pressure, Iron (restraint): hidden wear builds while Heat stays above `heat` and drains away when it does not (faster at
+// rest), and the base infection hazard (Iron's "drift") follows wear instead of staying flat. A spike is nearly free; a long redline
+// is not. Off by default; IRON='{"on":true}' switches it on. rate: wear per minute per Heat point over the threshold; decay: the
+// share of wear lost a minute (times restMult while resting); floor and slope: the base hourly hazard at no wear and the extra at
+// wear 100; line: the wear at which it logs a warning.
+export const IRON = { on: false, heat: 70, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.01, slope: 0.06, line: 50 };
+if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
+function stepWear(s, t, rest) {
+  const before = s.wear ?? 0;
+  const excess = Math.max(0, s.stats.heat - IRON.heat);
+  let w = before * (1 - IRON.decay * (rest ? IRON.restMult : 1)) + (rest ? 0 : IRON.rate * excess);
+  w = Math.min(100, Math.max(0, w));
+  s.wear = w;
+  s.wearMax = Math.max(s.wearMax ?? 0, w);
+  if (w >= IRON.line) s.wearHighMin = (s.wearHighMin ?? 0) + 1;
+  if (before < IRON.line && w >= IRON.line) log(s, t, '> tolerances are slipping.');
+}
+const baseVirusPerHour = (s) => (IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : CFG.virusBasePerHour);
 export const pushGame = (s, game) => {
   const last = s.lastGames ?? [];
   s.lastGames = PREF.distinct ? [game, ...last.filter((g) => g !== game)].slice(0, 2) : [game, ...last].slice(0, 2);
@@ -688,6 +706,8 @@ function step(s, t, rng) {
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
 
+  if (IRON.on) stepWear(s, t, rest);
+
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
     s.cache++;
     log(s, t, '> corrupted cache file written.');
@@ -696,7 +716,7 @@ function step(s, t, rng) {
 
   // No fresh infections while it rests: it's offline, not browsing.
   if (!s.virus && !shielded(s) && !rest) {
-    let perHour = CFG.virusBasePerHour + CFG.virusPerCachePerHour * s.cache;
+    let perHour = baseVirusPerHour(s) + CFG.virusPerCachePerHour * s.cache;
     perHour *= 1 - traitEffect(s, 'hardened');
     perHour *= mod(s, 'virusMult');
     if (rng() < perHour / 60) {
