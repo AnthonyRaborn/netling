@@ -1,5 +1,44 @@
 # Netling 2.0 rule prototypes
 
+## The 2.0 simulator (current)
+
+`prototype/netling2/sim/` is a fork of 1.0's simulator carrying the 2.0 core life rules as real rules, replacing the scratch patch described further down for everything it covers. `src/` and `tools/` are untouched, and the fork reproduced 1.0's `npm run balance` output exactly before any 2.0 change (casual, 100 lives), so its diffs show only the 2.0 rules. It is a prototype: not shipped, not in `sw.js`.
+
+| File | What it is |
+|---|---|
+| `sim/sim.js` | Fork of `src/sim.js`. Standing as two tracks, temper with a 24 hour half-life and the five levels (the flicker guard is `tell.js`'s), bugs, no fault cap, teen and adult evolution with the tie-break weights, care preferences, 22 generic forms per egg |
+| `sim/netrun/run.js` | Fork of `src/netrun/run.js`: ICE games enter the preference history; a disconnect fault owes a bug roll |
+| `sim/netrun-bot.mjs`, `sim/balance.mjs` | Forks of the scripted netrun player and `tools/balance.mjs` (same archetypes, same settings, new report lines) |
+| `sim.test.js` | 21 tests, one or more per rule (`npm run proto:test`) |
+
+Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 16 archetypes take about 80 seconds.
+
+**Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, clearing for 15 scrip or 2 Standing (Bugs); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by whole-point Standing and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
+
+**Not modeled:** the debug station anomaly and any bug-clearing node (undecided); 2.0 perks, traits, keepsakes and netrun abilities (undesigned, so the 22 forms differ only in how they are reached and the three eggs behave the same); Root Access granted at once and the elder tiers (progression layer, use the drivers below); egg pages and the Rogue gate; neglect's look; the sprite. The bots are still 1.0's: they cycle games in a fixed order, so the **role is never certain** (the top two games are within 5 wins), and no archetype steers a role; they do not react to a glitching sprite; the Standing display (floors) is not modeled, decisions read whole points.
+
+**Fidelity checks** (300 lives, share of lives ending at each shown temper level, strongly unsteady / unsteady / middle / steady / strongly steady; the sketch's figures came from the scratch patch):
+
+| Archetype | Sketch | This simulator |
+|---|---|---|
+| Casual | 0/20/76/4/0 | 0/21/74/4/0 |
+| Worker | 2/37/60/0/0 | 3/40/56/1/0 |
+| Attentive | 0/0/10/46/43 | 0/0/14/38/48 |
+| Steer-daemon | 0/0/1/25/74 | 0/0/2/22/76 |
+| Steer-glitch | 6/49/45/0/0 | 4/50/46/0/0 |
+| Daredevil | 24/53/22/0/0 | 32/55/12/0/0 |
+| Overclocker | 72/27/0/0/0 | 83/17/0/0/0 |
+| Neglectful | 18/56/25/0/0 | 14/43/43/0/0 |
+
+Also in line: casual Standing by adulthood about 9.4 and 8.9 (the sketch: about 10 and 8); a worker without clearing 7.7 faults and 14% at the bug ceiling (the sketch: 7.7 and 17%); the 12 hour hold reach with neglect level 2 paused: attentive 48% (52%), steer-daemon 80% (87%), daredevil 35% (34%), steer-glitch 5% (5%), overclocker 80% (90%). Casual full-life rate 94% (the sketch: 95.7% without the cap). **The hot end does not reproduce** (daredevil and overclocker end more unsteady), and the gap is not explained: it does not come from bugs (switching them off changes nothing), and switching care preferences off widens it (overclocker 91% strongly unsteady, daredevil 35%), so preferences narrow it without closing it.
+
+**New findings:** care preferences pull the unsteady end back. A matched action gives Sync, so a hot player plays less. With preferences off the overclocker's 12 hour unsteady hold reaches 89% of lives against 80% with them, the daredevil's 45% against 35%, and overclockers ending strongly unsteady 91% against 83%. The sketch measured the preference and the Metronome separately, so their interaction was not seen. Clearing bugs with Standing as a fallback (`CLEAR=both`) cuts a worker's final bugs from 1.24 to 0.04 and the bug ceiling from 7% to 0 at the cost of a few Standing points; with no clearing a worker ends with 2.1 bugs and 14% at the ceiling.
+
+Not verified: `npm run smoke`, any device check, and the temper-level differences above beyond the sample noise (about 1.5 points a share at 300 lives).
+
+## The scratch patch (earlier figures)
+
+
 Scratch prototypes that test Netling 2.0 rule ideas on 1.0's headless simulator (`tools/balance.mjs`, `src/sim.js`). They are not part of the game and are not shipped, tested or wired into `sw.js`. They exist so the numbers in [NETLING_2_SKETCH.md](../NETLING_2_SKETCH.md) can be reproduced and re-run, and so a later session knows exactly what was and was not modeled.
 
 Everything here stands in for rules that do not exist yet. 1.0's single signed allegiance stands in for Standing, and 1.0's stability axis stands in for temper. Treat every figure as a rough guide. Retest the numbers when 2.0 is built.
