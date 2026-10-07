@@ -49,6 +49,11 @@
     <div id="progTeensRow" class="row"></div>
     <div id="progAdultsRow" class="row"></div>
     <div id="progEldersRow" class="row"></div>
+    <h2>WETWARE: BABY, TEENS, ADULTS AND ELDERS (first drafts)</h2>
+    <p class="note">The Wetware egg. First row: the organoid baby and the three teens (corp, street, hidden). Second row: the nine adults, corp then street within a role (Razor and Solo, Wired and Chipped, Mentat and Gibson, Nutri and Leech), then Blank. Third row: each adult's elder (Wired's is 1.0's Plat). <b>Blank's elder is in motion</b>: a camouflage band sweeps the hood and body and a ghost dub slides behind it (a 4.8 s loop; reduced motion parks it). That layer is the one place a form's outline changes on purpose; its registered frames still obey the frame rules. The controls above apply.</p>
+    <div id="wetTeensRow" class="row"></div>
+    <div id="wetAdultsRow" class="row"></div>
+    <div id="wetEldersRow" class="row"></div>
     <h2>HOW MODEL A IS BUILT</h2>
     <p class="note">Body (grey), role overlay (pink), lean overlay (yellow; erased cells dark red) and the result, in the A frame.</p>
     <div id="layers" class="row"></div>
@@ -70,6 +75,7 @@
       import { PALETTES } from '../../src/sim.js';
       import { forms, FORMS, LINE, TEENS_ALL, HIDDEN_BRANCH, ADULTS_ALL, ELDER_OF } from './models.js';
       import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_ELDER_OF } from './program-models.js';
+      import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_NINE, WETWARE_ELDER_OF } from './wetware-models.js';
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { neglected } from './neglect.js';
@@ -175,6 +181,16 @@
           cells.push({ ctx: canvasFor(document.getElementById('progEldersRow'), PROGRAM_ELDER_OF(id), 3), f: P[PROGRAM_ELDER_OF(id)], fixed: null });
         }
 
+        // Wetware: the same controls, on its own forms (registered with the wearable code by ready.js).
+        const Wt = wetwareForms();
+        make(document.getElementById('wetTeensRow'), 'baby (organoid)', Wt.baby);
+        for (const id of WETWARE_TEENS_ALL) make(document.getElementById('wetTeensRow'), `${id} (teen, ${WETWARE_FORMS[id].lean})`, Wt[id]);
+        for (const id of WETWARE_NINE) {
+          const f = WETWARE_FORMS[id];
+          cells.push({ ctx: canvasFor(document.getElementById('wetAdultsRow'), `${id} (${f.role}${f.lean ? `, ${f.lean}` : ''})`, 3), f: Wt[id], fixed: null });
+          cells.push({ ctx: canvasFor(document.getElementById('wetEldersRow'), WETWARE_ELDER_OF(id), 3), f: Wt[WETWARE_ELDER_OF(id)], fixed: null });
+        }
+
         function drawCell({ ctx, f, fixed }, time) {
           const pal = PALETTES[state.palette];
           ctx.globalAlpha = 1;
@@ -190,10 +206,13 @@
           const rusty = neglect && key !== 'dead' ? neglected(sprite, f.anchors[anchorsKey], neglect, state.seed) : sprite;
           // Bugs tear rows (persistent); the twitch only moves when motion is allowed.
           const look = nBugs && key !== 'dead' ? glitched(rusty, f.anchors[anchorsKey], nBugs, { time, reduced: state.reduced || Boolean(fixed), seed: state.seed }) : rusty;
+          // A form with a motion layer (Blank's elder) is drawn from that layer, which may be wider; wearables stay on the registered sprite.
+          const shown = f.motion && key !== 'dead' && key !== 'sleep' ? f.motion(look, f.anchors[anchorsKey], { time, reduced: state.reduced }) : look;
           const x = Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx;
+          const xShown = Math.floor((LCD.w - shown[0].length) / 2) + tell.dx;
           const y = 20 - sprite.length + tell.dy + (awake ? 0 : 1);
           ctx.globalAlpha = tell.shade;
-          drawSprite(ctx, look, x, y, state.pose === 'dead' ? DEAD_COLORS : paletteColors(pal));
+          drawSprite(ctx, shown, xShown, y, state.pose === 'dead' ? DEAD_COLORS : paletteColors(pal));
           ctx.globalAlpha = 1;
           // The wearable code reads the registered sprite (same outline as the neglected one).
           if (state.wear && state.pose !== 'dead') drawWorn(ctx, [{ id: state.wear }], sprite, x, y, tell.frame, state.pose === 'sleep', time, pal);

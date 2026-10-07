@@ -9,6 +9,7 @@
 //           opposite of Program's bright flatline; the dream ends, and the next one starts as a new culture).
 // Marks only: they replace body cells (never the eyes or the outline).
 import { pose, eyeGroups } from './models.js';
+import { blankMotion } from './blank-motion.js';
 import { WETWARE_BABY, WETWARE_BABY_ANCHORS, WETWARE_TEENS, WETWARE_TEEN_ANCHORS, WETWARE_ADULTS, WETWARE_ADULT_ANCHORS, WETWARE_ELDERS, WETWARE_ELDER_ANCHORS } from './wetware-art.js';
 
 export const WETWARE_FORMS = {
@@ -112,6 +113,8 @@ function build(id) {
     sleep: wetwarePose(frames.a, a, 'sleep', id),
     dead: wetwarePose(frames.a, a, 'dead', id),
     anchors: { a, b: a, sleep: a },
+    // Blank's elder carries a motion layer that changes its outline on purpose (see blank-motion.js); the frames above obey the frame rules.
+    ...(id === 'blankElder' ? { motion: blankMotion } : {}),
   };
 }
 let cache;

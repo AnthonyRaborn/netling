@@ -9,6 +9,7 @@ import { programForms } from './program-models.js';
 import { SPRITES } from '../../src/sprites.js';
 import { silhouetteIou, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 import { scaledOverlap } from './metrics.js';
+import { blankMotion, motionStep, STEPS, STEP_MS, PAD, BANDS, SHIFTS } from './blank-motion.js';
 
 const set = wetwareForms();
 const baby = set.baby;
@@ -310,4 +311,66 @@ test('Wired\'s elder is 1.0\'s Plat with its head still and its feet stepping; C
   assert.ok(l.a.some((r) => r.includes('xx')), 'Leech: a pump');
   assert.equal(set.blankElder.a[0].replace(/\./g, '').length, 2, 'Blank: a hood peak');
   assert.ok(set.blankElder.a.slice(5, 8).every((r) => r.includes('xx')) && !set.blankElder.a.join('').includes('+'), 'Blank: a dark face opening, no mouth');
+});
+
+// --- Blank's elder in motion: camouflage activation and a ghost dub (the frame rule is waived for this layer, not for the frames) -------------
+test('Blank\'s elder carries a motion layer; its registered frames still obey the frame rules', () => {
+  const b = set.blankElder;
+  assert.equal(typeof b.motion, 'function');
+  assert.equal(set.blank.motion, undefined);
+  assert.equal(b.a[0].length, 18, 'the sprite stays 18 columns');
+  for (let y = 0; y <= b.anchors.a.neckRow; y++) assert.equal(b.b[y].replace(/x/g, '#'), b.a[y].replace(/x/g, '#'), `row ${y}`);
+});
+
+test('the motion layer: 12 steps of 400 ms, a pure function of time, no picture change faster than the flash floor', () => {
+  const b = set.blankElder;
+  assert.equal(STEPS, 12);
+  assert.ok(STEP_MS >= 400);
+  const at = (t) => b.motion(b.a, b.anchors.a, { time: t });
+  assert.deepEqual(at(0), at(STEP_MS - 1), 'the same picture within a step');
+  assert.deepEqual(at(0), at(STEPS * STEP_MS), 'it loops');
+  assert.deepEqual(at(5 * STEP_MS), b.motion(b.a, b.anchors.a, { time: 5 * STEP_MS }), 'a pure function');
+  assert.equal(motionStep(-5), 0);
+  const changes = [];
+  for (let s = 1; s < STEPS; s++) changes.push(at((s - 1) * STEP_MS).join('') === at(s * STEP_MS).join('') ? 0 : 1);
+  assert.ok(changes.every(Boolean), 'every step shows something new');
+});
+
+test('the motion layer keeps the face opening and the eyes whole at every step, is 24 columns wide and the same height, and only adds or removes body cells', () => {
+  const b = set.blankElder;
+  const eyeRow = b.anchors.a.eyeRow;
+  for (let s = 0; s < STEPS; s++) {
+    const m = b.motion(b.a, b.anchors.a, { time: s * STEP_MS });
+    assert.equal(m.length, b.a.length);
+    assert.ok(m.every((r) => r.length === 18 + PAD * 2), `step ${s}: width`);
+    for (const y of [eyeRow, eyeRow + 1, eyeRow + 2]) assert.equal(m[y].slice(PAD + 4, PAD + 14), b.a[y].slice(4, 14), `step ${s}: the face opening, row ${y}`);
+    assert.match(m.join(''), /^[.#ox]+$/);
+    assert.equal(m.join('').split('o').length - 1, b.a.join('').split('o').length - 1, `step ${s}: both eyes`);
+  }
+});
+
+test('the camouflage band sweeps the whole hood to the feet and back, and the dub slides three cells either way', () => {
+  const b = set.blankElder;
+  assert.deepEqual(BANDS, [1, 3, 5, 7, 9, 11, 13, 11, 9, 7, 5, 3]);
+  assert.equal(Math.min(...BANDS), 1, 'the band starts at the hood peak');
+  assert.ok(Math.max(...BANDS) >= 13, 'and reaches the feet');
+  assert.equal(Math.max(...SHIFTS), 3);
+  assert.equal(Math.min(...SHIFTS), -3);
+  const cells = (rows, re) => rows.join('').split('').filter((c) => re.test(c)).length;
+  const top = b.motion(b.a, b.anchors.a, { time: 0 });
+  const bottom = b.motion(b.a, b.anchors.a, { time: 6 * STEP_MS });
+  assert.ok(cells(bottom, /#/) > cells(top, /#/), 'more of the body is solid when the band is at the feet than at the hood');
+  assert.ok(top.slice(0, 3).join('').includes('x'), 'a dim band on the hood');
+  // the dub: at the extreme steps a dim copy sticks out of one side, on opposite sides at steps 0 and 6
+  const leftEdge = (rows) => Math.min(...rows.slice(0, 10).map((r) => r.search(/[#ox]/)).filter((x) => x >= 0));
+  const rightEdge = (rows) => Math.max(...rows.slice(0, 10).map((r) => r.search(/[#ox][.]*$/)).filter((x) => x >= 0));
+  assert.ok(leftEdge(top) < leftEdge(bottom) && rightEdge(bottom) > rightEdge(top), 'the dub is on the left at step 0 and on the right at step 6');
+});
+
+test('reduced motion: no movement, the camouflage as drawn and the dub parked two cells out', () => {
+  const b = set.blankElder;
+  const still = [0, 3, 7, 11].map((s) => b.motion(b.a, b.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n'));
+  assert.equal(new Set(still).size, 1);
+  const rows = b.motion(b.a, b.anchors.a, { time: 0, reduced: true });
+  assert.deepEqual(rows.map((r) => r.slice(PAD, PAD + 18)).map((r, y) => [...r].map((c, x) => (c === 'x' && b.a[y][x] === '.' ? '.' : c)).join('')), b.a, 'the sprite itself is untouched');
 });
