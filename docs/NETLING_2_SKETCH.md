@@ -372,18 +372,32 @@ The stage beyond adult. 1.0 already has it under the name Mainframe (`docs/SOURC
 1. **Root Access is earned once and kept for every later netling, any egg (decided).** So the second and third egg need no second Root: their netlings can reach an elder in their own first life that meets the gate. Each new netling still clears the five regions again (clears belong to a netling), so about 1.8 lives an egg at the 55% feat rate, if the 1.0 numbers hold.
 2. **Per-egg feats are not needed.** The gate is region-based (The Deep), not form-based, so it applies to Program, Iron and Wetware unchanged; the three eggs' abilities and upgrades are the part that still has to be designed (netrun abilities per form).
 3. **The Source needs an elder and `deep-6` in the codex** (`deep-6` is 1.0's `deep-5`, the Deep's last word; the new NL-0 page took `deep-5`). The codex is shared across eggs, so one read serves every egg.
-4. **The egg's Source page.** Each egg finds one extra page there (decided). Proposal: **the first Source exit of an egg always yields that egg's Source page** (the egg's own descent page), not a per-run roll. Reason: elders reach the Source rarely (attentive lines 0.47 Source runs in the first elder life, about 40% of runs reach the exit), so even a 0.25 roll per Source run (the hidden pages' rate) would mean about eight lives an egg for one page; a guaranteed first exit makes the Rogue gate a matter of getting through the Source once with each egg. Not simulated.
+4. **The egg's Source page (decided, maintainer): the first Source exit of an egg's lineage always yields that egg's Source page.** Measured (below): it makes the Source page a non-issue, and rolling after the guarantee adds nothing.
 5. **How the descent is drawn per egg (decided that it is; not designed).** Proposal in one line each: Program, it is read (the Source's text scrolls like code being parsed); Iron, it is burned in (the screen fills as a firmware image is written); Wetware, it is dreamed (slow, soft, as in sleep). All are static or slow and must stay under the flash limit; the Source's existing corrupted-name glitch is the model.
 6. **The Dex.** The elder rows are corrupted records until Root, then `???` with a hint, then found (1.0's rule); the hidden adult's elder row stays unlisted until its adult is revealed or raised (decided). No lore page hints at elders (decided).
 
-**Pacing for the Rogue gate (arithmetic, not simulation).** Rogue needs the ending and all 18 egg pages. For a committed player: Root around life 4; a first elder around life 5 or 6; the other two eggs about 2 lives each to an elder; each egg's Source page on its first Source exit (about 40% of Source runs reach the exit, and an elder has about two days); the ending needs all 39 story pages, so the four Source story pages and a Source exit. A rough total is 10 to 20 lives, which is long but of the same order as 1.0's "the codex takes 4 lives" scaled by three eggs. Casual players are effectively locked out, as with Aurora; that is accepted unless the maintainer wants a softer route.
+**Pacing for the Rogue gate (measured on 1.0's simulator).** Rogue needs the ending and all 18 egg pages. Model: 300 lineages of 14 lives an archetype on the unpatched 1.0 simulator (`lines.mjs`; runs by region, elder reached and Source exit per life); role pages roll 0.10 on each non-Deep run, the hidden page 0.25 on each Deep run (both decided), the Source page by the rule under test; the three eggs are played one after another, egg 1 as the real lineage (Root around life 4) and eggs 2 and 3 from post-Root lives (Root is kept, so they start with the whole codex and The Deep open). Lives to finish all 15 role and hidden pages and 3 Source pages (the ending's 39 story pages are not modeled; they come in the same lives):
+
+| Source page rule | Attentive: three eggs, median (p10 to p90) | Daredevil | Casual |
+|---|---|---|---|
+| 0.25 a Source run | 14 (10 to 21) | 13 (10 to 17) | 25 (15 to 43) |
+| **Guaranteed on the first Source exit (decided)** | **11 (9 to 14)** | **11 (9 to 13)** | **18 (13 to 27)** |
+| 0.5 a Source run | 12 (9 to 15) | 11 (9 to 14) | 19 (13 to 29) |
+| 0.75 a Source run | 11 (9 to 14) | 11 (9 to 13) | 17 (13 to 26) |
+| Guaranteed plus 0.5 a run | 11 (9 to 14) | 11 (9 to 13) | 17 (12 to 25) |
+| Guaranteed plus 0.75 a run | 11 (9 to 14) | 11 (9 to 13) | 17 (12 to 25) |
+
+- With the guarantee, the Source page is the last page for only 9% to 13% of attentive and daredevil eggs; the **four role pages at 0.10** are (about three quarters). A roll after the guarantee changes nothing, so none is proposed. One egg alone takes a median 5 lives (attentive; p90 7) and 8 for casual (p90 13).
+- Players who do not often reach an elder are limited by it: a fresh netling reaches an elder in 60% of attentive lives, 68% of daredevil and 27% of casual lives (post-Root pool); casual is limited by the Source for 43% of its later eggs even with the guarantee. A median of 18 lives for casual is a long goal, accepted unless the maintainer wants softer.
+- The earlier arithmetic here (about eight lives an egg for a 0.25 roll) was wrong; measured, 0.25 a Source run costs three eggs about 14 lives, not 24.
+- Not modeled: the ending's story pages (all 39, including four in the Source), whether a player really plays the eggs one after another, and 2.0 rules.
+
+**Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 
 **Open for the maintainer.**
-- Keep 1.0's gate (96 hours old, three Deep exits or two clean) as is, or change the feat per egg (for example Iron by count of clean exits, Wetware by coming home in flow)? 1.0 measured the feats against alternatives (`SOURCE_PLAN.md`, gate test results) and kept this one.
-- Keep the extra day of life, given 2.0 removes the 10-fault death and the fault cap?
-- The guaranteed Source page on an egg's first Source exit (proposal 4).
 - What the elder upgrades are per form (23 more to design; 1.0 has five), tied to the netrun abilities per form that are not designed yet.
 - Whether elders keep the same temper tell as their adult, or the elder's wider body needs its own check (the sprite handoff already lists wide elders as a risk).
+- Whether the four role pages at 0.10 a run (now the Rogue gate's slowest part) should rise, for example to 0.15, to bring the gate under about 10 lives for attentive play; not measured.
 
 ## Codex pages
 
