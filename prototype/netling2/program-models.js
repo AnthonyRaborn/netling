@@ -1,4 +1,4 @@
-// The Program egg's forms (baby and teens so far), built like Iron's authored forms in models.js: A and B share the head, eyes, mouth
+// The Program egg's forms (baby, teens and adults so far), built like Iron's authored forms in models.js: A and B share the head, eyes, mouth
 // and neck (only the legs move), sleep and dead are the 1.0 generic poses plus Program's own chest mark.
 //
 // Program's marks come from the sketch's Program register (interrupt-driven, a process that ends):
@@ -8,22 +8,33 @@
 // Marks only: they replace body cells (never the eyes or the outline), on the first chest row they fit.
 import { ANCHOR_ROWS } from '../../src/sprites.js';
 import { pose } from './models.js';
-import { PROGRAM_BABY, PROGRAM_TEENS } from './program-art.js';
+import { PROGRAM_BABY, PROGRAM_TEENS, PROGRAM_ADULTS, PROGRAM_ADULT_ANCHORS } from './program-art.js';
 
 export const PROGRAM_FORMS = {
   baby: { stage: 'baby', from: 'bitling' },
   teenCorp: { stage: 'teen', lean: 'corp', from: 'kernel' },
   teenStreet: { stage: 'teen', lean: 'street' },
   teenHidden: { stage: 'teen', lean: 'hidden', from: 'shell' }, // 1.0's hidden teen; grows into the Ghost
+  // Option C, corp then street within a role; the hidden adult last.
+  tiger: { stage: 'adult', role: 'breach', lean: 'corp' },
+  worm: { stage: 'adult', role: 'breach', lean: 'street' },
+  mouse: { stage: 'adult', role: 'dodge', lean: 'corp' },
+  spoof: { stage: 'adult', role: 'dodge', lean: 'street' },
+  parse: { stage: 'adult', role: 'tune', lean: 'corp' },
+  phreak: { stage: 'adult', role: 'tune', lean: 'street' },
+  gobble: { stage: 'adult', role: 'feast', lean: 'corp' },
+  snarf: { stage: 'adult', role: 'feast', lean: 'street' },
+  ghost: { stage: 'adult', role: 'hidden', from: 'ghost' }, // 1.0's hidden adult
 };
+export const PROGRAM_ADULTS_ALL = ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost'];
 export const PROGRAM_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
-export const PROGRAM_HIDDEN_BRANCH = ['baby', 'teenHidden'];
+export const PROGRAM_HIDDEN_BRANCH = ['baby', 'teenHidden', 'ghost'];
 
-const FRAMES = { baby: PROGRAM_BABY, ...PROGRAM_TEENS };
+const FRAMES = { baby: PROGRAM_BABY, ...PROGRAM_TEENS, ...PROGRAM_ADULTS };
 // 1.0's anchors for the forms reused as they are. Their B anchors equal A's (the head does not move), and sleep takes A's.
 // The street teen is Kernel's body, so it takes Kernel's rows.
 const ANCHORS_1_0 = { baby: 'bitling', teenCorp: 'kernel', teenStreet: 'kernel', teenHidden: 'shell' };
-const anchorsOf = (id) => ({ ...ANCHOR_ROWS[ANCHORS_1_0[id]].a });
+const anchorsOf = (id) => ({ ...(PROGRAM_ADULT_ANCHORS[id] ?? ANCHOR_ROWS[ANCHORS_1_0[id]].a) });
 
 const CURSOR = 'oo';
 const FLATLINES = ['oooooooo', 'oooooo', 'oooo']; // the longest that fits the chest

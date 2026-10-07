@@ -18,7 +18,7 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 - **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which did not meet this. Iron's hidden-path teen is now drawn with its own outline (see The hidden path, below). The hidden adult (Guru) was already distinct (closest overlap 0.77).
 - **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
 
-## Program (baby and teens)
+## Program (baby, teens and adults)
 
 Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 sprites directly where they fit). Code: `program-art.js`, `program-models.js`, `program.test.js`, registered by `register.js` under the key `protoP_<id>`. In the audit wrapper (`npm run proto:audit:program`, or `EGG=program` / `EGG=all` with `proto:audit`; the default stays Iron so its numbers remain comparable). Not yet in the generated gallery or the review page.
 
@@ -34,8 +34,21 @@ Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 
 - **Poses.** Sleep and dead are the generic 1.0 poses (slit eyes, X eyes) plus Program's own chest mark, from the sketch's Program register (interrupt-driven, a process that ends): asleep is a block cursor waiting for an interrupt, dead is a flatline run across the chest. A pair of marks for asleep read as a second pair of eyes, hence one block. The marks are a proposal.
 - **Teens.** Corp and street overlap 0.81 (17 outline cells and 2 marks differ), inside 1.0's 0.82 bar and closer than Iron's 0.74 because Kernel is a compact shape. The first street teen was 0.94 (5 cells) and failed the audit; this is the redraw. The hidden teen is 0.63 from corp and 0.54 from street. The street teen's head top still covers both eyes, so eyewear spans them. Whether the lean reads on a phone is a by-eye call.
 - **Wearables.** All 41 non-prop wearables on every Program form and pose (492 cases): none leave the screen, and none move between frames (164 cases).
-- **Audit (Program's 4 forms, `npm run proto:audit:program`).** The first run flagged corp and street teens at 0.94, above 1.0's 0.82 bar; after the street teen's redraw the highest same-stage pair is 0.81 and nothing else is flagged. Everything is at or inside 1.0: the holologo clips 1 px on the baby and the hidden teen (as on 1.0's forms), the necktie loses half its pixels on the corp teen on the ice palette (0.60), and the worst worn combinations are the usual ones (Chrome jaw over Gold chain 0.83, over Necktie 0.80, worst on the baby). The audit's `similar` section still names 1.0's Bitling and Chrome, not Program forms.
-- **Not drawn:** Program's nine adults and nine elders. Ghost (1.0) is the likely base of the hidden adult, but nothing is decided.
+- **Audit (Program's 4 forms, `npm run proto:audit:program`).** The first run flagged corp and street teens at 0.94, above 1.0's 0.82 bar; after the street teen's redraw the highest same-stage pair is 0.81 and nothing else is flagged. Everything is at or inside 1.0: the holologo clips 1 px on the baby and the hidden teen (as on 1.0's forms), the necktie loses half its pixels on the corp teen on the ice palette (0.60), and the worst worn combinations are the usual ones (Chrome jaw over Gold chain 0.83, over Necktie 0.80, worst on the baby). 
+- **The nine adults** (option C: corp then street within a role, then the hidden form). Only Ghost has a 1.0 slot (1.0's hidden adult, which the hidden teen Shell grows into); the other eight are new, on 1.0's language (rounded bodies, antennae, 2x2 accent eyes), the corp lean tidy and symmetric and the street lean ragged, as with the teens. All 16 columns, 13 to 14 rows (Mouse is 13), with their own anchor rows.
+
+  | Role | Corp | Street | Motif |
+  |---|---|---|---|
+  | Breach | Tiger | Worm | Tiger: broad shoulders, arms apart, fangs, stripes. Worm: a tall segmented column with jaws whose rings undulate |
+  | Dodge | Mouse | Spoof | Mouse: small, big round ears, a flicking tail. Spoof: hooded, half masked (the left half of the face is dim), ragged cape |
+  | Tune | Parse | Phreak | Parse: a screen head with bracket antennae and a line of text for a mouth, on a slim stand. Phreak: a narrow head between huge headphone cups, a swaying cable |
+  | Feast | Gobble | Snarf | Gobble: a small head on a big round belly, a wide mouth. Snarf: almost all jaw, a dark maw with teeth above and below |
+  | Hidden | Ghost (1.0's) | | |
+
+- **Distinctness.** The closest same-stage pairs are Tiger and Snarf 0.78, Snarf and Ghost 0.78, then Worm and Spoof 0.76; every pair is under 1.0's 0.82 and Iron's highest (0.81). Each role's two forms overlap under 0.8 and differ by 20 or more outline cells (a test checks it).
+- **Frames.** Rows 0 to the neck row are identical in A and B and the body's bottom is the same row in both. A and B differ by 4 to 18 cells: Worm's rings undulate (18), Ghost's hem shifts (14), the rest move their feet, tail or cable (4 to 8). Ghost's B frame is 1.0's with the head frozen and the hem's last row kept, because 1.0's B moves the mouth and thins the last row, which would move the bottom.
+- **Audit (the nine adults added, 13 forms).** Nothing new flagged. The highest same-stage pair is still the teens at 0.81. The holologo clips 1 px on 11 of the 13 forms (all but the corp and street teens, as on 1.0's forms), and no wearable loses half its pixels in the dark. All 41 wearables on all 13 forms: none move between frames (533 cases) and none leave the screen (1599 cases).
+- **Not drawn:** Program's nine elders, and the teen, elder and adult names are as in the sketch (elders and teens are unnamed).
 
 ## Scope
 

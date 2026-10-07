@@ -2,18 +2,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
-import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, programPose } from './program-models.js';
+import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_HIDDEN_BRANCH, programPose } from './program-models.js';
 import { programKey } from './register.js';
 import { SPRITES } from '../../src/sprites.js';
 import { silhouetteIou, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const set = programForms();
-const WIDTH = { baby: 12, teen: 14 };
+const WIDTH = { baby: 12, teen: 14, adult: 16 };
 const forms = Object.values(set);
 const key = (f, pose) => `${programKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
-test('Program has a baby and three teens (corp, street, hidden), in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(PROGRAM_FORMS), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
+test('Program has a baby, three teens (corp, street, hidden) and nine adults, in the egg\'s own table', () => {
+  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage !== 'adult'), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
+  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'adult'), PROGRAM_ADULTS_ALL);
+  assert.deepEqual(PROGRAM_HIDDEN_BRANCH, ['baby', 'teenHidden', 'ghost']);
   assert.deepEqual(PROGRAM_TEENS_ALL.map((id) => PROGRAM_FORMS[id].lean), ['corp', 'street', 'hidden']);
 });
 
@@ -21,6 +23,7 @@ test('the reused forms are 1.0\'s art: the A frame of Bitling, Kernel and Shell,
   assert.deepEqual(set.baby.a, SPRITES.bitlingA);
   assert.deepEqual(set.teenCorp.a, SPRITES.kernelA);
   assert.deepEqual(set.teenHidden.a, SPRITES.shellA);
+  assert.deepEqual(set.ghost.a, SPRITES.ghostA);
 });
 
 test('every sprite is rectangular, the stage\'s width, 9 to 15 rows, with known marks', () => {
@@ -161,4 +164,53 @@ test('every 1.0 wearable stays on screen on every Program form and pose', async 
   }
   console.log(`  ${cases} Program wearable cases, ${bad.length} leave the screen${bad.length ? `: ${bad.join(', ')}` : ''}`);
   assert.deepEqual(bad, []);
+});
+
+// --- adults ----------------------------------------------------------------------------------------------------------------------
+test('option C: each of the four roles has a corp and a street form, and the hidden form has no lean', () => {
+  const adults = PROGRAM_ADULTS_ALL.map((id) => PROGRAM_FORMS[id]);
+  for (const role of ['breach', 'dodge', 'tune', 'feast']) {
+    assert.deepEqual(adults.filter((f) => f.role === role).map((f) => f.lean), ['corp', 'street'], role);
+  }
+  assert.deepEqual(adults.filter((f) => f.role === 'hidden').map((f) => f.lean), [undefined]);
+  assert.equal(adults.length, 9);
+});
+
+test('the nine adults are distinct from one another: no pair overlaps more than 1.0 allows within a stage (0.82)', () => {
+  const pairs = [];
+  for (let i = 0; i < PROGRAM_ADULTS_ALL.length; i++) {
+    for (let j = i + 1; j < PROGRAM_ADULTS_ALL.length; j++) {
+      pairs.push({ pair: `${PROGRAM_ADULTS_ALL[i]}/${PROGRAM_ADULTS_ALL[j]}`, iou: silhouetteIou(set[PROGRAM_ADULTS_ALL[i]].a, set[PROGRAM_ADULTS_ALL[j]].a) });
+    }
+  }
+  pairs.sort((p, q) => q.iou - p.iou);
+  console.log(`  closest Program adults: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  for (const p of pairs) assert.ok(p.iou <= 0.82, `${p.pair}: ${p.iou.toFixed(2)}`);
+});
+
+test('the two forms of a role are not look-alikes, and a hidden-path adult stands apart from the role forms', () => {
+  const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
+  for (const [corp, street] of [['tiger', 'worm'], ['mouse', 'spoof'], ['parse', 'phreak'], ['gobble', 'snarf']]) {
+    assert.ok(iou(corp, street) < 0.8, `${corp}/${street}: ${iou(corp, street).toFixed(2)}`);
+    assert.ok(poseDistance(set[corp].a, set[street].a) >= 20, `${corp}/${street}: outline`);
+  }
+});
+
+test('each role form carries its motif: Breach teeth or jaws, Dodge ears or a hood, Tune a bracket or cups, Feast a big mouth', () => {
+  const has = (id, re) => re.test(set[id].a.join('\n'));
+  assert.ok(has('tiger', /x.{12}x/) && set.tiger.a[set.tiger.anchors.a.mouthRow].includes('+'), 'Tiger: stripes and fangs');
+  assert.ok(has('worm', /#\+#\+##\+#\+#/), 'Worm: jaws');
+  assert.ok(set.mouse.a[0].replace(/\./g, '').length >= 8, 'Mouse: big ears');
+  assert.ok(set.spoof.a.slice(4, 8).every((r) => r.includes('x')), 'Spoof: half mask');
+  assert.ok(set.parse.a[0].startsWith('#.#') && set.parse.a[0].endsWith('#.#'), 'Parse: bracket antennae');
+  assert.ok(set.phreak.a[5].startsWith('#x#') && set.phreak.a[5].endsWith('#x#'), 'Phreak: headphone cups');
+  const wide = (id) => set[id].a[set[id].anchors.a.mouthRow].split('+').length - 1;
+  assert.ok(wide('gobble') >= 6 && wide('snarf') >= 8, 'Feast: wide mouths');
+  assert.ok(set.snarf.a.some((r) => r.includes('xxxxxxxx')), 'Snarf: a dark maw');
+});
+
+test('Ghost is the hidden adult the Shell grows into: 1.0\'s eyes, mouth and dome, with a frozen head', () => {
+  assert.equal(set.ghost.anchors.a.eyeRow, 4);
+  assert.deepEqual(set.ghost.a.slice(0, 11), SPRITES.ghostA.slice(0, 11));
+  assert.notDeepEqual(set.ghost.a, SPRITES.ghostB, '1.0\'s own B frame moves the mouth, so it is not used as is');
 });
