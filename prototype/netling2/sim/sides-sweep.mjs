@@ -13,7 +13,7 @@ const apply = (on, owner) => {
   for (const k of ['charge', 'sync']) Object.assign(SIDES[k], fresh[k]);
   Object.assign(SIDES.charge, over.charge ?? {});
   Object.assign(SIDES.sync, over.sync ?? {});
-  SIDES.on = on; SIDES.owner = owner; SIDES.ownerMult = over.ownerMult ?? fresh.ownerMult;
+  SIDES.on = on; SIDES.owner = owner; SIDES.ownerMult = over.ownerMult ?? fresh.ownerMult; SIDES.lowOwnerOnly = over.lowOwnerOnly ?? fresh.lowOwnerOnly;
 };
 for (const base of bases) {
   for (const [egg, owner] of [['off', null], ...Object.entries(eggs)]) {

@@ -646,9 +646,9 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDES = {
-  on: false, owner: null, ownerMult: 2,
+  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false,
   charge: { hi: 85, lo: 30, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
-  sync: { hi: 85, lo: 30, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, calm: 0.2, dull: 0.3 },
+  sync: { hi: 85, lo: 30, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
@@ -659,6 +659,8 @@ const dropSides = (s) =>
   (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.drop * sideM('sync') : 1) /
   (sideOf(s, 'sync') === 'lo' ? 1 + SIDES.sync.dull * sideM('sync') : 1);
 const sideM = (key) => (SIDES.owner === key ? SIDES.ownerMult : 1);
+// Low-side benefits: with lowOwnerOnly only the owner gets them (0 for everyone else), the costs stay for all.
+const lowM = (key) => (SIDES.lowOwnerOnly && SIDES.owner !== key ? 0 : sideM(key));
 const baseVirusPerHour = (s) => {
   const b = bandOn();
   const a = actOn();
@@ -792,7 +794,7 @@ function step(s, t, rng) {
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
-  const chargeLo = sideOf(s, 'charge') === 'lo' ? 1 / (1 + SIDES.charge.slow * sideM('charge')) : 1;
+  const chargeLo = sideOf(s, 'charge') === 'lo' ? 1 / (1 + SIDES.charge.slow * lowM('charge')) : 1;
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * chargeLo * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
@@ -850,7 +852,10 @@ function step(s, t, rng) {
   else if (!rest && overclocked(s)) s.temper += CFG.overclockTemperPerHour / 60;
   else if (!rest && !alertReason(s)) s.temper += (inFlow(s) ? CFG.flowTemperPerHour : CFG.uptimeTemperPerHour) / 60;
   s.temper *= TEMPER_DECAY();
-  if (!rest && sideOf(s, 'sync') === 'hi') s.temper *= 1 + SIDES.sync.swing * sideM('sync');
+  if (!rest && sideOf(s, 'sync') === 'hi') {
+    s.temper *= 1 + SIDES.sync.swing * sideM('sync');
+    if (s.temper > 0) s.temper *= 1 - SIDES.sync.steadyDecay * sideM('sync');
+  }
   s.tLevel = guardedLevel(s.temper, s.tLevel ?? 0);
   while (s.faultRolls > 0) {
     s.faultRolls--;
@@ -911,7 +916,7 @@ function stepEvents(s, t, rng) {
   if (resting(s)) return;
   // Overclocked draws trouble; flow keeps it away (the two never overlap: flow needs Heat under 60).
   let hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
-  if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * sideM('sync');
+  if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * lowM('sync');
   const overflowMult = sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * sideM('charge') : 1;
   if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
     if (s.buffs?.traceSkip) {
