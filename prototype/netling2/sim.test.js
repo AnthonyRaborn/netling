@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createScript, tick, act, mulberry32, CFG, BUG_CFG, SPECIES, FORMS, MAINFRAME_OF, ROLES, LEANS, GAME_IDS, MIN,
-  clearBug, pushGame, standingInt, teenCandidates, teenForm, adultCandidates, adultForm, hiddenTeenMet, hiddenAdultMet,
+  clearBug, pushGame, standingInt, gapIndex, teenCandidates, teenForm, adultCandidates, adultForm, hiddenTeenMet, hiddenAdultMet,
   temperDecayFactor, temperLevel,
 } from './sim/sim.js';
 import { guardedLevel } from './tell.js';
@@ -199,21 +199,28 @@ test('PATCH is +1 within 30 minutes and -1 later; PURGE is +0.5', () => {
   assert.equal(p.temper, 0.5);
 });
 
-test('teen lean: a gap of 0 or 1 is a tie, then 4:3, 4:2, 4:1, and 5 or more is certain (whole points)', () => {
+test('teen lean: Standing is fractional, the cutpoints are whole numbers: a gap under 2 is a tie, then 4:3, 4:2, 4:1, and 5 or more is certain', () => {
   const w = (corp, street) => {
     const s = fresh({ stage: 'baby', form: 'baby' });
     s.standing = { corp, street };
     return teenCandidates(s);
   };
   assert.deepEqual(w(3, 3), { teenCorp: 4, teenStreet: 4 });
-  assert.deepEqual(w(3.9, 3), { teenCorp: 4, teenStreet: 4 }, 'decisions use whole points: 3.9 is 3');
-  assert.deepEqual(w(4.2, 3), { teenCorp: 4, teenStreet: 4 }, 'a gap of 1');
+  assert.deepEqual(w(4.9, 3), { teenCorp: 4, teenStreet: 4 }, 'a true gap of 1.9 is still a tie');
   assert.deepEqual(w(5, 3), { teenCorp: 4, teenStreet: 3 });
   assert.deepEqual(w(6, 3), { teenCorp: 4, teenStreet: 2 });
   assert.deepEqual(w(7, 3), { teenCorp: 4, teenStreet: 1 });
+  assert.deepEqual(w(7.99, 3), { teenCorp: 4, teenStreet: 1 }, 'a true gap of 4.99 is not yet certain');
   assert.deepEqual(w(8, 3), { teenCorp: 4, teenStreet: 0 });
   assert.deepEqual(w(2, 30), { teenCorp: 0, teenStreet: 4 });
-  assert.equal(standingInt({ standing: { corp: 2.9999999999, street: 0 } }, 'corp'), 3, 'a float sum just under a whole point counts');
+  // The maintainer's example: shown 10 and 6 (a shown gap of 4), true 10.25 and 6.5 (a gap of 3.75): it weighs as a gap of 3.
+  const ex = fresh({ stage: 'baby', form: 'baby' });
+  ex.standing = { corp: 10.25, street: 6.5 };
+  assert.deepEqual([standingInt(ex, 'corp'), standingInt(ex, 'street')], [10, 6]);
+  assert.deepEqual(teenCandidates(ex), { teenCorp: 4, teenStreet: 2 });
+  assert.equal(gapIndex(3.75), 3);
+  assert.equal(gapIndex(99), CFG.tieWeights.length - 1);
+  assert.equal(standingInt({ standing: { corp: 2.9999999999, street: 0 } }, 'corp'), 3, 'a float sum just under a whole point shows as it should');
 });
 
 test('a form never raised weighs 20% more, after the gap weights', () => {
@@ -228,6 +235,11 @@ test('the hidden teen needs 3 wins in every game and the tracks within a point',
   for (const g of GAME_IDS) s.games[g].won = 3;
   s.standing = { corp: 5.9, street: 5 };
   assert.equal(hiddenTeenMet(s), true);
+  s.standing = { corp: 6, street: 5 };
+  assert.equal(hiddenTeenMet(s), true, 'a true gap of exactly 1 is within the cutpoint');
+  s.standing = { corp: 6.1, street: 5 };
+  assert.equal(hiddenTeenMet(s), false, 'a true gap of 1.1 is not, though both show as 6 and 5');
+  s.standing = { corp: 5.9, street: 5 };
   assert.equal(teenForm(s, mulberry32(1)), 'teenHidden');
   s.standing = { corp: 7, street: 5 };
   assert.equal(hiddenTeenMet(s), false, 'a gap of 2 breaks it');

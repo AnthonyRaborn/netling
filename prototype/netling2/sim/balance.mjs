@@ -227,10 +227,10 @@ export function checkIn(s, p, now, rng, ctx) {
 
 // One life. fragment: the parent's (as flatline() leaves it), for a later generation. codex: the
 // fragments already found, carried along a lineage.
-// Standing, temper and the shown level at a stage change; the gap is in whole points as the evolution rules read it.
+// Standing, temper and the shown level at a stage change.
 const snap = (s) => ({
   standing: { ...s.standing },
-  gap: Math.abs(Math.floor(s.standing.corp + 1e-9) - Math.floor(s.standing.street + 1e-9)),
+  gap: Math.abs(s.standing.corp - s.standing.street), // the true gap; the evolution rules use its whole part
   roleGap: (() => { const w = GAME_IDS.map((id) => s.games[id].won).sort((a, b) => b - a); return w[0] - w[1]; })(),
   temper: s.temper,
   level: s.tLevel,
@@ -501,7 +501,7 @@ export function stats(results) {
           street: round(avg(teens.map((x) => x.standing.street)), 2),
           gap: round(avg(teens.map((x) => x.gap)), 2),
           leanCertain: round(teens.filter((x) => x.gap >= 5).length / teens.length),
-          tied: round(teens.filter((x) => x.gap <= 1).length / teens.length),
+          tied: round(teens.filter((x) => x.gap < 2).length / teens.length),
           temper: round(avg(teens.map((x) => x.temper)), 2),
           level: levelShares(teens.map((x) => x.level)),
           mistakes: round(avg(teens.map((x) => x.mistakes)), 2),

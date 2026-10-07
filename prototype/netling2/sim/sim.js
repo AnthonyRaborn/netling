@@ -5,7 +5,7 @@
 //              flow +0.5 an hour, items +1, Segfault -4.
 //   Bugs       a fault rolls a bug (ceiling 5) that raises the drains; cleared with scrip or Standing (clearBug).
 //   Faults     no cap and no neglect death; integrity collapse and the end of the cycle remain.
-//   Evolution  teen and adult forms follow Standing and the games with the sketch's tie-break weights.
+//   Evolution  teen and adult forms follow Standing (fractions against whole-number cutpoints) and the games, with the sketch's tie-break weights.
 //   Care preferences  a steady temper likes routine, an unsteady one novelty (a small Sync bonus).
 // Netrun code (netrun/run.js here) still writes the signed `axes` pair; `axes` is an adapter onto standing and temper.
 // Pure-ish: every function takes the state, a time (ms epoch) and an rng, so tests can drive it deterministically.
@@ -84,7 +84,8 @@ export const CFG = {
   mainframeCleanExits: 2,
   mainframeTraitLevel: 2,
   // 2.0 evolution. The hidden-path teen needs this many wins in every game and the two Standing tracks within
-  // hiddenBand (whole points). Choices (Standing lean, role) are weighted by the gap to the leader: tieWeights[gap],
+  // hiddenBand (the true gap between the fractional tracks). Choices (Standing lean, role) are weighted by the gap to the leader:
+  // tieWeights[whole part of the gap],
   // the last entry for any larger gap. A form never raised weighs newFormWeight more.
   shellMinWinsEach: 3,
   hiddenBand: 1,
@@ -496,8 +497,11 @@ export function clearBug(s, { pay = 'scrip', corp = 1 } = {}) {
   return true;
 }
 
-// Standing as the decisions read it: whole points (the tie-break rules count integers; the HUD would show the same floor).
+// Standing as the player sees it: the floor of each track. Decisions read the fractions (maintainer: a little extra randomness in
+// evolution), against whole-number cutpoints: see gapIndex.
 export const standingInt = (s, track) => Math.floor(s.standing[track] + 1e-9);
+// The gap between two scores as a tie-weight index: its whole part, so a true gap of 3.75 (shown as 4) weighs as a gap of 3.
+export const gapIndex = (gap) => Math.min(Math.floor(gap + 1e-9), CFG.tieWeights.length - 1);
 
 // The temper level the sprite shows (-2 strongly unsteady .. +2 strongly steady), with the flicker guard.
 export const temperLevel = (s) => s.tLevel ?? 0;
@@ -1018,12 +1022,14 @@ function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
 
 // --- 2.0 evolution (docs/NETLING_2_SKETCH.md, Evolution) ---------------------------------------------------
 
-// A choice among options with whole-number scores: each option's weight falls with its gap to the leader (CFG.tieWeights).
+// A choice among options: each option's weight falls with its gap to the leader (CFG.tieWeights, indexed by the gap's whole part).
+// Standing is fractional underneath (the HUD shows floors), wins are whole numbers.
 const gapWeights = (scores) => {
   const top = Math.max(...Object.values(scores));
-  return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, CFG.tieWeights[Math.min(top - v, CFG.tieWeights.length - 1)]]));
+  return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, CFG.tieWeights[gapIndex(top - v)]]));
 };
-const tracksWithin = (s, band) => Math.abs(standingInt(s, 'corp') - standingInt(s, 'street')) <= band;
+// The hidden paths: the true gap between the tracks is within the band (whole-number cutpoint, fractional Standing).
+const tracksWithin = (s, band) => Math.abs(s.standing.corp - s.standing.street) <= band + 1e-9;
 const winsOf = (s) => GAME_IDS.map((id) => s.games?.[id]?.won ?? 0);
 
 // The hidden-path teen: every game won shellMinWinsEach times and the two tracks within a point.
@@ -1044,7 +1050,7 @@ const withFresh = (s, pool) => {
 // The teen's candidates and weights: the leading Standing track, or both when the gap is a tie. Never empty when a track is
 // ahead by 5 or more: the other weighs 0.
 export function teenCandidates(s) {
-  const lean = gapWeights({ corp: standingInt(s, 'corp'), street: standingInt(s, 'street') });
+  const lean = gapWeights({ corp: s.standing.corp, street: s.standing.street });
   return withFresh(s, { teenCorp: lean.corp, teenStreet: lean.street });
 }
 export function teenForm(s, rng = null) {
@@ -1056,7 +1062,7 @@ export function teenForm(s, rng = null) {
 
 // The adult's candidates: role (the game with the most wins) and Standing lean are weighted by their gaps and rolled together.
 export function adultCandidates(s) {
-  const lean = gapWeights({ corp: standingInt(s, 'corp'), street: standingInt(s, 'street') });
+  const lean = gapWeights({ corp: s.standing.corp, street: s.standing.street });
   const role = gapWeights(Object.fromEntries(ROLES.map((r) => [r, s.games?.[r]?.won ?? 0])));
   const pool = {};
   for (const r of ROLES) for (const l of LEANS) pool[roleForm(r, l)] = role[r] * lean[l];
