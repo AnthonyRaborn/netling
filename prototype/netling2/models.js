@@ -80,12 +80,12 @@ function eyeGroups(rows, eyeRow) {
   );
   return groups;
 }
-export function pose(a, eyeRow, kind) {
+export function pose(a, eyeRow, kind, fill = '#') {
   const g = a.map((r) => [...r]);
   const groups = eyeGroups(a, eyeRow);
   // Any other accent cell on the head above the eyes (a hidden form's third eye) goes dark in both poses.
-  a.forEach((row, y) => y < eyeRow && y >= eyeRow - 2 && [...row].forEach((ch, x) => ch === 'o' && (g[y][x] = '#')));
-  for (const cells of groups) for (const [x, y] of cells) g[y][x] = '#';
+  a.forEach((row, y) => y < eyeRow && y >= eyeRow - 2 && [...row].forEach((ch, x) => ch === 'o' && (g[y][x] = fill)));
+  for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
   for (const cells of groups) {
     const mx = Math.round(cells.reduce((n, [x]) => n + x, 0) / cells.length);
     const my = Math.round(cells.reduce((n, [, y]) => n + y, 0) / cells.length);

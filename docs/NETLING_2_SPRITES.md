@@ -18,6 +18,24 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 - **Teens:** the two main teens per egg (corp lean, street lean) may differ only slightly. **Hidden paths must be distinct.** In the wider run the hidden teen differed from the street teen by marks only (outline overlap 0.95), which did not meet this. Iron's hidden-path teen is now drawn with its own outline (see The hidden path, below). The hidden adult (Guru) was already distinct (closest overlap 0.77).
 - **Neglect and bugs (decided to try):** neglect is transient and comes from the care needs left unmet; bugs are the persistent layer and show as glitches. See What drives neglect and bugs, below.
 
+## Program (baby and teens)
+
+Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 sprites directly where they fit). Code: `program-art.js`, `program-models.js`, `program.test.js`, registered by `register.js` under the key `protoP_<id>`. Not yet in the audit wrapper, the generated gallery or the review page.
+
+| Form | Source | Size |
+|---|---|---|
+| Baby | 1.0's Bitling | 12 x 12 |
+| Teen, corp lean | 1.0's Kernel | 14 x 11 |
+| Teen, street lean | new: Kernel with one antenna, a notched head corner, one arm gone and a taped patch | 14 x 11 |
+| Teen, hidden path | 1.0's Shell (1.0's hidden teen, which grows into the Ghost) | 14 x 12 |
+
+- **Stub has no slot.** 1.0's Stub was the teen that faults picked, and faults no longer choose a teen form.
+- **What the 2.0 rules changed.** The A frames are 1.0's, unchanged (a test checks it). The B frames are not: 1.0's Bitling, Kernel and Shell move the head, eyes or both between frames, which makes wearables bob, so each B frame keeps the head and takes only the legs. The Shell's own B frame swaps its last two rows, leaving a last row too thin for the wearable code to find the body's bottom, so its feet widen outward instead. A and B differ by only 4 to 8 cells (the audit floor is 4), so these forms animate quietly.
+- **Poses.** Sleep and dead are the generic 1.0 poses (slit eyes, X eyes) plus Program's own chest mark, from the sketch's Program register (interrupt-driven, a process that ends): asleep is a block cursor waiting for an interrupt, dead is a flatline run across the chest. A pair of marks for asleep read as a second pair of eyes, hence one block. The marks are a proposal.
+- **Teens.** Corp and street overlap 0.94 (5 outline cells and a mark differ), closer than Iron's 0.74, because Kernel is an already compact shape. The hidden teen is 0.63 from both (43 and 44 outline cells). Whether 5 cells is enough to read the lean on a phone is a by-eye call.
+- **Wearables.** All 41 non-prop wearables on every Program form and pose (492 cases): none leave the screen, and none move between frames (164 cases).
+- **Not drawn:** Program's nine adults and nine elders. Ghost (1.0) is the likely base of the hidden adult, but nothing is decided.
+
 ## Scope
 
 One line, four forms, as the maintainer asked: Iron, baby to elder. The line is **Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder**. The sketch's full tree (3 teens and 9 adults per egg under option C) is not in this prototype. An earlier, wider version that drew all of it is in git history at commit `580db88`; its measured numbers are quoted below, marked as such, because the code that produced them is no longer in the tree. The line is a table (`FORMS` in `models.js`), so another can be swapped in.
