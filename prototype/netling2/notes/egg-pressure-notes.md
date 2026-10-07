@@ -191,3 +191,13 @@ Scripts: `act-sweep.mjs`, `act-calibrate.mjs`. Strain +3 per corp/scav feed (Cha
 - Sync, line 65: 8.64 at floor 0. Sysadmin +5.6, attentive +3.8, casual +0.3, worker 0. A budgeter pays about nothing (worker full-life 0.83 vs 0.845). Cadence-neutral.
 - Not equal on average yet: both overshoot by 1.1 to 2.0. Remaining levers: a higher line, a smaller `add`, a longer half-life. Not run.
 - Who pays is wrong for both: the two heaviest feeders/players (sysadmin, attentive) pay, which is the "pay for what you do" intent, but the mean must come back to off before this is adopted.
+
+## Result 10: two-sided Charge and Sync (SIDES)
+
+Design (user): every egg gets both sides on Charge and Sync; the owner's meter (Program: Charge, Wetware: Sync; Iron owns Heat, so neither) has every effect x2. No bug resistance on Sync's high side. Charge high (85+): play pays more Sync, wins drop more; cost: overflow likelier, Integrity bleeds. Charge low (30-): drain and Heat drift slower; cost: play needs more Charge. Sync high (85+): visits likelier, wins drop more; cost: infection hazard up, temper amplified. Sync low (30-): fewer events; cost: wins drop less. Script `sides-sweep.mjs`; code `SIDES` in sim.js (off by default). 200 to 300 lives per cell; not unit-tested.
+
+Time in the sides (awake): attentive/sysadmin/daredevil sit high 34-43% of the time and low 5%; worker sits low 43-46% and high 5-7%; casual about 10-14% each. So the high side is the attentive player's side and the low side the sparse player's.
+
+Pass 1 (cost bleed 1.5, overflow 0.5, virus 0.3, swing 0.0002; low slow 0.25, gate 5): infections within +-0.3 everywhere; the low-side benefit lifts sparse players on every egg incl. Iron (worker full-life 0.833 -> 0.907, mistakes 9.1 -> 6.5). The cost side barely bites.
+Pass 2 (bleed 4, overflow 1, virus 0.6, swing 0.0004; slow 0.1, gate 10): full-life stays within noise for attentive, sysadmin, daredevil, overclocker (0.93-1.0). Infections up 0.2-1.0 (sysadmin 7.33 -> 7.9 to 8.3). Wetware temper amplified (attentive 4.9 -> 7.0, sysadmin 5.5 -> 8.4, daredevil -4.95 -> -7.0, overclocker -7.5 -> -8.5): the swing works but pushes the mean away from off. Worker: mistakes 8.95 -> 7.1 (Program) to 8.0, full-life 0.84 -> 0.865-0.88; casual mistakes 6.65 -> 5.7-6.2. Still a sparse-player benefit on every egg, from the low side's slower drain.
+Open: the swing is a bias, not an equal-mean change; the low-side benefit helps sparse players on non-owner eggs; the owner contrast (x2) is small in infections and full-life, visible mainly in Wetware temper and Program worker mistakes.
