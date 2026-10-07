@@ -3,7 +3,7 @@
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
-// BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
+// BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear and WET='{"on":true}' Wetware's shock (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
 // carries a trait). The remaining text below is 1.0's.
 // Settings (environment): DETAIL=1 more lines; JSON=1 machine-readable output (compare two with
@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, temperLevel, clearBug, leanSeen } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, temperLevel, clearBug, leanSeen } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -87,6 +87,7 @@ export const ARCHETYPES = {
   // Sync; unlike it they also play whichever game they have won least (`balanceGames`) and answer requests only for games that are not
   // ahead. `shown`: they see only the HUD's floors of Standing (and alternate packets on a tie) instead of the true fractions.
   'hunter-exact': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, balanceGames: true },
+  'hunter-blocks': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, balanceGames: true, blocks: 3 },
   'hunter-shown': { checks: ATTENTIVE, jitter: 10, diet: 'balance', trace: 'balance', winRate: 0.75, gamer: true, coolAt: 45, balanceGames: true, shown: true },
   // The same aim on a casual schedule and skill: how little play still reaches the hidden forms.
   'hunter-casual': { checks: [at(7, 30), at(10), at(13), at(16), at(19), at(22, 30)], jitter: 30, diet: 'balance', trace: 'balance', winRate: 0.6, gamer: true, coolAt: 45, balanceGames: true, shown: true },
@@ -218,7 +219,13 @@ export function checkIn(s, p, now, rng, ctx) {
         if (lv > 0) corp = s.lastPacket === 'corp';
         else if (lv < 0) corp = s.lastPacket !== 'corp';
       }
+      // `blocks`: a balancer who feeds in runs of that many of one type before changing sides (a block costs Wetware one switch).
+      if (p.blocks && s.lastPacket && (ctx.blockRun ?? 0) < p.blocks) corp = s.lastPacket === 'corp';
+      // WETBOT=settle: a player who sees Wetware's rejection building feeds the same type as last time until it fades.
+      if (process.env.WETBOT === 'settle' && WET.on && s.lastPacket && (s.shock ?? 0) >= WET.line * 0.6) corp = s.lastPacket === 'corp';
+      const prev = s.lastPacket;
       doAct(corp ? 'corp' : 'scav');
+      ctx.blockRun = s.lastPacket === prev ? (ctx.blockRun ?? 1) + 1 : 1;
     }
   };
   // 2.0 soft push: a bugged netling, or one with a job posted, nudges a player who can be nudged (`pushRuns`, the chance they go despite their
@@ -436,6 +443,10 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     rattledEvents: s.rattledEvents ?? 0,
     rattlePaid: s.rattlePaid ?? 0,
     wearMax: s.wearMax ?? 0,
+    switches: s.switches ?? 0,
+    feeds: s.feeds ?? 0,
+    shockMax: s.shockMax ?? 0,
+    shockHighMin: s.shockHighMin ?? 0,
     wearHighMin: s.wearHighMin ?? 0,
     awakeMin: s.ageMin,
     eventsAnswered: s.eventsAnswered ?? 0,
@@ -609,7 +620,7 @@ export function stats(results) {
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
     bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1), clinicVisits: round(avg(results.map((r) => r.clinicVisits)), 2) },
     // Egg pressure (Program's rattle timer, RATTLE='{"on":true}'): infections a life, and how often the timer was set and bit.
-    pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2), rattlePaid: round(avg(results.map((r) => r.rattlePaid)), 2), wearMax: round(avg(results.map((r) => r.wearMax)), 1), wearHighShare: round(avg(results.map((r) => r.wearHighMin / Math.max(1, r.awakeMin))), 3) },
+    pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2), rattlePaid: round(avg(results.map((r) => r.rattlePaid)), 2), wearMax: round(avg(results.map((r) => r.wearMax)), 1), switches: round(avg(results.map((r) => r.switches)), 1), feeds: round(avg(results.map((r) => r.feeds)), 1), shockMax: round(avg(results.map((r) => r.shockMax)), 1), shockHighShare: round(avg(results.map((r) => r.shockHighMin / Math.max(1, r.awakeMin))), 3), wearHighShare: round(avg(results.map((r) => r.wearHighMin / Math.max(1, r.awakeMin))), 3) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length
       ? {

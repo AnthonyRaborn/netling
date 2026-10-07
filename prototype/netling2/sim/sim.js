@@ -578,7 +578,7 @@ function eventAnswered(s, t) {
 // is not. Off by default; IRON='{"on":true}' switches it on. rate: wear per minute per Heat point over the threshold; decay: the
 // share of wear lost a minute (times restMult while resting); floor and slope: the base hourly hazard at no wear and the extra at
 // wear 100; line: the wear at which it logs a warning.
-export const IRON = { on: false, heat: 70, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.01, slope: 0.06, line: 50 };
+export const IRON = { on: false, heat: 80, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, line: 50 };
 if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
 function stepWear(s, t, rest) {
   const before = s.wear ?? 0;
@@ -590,7 +590,26 @@ function stepWear(s, t, rest) {
   if (w >= IRON.line) s.wearHighMin = (s.wearHighMin ?? 0) + 1;
   if (before < IRON.line && w >= IRON.line) log(s, t, '> tolerances are slipping.');
 }
-const baseVirusPerHour = (s) => (IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : CFG.virusBasePerHour);
+const baseVirusPerHour = (s) =>
+  IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
+// 2.0 egg pressure, Wetware (consistency): hidden shock is added whenever a feed is the other packet type from the last feed (a
+// block of one type costs one switch, flip-flopping costs one a feed) and fades with `halfLifeMin`. The base infection hazard (its
+// "rejection") follows shock instead of staying flat. Off by default; WET='{"on":true}' switches it on. Not used together with IRON.
+// shock: added a switch; floor, slope: the base hourly hazard at no shock and the extra at shock 100; line: the shock at which it
+// logs a warning.
+export const WET = { on: false, shock: 3, halfLifeMin: 1440, floor: 0.0075, slope: 0.03, line: 50 };
+if (process.env.WET) Object.assign(WET, JSON.parse(process.env.WET));
+function wetSwitch(s, t) {
+  const before = s.shock ?? 0;
+  s.switches = (s.switches ?? 0) + 1;
+  s.shock = Math.min(100, before + WET.shock);
+  s.shockMax = Math.max(s.shockMax ?? 0, s.shock);
+  if (before < WET.line && s.shock >= WET.line) log(s, t, '> it is rejecting the change.');
+}
+function stepShock(s) {
+  s.shock = (s.shock ?? 0) * 0.5 ** (1 / WET.halfLifeMin);
+  if (s.shock >= WET.line) s.shockHighMin = (s.shockHighMin ?? 0) + 1;
+}
 export const pushGame = (s, game) => {
   const last = s.lastGames ?? [];
   s.lastGames = PREF.distinct ? [game, ...last.filter((g) => g !== game)].slice(0, 2) : [game, ...last].slice(0, 2);
@@ -707,6 +726,7 @@ function step(s, t, rng) {
   );
 
   if (IRON.on) stepWear(s, t, rest);
+  if (WET.on) stepShock(s);
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
     s.cache++;
@@ -1384,6 +1404,8 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         const lv = temperLevel(s);
         const match = lv > 0 ? s.lastPacket === action : lv < 0 ? Boolean(s.lastPacket) && s.lastPacket !== action : false;
         msg += prefApply(s, match);
+        if (WET.on && s.lastPacket && s.lastPacket !== action) wetSwitch(s, now);
+        s.feeds = (s.feeds ?? 0) + 1;
         s.lastPacket = action;
       }
       if (s.quirk.favPacket === action) {

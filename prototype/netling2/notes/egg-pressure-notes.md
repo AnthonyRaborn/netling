@@ -104,3 +104,23 @@ slope 0.3). Cache and SCAV DATA infection terms are unchanged.
   under 1% of awake time) and is felt only by overclockers. As Iron's identity it is thin; it is not a gap penalty.
 - Not modelled: a human's response to the warning line, the LOCK drain effect, and wear from netruns or Black ICE shard
   (the notes proposed those; only Heat counts so far).
+
+## Result 5: Wetware shock (WET env, off by default; WETBOT=settle feeds the same type as last once shock builds)
+1000 lives per archetype. A feed of the other packet type from the last feed adds `shock` (3); shock halves every 24h;
+the base infection hazard becomes floor + slope * shock/100 (floor 0.0075, slope 0.03). Bots feed about 40 to 115
+times a life (not the 6 to 10 a day I assumed), so a per-switch value of 10 saturated at 100 for almost everyone;
+3 is the calibrated value.
+- Equal on average: mean infections of the five ordinary archetypes 6.30 off, 6.15 on (about 2% under; floor 0.009
+  would match). Full-life rate within noise everywhere.
+- Who pays (infections a life, off to on): flip-flopping balancer (hunter-exact) 7.27 to 7.32; block-feeding balancer
+  (3 of one type, then the other) 7.18 to 6.57; steady follower 6.72 to 6.36; unsteady follower 7.24 to 7.43; corpo
+  (never switches) 3.93 to 2.76. The whole spread is about 1.3 infections either side of average: faint, like Program.
+- The Standing worry: no sign of a push to one side. Random-diet players: Standing gap at adulthood 2.91 to 2.95
+  (attentive), 2.66 to 2.72 (casual). With the settle bot (feeds the same type once shock reaches 30): attentive 3.05,
+  hunter-exact gap 0.17 to 0.30 and hidden adult 96% to 94%. Block feeding keeps the hidden path (94%) and costs less.
+- The temper tension is real but small: an unsteady follower pays about +0.2 infections, a steady one about -0.4
+  (a 0.6 swing a life) and its Sync bonus is unchanged.
+- Reading: the pressure only touches the base infection term (about 2.4 of 7 infections a life), so every egg's
+  pressure lands at the same faint size. To make any of them felt, the lever is what shock or wear also touches
+  (Sync drain, a bug chance), not the threshold. IRON defaults are now the calibrated ones (heat 80, floor 0.014,
+  slope 0.3).

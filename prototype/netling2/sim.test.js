@@ -920,6 +920,66 @@ test('wear: off by default; on, it builds only above the Heat threshold, decays 
     advance(fresh0, 1, () => 0.005); // 0.005 < 0.01/60 = 0.00017 is false
     assert.equal(fresh0.virus, false);
   } finally {
-    Object.assign(sim.IRON, { on: false, heat: 70, floor: 0.01, slope: 0.06 });
+    Object.assign(sim.IRON, { on: false, heat: 80, floor: 0.014, slope: 0.3 });
+  }
+});
+
+// --- Wetware's shock (egg pressure, off by default) ----------------------------------------------
+
+test('shock: off by default; on, only a switch of packet type adds it, it fades by its half-life, and it sets the base infection hazard', async () => {
+  const sim = await import('./sim/sim.js');
+  assert.equal(sim.WET.on, false);
+  const plain = fresh();
+  act(plain, 'corp', T0, calm);
+  plain.stats.charge = 30;
+  act(plain, 'scav', T0 + MIN, calm);
+  assert.equal(plain.shock, undefined, 'nothing is tracked while off');
+
+  Object.assign(sim.WET, { on: true, shock: 10, halfLifeMin: 1440, floor: 0.01, slope: 0.3 });
+  try {
+    const s = fresh();
+    s.stats.charge = 30;
+    act(s, 'corp', T0, calm); // the first feed has no last feed to differ from
+    assert.equal(s.shock, undefined);
+    s.stats.charge = 30;
+    act(s, 'corp', T0, calm); // same type again
+    assert.equal(s.shock, undefined);
+    s.stats.charge = 30;
+    act(s, 'scav', T0, calm); // a switch
+    assert.equal(s.shock, 10);
+    assert.equal(s.switches, 1);
+    s.stats.charge = 30;
+    act(s, 'scav', T0, calm); // a block of one type costs nothing more
+    assert.equal(s.shock, 10);
+    s.stats.charge = 30;
+    act(s, 'corp', T0, calm);
+    assert.equal(s.shock, 20);
+
+    advance(s, 1440, calm);
+    assert.ok(Math.abs(s.shock - 10) < 0.5, `halves in a day (${s.shock})`);
+
+    // Flip-flopping caps at 100.
+    const f = fresh();
+    for (let i = 0; i < 30; i++) {
+      f.stats.charge = 30;
+      act(f, i % 2 ? 'corp' : 'scav', T0, calm);
+    }
+    assert.equal(f.shock, 100);
+    assert.equal(f.shockMax, 100);
+
+    // The base hazard follows shock: at 100 with no cache it is floor + slope = 0.31 an hour.
+    const worn = fresh();
+    worn.shock = 100;
+    worn.stats.heat = 20;
+    worn.cache = 0;
+    advance(worn, 1, () => 0.005);
+    assert.equal(worn.virus, true);
+    const calmOne = fresh();
+    calmOne.stats.heat = 20;
+    calmOne.cache = 0;
+    advance(calmOne, 1, () => 0.005);
+    assert.equal(calmOne.virus, false);
+  } finally {
+    Object.assign(sim.WET, { on: false, shock: 3, floor: 0.0075, slope: 0.03 });
   }
 });
