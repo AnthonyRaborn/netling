@@ -105,7 +105,7 @@ export const WETWARE_TEEN_ANCHORS = {
 // --- corp adults (16 wide, up to 15 rows) -----------------------------------------------------------------------------------------
 // The four corp-lean role forms (the street forms and the hidden Blank come later). Maintainer's hunch: Wetware reads more humanoid
 // than Iron and Program, so these are people-shaped (a neck, shoulders, arms, legs) and keep the baby's folded cortex on the head.
-//   Razor (Breach): heavily cybered muscle; a narrow jaw on full-width shoulders, with blade forearms ('+' strips). No brow (a dark brow row made the dead X's land on it).
+//   Razor (Breach): heavily cybered muscle; a narrow jaw, shoulders, and arms that hang beside the torso, each ending in a blade ('+' strip) that runs down the outside of the forearm. No brow (a dark brow row made the dead X's land on it).
 //   Wired (Dodge): 1.0's Chrome as it is (the maintainer's suggestion), its visor and reflexes; the B frame is Chrome's with the head and
 //           eyes frozen, as Program's reused forms are.
 //   Mentat (Tune): an oversized cortex on a narrow body in a robe: someone who stares at a problem and answers.
@@ -124,10 +124,10 @@ export const WETWARE_ADULTS = {
       '....########....',
       '.....#+##+#.....',
       '......####......',
-      '################',
-      '.+.##########.+.',
-      '.+..########..+.',
-      '....##....##....',
+      '..############..',
+      '+##.########.##+',
+      '+##.########.##+',
+      '+..###....###..+',
     ],
     b: [
       '.....#xxxx#.....',
@@ -140,10 +140,10 @@ export const WETWARE_ADULTS = {
       '....########....',
       '.....#+##+#.....',
       '......####......',
-      '################',
-      '.+.##########.+.',
-      '.+..########..+.',
-      '...##......##...',
+      '..############..',
+      '+##.########.##+',
+      '+##.########.##+',
+      '+.###......###.+',
     ],
   },
   // Wired: 1.0's Chrome, head frozen (1.0's B frame moves the visor's lights and eyes; only its arms are taken from B).
