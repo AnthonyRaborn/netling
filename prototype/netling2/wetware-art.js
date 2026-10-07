@@ -40,3 +40,59 @@ export const WETWARE_BABY = {
 
 // headTop, eyeRow, mouthRow and neckRow, the same in both frames.
 export const WETWARE_BABY_ANCHORS = { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 };
+
+// --- teens (14 wide, 11 rows like Iron's and Program's) ---------------------------------------------------------------------------
+// Maintainer's direction: blobs for now, not humanoids (the humanoid bodies come at the adult stage). Corp and street are the baby grown:
+// the same folded cortex on a taller, wider body with four tendril feet. The street lean adds, it does not cut away (the rule from
+// Program): spikes over the cortex, a dark unibrow, and arms held off the body. The hidden-path teen is Blank's: a cloaked blob in
+// the spirit of Ghost in the Shell's thermoptic camouflage (Program's hidden path is its own take, a hollow Shell): a hooded peak, slit
+// eyes, a body that shimmers (dim and bright cells alternating, as a camouflaged figure does) and a scalloped hem. The cyber ninja is the
+// silhouette: a hood and a flared cloak, where the other two are rounded.
+const teen = (a, tail) => ({ a, b: a.map((row, y) => (y === 10 ? tail : row)) });
+
+export const WETWARE_TEENS = {
+  teenCorp: teen([
+    '.....#xx#.....',
+    '...#x#xx#x#...',
+    '..#x##xx##x#..',
+    '.############.',
+    '.#oo######oo#.',
+    '.#oo######oo#.',
+    '.############.',
+    '..####++####..',
+    '...########...',
+    '..##########..',
+    '..#.#....#.#..',
+  ], '...#.#..#.#...'),
+  teenStreet: teen([
+    '#.#.#.xx.#.#.#',
+    '...#x#xx#x#...',
+    '..#x##xx##x#..',
+    '#xxxxxxxxxxxx#',
+    '##oo######oo##',
+    '##oo######oo##',
+    '.############.',
+    '#.####++####.#',
+    '#..########..#',
+    '#.##########.#',
+    '.####....####.',
+  ], '...###..###...'),
+  teenHidden: teen([
+    '......##......',
+    '.....####.....',
+    '....######....',
+    '...########...',
+    '...#oo##oo#...',
+    '...#oo##oo#...',
+    '...x#x#x#x#...',
+    '...#x#x#x#x...',
+    '...########...',
+    '.############.',
+    '.####.##.####.',
+  ], '.#.#.####.#.#.'),
+};
+export const WETWARE_TEEN_ANCHORS = {
+  teenCorp: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  teenStreet: { headTop: 1, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+  teenHidden: { headTop: 2, eyeRow: 4, mouthRow: 7, neckRow: 8 },
+};

@@ -265,7 +265,7 @@ The composition question is closed (see Decision).
 0. 1.0's own Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch and Panic still move wearables between frames (see Fit and frame stability). Not changed; fixing them is a 1.0 art change.
 1. Iron's unsteady tell is a drift off its grid. Is it distinct enough from 1.0's idle sway (a separate inherited quirk)? The steady settle and the Program blink are the other new motions to judge.
 2. **Neglect and bugs (saved for later):** the thresholds, the bug look and whether two looks are readable together on a device are untested; the review page shows neglect only on Iron's four-form line and bugs only on Gronk, so 18 of 22 Iron forms have never been looked at with either, and the audit does not check them; see What drives neglect and bugs. Program needs its own skin; only Iron's rust exists.
-3. Not drawn: Wetware's three teens, nine adults and nine elders (the baby is drawn). Program's 22 forms are drawn.
+3. Not drawn: Wetware's nine adults and nine elders (its baby and three teens are drawn). Program's 22 forms are drawn.
 3a. Program by-eye checks: the street teen (six passes), Gobble and Worm (weakest reads), the 4-cell frame changes on Tiger, Parse and Snarf, and the thin elder margin on Parse (0.02).
 4. Names for the teens and elders of both eggs, and whether the thin elder margins (above) read right by eye.
 5. Temper level edges and the guard width of 0.5, and Wetware's pulse numbers: tune with the balance tools once temper accrual exists.
@@ -301,7 +301,7 @@ Decided to try (maintainer): **neglect comes from unmet needs and is transient; 
 - The smoke test was not run. The page was loaded in headless Chromium with no console errors apart from the browser's favicon request.
 - **1.0 code was changed in one place**, with the maintainer's agreement: acid, toxic and origin get a `mark` color and toxic's accent changed (`src/sim.js`, `src/sprites.js`, `tools/lib/sprite-checks.mjs`, regenerated `src/wearable-colors.js`). Nothing else under `src/` or `tools/` changed. The wearable movement and holologo clipping in 1.0 were measured, not changed.
 
-## Wetware (baby)
+## Wetware (baby and teens)
 
 Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude-wetware.js`; forms register under `protoW_<id>`. Run `npm run proto:audit:wetware` (or `EGG=wetware`, `EGG=all`) and `npm run proto:gallery`.
 
@@ -309,3 +309,10 @@ Code: `wetware-art.js`, `wetware-models.js`, `wetware.test.js`, `gallery-prelude
 - **Silhouette.** The first draft overlapped Iron's baby at 0.84, over 1.0's 0.82 same-stage bar (a cross-egg pair, but kept under it anyway); rounding the top and narrowing the row under the eyes brought it to 0.77 against Iron's and 0.75 against Program's.
 - **Poses (a proposal, easy to change).** Asleep: two accent cells with a gap (a slow pulse) on the first chest row under the mouth. Dead: a run of dim cells across the chest (a pale trace, the colour going out of the tissue; the opposite of Program's bright flatline). Both from the sketch's Wetware register (polling; a dream ends and the next begins). Neither has been judged by eye on a device.
 - **Verified:** the prototype tests (79, including 9 new), the real 1.0 audit on the baby (0 wearables move between frames, 0 leave the screen, no contrast losses), and `npm test` (500). **Not done:** a by-eye or device check, the Wetware neglect (pallor) and bug skins, and the tell seen on art.
+
+**Teens (maintainer's directions: blobs for now, humanoid bodies come at the adult stage; 11 rows like Iron's and Program's; Blank's line may keep a Ghost in the Shell reference as long as it is a different take on Program's).** Ids `teenCorp`, `teenStreet`, `teenHidden` (names undecided). 14 columns, 11 rows, head, eyes, mouth and neck identical in A and B, only the last row animates.
+- **Corp:** the baby grown: the same folded cortex, a wider body, four tendril feet.
+- **Street:** the corp body kept whole plus added parts (the rule from Program): spikes over the cortex, a dark unibrow, ear stubs by the eyes, arms held off the body and wide boots.
+- **Hidden (Blank's line):** a cloaked blob. A hood peak, slit eyes, no mouth, a body of alternating dim and bright cells (the shimmer of the thermoptic camouflage in Ghost in the Shell, where Program's hidden path takes the Shell as a hollow casing and the Ghost as the thing inside) and a scalloped hem. A first draft was a humanoid ninja at 13 rows; both were set aside by the maintainer's directions.
+- **Measured (the 1.0 silhouette overlap, centred):** corp and street 0.81 (under 1.0's 0.82 bar; the first draft was 0.93, then 0.86, 0.83 and 0.82 as parts were added), hidden against corp 0.67 and against street 0.62; baby against each teen 0.58 to 0.66. Outline cells differing: corp/street 24, hidden against either 36 and 48.
+- **Verified:** 83 prototype tests, the real audit on the four forms (no clips, no frame movement, no contrast losses), `npm test`. **Not done:** by-eye or device review; the corp and street pair is the closest (0.81) and the street's unibrow reads as a headband at small size; the hidden teen's shimmer and the 4 dim cells of its eye row read small.
