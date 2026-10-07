@@ -41,6 +41,8 @@ Run from the scratch copy with Node 22. Each driver takes an archetype name from
 | Egg page pace by placement | `node egg-pages.mjs` | needs only `tools/baseline/lineages.json`; compares home-region placement with any-region at 0.10 a run, and the hidden page's Deep rate |
 | Actions per life | `BUGS='{"on":false}' node acts.mjs casual` | counts feeds, plays, cooling and so on over 100 lives |
 
+**Which copy each driver needs.** Patched copy (the patch above): `gap`, `standing`, `bugs`, `temper`, `pref`, `acts`, `guard`, `hold`. Unpatched copy (`cp -r src tools package.json`): `lines`, `lines2`. No simulator: `egg-pages` (reads `tools/baseline/lineages.json`), `rogue` and `rogue2` (read the `lines` and `lines2` output).
+
 Results are printed as one JSON line each. The sketch quotes them with their limits.
 
 ## Known limits
@@ -49,4 +51,5 @@ Results are printed as one JSON line each. The sketch quotes them with their lim
 - Bugs from netrun-disconnect faults are not rolled, Heat from actions is not scaled by bugs, and clearing by Standing or by a netrun anomaly is not modeled (only the scrip route, at scheduled check-ins).
 - Standing is 1.0's one signed number, so a netling with both tracks high looks balanced. Hidden-path "low on both" was replaced by "within 1 point" for that reason.
 - Sample sizes are 150 to 300 lives per cell, so differences under about 3 points on a rate near 93% are noise. Bug rolls change the random stream, so scenarios do not share exact lives.
+- `tools/balance.mjs` grants Root Access to the next netling after the codex completes; the game grants it at once. `lines2.mjs` with `MID=1` (plus the one-line hook in its row) models the game; `lines.mjs` and the first Rogue-gate tables in the sketch do not, and run egg 1 about a life long.
 - The patch was built against 1.0 at the time of writing; if `src/sim.js` changes, re-apply by hand.
