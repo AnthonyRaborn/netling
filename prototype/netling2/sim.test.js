@@ -833,3 +833,32 @@ test('rattle (pileup): an event opening soon after another ended opens shorter, 
     sim.RATTLE.answeredOnly = false;
   }
 });
+
+test('rattle (cost): answering an event that opened rattled costs extra Heat and Charge; an unrattled answer does not', async () => {
+  const sim = await import('./sim/sim.js');
+  Object.assign(sim.RATTLE, { on: true, cut: 0, heat: 5, charge: 3 });
+  try {
+    const rng = () => 0;
+    const s = fresh();
+    s.event = { type: 'trace', startedAge: s.ageMin };
+    act(s, 'comply', T0, calm); // ends an event; the next one soon after is rattled
+    advance(s, 20, calm);
+    advance(s, 1, rng);
+    assert.equal(s.event?.type, 'trace');
+    assert.equal(s.event.rattled, true);
+    assert.equal(s.event.window, CFG.traceWindowMin, 'cut 0 leaves the window alone');
+    const heat = s.stats.heat;
+    const charge = s.stats.charge;
+    act(s, 'hide', T0 + 30 * MIN, calm); // hide itself costs 10 Charge and 10 Heat
+    assert.equal(s.stats.heat, heat + 5 + 10);
+    assert.equal(s.stats.charge, charge - 3 - 10);
+    assert.equal(s.rattlePaid, 1);
+
+    const c = fresh();
+    c.event = { type: 'trace', startedAge: c.ageMin };
+    act(c, 'hide', T0, calm);
+    assert.equal(c.rattlePaid, undefined);
+  } finally {
+    Object.assign(sim.RATTLE, { on: false, cut: 0.25, heat: 0, charge: 0 });
+  }
+});

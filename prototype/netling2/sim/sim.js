@@ -534,8 +534,9 @@ if (process.env.PREF) Object.assign(PREF, JSON.parse(process.env.PREF));
 //     answeredOnly, only answered). It depends on how events arrive, not on when the player checks in.
 //   'late': answering an event after `late` of its window set a timer of `minutes` (the first version; it falls hardest
 //     on players who check in rarely, see the scratchpad notes).
-// cut: the share of the window taken off.
-export const RATTLE = { on: false, mode: 'pileup', gap: 60, answeredOnly: false, late: 2 / 3, cut: 0.25, minutes: 120 };
+// cut: the share of the window taken off. heat, charge: what answering a rattled event costs extra (Heat added, Charge taken);
+// the window cut and the answer cost are separate, so either can be set to 0.
+export const RATTLE = { on: false, mode: 'pileup', gap: 60, answeredOnly: false, late: 2 / 3, cut: 0.25, minutes: 120, heat: 0, charge: 0 };
 if (process.env.RATTLE) Object.assign(RATTLE, JSON.parse(process.env.RATTLE));
 export const rattled = (s) => {
   if (!RATTLE.on) return false;
@@ -548,6 +549,7 @@ const eventWindow = (s, type) => {
   return rattled(s) ? Math.max(1, Math.round(w * (1 - RATTLE.cut))) : w;
 };
 function rattleNote(s, t) {
+  s.event.rattled = true;
   s.rattledEvents = (s.rattledEvents ?? 0) + 1;
   if (RATTLE.mode === 'pileup') s.rattleCount = (s.rattleCount ?? 0) + 1;
   log(s, t, '> it flinches. another alarm so soon.');
@@ -559,6 +561,12 @@ function eventAnswered(s, t) {
   s.eventsAnswered = (s.eventsAnswered ?? 0) + 1;
   s.lastEventEnd = s.ageMin;
   s.lastEventAnswered = true;
+  if (RATTLE.on && s.event.rattled && (RATTLE.heat || RATTLE.charge)) {
+    s.stats.heat = clamp(s.stats.heat + RATTLE.heat);
+    s.stats.charge = clamp(s.stats.charge - RATTLE.charge);
+    s.rattlePaid = (s.rattlePaid ?? 0) + 1;
+    if (t !== undefined) log(s, t, '> rattled. that took more out of it.');
+  }
   if (RATTLE.on && RATTLE.mode === 'late' && used >= RATTLE.late) {
     s.rattleUntil = s.ageMin + RATTLE.minutes;
     s.rattleCount = (s.rattleCount ?? 0) + 1;
