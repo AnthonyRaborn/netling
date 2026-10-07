@@ -392,6 +392,20 @@ The stage beyond adult. 1.0 already has it under the name Mainframe (`docs/SOURC
 - The earlier arithmetic here (about eight lives an egg for a 0.25 roll) was wrong; measured, 0.25 a Source run costs three eggs about 14 lives, not 24.
 - Not modeled: the ending's story pages (all 39, including four in the Source), whether a player really plays the eggs one after another, and 2.0 rules.
 
+**Aim (maintainer): about 6 lives in all for the 18 egg pages, 2 an egg**, and shorter steps in general ("pretty big and long for a vpet"). Measured on 1.0's simulator (300 lineages of 10 lives; `lines.mjs`, `rogue.mjs`), the guaranteed Source page kept; median lives for all three eggs, attentive (casual) in brackets:
+
+| Levers stacked | Root arrives (median life) | A fresh elder-age netling reaches an elder | Egg 1 | Three eggs |
+|---|---|---|---|---|
+| As now: role 0.10, hidden 0.25, 8 fragments a life, 22 Root pages, 3 Deep exits or 2 clean | 4 (5) | 59% (26%) | 5 (8) | 11 (18) |
+| + role pages 0.20, hidden 0.50 | 4 (5) | 59% (26%) | 5 (7) | 9 (17) |
+| + the feat lightened to 2 Deep exits or 1 clean | 3 (4) | 91% (69%) | 4 (5) | 7 (10) |
+| + Root without The Deep's four pages, 12 fragments a life | 2 (3) | 80% (61%) | 3 (4) | **6 (9)** |
+| Root cut to 16 pages (four a region before The Deep) at 8 a life, with the feat lightened and the rates above | 3 (3) | 75% (57%) | 4 (5) | 7 (9) |
+
+Reading it: the floor is egg 1, not the other two. Root Access needs a netling to be an adult in the Ruins and then in The Deep, and the Deep's four pages only open after `ruins-4`, so Root cannot arrive before life 3 with the Deep's pages in it, whatever the per-life cap (12 a life alone moved Root only from life 4 to 3). Eggs 2 and 3 then take about 1.5 lives each. 2 lives an egg for egg 1 would need Root in life 1, which no layout reaches; "6 in all" is reachable for attentive play only with Root out of The Deep (or smaller) and the feat lightened, and casual play still needs about 9 to 10 lives. Role pages at 0.30 add about one life less (attentive 6, p10 to p90 4 to 7). Not modeled: the ending's 39 story pages, 2.0 rules, and a player who plays the eggs in another order or in parallel.
+
+Levers that touch earlier decisions (not changed here): the elder feat (the gate was kept; its feat count is the lever with the largest effect on elder reach), the Root list (the Deep's four NL-0 pages, `deep-1` to `deep-4`, are where NL-0 speaks to the player and the sketch keeps Root at 24 pages, 3 lives at 8 a life), the page cap (8 a life), and the role and hidden page rates (decided at 0.10 and 0.25).
+
 **Decided (maintainer):** keep 1.0's gate (96 hours old, three Deep exits or two clean) and the extra day of life; the per-egg descent presentation (Program read, Iron burned in, Wetware dreamed); the guaranteed first-exit Source page.
 
 **Open for the maintainer.**
