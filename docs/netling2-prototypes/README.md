@@ -22,6 +22,8 @@ patch -p1 < <repo>/docs/netling2-prototypes/netling2-prototype.patch
 cp <repo>/docs/netling2-prototypes/*.mjs .
 ```
 
+`guard.mjs` and `hold.mjs` read each minute's temper through a hook that is not in the patch; add it to the scratch copy with `sed -i 's|^    tick(s, t0 + minute \* MIN, rng);|&\n    globalThis.__sample?.(s, minute);|' tools/balance.mjs`.
+
 Run from the scratch copy with Node 22. Each driver takes an archetype name from `tools/balance.mjs` and a number of lives.
 
 | Measurement | Command (example) | Settings used for the sketch |
@@ -31,6 +33,8 @@ Run from the scratch copy with Node 22. Each driver takes an archetype name from
 | Bugs, death rates, clearing | `BUGS='{"clear":true}' NOCAP=1 node bugs.mjs casual 300 S2` | `NOCAP=1` removes the fault cap; scenarios B1 (1.0 as is, `BUGS='{"on":false}'` and no `NOCAP`), B2 (`on:false` with `NOCAP`), S1 (`{}`), S2 (`clear`), S3 (`clear`, `chance` 0.5), S4 (`chance` 0.5, `max` 8) |
 | Temper levels | `ITEMTEMPER=1 FLOW=0.5 S1=3 S2=6 U1=2 U2=6 BUGS='{"clear":true,"tdecay":0.999519}' node temper.mjs attentive 300` | flow +0.5 an hour, 24-hour decay, items +1, thresholds -6, -2, +3, +6 |
 | Care preferences | `ITEMTEMPER=1 PREF='{"on":true,"reqbias":true,"steadyMode":"last2","distinct":true,"ice":true}' PREFBOT=follow BUGS='{"clear":true,"tdecay":0.999519}' node pref.mjs attentive 300 FOLB3I` | follow bot; `PREFBOT=ignore` for the ignore bot; `PREF='{"on":false}'` for off |
+| Temper level flips, flow against overclocked time, decay timing | `VARIANT=minute ITEMTEMPER=1 BUGS='{"clear":true,"tdecay":1}' node guard.mjs attentive 200` | needs the sampler hook (below); `VARIANT=minute\|hour\|sixh` is when the 24-hour decay is applied (`tdecay` must be 1 so the driver applies it), `GUARDS=0,0.25,0.5,1,1.5` |
+| Time at each temper level, longest holds | `ITEMTEMPER=1 BUGS='{"clear":true,"tdecay":1}' node hold.mjs attentive 200` | flow +0.5 an hour, guard 1.0, thresholds -6, -2, +3, +6 |
 | Egg page pace by placement | `node egg-pages.mjs` | needs only `tools/baseline/lineages.json`; compares home-region placement with any-region at 0.10 a run, and the hidden page's Deep rate |
 | Actions per life | `BUGS='{"on":false}' node acts.mjs casual` | counts feeds, plays, cooling and so on over 100 lives |
 

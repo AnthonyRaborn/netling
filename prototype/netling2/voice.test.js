@@ -3,6 +3,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { idleBehavior, chatterTone, ROUTINE, STRAYS, STEP_MS, ACTIVE_FRACTION, PROGRAM_BEAT, WETWARE_PAUSE, IRON_ITEMS, EGGS, SLOT_MS } from './voice.js';
 import { CHATTER } from '../../src/chatter.js';
+import { checkShape } from './voice.js';
+import { SAMPLES } from './voice-samples.js';
 
 const LEVELS = [-2, -1, 0, 1, 2];
 const trace = (egg, level, seed, ms = 600_000, step = 100) => {
@@ -166,4 +168,32 @@ test('chatter keeps its words: the shaped line is made of the original words, pl
 
 test('the shaped text uses no em dash', () => {
   for (const egg of EGGS) for (const level of LEVELS) for (const c of CHATTER) assert.ok(!chatterTone({ egg, level, text: c.text }).includes('—'));
+});
+
+test('hand-written voicings keep their shape (checkShape), and steady ones keep every word of the base line in order', () => {
+  const strip = (x) => x.replace(/[.,!?;:]+$/, '').toLowerCase();
+  for (const s of SAMPLES) {
+    for (const [level, text] of Object.entries(s.voices)) {
+      assert.deepEqual(checkShape({ egg: s.egg, level: Number(level), text }), [], `${s.egg}/${s.id}/${level}: ${text}`);
+    }
+    for (const level of [1, 2]) {
+      const words = s.voices[level].split(/\s+/).filter((w) => !/^(\/|\.\.\.|ok\.?|\d:)$/.test(w)).map(strip);
+      assert.deepEqual(words, s.base.split(/\s+/).map(strip), `${s.egg}/${s.id}/${level} must keep the base line's words`);
+    }
+  }
+});
+
+test('checkShape rejects broken voicings and accepts the machine output of the same shapes', () => {
+  assert.ok(checkShape({ egg: 'program', level: 1, text: 'all tasks finished / none were skipped.' }).length > 0, 'beat of 3 words');
+  assert.ok(checkShape({ egg: 'program', level: 1, text: 'all tasks finished. none were skipped.' }).length > 0, 'no beats');
+  assert.ok(checkShape({ egg: 'iron', level: 1, text: '1: wall 2: cable 3: fan' }).length > 0, 'no ok');
+  assert.ok(checkShape({ egg: 'iron', level: -1, text: 'cable loose' }).length > 0, 'not a fault bell');
+  assert.ok(checkShape({ egg: 'wetware', level: 1, text: 'slept well. the culture is warm. nobody called.' }).length > 0, 'no pauses');
+  assert.ok(checkShape({ egg: 'wetware', level: -2, text: '-- warm. nobody called.' }).length > 0, 'strong needs a second burst');
+  for (const egg of EGGS) for (const level of [-2, -1, 1, 2]) {
+    for (const base of ['all tasks finished. none were skipped.', 'wall checked. cable checked. fan checked.', 'slept well. the culture is warm. nobody called.']) {
+      const out = chatterTone({ egg, level, text: base, seed: 3 });
+      assert.deepEqual(checkShape({ egg, level, text: out }), [], `${egg}/${level}: ${out}`);
+    }
+  }
 });

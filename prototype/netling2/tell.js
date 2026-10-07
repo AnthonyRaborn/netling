@@ -28,8 +28,9 @@ export const FRAME_MS = 500; // the 1.0 frame period
 // Temper values where the level changes, lowest first. Decided in the sketch (-6, -2, +3, +6).
 export const THRESHOLDS = [-6, -2, 3, 6];
 // A level only changes once temper is this far past a threshold (the flicker guard), so a value hovering on one does not flip
-// the tell back and forth. A placeholder to tune with the balance tools.
-export const GUARD = 0.5;
+// the tell back and forth. 1.0 was measured on 1.0's simulator (docs/netling2-prototypes/guard.mjs): temper moves in steps of about 1 (a fault,
+// an item), and at 0.5 a life still shows 0.2 to 1.3 level reversals within three hours, at 1.0 at most 0.3.
+export const GUARD = 1;
 
 const LEVELS = [-2, -1, 0, 1, 2];
 export const levelOf = (temper) => LEVELS[THRESHOLDS.filter((t) => temper >= t).length];

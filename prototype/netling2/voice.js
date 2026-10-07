@@ -135,3 +135,43 @@ export function chatterTone({ egg, level, text, seed = 0 }) {
   if (level === 0 || !w.length) return text;
   return level > 0 ? steadyTone(egg, level, w) : unsteadyTone(egg, level, w, seed);
 }
+
+// --- a check for hand-written voicings ----------------------------------------------------------------------------------------
+// The shapes above are what a hand-written 2.0 line must keep, so an author can test a voicing instead of trusting the eye.
+// -> a list of problems (empty if the voicing keeps its shape). Level 0 has no shape to keep.
+const wordCount = (t) => t.split(/\s+/).filter(Boolean).length;
+export function checkShape({ egg, level, text }) {
+  const bad = [];
+  if (level === 0) return bad;
+  if (level > 0) {
+    if (egg === 'program' || egg === 'wetware') {
+      const sep = egg === 'program' ? ' / ' : ' ... ';
+      const size = (egg === 'program' ? PROGRAM_BEAT : WETWARE_PAUSE)[level];
+      const parts = text.split(sep).map(wordCount);
+      if (parts.length < 2) bad.push(`needs at least two parts split by "${sep.trim()}"`);
+      parts.slice(0, -1).forEach((c, i) => { if (c !== size) bad.push(`part ${i + 1} has ${c} words, not ${size}`); });
+      if (parts[parts.length - 1] > size) bad.push(`last part has ${parts[parts.length - 1]} words, more than ${size}`);
+    } else {
+      const items = [...text.matchAll(/(\d): ([^\d]*?)(?= \d: |$)/g)];
+      if (items.length !== IRON_ITEMS || items.some((m, i) => Number(m[1]) !== i + 1)) bad.push(`needs exactly ${IRON_ITEMS} numbered items`);
+      const oks = (text.match(/\bok\b/g) ?? []).length;
+      if (level === 1 && !/ ok\.$/.test(text)) bad.push('must end with "ok."');
+      if (level === 2 && oks !== IRON_ITEMS) bad.push(`needs an "ok" after each item (${oks} found)`);
+      const sizes = items.map((m) => wordCount(m[2].replace(/\bok\b\.?/g, '')));
+      if (sizes.length && Math.max(...sizes) - Math.min(...sizes) > 1) bad.push(`items should be even (${sizes.join(', ')} words)`);
+    }
+    return bad;
+  }
+  const strong = level === -2;
+  if (egg === 'program') {
+    if (!/ -( |$)/.test(text)) bad.push('needs a clipped clause ending in " -"');
+    if (strong && (text.match(/ -( |$)/g) ?? []).length < 2) bad.push('strong: the clipped clause must be said twice');
+  } else if (egg === 'iron') {
+    if (text !== text.toUpperCase() || !text.endsWith('!')) bad.push('must be capitals and end with "!"');
+    if (strong !== text.startsWith('FAULT: ')) bad.push(strong ? 'strong must start with "FAULT: "' : 'only strong starts with "FAULT: "');
+  } else {
+    if (!text.startsWith('-- ')) bad.push('must start mid thought with "-- "');
+    if (strong && !/ -- /.test(text)) bad.push('strong: needs a second burst after " -- "');
+  }
+  return bad;
+}
