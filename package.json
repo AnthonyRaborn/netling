@@ -10,6 +10,7 @@
     "smoke": "node tools/smoke.mjs",
     "proto:test": "TZ=UTC node --test --test-timeout=60000 'prototype/netling2/*.test.js'",
     "proto:audit": "node prototype/netling2/audit.mjs",
+    "proto:audit:program": "EGG=program node prototype/netling2/audit.mjs",
     "proto:gallery": "node prototype/netling2/make-gallery.mjs"
   }
 }

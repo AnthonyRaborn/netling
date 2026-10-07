@@ -20,7 +20,7 @@ Authored, for the current plan of forms (option C: two named forms per role, thr
 
 ## Program (baby and teens)
 
-Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 sprites directly where they fit). Code: `program-art.js`, `program-models.js`, `program.test.js`, registered by `register.js` under the key `protoP_<id>`. Not yet in the audit wrapper, the generated gallery or the review page.
+Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 sprites directly where they fit). Code: `program-art.js`, `program-models.js`, `program.test.js`, registered by `register.js` under the key `protoP_<id>`. In the audit wrapper (`npm run proto:audit:program`, or `EGG=program` / `EGG=all` with `proto:audit`; the default stays Iron so its numbers remain comparable). Not yet in the generated gallery or the review page.
 
 | Form | Source | Size |
 |---|---|---|
@@ -34,6 +34,7 @@ Drawn after Iron, from 1.0's art as the guideline (maintainer's call: reuse 1.0 
 - **Poses.** Sleep and dead are the generic 1.0 poses (slit eyes, X eyes) plus Program's own chest mark, from the sketch's Program register (interrupt-driven, a process that ends): asleep is a block cursor waiting for an interrupt, dead is a flatline run across the chest. A pair of marks for asleep read as a second pair of eyes, hence one block. The marks are a proposal.
 - **Teens.** Corp and street overlap 0.94 (5 outline cells and a mark differ), closer than Iron's 0.74, because Kernel is an already compact shape. The hidden teen is 0.63 from both (43 and 44 outline cells). Whether 5 cells is enough to read the lean on a phone is a by-eye call.
 - **Wearables.** All 41 non-prop wearables on every Program form and pose (492 cases): none leave the screen, and none move between frames (164 cases).
+- **Audit (Program's 4 forms, `npm run proto:audit:program`).** One flag worth acting on: **corp and street teen overlap 0.94, the only same-stage pair and above 1.0's 0.82 bar** (Iron's main teens are 0.74). The decided rule lets the main teens differ only slightly, so this may be accepted, but it is the pair to redraw if the lean does not read by eye. Everything else is at or inside 1.0: the holologo clips 1 px on the baby and the hidden teen (as on 1.0's forms), the necktie loses half its pixels on the corp and street teens on one palette (ice, 0.60), and the worst worn combinations are the usual ones (Chrome jaw over Gold chain 0.83, over Necktie 0.80, worst on the baby). The audit's `similar` section still names 1.0's Bitling and Chrome, not Program forms.
 - **Not drawn:** Program's nine adults and nine elders. Ghost (1.0) is the likely base of the hidden adult, but nothing is decided.
 
 ## Scope

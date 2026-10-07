@@ -21,7 +21,7 @@ npm run serve     # http://localhost:5174
 
 # Netling 2.0 sprite prototype (prototype/netling2/, not shipped; see docs/NETLING_2_SPRITES.md)
 npm run proto:test     # its tests
-npm run proto:audit    # the real sprite audit on Iron's forms
+npm run proto:audit    # the real sprite audit on Iron's forms (EGG=program or EGG=all for Program; proto:audit:program)
 npm run proto:gallery  # generates prototype/netling2/gallery.html (the real gallery on Iron's forms)
 ```
 
