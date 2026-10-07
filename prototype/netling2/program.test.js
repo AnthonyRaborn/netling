@@ -2,18 +2,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
-import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_HIDDEN_BRANCH, programPose } from './program-models.js';
+import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_HIDDEN_BRANCH, PROGRAM_ELDER_OF, programPose } from './program-models.js';
 import { programKey } from './register.js';
+import { scaledOverlap } from './metrics.js';
 import { SPRITES } from '../../src/sprites.js';
 import { silhouetteIou, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const set = programForms();
-const WIDTH = { baby: 12, teen: 14, adult: 16 };
+const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
 const forms = Object.values(set);
 const key = (f, pose) => `${programKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
-test('Program has a baby, three teens (corp, street, hidden) and nine adults, in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage !== 'adult'), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
+test('Program has a baby, three teens (corp, street, hidden), nine adults and nine elders, in the egg\'s own table', () => {
+  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => ['baby', 'teen'].includes(PROGRAM_FORMS[id].stage)), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
   assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'adult'), PROGRAM_ADULTS_ALL);
   assert.deepEqual(PROGRAM_HIDDEN_BRANCH, ['baby', 'teenHidden', 'ghost']);
   assert.deepEqual(PROGRAM_TEENS_ALL.map((id) => PROGRAM_FORMS[id].lean), ['corp', 'street', 'hidden']);
@@ -145,24 +146,31 @@ test('no wearable moves between the A and B frames on any Program form', async (
   assert.deepEqual(moved, []);
 });
 
-test('every 1.0 wearable stays on screen on every Program form and pose', async () => {
+test('every 1.0 wearable stays on screen on every Program form and pose, except where 1.0 already clips (a 15 row form)', async () => {
   const { ACCESSORIES, placeWorn } = await import('../../src/accessories.js');
+  const { SPECIES } = await import('../../src/sim.js');
   const pal = { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' };
+  const clips = (sprite, w, pose) => {
+    const ox = Math.floor((40 - sprite[0].length) / 2);
+    const oy = 20 - sprite.length;
+    const placed = placeWorn([{ id: w.id }], sprite, { frame: pose === 'b' ? 1 : 0, time: 0, pal, minRow: -oy });
+    return offScreen(placed.flatMap((p) => p.pts.map((q) => ({ x: ox + q.x, y: oy + q.y })))).length > 0;
+  };
+  const wearables = ACCESSORIES.filter((x) => x.slot !== 'prop');
+  const known = new Set(); // wearables that clip on a 1.0 form of 15 rows
+  for (const f of Object.keys(SPECIES).filter((id) => SPRITES[`${id}A`].length === 15)) for (const w of wearables) if (clips(SPRITES[`${f}A`], w, 'a')) known.add(w.id);
   const bad = [];
   let cases = 0;
   for (const f of forms) {
     for (const pose of ['a', 'b', 'sleep']) {
       const sprite = SPRITES[key(f, pose)];
-      const ox = Math.floor((40 - sprite[0].length) / 2);
-      const oy = 20 - sprite.length;
-      for (const w of ACCESSORIES.filter((x) => x.slot !== 'prop')) {
+      for (const w of wearables) {
         cases++;
-        const placed = placeWorn([{ id: w.id }], sprite, { frame: pose === 'b' ? 1 : 0, time: 0, pal, minRow: -oy });
-        if (offScreen(placed.flatMap((p) => p.pts.map((q) => ({ x: ox + q.x, y: oy + q.y })))).length) bad.push(`${f.id}/${pose}/${w.id}`);
+        if (clips(sprite, w, pose) && (sprite.length < 15 || !known.has(w.id))) bad.push(`${f.id}/${pose}/${w.id}`);
       }
     }
   }
-  console.log(`  ${cases} Program wearable cases, ${bad.length} leave the screen${bad.length ? `: ${bad.join(', ')}` : ''}`);
+  console.log(`  ${cases} Program wearable cases, ${bad.length} leave the screen where 1.0 would not (${[...known].join(', ') || 'none'} clip on 1.0's 15 row forms)`);
   assert.deepEqual(bad, []);
 });
 
@@ -213,4 +221,43 @@ test('Ghost is the hidden adult the Shell grows into: 1.0\'s eyes, mouth and dom
   assert.equal(set.ghost.anchors.a.eyeRow, 4);
   assert.deepEqual(set.ghost.a.slice(0, 11), SPRITES.ghostA.slice(0, 11));
   assert.notDeepEqual(set.ghost.a, SPRITES.ghostB, '1.0\'s own B frame moves the mouth, so it is not used as is');
+});
+
+// --- elders: one per adult --------------------------------------------------------------------------------------------------------
+test('every adult has exactly one elder, a variant of it: 18 columns, one row taller (never past 15), the adult\'s marks kept', () => {
+  const elders = Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'elder');
+  assert.deepEqual(elders.map((id) => PROGRAM_FORMS[id].from).sort(), [...PROGRAM_ADULTS_ALL].sort());
+  for (const adult of PROGRAM_ADULTS_ALL) {
+    const elder = set[PROGRAM_ELDER_OF(adult)];
+    assert.equal(PROGRAM_FORMS[elder.id].from, adult);
+    assert.equal(elder.a[0].length, 18, `${elder.id}: width`);
+    assert.ok(elder.a.length <= 15 && elder.a.length >= set[adult].a.length, `${elder.id}: ${elder.a.length} rows against ${set[adult].a.length}`);
+    for (const ch of new Set(set[adult].a.join('').replace(/[.]/g, ''))) assert.ok(elder.a.join('').includes(ch), `${elder.id}: lost the ${ch} mark`);
+    assert.deepEqual(elder.anchors.a, set[adult].anchors.a, `${elder.id}: the rows added are below the neck, so the anchors are the adult's`);
+    assert.notDeepEqual(elder.a.map((r) => r.replace(/x/g, '#')), set[adult].a.map((r) => r.padEnd(18, '.')), `${elder.id}: not just the adult`);
+  }
+});
+
+test('each elder is closest, after scaling, to the adult it grows from among all nine adults (the sibling of its role included)', () => {
+  const rows = PROGRAM_ADULTS_ALL.map((adult) => {
+    const elder = set[PROGRAM_ELDER_OF(adult)].a;
+    const ranked = PROGRAM_ADULTS_ALL.map((x) => ({ x, v: scaledOverlap(elder, set[x].a) })).sort((p, q) => q.v - p.v);
+    const other = ranked.find((r) => r.x !== adult);
+    return { adult, own: scaledOverlap(elder, set[adult].a), other: other.x, otherValue: other.v };
+  });
+  console.log('  Program elder against its adult (scaled), best other: ' + rows.map((r) => `${r.adult} ${r.own.toFixed(2)} vs ${r.other} ${r.otherValue.toFixed(2)}`).join(', '));
+  for (const r of rows) assert.ok(r.own > r.otherValue && r.own >= 0.75, `${r.adult}: ${r.own.toFixed(2)} against ${r.other} ${r.otherValue.toFixed(2)}`);
+});
+
+test('the nine Program elders are distinct from one another (under 1.0\'s 0.82 for a pair of different roles)', () => {
+  const pairs = [];
+  for (let i = 0; i < PROGRAM_ADULTS_ALL.length; i++) {
+    for (let j = i + 1; j < PROGRAM_ADULTS_ALL.length; j++) {
+      const [x, y] = [PROGRAM_ADULTS_ALL[i], PROGRAM_ADULTS_ALL[j]];
+      pairs.push({ pair: `${x}/${y}`, sibling: PROGRAM_FORMS[x].role === PROGRAM_FORMS[y].role, iou: silhouetteIou(set[PROGRAM_ELDER_OF(x)].a, set[PROGRAM_ELDER_OF(y)].a) });
+    }
+  }
+  pairs.sort((p, q) => q.iou - p.iou);
+  console.log(`  closest Program elders: ${pairs.slice(0, 3).map((p) => `${p.pair} ${p.iou.toFixed(2)}`).join(', ')}`);
+  for (const p of pairs) assert.ok(p.iou < 0.82, `${p.pair} ${p.iou.toFixed(3)}`);
 });

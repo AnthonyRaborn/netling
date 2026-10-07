@@ -1,4 +1,4 @@
-// The Program egg's forms (baby, teens and adults so far), built like Iron's authored forms in models.js: A and B share the head, eyes, mouth
+// The Program egg's forms (baby, teens, adults and elders), built like Iron's authored forms in models.js: A and B share the head, eyes, mouth
 // and neck (only the legs move), sleep and dead are the 1.0 generic poses plus Program's own chest mark.
 //
 // Program's marks come from the sketch's Program register (interrupt-driven, a process that ends):
@@ -8,7 +8,7 @@
 // Marks only: they replace body cells (never the eyes or the outline), on the first chest row they fit.
 import { ANCHOR_ROWS } from '../../src/sprites.js';
 import { pose } from './models.js';
-import { PROGRAM_BABY, PROGRAM_TEENS, PROGRAM_ADULTS, PROGRAM_ADULT_ANCHORS } from './program-art.js';
+import { PROGRAM_BABY, PROGRAM_TEENS, PROGRAM_ADULTS, PROGRAM_ADULT_ANCHORS, PROGRAM_ELDERS, PROGRAM_ELDER_ANCHORS } from './program-art.js';
 
 export const PROGRAM_FORMS = {
   baby: { stage: 'baby', from: 'bitling' },
@@ -26,15 +26,18 @@ export const PROGRAM_FORMS = {
   snarf: { stage: 'adult', role: 'feast', lean: 'street' },
   ghost: { stage: 'adult', role: 'hidden', from: 'ghost' }, // 1.0's hidden adult
 };
+// One elder per adult, each a variant of the adult it grows from.
+for (const id of ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost']) PROGRAM_FORMS[`${id}Elder`] = { stage: 'elder', from: id };
+export const PROGRAM_ELDER_OF = (adult) => `${adult}Elder`;
 export const PROGRAM_ADULTS_ALL = ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost'];
 export const PROGRAM_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
 export const PROGRAM_HIDDEN_BRANCH = ['baby', 'teenHidden', 'ghost'];
 
-const FRAMES = { baby: PROGRAM_BABY, ...PROGRAM_TEENS, ...PROGRAM_ADULTS };
+const FRAMES = { baby: PROGRAM_BABY, ...PROGRAM_TEENS, ...PROGRAM_ADULTS, ...PROGRAM_ELDERS };
 // 1.0's anchors for the forms reused as they are. Their B anchors equal A's (the head does not move), and sleep takes A's.
 // The street teen is Kernel's body, so it takes Kernel's rows.
 const ANCHORS_1_0 = { baby: 'bitling', teenCorp: 'kernel', teenStreet: 'kernel', teenHidden: 'shell' };
-const anchorsOf = (id) => ({ ...(PROGRAM_ADULT_ANCHORS[id] ?? ANCHOR_ROWS[ANCHORS_1_0[id]].a) });
+const anchorsOf = (id) => ({ ...(PROGRAM_ADULT_ANCHORS[id] ?? PROGRAM_ELDER_ANCHORS[id] ?? ANCHOR_ROWS[ANCHORS_1_0[id]].a) });
 
 const CURSOR = 'oo';
 const FLATLINES = ['oooooooo', 'oooooo', 'oooo']; // the longest that fits the chest
