@@ -107,7 +107,8 @@ Reading:
 - Iron and Wetware: no archetype moves by 1.5 points or more at either line.
 - Bot sweep (Charge perks on), full life / win drops a life, no break, 55, 40: greedy Tune corp 68.4 / 20.8, 99.8 / 15.1, 99.2 / 17.2; watching Tune corp 99.2 / 18.0, 99.5 / 15.0, 99.5 / 17.4; greedy ghosthunter 82.3 / 28.9, 98.6 / 23.1, 98.1 / 24.7; watching ghosthunter 97.9 / 25.7, 98.4 / 23.5, 97.8 / 25.3.
 - Reading: the lower line costs 0.3 to 1.5 points of full life and returns about 83% to 96% of the unbraked benefit. A careful player and a careless one end up with almost the same benefit (17.4 against 17.2 for Tune corp), so the break protects the careless without rewarding the careful.
-- Untested: the warning line (70), other lockout lengths, and an Iron-specific trigger.
+- **Lockout length** (break line 40; Program only; `results/followup/program-bot-sweep-brake-lock{8,12}-*.txt`, `results/balance-brake-lock{8,12}-program.json`), no break / 24h / 12h / 8h: greedy Tune corp full life 68.4 / 99.2 / 99.6 / 99.6, win drops 20.8 / 17.2 / 18.1 / 18.1, time in Overdrive 33.6 / 15.3 / 19.9 / 19.9 percent; greedy ghosthunter win drops 28.9 / 24.7 / 25.7 / 25.7; watching players barely move (Tune corp 18.0 / 17.4 / 17.7 / 17.7). No archetype in the 37 moves by 1 point or more between 24h, 12h and 8h; mean netruns a life 13.43, 13.26, 13.25 (12.81 with no break). 8 and 12 hours are identical to the digit, probably because both end before the netling wakes (sleep is 22:00 to 07:00 and a hold needs 3 awake hours); not isolated. A shorter lockout gives greedy play about 5% more benefit and puts it level with, or just above, careful play (Tune corp 18.1 against 17.7), so it does not help the break reward care.
+- Untested: the warning line (70), lockouts on Iron and Wetware (the break rarely fires there), and an Iron-specific trigger.
 
 ## Against the figures in the docs
 

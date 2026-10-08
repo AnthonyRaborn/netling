@@ -43,6 +43,8 @@ const CONFIG = {
 };
 
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`brake-${egg}`] = { ...CONFIG[`full-${egg}`], ...CONFIG[`brake-${egg}`] };
+// Lockout lengths for the break (hours), Program only: the shorter the lockout, the more often a greedy player can re-enter the state.
+for (const h of [8, 12]) CONFIG[`brake-program-lock${h}`] = { ...CONFIG['full-program'], BRAKE: JSON.stringify({ on: true, lockMin: h * 60 }) };
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
@@ -50,6 +52,8 @@ const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name,
 for (const c of ['core', 'full-iron', 'full-program', 'full-wetware']) add(`balance-${c}`, 'balance.mjs', [LIVES], c, { JSON: '1' }, 900);
 
 for (const egg of ['iron', 'program', 'wetware']) add(`balance-brake-${egg}`, 'balance.mjs', [LIVES], `brake-${egg}`, { JSON: '1' }, 900);
+
+for (const h of [8, 12]) add(`balance-brake-lock${h}-program`, 'balance.mjs', [LIVES], `brake-program-lock${h}`, { JSON: '1' }, 900);
 
 // Lineage pacing and the Rogue gate (egg pages, ending).
 for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'rules', { JSON: '1' }, 600);
