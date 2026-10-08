@@ -309,6 +309,7 @@ export function checkIn(s, p, now, rng, ctx) {
   let syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
   // SYNCBOT=greedy plays until Sync is full; SYNCBOT=budget never plays at or over the Sync penalty line (SIDES.sync.penLine).
   if (process.env.SYNCBOT === 'greedy') syncTarget = 100;
+  else if (process.env.SYNCBOT === 'sip' && SIDES.on) syncTarget = Math.min(syncTarget, SIDES.sync.penFree - 1);
   else if (process.env.SYNCBOT === 'budget' && SIDES.on && SIDES.sync.penLine > 0) syncTarget = Math.min(syncTarget, SIDES.sync.penLine);
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play') && !(process.env.ACTBOT === 'budget' && ACTS.sync.on && s.stats.sync >= ACTS.sync.line); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];

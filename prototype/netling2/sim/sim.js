@@ -650,7 +650,7 @@ export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
-  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
+  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
@@ -669,6 +669,7 @@ function stepHeld(s, rest) {
     if (rest || s.stats[key] < c.exit) {
       s.sideHold[key] = 0;
       s.sideHeld[key] = false;
+      if (key === 'sync') s.wiredOver = 0;
     } else if (s.stats[key] >= c.hi) {
       s.sideHold[key]++;
       if (s.sideHold[key] >= c.hold) s.sideHeld[key] = true;
@@ -1550,6 +1551,16 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       gain *= 1 + traitEffect(s, 'volatile');
       if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
       SIDE_METER.plays++;
+      // Graduated penalty (penStep > 0): inside Wired, plays below penFree are free; each play at penFree or over adds penStep to the
+      // infection chance (x owner multiplier, capped at penCap) until the state ends.
+      if (SIDES.on && SIDES.sync.penStep > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
+        s.wiredOver = (s.wiredOver ?? 0) + 1;
+        if (!s.virus && !shielded(s) && rng() < Math.min(SIDES.sync.penCap, SIDES.sync.penStep * s.wiredOver * sideM('sync'))) {
+          SIDE_METER.penHits++;
+          infect(s, SIDES.sync.penDmg);
+          log(s, now, '> too wired to play. !! virus signature detected.');
+        }
+      }
       // Playing while Sync is at penLine or over risks an infection (penP x owner multiplier): too wired to play safely.
       if (SIDES.on && SIDES.sync.penLine > 0 && st.sync >= SIDES.sync.penLine && !s.virus && !shielded(s) && rng() < SIDES.sync.penP * sideM('sync')) {
         SIDE_METER.penHits++;
