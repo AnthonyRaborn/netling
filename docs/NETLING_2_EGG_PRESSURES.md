@@ -4,6 +4,8 @@ Status: simulator-tested working design, not in any game code. Numbers come from
 
 ## The idea
 
+Name warning: Surge and Wired are working names only. They clash with Chipped's elder (Surge), the Wired adult and the power-surge event; candidates are not drafted.
+
 Each egg manages one bar harder than the others, and that bar has a special state with a real benefit and a real risk. The same states exist for every egg; the owner's bar is stronger (x3 on every effect), so the egg decides which risk is worth taking. Pass bar: the ordinary archetypes (attentive, casual, worker, sysadmin, human-regular) stay within noise on full-life rate, infections and temper.
 
 | Egg | Bar | State | Starts | Ends |

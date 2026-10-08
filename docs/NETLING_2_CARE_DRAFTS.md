@@ -1,13 +1,13 @@
 # Netling 2.0 care drafts
 
-Status: first-pass proposals for step 1 of the sketch's next steps (per-egg meters and care buttons). Nothing here is implemented, playtested or measured. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions) and [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (page text and the same three registers).
+Status: first-pass proposals for step 1 of the sketch's next steps (per-egg meters and care buttons). Nothing here is implemented or playtested; the per-egg pressure the wording sits on is measured on the simulator ([NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md)). Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions) and [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (page text and the same three registers).
 
 ## Frame (maintainer answers, first pass, not set in stone)
 
 - **Reskins are enough.** Every egg keeps 1.0's four meters, the cache, and the same rules. Only names, log lines and alert text change. Lineage, traits, Standing, temper, bugs and the simulator stay shared.
 - **Rhythm is flavor.** Interrupt, batch and polling are wording, not clock changes. Drains, windows and event chances are 1.0's.
 - **The button count stays fixed:** nine control buttons (feed, feed, play, cure, cool, purge, netrun, nap, lights) plus the event-bar buttons (two trace answers, DEFEND, PURGE) and GREET. Names change, the layout does not.
-- **Extra pressure per egg is open.** Program reuses 1.0's. For Iron (drift) and Wetware (rejection) this draft uses them only as names for existing things (see Failures), so a real extra mechanism is still undecided.
+- **Extra pressure per egg is a hidden rule behind the same buttons.** Iron keeps Heat in a band with hidden wear (drift), Program has a Charge state and Wetware a Sync state, each with a benefit, a risk and a brake (see the pressures doc). Buttons, drains' base numbers and meters do not change; the state cues below are log lines, not new controls.
 
 Rules for the words: Program is bureaucratic and technical, Iron is physical and procedural, Wetware is street-level and plain (no CP2020 jargon in game text). Button labels stay at 9 characters or fewer (the longest 1.0 labels are `SCAV DATA` and `LIGHTS OFF`). Log lines are lowercase with a `> ` prefix as in 1.0.
 
@@ -69,7 +69,7 @@ Notes:
 
 Notes:
 - Program's death register, Iron's and Wetware's are the sketch's. "Care mistake" is internal and shown only in log text.
-- Wetware's rejection is the sketch's failure model used as the name of the virus. It is not yet a mechanism that grows with augmentation (open).
+- Wetware's rejection is the sketch's failure model used as the name of the virus. Its closest mechanism now is the Sync state: infections are likelier inside it, and playing past 90 inside it rolls one. It still does not grow with augmentation (open).
 - **Bug clearing goes through netruns (maintainer, first pass).** The control bar stays fixed. How is undecided: either a new node type in the existing netrun (the debug station anomaly in the sketch is one entry in the anomaly pool, which would grow into a node that needs rebalancing), or netruns split into a dive (JACK IN, the current expedition) and a market-like open mode. Scrip (15) and Standing (2, any split) remain the prices. Both options touch `netrun/` and its balance tools, so they come after the balance-bot update.
 
 ## Items
@@ -122,12 +122,30 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 
 ## Open
 
-1. Iron's extra pressure is decided (drift: a Heat band of about 20 to 75; see the sketch, Next steps). Wetware's rejection and Program's are still open, tried as one managed meter each (Charge, Sync); Wetware's rejection is the one most tied to wearables, and that is a content choice.
+1. Egg pressures have a working design (Iron's drift band and wear, a Charge state, a Sync state; see the pressures doc). Open here: the state names (Surge and Wired clash with existing names), and whether the cue lines below are enough of a signal.
 2. Bug clearing in netruns: the maintainer's direction is a clinic, a third unaligned kind of market that fixes bugs and sells the healing items (see the prototypes README, The clinic); names for it per egg are not drafted (Program clinic or repair shop, Iron workshop, Wetware clinic).
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.
 5. Everything here is untested: label widths on the real control bar, the readout line length, the field manual (generated from `CFG`, so it needs egg-aware text).
 6. The balance tools model 1.0 only and need updating for the current rules before they can check any of this (maintainer, this session).
+
+## Pressure cues (drafts, first pass)
+
+Log lines for the states in the pressures doc, in the register of each egg. Every egg can enter both states (at x1 when it is not the owner), so every egg needs both rows. Cues must be visible: the player is never told a number. Unread in context.
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Charge state begins | > buffers full and steady. boost mode on. | > mains steady. running above spec. | > well fed and humming. |
+| Charge state ends | > boost mode off. | > back within spec. | > the hum settles. |
+| Sync state begins | > link saturated. latency near zero. | > locked tight. every move lands. | > it is buzzing. everything feels close. |
+| Sync state, first play at the top | > link at limit. more load will bite. | > lock at limit. more will strain it. | > it is wound too tight to play safely. |
+| Sync state, burnout | > link burned out. offline until tomorrow. | > lock burned out. it needs the day to settle. | > burned out. it needs the rest of the day. |
+| Sync state ends | > link settles. | > lock eases. | > the buzz fades. |
+| Penalty hit (infection from a play) | > overloaded. !! virus signature detected. | > overloaded. !! drift detected. | > too wound up. !! rejection setting in. |
+| Wear passes the warning line (Iron only) | none | > tolerances are slipping. | none |
+| Wear from running cold (Iron only) | none | > running cold. it stiffens. | none |
+
+Wear exists only on Iron, so those two rows have one line. The two Iron lines are the simulator's text. The Charge state's cost (overflow, Integrity bleed) already has existing overflow and decay text.
 
 ## Clinic and bug statements (drafts, first pass)
 
