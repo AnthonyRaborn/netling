@@ -147,6 +147,54 @@ Log lines for the states in the pressures doc, in the register of each egg. Ever
 
 Wear exists only on Iron, so those two rows have one line. The two Iron lines are the simulator's text. The Charge state's cost (overflow, Integrity bleed) already has existing overflow and decay text.
 
+## State clues (drafts, first pass)
+
+How a player sees the states without a number. Patterned on 1.0's two: the Heat bar reads OC with a title and a screen-reader value, the readout line appends " · overclocked", and the sprite grows three heat wisps (`src/render.js`, `src/ui/hud.js`). Flow is a slow breathing outline and " · in flow". Rules kept from 1.0: nothing flashes more than three times a second (steps of 400 ms or more, double `FLASH_TOGGLE_MS`), every motion cue has a still version in calm mode, color is never the only signal (a label, a shape and a text value go with it), and no new sound (props have none). Not rendered or read on a device.
+
+**Where each cue lives**
+
+| Clue | Overclock (1.0) | Overdrive (Charge) | Overlink (Sync) |
+|---|---|---|---|
+| Bar label | OC replaces HEAT | OD replaces the Charge label | OL replaces the Sync label |
+| Readout line | " · overclocked" | " · overdrive" | " · overlink" |
+| Sprite | three wisps rise off the top edge | two sparks hop along its base, one step per 400 ms | two dots orbit its head, one step per 400 ms |
+| Calm mode | wisps still, stacked | sparks still, one each side | dots still, one each side |
+| Screen-reader value | ", overclocked" | ", overdrive" | ", overlink" |
+| Title (hover) | what OC does | "Overdrive: a full buffer pays off, but overdrawing it hurts." | "Overlink: closely linked, but pushing it too far burns it out." |
+
+The three marks sit in different places (above, below, around) and have different shapes (rising pixels, hopping pixels, orbiting pixels), so two states at once (Overclock and Overlink, say) stay readable. Flow keeps its outline.
+
+**Stages of Overlink** (the one with a brake; Overdrive has no brake and only the first two rows)
+
+| Stage | What the player sees | Why |
+|---|---|---|
+| Building (Sync high, under 3 hours) | nothing | the hold is the discovery; a countdown would give the number away |
+| Active | OL label, two orbiting dots, " · overlink", the begins log line; a thin tick appears on the Sync bar just under the top | the tick marks where playing stops being free, without a number |
+| Strained (a play above the tick) | the tick fills in, one dot drops away, " · strained", the first-play log line | the warning that a second play burns it out |
+| Burned out | dots fall away, label back to the Sync name, " · spent", the burnout log line | the state is over and cannot return today |
+| Ready again | " · spent" clears, the log line "> it can link again." | the player learns when to try again |
+| Infection from a play | the existing virus alert and the penalty log line | the cost is an infection, shown as one |
+
+**Iron's wear** (Iron only; the other eggs show none):
+
+| Stage | What the player sees |
+|---|---|
+| Wear below the warning line | nothing |
+| Past the line | a small static seam on one edge of the sprite, " · worn" in the readout, "> tolerances are slipping." |
+| Heavy wear | a second seam, the readout stays " · worn" |
+| Recovering | seams go one at a time as wear fades; "> back within spec." |
+| Heat under the cold line, awake | the Heat label reads COLD, "> running cold. it stiffens." |
+
+Seams do not move, so they carry no flash risk and need no calm version. Titles: "Worn: running outside its range wears it down. Rest to recover." and "Cold: running too cool wears it down too."
+
+**Field manual lines (draft, in the existing style)**
+
+- OD · Overdrive: "Charge held full for hours. Games pay more and wins find more, but the buffer overflows more often and it loses Integrity. Rest or a drop in Charge ends it."
+- OL · Overlink: "Sync held high for hours. Visitors drop by more, wins find more, and infections come easier. Play inside the tick and it holds; play past it and it can burn out for a day."
+- Open: whether the manual prints numbers (1.0's is generated from `CFG` and does) or stays qualitative for these two; the hold time and thresholds are hidden mechanics and printing them lets a player aim at them.
+
+Open: the colors of the sparks and dots (the palette's accent is taken by Flow's outline, the heat color by the wisps); whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted); a temper tell for the states (none).
+
 ## Clinic and bug statements (drafts, first pass)
 
 The maintainer's direction: bugs are cleared at a clinic node on a netrun (a third, unaligned market kind that also sells the healing items), and a bugged netling softly pushes its player to go: it says so, and a clinic job is offered (see the prototypes README, The clinic and Soft push to run). Names per egg follow the registers above; the simulator uses the generic wording. All lines are the Wetware-plain or Iron-physical or Program-technical voice and have not been read in context.
