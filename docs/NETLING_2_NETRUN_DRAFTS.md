@@ -1,6 +1,8 @@
 # Netling 2.0 netrun drafts
 
-Status: first-pass design drafts for step 2 of the sketch's Next steps (netrun content per egg: abilities, 23 more elder upgrades, regions, events, tutorial run). Everything here is a proposal unless marked Decided. Nothing is in code, nothing is tuned and nothing has been measured; any number quoted is 1.0's, shown only as a starting point. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (the design record), [NETRUN.md](NETRUN.md) (1.0's netrun, the source of every hook named below) and [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) (item and meter wording). Spoilers throughout.
+Status: first-pass design drafts, revised after the maintainer's answers (see Decided below), for step 2 of the sketch's Next steps (netrun content per egg: abilities, 23 more elder upgrades, regions, events, tutorial run). Everything here is a proposal unless marked Decided. Nothing is in code, nothing is tuned and nothing has been measured; any number quoted is 1.0's, shown only as a starting point. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (the design record), [NETRUN.md](NETRUN.md) (1.0's netrun, the source of every hook named below) and [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) (item and meter wording). Spoilers throughout.
+
+**Decided (maintainer), recorded here:** (1) one ability per role and lean, at two levels (adult, elder), with the egg's flavor as the starting point of each egg's version; (2) egg pressures pause during a run, but each egg's own problem (Iron's wear and so on) can be made worse by a run; (3) no triggered abilities if avoidable; (4) a second, harder tier of ICE is mixed into runs at proportions that depend on the depth of the net (section 2.1). Everything else below is still a proposal.
 
 ## 1. Scope and ground rules
 
@@ -8,8 +10,8 @@ In: adult abilities, elder upgrades, how the three eggs differ inside a run, ano
 
 Ground rules carried over (all from 1.0's netrun code and docs):
 1. **Pure rules.** Anything that changes a run lives in `run.js`-style code: `(pet, rng)`, no DOM, driven by the balance bots.
-2. **Two effects per adult, one more per elder.** 1.0 gave each line one ability, found a form fell behind in The Deep, and added a second effect in balance pass 2; the Mainframe upgrade is a third. A single-effect ability is not enough.
-3. **Parity target.** In 1.0 no adult ability was more than about 4 points better than another at avoiding disconnects in The Deep, and the five mainframe upgrades sat within a few points of each other in the Source (careful disconnects 24 to 28%). The same bar applies to every 2.0 form, measured, not argued.
+2. **One ability, two levels (Decided).** The adult has the ability at level 1 and the elder at level 2. Caution from 1.0: its lines started with one effect, fell behind in The Deep, and got a second effect in balance pass 2, so a named ability may have two parts (for example 'takes less ICE damage, and the first loss each run barely scratches it'), and level 2 steps both parts up. That keeps 'one ability' without repeating 1.0's mistake.
+3. **Parity target (re-measured with the ICE tiers on).** In 1.0 no adult ability was more than about 4 points better than another at avoiding disconnects in The Deep, and the five mainframe upgrades sat within a few points of each other in the Source (careful disconnects 24 to 28%). The same bar applies to every 2.0 form, measured, not argued.
 4. **Daily trace.** Any ability that rolls must use the lane rng (`laneRng`), and any ability that takes or gives items or scrip must work with the stake ledger or be off in the daily. A change in the order of rolls bumps `DAILY.rules`.
 5. **Challenges.** Every ability is checked against Unplugged (no relay repair or venting), Blackout (no sight), Glass (a soft loss counts as lost) and Bare metal (no items).
 6. **Ids are permanent** once the app uses them; use the form ids, not display names.
@@ -30,23 +32,29 @@ The six places an ability can act in 1.0, plus the small hooks a 2.0 ability mig
 | Market price or stock edge (a discount, one extra offer) | Chrome's exchange price only | Small |
 | Move cost (Charge or Heat per move) | none | Small |
 | Heat handling in a run (cooling per relay, less Heat from a lost fight) | none (an Airgap version was dropped in 1.0: Heat drives throttling, so it was worth more than it looked) | Small, but measure first |
-| An ability the player triggers (a button, a charge) | none | New |
+| An ability the player triggers (a button, a charge) | none | New; avoided (maintainer prefers no triggered abilities) |
 
 Observation for design: the 1.0 five cover every existing hook once. Reusing them for 27 adults means each hook is used about five times, so the 2.0 forms must differ by pairing and by egg, not only by hook. Section 3 proposes how.
 
+### 2.1 ICE tiers (new input to everything below)
+
+Decided (maintainer): a second tier of harder ICE is mixed in at random, with the share of tier-2 ICE set by the depth of the net. My reading, to confirm: the shallow regions currently hold only the one kind of ICE, so they get an occasional harder fight, and the share grows toward The Source.
+
+What the code gives us: an ICE fight is a random one of the four mini-games, played at `speed` 1, or 0.85 while jacked in overclocked; the region sets only the damage (35 in the Public Net up to 52 in the Source). Dodge and Feast also speed up over the course of a game. So the cheapest harder variant is a higher `speed` and, if wanted, a higher damage or better reward, using the lever overclock already uses. A per-game variant (a different Breach or Tune puzzle) is new content and needs its own design.
+
+What it changes in this work:
+1. **Re-baseline.** The disconnect targets (careful: 3% Public Net, 4% Bazaar, 6% Corp Grid, 10% Ruins, 34% Deep in 1.0) were set with one kind of ICE. Any tier share moves every one of them, so the targets and the parity bars (ground rule 3) must be re-measured with the mix on, and the shallow regions will no longer be near-risk-free.
+2. **Abilities that touch ICE gain value.** Damage reduction, avoidance and last stands are worth more against harder ICE, and Feast and Tune relatively less, so the Breach and Dodge abilities need re-balancing against Feast and Tune once the mix exists. This is the main reason to settle the ICE tiers before tuning any numbers.
+3. **Open design questions for the maintainer:** (a) depth by region only, or also by layer inside a map; (b) is the tier visible on the map or revealed at the fight; (c) harder means faster, or more damage, or both; do tier-2 wins pay more; (d) do avoidance abilities (phase, slip) treat tier 2 the same as tier 1 (proposal: yes, otherwise Dodge forms stop being Dodge forms); (e) how this fits the challenges (Glass becomes harder) and the daily trace (the tier roll must be seeded in the ice lane); (f) the flash rule: a faster game must still keep every strobe under three a second.
+4. **Not proposed here:** the shares themselves. They are a tuning output of the bots, not a design choice to guess at.
+
 ## 3. Adult abilities
 
-### 3.1 The key question (needs the maintainer)
+### 3.1 Structure (Decided, maintainer)
 
-1.0 tied abilities to a line (five lines, five abilities). 2.0 has per egg 8 role forms (4 roles x corp or street lean) and 1 hidden form, 27 adults in all. Three ways to assign:
+One ability per role and lean combination, at two levels (adult is level 1, elder is level 2). That is 8 abilities plus 3 hidden ones, each defined once and stepped once, so 11 abilities and 22 level definitions, not 27 adults with separate upgrades. The egg's flavor is the starting point for each egg's version of an ability.
 
-| Option | What it means | Cost | Risk |
-|---|---|---|---|
-| A. By role and lean, shared across eggs | 8 abilities plus 3 hidden ones; the egg changes the surrounding pressure, not the ability | Smallest. Reuses the 1.0 balance method on 11 abilities | Eggs feel the same in a run apart from skin and pressure |
-| B. By role and lean, with an egg twist | The same 8, each with a small egg-specific second effect (24 variants) plus 3 hidden | Medium. 27 things to measure | Parity harder to hold |
-| C. Fully separate per form | 27 unique abilities | Largest | Parity almost impossible without long tuning; most invented content |
-
-**Proposal: A for the first pass, B only where playtests show the eggs feel identical.** Reason: the eggs already differ in forms, names, codex text, care loop and the egg pressure (Overclock with wear, Overdrive, Overlink, each tripled for its owner), so one ability set per role and lean keeps measurable parity and still lets the pressure do the egg-specific work. The remainder of this document assumes A.
+**How I read 'egg flavor as the starting point' (please confirm):** the core ability is the same in every egg, so parity can be measured once; each egg adds a rider that comes from the problem it already manages (section 3.5). The alternative reading, three separately designed versions of every ability, is closer to the earlier option B or C and about three times the tuning; I have not assumed it.
 
 ### 3.2 Roles and leans as ability themes
 
@@ -61,66 +69,70 @@ The role is the mini-game a form is built around; the lean is the Standing lean.
 
 Lean: **corp** forms lean on credentials, relays and the exchange; **street** forms lean on toughness, the black market and risk.
 
-### 3.3 The eight (proposal, two effects each)
+### 3.3 The eight (proposal; each is one ability, level 1 shown)
 
-First effect is the role's hook; the second is the lean's flavor. Both are existing or small hooks. Strength is not set here; the 1.0 constants are the starting point for the bots.
+Working names are placeholders. Each ability is one named ability with up to two parts, both existing or small hooks. Strength is not set here; 1.0's constants are the starting point for the bots. Level 2 (elder) is the same ability one step stronger in every part, which the elder in 1.0 already did for its line.
 
-| Form (egg-neutral name) | Effect 1 (role) | Effect 2 (lean) | Hooks | Closest 1.0 |
-|---|---|---|---|---|
-| Breach corp | Takes reduced ICE damage | Checkpoints waved through | damage, checkpoint | Firewall plus Chrome |
-| Breach street | Takes reduced ICE damage, the first loss of a run barely scratches it | Black market discount and one extra offer | damage, market (small) | Firewall plus Airgap |
-| Dodge corp | Slips the first ICE of a run, then often the later ones | Corp insurance (one last stand a run) | avoidance, last stand | Glitch plus Chrome |
-| Dodge street | ICE often never notices it | Checkpoints never notice it | avoidance, checkpoint | Ghost minus sight |
-| Tune corp | Sees node types two steps ahead | Relays patch it | sight, relay | Daemon plus Chrome |
-| Tune street | Sees node types two steps ahead | Repairs a little Integrity every move | sight, per-move repair | Daemon |
-| Feast corp | More loose scrip (exit and caches) | Cheaper exchange, exchange offers one more item | loot (small), market (small) | New, Chrome's price |
-| Feast street | Better cache and ICE-win loot odds | Move costs less Charge | loot (small), move cost (small) | New |
+| Form (egg-neutral name) | Ability (working name) and what it does at level 1 | Hooks | Closest 1.0 |
+|---|---|---|---|
+| Breach corp | Clearance: takes reduced ICE damage, and checkpoints wave it through | damage, checkpoint | Firewall plus Chrome |
+| Breach street | Hardened: takes reduced ICE damage, and the first loss each run barely scratches it | damage | Firewall plus Airgap |
+| Dodge corp | Phase: slips the first ICE of a run, and often the later ones | avoidance | Glitch |
+| Dodge street | Unseen: ICE often never notices it, and checkpoints never notice it | avoidance, checkpoint | Ghost without the sight |
+| Tune corp | Lookahead: sees node types two steps ahead, and relays patch it | sight, relay | Daemon plus Chrome |
+| Tune street | Upkeep: sees node types two steps ahead, and repairs a little Integrity every move | sight, per-move repair | Daemon |
+| Feast corp | Concession: more loose scrip, and a cheaper exchange | loot (small), market (small) | New, Chrome's price |
+| Feast street | Scavenge: better cache and ICE-win loot odds, and moves cost a little less Charge | loot (small), move cost (small) | New |
 
-Notes:
-- Several rows are near-copies of 1.0 lines on purpose: the 1.0 lines were already measured for parity, and a near-copy starts close to balanced. The two Feast rows and the move-cost effect are the only new ground, and they are small hooks, not new mechanics.
-- Tune corp and Tune street overlap in sight; they differ in the second effect. Tune is the weakest differentiation here. Flag for review.
-- Dodge street is Ghost without Ghost's full sight, because full sight belongs to the hidden forms (below).
-- Breach has two ICE-damage forms. If both seem too strong against the Deep's 9 ICE, trade the corp row's damage for the first-loss soft hit and keep full reduction only for street. Measure first.
+Where this is weak (flag for the maintainer):
+- **Tune** has two forms with nearly the same first part. They differ only in the second part. If that is too thin, give one of them a different hook.
+- **Dodge corp** has only one part. 1.0's Glitch also needed a second effect (the later phases) to catch up, so I counted the 'often the later ones' as part of the same ability. Measure first.
+- **Last stand** (Chrome's insurance) is dropped from the eight. In 1.0 it lived on Chrome only. It could return as a part of Clearance or Phase if the bots show those lagging.
+- With ICE tiers coming (2.1), Breach and Dodge abilities will need to be re-tuned against Feast and Tune.
 
-### 3.4 Hidden adults (one per egg)
+### 3.4 Hidden abilities (one per egg, proposal)
 
-The hidden forms master all four games and take no side, and they may break form rules. Proposal: each gets **three effects drawn from different roles**, plus an egg-colored rider, so they are the strongest runners and cost the most to reach (the wins requirement, not Standing, is the hurdle; sketch, Evolution).
+Each hidden form masters all four games and takes no side, and may break the form rules. Proposal: each hidden ability has **parts drawn from three of the four roles**, at two levels, so it is the strongest runner and the most expensive to reach.
 
-| Egg | Form | Proposal |
+| Egg | Form | Level 1 |
 |---|---|---|
 | Program | Ghost | 1.0's Ghost: full sight, checkpoints never notice it, 45% of ICE never notice it |
-| Iron | Guru | Full sight, ICE damage reduced, plus a small loot edge (the knowledge-resource reading of the name) |
-| Wetware | Blank | Checkpoints never notice it, ICE often misses it, last stand once a run (camouflage and a body that holds together) |
+| Iron | Guru | Full sight, reduced ICE damage, a small loot edge |
+| Wetware | Blank | Checkpoints never notice it, ICE often misses it, one last stand a run |
 
-Open: whether Guru and Blank should reuse Ghost's full sight at all (full sight removes the fog, which is the map's main uncertainty). Giving it only to Program's Ghost keeps Ghost special and is a reasonable default.
+Open: whether Guru and Blank get full sight at all. Full sight removes the map's fog, which is its main uncertainty, so keeping it to Program's Ghost is a reasonable default.
 
-## 4. Elder upgrades
+### 3.5 Egg riders (proposal, starting point)
 
-The elder replaces 1.0's Mainframe. It keeps its adult's ability, adds an upgrade, and is the only stage that enters the Source (13 layers, 11 ICE weight, no markets or checkpoints, ICE damage 52). 1.0's five upgrades sit within a few points of each other there.
+Each egg adds a small rider to every one of its abilities, drawn from the egg's own bar (sketch, Egg pressures), so the same ability plays slightly differently per egg:
 
-**Counting.** 27 elders. Names already in use from 1.0: Whisper (Ghost's elder), Plat (Wired's elder), Init (Guru's elder). With Daemon also reused as a name for Mouse's elder, the sketch's figure of 23 new upgrades follows. Under option A in 3.1 the abilities are shared by role and lean, so the **upgrade can be shared too**: eight role-and-lean upgrades plus three hidden ones is 11 to design and tune, not 23. The remaining forms in each egg inherit the same upgrade by their role and lean. The sketch's 23 stays the count if the maintainer wants per-form uniqueness (option C territory); flag.
+| Egg | Bar | Rider theme |
+|---|---|---|
+| Iron | Heat | Heat in a run: a lost fight adds less Heat, or a relay vents more |
+| Program | Charge | Charge in a run: a move costs a little less, or a relay refills more |
+| Wetware | Sync | Sync in a run: a lost fight costs less Sync, or a loss never rolls an infection |
 
-Proposed pattern, stated as a rule so the 11 are consistent: **the upgrade strengthens the form's weaker effect and adds one new small effect, never a third hook of the adult's strongest kind.** For example (proposal only):
+Cautions: 1.0 dropped an 'Airgap: no Heat from a lost fight' upgrade because Heat drives throttling damage, so it was worth far more than it looked; the Heat rider especially needs measuring. The riders should be small enough that no egg's abilities are ahead in The Deep. The riders are also where section 5's run pressure enters (a rider that eases Iron's Heat matters more because a run raises Heat).
 
-| Form | Upgrade |
-|---|---|
-| Breach corp | Waved checkpoints also refund the scan fee; the first ICE a run deals nothing |
-| Breach street | The first two losses barely scratch it; one free market item per run |
-| Dodge corp | Slips two ICE a run for certain; insurance pays twice |
-| Dodge street | ICE misses it more often still; a missed ICE drops nothing but is never lost to a fight |
-| Tune corp | Sees three steps ahead; relays patch twice as much |
-| Tune street | Sees three steps ahead; repairs more every move |
-| Feast corp | Exit bonus counts double; exchange unlocks a rare item |
-| Feast street | Caches find an item more often still; a win in ICE refunds the Charge of the move |
-| Hidden (each egg) | Section 3.4's three effects, each a step up |
+## 4. Elder level (level 2)
 
-These mirror 1.0's five (Plat, Airgap, Init, Panic, Whisper), which were each "the line's ability, one notch stronger, plus one small extra". Numbers are not proposed; the starting point is 1.0's upgrade constants, then the bots.
+Decided structure (3.1): the elder has the same ability as its adult at level 2, not a separate upgrade. That is 11 level-2 definitions, one per ability, shared by every form of that role and lean in every egg, plus the egg riders stepped to their level 2.
+
+**Counting.** The sketch's 'about 23 more elder upgrades' (27 elders minus the 4 whose names come from 1.0: Whisper, Plat, Init and Daemon) is replaced by 11 level-2 definitions. The 1.0 names stay as names only; their old Mainframe upgrades are not carried over as such. This is a smaller job than the sketch assumed.
+
+**Method.** Level 2 steps every part of the ability once: reduction a little deeper, sight one step further, a repair a little bigger, a slip chance a little higher. 1.0's own Mainframe upgrades were exactly that plus one small extra, and they sat within a few points of each other in the Source (careful disconnects 24 to 28%); the target for level 2 is the same closeness, measured in the Source with the ICE tiers on.
+
+The elder is the only stage that enters the Source (13 layers, ICE weight 11, ICE damage 52, no markets or checkpoints). Markets and checkpoints are absent there, so a Concession or Clearance ability does nothing in the Source; the rest of its power must live in the parts that act elsewhere. This is true in 1.0 for Chrome's checkpoint and exchange parts too, and its relay and insurance parts are what carried it. Flag: Feast corp and Breach corp need a part that works in the Source.
 
 ## 5. How the three eggs differ inside a run
 
-Because abilities are shared (3.1), the eggs differ through the egg pressures and skin. This section is the open design area.
+Because the core abilities are shared (3.1), the eggs differ through the riders (3.5), the egg pressures and skin. This section is the open design area.
 
-1. **Heat, Charge and Sync in a run.** A move costs 4 Charge and adds 5 Heat. Iron's wear builds above Heat 75 and below Heat 20; Program's Overdrive needs Charge held at 80 or more for three awake hours; Wetware's Overlink needs Sync 85 or more held for three awake hours. A run starts only at Charge 30 or more and Charge falls through it, so a run naturally breaks an Overdrive hold and heats an Iron. **Open, to measure in the fork:** do the pressures progress during a run (the sketch says they are awake-time rules), pause during it, or end on jack-in? Proposal: the clock pauses during a run and the state ends at jack-in (simplest, no new interaction), except Iron's wear, which should keep building at Heat above 75 because that is the point of Iron's trade. Needs a decision before bots can model it.
+1. **Pressures pause in a run (Decided, maintainer).** The hold clocks of Overdrive and Overlink and the state benefits do not advance during a run. Iron's wear is the exception the maintainer named: an egg's own problem can get worse in a run. Proposal for each (starting points to measure, not set):
+   - **Iron:** wear keeps building. A run adds Heat on every move (5) and on a lost fight (12), so a run that gets hot builds wear, and the wear stays after the jack-out.
+   - **Program:** Charge falls with every move (4), and the 'bleed and overflow' problem becomes a run problem, for example a lost fight at high Charge costs extra Integrity.
+   - **Wetware:** Sync and infections: a lost fight rolls an infection at the usual chance, and a disconnect hurts Sync more.
+   Open: when the run ends, does a pressure state that was held resume where it stopped, or does it end at jack-in? Proposal: it resumes (pause means pause), which keeps a long run from silently punishing an attentive player.
 2. **Run texture, not rules.** Each egg gets its own wording for the same events: node labels, ICE names, relay text, the summary. This is a skin: Program (processes, interrupts), Iron (firmware, batch queue, read-only), Wetware (plain words, tissue, culture; no CP2020 jargon in-game).
 3. **One egg-flavored anomaly each** (section 6). This is where eggs can differ in play without touching ability parity.
 4. **Items.** Item names per egg are already proposed in the sketch (Coolant cell / Coolant loop / Cold pack, and so on); the effects are unchanged, so nothing here needs balancing.
@@ -159,19 +171,25 @@ The fork already carries the netrun rules: `prototype/netling2/sim/netrun/run.js
 3. Targets: the 1.0 parity bars in ground rule 3, per ability set, in The Deep and The Source; plus the "do not make The Deep trivial" check (careful adults 14 to 19% disconnect).
 4. Challenge and daily matrix: each ability against the four challenges and the daily's refund.
 5. Tests: one narrow test per ability in the 1.0 style ("Chrome: corp insurance saves it from one disconnect a run"), in `prototype/netling2` until a 2.0 app exists.
-6. Record each result in `prototype/netling2/notes/` and summarize here; do not quote numbers before they are measured.
+6. Add the ICE tier mix to the fork first (2.1), then re-baseline, then tune abilities against it; abilities tuned before the mix will be wrong.
+7. Record each result in `prototype/netling2/notes/` and summarize here; do not quote numbers before they are measured.
 
 ## 10. Open questions for the maintainer
 
-1. **Ability structure:** option A (shared by role and lean), B (egg twist) or C (unique), section 3.1. Proposal: A.
-2. **Elder upgrades:** 11 shared or 23 per form (4).
-3. **Hidden forms:** should Guru and Blank get full sight, or is that Ghost's alone (3.4)?
-4. **Egg pressures in a run:** pause, end at jack-in, or keep running (5.1).
-5. **Feast:** are loot, scrip and market edges the right theme, or should Feast mean sustain (healing, Charge) instead?
-6. **Tune:** the weakest split in 3.3; give it a different second hook, or accept the overlap.
-7. **A triggered ability** (a button the player presses, which 1.0 has none of): wanted for any form, or kept out as a new mechanic? Proposal: out.
-8. **Egg-flavored anomalies:** the three proposed in section 6, or none.
-9. **Order:** abilities first, then elder upgrades, then skin and anomalies, with Rogue last.
+Answered (Decided, recorded at the top): ability structure (one per role and lean, two levels), egg flavor as the starting point, pressures pause, no triggered abilities, ICE tiers by depth.
+
+Still open:
+1. **Egg flavor reading:** shared core with egg riders (3.1, 3.5, my reading), or three designed versions of each ability.
+2. **'One ability':** may a named ability have two parts, as proposed in ground rule 2, or must it be a single effect.
+3. **ICE tiers (2.1):** depth by region or also by layer; visible or hidden; faster, stronger or both; rewards; whether avoidance treats tier 2 as tier 1.
+4. **Pause semantics:** a held state resumes after a run (my proposal) or ends at jack-in.
+5. **Egg run problems (5.1):** the three proposals (Iron's wear, Program's overflow, Wetware's infections), or others.
+6. **Hidden forms:** do Guru and Blank get full sight, or is that Ghost's alone.
+7. **Feast:** loot and scrip (proposed) or sustain.
+8. **Tune:** overlap between its two forms.
+9. **Elder in the Source:** Feast corp and Breach corp need a part that works where there are no markets or checkpoints (4).
+10. **Egg-flavored anomalies:** the three proposed in section 6, or none.
+11. **Order:** ICE tiers first, then abilities, then elder level, then anomalies and wording, with Rogue last.
 
 ## 11. Not done
 
