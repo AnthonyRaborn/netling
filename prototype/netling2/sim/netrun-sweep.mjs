@@ -12,7 +12,7 @@ process.env.TZ = 'UTC';
 if (process.env.EGG === 'iron') process.env.IRON = process.env.IRON ?? '{"on":true}';
 if (process.env.EGG === 'program') process.env.SIDES = process.env.SIDES ?? '{"on":true,"owner":"charge","ownerMult":3,"charge":{"hold":180}}';
 if (process.env.EGG === 'wetware') process.env.SIDES = process.env.SIDES ?? '{"on":true,"owner":"sync","ownerMult":3,"sync":{"hold":180}}';
-const { createScript, mulberry32 } = await import('./sim.js');
+const { createScript, mulberry32, SCRIP } = await import('./sim.js');
 const { playRun, RUN_STYLES } = await import('./netrun-bot.mjs');
 const { NR2 } = await import('./netrun/nr2.js');
 const { REGION_ORDER } = await import('../../../src/netrun/regions.js');
@@ -45,13 +45,19 @@ function play(styleName, form, level, seed, region) {
   pet.form = form === 'none' ? 'breachCorp' : level === 2 ? `${form}Elder` : form;
   if (form === 'none') pet.form = 'none';
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 });
+  // INVFILL=n: the run starts with n cheap items already carried, so overflow and the end-of-run choice bite (a real inventory is rarely empty).
+  const fill = Number(process.env.INVFILL ?? 0);
+  pet.inventory = Array.from({ length: fill }, (_, i) => ['coolant', 'antivirus', 'repair'][i % 3]);
+  const worth = (inv) => inv.reduce((n, id) => n + (SCRIP.price[id] ?? 0), 0) / VALUE_PER_ITEM;
+  const worthBefore = worth(pet.inventory);
   const start = { ...pet.stats };
   playRun(pet, { ...RUN_STYLES[styleName], lean: form.endsWith('Corp') ? 'corp' : form.endsWith('Street') ? 'indie' : 'mix' }, region, rng);
   const run = pet.run;
   return {
     result: run.result,
     exit: run.result === 'jacked' && run.map.nodes.find((x) => x.id === run.pos)?.type === 'exit',
-    items: pet.inventory.length + (run.result === 'jacked' ? 0 : 0),
+    items: pet.inventory.length - fill,
+    invWorth: worth(pet.inventory) - worthBefore,
     scrip: pet.scrip,
     intSpent: start.integrity - pet.stats.integrity,
     hard: run.tally.iceHard ?? 0,
@@ -65,12 +71,13 @@ function play(styleName, form, level, seed, region) {
 const sum = (rs) => {
   const share = (f) => Math.round((1000 * rs.filter(f).length) / rs.length) / 10;
   const avg = (k) => Math.round((100 * rs.reduce((a, x) => a + x[k], 0)) / rs.length) / 100;
-  return { disc: share((r) => r.result === 'disconnected'), exit: share((r) => r.exit), items: avg('items'), scrip: avg('scrip'), value: Math.round((100 * rs.reduce((a, x) => a + x.items + x.scrip / VALUE_PER_ITEM, 0)) / rs.length) / 100, int: avg('intSpent'), hard: avg('hard'), ice: avg('ice'), slipped: avg('slipped'), forced: avg('forced') };
+  return { disc: share((r) => r.result === 'disconnected'), exit: share((r) => r.exit), items: avg('items'), scrip: avg('scrip'), value: Math.round((100 * rs.reduce((a, x) => a + (fill ? x.invWorth : x.items) + x.scrip / VALUE_PER_ITEM, 0)) / rs.length) / 100, int: avg('intSpent'), hard: avg('hard'), ice: avg('ice'), slipped: avg('slipped'), forced: avg('forced') };
 };
 
 // The parity yardstick (settled at the maintainer's request; see notes/netrun-sim-notes.md): banked value per run, in common items
 // (items banked plus scrip over one common item's price, 15), and the exit rate. A disconnect banks nothing, so value includes survival.
 const VALUE_PER_ITEM = 15;
+const fill = Number(process.env.INVFILL ?? 0); // with a starting inventory, value is the change in what the inventory is worth (price over 15) plus scrip over 15
 const report = [];
 for (const c of cases) {
   apply(c);
