@@ -649,6 +649,7 @@ export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0 }; // sum
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
+  heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
   sync: { hi: 85, lo: 30, hold: 0, exit: 75, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
@@ -660,11 +661,11 @@ const heldNow = (s, key) => Boolean(s.sideHeld?.[key]);
 const sideOf = (s, key) => (!SIDES.on ? null : (SIDES[key].hold > 0 ? heldNow(s, key) : s.stats[key] >= SIDES[key].hi) ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
 function stepHeld(s, rest) {
   if (!SIDES.on) return;
-  s.sideHold ??= { charge: 0, sync: 0 };
-  s.sideHeld ??= { charge: false, sync: false };
-  for (const key of ['charge', 'sync']) {
+  s.sideHold ??= { charge: 0, sync: 0, heat: 0 };
+  s.sideHeld ??= { charge: false, sync: false, heat: false };
+  for (const key of ['charge', 'sync', 'heat']) {
     const c = SIDES[key];
-    if (!(c.hold > 0)) continue;
+    if (!(c.hold > 0) || (key === 'heat' && SIDES.owner !== null)) continue;
     if (rest || s.stats[key] < c.exit) {
       s.sideHold[key] = 0;
       s.sideHeld[key] = false;
@@ -1115,7 +1116,7 @@ function answerRequest(s, action, game) {
 }
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
-export const overclocked = (s) => s.stats.heat >= CFG.overclockHeat;
+export const overclocked = (s) => (SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
 const visitMult = (s) => (overclocked(s) ? CFG.overclockVisitMult : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
 // How fast mini-games and ICE run: slower while overclocked.
 export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
