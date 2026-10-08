@@ -75,3 +75,7 @@
 2026-10-08T18:37:02.673Z start foresight-sweep
 2026-10-08T18:37:29.878Z done challenge-sweep [rules] 85s
 2026-10-08T18:37:29.880Z start egg-anomaly-iron
+2026-10-08T18:37:41.578Z done egg-anomaly-iron [full-iron] 12s
+2026-10-08T18:37:41.579Z start egg-anomaly-program
+2026-10-08T18:37:53.135Z done egg-anomaly-program [full-program] 12s
+2026-10-08T18:37:53.140Z start egg-anomaly-wetware
