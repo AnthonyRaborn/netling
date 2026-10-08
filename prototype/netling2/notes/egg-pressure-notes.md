@@ -242,3 +242,13 @@ State is entered after `hold` awake minutes at the entry level and left under `e
 - H: no ordinary archetype moves outside noise (full-life 0.99 to 1.0; infections attentive 7.39 to 7.56, sysadmin 7.21 to 7.58; temper -0.3 to -0.5). Flow share falls a little (attentive 0.27 -> 0.21 to 0.24). Owner contrast is small.
 - G: the owner contrast appears and only where the owner's bar is held. Program: attentive full-life 0.97, sysadmin 0.94, daredevil 0.935 (others 0.99 to 1.0); Flow 0.27 -> 0.185, 0.32 -> 0.23. Wetware: sysadmin infections 7.97 against 7.27 to 7.30 on Iron/Program, attentive 7.71 against 7.29 to 7.46. Iron unchanged by G (its pressure is wear).
 - Open: the benefits are unmeasured, so G is a cost-only reading; the Program cost (Integrity bleed x3) is the one that moves full-life.
+
+## Result 15: benefits of the held states (G costs)
+
+Same run as Result 14's G (200 lives per cell), with `SIDE_METER` counters (win drops, Sync gained per play, visits, a life). Benefit strengths unchanged: Charge held: play Sync +15% and win drops +25% (x3 owner); Sync held: visits +25% and win drops +25% (x3 owner). Overclock (Iron, existing) is win drops x1.5.
+
+- Win drops a life, off -> Program / Wetware: attentive 12.6 -> 13.3 / 13.2 (+5%), sysadmin 13.66 -> 15.1 / 14.8 (+10%), daredevil 15.6 -> 16.6 / 16.8. Casual, worker, human-regular, overclocker unchanged (never enter).
+- Sync a play: attentive 19.8 -> 20.5 Program (+3.5%), sysadmin 19.8 -> 20.7.
+- Visits a life: attentive 4.4 -> 4.5 Program / 4.8 Wetware (+9%), sysadmin 4.5 -> 4.7 Wetware, daredevil 4.45 -> 4.8 Wetware.
+- Iron's Overclock gives more (daredevil drops 15.6 -> 18.6, overclocker 13.1 -> 16.9) and costs more (infections 9.3 and 12.2).
+- Read: against the costs in Result 14 (Program sysadmin full-life 0.99 -> 0.94, Wetware sysadmin infections +0.7) the benefits are small (+3 to +10%) because the states are held about 12% of the time. Raising benefit strength is the lever to make holding worth the risk.
