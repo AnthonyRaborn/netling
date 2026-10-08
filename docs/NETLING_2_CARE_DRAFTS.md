@@ -123,7 +123,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 ## Open
 
 1. Egg pressures have a working design (Iron's drift band and wear, a Charge state, a Sync state; see the pressures doc). The states are named Overdrive (Charge) and Overlink (Sync). Open here: whether the cue lines below are enough of a signal.
-2. Bug clearing in netruns: the maintainer's direction is a clinic, a third unaligned kind of market that fixes bugs and sells the healing items (see the prototypes README, The clinic); names for it per egg are not drafted (Program clinic or repair shop, Iron workshop, Wetware clinic).
+2. Bug clearing in netruns: the maintainer's direction is a clinic, a third unaligned kind of market that fixes bugs and sells the healing items (see the prototypes README, The clinic); its per-egg names, statements, hover text and visit lines are drafted below (Clinic and bug statements).
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.
 5. Everything here is untested: label widths on the real control bar, the readout line length, the field manual (generated from `CFG`, so it needs egg-aware text).
@@ -224,10 +224,32 @@ The maintainer's direction: bugs are cleared at a clinic node on a netrun (a thi
 | | Program | Iron | Wetware |
 |---|---|---|---|
 | The node | repair shop | workshop | clinic |
-| A bug settles in | > a bug has crept in. a repair shop out on the net can patch it. | > out of true. a workshop out on the net can rework it. | > something is wrong under the skin. a clinic out on the net can stitch it. |
+| A bug settles in | > a bug has crept in. a repair shop out on the net can fix it. | > out of true. a workshop out on the net can rework it. | > something is wrong under the skin. a clinic out on the net can stitch it. |
 | Three or more bugs | > it is riddled with bugs. find a repair shop. | > badly out of true. find a workshop. | > it is badly scarred. find a clinic. |
 | A reminder, now and then | > still buggy. repair shops are out there. | > still out of true. there are workshops out there. | > still sore. there are clinics out there. |
 | The job (contract text) | get a bug fixed at a Public Net repair shop | get a bug reworked at a Public Net workshop | get a bug stitched at a Public Net clinic |
 | Fix button | FIX A BUG | REWORK | STITCH |
 
-Open: whether the three healing items keep their egg names there (Coolant cell / Coolant loop / Cold pack; Repair kit / Spare parts / Skin patch; Antivirus patch / Shielding / Immune booster); the clinic's look on the map; whether the corp exchange should stock something in place of the healing items (the maintainer will revisit it).
+**Read in context (first pass).** One collision fixed: Program's first statement said a repair shop "can patch it", but PATCH is Program's virus cure and Antivirus patch is an item, so it now says "fix". Fix button labels stay at nine characters or fewer (FIX A BUG is nine). The fix button lives on the clinic node, not the control bar, so the control bar's nine buttons are unchanged. Lines are not read on a device.
+
+**Healing items keep their egg names at the clinic (proposal).** Coolant cell / Coolant loop / Cold pack, Repair kit / Spare parts / Skin patch, Antivirus patch / Shielding / Immune booster, as in Items. The clinic is where they are bought, and each egg already reads them in its own voice, so no clinic-only names are needed.
+
+**Hover text (draft).** Numbers are the simulator's first guesses (12 Charge plus 15 scrip, or 2 Standing, any split; not tuned against the final pressure design) and 1.0 shows prices on market buttons, so these show them too.
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Node (map) | Repair shop: fixes one bug for a fee. Sells coolant, repair and antivirus supplies. Takes no side. | Workshop: reworks one errata for a fee. Sells coolant, spare parts and shielding. Takes no side. | Clinic: closes one scar for a fee. Sells cold packs, skin patches and immune boosters. Takes no side. |
+| Fix button | Fix one bug. 12 Charge plus 15 scrip, or 2 Standing. Fix as many as you can pay for. | Rework one errata. 12 Charge plus 15 scrip, or 2 Standing. Rework as many as you can pay for. | Close one scar. 12 Charge plus 15 scrip, or 2 Standing. Stitch as many as you can pay for. |
+
+**Visit log lines (draft).**
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Arrive | > a repair shop. open for bugs. | > a workshop. benches free. | > a clinic. someone waves you in. |
+| Nothing to fix | > no bugs found. nothing to fix. | > in true. nothing to rework. | > nothing wrong under the skin. |
+| A fix | > bug fixed. clean build. | > errata reworked. back in true. | > scar closed. it breathes easier. |
+| Cannot pay | > cannot cover the fee. | > cannot cover the bench time. | > cannot cover the bill. |
+
+The pay choice (scrip, or 2 Standing as 2 corp, 1 and 1 or 2 street) keeps 1.0's market button style and needs no egg wording.
+
+Open: the clinic's look on the map; the corp exchange's stock without the healing items (the maintainer will revisit it); the clinic's share, fee and stock weights against the final design.
