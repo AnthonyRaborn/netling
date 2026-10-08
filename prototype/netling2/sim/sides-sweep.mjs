@@ -38,6 +38,6 @@ for (const base of bases) {
     }
     const st = stats(rs);
     const f = (x) => +(x / awake).toFixed(3);
-    console.log(JSON.stringify({ base, egg, fullLife: st.fullLife, infections: st.pressure.viruses, mistakes: st.mistakes, temper: st.temper, cHi: f(share.cHi), cLo: f(share.cLo), sHi: f(share.sHi), sLo: f(share.sLo), flow: f(share.flow), oc: f(share.oc), drops: +(SIDE_METER.drops / lives).toFixed(2), playGain: +(SIDE_METER.playGain / Math.max(1, SIDE_METER.plays)).toFixed(2), plays: +(SIDE_METER.plays / lives).toFixed(1), visits: +(SIDE_METER.visits / lives).toFixed(2), penHits: +(SIDE_METER.penHits / lives).toFixed(2) }));
+    console.log(JSON.stringify({ base, egg, fullLife: st.fullLife, infections: st.pressure.viruses, mistakes: st.mistakes, temper: st.temper, cHi: f(share.cHi), cLo: f(share.cLo), sHi: f(share.sHi), sLo: f(share.sLo), flow: f(share.flow), oc: f(share.oc), drops: +(SIDE_METER.drops / lives).toFixed(2), playGain: +(SIDE_METER.playGain / Math.max(1, SIDE_METER.plays)).toFixed(2), plays: +(SIDE_METER.plays / lives).toFixed(1), visits: +(SIDE_METER.visits / lives).toFixed(2), penHits: +(SIDE_METER.penHits / lives).toFixed(2), burns: +(SIDE_METER.burns / lives).toFixed(2) }));
   }
 }

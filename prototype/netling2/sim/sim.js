@@ -645,12 +645,12 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
-  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
+  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
@@ -669,7 +669,9 @@ function stepHeld(s, rest) {
     if (rest || s.stats[key] < c.exit) {
       s.sideHold[key] = 0;
       s.sideHeld[key] = false;
-      if (key === 'sync') s.wiredOver = 0;
+      if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
+    } else if (key === 'sync' && (s.burnUntil ?? 0) > s.ageMin) {
+      s.sideHold[key] = 0;
     } else if (s.stats[key] >= c.hi) {
       s.sideHold[key]++;
       if (s.sideHold[key] >= c.hold) s.sideHeld[key] = true;
@@ -1551,6 +1553,18 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       gain *= 1 + traitEffect(s, 'volatile');
       if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
       SIDE_METER.plays++;
+      // Burnout (burnN > 0): inside Wired, burnN plays at penFree or over end the state, and it cannot be re-entered for burnCool minutes.
+      if (SIDES.on && SIDES.sync.burnN > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
+        s.burnCount = (s.burnCount ?? 0) + 1;
+        if (s.burnCount >= SIDES.sync.burnN) {
+          s.sideHeld.sync = false;
+          s.sideHold.sync = 0;
+          s.burnCount = 0;
+          s.burnUntil = s.ageMin + SIDES.sync.burnCool;
+          SIDE_METER.burns++;
+          log(s, now, '> burned out. too wired for too long.');
+        }
+      }
       // Graduated penalty (penStep > 0): inside Wired, plays below penFree are free; each play at penFree or over adds penStep to the
       // infection chance (x owner multiplier, capped at penCap) until the state ends.
       if (SIDES.on && SIDES.sync.penStep > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
