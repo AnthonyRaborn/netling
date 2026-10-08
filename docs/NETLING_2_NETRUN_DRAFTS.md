@@ -195,7 +195,7 @@ Still open:
 1. **Egg run problems (5.1):** light extra costs to start (Decided). The sizes are not set; the three proposals (Iron's wear, Program's overflow, Wetware's infections) stand as starting points.
 2. **Foresight (Tune street):** which details at which depth beyond the ICE type; whether the elder shows the tier (balance).
 3. **Forced filled cache:** the placement rule in 3.3 (one at the layer before the halfway layer, in the next layer's options); how many a run; whether to preserve the relay later (a balance lever).
-4. **Fog of war (7):** confirm 'a set of lines' as the lines leaving one layer's nodes; how far elder sight draws lines (the lines between the nodes it sees, my reading).
+4. **Fog of war (7):** 'a set of lines' is confirmed; still to confirm: that elder sight draws the lines between the nodes it sees.
 5. **Share line:** the tier as a count (proposed); check the sanitizer.
 6. **Second parts** for all eight are candidates; none is tuned.
 7. **Order:** ICE tiers first, then abilities, then elder level, then anomalies and wording, with Rogue last. The fog change is independent and small.
