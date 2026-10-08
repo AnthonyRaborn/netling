@@ -14,3 +14,5 @@
 {"variant":"no pressure","archetype":"ghosthunter","fullLife":0.998,"collapse":0.002,"faults":0,"viruses":6.81,"feeds":88.7,"events":9.06}
 {"variant":"no pressure","archetype":"hunter-shown","fullLife":0.998,"collapse":0.002,"faults":0,"viruses":7.23,"feeds":89,"events":8.77}
 {"variant":"no pressure","archetype":"attentive","fullLife":0.998,"collapse":0.002,"faults":0.41,"viruses":6.75,"feeds":109.6,"events":8.64}
+{"variant":"no pressure","archetype":"sysadmin","fullLife":0.999,"collapse":0.001,"faults":0.02,"viruses":7.25,"feeds":92.3,"events":8.84}
+{"variant":"no pressure","archetype":"steer-tune-street","fullLife":0.996,"collapse":0.004,"faults":0.69,"viruses":11.59,"feeds":129,"events":8.53}

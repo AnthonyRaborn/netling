@@ -13,3 +13,6 @@
 {"variant":"no charge perk","archetype":"steer-tune-corp","fullLife":0.976,"collapse":0.024,"faults":0.5,"viruses":2.72,"feeds":101.3,"events":9.98}
 {"variant":"no charge perk","archetype":"ghosthunter","fullLife":0.978,"collapse":0.022,"faults":0.01,"viruses":6.8,"feeds":92.2,"events":9.75}
 {"variant":"no charge perk","archetype":"hunter-shown","fullLife":0.981,"collapse":0.019,"faults":0.02,"viruses":7.35,"feeds":92.3,"events":9.56}
+{"variant":"no charge perk","archetype":"attentive","fullLife":0.989,"collapse":0.011,"faults":0.43,"viruses":6.95,"feeds":108,"events":9.47}
+{"variant":"no charge perk","archetype":"sysadmin","fullLife":0.968,"collapse":0.032,"faults":0.01,"viruses":7.2,"feeds":91.3,"events":9.68}
+{"variant":"no charge perk","archetype":"steer-tune-street","fullLife":0.984,"collapse":0.016,"faults":0.66,"viruses":11.45,"feeds":127.1,"events":9.11}

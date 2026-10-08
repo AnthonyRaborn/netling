@@ -2,7 +2,7 @@
 // Usage: node prototype/netling2/sim/balance.mjs [runsPerArchetype=300] [archetype filter]
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
-// PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference;
+// PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference; PROGBOT=avoid|watch makes the bots mind Program's Overdrive (see chargeTarget below; needs SIDES on with owner 'charge');
 // BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear and WET='{"on":true}' Wetware's shock (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
 // carries a trait). The remaining text below is 1.0's.
@@ -212,8 +212,20 @@ export function checkIn(s, p, now, rng, ctx) {
   const mayPlay = !holdBack || s.flagged.sync;
   // A player who knows a long absence is coming (`prepare`, 4 hours or more to the next check) tops up Charge and Sync first.
   const topUp = Boolean(p.prepare) && ctx.gapToNext >= 240;
+  // PROGBOT (Program's Overdrive, SIDES.owner 'charge'): a player who watches the cost. A feed adds 25 to 30 Charge, so to stay under
+  // Overdrive's line a player feeds only below it minus 31. avoid does that always; watch feeds as usual until Integrity falls under
+  // PROGBOT_INT (70), then does that until it recovers (so the held state lapses and is not re-entered). Neither changes how a player
+  // tops up before a long absence (`topUp`), which stays at 94.
+  const chargeTarget = () => {
+    if (topUp) return 94;
+    if (!process.env.PROGBOT || !SIDES.on || SIDES.owner !== 'charge') return 85;
+    const under = Math.min(85, SIDES.charge.hi - 31);
+    if (process.env.PROGBOT === 'avoid') return under;
+    if (process.env.PROGBOT === 'watch' && s.stats.integrity < Number(process.env.PROGBOT_INT ?? 70)) return under;
+    return 85;
+  };
   const feed = () => {
-    for (let i = 0; i < 4 && s.stats.charge < (topUp ? 94 : 85) && !blockReason(s, 'corp') && !(process.env.ACTBOT === 'budget' && ACTS.charge.on && s.stats.charge >= ACTS.charge.line); i++) {
+    for (let i = 0; i < 4 && s.stats.charge < chargeTarget() && !blockReason(s, 'corp') && !(process.env.ACTBOT === 'budget' && ACTS.charge.on && s.stats.charge >= ACTS.charge.line); i++) {
       // `shown` bots see only the HUD's floors; on a shown tie they alternate packets (a lone tie rule would drift one way).
       const lean = leanSeen(s, p.shown);
       let corp = p.diet === 'balance' ? (p.shown && lean === 0 ? s.lastPacket !== 'corp' : lean <= 0) : rng() < p.diet;
