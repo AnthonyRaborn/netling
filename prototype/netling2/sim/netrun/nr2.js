@@ -44,7 +44,8 @@ export const NR2 = {
     hardened: { 1: { dmg: 0.7, soft: 0 }, 2: { dmg: 0.65, soft: 1 } }, // breachStreet: ICE damage share; soft: first loss deals softMult of it (tuned down from 0.5 to the parity yardstick)
     softMult: 0.3,
     phase: { 1: { free: 1, later: 0.15 }, 2: { free: 1, later: 0.3 } }, // dodgeCorp: ICE slipped for certain, then the chance (tuned down from 0.35 and two free to the parity yardstick)
-    unseen: { 1: 0.45, 2: 0.5 }, // dodgeStreet and hidden: chance an ICE never notices it
+    unseen: { 1: 0.45, 2: 0.5 }, // dodgeStreet: chance an ICE never notices it (Ghost's 45% and Whisper's 50%)
+    hiddenUnseen: { 1: 0.3, 2: 0.55 }, // the hidden forms: trimmed from Ghost's and Whisper's numbers to the parity yardstick (the elder above Whisper's 50% to keep it ahead)
     checkpoint: { dodgeCorp: { 1: false, 2: true }, dodgeStreet: { 1: false, 2: true }, hidden: { 1: true, 2: true } },
     sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
     upkeep: { tuneStreet: { 1: 0, 2: 6 } }, // Integrity restored per move

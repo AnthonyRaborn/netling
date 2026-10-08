@@ -345,7 +345,7 @@ function moveToNode(pet, nodeId, rng) {
       if (key2) {
         // Phase (Dodge corp): the first ICE (two at the elder level) for certain, then often; against tier 2 each works less often.
         const ph = key2 === 'dodgeCorp' ? NR2.ab.phase[lvl(pet)] : null;
-        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' || key2 === 'hidden' ? NR2.ab.unseen[lvl(pet)] : 0;
+        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' ? NR2.ab.unseen[lvl(pet)] : key2 === 'hidden' ? NR2.ab.hiddenUnseen[lvl(pet)] : 0;
         if (chance > 0 && rng() < chance * am) {
           if (ph && run.freePhases < ph.free) run.freePhases++;
           run.tally.icePhased++;
