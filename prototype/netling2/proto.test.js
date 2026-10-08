@@ -6,7 +6,9 @@ import './ready.js'; // first: registers the forms before src/sim.js can load sr
 import { forms, compose, FORMS, LINE, HIDDEN_BRANCH, TEENS_ALL, ADULTS_ALL, ELDER_OF, pose, ironMarks } from './models.js';
 import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS, ANCHORS } from './art.js';
 import { temperTell, levelOf, guardedLevel, THRESHOLDS, GUARD, EGGS, SLOT_MS, FRAME_MS } from './tell.js';
-import { neglected, NEGLECT_LEVELS } from './neglect.js';
+import { neglected, NEGLECT_LEVELS, SMALL_WIDTH, MOSTLY_DIM } from './neglect.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
 import { neglectLevel, guardedNeglect, LINES, GUARD as NEED_GUARD } from './needs.js';
 import { glitched, tearRows, MAX_BUGS, TWITCH_EVERY_MS, TWITCH_MS } from './glitch.js';
 import { register, protoKey, MODELS } from './register.js';
@@ -15,6 +17,8 @@ import { silhouetteIou } from '../../tools/lib/sprite-checks.mjs';
 import { spriteCells, poseDistance, markDistance, offScreen } from '../../tools/lib/sprite-checks.mjs';
 
 const WIDTH = { baby: 12, teen: 14, adult: 16, elder: 18 };
+// All 66 forms (Iron, Program, Wetware), for the care and bug layers, which are one skin for every egg.
+const everyForm = () => [...Object.values(forms('B')), ...Object.values(programForms()), ...Object.values(wetwareForms())];
 
 // --- the line ---------------------------------------------------------------------------------------------------------------
 test('the main line is four forms in life order; the other main teen and the hidden branch exist in the authored model only', () => {
@@ -243,44 +247,57 @@ test('every 1.0 wearable stays on screen on every prototype form and pose, excep
 });
 
 // --- neglect ---------------------------------------------------------------------------------------------------------------
-test('neglect: level 0 is untouched; the outline, eyes and the rows above the mouth never change; only body cells rust', () => {
-  for (const model of MODELS) {
-    for (const f of Object.values(forms(model))) {
-      for (const pose of ['a', 'b']) {
-        const sprite = f[pose];
-        const anchors = f.anchors[pose];
-        assert.equal(neglected(sprite, anchors, 0, 3), sprite);
-        for (const level of [1, 2]) {
-          const n = neglected(sprite, anchors, level, 3);
-          assert.equal(n.length, sprite.length);
-          sprite.forEach((row, y) => {
-            assert.equal(n[y].length, row.length);
-            [...row].forEach((ch, x) => {
-              assert.equal(n[y][x] === '.', ch === '.', `${f.id}: outline changed at ${x},${y}`);
-              if (n[y][x] !== ch) {
-                assert.ok(ch === '#' && n[y][x] === 'x' && y > anchors.mouthRow, `${f.id}: changed ${ch} at ${x},${y}`);
-              }
-            });
+test('neglect, every egg: level 0 is untouched; the outline, eyes and rows above the start row never change; only body cells flip', () => {
+  for (const f of everyForm()) {
+    for (const pose of ['a', 'b']) {
+      const sprite = f[pose];
+      const anchors = f.anchors[pose];
+      const small = sprite[0].length <= SMALL_WIDTH;
+      const start = small ? anchors.eyeRow + 2 : anchors.mouthRow + 1;
+      const marks = sprite.join('');
+      const flip = marks.split('x').length - 1 >= MOSTLY_DIM * ((marks.split('x').length - 1) + (marks.split('#').length - 1));
+      assert.equal(neglected(sprite, anchors, 0, 3), sprite);
+      for (const level of [1, 2]) {
+        const n = neglected(sprite, anchors, level, 3);
+        assert.equal(n.length, sprite.length);
+        sprite.forEach((row, y) => {
+          assert.equal(n[y].length, row.length);
+          [...row].forEach((ch, x) => {
+            assert.equal(n[y][x] === '.', ch === '.', `${f.id}: outline changed at ${x},${y}`);
+            if (n[y][x] !== ch) {
+              const [from, to] = flip ? ['x', '#'] : ['#', 'x'];
+              assert.ok(ch === from && n[y][x] === to && y >= start, `${f.id}: changed ${ch} at ${x},${y}`);
+            }
           });
-        }
+        });
       }
     }
   }
 });
 
 test('neglect grows and clears without jumping: level 2 contains level 1, patches are deterministic, and the count rises', () => {
-  for (const model of MODELS) {
-    for (const f of Object.values(forms(model))) {
-      const [l0, l1, l2] = NEGLECT_LEVELS.map((l) => neglected(f.a, f.anchors.a, l, 5));
-      assert.deepEqual(neglected(f.a, f.anchors.a, 1, 5), l1);
-      const patches = (s) => s.join('').split('x').length - 1;
-      assert.ok(patches(l0) <= patches(l1) && patches(l1) < patches(l2), `${f.id}: ${patches(l0)} ${patches(l1)} ${patches(l2)}`);
-      l1.forEach((row, y) => [...row].forEach((ch, x) => ch === 'x' && assert.equal(l2[y][x], 'x', `${f.id}: level 1 patch missing at level 2`)));
-      assert.ok(patches(l2) - patches(l0) >= 3, `${f.id}: neglect barely visible`);
-    }
+  for (const f of everyForm()) {
+    const [l0, l1, l2] = NEGLECT_LEVELS.map((l) => neglected(f.a, f.anchors.a, l, 5));
+    assert.deepEqual(neglected(f.a, f.anchors.a, 1, 5), l1);
+    const flips = (s) => s.filter((row, y) => row !== f.a[y]).join('').length && s.reduce((n, row, y) => n + [...row].filter((ch, x) => ch !== f.a[y][x]).length, 0);
+    const [c1, c2] = [l1, l2].map(flips);
+    assert.ok(flips(l0) === 0 && c1 < c2, `${f.id}: ${c1} ${c2}`);
+    l1.forEach((row, y) => [...row].forEach((ch, x) => ch !== f.a[y][x] && assert.equal(l2[y][x], ch, `${f.id}: level 1 patch missing at level 2`)));
+    // Readable at a glance on every stage: a few cells at level 1, several at level 2 (the small forms have fewer cells to give).
+    const min = f.stage === 'baby' || f.stage === 'teen' ? [3, 6] : [3, 8];
+    assert.ok(c1 >= min[0] && c2 >= min[1], `${f.id}: neglect barely visible (${c1}, ${c2}; wants ${min})`);
   }
 });
 
+test('neglect on a mostly dim form brightens cells instead of dimming them, so it stays visible', () => {
+  const dimForms = everyForm().filter((f) => { const m = f.a.join(''); const d = m.split('x').length - 1; return d / (d + m.split('#').length - 1) >= MOSTLY_DIM; });
+  assert.ok(dimForms.length >= 3, 'Program Shell, Wetware Blank and Cipher are such forms');
+  for (const f of dimForms) {
+    const n = neglected(f.a, f.anchors.a, 2, 5);
+    assert.ok(n.join('').split('#').length > f.a.join('').split('#').length, `${f.id}: no cell brightened`);
+    assert.equal(n.join('').split('x').length <= f.a.join('').split('x').length, true, `${f.id}: a dim cell was added`);
+  }
+});
 
 // --- no wearable moves between frames ----------------------------------------------------------------------------------------------
 // The complaint about 1.0's smallest forms: the bitling's ears move between frames, so headphones slide sideways and every head
@@ -415,29 +432,50 @@ test('the neglect guard: a stat hovering on a line does not flip the look', () =
 });
 
 // --- what bugs look like: glitches (persistent until cleared) ---------------------------------------------------------------
-test('bugs: none is untouched, and each bug tears one body row a column, never an eye row, never losing a cell', () => {
-  for (const f of Object.values(forms('B'))) {
+// Overlap in place (no centring): a tear moves cells inside the picture, so the figure must stay where it was.
+const fixedOverlap = (p, q) => {
+  let both = 0;
+  let either = 0;
+  p.forEach((row, y) => [...row].forEach((ch, x) => { const u = ch !== '.'; const v = q[y][x] !== '.'; both += u && v; either += u || v; }));
+  return both / either;
+};
+const cells = (row) => [...row].filter((c) => c !== '.').length;
+
+test('bugs, every egg: none is untouched, and each bug glitches one body row a column, never an eye row, never losing a cell', () => {
+  for (const f of everyForm()) {
     const anchors = f.anchors.a;
     assert.equal(glitched(f.a, anchors, 0, { reduced: true, seed: 2 }), f.a);
     const rows = tearRows(f.a, anchors);
-    assert.ok(rows.length >= MAX_BUGS, `${f.id}: only ${rows.length} rows can tear`);
+    assert.ok(rows.length >= MAX_BUGS, `${f.id}: only ${rows.length} rows can glitch`);
     for (let n = 1; n <= MAX_BUGS; n++) {
       const g = glitched(f.a, anchors, n, { reduced: true, seed: 2 });
       const torn = g.map((row, y) => (row !== f.a[y] ? y : -1)).filter((y) => y >= 0);
       assert.equal(torn.length, n, `${f.id}: ${n} bugs tore ${torn.length} rows`);
       for (const y of torn) {
         assert.ok(rows.includes(y) && y !== anchors.eyeRow && y !== anchors.eyeRow + 1);
-        assert.equal([...g[y]].filter((c) => c !== '.').length, [...f.a[y]].filter((c) => c !== '.').length, `${f.id}: a cell was lost`);
-        const left = g[y] === '.' + f.a[y].slice(0, -1);
-        const right = g[y] === f.a[y].slice(1) + '.';
-        assert.ok(left || right, `${f.id}: row ${y} moved more than a column`);
+        assert.equal(cells(g[y]), cells(f.a[y]), `${f.id}: a cell was lost`);
+        const w = f.a[y].length;
+        const moved = g[y] === '.' + f.a[y].slice(0, -1) || g[y] === f.a[y].slice(1) + '.'; // a one-column shift
+        const wrapped = g[y] === f.a[y].slice(-1) + f.a[y].slice(0, w - 1) || g[y] === f.a[y].slice(1) + f.a[y][0]; // a one-column wrap (rows with paint on both frame edges)
+        assert.ok(moved || wrapped, `${f.id}: row ${y} moved more than a column`);
+        if (wrapped && !moved) assert.ok(f.a[y][0] !== '.' && f.a[y][w - 1] !== '.', `${f.id}: row ${y} wrapped though it had room`);
       }
     }
   }
 });
 
+test('bugs, every egg: rows with room tear before any row wraps, so only forms with spiked edges ever wrap', () => {
+  for (const f of everyForm()) {
+    const anchors = f.anchors.a;
+    const room = tearRows(f.a, anchors).filter((y) => f.a[y][0] === '.' || f.a[y][f.a[y].length - 1] === '.');
+    const g = glitched(f.a, anchors, MAX_BUGS, { reduced: true, seed: 2 });
+    const wraps = g.filter((row, y) => row !== f.a[y] && f.a[y][0] !== '.' && f.a[y][f.a[y].length - 1] !== '.').length;
+    assert.equal(wraps, Math.max(0, MAX_BUGS - room.length), `${f.id}: ${wraps} wraps with ${room.length} rows of room`);
+  }
+});
+
 test('bugs are persistent: the same for any time under reduced motion, a new bug adds a tear and clearing removes the last', () => {
-  for (const f of Object.values(forms('B'))) {
+  for (const f of everyForm()) {
     for (let n = 0; n <= MAX_BUGS; n++) {
       const still = glitched(f.a, f.anchors.a, n, { reduced: true, seed: 7 });
       for (const time of [0, 1234, 99_999]) assert.deepEqual(glitched(f.a, f.anchors.a, n, { time, reduced: true, seed: 7 }), still);
@@ -450,12 +488,32 @@ test('bugs are persistent: the same for any time under reduced motion, a new bug
   }
 });
 
-test('bugs keep the form recognisable: the outline stays close to the original at the ceiling', () => {
-  for (const f of Object.values(forms('B'))) {
-    const g = glitched(f.a, f.anchors.a, MAX_BUGS, { reduced: true, seed: 1 });
-    const iou = silhouetteIou(f.a, g);
-    assert.ok(iou >= 0.8, `${f.id}: overlap ${iou.toFixed(2)}`);
-    assert.ok(iou < 1, `${f.id}: five bugs should show`);
+test('bugs keep the form recognisable: the outline stays close to the original at the ceiling, in place, for any seed', () => {
+  // The baby has the fewest cells (12 wide), so five tears take the most from it; measured worst over seeds 0 to 19: baby 0.74, adult 0.78, teen 0.79, elder 0.81.
+  const floor = { baby: 0.72, teen: 0.77, adult: 0.77, elder: 0.77 };
+  for (const f of everyForm()) {
+    for (let seed = 0; seed < 20; seed++) {
+      const g = glitched(f.a, f.anchors.a, MAX_BUGS, { reduced: true, seed });
+      const iou = fixedOverlap(f.a, g);
+      assert.ok(iou >= floor[f.stage], `${f.id} seed ${seed}: overlap ${iou.toFixed(2)}`);
+      assert.ok(iou < 1, `${f.id}: five bugs should show`);
+    }
+  }
+});
+
+test('the twitch is one column on the small forms (baby, teens) and up to two on adults and elders, and never loses a cell', () => {
+  for (const f of everyForm()) {
+    const a = f.anchors.a;
+    const still = glitched(f.a, a, 1, { reduced: true, seed: 3 });
+    const moving = glitched(f.a, a, 1, { time: 100, seed: 3 });
+    const extra = moving.map((row, y) => (row !== still[y] ? y : -1)).filter((y) => y >= 0);
+    assert.equal(extra.length, 1, `${f.id}: the twitch should touch one row`);
+    const y = extra[0];
+    assert.equal(cells(moving[y]), cells(f.a[y]), `${f.id}: the twitch lost a cell`);
+    const reach = f.a[0].length <= 14 ? 1 : 2;
+    const left = [...Array(reach + 1).keys()].some((d) => moving[y] === '.'.repeat(d) + f.a[y].slice(0, f.a[y].length - d) || moving[y] === f.a[y].slice(d) + '.'.repeat(d));
+    const wrapped = moving[y] === f.a[y].slice(-1) + f.a[y].slice(0, -1) || moving[y] === f.a[y].slice(1) + f.a[y][0];
+    assert.ok(left || wrapped, `${f.id}: the twitch moved row ${y} by more than ${reach}`);
   }
 });
 
