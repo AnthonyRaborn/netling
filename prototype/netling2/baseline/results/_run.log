@@ -17,3 +17,5 @@
 2026-10-08T17:26:21.611Z start lineage-daredevil
 2026-10-08T17:30:25.262Z done lineage-daredevil [rules] 244s
 2026-10-08T17:30:25.265Z start lineage-casual
+2026-10-08T17:37:02.569Z done lineage-casual [rules] 397s
+2026-10-08T17:37:02.570Z start bug-sweep
