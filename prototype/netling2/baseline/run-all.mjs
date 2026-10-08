@@ -33,7 +33,7 @@ const sides = (owner) => JSON.stringify({ on: true, owner, ownerMult: 3, teenSta
 const CONFIG = {
   core: {},
   rules: { NR2: 'all', PERKS: '1' },
-  'full-iron': { NR2: 'all', PERKS: '1', IRON: '{"on":true}', SIDES: JSON.stringify({ on: true, owner: null, ownerMult: 3, teenStates: true, ironBenefit: 3 }) },
+  'full-iron': { NR2: 'all', PERKS: '1', IRON: '{"on":true}', SIDES: JSON.stringify({ on: true, owner: null, ownerMult: 3, teenStates: true, ironBenefit: 3, ...FINAL_SIDES }) }, // the final Charge and Sync numbers apply to every egg (clinic-final.mjs); the first baseline run left them out for Iron
   'full-program': { NR2: 'all', PERKS: '1', SIDES: sides('charge') },
   'full-wetware': { NR2: 'all', PERKS: '1', SIDES: sides('sync') },
 };

@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
 const { ARCHETYPES, simulate } = await import('./sim/balance.mjs');
-const { SIDES, IRON, overclocked } = await import('./sim/sim.js');
+const { SIDES, IRON, overclocked, BRAKE, SIDE_METER } = await import('./sim/sim.js');
 
 const configure = (on) => {
   Object.assign(SIDES.charge, { hi: 80, hold: 180, exit: 65, gate: 0, slow: 0, bleed: 8, overflow: 2, playGain: 0.45, drop: 0.75 });
@@ -41,5 +41,64 @@ test('over 40 seeded lives of each heavy archetype, no state is first held or ca
     assert.ok(reached > 0, `${base} reaches a state in some life`);
   }
   globalThis.__sample = undefined;
+  configure(false);
+});
+
+// The break (BRAKE, off by default): a cost trigger for the held states with a warning, a drop well below the exit line and a 24 hour lockout.
+test('the break is off by default and changes nothing: no break, no warning, same life', () => {
+  configure(true);
+  SIDES.owner = 'charge';
+  assert.equal(BRAKE.on, false);
+  for (const k of Object.keys(SIDE_METER)) SIDE_METER[k] = 0;
+  const off = simulate({ ...ARCHETYPES['steer-tune-corp'] }, 7);
+  assert.equal(SIDE_METER.brakes, 0);
+  assert.equal(SIDE_METER.brakeWarns, 0);
+  BRAKE.on = true;
+  const on = simulate({ ...ARCHETYPES['steer-tune-corp'] }, 7);
+  BRAKE.on = false;
+  const again = simulate({ ...ARCHETYPES['steer-tune-corp'] }, 7);
+  assert.deepEqual(again, off, 'switching it off again gives the same life');
+  assert.ok(on !== undefined);
+  configure(false);
+});
+
+test('with the break on, a held Overdrive ends below breakInt, the bar drops, and nothing is held again for the lockout', () => {
+  configure(true);
+  SIDES.owner = 'charge';
+  BRAKE.on = true;
+  for (const k of Object.keys(SIDE_METER)) SIDE_METER[k] = 0;
+  let minutesHeldUnder = 0;
+  let lockViolations = 0;
+  let dropViolations = 0;
+  let breaks = 0;
+  let prevLock = false;
+  globalThis.__sample = (s) => {
+    if (s.stage === 'dead') return;
+    if (s.sideHeld?.charge && s.stats.integrity < BRAKE.breakInt - 1) minutesHeldUnder++;
+    if ((s.brakeUntil?.charge ?? 0) > s.ageMin && s.sideHeld?.charge) lockViolations++;
+    const lockNow = (s.brakeUntil?.charge ?? 0) > s.ageMin;
+    if (lockNow && !prevLock) { breaks++; if (s.stats.charge > BRAKE.drop.charge + 1) dropViolations++; } // Overdrive's own break (Overlink's drops Sync)
+    prevLock = lockNow;
+  };
+  for (let i = 1; i <= 30; i++) { prevLock = false; simulate({ ...ARCHETYPES['steer-tune-corp'] }, i); }
+  globalThis.__sample = undefined;
+  BRAKE.on = false;
+  configure(false);
+  assert.ok(SIDE_METER.brakes > 0, 'a greedy Tune corp netling hits the break in some of 30 lives');
+  assert.ok(SIDE_METER.brakeWarns >= SIDE_METER.brakes, 'every break is preceded by a warning');
+  assert.equal(minutesHeldUnder, 0, 'a state is not held while Integrity is more than 1 under breakInt');
+  assert.equal(lockViolations, 0, 'Overdrive is not held during the lockout');
+  assert.equal(dropViolations, 0, 'the bar is at or under the drop level when the break fires');
+  assert.ok(breaks > 0);
+});
+
+test('Iron: the break throttles Overclock for the lockout, and a baby never triggers it', () => {
+  configure(true);
+  BRAKE.on = true;
+  const hot = { stage: 'teen', stats: { heat: 90 }, ageMin: 1000, brakeUntil: { charge: 0, sync: 0, heat: 2440 } };
+  assert.equal(overclocked(hot), false, 'locked out');
+  assert.equal(overclocked({ ...hot, ageMin: 2441 }), true, 'free again after the lockout');
+  BRAKE.on = false;
+  assert.equal(overclocked(hot), true, 'with the break off the lockout field does nothing');
   configure(false);
 });

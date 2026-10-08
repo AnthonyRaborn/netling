@@ -688,7 +688,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeWarns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -699,6 +699,17 @@ export const SIDES = {
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
 }
+// 2.0 break (maintainer, off by default; BRAKE='{"on":true}' switches it on): a cost trigger for the three states (Iron's Overclock, Program's
+// Overdrive, Wetware's Overlink). While a state is active and Integrity is under warnInt the netling warns once (visibility only); under breakInt
+// the state is forced to end, the bar is pushed well below its exit line (drop: Charge, Sync or Heat is set to at most that), and the state cannot
+// be entered again for lockMin minutes (24 hours, the same as Overlink's burnout). Iron's Overclock is a plain Heat band, so its lockout turns the
+// Overclock rules (benefits and costs) off while it lasts. The trigger is Integrity for all three; the design doc may choose another for Iron.
+export const BRAKE = { on: false, warnInt: 70, breakInt: 55, lockMin: 1440, drop: { charge: 50, sync: 55, heat: 35 } };
+if (process.env.BRAKE) {
+  const v = JSON.parse(process.env.BRAKE);
+  Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
+}
+const brakeLocked = (s, key) => BRAKE.on && SIDES.on && (s.brakeUntil?.[key] ?? 0) > s.ageMin;
 // Held state: with hold > 0 the high side is entered only after the stat has been at hi or over for `hold` awake minutes (dips down to
 // `exit` do not break it), and left when it falls under `exit` or the netling rests. hold 0 is the plain threshold.
 const heldNow = (s, key) => Boolean(s.sideHeld?.[key]);
@@ -717,7 +728,7 @@ function stepHeld(s, rest) {
       if (s.sideHeld[key] && !rest) SIDE_METER[s.ageMin - (s.lastJackOutAge ?? -1e9) <= 30 ? 'endsSoonAfterRun' : 'endsOther']++; // a state the bars ended: soon after a run, or otherwise
       s.sideHeld[key] = false;
       if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
-    } else if (key === 'sync' && (s.burnUntil ?? 0) > s.ageMin) {
+    } else if (brakeLocked(s, key) || (key === 'sync' && (s.burnUntil ?? 0) > s.ageMin)) {
       s.sideHold[key] = 0;
     } else if (s.stats[key] >= c.hi) {
       s.sideHold[key]++;
@@ -729,6 +740,34 @@ function stepHeld(s, rest) {
       // The one-time pre-state caption: once a netling, for this bar, after hintMin minutes of building toward the state.
       s.hintAt ??= { charge: null, sync: null };
       if (!s.sideHeld[key] && s.heldAt?.[key] == null && s.stage !== 'baby' && s.sideHold[key] >= (SIDES[key].hintMin ?? 120) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin; // never as a baby
+    }
+  }
+}
+function stepBrake(s, rest, t) {
+  if (!BRAKE.on || !SIDES.on) return;
+  s.brakeUntil ??= { charge: 0, sync: 0, heat: 0 };
+  s.brakeWarn ??= { charge: false, sync: false, heat: false };
+  const st = s.stats;
+  for (const key of ['charge', 'sync', 'heat']) {
+    if (key === 'heat' && SIDES.owner !== null) continue; // Overclock's break is Iron's
+    const active = !rest && (key === 'heat' ? overclocked(s) : Boolean(s.sideHeld?.[key]));
+    if (!active) { s.brakeWarn[key] = false; continue; }
+    if (st.integrity < BRAKE.breakInt) {
+      if (key !== 'heat') {
+        s.sideHeld[key] = false;
+        s.sideHold[key] = 0;
+        if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
+      }
+      st[key] = Math.min(st[key], BRAKE.drop[key]);
+      s.brakeUntil[key] = s.ageMin + BRAKE.lockMin;
+      s.brakeWarn[key] = false;
+      s.brakes = (s.brakes ?? 0) + 1;
+      SIDE_METER.brakes++;
+      log(s, t, `> !! ${{ charge: 'overdrive discharged', sync: 'overlink crashed', heat: 'overclock throttled' }[key]}. locked out for ${Math.round(BRAKE.lockMin / 60)}h.`);
+    } else if (st.integrity < BRAKE.warnInt && !s.brakeWarn[key]) {
+      s.brakeWarn[key] = true;
+      SIDE_METER.brakeWarns++;
+      log(s, t, `> ${{ charge: 'overdrive', sync: 'overlink', heat: 'overclock' }[key]} is costing integrity. ease off.`);
     }
   }
 }
@@ -887,6 +926,7 @@ function step(s, t, rng) {
   if (IRON.on) stepWear(s, t, rest);
   for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
   stepHeld(s, rest);
+  stepBrake(s, rest, t);
   if (WET.on) stepShock(s);
   stepActs(s);
 
@@ -1179,7 +1219,7 @@ function answerRequest(s, action, game) {
 }
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
-export const overclocked = (s) => (SIDES.on && SIDES.teenStates && s.stage === 'baby' ? false : SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
+export const overclocked = (s) => (brakeLocked(s, 'heat') ? false : SIDES.on && SIDES.teenStates && s.stage === 'baby' ? false : SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
 // Iron is the owner of Heat: with ironBenefit above 1 its Overclock benefits (win drops, visits) grow by that factor (1 = the 1.0 rule).
 const ocBoost = (m) => (SIDES.on && SIDES.owner === null ? 1 + (m - 1) * SIDES.ironBenefit : m);
 const visitMult = (s) => (overclocked(s) ? ocBoost(CFG.overclockVisitMult) : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
