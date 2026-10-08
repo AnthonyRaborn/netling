@@ -65,3 +65,5 @@
 2026-10-08T18:20:29.018Z start band-sweep-charge
 2026-10-08T18:23:15.250Z done runcost-wetware [full-wetware] 339s
 2026-10-08T18:23:15.254Z start act-sweep-sync
+2026-10-08T18:26:30.156Z done iron-cold-sweep [rules] 1335s
+2026-10-08T18:26:30.167Z start band-sweep-sync
