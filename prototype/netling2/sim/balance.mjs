@@ -230,6 +230,7 @@ export function checkIn(s, p, now, rng, ctx) {
   };
   // 2.0 soft push: a bugged netling, or one with a job posted, nudges a player who can be nudged (`pushRuns`, the chance they go despite their
   // usual reluctance; a player without runs of their own goes carefully). `contracts`: the player reads the job board at each check-in.
+  ctx.ranNow = false;
   if (p.contracts && !s.run) updateContract(s, rng, ctx.codex, now);
   const pushed = Boolean(p.pushRuns) && (s.bugs > 0 || Boolean(s.contract)) && rng() < p.pushRuns;
   const runStyle = p.runs ?? (pushed ? 'careful' : null);
@@ -256,6 +257,7 @@ export function checkIn(s, p, now, rng, ctx) {
       ctx.standingSpent = (ctx.standingSpent ?? 0) + (run.tally.fixStanding ?? 0) * BUG_CFG.clearStanding;
       ctx.clinicVisits = (ctx.clinicVisits ?? 0) + (run.tally.clinics ?? 0);
       ctx.runs = (ctx.runs ?? 0) + 1;
+      ctx.ranNow = true;
       ctx.regionRuns[region] = (ctx.regionRuns[region] ?? 0) + 1;
       ctx.bought = (ctx.bought ?? 0) + run.messages.filter((m) => m.startsWith('bought')).length;
       ctx.sold = (ctx.sold ?? 0) + (run.sold ?? 0);
@@ -277,6 +279,7 @@ export function checkIn(s, p, now, rng, ctx) {
       }
       ctx.codex.push(...(s.codexInbox ?? []).filter((id) => !ctx.codex.includes(id)));
       s.codexInbox = [];
+      if (CFG.rootMid && !s.rootAccess && ROOT_FRAGMENT_IDS.every((id) => ctx.codex.includes(id))) s.rootAccess = true; // the game grants Root the moment the codex is complete
     }
   }
   if (s.event?.type === 'trace') {
@@ -329,7 +332,8 @@ export function checkIn(s, p, now, rng, ctx) {
     if (s.stats.heat > coolAt + 10) doAct('cool');
   }
   if (s.stats.heat > coolAt) doAct('cool');
-  if (mayFeed) feed();
+  // POSTRUN=skip: a player who does not top Charge up again after a netrun in the same check-in (the question the grace window answers).
+  if (mayFeed && !(process.env.POSTRUN === 'skip' && ctx.ranNow)) feed();
   // The UI shows bedtime, so players kill the lights if it's due before their next check.
   const nowMin = (now / MIN) % (24 * 60);
   const untilBed = (bedtimeHour(s) * 60 - nowMin + 24 * 60) % (24 * 60);
@@ -472,6 +476,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     life: { ...s.life },
     segfaultAt,
     fragment: s.fragment ?? null,
+    form: s.form,
     codex: ctx.codex,
     newFragments: ctx.codex.length - codexAtStart,
     // Days spent in each stage (a stage not reached counts as 0).

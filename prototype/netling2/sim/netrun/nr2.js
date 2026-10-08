@@ -29,6 +29,7 @@ export const NR2 = {
     breachPenalty: 0.1, // Breach 4-in-5: the win chance drops this much
     breachRefund: 0, // the maintainer's possible timer refund for the longer target: win chance given back (to test)
     avoid: { 1: 0.5, 2: 0.75 }, // avoidance works this share as often against tier 2, adult (level 1) and elder (level 2)
+    scale: 1, // multiplies every share (a sweep knob)
     damageMult: 1, // harder ICE does not pay more and (not decided) bites the same
   },
 
@@ -67,7 +68,7 @@ if (process.env.NR2) {
 export const levelOf = (pet) => (pet.stage === 'mainframe' ? 2 : 1);
 
 // Chance a tier-2 roll is made for a fight in this region.
-export const tierShare = (region) => (NR2.tiers ? NR2.tier.share[region] ?? 0 : 0);
+export const tierShare = (region) => (NR2.tiers ? Math.min(1, (NR2.tier.share[region] ?? 0) * (NR2.tier.scale ?? 1)) : 0);
 
 // The win chance a bot gives up against a tier-2 fight of this game. Assumed, see NR2.tier.
 export function tierPenalty(pending) {

@@ -354,3 +354,21 @@ test('Wetware and Program: a lost fight can infect or bleed, lightly, only with 
   assert.equal(lose('wetware', false).virus, false);
   reset();
 });
+
+test('the elder feat can follow the account: the first-elder feat by default, a lighter one through CFG.featFor', async () => {
+  const { mainframeFeat, CFG } = await import('./sim/sim.js');
+  const s = { deepExits: { all: 2, clean: 0 } };
+  assert.equal(mainframeFeat(s), false, '2 exits do not meet 3 or 2 clean');
+  CFG.featFor = () => [2, 99];
+  assert.equal(mainframeFeat(s), true, 'tier 2: two exits');
+  CFG.featFor = () => [1, 99];
+  assert.equal(mainframeFeat({ deepExits: { all: 1, clean: 0 } }), true, 'tier 4: one exit');
+  CFG.featFor = null;
+});
+
+test('Root Access arrives mid-life by default (the game\'s rule), and the codex cap is 12', async () => {
+  const { CFG } = await import('./sim/sim.js');
+  const { RUN_CFG } = await import('./sim/netrun/run.js');
+  assert.equal(CFG.rootMid, true);
+  assert.equal(RUN_CFG.codexPerLife, 12);
+});

@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, infect } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, infect } from '../sim.js';
 import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
@@ -57,7 +57,7 @@ export const RUN_CFG = {
   clinicStock: { coolant: 3, repair: 3, antivirus: 2 },
   cacheFragmentChance: 0.15,
   // A netling's memory holds this many new codex fragments; the rest wait for the next generation.
-  codexPerLife: 8,
+  codexPerLife: 12, // 2.0 (decided): 12 a life (1.0: 8)
   // Loose scrip, banked on jack-out like loot.
   exitScrip: 3,
   cacheScripChance: 0.3, // an empty cache
@@ -788,6 +788,9 @@ function endRun(pet, result) {
   run.result = result;
   // A held pressure state resumes after a jack-out; for a few minutes the bars cannot end it (decided). A failure or an abort gets no window.
   if (result === 'jacked' && NR2.graceMin > 0) pet.graceUntil = pet.ageMin + NR2.graceMin;
+  if (result === 'jacked') pet.lastJackOutAge = pet.ageMin;
+  if (!run.daily) for (const k of ['charge', 'sync']) if (pet.sideHeld?.[k] && pet.stats[k] < SIDES[k].exit) SIDE_METER.runEndsBelowExit++; // a held state the bars would end the moment the run is over
+  if (!run.daily) SIDE_METER.runsInState += Object.values(pet.sideHeld ?? {}).filter(Boolean).length; // pressure states held at the end of a run (the sim runs take no time, so these were held going in)
   if (run.daily) return; // nothing at stake: no cooldown, and not counted among the netling's runs
   if (!REGIONS[run.region].noCooldown) {
     pet.lastRunEndAge = pet.ageMin;

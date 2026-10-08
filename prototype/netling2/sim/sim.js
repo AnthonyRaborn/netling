@@ -83,6 +83,8 @@ export const CFG = {
   mainframeExits: 3,
   mainframeCleanExits: 2,
   mainframeTraitLevel: 2,
+  rootMid: true, // 2.0 (decided): Root Access arrives the moment the codex is complete, mid-life, as in the game (the 1.0 balance tool granted it to the next netling)
+  featFor: null, // see mainframeFeat
   // 2.0 evolution. The hidden-path teen needs this many wins in every game and the two Standing tracks within
   // hiddenBand (the true gap between the fractional tracks). Choices (Standing lean, role) are weighted by the gap to the leader:
   // tieWeights[whole part of the gap],
@@ -353,7 +355,12 @@ export const lifeEnd = (s) => s.life.lifespan + (s.lifeBonus ?? 0);
 // The Mainframe gate. The age half: the start of the last ordinary day. The feat: this life's exits from The Deep
 // (s.deepExits, counted by run.js at jack-out), three of them or two clean ones.
 export const mainframeAt = (s) => s.life.lifespan - CFG.mainframeBeforeEndMin;
-export const mainframeFeat = (s) => (s.deepExits?.all ?? 0) >= CFG.mainframeExits || (s.deepExits?.clean ?? 0) >= CFG.mainframeCleanExits;
+// 2.0: the feat gets easier with every elder the account has (decided in principle; the tiers are in lineage-sweep.mjs). CFG.featFor(s), when set,
+// returns [exits, clean] for this netling; otherwise the first-elder feat of CFG.mainframeExits and CFG.mainframeCleanExits.
+export const mainframeFeat = (s) => {
+  const [exits, clean] = CFG.featFor ? CFG.featFor(s) : [CFG.mainframeExits, CFG.mainframeCleanExits];
+  return (s.deepExits?.all ?? 0) >= exits || (s.deepExits?.clean ?? 0) >= clean;
+};
 // Whether it would recompile now (whether or not the stage is switched on): an adult, home, old enough, feat met,
 // with Root Access earned.
 // Root Access must have been earned in this line (NL-0 watches it, or rests after a rescue): the stage is NL-0's to open.
@@ -646,7 +653,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -666,12 +673,13 @@ function stepHeld(s, rest) {
   s.sideHold ??= { charge: 0, sync: 0, heat: 0 };
   s.sideHeld ??= { charge: false, sync: false, heat: false };
   // 2.0: after a jack-out the held states resume and the bars cannot end them for a few minutes (NR2.graceMin, nr2.js); the counters wait too.
-  if ((s.graceUntil ?? 0) > s.ageMin && !rest) return;
+  const grace = (s.graceUntil ?? 0) > s.ageMin; // inside it the bars cannot end a state or reset a count (rest still does); a bar at the high line still counts
   for (const key of ['charge', 'sync', 'heat']) {
     const c = SIDES[key];
     if (!(c.hold > 0) || (key === 'heat' && SIDES.owner !== null)) continue;
-    if (rest || s.stats[key] < c.exit || (SIDES.teenStates && s.stage === 'baby')) {
+    if (rest || (!grace && s.stats[key] < c.exit) || (SIDES.teenStates && s.stage === 'baby')) {
       s.sideHold[key] = 0;
+      if (s.sideHeld[key] && !rest) SIDE_METER[s.ageMin - (s.lastJackOutAge ?? -1e9) <= 30 ? 'endsSoonAfterRun' : 'endsOther']++; // a state the bars ended: soon after a run, or otherwise
       s.sideHeld[key] = false;
       if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
     } else if (key === 'sync' && (s.burnUntil ?? 0) > s.ageMin) {
