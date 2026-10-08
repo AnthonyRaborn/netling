@@ -18,7 +18,7 @@
 | `sim/temper-sweep.mjs` | How much play the Metronome's 12 hour hold takes (see Temper seekers) |
 | `sim/hunter-sweep.mjs` | How much play the hidden forms take (see Hidden-path hunters) |
 
-**Netrun rules (added after the tables below; see `prototype/netling2/notes/netrun-sim-notes.md`).** The fork also carries the decided 2.0 netrun rules as switches in `sim/netrun/nr2.js`, off by default so the tables below reproduce: one ability per role and lean at two levels, a harder tier of ICE, the forced filled cache, the 5 minute grace window and light egg run costs (`NR2=all` switches them on). The codex cap is now 12, Root Access arrives mid-life, and the elder feat can follow the account (`CFG.featFor`). New commands: `npm run proto:netrun` (`sim/netrun-sweep.mjs`, per-form netrun outcomes and a parity read-out), `npm run proto:lineage` (`sim/lineage-sweep.mjs`, lives to finish the 18 egg pages, replacing `lines`, `lines2`, `rogue` and `rogue2` on the fork) and `sim/grace-sweep.mjs`. **Every table below was measured without run abilities, with one kind of ICE, with cap 8 and with Root for the next life only; the netrun-dependent ones (clinic, push, bug policies at clinics, noisy players, role and hunter tables) are stale until rerun with `NR2=all`.** The notes file lists what is stale and which sweep tests which open balance question.
+**Netrun rules (added after the tables below; see `prototype/netling2/notes/netrun-sim-notes.md`).** The fork also carries the decided 2.0 netrun rules as switches in `sim/netrun/nr2.js`, off by default so the tables below reproduce: one ability per role and lean at two levels, a harder tier of ICE, the forced filled cache, the 5 minute grace window and light egg run costs (`NR2=all` switches them on). The codex cap is now 12, Root Access arrives mid-life, and the elder feat can follow the account (`CFG.featFor`). New commands: `npm run proto:netrun` (`sim/netrun-sweep.mjs`, per-form netrun outcomes and a parity read-out), `npm run proto:lineage` (`sim/lineage-sweep.mjs`, lives to finish the 18 egg pages, replacing `lines`, `lines2`, `rogue` and `rogue2` on the fork) and `sim/grace-sweep.mjs`. **The tables below were re-run with these rules on (`NR2=all`, 300 lives unless a sweep says otherwise; 200 for the sweeps that default to 200, 150 for the clinic against the final pressure design): the clinic, soft push, fidelity, role, hunter, noisy, gap, bug policy, temper seeker and steerer tables carry the refreshed figures, and they mostly agree with the earlier ones within noise (about 2 to 3 points). Where they moved by more than noise: casual and worker end more unsteady (the harder ICE and the new abilities change disconnects), the daredevil and overclocker end more unsteady still, unsteady-warm play holds the Metronome more often, the Segfault route reaches the bug ceiling more often (14% of lives against 5%), and survival at 4 and 5 hour gaps is lower (the earlier gap table predates the stronger bugs). Not re-run: the egg pressure sweeps, the exchange stock and the quoted bug-lethality experiments (their text still carries the figures it was measured with).** The notes file lists what is stale and which sweep tests which open balance question.
 
 Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs unless the archetype sets its own `fix`: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 36 archetypes take about 3.5 minutes.
 
@@ -28,20 +28,20 @@ Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report,
 
 | Base | Case | Full life | Bugs average / end | Ceiling | Visits / cleared |
 |---|---|---|---|---|---|
-| casual | no way to clear | 87% | 0.92 / 2.25 | 14% | 0.0 / 0.0 |
-| casual | home clearing (earlier rules) | 94% | 0.11 / 0.13 | 0% | 0.0 / 1.8 |
-| casual | clinic 10% | 92% | 0.48 / 1.05 | 7% | 1.6 / 1.1 |
-| casual | **clinic 25%** | 95% | 0.28 / 0.53 | 2% | 3.5 / 1.6 |
-| casual | clinic 50% | 95% | 0.15 / 0.30 | 0% | 6.8 / 1.5 |
-| casual | clinic 25%, healing also in markets | 93% | 0.27 / 0.55 | 2% | 3.5 / 1.3 |
-| worker | no way to clear | 78% | 1.02 / 2.46 | 25% | 0.0 / 0.0 |
-| worker | home clearing (earlier rules) | 81% | 0.82 / 1.85 | 20% | 0.0 / 0.6 |
-| worker | **clinic 25%** | 83% | 0.83 / 2.01 | 20% | 0.6 / 0.4 |
-| worker | clinic 50% | 85% | 0.73 / 1.74 | 17% | 1.2 / 0.7 |
-| attentive | **clinic 25%** | 100% | 0.02 / 0.03 | 0% | 6.0 / 0.1 |
+| casual | no way to clear | 91% | 0.97 / 2.25 | 16% | 0.0 / 0.0 |
+| casual | home clearing (earlier rules) | 95% | 0.12 / 0.07 | 0% | 0.0 / 1.7 |
+| casual | clinic 10% | 95% | 0.51 / 0.97 | 5% | 1.7 / 1.2 |
+| casual | **clinic 25%** | 94% | 0.28 / 0.48 | 2% | 3.5 / 1.4 |
+| casual | clinic 50% | 93% | 0.16 / 0.34 | 0% | 6.8 / 1.4 |
+| casual | clinic 25%, healing also in markets | 95% | 0.23 / 0.42 | 0% | 3.7 / 1.4 |
+| worker | no way to clear | 79% | 1.04 / 2.57 | 27% | 0.0 / 0.0 |
+| worker | home clearing (earlier rules) | 84% | 0.82 / 1.79 | 19% | 0.0 / 0.7 |
+| worker | **clinic 25%** | 83% | 0.83 / 2.01 | 21% | 0.6 / 0.4 |
+| worker | clinic 50% | 83% | 0.72 / 1.73 | 18% | 1.2 / 0.7 |
+| attentive | **clinic 25%** | 100% | 0.01 / 0.03 | 0% | 5.9 / 0.1 |
 | overclocker | **clinic 25%** | 95% | 0.23 / 0.54 | 2% | 0.0 / 0.0 |
-| human-regular | no way to clear | 25% | 0.51 / 1.48 | 4% | 0.0 / 0.0 |
-| human-regular | **clinic 25%** | 27% | 0.39 / 1.14 | 2% | 0.8 / 0.4 |
+| human-regular | no way to clear | 29% | 0.49 / 1.48 | 5% | 0.0 / 0.0 |
+| human-regular | **clinic 25%** | 26% | 0.34 / 1.04 | 3% | 0.9 / 0.3 |
 
 Reading it (bug effects as chosen below). A player who netruns often (casual makes 17 runs a life) meets a clinic 3.5 times and ends with 0.3 bugs on average: 95% full life, as good as clearing at home (94%) and well above having no way to clear (87%). **A player who rarely or never netruns cannot clear bugs at all**: the careful worker (2 runs a life, only when healthy and soon back) meets 0.6 clinics, ends at 83% against 78% with no way to clear, and reaches the bug ceiling in 20% of lives; the overclocker (no runs) and the noisy players (3 runs) are no better off. That removes the Standing price's use for exactly the players the sketch said it was for ("the Standing price helps those who do not run"): the Standing payment now needs a netrun too. Removing the healing items from the other markets changes little at this scale (casual ends alive 95% of the time against 93% when the markets still stock them, within noise). Limits: bots detour to a clinic only when it is one step ahead or within three steps and visible; the clinic's share, fee and stock are guesses; bugs do not carry between lives.
 
@@ -62,18 +62,18 @@ Reading it (bug effects as chosen below). A player who netruns often (casual mak
 
 | Base | Case | Bugs average | Ceiling | Visits | Runs | Full life |
 |---|---|---|---|---|---|---|
-| worker | no push | 0.83 | 20% | 0.6 | 2.1 | 83% |
-| worker | statements, goes 50% | 0.48 | 10% | 1.1 | 3.6 | 82% |
-| worker | statements + job board, 50% | 0.29 | 4% | 2.2 | 4.6 | 89% |
-| worker | job board only | 0.63 | 18% | 1.0 | 2.0 | 85% |
-| worker | statements + job board, always | 0.16 | 2% | 3.0 | 6.9 | 90% |
-| human-regular | no push | 0.39 | 2% | 0.8 | 3.0 | 27% |
-| human-regular | statements + job board, 50% | 0.22 | 0% | 1.7 | 5.0 | 34% |
-| human-casual | no push | 0.43 | 3% | 0.4 | 2.1 | 5% |
-| human-casual | statements + job board, always | 0.32 | 1% | 0.9 | 2.6 | 6% |
+| worker | no push | 0.83 | 21% | 0.6 | 2.0 | 83% |
+| worker | statements, goes 50% | 0.49 | 8% | 1.1 | 3.5 | 82% |
+| worker | statements + job board, 50% | 0.32 | 6% | 2.4 | 4.6 | 88% |
+| worker | job board only | 0.69 | 17% | 0.9 | 2.1 | 86% |
+| worker | statements + job board, always | 0.20 | 2% | 3.1 | 6.8 | 89% |
+| human-regular | no push | 0.34 | 3% | 0.9 | 3.1 | 26% |
+| human-regular | statements + job board, 50% | 0.21 | 0% | 1.9 | 4.7 | 35% |
+| human-casual | no push | 0.42 | 3% | 0.3 | 1.9 | 4% |
+| human-casual | statements + job board, always | 0.36 | 1% | 1.0 | 2.8 | 8% |
 | overclocker (no runs) | no push | 0.23 | 2% | 0.0 | 0.0 | 95% |
-| overclocker | statements, goes 50% | 0.08 | 0% | 0.3 | 0.8 | 95% |
-| overclocker | statements + job board, 50% | 0.08 | 0% | 2.3 | 7.4 | 96% |
+| overclocker | statements, goes 50% | 0.10 | 1% | 0.3 | 1.0 | 96% |
+| overclocker | statements + job board, 50% | 0.08 | 0% | 2.3 | 7.5 | 95% |
 
 Reading it. The nudges work for players who can run: the worker's bugs fall from 0.83 to 0.29 on average and the bug ceiling from 20% to 4% of lives, with survival up from 83% to 89%, when both nudges act half the time; the overclocker, who never ran, clears its bugs once it is nudged (0.23 to 0.08). The statements alone move a worker less (0.48 bugs, 10% at the ceiling) and do not help survival (82%): a nudged run ignores the 'be back soon' rule and costs some disconnects. The job board alone helps a little (0.63, 85%). A noisy player who is rarely around (`human-casual`, 5% full life) gains little because they do not live to see a clinic. **Side effects to know:** bots that read the board accept every kind of job, not only the clinic one, so their scrip rises (a worker ends with about 46 against 20), which is an economy effect of using contracts at all (1.0's bots never did) and not part of the push. The statements consume random numbers, so runs with bugs differ slightly from before they existed.
 
@@ -87,26 +87,26 @@ Reading it. The nudges work for players who can run: the worker's bugs fall from
 
 | Archetype | Sketch | This simulator |
 |---|---|---|
-| Casual | 0/20/76/4/0 | 0/21/74/4/0 (clinic only: 0/31/67/2/0) |
-| Worker | 2/37/60/0/0 | 3/40/56/1/0 (3/43/54/0/0) |
-| Attentive | 0/0/10/46/43 | 0/0/14/38/48 (0/0/10/49/41) |
-| Steer-daemon | 0/0/1/25/74 | 0/0/2/22/76 (0/0/2/22/77) |
-| Steer-glitch | 6/49/45/0/0 | 4/50/46/0/0 (6/52/42/0/0) |
-| Daredevil | 24/53/22/0/0 | 32/55/12/0/0 (38/51/11/0/0) |
-| Overclocker | 72/27/0/0/0 | 83/17/0/0/0 (84/16/0/0/0) |
-| Neglectful | 18/56/25/0/0 | 14/43/43/0/0 (14/43/43/0/0) |
+| Casual | 0/20/76/4/0 | 1/28/68/3/0 |
+| Worker | 2/37/60/0/0 | 13/48/39/0/0 |
+| Attentive | 0/0/10/46/43 | 0/0/14/44/42 |
+| Steer-daemon | 0/0/1/25/74 | 0/0/2/20/78 |
+| Steer-glitch | 6/49/45/0/0 | 7/53/39/1/0 |
+| Daredevil | 24/53/22/0/0 | 36/56/7/0/0 |
+| Overclocker | 72/27/0/0/0 | 84/16/0/0/0 |
+| Neglectful | 18/56/25/0/0 | 15/41/44/0/0 |
 
-Also in line: casual Standing by adulthood about 9.4 and 8.9 (the sketch: about 10 and 8); a worker without clearing 7.7 faults and 14% at the bug ceiling (the sketch: 7.7 and 17%); the 12 hour hold reach with neglect level 2 paused: attentive 48% (52%), steer-daemon 80% (87%), daredevil 35% (34%), steer-glitch 5% (5%), overclocker 80% (90%). Casual full-life rate 94% (the sketch: 95.7% without the cap). **The hot end does not reproduce** (daredevil and overclocker end more unsteady), and the gap is not explained: it does not come from bugs (switching them off changes nothing), and switching care preferences off widens it (overclocker 91% strongly unsteady, daredevil 35%), so preferences narrow it without closing it.
+Also in line (refreshed): casual Standing by adulthood about 8.8 and 8.9 (the sketch: about 10 and 8); a worker without clearing 9.7 faults and 27% at the bug ceiling (the sketch: 7.7 and 17%; the bugs are stronger now); the 12 hour hold reach with neglect level 2 paused: attentive 43% (52%), steer-daemon 81% (87%), daredevil 38% (34%), steer-glitch 6% (5%), overclocker 81% (90%). Casual full-life rate 94% (the sketch: 95.7% without the cap). **The hot end does not reproduce** (daredevil and overclocker end more unsteady), and the gap is not explained: it does not come from bugs (switching them off changes nothing), and switching care preferences off widens it (overclocker 91% strongly unsteady, daredevil 35%), so preferences narrow it without closing it.
 
 **Role steerers.** Nine archetypes added: `steer-<role>-corp` and `steer-<role>-street` for breach, dodge, tune and feast (attentive, steering the lean as `steer-chrome` and `steer-firewall` do, and giving 80% of their plays to one game, the rest rotating; they decline requests for other games), and `nudge-breach` (50% of plays in one game, packets and traces leaning corp). 300 lives each: every steerer ends as exactly its role and lean (100%), with the role certain (a lead of 5 or more wins) and the lean certain at adulthood in 100% of lives; at the teen check the lean is certain in 85% to 99% (corp 85% to 94%, street 95% to 99%), which matches the sketch's 92% to 98% measured on 1.0's allegiance. The half-committed `nudge-breach` still ends as a breach form 98% of the time (breachCorp 95%) with the role certain in 95%. `role-sweep.mjs [lives] [shares]` varies the share of plays given to one game with no lean steering (300 lives; the rest rotate, so a share of 0 is the plain rotation):
 
 | Share of plays in one game | Role certain at adulthood | Adult is a role of that game (a quarter by chance) |
 |---|---|---|
-| 0 | 0% | 28% |
-| 0.1 | 8% | 50% |
-| 0.2 | 32% | 68% |
-| 0.3 | 59% | 83% |
-| 0.5 | 93% | 97% |
+| 0 | 1% | 26% |
+| 0.1 | 10% | 41% |
+| 0.2 | 31% | 60% |
+| 0.3 | 61% | 80% |
+| 0.5 | 96% | 98% |
 | 0.8 | 100% | 100% |
 
 So role is cheap to steer: a player who gives one game twice the plays of each other game (a share of 0.2 is 40% of plays against 20% each) already ends in that role two times in three, and a share of 0.5 is nearly certain. This is the middle the sketch said it had not measured. It is one bot design (the focus game is chosen at random each play, wins are at the archetype's win rate for every game, and the play count is fixed by Sync need), and it ignores care preferences (`PREFBOT` unset), which pull a steady netling toward its last two games and an unsteady one away from them.
@@ -127,36 +127,36 @@ So the Standing condition is not the hurdle even when the player sees only floor
 
 | Archetype | Teen | Adult | Full life | Median days | Deaths by integrity collapse |
 |---|---|---|---|---|---|
-| `human-casual` | 79% | 35% | 8% | 1.6 | 92% |
-| `human-regular` | 93% | 65% | 30% | 3.2 | 70% |
-| `human-keen` | 97% | 86% | 72% | 5.0 | 28% |
-| `human-bursty` | 100% | 21% | 1% | 1.6 | 99% |
+| `human-casual` | 78% | 28% | 4% | 1.4 | 96% |
+| `human-regular` | 93% | 64% | 26% | 3.3 | 74% |
+| `human-keen` | 97% | 88% | 65% | 5.0 | 35% |
+| `human-bursty` | 100% | 15% | 0% | 1.6 | 100% |
 
 **This is the main finding: survival depends on the longest awake gap, not on how often the player checks in.** `gap-sweep.mjs` runs the casual archetype with check-ins evenly spaced every N hours from 07:00 to 23:00 (300 lives; `SIM=1.0` runs 1.0's simulator for the same table):
 
 | Gap | Check-ins a day | Full life, 2.0 | Full life, 1.0 |
 |---|---|---|---|
 | 2 h | 9 | 99% | 99% |
-| 3 h | 6 | 95% | 95% |
-| 4 h | 5 | 93% | 84% |
-| 5 h | 4 | 73% | 35% |
-| 6 h | 3 | 24% | 27% |
-| 8 h | 3 | 5% | 0% |
+| 3 h | 6 | 94% | 95% |
+| 4 h | 5 | 90% | 84% |
+| 5 h | 4 | 58% | 35% |
+| 6 h | 3 | 19% | 27% |
+| 8 h | 3 | 3% | 0% |
 
-Gaps of 4 hours or less are survivable, 5 hours costs a quarter of lives, and 6 hours or more (a work day away) kills most netlings, in 1.0 as well as in this simulator. Six check-ins a day at random times survive in only 40% of lives (`human-sweep.mjs`: 4 a day 11%, 6 40%, 8 68%, 10 82%, 12 87%, 16 95%), against 95% when they are evenly spaced; adding lapses lowers each by 3 to 20 points; adding busy and off days (a quarter of days with 1 or 2 check-ins, a tenth with 0 or 1) caps survival near 25% however many check-ins the other days have (6 a day: 6%, 16 a day: 22%), because one day with at most two check-ins is usually fatal. Topping up before a long gap made no consistent difference (runs with and without `prepare` were within about 10 points of each other, in both directions). For the deaths, at 8-hour gaps a life takes about 3.9 Charge faults and 3.4 Sync faults and dies by integrity collapse at a median of day 1.3; the exact drain that kills it was not traced. **This contradicts the comment on `drainCurve` in `src/sim.js` ("long gaps (a work day, the night) still cost faults without being fatal") and `docs/BALANCE.md`'s picture of a casual player.** It is a 1.0 property carried into 2.0 (the fault cap's removal helps a little: 1.0's neglect deaths became collapses or survivals), so it is a question for the maintainer, not a simulator fault: whether a work-day gap should be survivable (a gentler drain when it is far from full, a floor on Integrity loss while Charge is at 0, or the sketch's hibernation made easier to reach). Limits: bots top up to 85 or 94, not 100; a real player may cool, patch and play more cleverly before leaving; the bots do not carry items for a long gap beyond an Antivirus patch; 200 to 300 lives a cell.
+Gaps of 4 hours or less are survivable, 5 hours costs four lives in ten, and 6 hours or more (a work day away) kills most netlings (decided by the maintainer to stay: a work-day gap is not survivable), in 1.0 as well as in this simulator. Six check-ins a day at random times survive in only 40% of lives (`human-sweep.mjs`: 4 a day 9%, 6 37%, 8 60%, 10 74%, 12 88%, 16 93%), against 95% when they are evenly spaced; adding lapses lowers each by 3 to 20 points; adding busy and off days (a quarter of days with 1 or 2 check-ins, a tenth with 0 or 1) caps survival near 25% however many check-ins the other days have (6 a day: 6%, 16 a day: 22%), because one day with at most two check-ins is usually fatal. Topping up before a long gap made no consistent difference (runs with and without `prepare` were within about 10 points of each other, in both directions). For the deaths, at 8-hour gaps a life takes about 3.9 Charge faults and 3.4 Sync faults and dies by integrity collapse at a median of day 1.3; the exact drain that kills it was not traced. **This contradicts the comment on `drainCurve` in `src/sim.js` ("long gaps (a work day, the night) still cost faults without being fatal") and `docs/BALANCE.md`'s picture of a casual player.** It is a 1.0 property carried into 2.0 (the fault cap's removal helps a little: 1.0's neglect deaths became collapses or survivals), so it is a question for the maintainer, not a simulator fault: whether a work-day gap should be survivable (a gentler drain when it is far from full, a floor on Integrity loss while Charge is at 0, or the sketch's hibernation made easier to reach). Limits: bots top up to 85 or 94, not 100; a real player may cool, patch and play more cleverly before leaving; the bots do not carry items for a long gap beyond an Antivirus patch; 200 to 300 lives a cell.
 
 **Bug policies (home clearing; the rules no longer allow it, so these tables used `BUGS='{"homeClear":true}'`, which `bug-sweep.mjs` sets).** An archetype's `fix` sets how it handles bugs (at a clinic only `mode` and `split` apply): `mode` (`scrip`, `standing`, `both` or `none`), `at` (clear once it carries this many) and `split` (how a Standing payment is taken: `even`, 1 from each track; `leader`, 2 from the larger; `trailer`, 2 from the smaller). The report now gives the average bugs carried, the share of time at the ceiling and what clearing cost in scrip and Standing. `bug-sweep.mjs [lives] [bases] [policies]` runs a base archetype under eight policies. 300 lives, the default rule (30% a fault, ceiling 5), faults by the end of life, average bugs carried, lives that reached the ceiling, adult Standing gap:
 
 | Policy | casual: full life, faults, bugs, ceiling, gap | worker: full life, faults, bugs, ceiling, gap |
 |---|---|---|
-| ignore | 91%, 7.3, 0.86, 11%, 2.86 | 89%, 7.7, 0.91, 14%, 1.87 |
-| scrip, at once | 94%, 6.1, 0.11, 0%, 2.75 | 89%, 7.1, 0.65, 7%, 1.87 |
-| scrip, from 2 bugs | 92%, 6.6, 0.42, 0%, 2.82 | 88%, 7.2, 0.74, 7%, 1.88 |
-| scrip, at the ceiling | 91%, 7.3, 0.83, 11%, 2.86 | 89%, 7.6, 0.89, 14%, 1.87 |
-| Standing, even split | 94%, 6.0, 0.05, 0%, 2.80 | 91%, 5.6, 0.03, 0%, 1.68 |
-| Standing, from the leader | 94%, 6.0, 0.05, 0%, 2.57 | 90%, 5.6, 0.04, 0%, 1.70 |
-| Standing, from the trailer | 94%, 6.0, 0.06, 0%, 3.73 | 91%, 6.0, 0.15, 1%, 2.62 |
-| scrip, then Standing | 94%, 5.9, 0.04, 0%, 2.74 | 91%, 5.6, 0.03, 0%, 1.68 |
+| ignore | 89%, 7.7, 0.97, 19%, 2.54 | 81%, 9.7, 1.00, 27%, 1.91 |
+| scrip, at once | 96%, 5.8, 0.11, 1%, 2.52 | 84%, 8.8, 0.76, 18%, 1.89 |
+| scrip, from 2 bugs | 94%, 6.3, 0.25, 1%, 2.63 | 85%, 9.1, 0.82, 17%, 1.90 |
+| scrip, at the ceiling | 93%, 6.5, 0.39, 3%, 2.64 | 82%, 9.4, 0.93, 25%, 1.90 |
+| Standing, even split | 93%, 5.4, 0.04, 0%, 2.54 | 91%, 5.4, 0.03, 0%, 1.79 |
+| Standing, from the leader | 93%, 5.5, 0.04, 0%, 2.29 | 90%, 5.4, 0.03, 0%, 1.65 |
+| Standing, from the trailer | 94%, 5.5, 0.06, 0%, 3.65 | 89%, 6.0, 0.15, 1%, 2.74 |
+| scrip, then Standing | 95%, 5.4, 0.04, 0%, 2.54 | 91%, 5.4, 0.03, 0%, 1.80 |
 
 A worker ends a life with about 11 scrip after spending 12 on bugs, so clearing with scrip alone leaves it carrying 0.65 bugs on average and 7% of lives at the ceiling, while paying 3.5 Standing (about 15% of the 23 it ends with) clears nearly everything. Clearing is worth doing at once: waiting for 2 bugs costs a casual netling a point or two of survival and 0.3 bugs carried, and waiting for the ceiling is no better than ignoring them. Ignoring costs a casual netling about 3 points of full life and 1.2 faults, and a worker about 0 points (its deaths come from elsewhere). A Standing payment moves the lean by the split: from the trailer widens the adult gap by about 1 (casual 2.8 to 3.7), from the leader narrows it by about 0.2 (0.4 at the harsh rule), and an even split leaves it. A payment from the trailer also fails whenever that track is under 2, so a steerer (whose trailing track stays near 1) cannot use it, which is what the sketch called the hidden retooling effect and also a limit on it. With the harsh rule (50% a fault, ceiling 8, `BUGS` set) a worker ignoring bugs reaches the ceiling in 26% of lives and carries 1.8 on average; scrip at once leaves 17% and 1.45; Standing leaves none and 0.06. Casual at the harsh rule: ignoring 90% full life and 1.6 bugs, scrip at once 92% and 0.23 (42 scrip), Standing 94% and 0.07 (5.9 Standing). A steerer (`corpo`) rarely has bugs even then (0.1 on average, 0.5 Standing a life when it pays). Limits: bots clear only at check-ins; the netrun debug station is not modeled; bugs do not carry across lives (a proposal in the sketch); the policies are single rules, not a player who weighs the lean.
 
@@ -175,18 +175,18 @@ Following costs the hidden adult almost entirely, for two reasons seen in `hunte
 
 | Archetype | Held 12 hours | Median day | Held 24 hours | Faults a life | Bugs at the ceiling |
 |---|---|---|---|---|---|
-| `seek-steady` | 87% | 2.4 | 67% | 0.2 | 0% |
-| `seek-unsteady` | 32% | 3.4 | 9% | 1.6 | 0% |
-| `seek-unsteady-segfault` | 90% | 2 | 71% | 12.6 | 5% |
+| `seek-steady` | 90% | 2.5 | 64% | 0.2 | 0% |
+| `seek-unsteady` | 44% | 3.2 | 21% | 1.7 | 1% |
+| `seek-unsteady-segfault` | 92% | 2.1 | 74% | 13.2 | 14% |
 
 `temper-sweep.mjs [lives] [gaps] [archetypes]` varies check-ins (200 lives; run it with `PREF='{"on":false}'` for the same without care preferences). Share that held 12 hours, preferences on (off in brackets):
 
 | Check-ins a day | `seek-steady` | `seek-unsteady` | `seek-unsteady-segfault` |
 |---|---|---|---|
-| 17 | 88% (85%) | 32% (43%) | 90% (97%) |
-| 9 | 24% (37%) | 29% (33%) | 82% (88%) |
-| 6 | 1% (0%) | 25% (32%) | 50% (55%) |
-| 3 | 0% (0%) | 6% (7%) | 11% (8%) |
+| 17 | 90% (87%) | 44% (49%) | 92% (97%) |
+| 9 | 30% (27%) | 30% (45%) | 86% (92%) |
+| 6 | 1% (0%) | 23% (34%) | 49% (53%) |
+| 3 | 0% (0%) | 5% (6%) | 6% (4%) |
 
 Reading it: the steady end takes near hourly attention (an unattended netling does not reach flow); the unsteady end is open to a player who checks in 6 to 9 times a day, and a Segfault is what makes it cheap, because warm play alone only reaches 25% to 32% of lives. The Segfault route costs a lot: 11 to 13 faults a life, a bug ceiling reached by 5% to 8% of lives and a worse full-life rate at 6 check-ins a day (92% to 96% against 99% to 100%). So the two ends are not symmetric in effort, which the sketch said it wanted ("neither end is the good one"): steady is the high-attention reward, unsteady the cheaper and riskier one. Preferences matter less here than in the earlier archetypes (the unsteady warm-play seeker loses 1 to 11 points to them, as the overclocker did); the steady seeker's 13 point loss at 9 check-ins is unexplained and may be partly noise (200 lives, about 3 points a share). Limits: bots that use every Segfault they find (a real player may keep them), one fixed heat policy for the warm seekers, and no tuning of the 12 hour length or the neglect rule, which the sketch measured separately on 1.0's simulator.
 
@@ -194,11 +194,11 @@ Reading it: the steady end takes near hourly attention (an unattended netling do
 
 | Archetype | Role and lean ignoring the preference | Following it |
 |---|---|---|
-| `steer-breach-corp` | breachCorp 100%, role certain 100% | breachCorp 76%, role certain 59% |
-| `steer-breach-street` | breachStreet 100%, 100% | breachStreet 85%, 73% |
-| `steer-tune-corp` | tuneCorp 100%, 100% | tuneCorp 77%, 60% |
-| `steer-tune-street` | tuneStreet 100%, 100% | tuneStreet 84%, 69% |
-| `nudge-breach` | a breach form 98%, role certain 95% | breachCorp 71% (a breach form 76%), role certain 55% |
+| `steer-breach-corp` | breachCorp 100%, role certain 100% | breachCorp 79%, role certain 60% |
+| `steer-breach-street` | breachStreet 100%, 100% | breachStreet 87%, 74% |
+| `steer-tune-corp` | tuneCorp 100%, 100% | tuneCorp 73%, 59% |
+| `steer-tune-street` | tuneStreet 100%, 100% | tuneStreet 83%, 72% |
+| `nudge-breach` | a breach form 98%, role certain 96% | breachCorp 65% (a breach form 71%), role certain 56% |
 | No focus (share 0) | role certain 0%, in the role 28% | role certain 17%, in the role 30% |
 | Share 0.2 / 0.5 | certain 32% / 93%, in the role 68% / 97% | certain 25% / 59%, in the role 50% / 77% |
 

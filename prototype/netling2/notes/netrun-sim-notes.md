@@ -9,12 +9,14 @@ Written for step 2 of the sketch (netrun content per egg). Companion to `docs/NE
 | Switch | What it does | Decided (maintainer) or mine |
 |---|---|---|
 | `abilities` | One ability per role and lean, adult at level 1 and elder at level 2 (breach corp insurance, breach street hardened, dodge corp phase, dodge street unseen, tune corp lookahead, tune street upkeep at the elder level, feast corp concession and the forced cache at the elder level, feast street scavenge, hidden follows Ghost and Whisper) | Structure and themes decided; every number is 1.0's constant, untuned |
-| `tiers` | A tier 2 of ICE rolled per fight by region share (placeholder shares 0.10 to 0.60); logged and counted; seeded by node in the daily trace; avoidance abilities work less often against it (adult 0.5, elder 0.75 of normal) | By-depth, speed lever, Breach 4-in-5, no extra pay: decided. Shares, 0.5 and 0.75, the speed 1.25: mine |
+| `tiers` | A tier 2 of ICE rolled per fight by region share (placeholder shares 0.05 in the Public Net to 0.60 in the Source; the maintainer wants few harder fights in the shallow regions); logged and counted; seeded by node in the daily trace; avoidance abilities work less often against it (adult 0.5, elder 0.75 of normal) | By-depth, speed lever, Breach 4-in-5, no extra pay: decided. Shares, 0.5 and 0.75, the speed 1.25: mine |
 | `eggCost` | Light run costs: Iron's wear keeps building from run Heat, Program's lost fight at high Charge bleeds 4 more Integrity, Wetware's lost fight rolls a 4% infection | Light costs decided; sizes mine |
 | `graceMin` (5) | After a jack-out a held Overdrive or Overlink cannot be ended by the bars for 5 minutes | Decided. An error-out also gets it in the design; the fork has none, so only a jack-out does |
-| `forcedCache` | The Feast corp elder gets one filled cache a run, placed in the layer after the one before halfway, may displace any node; `relaySafe` keeps the relay | Interval and any-node decided; `relaySafe` is the balance lever |
+| `forcedCache` | The Feast corp elder gets one filled cache a run, placed in the layer after the one before halfway; may displace any node **except a relay** (`relaySafe` is true) | Interval decided; never a relay: decided after the first run (section 3) |
 
-Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 210 tests (it was 190); `npm test` is 503, unchanged.
+**Parity yardstick (settled at the maintainer's request; my proposal, veto welcome).** Banked value per run, in common items (items plus scrip over 15; a disconnect banks nothing), with the exit rate. Bar, in the Deep and the Source with careful play and ICE tiers on, at both levels: every form's value within 20% of the mean, every exit rate within 10 points of the mean, each elder no worse than its own adult, the elder level's mean value at least 15% above the adult level's. `netrun-sweep.mjs` prints the read-out. First reading (400 runs, ICE tiers on, placeholder numbers): Deep, adult level, Tune corp, Tune street and Feast corp are more than 20% below the mean value and Breach street, Dodge corp and the hidden form more than 20% above; at elder level Feast corp and Feast street are low and Breach street and Dodge corp high; the elder level's mean value is 1.24 times the adult's in the Deep and 1.35 times in the Source, so that bar is met, and no elder is worse than its own adult now that the cache keeps the relay. The Feast forms are the clearest gap: their loot parts are too small to match what the defensive forms bank by surviving.
+
+Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 212 tests (it was 190); `npm test` is 503, unchanged.
 
 Not modelled: Tune street's Foresight (the bots have one skill number, so knowing an ICE's game changes nothing for them), the fog change (a drawing change; the bots plan from the rules and are not affected, which is why it can wait for the 2.0 app), the share line, the Breach variant's real difficulty (an assumed win-chance drop), and an error-out.
 
@@ -44,17 +46,17 @@ Elders are only a few points better than adults on average (Deep 21.5 against 24
 
 With ICE tiers on at the placeholder shares, the Deep rises by about 4 points (mean 28.4 adult, 25.3 elder) and the Source by about 6 (46.4 and 43.6).
 
-### The forced cache displaces the relay: that is the lever the maintainer expected
+### The forced cache displaced the relay, so it no longer may (decided)
 
 Feast corp elder, careful, 1500 runs, disconnect rate in Ruins, Deep and Source, and items banked in the Deep:
 
 | Rule | Ruins | Deep | Source | Items (Deep) |
 |---|---|---|---|---|
 | No forced cache | 8.5% | 35.7% | 51.7% | 1.43 |
-| Forced cache, may displace the relay | 10.6% | 42.9% | 64.0% | 1.85 |
-| Forced cache, relay kept | 7.7% | 34.5% | 52.6% | 1.74 |
+| Forced cache, may displace the relay (measured) | 10.6% | 42.9% | 64.0% | 1.85 |
+| Forced cache, relay kept (now the rule) | 7.7% | 34.5% | 52.6% | 1.74 |
 
-The cache lands in the layer that holds the map's guaranteed relay, so letting it displace the relay costs 3 to 11 points of disconnect rate (Ruins, Deep, Source) against keeping it, for 0.4 more items than no cache. Keeping the relay costs nothing and gives 0.3 items.
+The cache lands in the layer that holds the map's guaranteed relay, so letting it displace the relay cost 3 to 11 points of disconnect rate for 0.4 more items. The maintainer ruled that it never displaces a relay. With the relay kept it costs nothing and gives 0.3 more items than no cache.
 
 ### Harder ICE: the shares barely move the disconnect rate unless the harder tier also hits harder
 
@@ -79,8 +81,9 @@ Lives to finish all 18 egg pages across three eggs. The page rates are the decid
 | Abilities, 1.0's feat for every elder | 9 (6 to 12) | 24 (12 to 44) |
 | Abilities, feat tiers | 8 (6 to 11) | 15 (10 to 22) |
 | Abilities, feat tiers, ICE tiers at the placeholder shares | 8 (6 to 12) | 21 (13 to 31) |
+| The same, with the 2.0 page list (24 Root, 15 late; 100 lineages, shallower tier shares) | 9 (7 to 13) | 22 (14 to 35) |
 
-Reading it. The abilities matter a lot for pacing, because without any ability the Deep is a wall (35% disconnects) and the first elder comes late. The feat tiers matter most for casual play (24 down to 15). ICE tiers at the placeholder shares cost casual play about six lives and attentive play none. Casual first-elder reach is 51% with ICE tiers against 73% without. Limits: 80 lineages, an old-1.0 Root list of 22 pages (see section 4), bots, and ICE tiers that cost an assumed win chance.
+Reading it. The abilities matter a lot for pacing, because without any ability the Deep is a wall (35% disconnects) and the first elder comes late. The feat tiers matter most for casual play (24 down to 15). ICE tiers at the placeholder shares cost casual play about six lives and attentive play none. Casual first-elder reach is 51% with ICE tiers against 73% without. The 2.0 page list costs about one life (more Root pages to find in the same cap). Limits: 80 to 100 lineages, bots, and ICE tiers that cost an assumed win chance. The three-egg totals also exclude the ending's 39 story pages and the Source's story pages.
 
 ### The grace window cannot be resolved by this simulator
 
@@ -92,10 +95,10 @@ Reading it. The abilities matter a lot for pacing, because without any ability t
 |---|---|
 | 2.0 run abilities, ICE tiers, forced cache, grace, egg costs | Added this stretch (section 1) |
 | Codex cap 12, Root at once, elder feat tiers, page rates 0.20 and 0.50, first-exit Source page | Updated in the fork (defaults and `lineage-sweep.mjs`); the older drivers in `docs/netling2-prototypes/` still run on a scratch copy of 1.0 |
-| The Root list | **Stale.** The fork uses 1.0's 22 Root pages. The 2.0 plan is 24 Root pages, 15 late pages and 18 egg pages, with their regions in `docs/NETLING_2_CODEX_DRAFTS.md`. The pace of finishing the codex depends on how many pages each region holds, so every Root-life figure above is approximate. A fork codex list is a moderate job |
+| The Root list | **Updated.** `sim/codex2.js` holds the 24 Root pages and 15 late pages by region as in `docs/NETLING_2_CODEX_DRAFTS.md` (late pages drop only once Root is held; the Source opens on `deep-6`). The 18 egg pages stay rates in `lineage-sweep.mjs` |
 | The ending's 39 story pages and the Source story pages | Not modelled |
-| Older fork tables (role, hunters, temper seekers, noisy players, bug policies, clinic, push, the clinic against the final pressure design) | **Stale for netrun-dependent parts.** They were measured with no run ability, one kind of ICE, cap 8 and Root for the next life. Rerun with `NR2=all` to refresh. Those that depend on runs: clinic, push, bug policies at clinics, human and gap sweeps (casual runs), role steerers and hunters (a little) |
-| Egg pressure sweeps (`iron-sweep`, `sides-sweep`, `band`, hint sweeps) | Not affected by the netrun changes; rerun the pass bar with `NR2.eggCost` once the cost sizes are chosen |
+| Older fork tables (role, hunters, temper seekers, noisy players, bug policies, clinic, push, gap, human, fidelity, steerers, the clinic against the final pressure design) | **Refreshed** with `NR2=all` (abilities, ICE tiers, light costs), cap 12, Root mid-life and the 2.0 page list; the figures are in `docs/netling2-prototypes/README.md`. Most agree with the earlier ones within noise. Moved by more than noise: casual and worker end more unsteady, the Segfault route reaches the bug ceiling more often (14% against 5%), survival at 4 and 5 hour gaps is lower (the earlier gap table predates the stronger bugs), and the human-casual and human-keen full-life rates fall (4% and 65%, from 8% and 72%) |
+| Egg pressure sweeps (`iron-sweep`, `sides-sweep`, `band`, hint sweeps), exchange stock | Not re-run: the netrun changes do not touch them; rerun the pass bar with `NR2.eggCost` once the cost sizes are chosen. The clinic against the final pressure design was re-run (README) |
 | The scratch-patch drivers in `docs/netling2-prototypes/*.mjs` | Superseded on the fork for pacing; left as they are for the 1.0 patch |
 | The fog change, the share line, Foresight | Not simulable here (section 1) |
 | `bug-sweep`, `clinic-sweep` assumptions on healing stock | Unchanged by this work |
@@ -107,7 +110,7 @@ Reading it. The abilities matter a lot for pacing, because without any ability t
 | Tier shares by region; speed; whether tier 2 should hit harder or pay more | `netrun-sweep` with `CASES` on `tier.scale`, `tier.share`, `tier.speed`, `tier.winPerSpeed`, `tier.damageMult`; `lineage-sweep` for pacing | Shape yes. The size of a speed penalty on a human is an assumption: it needs a game-playing bot or a playtest |
 | Breach 4-in-5 and a timer refund | `tier.breachPenalty` and `tier.breachRefund` | No: the cost is assumed. Needs a Breach-playing bot or a playtest |
 | Avoidance weaker against tier 2 (adult and elder) | `tier.avoid` | Yes, as a rate |
-| Forced cache: how many, the relay lever | `forcedCache.perRun`, `forcedCache.relaySafe` (section 3) | Yes |
+| Forced cache: how many a run (the relay question is settled: never displaced) | `forcedCache.perRun` | Yes |
 | Second parts and the elder level | `ab.*` values, parity read-out | Yes, for hooks the bot uses; no for Foresight and for checkpoint and market parts in regions without them |
 | Is disconnect rate the right yardstick for Feast and Tune | `items` and `scrip` columns of `netrun-sweep`, plus a lives run (`balance.mjs` with `NR2=all`) | Partly: needs a decision on the yardstick |
 | Egg run cost sizes | `cost.*` with `EGG=` in `netrun-sweep`, then `sides-sweep` / `balance.mjs` pass bar (ordinary archetypes unchanged) | Yes |
