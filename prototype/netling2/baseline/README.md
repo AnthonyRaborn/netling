@@ -102,6 +102,12 @@ Reading:
 - A player who ignores the cost (the default bot) still loses 18 to 32 points as Tune corp or the hidden form. That is the worst case, not the typical one.
 - Assumptions: the 70 threshold for `watch`, and that the player understands the state and its cost at all. The thresholds are hidden by design (`docs/NETLING_2_EGG_PRESSURES.md`), so a first-time player is the greedy case once.
 
+**With the break** (`BRAKE='{"on":true}'`; design in `docs/NETLING_2_EGG_PRESSURES.md`, "The break"): `balance-brake-iron`, `-program` and `-wetware`, 1000 lives of 37 archetypes each, compared with the same egg without it in `summary-balance.md`.
+- Program: every archetype that lost full life recovers: steer-tune-corp 67.5 to 99.7, ghosthunter 80.5 to 98.6, the hidden-path hunters about 81 to 98.6 to 99.4, sysadmin 92.2 to 98.6, attentive 95.0 to 99.6. Nothing gets worse. Netruns a life rise by 1 to 6 because the netling is healthier.
+- Iron and Wetware: no archetype moves by 1.5 points or more, and none gains or loses a fault.
+- The bot sweep (`results/followup/program-bot-sweep-brake-*.txt`) shows the cost: for greedy Tune corp the win drops fall from 20.8 to 15.1 a life, and a player who watches the bar ends with about the same benefit as one who does not (15.0 against 15.1), because the lockout removes access for a day after each break.
+- Untested: the break line and the warning line (55 and 70), other lockout lengths, and an Iron-specific trigger.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |
