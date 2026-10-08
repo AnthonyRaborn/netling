@@ -14,7 +14,7 @@ const { SIDES, SIDE_METER, PERK_MODS } = await import('./sim.js');
 Object.assign(SIDES.charge, { hi: 80, hold: 180, exit: 65, gate: 0, slow: 0, bleed: 8, overflow: 2, playGain: 0.45, drop: 0.75 });
 Object.assign(SIDES, { on: true, owner: 'charge', ownerMult: 3, teenStates: true });
 const keep = { tune: PERK_MODS.tuneCorp.chargeDrainMult, hid: PERK_MODS.hidden.chargeDrainMult };
-for (const perk of [true, false]) {
+for (const perk of process.env.PERKS_ROWS === 'on' ? [true] : [true, false]) { // PERKS_ROWS=on skips the rows without the Charge-drain perks
   PERK_MODS.tuneCorp.chargeDrainMult = perk ? keep.tune : 1;
   PERK_MODS.hidden.chargeDrainMult = perk ? keep.hid : 1;
   for (const bot of bots) {
@@ -29,7 +29,7 @@ for (const perk of [true, false]) {
         if (s.sideHeld?.charge) held++;
       };
       const st = stats(Array.from({ length: lives }, (_, i) => simulate({ ...ARCHETYPES[n] }, i + 1)));
-      console.log(JSON.stringify({ chargePerks: perk, bot, archetype: n, fullLife: st.fullLife, collapse: st.deaths?.['integrity collapse'] ?? 0, inOverdrive: +(held / awake).toFixed(3), drops: +(SIDE_METER.drops / lives).toFixed(1), playGain: +(SIDE_METER.playGain / lives).toFixed(0), feeds: st.pressure?.feeds, faults: st.mistakes }));
+      console.log(JSON.stringify({ chargePerks: perk, bot, archetype: n, fullLife: st.fullLife, collapse: st.deaths?.['integrity collapse'] ?? 0, inOverdrive: +(held / awake).toFixed(3), drops: +(SIDE_METER.drops / lives).toFixed(1), playGain: +(SIDE_METER.playGain / lives).toFixed(0), feeds: st.pressure?.feeds, faults: st.mistakes, bugs: st.bugs?.avg, temper: st.temper }));
     }
   }
 }

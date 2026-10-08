@@ -702,9 +702,10 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // 2.0 break (maintainer, off by default; BRAKE='{"on":true}' switches it on): a cost trigger for the three states (Iron's Overclock, Program's
 // Overdrive, Wetware's Overlink). While a state is active and Integrity is under warnInt (70) the netling warns once (visibility only); under breakInt (first 55, lowered to 40 by the maintainer)
 // the state is forced to end, the bar is pushed well below its exit line (drop: Charge, Sync or Heat is set to at most that), and the state cannot
-// be entered again for lockMin minutes (24 hours, the same as Overlink's burnout). Iron's Overclock is a plain Heat band, so its lockout turns the
+// be entered again for lockMin minutes (12 hours: lockouts of 8, 12 and 24 hours were tried, see baseline/README.md). Optional consequences (off):
+// `faults` ordinary faults (care mistakes, temper, a bug roll each) and `integrityHit` Integrity lost when the break fires. Iron's Overclock is a plain Heat band, so its lockout turns the
 // Overclock rules (benefits and costs) off while it lasts. The trigger is Integrity for all three; the design doc may choose another for Iron.
-export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 1440, drop: { charge: 50, sync: 55, heat: 35 } };
+export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 0, integrityHit: 0 };
 if (process.env.BRAKE) {
   const v = JSON.parse(process.env.BRAKE);
   Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
@@ -759,11 +760,13 @@ function stepBrake(s, rest, t) {
         if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
       }
       st[key] = Math.min(st[key], BRAKE.drop[key]);
+      for (let i = 0; i < BRAKE.faults; i++) { s.careMistakes++; s.temper -= CFG.faultTemper; s.faultRolls++; }
+      if (BRAKE.integrityHit > 0) st.integrity = clamp(st.integrity - BRAKE.integrityHit);
       s.brakeUntil[key] = s.ageMin + BRAKE.lockMin;
       s.brakeWarn[key] = false;
       s.brakes = (s.brakes ?? 0) + 1;
       SIDE_METER.brakes++;
-      log(s, t, `> !! ${{ charge: 'overdrive discharged', sync: 'overlink crashed', heat: 'overclock throttled' }[key]}. locked out for ${Math.round(BRAKE.lockMin / 60)}h.`);
+      log(s, t, `> !! ${{ charge: 'overdrive discharged', sync: 'overlink crashed', heat: 'overclock throttled' }[key]}. locked out for ${Math.round(BRAKE.lockMin / 60)}h.${BRAKE.faults > 0 ? ' care mistake.' : ''}`);
     } else if (st.integrity < BRAKE.warnInt && !s.brakeWarn[key]) {
       s.brakeWarn[key] = true;
       SIDE_METER.brakeWarns++;

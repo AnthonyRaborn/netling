@@ -106,3 +106,38 @@ test('Iron: the break throttles Overclock for the lockout, and a baby never trig
   assert.equal(overclocked(hot), true, 'with the break off the lockout field does nothing');
   configure(false);
 });
+
+test('the break can cost faults and Integrity (both off by default): each break adds its faults and takes its Integrity', () => {
+  configure(true);
+  SIDES.owner = 'charge';
+  assert.equal(BRAKE.faults, 0);
+  assert.equal(BRAKE.integrityHit, 0);
+  BRAKE.on = true;
+  BRAKE.faults = 2;
+  BRAKE.integrityHit = 10;
+  let prevLock = false;
+  let hitChecks = 0;
+  let hitFailures = 0;
+  let last = null;
+  globalThis.__sample = (s) => {
+    last = s;
+    const lockNow = (s.brakeUntil?.charge ?? 0) > s.ageMin;
+    // Overdrive's own break: Integrity was under the line before the hit, so it is under line - hit + the minute's regeneration after it
+    if (lockNow && !prevLock) { hitChecks++; if (s.stats.integrity > BRAKE.breakInt - BRAKE.integrityHit + 1) hitFailures++; }
+    prevLock = lockNow;
+  };
+  let breaks = 0;
+  let faults = 0;
+  for (let i = 1; i <= 20; i++) {
+    prevLock = false;
+    simulate({ ...ARCHETYPES['steer-tune-corp'] }, i);
+    breaks += last.brakes ?? 0;
+    faults += last.careMistakes;
+  }
+  globalThis.__sample = undefined;
+  BRAKE.on = false; BRAKE.faults = 0; BRAKE.integrityHit = 0;
+  configure(false);
+  assert.ok(breaks > 0 && hitChecks > 0, 'breaks happen');
+  assert.ok(faults >= breaks * 2, `faults ${faults} cover two a break (${breaks} breaks)`);
+  assert.equal(hitFailures, 0, 'Integrity is taken at the break');
+});
