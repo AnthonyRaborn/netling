@@ -233,3 +233,12 @@ Config: x3, high at 95 for Charge and Sync, Charge gate 0, low-side benefits off
 - Worker full-life still falls on every egg (0.84 off; Iron 0.81, Program 0.815, Wetware 0.755). With the Charge gate gone the likely cause is Sync low's dull (fewer drops, x3 on Wetware) on the worker's 43% of time at low Sync; not isolated.
 - Daredevil and overclocker pay on Iron as before (9.3, 12.1 infections).
 - Open: effects at 95 are nearly inert for averages; the owner contrast would need stronger effects or a state that is entered on purpose (held). Isolate the worker drop (dull).
+
+## Result 14: held special states (Surge, Wired)
+
+State is entered after `hold` awake minutes at the entry level and left under `exit` or on rest (`SIDES.<bar>.hold`/`exit`, `sideHold`/`sideHeld` in sim.js; not the temper `hold`). Charge: enter 80, hold 180, exit 65. Sync: enter 85, hold 180, exit 70. x3 owner, Iron with wear, Flow Heat-gated, low-side gate and benefits off, Sync low dull 0.3. H = costs bleed 4, overflow 1, virus 0.6. G = double (bleed 8, overflow 2, virus 1.2). 200 lives per cell. The benefits (play gain, drops, visits) are in the sim but not measured here.
+
+- Who enters (share of awake time): attentive 12% Charge / 6% Sync, sysadmin 12-13% / 11-12%, daredevil 12-13% / 10% (2% on Iron). Casual, worker, human-regular and overclocker never enter, so they are unchanged from off on Program and Wetware.
+- H: no ordinary archetype moves outside noise (full-life 0.99 to 1.0; infections attentive 7.39 to 7.56, sysadmin 7.21 to 7.58; temper -0.3 to -0.5). Flow share falls a little (attentive 0.27 -> 0.21 to 0.24). Owner contrast is small.
+- G: the owner contrast appears and only where the owner's bar is held. Program: attentive full-life 0.97, sysadmin 0.94, daredevil 0.935 (others 0.99 to 1.0); Flow 0.27 -> 0.185, 0.32 -> 0.23. Wetware: sysadmin infections 7.97 against 7.27 to 7.30 on Iron/Program, attentive 7.71 against 7.29 to 7.46. Iron unchanged by G (its pressure is wear).
+- Open: the benefits are unmeasured, so G is a cost-only reading; the Program cost (Integrity bleed x3) is the one that moves full-life.
