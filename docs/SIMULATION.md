@@ -81,7 +81,7 @@ Four stats, all clamped to 0..100.
 | Integrity | see below | At 0 for 120 minutes: death |
 | Heat | +3/hr | At 65+: overclocked (see [Overclocked](#overclocked)). At 85+ also: -8 Integrity/hr and -1 stability/hr; at 100: 15 minutes makes a care mistake |
 
-**Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, so a long gap still costs faults without being fatal. Casual players take about 4.5 faults a life and workers about 5.4; attentive players act about 54 times a day (see [BALANCE.md](BALANCE.md)).
+**Drain curve** (`drainCurve`): Charge and Sync drain faster the fuller they are. Each minute the base rate is scaled by `empty + (full - empty) * value / 100`, with `empty` 0.39 and `full` 2, so a stat drains at 0.39x near 0, 1.2x at half and 2x when full. Awake, that is about 31, 18 and 6 Charge an hour (26, 16 and 5 Sync). Topping up often means more to do between check-ins; a stat left low eases off, which softens a short gap but not a long one: a casual player's full-life rate with evenly spaced check-ins is 84% at a 4 hour gap, 35% at 5, 27% at 6 and 0% at 8, so a work-day gap is fatal to most netlings (see [BALANCE.md](BALANCE.md), Drain). Casual players take about 4.5 faults a life and workers about 5.4; attentive players act about 54 times a day (see [BALANCE.md](BALANCE.md)).
 
 Drain multipliers stack multiplicatively on the base rate (and on the curve):
 

@@ -13,8 +13,9 @@ export const CFG = {
   bootMinutes: 3,
   drainPerHour: { charge: 15.4, sync: 13.2 },
   // Charge and Sync drain faster the fuller they are: the rate above is scaled from `empty` at 0 to
-  // `full` at 100. Topping up often means more to do; a stat left low eases off, so long gaps
-  // (a work day, the night) still cost faults without being fatal.
+  // `full` at 100. Topping up often means more to do; a stat left low eases off, which softens
+  // short gaps but not long ones: an awake gap of 6 hours or more (a work day away) is fatal to
+  // most netlings (docs/BALANCE.md, Drain).
   drainCurve: { empty: 0.39, full: 2 },
   sleepDrainMult: 0.5, // asleep with the lights on: restless
   sleepDarkDrainMult: 0.33, // asleep in the dark: real rest

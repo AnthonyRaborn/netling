@@ -17,7 +17,7 @@ What the balance passes left in the game, and what is still open. Spoiler-heavy,
 
 **Life and stages.** A life is 5 days, with the teen at 17 hours and the adult at 51 (`CFG.teenAtMin`, `adultAtMin`). Each netling stores the life lengths it was compiled with in `s.life`; saves without it get the older 7 day values.
 
-**Drain.** Base drain is 15.4 Charge and 13.2 Sync an hour, scaled by a curve (`drainCurve`, `empty` 0.39, `full` 2): about 31 an hour when full, 18 at half, 6 near empty. Keeping the bars topped up costs more actions, and a stat left low eases off, so a long gap costs faults rather than a life. Faults are sensitive to `empty`: each 0.01 moves casual faults by about 0.2.
+**Drain.** Base drain is 15.4 Charge and 13.2 Sync an hour, scaled by a curve (`drainCurve`, `empty` 0.39, `full` 2): about 31 an hour when full, 18 at half, 6 near empty. Keeping the bars topped up costs more actions, and a stat left low eases off, which softens a short gap but not a long one. Survival depends on the longest awake gap, not on how often the player checks in: for a casual player with evenly spaced check-ins the full-life rate is 99% at 2 hours, 95% at 3, 84% at 4, 35% at 5, 27% at 6 and 0% at 8 (300 lives, `SIM=1.0 node prototype/netling2/sim/gap-sweep.mjs` on the Netling 2.0 branch). A work-day gap of 6 hours or more is not survivable, and that is the intended difficulty (maintainer). Faults are sensitive to `empty`: each 0.01 moves casual faults by about 0.2.
 
 **Forms.**
 - Ghost needs 29 wins with at least 4 in each game (boosted wins count double).
