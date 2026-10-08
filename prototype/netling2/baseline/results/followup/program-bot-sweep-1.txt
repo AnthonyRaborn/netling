@@ -1,1 +1,12 @@
 {"chargePerks":true,"bot":"greedy","archetype":"steer-tune-corp","fullLife":0.684,"collapse":0.316,"inOverdrive":0.336,"drops":20.8,"playGain":1661,"feeds":88.6,"faults":0.33}
+{"chargePerks":true,"bot":"greedy","archetype":"ghosthunter","fullLife":0.823,"collapse":0.177,"inOverdrive":0.293,"drops":28.9,"playGain":2327,"feeds":83.8,"faults":0}
+{"chargePerks":true,"bot":"watch","archetype":"steer-tune-corp","fullLife":0.992,"collapse":0.008,"inOverdrive":0.184,"drops":18,"playGain":1530,"feeds":93,"faults":0.42}
+{"chargePerks":true,"bot":"watch","archetype":"ghosthunter","fullLife":0.979,"collapse":0.021,"inOverdrive":0.155,"drops":25.7,"playGain":2194,"feeds":85,"faults":0.02}
+{"chargePerks":true,"bot":"avoid","archetype":"steer-tune-corp","fullLife":1,"collapse":0,"inOverdrive":0,"drops":13.7,"playGain":1305,"feeds":68.6,"faults":0.75}
+{"chargePerks":true,"bot":"avoid","archetype":"ghosthunter","fullLife":0.999,"collapse":0.001,"inOverdrive":0,"drops":21.2,"playGain":1977,"feeds":62.3,"faults":0.47}
+{"chargePerks":false,"bot":"greedy","archetype":"steer-tune-corp","fullLife":0.976,"collapse":0.024,"inOverdrive":0.12,"drops":15.9,"playGain":1402,"feeds":101.3,"faults":0.5}
+{"chargePerks":false,"bot":"greedy","archetype":"ghosthunter","fullLife":0.978,"collapse":0.022,"inOverdrive":0.087,"drops":22.9,"playGain":2056,"feeds":92.2,"faults":0.01}
+{"chargePerks":false,"bot":"watch","archetype":"steer-tune-corp","fullLife":0.996,"collapse":0.004,"inOverdrive":0.085,"drops":15,"playGain":1354,"feeds":101.3,"faults":0.54}
+{"chargePerks":false,"bot":"watch","archetype":"ghosthunter","fullLife":0.991,"collapse":0.009,"inOverdrive":0.065,"drops":22.5,"playGain":2038,"feeds":91.9,"faults":0.04}
+{"chargePerks":false,"bot":"avoid","archetype":"steer-tune-corp","fullLife":0.999,"collapse":0.001,"inOverdrive":0,"drops":13.4,"playGain":1282,"feeds":73.1,"faults":1.06}
+{"chargePerks":false,"bot":"avoid","archetype":"ghosthunter","fullLife":0.998,"collapse":0.002,"inOverdrive":0,"drops":21.2,"playGain":1979,"feeds":66.1,"faults":0.73}
