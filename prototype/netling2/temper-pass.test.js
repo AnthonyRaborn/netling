@@ -141,13 +141,25 @@ test('the idle runs at its own pace between beats, and is paused for 13% (steady
 // --- visits: the layers pause, the sprite plays 1.0's bounce ---------------------------------------------------------------
 import { readFileSync as readSrc } from 'node:fs';
 import { visitLayers, visitMotion } from './visit.js';
+import { glitched } from './glitch.js';
 
-test('during a visit every layer is off: no tell, neglect, bugs, idle or marks; outside one the state is untouched', () => {
+test('during a visit the tell, idle and bug twitch are off and neglect, bugs and marks stay; outside one the state is untouched', () => {
   const state = { level: -2, neglect: 2, bugs: 5, idle: 'hover', marks: true, seed: 3 };
   assert.deepEqual(visitLayers(state, false), state);
-  assert.deepEqual(visitLayers(state, true), { level: 0, neglect: 0, bugs: 0, idle: 'none', marks: false, seed: 3 });
+  assert.deepEqual(visitLayers(state, true), { level: 0, neglect: 2, bugs: 5, idle: 'none', marks: true, seed: 3, still: true });
   // Level 0 is the 1.0 rhythm for every egg: no offset, no blink, full brightness.
   for (const egg of EGGS) assert.deepEqual(temperTell({ egg, level: 0, time: 1234, seed: 3 }), { frame: Math.floor(1234 / 500) % 2, blink: false, dx: 0, dy: 0, shade: 1 });
+});
+
+test('a visiting netling keeps its still bug tears but does not twitch', () => {
+  for (const { f } of every().slice(0, 66)) {
+    const a = f.anchors.a;
+    const v = visitLayers({ bugs: 3 }, true);
+    const shown = (time) => glitched(f.a, a, 3, { time, reduced: v.still, seed: 2 });
+    const still = glitched(f.a, a, 3, { reduced: true, seed: 2 });
+    for (const time of [0, 100, 3050, 6100]) assert.deepEqual(shown(time), still, `${f.id}: twitched during a visit`);
+    assert.notDeepEqual(glitched(f.a, a, 3, { time: 100, seed: 2 }), still, `${f.id}: the twitch should exist outside a visit`);
+  }
 });
 
 test('the visit bounce matches src/render.js and keeps every form clear of the visitor and on screen', () => {

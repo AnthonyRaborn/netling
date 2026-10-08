@@ -141,7 +141,7 @@
         flag('reduced', 'reduced motion ');
         flag('anchors', 'anchor rows ');
         flag('paused', 'pause ');
-        flag('visit', 'visit (layers paused) ');
+        flag('visit', 'visit (motion paused) ');
         select('pose', [['awake', 'awake'], ['sleep', 'asleep'], ['dead', 'dead']], 'pose ');
         select('wear', [['', 'no wearable'], ...ACCESSORIES.filter((a) => a.slot !== 'prop').map((a) => [a.id, a.id])], 'wear ');
 
@@ -207,7 +207,7 @@
           ctx.fillStyle = BG;
           ctx.fillRect(0, 0, LCD.w, LCD.h);
           const awake = state.pose === 'awake';
-          // A visit pauses every layer (visit.js): no tell, neglect, bugs or idle; the sprite plays 1.0's bounce.
+          // A visit pauses the motion layers (visit.js): no tell, idle or bug twitch; neglect and bug tears stay; the sprite plays 1.0's bounce.
           const v = visitLayers({ level: state.level, neglect: fixed?.neglect ?? state.neglect, bugs: fixed ? fixed.bugs ?? 0 : state.bugs, idle: state.idle }, awake && state.visit);
           const neglect = v.neglect;
           const nBugs = v.bugs;
@@ -217,7 +217,7 @@
           const anchorsKey = key === 'dead' ? 'a' : key;
           const rusty = neglect && key !== 'dead' ? neglected(sprite, f.anchors[anchorsKey], neglect, state.seed) : sprite;
           // Bugs tear rows (persistent); the twitch only moves when motion is allowed.
-          const look = nBugs && key !== 'dead' ? glitched(rusty, f.anchors[anchorsKey], nBugs, { time, reduced: state.reduced || Boolean(fixed), seed: state.seed }) : rusty;
+          const look = nBugs && key !== 'dead' ? glitched(rusty, f.anchors[anchorsKey], nBugs, { time, reduced: state.reduced || Boolean(fixed) || Boolean(v.still), seed: state.seed }) : rusty;
           // A form with a motion layer (Blank's elder) is drawn from that layer, which may be wider; wearables stay on the registered sprite.
           const shown = f.motion && key !== 'dead' && key !== 'sleep' ? f.motion(look, f.anchors[anchorsKey], { time, reduced: state.reduced }) : look;
           // 1.0's idle wander (a copy in idle.js), on the tell's own clock: a steady Iron holds it still around each beat.

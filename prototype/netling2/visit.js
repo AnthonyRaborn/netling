@@ -1,15 +1,17 @@
 // Visits (docs/NETLING_2_SPRITES.md, Temper pass). A visit is short, and the 1.0 screen is busy with two sprites bouncing
-// toward each other, so the prototype's visual layers PAUSE during one (maintainer): no temper tell, no neglect, no bugs, no
-// idle wander, no state marks. The sprite plays 1.0's own visit animation, a plain bounce, and nothing else.
+// toward each other, so the prototype's MOTION layers pause during one (maintainer): no temper tell, no idle wander and no bug
+// twitch. What the netling looks like stays: neglect and the still bug tears (and the state marks, which are not motion quirks
+// and which 1.0 also draws during a visit). The sprite plays 1.0's own visit animation, a plain bounce, and nothing else.
 //
 // visitLayers() is what every layer reads: it returns the layer state to draw. visitMotion() is the bounce, a copy of the visit
 // rules in src/render.js (swing and hop), so it can be drawn and tested without the DOM. Keep it in step with that file.
 const LCD_W = 40;
 
-// The layer state to draw: while visiting, every layer is off and the tell shows the plain 1.0 frame rhythm.
+// The layer state to draw: while visiting, the tell is off (level 0 is the plain 1.0 frame rhythm), the idle is off and the bug
+// twitch is off (`still`: only the persistent tears show). Neglect, bugs and marks are kept.
 export function visitLayers(state, visiting) {
   if (!visiting) return state;
-  return { ...state, level: 0, neglect: 0, bugs: 0, idle: 'none', marks: false };
+  return { ...state, level: 0, idle: 'none', still: true };
 }
 
 // -> { x, y, frame } for a visiting netling `w` columns and `h` rows, with a visitor `visitorWidth` columns wide, at `time` ms;

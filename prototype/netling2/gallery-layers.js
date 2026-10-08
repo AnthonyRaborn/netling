@@ -25,14 +25,14 @@ let quirk = 'none'; // the 1.0 idle shown under the temper tell (the section's o
 // One picture: the form with a layer state, on the LCD background. `tell` null draws the still pose.
 function picture(env, f, state) {
   const CROP_ = state.visit ? FULL_WIDTH : CROP;
-  // A visit pauses every layer and plays 1.0's bounce (visit.js).
-  const { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg } = { ...state, ...visitLayers(state, state.visit) };
+  // A visit pauses the motion layers (tell, idle, bug twitch) and plays 1.0's bounce (visit.js).
+  const { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg, still = false } = { ...state, ...visitLayers(state, state.visit) };
   const t = tell ? temperTell({ egg, level, time, reduced, seed: SEED }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
   const { draw: key, wear } = tellPose(t, 'awake');
   const base = f[key];
   const anchors = f.anchors[key];
   const rusty = neglect ? neglected(base, anchors, neglect, SEED) : base;
-  const look = bugs ? glitched(rusty, anchors, bugs, { time, reduced, seed: SEED }) : rusty;
+  const look = bugs ? glitched(rusty, anchors, bugs, { time, reduced: reduced || still, seed: SEED }) : rusty;
   const shown = f.motion && key !== 'sleep' ? f.motion(look, anchors, { time, reduced }) : look;
   const wander = idle !== 'none' ? idleOffset(idle, base.length, idleClock({ egg, level, time })) : { x: 0, y: 0 };
   const bounce = state.visit ? visitMotion({ w: base[0].length, h: base.length, time, calm: reduced }) : null;
@@ -101,8 +101,8 @@ export function layersSection(env, egg) {
   root.append(bar);
   root.append(table(env, set, egg, [
     ...LEVELS.map(([level, name]) => ({ head: `${level > 0 ? '+' : ''}${level} ${name}`, state: { level } })),
-    // A visit pauses every layer: asked for strongly unsteady, neglect 2 and 5 bugs, it shows none of them and plays 1.0's bounce.
-    { head: 'on a visit (layers paused)', state: { level: -2, neglect: 2, bugs: 5, visit: true } },
+    // A visit pauses the motion: asked for strongly unsteady, neglect 2 and 5 bugs, it shows the neglect and the still tears, no tell and no twitch, and plays 1.0's bounce.
+    { head: 'on a visit (motion paused)', state: { level: -2, neglect: 2, bugs: 5, visit: true } },
   ], true));
   return root;
 }
