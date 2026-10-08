@@ -45,7 +45,7 @@ export const RUN_CFG = {
   blackLean: -0.5,
   exchangeLean: 0.5,
   blackStock: { blackice: 3, booster: 2, overclock: 2, memory: 2, segfault: 1, coolant: 1 },
-  exchangeStock: { voucher: 3, coolant: 2, repair: 2, antivirus: 2, memory: 1 },
+  exchangeStock: { voucher: 3, booster: 2, overclock: 1, coolant: 2, repair: 2, antivirus: 2, memory: 1 }, // 2.0: booster and bypass added so a clinic-only healing stock leaves it four kinds (was a fixed voucher and memory pair)
   // 2.0 clinic (a third kind of market, unaligned: no Standing lean). It fixes bugs (the only place that can), and it is the only market
   // that sells the healing items, which the black market and the corp exchange no longer stock (HEALING). A quarter of market nodes.
   // A fix costs the market's Charge fee plus 15 scrip, or 2 Standing in a split the player picks; fixes keep the visit open, a purchase
