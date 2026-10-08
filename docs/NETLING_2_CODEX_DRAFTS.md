@@ -208,6 +208,28 @@ Notes:
 - **Idle behavior is specified and tested, not rendered.** Steady: a routine of four steps in a fixed order on an exact clock (a step every 12 s, every 6 s strongly; each acts for half its slot): Program scan, sort, flush, sync; Iron neck, arm, hip, base; Wetware stretch, rest, stretch, rest. Unsteady: strays that are not in the routine (Program probe, fork, loop, spawn; Iron port, relay, fan, lamp; Wetware sniff, twist, curl, tap) start at random times and are dropped partway, about a third of 10 s windows at -1 and most 5 s windows at -2. Every action lasts over a second, so the 3 a second flash limit holds by construction (tested). What a step looks like on the sprite (a pose, a look, a status line) is not designed, and the unsteady idle has no reduced-motion variant yet.
 - **Length:** the 18 hints have a median of 70 characters and a longest of 111, against 90 and 166 in 1.0's pages.
 
+## State chatter and Archive hints
+
+Drafts for the three bar states (Overclock for Heat, Overdrive for Charge, Overlink for Sync; see [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md)). Like 1.0's chatter, a netling says one of its egg's lines while it is in the state, heard lines are kept across lives and listed in the Archive under the state's name, and the group's hint shows until a line is heard. Data and tests: `prototype/netling2/state-lines.js` and `state-lines.test.js`. These are base lines; the hand-written temper voicings follow the pattern in `voice-samples.js` and are not drafted. Not wired into any game, not read on a device. There is no reward tied to a state, so no unlock hints.
+
+| Group (Archive name) | Hint |
+|---|---|
+| Overclock | listen to it while it runs hot. |
+| Overdrive | listen to it when it is full to the brim. |
+| Overlink | listen to it when it is closest to you. |
+
+| State | Program | Iron | Wetware |
+|---|---|---|---|
+| Overclock | cycles are running ahead of schedule. fans at maximum. logged. / heat is within tolerance, technically. | casing is hot. fans at full. do not touch. / running past rating. noted. holding. | i feel hot all over. it is fine. it is good. / my pulse is up. go on, play. |
+| Overdrive | buffers full. queues draining fast. no backlog. / overdrawing the supply. will correct later. | mains steady. every relay sings. running over spec. / power above rating. holding. | i am stuffed. i could run for days. / full belly, full tank. watch me go. |
+| Overlink | link at saturation. your input arrives early. / latency near zero. do not look away. | locked tight. every move lands. do not slip. / your hand, my gears. one motion. | i can feel you from here. it is a lot. / we are so close. i hum when you play. |
+
+Notes:
+- Two lines per state per egg (18 lines), so a chatter pool for a state is small; the 1.0 groups have four to seven. More can be added once the register is approved.
+- No line names a state or a number, and none says how to enter the state. The hints say only when to listen.
+- Tested: lowercase, no digits, no em dash, 62 characters or less, ids and groups new, and every line keeps its shape in the machine voicing at all four temper levels. One finding in `voice.js`: the machine voicing of an unsteady Program line can be the two halves swapped, which `checkShape` (the rule for hand-written voicings) rejects. The test checks that case for lost words instead. Hand-written unsteady Program voicings must still be a clipped clause.
+- Open: whether the Overclock lines should exist for netlings that never reach the state (they are only said inside it, as designed); whether the group order in the Archive is Overclock, Overdrive, Overlink.
+
 ## Cross-checks
 
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.

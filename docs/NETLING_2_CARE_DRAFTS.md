@@ -215,7 +215,7 @@ What a player can read: a steady beat with steady marks (calm and in a state); a
 
 Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
 
-Open: the Dex hint and chatter lines for the states (the log, readout, title and manual lines exist: Pressure cues and State clues above; the codex drafts have none, and 1.0's Dex hints and chatter are what is missing); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
+Archive hints and chatter lines for the states are drafted in `NETLING_2_CODEX_DRAFTS.md`, State chatter and Archive hints. Open: whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
 ## Clinic and bug statements (drafts, first pass)
 
