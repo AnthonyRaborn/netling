@@ -222,3 +222,14 @@ Config: x3 owner multiplier, high at 85, low at 30; low-side benefits removed (s
 - P: worker full-life 0.84 -> 0.77 (Iron, with wear), 0.785 (Program), 0.805 (Wetware); casual Program 0.875 (off 0.94). The low-side gate (10 more Charge to play under 30) costs sparse players on every egg, and Program's worker no longer has the slower-drain benefit.
 - P infections, ordinary five: within +-0.7 of off (attentive 7.4 to 8.1, sysadmin 7.6 to 8.4 Wetware, worker 6.1 to 6.6, human-regular 3.8 to 4.6). Daredevil and overclocker pay on Iron (9.5, 12.0 against 7.3, 8.7) because of the wear model; not a new effect.
 - Open: raise the special-state threshold (95); make the low-side gate owner-only or drop it; Flow stays Heat-gated unless the special states are made rare enough to gate it.
+
+## Result 13: special states at 95, low-side gate dropped
+
+Config: x3, high at 95 for Charge and Sync, Charge gate 0, low-side benefits off, Sync low dull 0.3, costs as Result 12, Iron with wear. R = Flow unchanged; T = Flow blocked while Charge or Sync is at 95+. 200 lives per cell.
+
+- Time on a high side: attentive/sysadmin/daredevil 6-11%, overclocker 4-5%, casual 2%, worker 1-2%, human-regular 3%.
+- R: the ordinary five stay within noise on full-life (attentive/sysadmin 0.99 to 1.0, casual 0.9 to 0.95, human-regular 0.27 to 0.28) and infections (+-0.5, Wetware sysadmin 7.69, attentive 7.84 against 7.33, 7.67), temper (+-0.4). The owner contrast is small: Program attentive 7.52, Wetware 7.84 against Iron 7.57; owner effects are mostly flavor at 7-10% of the time.
+- T fails again: requiring no 95+ moment in the 180 Flow minutes drops the attentive Flow share from 0.27 to 0.002 and the sysadmin's from 0.32 to 0.002 (temper 4.9 to 2.2, 5.45 to 2.65). Any brief touch of 95 resets the counter. Flow stays Heat-gated.
+- Worker full-life still falls on every egg (0.84 off; Iron 0.81, Program 0.815, Wetware 0.755). With the Charge gate gone the likely cause is Sync low's dull (fewer drops, x3 on Wetware) on the worker's 43% of time at low Sync; not isolated.
+- Daredevil and overclocker pay on Iron as before (9.3, 12.1 infections).
+- Open: effects at 95 are nearly inert for averages; the owner contrast would need stronger effects or a state that is entered on purpose (held). Isolate the worker drop (dull).
