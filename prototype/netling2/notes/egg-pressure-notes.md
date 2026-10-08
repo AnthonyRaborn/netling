@@ -252,3 +252,14 @@ Same run as Result 14's G (200 lives per cell), with `SIDE_METER` counters (win 
 - Visits a life: attentive 4.4 -> 4.5 Program / 4.8 Wetware (+9%), sysadmin 4.5 -> 4.7 Wetware, daredevil 4.45 -> 4.8 Wetware.
 - Iron's Overclock gives more (daredevil drops 15.6 -> 18.6, overclocker 13.1 -> 16.9) and costs more (infections 9.3 and 12.2).
 - Read: against the costs in Result 14 (Program sysadmin full-life 0.99 -> 0.94, Wetware sysadmin infections +0.7) the benefits are small (+3 to +10%) because the states are held about 12% of the time. Raising benefit strength is the lever to make holding worth the risk.
+
+## Result 16: tripled benefits (G costs)
+
+Base benefit strengths x3 (Charge held: play Sync 0.45, drops 0.75; Sync held: visits 0.75, drops 0.75; x3 owner on top, so the owner's effective values are drops +225%, play +135%, visits +225%). Costs as G (bleed 8, overflow 2, virus 1.2). Same states and thresholds as Result 14. 200 lives per cell. Note: Result 15's closing line described the previous owner-effective values (+75%, +45%, +75%) as the tripled ones; they were the old values.
+
+- Win drops a life, off -> Program / Wetware: attentive 12.6 -> 15.2 / 14.3 (+20% / +13%), sysadmin 13.7 -> 17.0 / 17.2 (+25% / +26%), daredevil 15.6 -> 17.3 / 18.2. Iron's Overclock: daredevil 19.7, overclocker 16.9.
+- Sync a play: attentive 19.8 -> 22.1 Program (+11%), sysadmin 22.0; capped by the 100 ceiling.
+- Visits: attentive 4.4 -> 4.7 Program / 5.3 Wetware, sysadmin 4.5 -> 5.6 Wetware (+23%).
+- Costs: Program full-life attentive 0.975, sysadmin 0.975, daredevil 0.92; infections flat to slightly down (daredevil 6.9). Wetware: full-life 0.99 to 1.0, sysadmin infections 7.78 (off 7.33), temper -0.1 to -0.7.
+- Never-entering archetypes (casual, worker, human-regular, overclocker) unchanged from off on both eggs.
+- Read: the trade is now close to even for heavy players (about +25% drops for -2 points of full-life on Program, +25% drops and visits for +0.45 infections on Wetware). Iron's trade is bigger on both sides.
