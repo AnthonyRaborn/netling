@@ -425,3 +425,39 @@ test('the 2.0 pages: 24 Root and 15 late, in drop order, late only once Root is 
 test('the forced cache never displaces a relay by default', () => {
   assert.equal(NR2.forcedCache.relaySafe, true);
 });
+
+test('Feast corp is paid a company-store item at the exit, on top of the region\'s bonus', () => {
+  set({ abilities: true });
+  const bonus = (form) => {
+    const a = setup(form, 1, 'exit');
+    moveTo(a.s, a.node.id, mulberry32(3));
+    return a.s.run.loot.length;
+  };
+  assert.equal(bonus('breachCorp'), REGIONS.public.exitBonus ?? 1);
+  assert.equal(bonus('feastCorp'), (REGIONS.public.exitBonus ?? 1) + NR2.ab.concession[1].exitItems);
+  reset();
+});
+
+test('the forced cache repeats every few layers up to perRun, and never past the last middle layer', () => {
+  set({ abilities: true, forcedCache: { perRun: 3, every: 3 } });
+  const rng = mulberry32(7);
+  const s = createScript({ now: 0, rng });
+  s.stage = 'mainframe';
+  s.form = 'feastCorpElder';
+  Object.assign(s.stats, { charge: 100, integrity: 100, heat: 0 });
+  startRun(s, 'source', rng, []); // 13 middle layers: the first at layer 6, then 9, then 12
+  let guard = 0;
+  while (s.run.phase !== 'done' && guard++ < 60) {
+    if (s.run.phase === 'ice') resolveIce(s, true, rng);
+    else if (s.run.phase === 'choice') choose(s, s.run.pending.options.find((o) => !o.disabled && (o.id === 'continue' || o.id === 'leave' || o.id === 'ignore' || o.id === 'move' || o.id === 'comply'))?.id ?? s.run.pending.options[0].id, rng);
+    else {
+      const opts = runOptions(s.run);
+      const pick = opts.find((n) => n.type !== 'ice') ?? opts[0];
+      moveTo(s, pick.id, rng);
+    }
+    s.stats.charge = 100;
+    s.stats.integrity = 100;
+  }
+  assert.ok(s.run.tally.forced >= 2 && s.run.tally.forced <= 3, `forced ${s.run.tally.forced}`);
+  reset();
+});

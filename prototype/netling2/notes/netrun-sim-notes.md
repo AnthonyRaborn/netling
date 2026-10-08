@@ -16,7 +16,7 @@ Written for step 2 of the sketch (netrun content per egg). Companion to `docs/NE
 
 **Parity yardstick (settled at the maintainer's request; my proposal, veto welcome).** Banked value per run, in common items (items plus scrip over 15; a disconnect banks nothing), with the exit rate. Bar, in the Deep and the Source with careful play and ICE tiers on, at both levels: every form's value within 20% of the mean, every exit rate within 10 points of the mean, each elder no worse than its own adult, the elder level's mean value at least 15% above the adult level's. `netrun-sweep.mjs` prints the read-out. First reading (400 runs, ICE tiers on, placeholder numbers): Deep, adult level, Tune corp, Tune street and Feast corp are more than 20% below the mean value and Breach street, Dodge corp and the hidden form more than 20% above; at elder level Feast corp and Feast street are low and Breach street and Dodge corp high; the elder level's mean value is 1.24 times the adult's in the Deep and 1.35 times in the Source, so that bar is met, and no elder is worse than its own adult now that the cache keeps the relay. The Feast forms are the clearest gap: their loot parts are too small to match what the defensive forms bank by surviving.
 
-Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 212 tests (it was 190); `npm test` is 503, unchanged.
+Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 214 tests (it was 190); `npm test` is 503, unchanged.
 
 Not modelled: Tune street's Foresight (the bots have one skill number, so knowing an ICE's game changes nothing for them), the fog change (a drawing change; the bots plan from the rules and are not affected, which is why it can wait for the 2.0 app), the share line, the Breach variant's real difficulty (an assumed win-chance drop), and an error-out.
 
@@ -119,3 +119,27 @@ Reading it. The abilities matter a lot for pacing, because without any ability t
 | Challenges under the new abilities | none | Not tested; the fork's challenge code is 1.0's and the bots can run a challenge (`style.challenge`) but nothing here does |
 | Foresight's value; Tune street at adult level | none | No: needs per-game skill in the bots |
 | Whether harder ICE should pay more | `netrun-sweep` items and scrip with a pay knob (none yet) | Not yet: add a pay knob when it is decided |
+
+## 6. Feast tuning (first pass, against the settled yardstick)
+
+The maintainer's instruction: tune Feast first, and expect the sight-based abilities to be hard to tune with bots, because their job is to give a human more information. Values are now in `nr2.js`; the parity read-out of `netrun-sweep.mjs` is the check (800 runs a cell, careful play, ICE tiers on).
+
+What was tried, as value against the mean of the nine forms (Deep adult / Deep elder / Source adult / Source elder), Feast corp and Feast street:
+
+| Variant | Feast corp | Feast street |
+|---|---|---|
+| Starting values (loot odds 0.5/0.3 and 0.55/0.4, scrip +2, forced cache once) | 78 / 74 / 72 / 64% | 84 / 73 / 76 / 62% |
+| Bigger loot odds only (0.7/0.45 and 0.8/0.6), scrip +6 and +8 | 82 / 80 / 75 / 68% | 97 / 84 / 90 / 77% |
+| Scrip +14 and +20 (and loot odds 0.8/0.55, 0.9/0.8) | 92 / 93 / 81 / 77% | 103 / 92 / 102 / 89% |
+| **Chosen:** street odds 0.7/0.45 then 0.9/0.8; corp scrip +6 then +8 and one extra item at the exit; the forced cache up to three a run, every 3 layers | 92 / 108 / 77 / 78% | 96 / 90 / 90 / 89% |
+
+Findings:
+- **Scrip is a weak loot part.** The yardstick values 15 scrip as one item, and a run banks scrip only on surviving, so +14 scrip at the exit did far less than +1 item. Feast corp gained its value from an **extra company-store item at the exit** (a proposal; the decided part was "more loose scrip and a cheaper exchange"), and from the forced cache.
+- **More than one forced cache is what lifts the corp elder.** Three a run (every three layers, so two in the Deep and three in the Source) takes the elder to 108% in the Deep. The caches also replace ICE nodes, so the route is safer: its disconnect rate falls from 40% to 34% in the Deep. In the Ruins, though, the corp elder reaches 137% of the mean value, because the region is safe and the caches are free items; flag.
+- **Feast street needs very high odds.** Cache find 0.7 (adult) and 0.9 (elder) against the 0.4 of everyone else, ICE-win loot 0.45 and 0.8 against 0.2. That is what the yardstick asks for; it is large, so check it against the loot economy before keeping it.
+- **Still short:** Feast corp in the Source, adult 77% and elder 78% of the mean value. The cause is survival (57% disconnects there against about 40% for the mean), not loot.
+- **The exit-rate bar cannot be met by a loot form.** Feast forms exit 22% of Deep runs against a 33% mean, because they have nothing that keeps them alive. That also lowers how often a Feast netling meets the elder feat. Options: relax the exit bar for forms without a defensive part; or add a small sustain part. The sustain part was measured: a won ICE restoring 12 Integrity at the elder level (6 at the adult level) takes Feast street to 101 / 96 / 105 / 96% and lifts its Deep exit rate to 24 / 29% and its Source elder exit rate to 12.6%. `ab.scavenge[level].winHeal` holds it (set to 0, off) for the maintainer to decide.
+
+Tune forms, per the maintainer's note: Tune corp (types two steps ahead, relay patch at the elder level) is 20% or more below the mean in the Deep at the adult level and at the elder level; Tune street at the adult level (Foresight, which the bots cannot use) is low in both regions, as expected. These are not a tuning target for the bots: the read-out is a floor for them, and the real check is a playtest of what the extra information does for a person. The fog change (lines only from the current node, elder sight showing lines) makes sight worth more to a human and nothing to a bot, so it widens this gap.
+
+Remaining outliers on the yardstick (800 runs): Breach street is more than 20% above the mean at both levels in the Deep and the Source (it is the strongest form); the hidden form is high at the adult level; Dodge corp is high at some cells; Tune corp and Tune street are low. These are the next things to tune once the Feast question (sustain or a relaxed exit bar) is answered.

@@ -488,7 +488,7 @@ function moveToNode(pet, nodeId, rng) {
         note(run, 'exit node. trace complete.');
         return { ok: true, kind: 'exit', ...jackOut(pet) };
       }
-      const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
+      const bonus = Array.from({ length: (region.exitBonus ?? 1) + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].exitItems ?? 0 : 0) }, () => weighted(region.loot, rng)); // Feast corp: a company-store item at the exit (when set)
       run.loot.push(...bonus);
       run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].scrip : 0);
       const exitFragment = region.exitFragment ?? (run.contract?.kind === 'fragment' ? 1 : RUN_CFG.exitFragmentChance);
@@ -530,6 +530,7 @@ function resolveIceFight(pet, won, rng) {
   const tier2 = run.lastTier === 2;
   if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
   if (won) {
+    if (ab2(pet) === 'feastStreet' && NR2.ab.scavenge[lvl(pet)].winHeal) st.integrity = clamp(st.integrity + NR2.ab.scavenge[lvl(pet)].winHeal); // sustain from a win (when set; not decided)
     const acc = rng() < RUN_CFG.iceWinAccChance ? takeAccessory(run, rng) : '';
     if (rng() < (ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].iceWin : RUN_CFG.iceWinLootChance)) {
       const item = weighted(REGIONS[run.region].loot, rng);
@@ -1062,7 +1063,9 @@ function forceCache(pet, run, node, rng) {
   if (!NR2.abilities || !NR2.ab.forcedCacheForms.includes(ab2(pet)) || lvl(pet) < 2) return;
   if ((run.forced ?? 0) >= NR2.forcedCache.perRun) return;
   const region = REGIONS[run.region];
-  if (node.layer !== Math.ceil(region.layers / 2) - 1 || node.layer < 1) return;
+  const first = Math.ceil(region.layers / 2) - 1; // the layer before halfway; with perRun above 1 it repeats every `every` layers
+  const every = NR2.forcedCache.every || 1e9;
+  if (node.layer < 1 || node.layer < first || (node.layer - first) % every !== 0) return;
   const next = nodeById(run.map, run.pos).edges.map((id) => nodeById(run.map, id)).filter((n) => n.type !== 'exit' && n.type !== 'cache' && !(NR2.forcedCache.relaySafe && n.type === 'relay'));
   if (!next.length) return;
   const pick = next[Math.floor(rng() * next.length)];
