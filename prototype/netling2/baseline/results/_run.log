@@ -23,3 +23,5 @@
 2026-10-08T17:41:35.152Z start clinic-sweep
 2026-10-08T17:41:39.820Z done balance-full-wetware [full-wetware] 918s
 2026-10-08T17:41:39.821Z start push-sweep
+2026-10-08T17:41:57.587Z done balance-full-iron [full-iron] 936s
+2026-10-08T17:41:57.588Z start gap-sweep
