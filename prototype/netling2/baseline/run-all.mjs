@@ -35,14 +35,21 @@ const CONFIG = {
   rules: { NR2: 'all', PERKS: '1' },
   'full-iron': { NR2: 'all', PERKS: '1', IRON: '{"on":true}', SIDES: JSON.stringify({ on: true, owner: null, ownerMult: 3, teenStates: true, ironBenefit: 3, ...FINAL_SIDES }) }, // the final Charge and Sync numbers apply to every egg (clinic-final.mjs); the first baseline run left them out for Iron
   'full-program': { NR2: 'all', PERKS: '1', SIDES: sides('charge') },
+  // The break (BRAKE in sim.js): the same as the egg's full configuration with the cost trigger on.
+  'brake-iron': { BRAKE: '{"on":true}' },
+  'brake-program': { BRAKE: '{"on":true}' },
+  'brake-wetware': { BRAKE: '{"on":true}' },
   'full-wetware': { NR2: 'all', PERKS: '1', SIDES: sides('sync') },
 };
 
+for (const egg of ['iron', 'program', 'wetware']) CONFIG[`brake-${egg}`] = { ...CONFIG[`full-${egg}`], ...CONFIG[`brake-${egg}`] };
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
 // Whole-life balance (36 archetypes). The long ones go first.
 for (const c of ['core', 'full-iron', 'full-program', 'full-wetware']) add(`balance-${c}`, 'balance.mjs', [LIVES], c, { JSON: '1' }, 900);
+
+for (const egg of ['iron', 'program', 'wetware']) add(`balance-brake-${egg}`, 'balance.mjs', [LIVES], `brake-${egg}`, { JSON: '1' }, 900);
 
 // Lineage pacing and the Rogue gate (egg pages, ending).
 for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'rules', { JSON: '1' }, 600);

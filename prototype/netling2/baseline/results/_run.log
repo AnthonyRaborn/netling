@@ -85,3 +85,8 @@
 2026-10-08T18:43:20.050Z done band-sweep-sync [rules] 1010s
 2026-10-08T18:43:20.051Z all 36 jobs finished
 2026-10-08T20:37:25.871Z start balance-full-iron
+2026-10-08T20:39:45.623Z start balance-full-iron
+2026-10-08T20:39:45.638Z start balance-brake-iron
+2026-10-08T20:39:45.657Z start balance-brake-program
+2026-10-08T20:39:45.681Z start balance-brake-wetware
+2026-10-08T20:41:00Z NOTE: the five 'start' lines at 20:39:45 (balance-full-iron, balance-brake-iron/program/wetware) were an accidental import of run-all.mjs while checking syntax; the processes were killed within a minute and wrote no output. The real balance-full-iron rerun started at 20:37:25 (Iron configuration fixed to include the final Charge and Sync numbers; earlier outputs are in superseded/).
