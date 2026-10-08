@@ -14,7 +14,8 @@
 // orderly rhythm is the 1.0 one (a frame per 500 ms).
 //
 // Per egg skins (a proposal):
-//   iron      steady: it SETTLES, dropping a row for 400 ms on the beat.  unsteady: it drifts off its grid a column at a time.
+//   iron      steady: it SETTLES, dropping a row for 400 ms on the beat, and 1.0's idle wander PAUSES around it (see idleClock),
+//             so the drop is the only thing moving.  unsteady: it drifts off its grid a column at a time.
 //   program   steady: it BLINKS (the sleep pose for 200 ms).               unsteady: frames stutter and it hops a row.
 //   wetware   steady: a clean BEAT (one smooth dip in brightness).         unsteady: the pulse goes irregular.
 // Reduced motion: unsteady levels get a still variant (Iron sits one column off its grid, Program holds its alternate frame,
@@ -110,4 +111,35 @@ export function tellPose(tell, pose = 'awake') {
   if (pose !== 'awake') return { draw: pose === 'dead' ? 'dead' : 'sleep', wear: pose === 'dead' ? 'dead' : 'sleep' };
   const awake = tell.frame ? 'b' : 'a';
   return { draw: tell.blink ? 'sleep' : awake, wear: awake };
+}
+
+// Iron's settle is one row, and 1.0's idle moves a netling almost all the time (sway and wander up to 8 columns, hover a row
+// several times a second), so on its own the settle is the only row change in its window for 0 to 86% of beats (npm run
+// proto:temper). Decided (maintainer): a steady Iron holds still on each beat. The idle wander pauses from HOLD_BEFORE_MS before
+// the beat to HOLD_AFTER_MS after it and picks up where it stopped, with no jump. The renderer evaluates the idle (sway, hover,
+// wander, and its hop frames) at idleClock(...) instead of the real time. Only Iron's steady levels pause; every other egg and
+// level returns the time unchanged.
+export const HOLD_BEFORE_MS = 200;
+export const HOLD_AFTER_MS = 600;
+const HOLD_MS = HOLD_BEFORE_MS + HOLD_AFTER_MS;
+
+// How long the idle has been paused by time `time` (ms), for a beat every `interval` ms.
+function pausedBy(time, interval) {
+  const started = Math.floor((time + HOLD_BEFORE_MS) / interval); // windows begun: the beat k*interval, k >= 1
+  if (started < 1) return 0;
+  return (started - 1) * HOLD_MS + Math.min(HOLD_MS, time - (started * interval - HOLD_BEFORE_MS));
+}
+
+// -> true while the idle is held (the settle falls inside this window).
+export function idleHeld({ egg, level, time }) {
+  if (egg !== 'iron' || !(level > 0)) return false;
+  const interval = BEAT_MS[level];
+  const into = (time + HOLD_BEFORE_MS) % interval;
+  return time + HOLD_BEFORE_MS >= interval && into < HOLD_MS;
+}
+
+// -> the time to give the 1.0 idle in place of the real time. Continuous and never runs backwards.
+export function idleClock({ egg, level, time }) {
+  if (egg !== 'iron' || !(level > 0)) return time;
+  return time - pausedBy(time, BEAT_MS[level]);
 }

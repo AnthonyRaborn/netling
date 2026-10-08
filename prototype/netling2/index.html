@@ -77,7 +77,8 @@
       import { programForms, PROGRAM_FORMS, PROGRAM_TEENS_ALL, PROGRAM_ADULTS_ALL, PROGRAM_ELDER_OF } from './program-models.js';
       import { wetwareForms, WETWARE_FORMS, WETWARE_TEENS_ALL, WETWARE_NINE, WETWARE_ELDER_OF } from './wetware-models.js';
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
-      import { temperTell, tellPose, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
+      import { temperTell, tellPose, idleClock, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
+      import { idleOffset, QUIRKS } from './idle.js';
       import { neglected } from './neglect.js';
       import { guardedNeglect } from './needs.js';
       import { glitched, MAX_BUGS } from './glitch.js';
@@ -92,7 +93,7 @@
         const { ACCESSORIES, drawWorn } = await import('../../src/accessories.js');
 
         // temper is the hidden number; level is what the tell shows (it only moves GUARD past a threshold)
-        const state = { palette: 0, egg: 'auto', temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
+        const state = { palette: 0, egg: 'auto', idle: 'none', temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
         const A = forms('A');
         const B = forms('B');
         const LCD = { w: 40, h: 28 };
@@ -115,6 +116,7 @@
         };
         select('palette', PALETTES.map((p, i) => [i, p.name]), 'palette ', true);
         select('egg', [['auto', "the form's egg"], ...EGGS.map((e) => [e, e])], 'tell skin ');
+        select('idle', [['none', 'none'], ...QUIRKS.map((q) => [q, q])], "1.0 idle ");
         const t = add('temper ', Object.assign(document.createElement('input'), { type: 'range', min: -12, max: 12, step: 0.5, value: state.temper }));
         const tLabel = document.createElement('span');
         bar.append(tLabel);
@@ -214,9 +216,11 @@
           const look = nBugs && key !== 'dead' ? glitched(rusty, f.anchors[anchorsKey], nBugs, { time, reduced: state.reduced || Boolean(fixed), seed: state.seed }) : rusty;
           // A form with a motion layer (Blank's elder) is drawn from that layer, which may be wider; wearables stay on the registered sprite.
           const shown = f.motion && key !== 'dead' && key !== 'sleep' ? f.motion(look, f.anchors[anchorsKey], { time, reduced: state.reduced }) : look;
-          const x = Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx;
-          const xShown = Math.floor((LCD.w - shown[0].length) / 2) + tell.dx;
-          const y = 20 - sprite.length + tell.dy + (awake ? 0 : 1);
+          // 1.0's idle wander (a copy in idle.js), on the tell's own clock: a steady Iron holds it still around each beat.
+          const wander = awake && !fixed && state.idle !== 'none' ? idleOffset(state.idle, sprite.length, idleClock({ egg: skinFor(f), level: state.level, time })) : { x: 0, y: 0 };
+          const x = Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx + wander.x;
+          const xShown = Math.floor((LCD.w - shown[0].length) / 2) + tell.dx + wander.x;
+          const y = 20 - sprite.length + tell.dy + wander.y + (awake ? 0 : 1);
           ctx.globalAlpha = tell.shade;
           drawSprite(ctx, shown, xShown, y, state.pose === 'dead' ? DEAD_COLORS : paletteColors(pal));
           ctx.globalAlpha = 1;

@@ -67,3 +67,73 @@ test('only Program blinks, and only on the beat: the other skins never ask for t
     assert.equal(blinks > 0, egg === 'program', `${egg}: ${blinks} blink samples`);
   }
 });
+
+// --- Iron's steady hold (maintainer: the idle pauses around the settle) ----------------------------------------------------------
+import { readFileSync } from 'node:fs';
+import { idleClock, idleHeld, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
+import { idleOffset, QUIRKS } from './idle.js';
+
+test('idle.js uses the same walk constants as src/render.js', () => {
+  const src = readFileSync(new URL('../../src/render.js', import.meta.url), 'utf8');
+  assert.match(src, /const WALK_SEGMENT_MS = 5000;/);
+  assert.match(src, /const WALK_MOVE_MS = 2200;/);
+  assert.match(src, /Math\.sin\(time \/ 1500\) \* 8/);
+  assert.match(src, /Math\.sin\(time \/ 2600\) \* 7/);
+  assert.match(src, /Math\.sin\(time \/ 600\) \* 2\) - 1/);
+});
+
+test('the hold only applies to a steady Iron: every other egg and level keeps the real clock', () => {
+  for (const egg of EGGS) {
+    for (const level of [-2, -1, 0, 1, 2]) {
+      const holds = egg === 'iron' && level > 0;
+      for (let time = 0; time < 30_000; time += 130) {
+        assert.equal(idleClock({ egg, level, time }), holds ? idleClock({ egg, level, time }) : time);
+        if (!holds) assert.equal(idleHeld({ egg, level, time }), false);
+      }
+    }
+  }
+});
+
+test('the idle clock is continuous and never runs backwards: the pause resumes where it stopped, with no jump', () => {
+  for (const level of [1, 2]) {
+    let last = idleClock({ egg: 'iron', level, time: 0 });
+    for (let time = 1; time < 60_000; time++) {
+      const now = idleClock({ egg: 'iron', level, time });
+      assert.ok(now >= last, `level ${level} at ${time}: ran backwards`);
+      assert.ok(now - last <= 1, `level ${level} at ${time}: jumped ${now - last} ms`);
+      last = now;
+    }
+  }
+});
+
+test('the idle is still for the whole hold window of every beat, and the settle falls inside it', () => {
+  for (const level of [1, 2]) {
+    const interval = BEAT_MS[level];
+    for (let k = 1; k <= 20; k++) {
+      const beat = k * interval;
+      const start = beat - HOLD_BEFORE_MS;
+      const end = beat + HOLD_AFTER_MS;
+      for (const quirk of QUIRKS) {
+        for (const h of [11, 14, 15]) {
+          const first = idleOffset(quirk, h, idleClock({ egg: 'iron', level, time: start }));
+          for (let time = start; time < end; time += 10) {
+            assert.deepEqual(idleOffset(quirk, h, idleClock({ egg: 'iron', level, time })), first, `${quirk}/${h} level ${level}: idle moved at ${time}`);
+            assert.equal(idleHeld({ egg: 'iron', level, time }), true);
+          }
+        }
+      }
+      // The settle (dy = 1) is inside the window.
+      for (let time = beat; time < beat + 400; time += 10) assert.equal(temperTell({ egg: 'iron', level, time }).dy, 1);
+      assert.equal(idleHeld({ egg: 'iron', level, time: end }), false);
+      assert.equal(idleHeld({ egg: 'iron', level, time: start - 1 }), false);
+    }
+  }
+});
+
+test('the idle runs at its own pace between beats, and is paused for 13% (steady) and 27% (strongly steady) of the time', () => {
+  for (const [level, share] of [[1, 800 / 6000], [2, 800 / 3000]]) {
+    const span = BEAT_MS[level] * 100;
+    const run = idleClock({ egg: 'iron', level, time: span + 5000 }) - idleClock({ egg: 'iron', level, time: 5000 });
+    assert.ok(Math.abs(run - span * (1 - share)) <= 1, `level ${level}: ${run} ms of idle in ${span} ms`);
+  }
+});

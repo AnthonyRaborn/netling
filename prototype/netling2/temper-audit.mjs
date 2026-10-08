@@ -8,7 +8,8 @@ import './ready.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
-import { temperTell, BEAT_MS } from './tell.js';
+import { temperTell, idleClock, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
+import { idleOffset, QUIRKS } from './idle.js';
 import { placeWorn, ACCESSORIES } from '../../src/accessories.js';
 
 const LCD = { w: 40, h: 28 };
@@ -44,40 +45,27 @@ for (const [egg, set] of Object.entries(sets)) {
 console.log(`   ${caused} form and wearable pairs\n`);
 
 // --- 2. the idle hides a positional tell ------------------------------------------------------------------------------------------
-const spot = (k) => { const h = Math.imul(k ^ 0x9e3779b9, 0x85ebca6b) >>> 0; return { x: (h % 17) - 8, y: ((h >>> 8) % 101) / 100 }; };
-const wander = (time) => { const k = Math.floor(time / 5000); const t = Math.min(1, (time - k * 5000) / 2200); const a = spot(k - 1); const b = spot(k); return { x: Math.round(a.x + (b.x - a.x) * t), y: a.y + (b.y - a.y) * t, moving: t < 1 && a.x !== b.x }; };
-const idle = (quirk, h, time) => {
-  const y0 = 20 - h;
-  const up = Math.max(0, Math.min(3, y0 - 5));
-  const frame = Math.floor(time / 500) % 2;
-  const depth = (p) => Math.round(((Math.sin(time / p) + 1) / 2) * (up + 1)) - up;
-  if (quirk === 'sway') return { x: Math.round(Math.sin(time / 1500) * 8), y: depth(2300) };
-  if (quirk === 'hover') return { x: Math.round(Math.sin(time / 2600) * 7), y: Math.max(-up, Math.round(Math.sin(time / 600) * 2) - 1) };
-  const w = wander(time);
-  return { x: w.x, y: Math.max(-up, Math.round(w.y * (up + 1)) - up + (w.moving && !frame ? -1 : 0)) };
-};
-console.log('2. Iron\'s settle (1 row down, 400 ms) against 1.0\'s idle: share of beats with no idle row change from 300 ms before to 700 ms after,');
-console.log('   and idle row changes per 6 s (the settle is one more row change among them):');
+// The idle model is idle.js (a copy of src/render.js). A beat is "clean" when the idle makes no row change from 200 ms before the
+// settle to 600 ms after it (the hold window), so the settle is the only thing that moves.
+console.log('2. Iron\'s settle (1 row down, 400 ms): share of beats with no idle row change from 200 ms before to 600 ms after,');
+console.log('   with the idle running as in 1.0, and with the idle held on the beat (idleClock):');
 for (const h of [11, 14, 15]) {
-  for (const quirk of ['sway', 'hover', 'walk']) {
+  for (const quirk of QUIRKS) {
     const cells = [];
     for (const level of [1, 2]) {
-      let clean = 0;
-      let n = 0;
+      const tally = { free: 0, held: 0, n: 0 };
       for (let t = BEAT_MS[level]; t < 20 * 60_000; t += BEAT_MS[level]) {
-        n++;
-        const ys = new Set();
-        for (let u = t - 300; u <= t + 700; u += 50) ys.add(idle(quirk, h, u).y);
-        if (ys.size === 1) clean++;
+        tally.n++;
+        for (const [key, clock] of [['free', (u) => u], ['held', (u) => idleClock({ egg: 'iron', level, time: u })]]) {
+          const ys = new Set();
+          for (let u = t - HOLD_BEFORE_MS; u <= t + HOLD_AFTER_MS; u += 50) ys.add(idleOffset(quirk, h, clock(u)).y).add(idleOffset(quirk, h, clock(u)).x * 100);
+          if (ys.size <= 2) tally[key]++; // one y and one x
+        }
       }
-      cells.push(`${BEAT_MS[level] / 1000} s beat ${(100 * clean / n).toFixed(0)}%`);
+      cells.push(`${BEAT_MS[level] / 1000} s beat ${(100 * tally.free / tally.n).toFixed(0)}% -> ${(100 * tally.held / tally.n).toFixed(0)}%`);
     }
-    let changes = 0;
-    let last = idle(quirk, h, 0).y;
-    for (let u = 50; u < 600_000; u += 50) { const y = idle(quirk, h, u).y; if (y !== last) changes++; last = y; }
-    let moving = 0;
-    let lastX = idle(quirk, h, 0).x;
-    for (let u = 50; u < 600_000; u += 50) { const x = idle(quirk, h, u).x; if (x !== lastX) moving++; lastX = x; }
-    console.log(`   ${String(h).padStart(2)} rows, ${quirk.padEnd(5)}: ${cells.join(', ')}; ${(changes / 100).toFixed(1)} row changes per 6 s; sideways during ${(100 * moving / 12000).toFixed(0)}% of 50 ms steps`);
+    console.log(`   ${String(h).padStart(2)} rows, ${quirk.padEnd(5)}: ${cells.join(', ')}`);
   }
 }
+// How much of the time the idle is paused.
+for (const level of [1, 2]) console.log(`   idle paused ${(100 * (HOLD_BEFORE_MS + HOLD_AFTER_MS) / BEAT_MS[level]).toFixed(0)}% of the time at level +${level}`);
