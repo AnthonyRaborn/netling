@@ -218,6 +218,9 @@ export const ITEMS = {
   repair: { name: 'Repair kit', desc: 'Restores 40 Integrity. Works while asleep.' },
   overclock: { name: 'Bypass chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
   segfault: { name: 'Segfault', desc: 'Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life.', awake: true },
+  // 2.0 (docs/NETLING_2_PERKS_TRAITS_DRAFTS.md): drop tables and stock list them only with PERKS.on.
+  decoy: { name: 'Decoy', desc: 'Waves off the current or next intrusion. Leans indie.' },
+  salvage: { name: 'Salvage cell', desc: '+50 Charge, may carry a virus. Leans indie.' },
 };
 
 // Corpo scrip: a netling's money, spent with Charge at netrun markets. Prices follow rarity.
@@ -226,7 +229,7 @@ export const SCRIP = {
   inherit: 0.5, // the next generation starts with half, rounded down
   sellMarket: 0.5, // selling at a netrun market pays half the price
   sellElsewhere: process.env.INV && JSON.parse(process.env.INV).scrap !== undefined ? JSON.parse(process.env.INV).scrap : 0.25, // scrapping at home, or a pickup that meets a full inventory, a quarter
-  price: { coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15, blackice: 25, voucher: 25, segfault: 25, overclock: 50 },
+  price: { coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15, blackice: 25, voucher: 25, segfault: 25, overclock: 50, decoy: 25, salvage: 15 },
 };
 
 export const sellValue = (id, atMarket = false) => Math.floor((SCRIP.price[id] ?? 0) * (atMarket ? SCRIP.sellMarket : SCRIP.sellElsewhere));
@@ -238,6 +241,8 @@ export function addScrip(s, n) {
   return before + n - s.scrip;
 }
 
+// 2.0 extra drops (PERKS.on): Decoy mostly from HIDE, Salvage cell mostly from wins.
+const PERK_DROPS = { win: { decoy: 1, salvage: 2 }, hide: { decoy: 2, salvage: 1 }, comply: {}, visit: {} };
 // Weighted drop tables per source.
 const DROPS = {
   win: { coolant: 3, antivirus: 2, booster: 2, blackice: 2, repair: 2, memory: 1, overclock: 1, segfault: 1 },
@@ -254,8 +259,14 @@ export const LEANS = ['corp', 'street'];
 const cap1 = (x) => x[0].toUpperCase() + x.slice(1);
 export const roleForm = (role, lean) => `${role}${cap1(lean)}`;
 const ADULTS = ROLES.flatMap((r) => LEANS.map((l) => roleForm(r, l)));
-export const KEEPSAKES = {};
-export const FORMS = Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), trait: null }]));
+// 2.0 perks, traits and keepsakes (docs/NETLING_2_PERKS_TRAITS_DRAFTS.md): off unless PERKS=1 (or PERKS.on is set), so every earlier table
+// stays reproducible. Perks are by role and lean, traits by role (hidden has its own), keepsakes one per form.
+export const PERKS = { on: process.env.PERKS === '1' };
+const TRAIT_OF = { breach: 'hardened', dodge: 'evasive', tune: 'persistent', feast: 'foraging' };
+const traitFor = (f) => (f === 'hidden' ? 'untraceable' : TRAIT_OF[ROLES.find((r) => f.startsWith(r))]);
+const KEEP = { breachStreet: 'antivirus', breachCorp: 'repair', dodgeCorp: 'overclock', dodgeStreet: 'decoy', tuneCorp: 'coolant', tuneStreet: 'booster', feastCorp: 'voucher', feastStreet: 'salvage', hidden: 'memory' };
+export const KEEPSAKES = new Proxy({}, { get: (_, f) => (PERKS.on ? KEEP[f] : undefined) });
+export const FORMS = Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), get trait() { return PERKS.on ? traitFor(f) : null; } }]));
 
 // Every body a netling can have. Adult forms also appear in FORMS.
 export const SPECIES = {
@@ -274,10 +285,21 @@ export const lineOf = (form) => SPECIES[form]?.line ?? form;
 export const MAINFRAME_OF = Object.fromEntries(Object.entries(SPECIES).filter(([, x]) => x.line).map(([id, x]) => [x.line, id]));
 export const isMainframeForm = (form) => SPECIES[form]?.stage === 'mainframe';
 
-// In-life perks of each adult form (separate from inherited traits): none in 2.0 until they are designed.
+// In-life perks of each adult form (separate from inherited traits). The 2.0 set (PERKS.on) is PERK_MODS.
 export const FORM_MODS = {};
+export const PERK_MODS = {
+  breachStreet: { virusMult: 0.7 }, // infection chance -30% (per hour and from scavenged data)
+  breachCorp: { cureBonus: 10 }, // the cure restores 10 more Integrity
+  dodgeCorp: { traceMult: 0.7 }, // corp traces 30% less often
+  dodgeStreet: { attackMult: 0.7 }, // intrusions 30% less often
+  tuneCorp: { chargeDrainMult: 0.8 },
+  tuneStreet: { syncDrainMult: 0.8 },
+  feastCorp: { corpSync: 5, scavSync: -5 }, // Chrome's: loves corp packets, sulks at scavenged data
+  feastStreet: { scavVirusMult: 0.5 }, // the infection roll on scavenged data halved
+  hidden: { chargeDrainMult: 0.85, syncDrainMult: 0.85 },
+};
 
-const mod = (s, key, fallback = 1) => FORM_MODS[lineOf(s.form)]?.[key] ?? fallback;
+const mod = (s, key, fallback = 1) => (PERKS.on ? PERK_MODS[lineOf(s.form)]?.[key] : undefined) ?? FORM_MODS[lineOf(s.form)]?.[key] ?? fallback;
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
 // Asleep for the night, or napping: either way it rests and can't eat, play or run.
@@ -289,6 +311,9 @@ export const TRAITS = {
   persistent: { name: 'Persistent', desc: 'Drains slower while it rests' },
   volatile: { name: 'Volatile', desc: 'Bigger play rewards, but Integrity drains faster' },
   untraceable: { name: 'Untraceable', desc: 'Corp traces find it less often' },
+  // 2.0 (PERKS.on): Dodge's trait and Feast's, which generalises Licensed so it does not steer Standing.
+  evasive: { name: 'Evasive', desc: 'Alarms give it more time to answer' },
+  foraging: { name: 'Foraging', desc: 'Packets restore more Charge' },
 };
 
 // Trait strength (unchanged from 1.0; no 2.0 form carries a trait yet, so these are all zero unless a test sets one).
@@ -296,9 +321,9 @@ export const TRAIT_CFG = {
   history: 0.5,
   levelStep: 0.25,
   maxLevel: 3,
-  full: { licensed: 0.25, hardened: 0.5, persistent: 0.3, volatile: 0.5, untraceable: 0.6 },
+  full: { licensed: 0.25, hardened: 0.5, persistent: 0.3, volatile: 0.5, untraceable: 0.6, evasive: 0.25, foraging: 0.25 },
   volatileIntegrity: 0.75,
-  cap: { licensed: 1.5, hardened: 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25 },
+  cap: { licensed: 1.5, hardened: 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25, evasive: 1.25, foraging: 1.5 },
 };
 
 export const levelStrength = (level) => 1 + TRAIT_CFG.levelStep * (Math.min(Math.max(level ?? 1, 1), TRAIT_CFG.maxLevel) - 1);
@@ -428,7 +453,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     event: null,
     lastSurgeAt: null,
     inventory: fragment?.keepsake ? [fragment.keepsake] : [],
-    buffs: { shieldUntilAge: 0, traceSkip: false, boost: false },
+    buffs: { shieldUntilAge: 0, traceSkip: false, attackSkip: false, boost: false },
     run: null,
     rootAccess,
     rootUsed: false,
@@ -562,8 +587,8 @@ export const rattled = (s) => {
   return !RATTLE.answeredOnly || Boolean(s.lastEventAnswered);
 };
 const eventWindow = (s, type) => {
-  const w = CFG[EVENTS[type].window];
-  return rattled(s) ? Math.max(1, Math.round(w * (1 - RATTLE.cut))) : w;
+  const w = CFG[EVENTS[type].window] * (1 + traitEffect(s, 'evasive'));
+  return rattled(s) ? Math.max(1, Math.round(w * (1 - RATTLE.cut))) : Math.round(w);
 };
 function rattleNote(s, t) {
   s.event.rattled = true;
@@ -973,7 +998,7 @@ function stepEvents(s, t, rng) {
   let hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
   if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * lowM('sync');
   const overflowMult = sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * sideM('charge') : 1;
-  if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable'))) / 60) {
+  if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable')) * mod(s, 'traceMult')) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
       log(s, t, '> corp trace waved off by voucher.');
@@ -982,9 +1007,14 @@ function stepEvents(s, t, rng) {
     s.event = { type: 'trace', startedAge: s.ageMin, window: eventWindow(s, 'trace') };
     if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! corp trace incoming. ${s.event.window}m to respond.`);
-  } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour) / 60) {
+  } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour * mod(s, 'attackMult')) / 60) {
     if (shielded(s)) {
       log(s, t, '> intrusion attempt bounced off the antivirus shield.');
+      return;
+    }
+    if (s.buffs?.attackSkip) {
+      s.buffs.attackSkip = false;
+      log(s, t, '> intrusion waved off by decoy.');
       return;
     }
     s.event = { type: 'attack', startedAge: s.ageMin, window: eventWindow(s, 'attack') };
@@ -1092,7 +1122,7 @@ function stepVisit(s, t, rng) {
     s.visitAccGifts = (s.visitAccGifts ?? 0) + 1;
     gift = 'something stylish behind';
   } else if (rng() < CFG.visitItemChance) {
-    const id = weighted(DROPS.visit, rng);
+    const id = weighted(PERKS.on ? { ...DROPS.visit, ...PERK_DROPS.visit } : DROPS.visit, rng);
     const name = ITEMS[id].name;
     gift = grantItem(s, id).includes('full') ? `a ${name}, but inventory is full` : `a gift: ${name}`;
   }
@@ -1236,7 +1266,7 @@ function segfaultDrop(s, rng) {
 function maybeDrop(s, source, chance, rng) {
   const hit = rng() < chance;
   if (hit && source === 'win') SIDE_METER.drops++;
-  return hit ? grantItem(s, weighted(DROPS[source], rng)) : '';
+  return hit ? grantItem(s, weighted(PERKS.on ? { ...DROPS[source], ...PERK_DROPS[source] } : DROPS[source], rng)) : '';
 }
 
 // Minutes left to respond to the current timed event (0 when there is none).
@@ -1340,6 +1370,7 @@ export function adultCandidates(s) {
   return withFresh(s, Object.fromEntries(Object.entries(pool).filter(([, w]) => w > 0)));
 }
 export function adultForm(s, rng = null) {
+  if (process.env.FORCE_ADULT && FORMS[process.env.FORCE_ADULT]) return process.env.FORCE_ADULT; // measurement aid: every netling grows into this form
   if (hiddenAdultMet(s)) return 'hidden';
   const pool = adultCandidates(s);
   if (rng) return weighted(pool, rng);
@@ -1552,8 +1583,10 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       actEarly(s, 'charge');
       let gain = action === 'corp' ? 30 : 25;
       if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
+      gain *= 1 + traitEffect(s, 'foraging');
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
+      st.sync = clamp(st.sync + mod(s, action === 'corp' ? 'corpSync' : 'scavSync', 0));
       s.standing[action === 'corp' ? 'corp' : 'street'] += CFG.feedStanding;
       s.sinceFed = 0;
       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
@@ -1570,7 +1603,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         msg += ' it loves these.';
       }
       if (action === 'scav' && !s.virus && !shielded(s)) {
-        const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult');
+        const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult') * mod(s, 'scavVirusMult');
         if (rng() < chance) {
           s.virus = true;
           s.virusMin = 0;
@@ -1695,7 +1728,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'patch': {
       if (!s.virus) return fail('scan complete. no threats.');
       s.virus = false;
-      st.integrity = clamp(st.integrity + 10);
+      st.integrity = clamp(st.integrity + 10 + mod(s, 'cureBonus', 0));
       s.temper += s.virusMin <= 30 ? 1 : -1;
       res = ok('virus quarantined.', 'patch');
       break;
@@ -1808,6 +1841,25 @@ function useItem(s, id, rng) {
         return `${name} jacked in. sync surging. !! it carried a virus.`;
       }
       return `${name} jacked in. sync surging.`;
+    }
+    case 'decoy':
+      s.standing.street += 1;
+      if (s.event?.type === 'attack') {
+        s.event = null;
+        return `${name} deployed. intrusion waved off.`;
+      }
+      s.buffs.attackSkip = true;
+      return `${name} deployed. next intrusion pre-cleared.`;
+    case 'salvage': {
+      st.charge = clamp(st.charge + 50);
+      s.standing.street += 1;
+      if (!s.virus && !shielded(s) && rng() < 0.12) {
+        s.virus = true;
+        s.virusMin = 0;
+        s.virusCount = (s.virusCount ?? 0) + 1;
+        return `${name} consumed. charge up. !! payload was infected.`;
+      }
+      return `${name} consumed. charge up.`;
     }
     case 'booster':
       s.buffs.boost = true;

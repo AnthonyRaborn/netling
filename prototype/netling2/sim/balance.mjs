@@ -186,6 +186,7 @@ export function checkIn(s, p, now, rng, ctx) {
   const keep = ['coolant', 'antivirus', 'repair', 'overclock', 'blackice'];
   if (p.trace !== 'hide') keep.push('voucher');
   if (p.gamer) keep.push('booster');
+  keep.push('decoy', 'salvage'); // 2.0 items (PERKS=1): used below
   if (wantsFaults) keep.push('segfault');
   if (slotsUsed(s.inventory) >= INVENTORY_SLOTS && !p.noItems) {
     const slot = surplusSlot(s.inventory, keep);
@@ -195,6 +196,8 @@ export function checkIn(s, p, now, rng, ctx) {
   if (p.runs && runCooldownLeft(s) > 0) useItem('overclock');
   // Items first: they can resolve things more cheaply than actions.
   if (s.event?.type === 'trace' && p.trace !== 'hide') useItem('voucher');
+  if (s.event?.type === 'attack') useItem('decoy');
+  if (s.stats.charge < 25) useItem('salvage');
   if (s.stats.heat > 70) useItem('coolant');
   if (ctx.gapToNext >= 240 && !(s.buffs?.shieldUntilAge > s.ageMin)) useItem('antivirus');
   if (s.virus) useItem('antivirus');

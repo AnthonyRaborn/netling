@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS } from '../sim.js';
 import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
@@ -223,7 +223,7 @@ const withoutHealing = (t) => Object.fromEntries(Object.entries(t).filter(([id])
 // What a market of this flavor ('black' | 'corp' | 'clinic') stocks in this region.
 export function marketStock(flavor, region) {
   if (flavor === 'clinic') return RUN_CFG.clinicStock;
-  const table = flavor === 'corp' ? RUN_CFG.exchangeStock : region.market ?? RUN_CFG.blackStock;
+  const table = flavor === 'corp' ? RUN_CFG.exchangeStock : region.market ?? (PERKS.on ? { ...RUN_CFG.blackStock, decoy: 1, salvage: 1 } : RUN_CFG.blackStock);
   return RUN_CFG.healingOnlyAtClinic ? withoutHealing(table) : table;
 }
 // Turns a share of the map's market nodes into clinics, once each (a node a contract adds later is rolled when it appears).
@@ -687,7 +687,7 @@ function chooseOption(pet, optionId, rng) {
     pet.axes.stability += b;
   };
   const loot = (fixed) => {
-    const item = fixed ?? weighted(region.loot, rng);
+    const item = fixed ?? weighted(PERKS.on ? { ...region.loot, decoy: 1, salvage: 1 } : region.loot, rng);
     run.loot.push(item);
     return `+${ITEMS[item].name}.`;
   };
