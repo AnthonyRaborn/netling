@@ -11,10 +11,10 @@ const base = { key: DAY, trail: ['>', '#', '$', 'x', '+', '~', '>'], exit: true,
 
 test('the count follows the ICE figure and is left out when there is none', () => {
   const tally = { iceWon: 1, iceLost: 1, icePhased: 1 };
-  assert.equal(shareText2({ ...base, tally: { ...tally, iceHard: 2 } }), 'NETLING daily #2 (2026-10-02) r1\nEXIT 9/9  ICE 2/3 (2 hard)  Ghost\n>#$x+~>');
+  assert.equal(shareText2({ ...base, tally: { ...tally, iceHard: 2 } }), 'NETLING daily #2 (2026-10-02) r1\nEXIT 9/9  ICE 2/3 T2: 2  Ghost\n>#$x+~>');
   assert.equal(shareText2({ ...base, tally }), shareText({ ...base, tally }), 'no hard ICE: 1.0 line, unchanged');
   assert.equal(shareText2({ ...base, tally: { ...tally, iceHard: 0 } }), shareText({ ...base, tally }));
-  assert.match(shareText2({ ...base, exit: false, result: 'disconnected', reached: 3, trail: ['>', 'x'], tally: { iceLost: 1, iceHard: 1 } }), /\nDISCONNECTED 3\/9  ICE 0\/1 \(1 hard\)  Ghost\n>x!$/);
+  assert.match(shareText2({ ...base, exit: false, result: 'disconnected', reached: 3, trail: ['>', 'x'], tally: { iceLost: 1, iceHard: 1 } }), /\nDISCONNECTED 3\/9  ICE 0\/1 T2: 1  Ghost\n>x!$/);
   assert.ok(!shareText2({ ...base, tally: { ...tally, iceHard: 2 } }).includes('—'));
 });
 
