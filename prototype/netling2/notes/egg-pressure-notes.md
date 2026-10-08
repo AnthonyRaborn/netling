@@ -263,3 +263,10 @@ Base benefit strengths x3 (Charge held: play Sync 0.45, drops 0.75; Sync held: v
 - Costs: Program full-life attentive 0.975, sysadmin 0.975, daredevil 0.92; infections flat to slightly down (daredevil 6.9). Wetware: full-life 0.99 to 1.0, sysadmin infections 7.78 (off 7.33), temper -0.1 to -0.7.
 - Never-entering archetypes (casual, worker, human-regular, overclocker) unchanged from off on both eggs.
 - Read: the trade is now close to even for heavy players (about +25% drops for -2 points of full-life on Program, +25% drops and visits for +0.45 infections on Wetware). Iron's trade is bigger on both sides.
+
+## Result 17: Overclock as a held state on Iron
+
+`SIDES.heat.hold` (Iron rows only; hold 0 = plain). Tripled benefits, G costs, Iron wear on, 200 lives per cell. Plain / hold 120 / hold 360 minutes.
+- Daredevil drops 19.7 / 17.8 / 15.3; temper -5.8 / -5.1 / -4.2; infections 9.4 / 9.65 / 9.6. Overclocker drops 16.9 / 17.6 / 14.2, infections 12.2 / 12.0 / 12.1.
+- Attentive and sysadmin never reach Heat 65 (0.6% of time): unchanged. Casual, worker, human-regular: within noise (casual full-life 0.93 / 0.89 / 0.905 is the largest move).
+- Read: the daredevil and overclocker bots sit at Heat 65+ about half the time, so a hold barely filters them; it removes benefit and some temper cost but not the wear cost (wear follows Heat). Keep Overclock plain. Not unit-tested.
