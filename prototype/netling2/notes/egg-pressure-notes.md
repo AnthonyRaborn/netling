@@ -290,3 +290,14 @@ Rule (`penStep`, `penFree`, `penCap`, `SYNCBOT=sip`): inside Wired, plays below 
 - Greedy (play to full), Wetware, attentive / sysadmin: step 0 / 5% / 10% / 20%: infections 8.9 / 9.8 / 10.8 / 11.5 and 9.3 / 11.3 / 12.9 / 14.2 (off 7.5 and 7.8); hits a life 0 / 1.6 / 2.9 / 3.7 and 0 / 2.7 / 4.8 / 6.3; drops unchanged (38 / 48 against 21 / 22 off); full-life 0.985 to 1.0.
 - Program (non-owner x1) takes about half to two thirds of Wetware's hits; Iron fewer.
 - Read: the bot does not adapt, so these are costs paid by a player who ignores the penalty; greedy still nets about +80% drops (attentive) for +3 to +4 infections at 20%. The sip path is free by design. Whether greed pays depends on what an infection costs a human (a clinic visit). Open: a burnout rule (N plays at 90+ ends the state) instead of or on top of a chance.
+
+## Result 20: Wired burnout
+
+Rule (`burnN`, `burnCool` in `SIDES.sync`; meter `burns`): inside Wired, `burnN` plays at Sync 90+ end the state (counter reset when the state ends otherwise), and Wired cannot be re-entered for `burnCool` minutes. No infection chance (penStep 0). Greedy bot (plays to full) unless noted; config as Result 16. 200 lives per cell. Not unit-tested.
+
+- Win drops, Wetware attentive (off 21.3): none 38.9 (Wired 41% of time); 3 plays / 4 h 35.4 (34%); 2 plays / 8 h 32.0 (27%); 2 plays / 12 h 31.8 (27%); 2 plays / 24 h 29.1 (19%). Sysadmin (off 21.6): 47.1 / 42.2 / 36.5 / 36.7 / 31.9. Daredevil (off 24.4): 38.4 / 36.7 / 34.7 / 34.9 / 32.4.
+- Infections do not rise (attentive 8.9 -> 8.3; sysadmin 9.3 -> 8.0): burnout removes benefit, it adds no cost. Full-life unchanged (0.995 to 1.0). Casual is untouched.
+- 8 h and 12 h give the same result because the night's rest already ends the state; 24 h is the first cooldown that changes the picture.
+- Burnouts a life: attentive 1.7 to 2.8, sysadmin 2.5 to 3.9.
+- Sipping (stop at 89, 3 plays / 4 h): no burnouts, drops 14.3 attentive (+13% over its off 12.6), Wired 7%. Greedy at 2 plays / 24 h keeps +36% over its own off, Wired 19%.
+- Read: burnout narrows greedy toward the sipper but does not remove the gap; it costs the greedy player nothing in infections. A small infection chance (Result 19) on top would add cost. Program (non-owner) is affected the same way as Wetware's x1 side.
