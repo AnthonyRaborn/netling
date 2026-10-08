@@ -1,0 +1,14 @@
+  fired a life: lost fights 10.24, bleeds 2.04 (8.16 Integrity)
+program attentive      full-life 0.955 -> 0.95 (-0.01)  infections 6.82 -> 6.81 (-0.01)  temper 4.78 -> 4.71 (-0.07)  mistakes 0.37 -> 0.39  runs 22.21 disconnects 0.35 -> 0.37
+  fired a life: lost fights 0, bleeds 0 (0 Integrity)
+program sysadmin       full-life 0.922 -> 0.922 (0.00)  infections 7.18 -> 7.18 (0.00)  temper 4.8 -> 4.8 (0.00)  mistakes 0.02 -> 0.02  runs 0 disconnects 0 -> 0
+  fired a life: lost fights 14.72, bleeds 8.69 (34.74 Integrity)
+program casual         full-life 0.95 -> 0.949 (-0.00)  infections 7.04 -> 7.01 (-0.03)  temper -0.77 -> -0.89 (-0.12)  mistakes 6.12 -> 6.39  runs 17.59 disconnects 2.3 -> 2.53
+  fired a life: lost fights 1.26, bleeds 0.84 (3.37 Integrity)
+program worker         full-life 0.816 -> 0.814 (-0.00)  infections 6.36 -> 6.36 (0.00)  temper -2.37 -> -2.39 (-0.02)  mistakes 8.61 -> 8.65  runs 2.14 disconnects 0.07 -> 0.08
+  fired a life: lost fights 1.49, bleeds 0.74 (2.96 Integrity)
+program human-regular  full-life 0.293 -> 0.289 (-0.00)  infections 4.04 -> 4.06 (0.02)  temper -2.17 -> -2.18 (-0.01)  mistakes 5.07 -> 5.1  runs 2.96 disconnects 0.09 -> 0.1
+  fired a life: lost fights 9.38, bleeds 2.13 (8.52 Integrity)
+program daredevil      full-life 0.94 -> 0.936 (-0.00)  infections 6.49 -> 6.49 (0.00)  temper -3.46 -> -3.55 (-0.09)  mistakes 1.42 -> 1.46  runs 21.65 disconnects 0.92 -> 0.95
+  fired a life: lost fights 0, bleeds 0 (0 Integrity)
+program overclocker    full-life 0.968 -> 0.968 (0.00)  infections 8.71 -> 8.71 (0.00)  temper -7.58 -> -7.58 (0.00)  mistakes 1.7 -> 1.7  runs 0 disconnects 0 -> 0
