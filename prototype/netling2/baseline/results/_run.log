@@ -37,3 +37,7 @@
 2026-10-08T17:47:22.854Z start exchange-stock
 2026-10-08T17:49:00.524Z done item-sweep [rules] 138s
 2026-10-08T17:49:00.528Z start clinic-final
+2026-10-08T17:49:52.904Z done temper-sweep [rules] 292s
+2026-10-08T17:49:52.905Z start grace-sweep
+2026-10-08T17:50:01.799Z done clinic-sweep [rules] 507s
+2026-10-08T17:50:01.803Z start heat-hint-sweep
