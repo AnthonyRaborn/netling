@@ -6,7 +6,7 @@ const lives = Number(process.argv[2] ?? 300);
 const bases = (process.argv[3] ?? 'attentive,sysadmin,casual,worker,human-regular,daredevil,overclocker').split(',');
 const over = process.argv[4] ? JSON.parse(process.argv[4]) : {};
 const { ARCHETYPES, simulate, stats } = await import('./balance.mjs');
-const { SIDES, IRON } = await import('./sim.js');
+const { SIDES, IRON, SIDE_METER } = await import('./sim.js');
 const fresh = JSON.parse(JSON.stringify(SIDES));
 const eggs = { iron: null, program: 'charge', wetware: 'sync' };
 const apply = (on, owner) => {
@@ -20,6 +20,7 @@ for (const base of bases) {
     apply(egg !== 'off', owner);
     const share = { cHi: 0, cLo: 0, sHi: 0, sLo: 0, flow: 0 };
     let awake = 0;
+    for (const k of Object.keys(SIDE_METER)) SIDE_METER[k] = 0;
     const rs = [];
     for (let i = 1; i <= lives; i++) {
       globalThis.__sample = (s) => {
@@ -35,6 +36,6 @@ for (const base of bases) {
     }
     const st = stats(rs);
     const f = (x) => +(x / awake).toFixed(3);
-    console.log(JSON.stringify({ base, egg, fullLife: st.fullLife, infections: st.pressure.viruses, mistakes: st.mistakes, temper: st.temper, cHi: f(share.cHi), cLo: f(share.cLo), sHi: f(share.sHi), sLo: f(share.sLo), flow: f(share.flow) }));
+    console.log(JSON.stringify({ base, egg, fullLife: st.fullLife, infections: st.pressure.viruses, mistakes: st.mistakes, temper: st.temper, cHi: f(share.cHi), cLo: f(share.cLo), sHi: f(share.sHi), sLo: f(share.sLo), flow: f(share.flow), drops: +(SIDE_METER.drops / lives).toFixed(2), playGain: +(SIDE_METER.playGain / Math.max(1, SIDE_METER.plays)).toFixed(2), plays: +(SIDE_METER.plays / lives).toFixed(1), visits: +(SIDE_METER.visits / lives).toFixed(2) }));
   }
 }

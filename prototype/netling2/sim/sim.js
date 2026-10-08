@@ -645,6 +645,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
@@ -965,6 +966,7 @@ function stepEvents(s, t, rng) {
     s.lastSurgeAt = t;
     log(s, t, `> !! power surge. running hot.${segfaultDrop(s, rng)}`);
   } else if (!s.visit && !s.run && rebootMinutesLeft(s) === 0 && rng() < (visitMult(s) * CFG.visitChancePerHour) / 60) {
+    SIDE_METER.visits++;
     startVisit(s, t, rng);
   }
 }
@@ -1191,7 +1193,9 @@ function segfaultDrop(s, rng) {
 }
 
 function maybeDrop(s, source, chance, rng) {
-  return rng() < chance ? grantItem(s, weighted(DROPS[source], rng)) : '';
+  const hit = rng() < chance;
+  if (hit && source === 'win') SIDE_METER.drops++;
+  return hit ? grantItem(s, weighted(DROPS[source], rng)) : '';
 }
 
 // Minutes left to respond to the current timed event (0 when there is none).
@@ -1544,6 +1548,8 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       gain *= 1 + traitEffect(s, 'volatile');
       if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
+      SIDE_METER.plays++;
+      if (gain > 0) SIDE_METER.playGain += gain;
       // A lost game while overclocked costs instead of consoling.
       if (hot && !won) {
         gain = CFG.overclockLoseSync;
