@@ -41,9 +41,9 @@ export const NR2 = {
   ab: {
     insurance: { 1: { times: 1, to: 12 }, 2: { times: 2, to: 12 } }, // breachCorp (last stand)
     relayPatch: { breachCorp: { 1: 0, 2: 20 }, tuneCorp: { 1: 0, 2: 20 } }, // relays also repair this much
-    hardened: { 1: { dmg: 0.5, soft: 0 }, 2: { dmg: 0.5, soft: 1 } }, // breachStreet: ICE damage share; soft: first loss deals softMult of it
+    hardened: { 1: { dmg: 0.7, soft: 0 }, 2: { dmg: 0.65, soft: 1 } }, // breachStreet: ICE damage share; soft: first loss deals softMult of it (tuned down from 0.5 to the parity yardstick)
     softMult: 0.3,
-    phase: { 1: { free: 1, later: 0.35 }, 2: { free: 2, later: 0.35 } }, // dodgeCorp: ICE slipped for certain, then the chance
+    phase: { 1: { free: 1, later: 0.15 }, 2: { free: 1, later: 0.3 } }, // dodgeCorp: ICE slipped for certain, then the chance (tuned down from 0.35 and two free to the parity yardstick)
     unseen: { 1: 0.45, 2: 0.5 }, // dodgeStreet and hidden: chance an ICE never notices it
     checkpoint: { dodgeCorp: { 1: false, 2: true }, dodgeStreet: { 1: false, 2: true }, hidden: { 1: true, 2: true } },
     sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
