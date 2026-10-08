@@ -9,6 +9,7 @@
 import { ANCHOR_ROWS } from '../../src/sprites.js';
 import { pose } from './models.js';
 import { idMaps, nameOf } from './form-ids.js';
+import { whisperEcho } from './echo-motion.js';
 import { PROGRAM_BABY, PROGRAM_TEENS, PROGRAM_ADULTS, PROGRAM_ADULT_ANCHORS, PROGRAM_ELDERS, PROGRAM_ELDER_ANCHORS } from './program-art.js';
 
 const OLD_FORMS = {
@@ -90,6 +91,8 @@ function build(id) {
     sleep: programPose(id, frames.a, a, 'sleep'),
     dead: programPose(id, frames.a, a, 'dead'),
     anchors: { a, b: a, sleep: a },
+    // Whisper's echo (decided): a fork lagging behind it. A layer over the sprite; the frames above obey the frame rules.
+    ...(id === 'ghostElder' ? { motion: whisperEcho } : {}),
   };
 }
 let cache;

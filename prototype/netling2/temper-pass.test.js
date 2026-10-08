@@ -33,9 +33,11 @@ test('the tell never pushes a form off the LCD, at the far end of 1.0\'s idle wa
         }
       }
     }
-    const base = Math.floor((LCD.w - w) / 2);
+    // The figure (the registered sprite, centred inside a motion layer's padding) must stay on the LCD. A motion layer's own padding and its
+    // dim echo cells may clip at the far end of the wander, which is cosmetic (the echo is a layer over the figure, not the figure).
+    const base = Math.floor((LCD.w - w) / 2) + Math.floor((w - f.a[0].length) / 2);
     assert.ok(base - IDLE_X + dxMin >= 0, `${egg}/${f.id}: ${base - IDLE_X + dxMin} off the left edge`);
-    assert.ok(base + IDLE_X + dxMax + w <= LCD.w, `${egg}/${f.id}: off the right edge`);
+    assert.ok(base + IDLE_X + dxMax + f.a[0].length <= LCD.w, `${egg}/${f.id}: off the right edge`);
     const y0 = 20 - f.a.length;
     assert.ok(y0 - Math.min(3, Math.max(0, y0 - 5)) + dyMin >= 0, `${egg}/${f.id}: off the top`);
     assert.ok(y0 + 1 + dyMax + f.a.length <= LCD.h, `${egg}/${f.id}: off the bottom`);

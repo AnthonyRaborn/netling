@@ -8,6 +8,7 @@
 // are the other main teen and the hidden branch (hidden-path teen and Guru), authored only. The sketch's full tree (3 teens and 9
 // adults per egg) was prototyped earlier and is in git history at commit 580db88.
 import { idMaps, nameOf } from './form-ids.js';
+import { initEcho } from './echo-motion.js';
 import { BABY, ELDER, ELDERS, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
 // Form id -> what it is, in life order. `authoredOnly` forms exist in model B only: the composed model was rejected, so it is not
@@ -139,7 +140,8 @@ function build(id, frames, anchors, stable = false) {
   const dead = ironMarks(pose(frames.a, anchors.a.eyeRow, 'dead'), anchors.a, 'dead');
   // `stable` (the authored model): the B frame keeps the head, eyes, mouth and neck exactly where A has them and animates only the lower
   // body, so the anchors, and every wearable placed from them, do not move between frames. The composed model squashed the head.
-  return { id, ...OLD_FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: stable ? anchors.a : anchors.b, sleep: anchors.a } };
+  // Init's echo (decided): a ratchet trail, the rigid counterpart of Cipher's ghost dub. A layer over the sprite; the frames obey the frame rules.
+  return { id, ...OLD_FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: stable ? anchors.a : anchors.b, sleep: anchors.a }, ...(id === 'guruElder' ? { motion: initEcho } : {}) };
 }
 
 function framesA(id) {

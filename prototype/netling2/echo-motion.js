@@ -1,14 +1,20 @@
 // Echo layers for the hidden elders (maintainer's request after the sprite review): Wetware's Cipher has a ghost dub (blank-motion.js); Program's
-// Whisper gets a similar echo, and Iron's Init a different one, because Iron is solid and rigid. These are OPTIONS to choose from, drawn side
-// by side in echo-preview.html; none is registered on a form yet. Like blank-motion.js each is a pure function of (sprite, anchors, time) that
-// returns padded rows (a layer over the sprite, not a different sprite: the registered frames still obey the frame rules and wearables sit on
-// them), 12 steps of 400 ms, and under reduced motion a still version (the echo parked).
-//   Echo cells are dim ('x') and drawn only where the figure is empty, so the figure stays whole on top.
+// Whisper gets a similar echo, and Iron's Init a different one, because Iron is solid and rigid. Three options each were drawn side by side
+// (echo-preview.html, docs/netling2-prototypes/echo-options.png). Decided (maintainer): Whisper B, the fork lag, and Init C, the ratchet trail;
+// they are registered as `motion` on programElderHidden and ironElderHidden (program-models.js, models.js). The other options stay here for the
+// record and the preview. Like blank-motion.js each is a pure function of (sprite, anchors, time) that returns padded rows (a layer over the
+// sprite, not a different sprite: the registered frames still obey the frame rules and wearables sit on them), 12 steps of 400 ms, and under
+// reduced motion a still version (the echo parked).
+//   Echo cells are drawn only where the figure is empty, so the figure stays whole on top. They are faint on purpose (the shared dim 'x').
+//   THE KNOB for how faint: ECHO below. `cell: 'x'` is the dim cell; `cell: '#'` draws the echo in the body colour, and `pattern: 'checker'`
+//   keeps only every other cell, so a brighter but sparser echo ('#' with 'checker') is one edit. Tune it after screens, palettes, tints and
+//   wearables have been looked at together.
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 
 export const STEPS = 12;
 export const STEP_MS = FLASH_TOGGLE_MS * 2;
-export const PAD = 5;
+export const PAD = 6; // the widest echo (the ratchet's third copy) is six cells out
+export const ECHO = { cell: 'x', pattern: 'solid' };
 export const stepOf = (time) => Math.floor(Math.max(0, time) / STEP_MS) % STEPS;
 
 const pad = (sprite) => sprite.map((r) => [...('.'.repeat(PAD) + r + '.'.repeat(PAD))]);
@@ -23,10 +29,10 @@ function dub(g, src, dx, dy, mode = 'solid') {
         const edge = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([ax, ay]) => !isBody(src[y + ay]?.[x + ax]));
         if (!edge) continue;
       }
-      if (mode === 'checker' && (x + y) % 2) continue;
+      if ((mode === 'checker' || ECHO.pattern === 'checker') && (x + y) % 2) continue;
       const tx = x + dx;
       const ty = y + dy;
-      if (g[ty]?.[tx] === '.') g[ty][tx] = 'x';
+      if (g[ty]?.[tx] === '.') g[ty][tx] = ECHO.cell;
     }
   }
 }
@@ -92,3 +98,7 @@ export const IRON_OPTIONS = {
     return out(g);
   } },
 };
+
+// The two that were picked.
+export const whisperEcho = PROGRAM_OPTIONS.fork.fn;
+export const initEcho = IRON_OPTIONS.ratchet.fn;
