@@ -31,6 +31,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
 | Read the Netling 2.0 egg pressures (each egg's bar, special states, costs and benefits, play styles) | [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md) |
 | Read or edit the Netling 2.0 care wording (meters, buttons, events, items, alerts, clinic and bug statements) | [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) |
+| Read or edit the Netling 2.0 perks, lineage traits, keepsakes and the two new items (Decoy, Salvage cell) | [NETLING_2_PERKS_TRAITS_DRAFTS.md](NETLING_2_PERKS_TRAITS_DRAFTS.md) |
 | Read or edit the Netling 2.0 netrun drafts (adult abilities, elder upgrades, how the eggs differ in a run, anomalies) | [NETLING_2_NETRUN_DRAFTS.md](NETLING_2_NETRUN_DRAFTS.md) |
 | Run or read the Netling 2.0 balance simulator (core rules, archetypes, sweeps, every measured table and its limits) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 | Re-run or inspect the Netling 2.0 rule prototypes (bugs, temper, Standing, care preferences, egg page pace, elder stage and Rogue gate pace) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
