@@ -53,3 +53,5 @@
 2026-10-08T18:04:15.442Z start iron-cold-sweep
 2026-10-08T18:06:27.284Z done sides-sweep [rules] 653s
 2026-10-08T18:06:27.285Z start stat-profile
+2026-10-08T18:08:57.407Z done stat-profile [rules] 150s
+2026-10-08T18:08:57.408Z start runcost-iron
