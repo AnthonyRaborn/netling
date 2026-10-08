@@ -1,0 +1,15 @@
+{"variant":"base","archetype":"steer-tune-corp","fullLife":0.684,"collapse":0.316,"faults":0.33,"viruses":2.58,"feeds":88.6,"events":11.73}
+{"variant":"base","archetype":"ghosthunter","fullLife":0.823,"collapse":0.177,"faults":0,"viruses":6.29,"feeds":83.8,"events":11.56}
+{"variant":"base","archetype":"hunter-shown","fullLife":0.83,"collapse":0.17,"faults":0.01,"viruses":6.78,"feeds":84,"events":11.32}
+{"variant":"base","archetype":"attentive","fullLife":0.962,"collapse":0.038,"faults":0.39,"viruses":6.89,"feeds":106.3,"events":9.67}
+{"variant":"base","archetype":"sysadmin","fullLife":0.933,"collapse":0.067,"faults":0.01,"viruses":7.06,"feeds":90,"events":9.88}
+{"variant":"base","archetype":"steer-tune-street","fullLife":0.984,"collapse":0.016,"faults":0.66,"viruses":11.45,"feeds":127.1,"events":9.11}
+{"variant":"no perks","archetype":"steer-tune-corp","fullLife":0.986,"collapse":0.014,"faults":0.5,"viruses":2.73,"feeds":103.8,"events":10.01}
+{"variant":"no perks","archetype":"ghosthunter","fullLife":0.986,"collapse":0.014,"faults":0.01,"viruses":7.05,"feeds":96.6,"events":9.55}
+{"variant":"no perks","archetype":"hunter-shown","fullLife":0.985,"collapse":0.015,"faults":0.02,"viruses":7.65,"feeds":96.8,"events":9.5}
+{"variant":"no perks","archetype":"attentive","fullLife":0.986,"collapse":0.014,"faults":0.43,"viruses":7.01,"feeds":110.9,"events":9.44}
+{"variant":"no perks","archetype":"sysadmin","fullLife":0.982,"collapse":0.018,"faults":0.03,"viruses":7.69,"feeds":94.4,"events":9.8}
+{"variant":"no perks","archetype":"steer-tune-street","fullLife":0.993,"collapse":0.007,"faults":0.74,"viruses":11.31,"feeds":132.3,"events":8.94}
+{"variant":"no charge perk","archetype":"steer-tune-corp","fullLife":0.976,"collapse":0.024,"faults":0.5,"viruses":2.72,"feeds":101.3,"events":9.98}
+{"variant":"no charge perk","archetype":"ghosthunter","fullLife":0.978,"collapse":0.022,"faults":0.01,"viruses":6.8,"feeds":92.2,"events":9.75}
+{"variant":"no charge perk","archetype":"hunter-shown","fullLife":0.981,"collapse":0.019,"faults":0.02,"viruses":7.35,"feeds":92.3,"events":9.56}

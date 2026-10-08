@@ -1,0 +1,16 @@
+{"variant":"no bleed","archetype":"steer-tune-corp","fullLife":0.993,"collapse":0.007,"faults":0.5,"viruses":2.79,"feeds":98.6,"events":11.99}
+{"variant":"no bleed","archetype":"ghosthunter","fullLife":0.994,"collapse":0.006,"faults":0,"viruses":6.57,"feeds":87,"events":11.66}
+{"variant":"no bleed","archetype":"hunter-shown","fullLife":0.992,"collapse":0.008,"faults":0.01,"viruses":6.93,"feeds":87,"events":11.41}
+{"variant":"no bleed","archetype":"attentive","fullLife":0.997,"collapse":0.003,"faults":0.41,"viruses":6.93,"feeds":109.2,"events":9.54}
+{"variant":"no bleed","archetype":"sysadmin","fullLife":0.994,"collapse":0.006,"faults":0.02,"viruses":7.14,"feeds":91.1,"events":9.95}
+{"variant":"no bleed","archetype":"steer-tune-street","fullLife":0.997,"collapse":0.003,"faults":0.66,"viruses":11.43,"feeds":128.1,"events":9.14}
+{"variant":"no overflow","archetype":"steer-tune-corp","fullLife":0.675,"collapse":0.325,"faults":0.3,"viruses":2.53,"feeds":88.5,"events":10.36}
+{"variant":"no overflow","archetype":"ghosthunter","fullLife":0.858,"collapse":0.142,"faults":0,"viruses":6.34,"feeds":84.9,"events":10.42}
+{"variant":"no overflow","archetype":"hunter-shown","fullLife":0.833,"collapse":0.167,"faults":0.01,"viruses":6.75,"feeds":84.3,"events":10.04}
+{"variant":"no overflow","archetype":"attentive","fullLife":0.969,"collapse":0.031,"faults":0.4,"viruses":6.87,"feeds":106.4,"events":9.2}
+{"variant":"no overflow","archetype":"sysadmin","fullLife":0.928,"collapse":0.072,"faults":0.01,"viruses":7.02,"feeds":89.9,"events":9.39}
+{"variant":"no overflow","archetype":"steer-tune-street","fullLife":0.983,"collapse":0.017,"faults":0.66,"viruses":11.42,"feeds":126.9,"events":8.84}
+{"variant":"no pressure","archetype":"steer-tune-corp","fullLife":0.999,"collapse":0.001,"faults":0.43,"viruses":2.49,"feeds":100,"events":8.78}
+{"variant":"no pressure","archetype":"ghosthunter","fullLife":0.998,"collapse":0.002,"faults":0,"viruses":6.81,"feeds":88.7,"events":9.06}
+{"variant":"no pressure","archetype":"hunter-shown","fullLife":0.998,"collapse":0.002,"faults":0,"viruses":7.23,"feeds":89,"events":8.77}
+{"variant":"no pressure","archetype":"attentive","fullLife":0.998,"collapse":0.002,"faults":0.41,"viruses":6.75,"feeds":109.6,"events":8.64}
