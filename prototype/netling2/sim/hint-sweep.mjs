@@ -14,7 +14,7 @@ const med = (a) => (a.length ? a.sort((x, y) => x - y)[Math.floor(a.length / 2)]
 for (const base of bases) {
   let last = null;
   globalThis.__sample = (s) => { last = s; };
-  const out = { fired: { charge: 0, sync: 0 }, entered: { charge: 0, sync: 0 }, firedThenEntered: { charge: 0, sync: 0 }, enteredNoHint: { charge: 0, sync: 0 }, both: 0, day: { charge: [], sync: [] }, lead: { charge: [], sync: [] } };
+  const out = { fired: { charge: 0, sync: 0 }, entered: { charge: 0, sync: 0 }, firedThenEntered: { charge: 0, sync: 0 }, enteredNoHint: { charge: 0, sync: 0 }, both: 0, asBaby: { charge: 0, sync: 0 }, day: { charge: [], sync: [] }, lead: { charge: [], sync: [] } };
   for (let i = 1; i <= lives; i++) {
     last = null;
     simulate({ ...ARCHETYPES[base] }, i);
@@ -24,11 +24,12 @@ for (const base of bases) {
     for (const k of ['charge', 'sync']) {
       if (h[k] !== null) { out.fired[k]++; out.day[k].push(h[k] / 1440); }
       if (e[k] !== null) out.entered[k]++;
+      if (e[k] !== null && s?.life && e[k] < s.life.teenAt) out.asBaby[k]++;
       if (h[k] !== null && e[k] !== null) { out.firedThenEntered[k]++; out.lead[k].push((e[k] - h[k]) / 60); }
       if (h[k] === null && e[k] !== null) out.enteredNoHint[k]++;
     }
     if (h.charge !== null && h.sync !== null) out.both++;
   }
   const pct = (n) => `${Math.round((100 * n) / lives)}%`;
-  console.log(base.padEnd(14), ['charge', 'sync'].map((k) => `${k}: caption ${pct(out.fired[k])} (median day ${med(out.day[k])?.toFixed(1) ?? '-'}), state reached ${pct(out.entered[k])}, state without a caption ${pct(out.enteredNoHint[k])}, hours from caption to state ${med(out.lead[k])?.toFixed(1) ?? '-'}`).join(' | '), `| both bars ${pct(out.both)}`);
+  console.log(base.padEnd(14), ['charge', 'sync'].map((k) => `${k}: caption ${pct(out.fired[k])} (median day ${med(out.day[k])?.toFixed(1) ?? '-'}), state reached ${pct(out.entered[k])} (first reached as a baby ${pct(out.asBaby[k])}), state without a caption ${pct(out.enteredNoHint[k])}, hours from caption to state ${med(out.lead[k])?.toFixed(1) ?? '-'}`).join(' | '), `| both bars ${pct(out.both)}`);
 }

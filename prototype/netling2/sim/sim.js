@@ -682,7 +682,7 @@ function stepHeld(s, rest) {
       }
       // The one-time pre-state caption: once a netling, for this bar, after hintMin minutes of building toward the state.
       s.hintAt ??= { charge: null, sync: null };
-      if (!s.sideHeld[key] && s.stage !== 'baby' && s.sideHold[key] >= (SIDES[key].hintMin ?? 120) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin; // never as a baby
+      if (!s.sideHeld[key] && s.heldAt?.[key] == null && s.stage !== 'baby' && s.sideHold[key] >= (SIDES[key].hintMin ?? 120) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin; // never as a baby
     }
   }
 }
