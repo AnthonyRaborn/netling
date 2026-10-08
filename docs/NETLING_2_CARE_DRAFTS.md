@@ -200,7 +200,7 @@ Seams do not move, so they carry no flash risk and need no calm version. Titles:
 
 **Mark colors (proposal, measured).** Overclock keeps 1.0's orange `#ff9f1c`. Overdrive's sparks are white `#ffffff` and Overlink's dots sky blue `#4dabff` (`prototype/netling2/mark-colors.mjs`, `MARK_COLORS` in `marks.js`). Why: the six body palettes use cyan, magenta, yellow, green, purple and pale lilac for body and accents, and Flow's outline takes the palette accent, so the marks need hues that are not body colors: orange is taken by Overclock, and of the candidates tried white and sky blue were the pair with the largest worst-case separation (CIE76 distance 49 at the closest pair, over normal vision and protan, deutan and tritan simulations; 6.8:1 contrast on the LCD, against the 3:1 asked of non-text marks). The marks also differ by place (above, below, beside) and by motion, so color is never the only signal. White is also the body's small highlight color (the `+` marks); the sparks sit below the feet, outside the body, so they do not read as part of it. Preview: `docs/netling2-prototypes/state-mark-colors.png` (stand-in blocks in each palette, four vision modes), source `marks-preview.html`. Not seen on a device or against real sprites.
 
-Open: whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); the pre-state caption (drafted below, Pre-state caption).
+Open: whether Iron's seams need a design pass per form (drafted by a placement rule on all 22 forms, `prototype/netling2/seams.js`, for review; hand overrides go in its `OVERRIDES`); the pre-state caption (drafted below, Pre-state caption).
 
 ## Temper and the states (drafts, first pass)
 
