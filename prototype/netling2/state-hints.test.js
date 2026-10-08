@@ -30,6 +30,12 @@ test('the caption is due once, after the build time, and only when nothing urgen
   assert.equal(hintDue({ buildMin: 200, shown: false, busy: true }), false);
 });
 
+test('the caption never shows to a baby, and shows as soon as the teen stage begins if the bar has already built', () => {
+  assert.equal(hintDue({ buildMin: 500, shown: false, busy: false, stage: 'baby' }), false);
+  assert.equal(hintDue({ buildMin: 500, shown: false, busy: false, stage: 'teen' }), true);
+  assert.equal(hintDue({ buildMin: 500, shown: false, busy: false, stage: 'adult' }), true);
+});
+
 test('the Overclock captions (every egg) and the Iron wear caption keep the house rules and give nothing away', () => {
   const all = [...EGGS.flatMap((egg) => OVERCLOCK_HINTS[egg]), ...IRON_WEAR_HINT];
   assert.equal(OVERCLOCK_HINTS.iron.length, 2);

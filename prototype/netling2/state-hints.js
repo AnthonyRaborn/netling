@@ -17,14 +17,14 @@ export const STATE_HINTS = {
   },
 };
 
-// Whether to show the caption now: the bar has built for hintMin minutes, this netling has not seen it for this bar, and nothing more
-// urgent is on screen (an alert, an event, a request, a visit, a run, a nap or sleep).
-export function hintDue({ buildMin, shown, busy, hintMin = 120 }) {
-  return !shown && !busy && buildMin >= hintMin;
+// Whether to show the caption now: the netling is a teen or later (never as a baby, decided), the bar has built for hintMin minutes,
+// this netling has not seen it for this bar, and nothing more urgent is on screen (an alert, an event, a request, a visit, a run, a nap or sleep).
+export function hintDue({ buildMin, shown, busy, hintMin = 120, stage = 'teen' }) {
+  return !shown && !busy && stage !== 'baby' && buildMin >= hintMin;
 }
 
 // Heat is different: Overclock has no hold (it starts the moment Heat reaches the line and the OC label shows), so its caption is shown
-// once per netling the first time it is overclocked, not before. Iron alone also gets a wear caption the first time its wear passes
+// once per netling the first time it is overclocked at the teen stage or later (never as a baby), not before. Iron alone also gets a wear caption the first time its wear passes
 // the warning line (hidden wear; the cold side is covered by the same line).
 export const OVERCLOCK_HINTS = {
   program: ['it is running hot.', 'wins find more, but a loss costs it.'],
