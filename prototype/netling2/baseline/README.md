@@ -60,6 +60,46 @@ Full tables: `summary-balance.md`.
 3. **Iron helps the worker** (82.9 to 89.5) and the sparse human archetypes (+4 to +6). Not investigated.
 4. **Wetware moves almost nothing** on full life. Its cost shows in infections (the `viruses` column of `summary-balance.md`); I did not tabulate temper.
 
+## Follow-up: Program and the Charge-drain perks
+
+Scripts: `sim/program-perk-sweep.mjs` (one factor at a time) and `sim/program-bot-sweep.mjs` (players who mind the cost, `PROGBOT=avoid|watch` in `sim/balance.mjs`). Rows: `results/followup/`. 1000 lives each, Program's final design, `NR2=all PERKS=1`.
+
+**Which factor.** Full life, percent:
+
+| variant | tune-corp | ghosthunter | hunter-shown | attentive | sysadmin | tune-street |
+|---|---:|---:|---:|---:|---:|---:|
+| base | 68.4 | 82.3 | 83.0 | 96.2 | 93.3 | 98.4 |
+| no perks | 98.6 | 98.6 | 98.5 | 98.6 | 98.2 | 99.3 |
+| no Charge perk (Tune corp and hidden set to 1) | 97.6 | 97.8 | 98.1 | 98.9 | 96.8 | 98.4 |
+| no Overdrive bleed | 99.3 | 99.4 | 99.2 | 99.7 | 99.4 | 99.7 |
+| no overflow multiplier | 67.5 | 85.8 | 83.3 | 96.9 | 92.8 | 98.3 |
+| no pressure | 99.9 | 99.8 | 99.8 | 99.8 | 99.9 | 99.6 |
+
+The Integrity bleed is the damage and the Charge-drain perks (Tune corp 0.8, hidden 0.85) are what keep the bots in Overdrive long enough for it to matter. The overflow multiplier plays no part. (The "no perks" variant leaves the perk-dependent drop tables in place, which are fixed at import.)
+
+**A player who minds the cost** (perks on; benefits are per life):
+
+| archetype | bot | full life % | in Overdrive % | win drops | play gain | faults |
+|---|---|---:|---:|---:|---:|---:|
+| steer-tune-corp | greedy (the default bot) | 68.4 | 33.6 | 20.8 | 1661 | 0.33 |
+| steer-tune-corp | watch | 99.2 | 18.4 | 18.0 | 1530 | 0.42 |
+| steer-tune-corp | avoid | 100.0 | 0.0 | 13.7 | 1305 | 0.75 |
+| ghosthunter | greedy | 82.3 | 29.3 | 28.9 | 2327 | 0.00 |
+| ghosthunter | watch | 97.9 | 15.5 | 25.7 | 2194 | 0.02 |
+| ghosthunter | avoid | 99.9 | 0.0 | 21.2 | 1977 | 0.47 |
+| attentive | greedy | 96.2 | 12.2 | 16.9 | 1500 | 0.39 |
+| attentive | watch | 99.6 | 8.1 | 16.2 | 1458 | 0.49 |
+| attentive | avoid | 100.0 | 0.0 | 14.2 | 1380 | 0.95 |
+| sysadmin | greedy | 93.3 | 13.1 | 19.1 | 1712 | 0.01 |
+| sysadmin | watch | 98.7 | 8.7 | 18.4 | 1681 | 0.04 |
+| sysadmin | avoid | 99.7 | 0.0 | 17.2 | 1656 | 0.83 |
+
+Reading:
+- A player who stops feeding when Integrity falls under 70 (`watch`) survives in 98% to 99% of lives and keeps about 87% to 92% of the win drops and play gain. For that player the finding mostly goes away.
+- A player who never enters the state (`avoid`) survives about as often, gives up a third of the win drops (tune-corp 13.7 against 20.8), and takes more faults (0.75 against 0.33) because Charge sits lower between check-ins.
+- A player who ignores the cost (the default bot) still loses 18 to 32 points as Tune corp or the hidden form. That is the worst case, not the typical one.
+- Assumptions: the 70 threshold for `watch`, and that the player understands the state and its cost at all. The thresholds are hidden by design (`docs/NETLING_2_EGG_PRESSURES.md`), so a first-time player is the greedy case once.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |
