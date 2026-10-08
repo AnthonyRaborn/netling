@@ -10,6 +10,8 @@
     "smoke": "node tools/smoke.mjs",
     "proto:test": "TZ=UTC node --test --test-timeout=60000 'prototype/netling2/*.test.js'",
     "proto:balance": "node prototype/netling2/sim/balance.mjs",
+    "proto:netrun": "node prototype/netling2/sim/netrun-sweep.mjs",
+    "proto:lineage": "node prototype/netling2/sim/lineage-sweep.mjs",
     "proto:audit": "node prototype/netling2/audit.mjs",
     "proto:audit:program": "EGG=program node prototype/netling2/audit.mjs",
     "proto:audit:wetware": "EGG=wetware node prototype/netling2/audit.mjs",

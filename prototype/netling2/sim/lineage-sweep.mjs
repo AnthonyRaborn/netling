@@ -5,7 +5,7 @@
 //   feat gets easier with every elder the account has (the four tiers below; the first is 1.0's).
 //   Not modelled: the 22 Root pages are 1.0's (the 2.0 list has 24 Root and 15 late pages, whose regions are not in the fork), 2.0 abilities
 //   unless NR2 is set (NR2=all switches on the abilities, tiers and light costs), and the harder-ICE shares unless NR2 sets them.
-// Env: TIER=off keeps 1.0's feat for every elder (the old tables); ROLE, HID set the page rates; CAP the codex cap; JSON=1.
+// Env: FEATS=1.0 keeps 1.0's feat for every elder (the old tables; not the ICE tiers, which are NR2 tiers); ROLE, HID set the page rates; CAP the codex cap; JSON=1.
 process.env.TZ = 'UTC';
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
 const { CFG, lineOf } = await import('./sim.js');
@@ -25,7 +25,7 @@ function lineage(seed, fresh) {
   let rootLife = fresh ? null : 0;
   const owned = new Set(); // this egg's elders
   let tierUsed = 1;
-  CFG.featFor = process.env.TIER === 'off' ? null : (s) => {
+  CFG.featFor = process.env.FEATS === '1.0' ? null : (s) => {
     const tier = owned.has(lineOf(s.form)) ? 4 : owned.size ? 3 : fresh ? 1 : 2;
     tierUsed = tier;
     return LADDER[tier];
@@ -87,7 +87,7 @@ const rootLives = e1.map((l) => l.rootLife).filter((x) => x !== null);
 const elderShare = (pool) => pool.filter((r) => r.elder).length / pool.length;
 const firstElder = e1.map((l) => l.lives.findIndex((r) => r.elder) + 1).filter((x) => x > 0);
 const out = {
-  archetype: name, lineages: n, lives, role: ROLE, hidden: HID, cap: RUN_CFG.codexPerLife, tiers: process.env.TIER !== 'off',
+  archetype: name, lineages: n, lives, role: ROLE, hidden: HID, cap: RUN_CFG.codexPerLife, tiers: process.env.FEATS !== '1.0',
   rootLifeMedian: rootLives.length ? q(rootLives, 0.5) : null, rootReached: rootLives.length / n,
   firstElderLifeMedian: firstElder.length ? q(firstElder, 0.5) : null, firstElderReached: firstElder.length / n,
   elderShareAfterRoot: { egg1: +elderShare(p1).toFixed(2), later: +elderShare(p2).toFixed(2) },

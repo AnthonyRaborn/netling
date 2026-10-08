@@ -372,3 +372,32 @@ test('Root Access arrives mid-life by default (the game\'s rule), and the codex 
   assert.equal(CFG.rootMid, true);
   assert.equal(RUN_CFG.codexPerLife, 12);
 });
+
+test('the daily trace rolls the ICE tier from the node alone, so every player meets the same tiers', () => {
+  set({ tiers: true, tier: { share: { daily: 0.5 } } });
+  const walk = (seed, form, day = '2026-10-05') => {
+    const rng = mulberry32(seed);
+    const s = createScript({ now: 0, rng });
+    s.stage = 'adult';
+    s.form = form;
+    Object.assign(s.stats, { charge: 100, integrity: 100, heat: 0 });
+    startRun(s, 'daily', rng, [], [], { day });
+    const seen = [];
+    let guard = 0;
+    while (s.run.phase !== 'done' && guard++ < 80) {
+      if (s.run.phase === 'ice') { seen.push([s.run.pos, s.run.pending.tier]); resolveIce(s, true, rng); }
+      else if (s.run.phase === 'choice') { choose(s, 'continue', rng); }
+      else moveTo(s, runOptions(s.run)[0].id, rng);
+      s.stats.charge = 100;
+      s.stats.integrity = 100;
+    }
+    return seen;
+  };
+  const days = Array.from({ length: 12 }, (_, i) => `2026-10-${String(i + 1).padStart(2, '0')}`);
+  const a = days.flatMap((d) => walk(1, 'breachCorp', d));
+  const b = days.flatMap((d) => walk(2, 'feastStreet', d));
+  assert.ok(a.length > 0);
+  assert.deepEqual(a, b, 'different rng, different form, same tiers at the same nodes');
+  assert.ok(a.some(([, t]) => t === 2) && a.some(([, t]) => t === 1), 'a mix of both tiers');
+  reset();
+});

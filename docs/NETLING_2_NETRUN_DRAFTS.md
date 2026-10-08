@@ -177,6 +177,8 @@ Decided (maintainer, this stretch): Rogue is a line that escaped on its own from
 
 ## 9. Measuring it
 
+**Status (this stretch):** the fork now carries these rules as switches (`prototype/netling2/sim/netrun/nr2.js`, off by default), with tests (`nr2.test.js`) and three tools (`netrun-sweep.mjs`, `lineage-sweep.mjs`, `grace-sweep.mjs`). First results, the audit of which older sims are stale and which tools test which open question are in `prototype/netling2/notes/netrun-sim-notes.md`. Headlines: with every number at 1.0's value the abilities are far from parity (forms without a defensive hook sit near the no-ability disconnect rate), the elder level is too weak, the forced cache costs 3 to 11 points of disconnect rate when it may displace the relay, and ICE tiers at speed alone barely move the shallow regions. All starting values are untuned.
+
 The fork already carries the netrun rules: `prototype/netling2/sim/netrun/run.js` (1.0's `run.js` plus the clinic), with `sim/netrun-bot.mjs` and `sim/balance.mjs`. Plan:
 1. Keep abilities as constants beside `RUN_CFG`, like 1.0, so the bots can read them.
 2. Port `tools/netrun-bot.mjs`'s styles for the new abilities: sight and avoidance already work through `visibleNodeIds` and `moveToNode`; abilities that act on choices (markets, scrip) need bot support first. 1.0's bots never took contracts, so contract-dependent abilities cannot be measured until a bot does.
