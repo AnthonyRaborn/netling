@@ -1,5 +1,5 @@
 // The one-time pre-state caption (docs/NETLING_2_CARE_DRAFTS.md, Pre-state caption): how often it would show, and when, against the
-// state it is meant to teach. The caption fires once a netling per bar after SIDES.<bar>.hintMin (60) minutes of building toward the
+// state it is meant to teach. The caption fires once a netling per bar after SIDES.<bar>.hintMin (120) minutes of building toward the
 // state. Final egg-pressure design, owner multiplier 3, default bots. Usage: node prototype/netling2/sim/hint-sweep.mjs [lives=200] [bases]
 process.env.TZ = 'UTC';
 const lives = Number(process.argv[2] ?? 200);
@@ -8,6 +8,7 @@ const { ARCHETYPES, simulate } = await import('./balance.mjs');
 const { SIDES, IRON } = await import('./sim.js');
 Object.assign(SIDES.charge, { hi: 80, hold: 180, exit: 65, gate: 0, slow: 0, bleed: 8, overflow: 2, playGain: 0.45, drop: 0.75 });
 Object.assign(SIDES.sync, { hi: 85, hold: 180, exit: 70, swing: 0, steadyDecay: 0, calm: 0, dull: 0.3, virus: 1.2, visit: 0.75, drop: 0.75, penStep: 0.1, penFree: 90, penCap: 0.9, burnN: 2, burnCool: 1440 });
+SIDES.charge.hintMin = SIDES.sync.hintMin = Number(process.env.HINT_MIN ?? 120);
 SIDES.on = true; SIDES.owner = null; SIDES.ownerMult = 3; IRON.on = false;
 const med = (a) => (a.length ? a.sort((x, y) => x - y)[Math.floor(a.length / 2)] : null);
 for (const base of bases) {

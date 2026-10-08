@@ -198,7 +198,7 @@ Seams do not move, so they carry no flash risk and need no calm version. Titles:
 
 **Mark colors (proposal, measured).** Overclock keeps 1.0's orange `#ff9f1c`. Overdrive's sparks are white `#ffffff` and Overlink's dots sky blue `#4dabff` (`prototype/netling2/mark-colors.mjs`, `MARK_COLORS` in `marks.js`). Why: the six body palettes use cyan, magenta, yellow, green, purple and pale lilac for body and accents, and Flow's outline takes the palette accent, so the marks need hues that are not body colors: orange is taken by Overclock, and of the candidates tried white and sky blue were the pair with the largest worst-case separation (CIE76 distance 49 at the closest pair, over normal vision and protan, deutan and tritan simulations; 6.8:1 contrast on the LCD, against the 3:1 asked of non-text marks). The marks also differ by place (above, below, beside) and by motion, so color is never the only signal. White is also the body's small highlight color (the `+` marks); the sparks sit below the feet, outside the body, so they do not read as part of it. Preview: `docs/netling2-prototypes/state-mark-colors.png` (stand-in blocks in each palette, four vision modes), source `marks-preview.html`. Not seen on a device or against real sprites.
 
-Open: whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted).
+Open: whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); the pre-state caption (drafted below, Pre-state caption).
 
 ## Temper and the states (drafts, first pass)
 
@@ -218,6 +218,24 @@ What a player can read: a steady beat with steady marks (calm and in a state); a
 Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
 
 Archive hints and chatter lines for the states are drafted in `NETLING_2_CODEX_DRAFTS.md`, State chatter and Archive hints. Open: whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
+
+## Pre-state caption (draft, first pass)
+
+Decided (maintainer): one caption per netling, not one per player (the easier version), because vpets are played in short sessions and a new netling is a fresh start. A per-life or per-state countdown stays out (it would give the hold time away).
+
+- **What it is.** A two-line caption on the home screen in the style of 1.0's first-run tips, shown once per netling per bar (so at most two a life): one for Charge, one for Sync. It names no state, no number and no time. Lines are in `prototype/netling2/state-hints.js`:
+
+| | Charge | Sync |
+|---|---|---|
+| Program | charge is holding steady. / keep it up and something may change. | sync is holding steady. / keep it up and something may change. |
+| Iron | power is holding steady. / keep it up and something may change. | the lock is holding steady. / keep it up and something may change. |
+| Wetware | it is well fed and doing well. / keep it up and something may change. | the bond is holding strong. / keep it up and something may change. |
+
+- **When.** After 120 minutes of building toward the state (a bar at or over its entry level, dips above the exit level allowed), the state not yet on, this netling not yet shown the caption for that bar, and nothing more urgent on screen (an alert, event, request, visit, run, nap or sleep). A new netling resets it. The state it points to needs 180 minutes, so the caption comes two thirds of the way.
+- **Save.** A per-netling flag for each bar, default false, needs a default in `createScript`, `migrate` and `cleanSave` (the 2.0 app's equivalents of 1.0's rules).
+- **Measured (`sim/hint-sweep.mjs`, final pressure design, default bots, 100 to 150 lives each, simulator only).** At 120 minutes: attentive, sysadmin and daredevil see both captions in every life and reach the state 99% to 100% of the time (Charge) and 93% to 100% (Sync), about 2 hours after the Charge caption and 2 to 18 hours after the Sync caption. Casual and worker players never see a caption (0%) and never reach a state. Human-regular players see the Charge caption in 23% of lives (reaching the state in 1%) and the Sync caption in 3%. Overclocker players see Sync in 7%, never reaching it. At 60 minutes the promise went unkept too often (casual 11% to 29%, human-regular 69% to 85% with almost no state reached), and at 150 the lead time dropped to under an hour; 120 is the compromise.
+- **Reading it.** The caption mostly reaches the players who can reach the state, which is the point. A small share of occasional players see a caption for a state they will not reach. For attentive players the caption appears on the first day (median day 0.2 to 0.5), so while the netling is still a baby; whether it should wait for the teen stage is open, unmeasured.
+- **Not done.** The caption's look and timing on screen, a device check, a playtest, and wiring any flag.
 
 ## Clinic and bug statements (drafts, first pass)
 

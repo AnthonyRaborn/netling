@@ -650,7 +650,7 @@ export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
-  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, hintMin: 60, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
+  sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, hintMin: 120, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
@@ -681,7 +681,7 @@ function stepHeld(s, rest) {
       }
       // The one-time pre-state caption: once a netling, for this bar, after hintMin minutes of building toward the state.
       s.hintAt ??= { charge: null, sync: null };
-      if (!s.sideHeld[key] && s.sideHold[key] >= (SIDES[key].hintMin ?? 60) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin;
+      if (!s.sideHeld[key] && s.sideHold[key] >= (SIDES[key].hintMin ?? 120) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin;
     }
   }
 }
