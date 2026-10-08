@@ -1553,6 +1553,16 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       gain *= 1 + traitEffect(s, 'volatile');
       if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
       SIDE_METER.plays++;
+      // Graduated penalty (penStep > 0): inside Wired, plays below penFree are free; each play at penFree or over adds penStep to the
+      // infection chance (x owner multiplier, capped at penCap) until the state ends.
+      if (SIDES.on && SIDES.sync.penStep > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
+        s.wiredOver = (s.wiredOver ?? 0) + 1;
+        if (!s.virus && !shielded(s) && rng() < Math.min(SIDES.sync.penCap, SIDES.sync.penStep * s.wiredOver * sideM('sync'))) {
+          SIDE_METER.penHits++;
+          infect(s, SIDES.sync.penDmg);
+          log(s, now, '> too wired to play. !! virus signature detected.');
+        }
+      }
       // Burnout (burnN > 0): inside Wired, burnN plays at penFree or over end the state, and it cannot be re-entered for burnCool minutes.
       if (SIDES.on && SIDES.sync.burnN > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
         s.burnCount = (s.burnCount ?? 0) + 1;
@@ -1563,16 +1573,6 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
           s.burnUntil = s.ageMin + SIDES.sync.burnCool;
           SIDE_METER.burns++;
           log(s, now, '> burned out. too wired for too long.');
-        }
-      }
-      // Graduated penalty (penStep > 0): inside Wired, plays below penFree are free; each play at penFree or over adds penStep to the
-      // infection chance (x owner multiplier, capped at penCap) until the state ends.
-      if (SIDES.on && SIDES.sync.penStep > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
-        s.wiredOver = (s.wiredOver ?? 0) + 1;
-        if (!s.virus && !shielded(s) && rng() < Math.min(SIDES.sync.penCap, SIDES.sync.penStep * s.wiredOver * sideM('sync'))) {
-          SIDE_METER.penHits++;
-          infect(s, SIDES.sync.penDmg);
-          log(s, now, '> too wired to play. !! virus signature detected.');
         }
       }
       // Playing while Sync is at penLine or over risks an infection (penP x owner multiplier): too wired to play safely.
