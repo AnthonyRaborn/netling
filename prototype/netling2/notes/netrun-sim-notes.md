@@ -140,6 +140,17 @@ Findings:
 - **Still short:** Feast corp in the Source, adult 77% and elder 78% of the mean value. The cause is survival (57% disconnects there against about 40% for the mean), not loot.
 - **The exit-rate bar cannot be met by a loot form.** Feast forms exit 22% of Deep runs against a 33% mean, because they have nothing that keeps them alive. That also lowers how often a Feast netling meets the elder feat. Options: relax the exit bar for forms without a defensive part; or add a small sustain part. The sustain part was measured: a won ICE restoring 12 Integrity at the elder level (6 at the adult level) takes Feast street to 101 / 96 / 105 / 96% and lifts its Deep exit rate to 24 / 29% and its Source elder exit rate to 12.6%. `ab.scavenge[level].winHeal` holds it (set to 0, off) for the maintainer to decide.
 
+**Forced cache count (decided: one a run; re-run after the maintainer asked whether one was enough).** The "Chosen" row above set three a run while tuning Feast, before the relay rule and the later changes; `nr2.js` has carried `perRun: 1` since. Re-run with `netrun-sweep.mjs` (800 runs a cell, careful, abilities and tiers on, all nine forms, `forcedCache.perRun` 0, 1, 2, 3; `CASES` as in the usage line). Feast corp elder, banked value as a share of the nine elders' mean, with its disconnect rate:
+
+| Caches a run | Public | Bazaar | Corp | Ruins | Deep | Source |
+|---|---|---|---|---|---|---|
+| none | 131% | 136% | 128% | 113% | 98% (36.5% disc) | 95% (51.9%) |
+| 1 | 157% | 164% | 153% | 129% | 118% (35.8%) | 103% (53.4%) |
+| 2 | 170% | 178% | 171% | 136% | 130% (32.8%) | 111% (51.8%) |
+| 3 | 170% | 178% | 171% | 136% | 130% (32.8%) | 117% (50.5%) |
+
+Two and three are the same everywhere but the Source, because the shorter maps run out of middle layers. One keeps Feast corp inside the 20% band in the Deep and the Source, which is where the bar is set; two takes the Deep to 130% for 3 points less disconnect. The excess in the shallow regions comes mostly from the concession and the exit item, not the cache (none is already 113 to 136%). The Source figure with one cache is 103%, not the 78% of the "Chosen" row: the Feast tuning and the Source sustain changed since, so do not read that row as current. Not covered: bots only, one skill number, careful play.
+
 Tune forms, per the maintainer's note: Tune corp (types two steps ahead, relay patch at the elder level) is 20% or more below the mean in the Deep at the adult level and at the elder level; Tune street at the adult level (Foresight, which the bots cannot use) is low in both regions, as expected. These are not a tuning target for the bots: the read-out is a floor for them, and the real check is a playtest of what the extra information does for a person. The fog change (lines only from the current node, elder sight showing lines) makes sight worth more to a human and nothing to a bot, so it widens this gap.
 
 Remaining outliers on the yardstick (800 runs): Breach street is more than 20% above the mean at both levels in the Deep and the Source (it is the strongest form); the hidden form is high at the adult level; Dodge corp is high at some cells; Tune corp and Tune street are low. These are the next things to tune once the Feast question (sustain or a relaxed exit bar) is answered.
