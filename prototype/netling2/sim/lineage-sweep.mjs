@@ -12,16 +12,24 @@ process.env.TZ = 'UTC';
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
 const { CFG, lineOf } = await import('./sim.js');
 const { RUN_CFG } = await import('./netrun/run.js');
-const { ROOT_FRAGMENT_IDS, FRAGMENTS } = await import('./codex2.js');
+const { ROOT_FRAGMENT_IDS, FRAGMENTS, EGG_PAGES } = await import('./codex2.js');
+const { NR2 } = await import('./netrun/nr2.js');
 
 const [name, n = 200, lives = 10] = [process.argv[2], Number(process.argv[3] ?? 200), Number(process.argv[4] ?? 10)];
 if (!ARCHETYPES[name]) throw new Error(`unknown archetype ${name}`);
 const ROLE = Number(process.env.ROLE ?? 0.2), HID = Number(process.env.HID ?? 0.5);
+// The egg pages drop for real in the runs (NR2.eggPages, decided rates; ROLE and HID override them). The older roll model, which resampled
+// the same lives' run counts, is kept beside it ("rolls") for comparison.
+Object.assign(NR2.eggPages, { on: true, role: ROLE, hidden: HID });
 if (process.env.CAP) RUN_CFG.codexPerLife = Number(process.env.CAP);
 const LADDER = { 1: [3, 2], 2: [2, 99], 3: [2, 1], 4: [1, 99] }; // tier 1 first elder of the account, 2 any elder in the Dex, 3 an elder of this egg, 4 this very elder
 
 // One egg's lineage. fresh: empty codex and no Root (egg 1); otherwise Root held and the codex full, with an elder already in the account.
 function lineage(seed, fresh) {
+  const egg = fresh ? 'program' : 'iron'; // the eggs share every rule here, so later eggs differ only by their own empty page list
+  const mine = [...EGG_PAGES[egg].role, ...EGG_PAGES[egg].hidden, ...EGG_PAGES[egg].source];
+  let eggPages = [];
+  let pagesLife = null; // the first life in which this egg holds all six of its pages
   let codex = fresh ? [] : [...ROOT_FRAGMENT_IDS];
   let fragment = null;
   let rootLife = fresh ? null : 0;
@@ -37,8 +45,10 @@ function lineage(seed, fresh) {
   const rows = [];
   for (let gen = 1; gen <= lives; gen++) {
     tierUsed = fresh && !owned.size ? 1 : 2;
-    const r = simulate({ ...ARCHETYPES[name] }, seed * 1000 + gen, { fragment, generation: gen, codex, rootAccess: rootLife !== null });
+    const r = simulate({ ...ARCHETYPES[name] }, seed * 1000 + gen, { fragment, generation: gen, codex, rootAccess: rootLife !== null, egg, eggPages });
     codex = r.codex;
+    eggPages = r.eggPages;
+    if (pagesLife === null && mine.every((id) => eggPages.includes(id))) pagesLife = gen;
     fragment = r.fragment;
     if (rootLife === null && ROOT_FRAGMENT_IDS.every((id) => codex.includes(id))) rootLife = gen;
     sourceExit ||= r.cleared.includes('source');
@@ -55,7 +65,7 @@ function lineage(seed, fresh) {
     });
   }
   CFG.featFor = null;
-  return { rootLife, endingLife, lives: rows };
+  return { rootLife, endingLife, pagesLife, lives: rows };
 }
 
 // A tiny seeded generator for the page rolls (the lives above are seeded already).
@@ -84,17 +94,27 @@ function egg(seq, pool) {
 const T = 4000, first = [], total = [];
 const rogue = [];
 let endingCensored = 0;
+// Real drops: an egg that has not finished its pages within `lives` is counted at lives + 1 (a lower bound), and the share is reported.
+const dFirst = [], dTotal = [], dRogue = [];
+let pagesCensored = 0;
+const pagesAt = (L) => { if (L.pagesLife === null) pagesCensored++; return L.pagesLife ?? lives + 1; };
 for (let t = 0; t < T; t++) {
   const L1 = e1[Math.floor(rnd() * e1.length)];
+  const L2 = later[Math.floor(rnd() * later.length)];
+  const L3 = later[Math.floor(rnd() * later.length)];
   const a = egg(L1.lives, p1);
-  const b = egg(later[Math.floor(rnd() * later.length)].lives, p2);
-  const c = egg(later[Math.floor(rnd() * later.length)].lives, p2);
+  const b = egg(L2.lives, p2);
+  const c = egg(L3.lives, p2);
   first.push(a);
   total.push(a + b + c);
   // The ending comes in egg 1's lineage; a line that has not reached it within `lives` is counted at lives + 1 (a lower bound).
   const end = L1.endingLife ?? lives + 1;
   if (L1.endingLife === null) endingCensored++;
   rogue.push(Math.max(a + b + c, end));
+  const da = pagesAt(L1), db = pagesAt(L2), dc = pagesAt(L3);
+  dFirst.push(da);
+  dTotal.push(da + db + dc);
+  dRogue.push(Math.max(da + db + dc, end)); // as for the rolls: lives from life 1 of egg 1, the ending in egg 1's lineage
 }
 const by = (k) => Math.round((100 * total.filter((x) => x <= k).length) / T);
 const endLives = e1.map((l) => l.endingLife).filter((x) => x !== null);
@@ -110,6 +130,17 @@ const out = {
   ending: { median: endLives.length ? q(endLives, 0.5) : null, p90: endLives.length ? q(endLives, 0.9) : null, reached: endLives.length / n },
   rogueGate: { median: q(rogue, 0.5), p10: q(rogue, 0.1), p90: q(rogue, 0.9), censored: endingCensored / T, endingLater: rogue.filter((x, i) => x > total[i]).length / T },
   threeEggs: { median: q(total, 0.5), p10: q(total, 0.1), p90: q(total, 0.9), by6: by(6), by8: by(8), by10: by(10) },
+  drops: {
+    egg1: { median: q(dFirst, 0.5), p90: q(dFirst, 0.9) },
+    threeEggs: { median: q(dTotal, 0.5), p10: q(dTotal, 0.1), p90: q(dTotal, 0.9) },
+    rogueGate: { median: q(dRogue, 0.5), p10: q(dRogue, 0.1), p90: q(dRogue, 0.9) },
+    eggCensored: pagesCensored / (3 * T),
+    perEgg: { egg1: e1.filter((l) => l.pagesLife !== null).length / n, later: later.filter((l) => l.pagesLife !== null).length / n },
+  },
 };
 if (process.env.JSON) console.log(JSON.stringify(out));
-else console.log(`${name.padEnd(10)} cap ${out.cap} role ${ROLE} hid ${HID} tiers ${out.tiers ? 'on' : 'off'} | root life ${out.rootLifeMedian} (${Math.round(out.rootReached * 100)}% reach) | first elder life ${out.firstElderLifeMedian} (${Math.round(out.firstElderReached * 100)}%) | elder share after Root ${out.elderShareAfterRoot.egg1}/${out.elderShareAfterRoot.later} | egg 1 ${out.egg1.median}/${out.egg1.p90} | three eggs ${out.threeEggs.median} (p10 ${out.threeEggs.p10}, p90 ${out.threeEggs.p90}) by 6: ${out.threeEggs.by6}%, 8: ${out.threeEggs.by8}%, 10: ${out.threeEggs.by10}% | ending life ${out.ending.median} (p90 ${out.ending.p90}, ${Math.round(out.ending.reached * 100)}% within ${lives}) | Rogue gate ${out.rogueGate.median} (p10 ${out.rogueGate.p10}, p90 ${out.rogueGate.p90}; ending is the later in ${Math.round(out.rogueGate.endingLater * 100)}%, not reached in ${Math.round(out.rogueGate.censored * 100)}%)`);
+else {
+  const d = out.drops;
+  console.log(`${name.padEnd(10)} drops (real) | egg 1 ${d.egg1.median}/${d.egg1.p90} | three eggs ${d.threeEggs.median} (p10 ${d.threeEggs.p10}, p90 ${d.threeEggs.p90}) | Rogue gate ${d.rogueGate.median} (p10 ${d.rogueGate.p10}, p90 ${d.rogueGate.p90}) | eggs unfinished within ${lives} lives: ${Math.round(d.eggCensored * 100)}% (egg 1 finished ${Math.round(d.perEgg.egg1 * 100)}%, later ${Math.round(d.perEgg.later * 100)}%)`);
+}
+if (!process.env.JSON) console.log(`${name.padEnd(10)} rolls (old model, same lives) | cap ${out.cap} role ${ROLE} hid ${HID} tiers ${out.tiers ? 'on' : 'off'} | root life ${out.rootLifeMedian} (${Math.round(out.rootReached * 100)}% reach) | first elder life ${out.firstElderLifeMedian} (${Math.round(out.firstElderReached * 100)}%) | elder share after Root ${out.elderShareAfterRoot.egg1}/${out.elderShareAfterRoot.later} | egg 1 ${out.egg1.median}/${out.egg1.p90} | three eggs ${out.threeEggs.median} (p10 ${out.threeEggs.p10}, p90 ${out.threeEggs.p90}) by 6: ${out.threeEggs.by6}%, 8: ${out.threeEggs.by8}%, 10: ${out.threeEggs.by10}% | ending life ${out.ending.median} (p90 ${out.ending.p90}, ${Math.round(out.ending.reached * 100)}% within ${lives}) | Rogue gate ${out.rogueGate.median} (p10 ${out.rogueGate.p10}, p90 ${out.rogueGate.p90}; ending is the later in ${Math.round(out.rogueGate.endingLater * 100)}%, not reached in ${Math.round(out.rogueGate.censored * 100)}%)`);

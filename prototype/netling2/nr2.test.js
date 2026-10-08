@@ -6,6 +6,7 @@ process.env.TZ = 'UTC';
 const { createScript, tick, mulberry32, SIDES, IRON } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce, runOptions, jackOut, abortRun, disconnect, visibleNodeIds, choose } = await import('./sim/netrun/run.js');
 const { NR2, tierPenalty, avoidMult } = await import('./sim/netrun/nr2.js');
+const { EGG_PAGES, EGG_PAGE_IDS, nextEggPage, FRAGMENTS } = await import('./sim/codex2.js');
 const { REGIONS } = await import('../../src/netrun/regions.js');
 
 const DEFAULT = JSON.parse(JSON.stringify(NR2));
@@ -991,5 +992,94 @@ test('Bare metal: buying an item breaks it, and a clinic fix, a cache, an ICE wi
   goTo(found.s, 'cache', found.rng, { filled: true });
   assert.equal(found.s.run.challengeVoid, false, 'a found item is fine');
   assert.ok(found.s.run.loot.length > 0);
+  reset();
+});
+
+// Egg pages as real drops (NR2.eggPages; codex2.js EGG_PAGES).
+const eggRun = (region, { egg = 'iron', known = [], cleared = [region], rng = stub(0), stage = 'adult' } = {}) => {
+  const s = createScript({ now: 0, rng: mulberry32(5) });
+  Object.assign(s, { stage, form: 'breachCorp', egg, eggPages: [...known], cleared: [...cleared] });
+  Object.assign(s.stats, { charge: 90, integrity: 90, heat: 30 });
+  startRun(s, region, rng, []);
+  return s;
+};
+
+test('egg pages: 18 ids, six per egg (four role pages in order, the hidden page, the Source page), none a story page id', () => {
+  assert.equal(EGG_PAGE_IDS.length, 18);
+  assert.equal(new Set(EGG_PAGE_IDS).size, 18);
+  assert.ok(EGG_PAGE_IDS.every((id) => !FRAGMENTS.some((f) => f.id === id)));
+  assert.deepEqual(EGG_PAGES.iron.role, ['iron-breach', 'iron-dodge', 'iron-tune', 'iron-feast']);
+  assert.deepEqual([EGG_PAGES.program.hidden[0], EGG_PAGES.iron.hidden[0], EGG_PAGES.wetware.hidden[0]], ['program-ghost', 'iron-guru', 'wetware-blank']);
+  assert.equal(nextEggPage('wetware', 'role', ['wetware-breach']), 'wetware-dodge');
+  assert.equal(nextEggPage('wetware', 'hidden', ['wetware-blank']), null);
+});
+
+test('egg pages are off by default and then draw no random number, so the earlier tables reproduce', () => {
+  reset();
+  assert.equal(NR2.eggPages.on, false);
+  let draws = 0;
+  const counting = () => { draws++; return 0; };
+  const s = createScript({ now: 0, rng: mulberry32(5) });
+  s.cleared = ['public'];
+  set({ eggPages: { on: false } });
+  startRun(s, 'public', counting, []);
+  const off = draws;
+  draws = 0;
+  const t = createScript({ now: 0, rng: mulberry32(5) });
+  t.cleared = ['public'];
+  set({ eggPages: { on: true } });
+  startRun(t, 'public', counting, []);
+  assert.equal(draws, off + 1, 'one roll a run when on');
+  assert.deepEqual(s.run.eggPages, []);
+  reset();
+});
+
+test('egg pages: a role page drops in a cleared non-Deep region, in order and never a repeat; not in an uncleared region; banked on jack-out', () => {
+  set({ eggPages: { on: true } });
+  const a = eggRun('bazaar', { known: ['iron-breach'] });
+  assert.deepEqual(a.run.eggPages, ['iron-dodge']);
+  jackOut(a);
+  assert.deepEqual(a.eggPages, ['iron-breach', 'iron-dodge']);
+  assert.deepEqual(eggRun('corp', { cleared: [] }).run.eggPages, [], 'the region must be cleared');
+  assert.deepEqual(eggRun('public', { rng: stub(0.99) }).run.eggPages, [], 'the roll can miss');
+  assert.deepEqual(eggRun('ruins', { known: EGG_PAGES.iron.role }).run.eggPages, [], 'nothing left: no repeat');
+  reset();
+});
+
+test('egg pages: the hidden page drops only on a Deep run, at its own rate; the role pages do not drop there', () => {
+  set({ eggPages: { on: true } });
+  assert.deepEqual(eggRun('deep', { rng: stub(0.4) }).run.eggPages, ['iron-guru'], 'under 0.5');
+  assert.deepEqual(eggRun('public', { rng: stub(0.4) }).run.eggPages, [], 'over 0.2');
+  assert.deepEqual(eggRun('deep', { known: ['iron-guru'] }).run.eggPages, []);
+  reset();
+});
+
+test('egg pages: a disconnect or an abort loses the page found; the per-life codex cap does not apply', () => {
+  set({ eggPages: { on: true } });
+  const a = eggRun('public');
+  disconnect(a, 'power drained mid-run.');
+  assert.deepEqual(a.eggPages, []);
+  const b = eggRun('public');
+  abortRun(b);
+  assert.deepEqual(b.eggPages, []);
+  const c = eggRun('public');
+  c.codexFound = 99; // far over the cap of 12
+  jackOut(c);
+  assert.deepEqual(c.eggPages, ['iron-breach']);
+  reset();
+});
+
+test('egg pages: a Source exit guarantees the egg\'s Source page once; another egg\'s pages are its own', () => {
+  set({ eggPages: { on: true } });
+  const exit = (opts) => {
+    const s = eggRun('source', { stage: 'mainframe', rng: stub(0.99), ...opts });
+    const node = runOptions(s.run)[0];
+    node.type = 'exit';
+    moveTo(s, node.id, mulberry32(3));
+    return s.eggPages;
+  };
+  assert.deepEqual(exit({}), ['iron-source']);
+  assert.deepEqual(exit({ known: ['iron-source'] }), ['iron-source'], 'not twice');
+  assert.deepEqual(exit({ egg: 'wetware', known: ['iron-source'] }), ['iron-source', 'wetware-source']);
   reset();
 });

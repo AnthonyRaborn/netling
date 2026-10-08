@@ -372,10 +372,12 @@ const snap = (s) => ({
   total: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
 });
 
-export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [] } = {}) {
+export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [], egg = 'program', eggPages = [] } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
+  s.egg = egg; // which egg's pages drop (NR2.eggPages); the eggs share every other rule in this fork
+  s.eggPages = [...eggPages];
   const ctx = { bugMin: 0, ceilMin: 0, games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
   const codexAtStart = ctx.codex.length;
   let minute = 0;
@@ -493,6 +495,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     fragment: s.fragment ?? null,
     form: s.form,
     codex: ctx.codex,
+    eggPages: [...(s.eggPages ?? [])],
     newFragments: ctx.codex.length - codexAtStart,
     // Days spent in each stage (a stage not reached counts as 0).
     stageDays: {
