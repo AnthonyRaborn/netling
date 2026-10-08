@@ -911,6 +911,23 @@ test('Unplugged: the elder relay patches (Breach corp, Tune corp) are dark; Tune
   reset();
 });
 
+test('Unplugged: a dark-relay repair per move for the Tune corp elder is off by default, and applies only under Unplugged when set', () => {
+  const off = challengeRun('tuneCorp', 2, 'unplugged');
+  goTo(off.s, 'cache', off.rng);
+  assert.equal(off.s.stats.integrity, 50, 'off by default');
+  const patch = { ab: { darkUpkeep: { tuneCorp: { 1: 0, 2: 2 } } } };
+  const on = challengeRun('tuneCorp', 2, 'unplugged', patch);
+  goTo(on.s, 'cache', on.rng);
+  assert.equal(on.s.stats.integrity, 52);
+  const lit = challengeRun('tuneCorp', 2, null, patch);
+  goTo(lit.s, 'cache', lit.rng);
+  assert.equal(lit.s.stats.integrity, 50, 'not outside Unplugged');
+  const adult = challengeRun('tuneCorp', 1, 'unplugged', patch);
+  goTo(adult.s, 'cache', adult.rng);
+  assert.equal(adult.s.stats.integrity, 50, 'not for the adult');
+  reset();
+});
+
 test('Glass: an elder Breach street\'s soft first loss counts as lost, and so does a loss that Breach corp\'s insurance survives', () => {
   const soft = challengeRun('breachStreet', 2, 'glass');
   goTo(soft.s, 'ice', soft.rng);

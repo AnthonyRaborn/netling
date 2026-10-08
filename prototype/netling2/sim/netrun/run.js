@@ -310,6 +310,9 @@ function moveToNode(pet, nodeId, rng) {
   if (ab2(pet)) {
     const up = NR2.ab.upkeep[ab2(pet)]?.[lvl(pet)] ?? 0; // Tune street, elder: repairs a little every move
     if (up) st.integrity = clamp(st.integrity + up);
+    // Unplugged: a form whose relay patch is dark may repair a little every move instead (off at 0; maintainer's open question, notes section 13).
+    const dark = run.challenge === 'unplugged' ? NR2.ab.darkUpkeep?.[ab2(pet)]?.[lvl(pet)] ?? 0 : 0;
+    if (dark) st.integrity = clamp(st.integrity + dark);
   }
   // Iron's own problem in a run: the redline builds wear for the minutes a node takes (the run itself takes no simulated time).
   if (NR2.eggCost && eggOf(pet) === 'iron' && st.heat > IRON.heat) {

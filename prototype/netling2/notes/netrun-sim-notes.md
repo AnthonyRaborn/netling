@@ -364,6 +364,17 @@ The 2.0 rates sit where 1.0's did. Every challenge is completable by every form 
 | No challenge (exit rate) | 23.8 to 27.9 | 33.6 to 38.9 | 23.4 to 23.4 / 32.8 to 35.0 |
 So Foresight helps in Unplugged (+4 points adult, +8 elder at spread 0.2; the elder gains 4 even at spread 0 from seeing two steps) and in Bare metal and Glass, and it did, in the tables above: the Tune street cell under Unplugged (35 / 51, Deep careful) already includes it. It did nothing under Blackout only because the first reading made it dark.
 
+**Unplugged and Tune corp (maintainer's open question; measured, not decided).** Under Unplugged the Tune corp elder's second part, the relay patch, is dark, and its first part (sight) does not help survival much. It is the one form whose elder gains nothing over its adult: Deep careful 34.0 adult, 35.1 elder, against elders of 44 to 66% (the nine-form elder mean is 53.1%); Source careful 8.3 and 9.2 against a mean of 21.1, 44% of the mean and the lowest elder cell of any form. (Breach corp's elder loses its patch too, but its other parts carry it: 106% of the mean.) The option measured is a switch, `NR2.ab.darkUpkeep.tuneCorp[2]`, off at 0: under Unplugged only, the Tune corp elder repairs that much Integrity every move (Tune street's repair is the model; it is not a relay). `challenge-sweep.mjs`, 2000 runs a cell, Foresight on, spread 0.2; 0 is bit-identical to the default run. Tune corp elder completion, percent of the elder mean in brackets:
+
+| Repair a move | Deep careful | Deep skilled | Source careful | Source skilled |
+|---|---|---|---|---|
+| 0 (now) | 35.1 (66%) | 61.4 (80%) | 9.2 (44%) | 25.1 (54%) |
+| 1 | 40.6 (76%) | 67.6 (87%) | 13.1 (61%) | 33.9 (71%) |
+| 2 | 44.4 (82%) | 71.9 (92%) | 17.8 (81%) | 42.9 (88%) |
+| 3 | 48.3 (88%) | 74.7 (96%) | 20.4 (91%) | 48.5 (98%) |
+
+The other forms move by under 1 point (the elder mean rises 0.5 to 1.5 because Tune corp is in it). Two a move puts every cell inside the 20% band; three is the same repair as Tune street's. It is a special case for one challenge, so it needs a one-line in-game explanation if taken. Bots only; Tune corp's value to a person (sight) is not in these figures, and the adult is untouched (81% of the mean, the same low as without the challenge).
+
 **Blackout and the Tune forms: a limited variant** (`NR2.blackout`; 2000 runs; Tune corp / Tune street completion, percent of the nine-form mean in brackets; A dark, B Tune corp two steps of types, C Tune street's next-step Foresight, D both):
 | | A dark | B corp | C street | D both |
 |---|---|---|---|---|
