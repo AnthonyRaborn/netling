@@ -1,44 +1,54 @@
 # Netling 2.0: egg pressures (working design)
 
-Status: simulator-tested draft, not in any game code. Numbers are from `prototype/netling2/sim/` bots, never from players. Full measurements: `prototype/netling2/notes/egg-pressure-notes.md` (Results 6 to 17). Commands: `docs/netling2-prototypes/README.md`.
+Status: simulator-tested working design, not in any game code. Numbers come from `prototype/netling2/sim/` bots, never from players. Full measurements: `prototype/netling2/notes/egg-pressure-notes.md` (Results 6 to 21). Commands: `docs/netling2-prototypes/README.md` (`sides-sweep.mjs`, `SIDES`, `SYNCBOT`).
 
 ## The idea
 
-Each egg manages one bar harder than the others, and that bar has a special state with a real benefit and a real risk. The same states exist for every egg; the owner's bar is stronger (x3 on every effect), so the egg decides which risk is worth taking. Equal on average: the ordinary archetypes (attentive, casual, worker, sysadmin, human-regular) must stay within noise on full-life rate, infections and temper.
+Each egg manages one bar harder than the others, and that bar has a special state with a real benefit and a real risk. The same states exist for every egg; the owner's bar is stronger (x3 on every effect), so the egg decides which risk is worth taking. Pass bar: the ordinary archetypes (attentive, casual, worker, sysadmin, human-regular) stay within noise on full-life rate, infections and temper.
 
-| Egg | Bar | State | How it starts and ends | Benefit | Risk |
-|---|---|---|---|---|---|
-| Iron | Heat | Overclock (1.0 rule) and wear | Heat 65+. Wear builds above Heat 75 and below Heat 20, fades with rest; nap and sleep cool no lower than 20 | Win drops x1.5, visits x1.25 | Lost games cost Sync and Integrity, events x1.25, wear raises Sync drain and infection hazard |
-| Program | Charge | Surge | Charge 80+ for 3 awake hours; ends under 65 or at rest | Play pays more Sync, win drops up | Overflow events likelier, Integrity bleeds |
-| Wetware | Sync | Wired | Sync 85+ for 3 awake hours; ends under 70 or at rest | Visits up, win drops up | Infection hazard up (cyberpsychosis) |
+| Egg | Bar | State | Starts | Ends |
+|---|---|---|---|---|
+| Iron | Heat | Overclock (1.0 rule) plus wear | Heat 65+; wear builds above Heat 75 and below Heat 20, fades with rest; nap and sleep cool no lower than 20 | Heat under 65 |
+| Program | Charge | Surge | Charge 80+ held 3 awake hours | Charge under 65, or rest |
+| Wetware | Sync | Wired | Sync 85+ held 3 awake hours | Sync under 70, rest, or burnout |
 
-Low sides are deficits only: low Sync means fewer win drops (focus). Low Charge has no extra rule beyond the old ones (mistake at 0, no play under 10). Flow stays Heat-gated (Charge and Sync 50+, Integrity 80+, Heat under 60, 180 minutes). Non-owner eggs get the same states at x1.
+Tested strengths (base, before the x3 owner multiplier). Surge: play Sync +45%, win drops +75%; costs: Integrity bleeds 8 an hour, overflow events x3. Wired: visits +75%, win drops +75%; cost: infection hazard x2.2 (virus 1.2). Sync low (30 or under): win drops x0.77 (focus). Charge has no low-side rule and already refuses feeds at 95 ("buffer full"). Non-owner eggs get the same states at x1. Flow stays Heat-gated (Charge and Sync 50+, Integrity 80+, Heat under 60, 180 minutes): gating Flow on Surge or Wired removed it for attentive players in every test.
 
-## Numbers tested (tripled benefits, doubled costs, x3 owner, 200 lives a cell)
+## Wired: playing too high
 
-- Time in the state: attentive, sysadmin and daredevil 6% to 13% of awake time. Casual, worker, human-regular and overclocker never enter; they are unchanged from the no-pressure baseline on Program and Wetware.
-- Program, sysadmin: win drops 13.7 -> 17.0 (+25%), Sync a play +11% (the 100 cap limits it), full-life 0.99 -> 0.975. Daredevil full-life 0.92. Flow share falls (attentive 0.27 -> about 0.19).
-- Wetware, sysadmin: win drops +26%, visits +23%, infections 7.33 -> 7.78.
-- Iron: unchanged by Surge and Wired; its trade is wear (daredevil infections 9.4, overclocker 12.2 against 7.3 and 8.7 with no pressure).
-- Overclock as a held state (2 h and 6 h holds) was tried on Iron and rejected: the heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit (daredevil drops 19.7 -> 17.8 -> 15.3) and leaves the wear cost, which follows Heat, untouched. Overclock stays the plain 1.0 rule.
+Sync has no ceiling (a game can always be played), so Wired needs a brake:
+- Plays at Sync 85 to 89 inside Wired are free.
+- A play at Sync 90+ inside Wired rolls an infection (10% x the number of such plays so far x3 for the owner, capped at 90%).
+- The second play at 90+ burns the netling out: Wired ends and cannot be re-entered for 24 hours (a night's rest alone does not reset it).
+
+A player who stops at 89 pays essentially nothing and keeps a small benefit; a player who plays to full pays infections and loses the state.
+
+## Numbers (tripled benefits, doubled costs, x3 owner, burnout 2 plays / 24 h, +10% step, 200 lives a cell)
+
+- Time in a state: attentive, sysadmin and daredevil enter (Wired 19% to 23% if they play to full, 6% to 13% if they stop at 89). Casual, worker, human-regular and overclocker never enter and are unchanged from the no-pressure baseline.
+- Wetware, plays to full, attentive / sysadmin: win drops 21.3 -> 28.7 and 21.6 -> 32.0 (+35% and +48%), visits 4.3 -> 6.0 and 4.4 -> 6.5, infections 7.5 -> 9.2 and 7.8 -> 9.6, full-life 0.995 to 1.0, 1.3 and 1.7 penalty hits and 2.1 to 2.5 burnouts a life.
+- Wetware, stops at 89: drops +13% and +26%, visits +19% and +23%, infections within 0.3 of off.
+- Program (Surge): attentive drops 21.3 -> 25.2, sysadmin 21.6 -> 27.0; full-life 0.965 for both when they play to full (0.975 when they stop at 89).
+- Iron: its own trade is wear (daredevil infections 9.6, overclocker 11.8 to 12.2 against 7.1 and 8.7 with no pressure). It is the heaviest of the three and still unreconciled with the other two (see below).
+- Overclock as a held state was tried and rejected: heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit and leaves the wear cost.
 
 ## Play styles it pushes
 
-- Iron: a thermostat player. Run warm for the drops, nap or sleep before the wear builds, and do not chase cold (it wears too). The risky read is "one more game while hot".
-- Program: a feeder who keeps Charge topped. Feeding every few hours for three hours straight reaches Surge; the greed is feeding past it into overflow and Integrity loss. Cadence is rewarded, so it favors frequent check-ins.
-- Wetware: a player who keeps Sync high by playing often, to bring visits and drops, at the price of infections. Needs the antivirus habit (clinic, shield) more than the other eggs.
-- Casual, worker and human-regular players never reach a state. For them the egg changes forms, names and codex, not the care loop. Whether that is enough difference is a design question, not a finding.
+- Iron: a thermostat player. Run warm for drops, rest before wear builds, do not chase cold (it wears too). The risky read is "one more game while hot".
+- Program: a feeder who keeps Charge topped. Three steady hours reaches Surge; greed is feeding past it into overflow and Integrity loss.
+- Wetware: a player who keeps Sync high, plays up to 89 for visits and drops, and stops. Playing to full costs infections and the state.
+- Casual, worker and human-regular players never reach a state, so for them the egg changes forms, names and codex but not the care loop. Whether that is enough difference is a design question.
 
 ## What players should be able to find out
 
-- The thresholds and the three-hour hold are hidden; the player learns that a steadily full bar "comes on" after a while and that the egg's bar goes wrong faster. It needs a visible cue when a state starts and ends, or it will feel random.
-- Resting ends a state, so a nap or sleep is the reset. Players will learn to time it.
-- The same bar means different things on different eggs: a Program owner reaching Surge is a decision, a Wetware owner at the same Charge is not.
-- Surge competes with Flow for the same attentive players. Choosing between them is the intended texture.
+- The thresholds, the three-hour hold, the free band and the burnout count are hidden. They need a visible cue when a state starts, when it is close to burning out, and when it ends, or it will feel random.
+- Resting ends a state; a nap is the reset. Burnout is the only thing that blocks re-entry for a day.
+- The same bar means different things on different eggs: Surge for a Program owner is a decision; for another egg it is a mild side effect.
+- Surge and Wired compete with Flow for the same attentive players, and the choice between them is the intended texture.
 
 ## Not verified
 
+- The bots are not people: a human can nap to end a state, hold exactly 3 hours, or stay at 89 indefinitely.
 - Only drops, play Sync and visits were measured as benefits; the worth of an item is a design call.
-- The bots are not people. A human can nap on purpose to end a state, hold exactly 3 hours, or ignore the bar entirely.
-- Low-side rules are not settled (Charge low is empty; Sync low costs the worker about 0.03 to 0.06 full-life).
-- Nothing here has unit tests; the temper tells for these states are not designed.
+- Iron: wear plus Overclock is heavier than Surge or Wired and a human reads it as harder to hold. Options (ease wear, or tighten the others further) are open.
+- Low-side rules are thin (Charge low is empty); the temper tells for these states are undesigned; nothing here has unit tests.

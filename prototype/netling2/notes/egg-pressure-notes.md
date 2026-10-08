@@ -301,3 +301,13 @@ Rule (`burnN`, `burnCool` in `SIDES.sync`; meter `burns`): inside Wired, `burnN`
 - Burnouts a life: attentive 1.7 to 2.8, sysadmin 2.5 to 3.9.
 - Sipping (stop at 89, 3 plays / 4 h): no burnouts, drops 14.3 attentive (+13% over its off 12.6), Wired 7%. Greedy at 2 plays / 24 h keeps +36% over its own off, Wired 19%.
 - Read: burnout narrows greedy toward the sipper but does not remove the gap; it costs the greedy player nothing in infections. A small infection chance (Result 19) on top would add cost. Program (non-owner) is affected the same way as Wetware's x1 side.
+
+## Result 21: Wired burnout (2 plays at 90+, 24 h) with a +10% infection step
+
+Penalty rolls before burnout (the first version burned out first and skipped the roll on the second play). Config as Result 16. Greedy (plays to full) / sip (stops at 89), 200 lives per cell, all seven archetypes. Not unit-tested.
+
+- Wetware, greedy, attentive / sysadmin: drops 21.3 -> 28.7 / 21.6 -> 32.0, visits 4.3 -> 6.0 / 4.4 -> 6.5, infections 7.5 -> 9.2 / 7.8 -> 9.6, full-life 0.995 / 0.995, penalty hits 1.3 / 1.7, burnouts 2.1 / 2.5, Wired 19% / 23%. Daredevil: drops 24.4 -> 32.3, infections 7.1 -> 8.1.
+- Program, greedy: attentive drops 25.2, sysadmin 27.0, full-life 0.965 for both; infections 8.2 and 8.1. Iron: infections 8.1 and 8.4.
+- Sip: penalty hits 0.01, burnouts 0.01; Wetware drops 14.3 / 17.2 (off 12.6 / 13.7), infections 7.6 / 7.8.
+- Casual, worker, human-regular, overclocker: no entry; Program and Wetware rows equal the no-pressure rows.
+- Read: greedy play now costs about 1.7 infections and the state for about +35% to +48% drops; careful play keeps +13% to +26% free. The penalty hits are few because burnout caps the plays at 90+.
