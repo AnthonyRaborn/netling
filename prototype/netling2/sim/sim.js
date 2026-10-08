@@ -648,7 +648,8 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
-  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3,
+  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
+ 
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
   sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, hintMin: 120, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
@@ -659,7 +660,7 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // Held state: with hold > 0 the high side is entered only after the stat has been at hi or over for `hold` awake minutes (dips down to
 // `exit` do not break it), and left when it falls under `exit` or the netling rests. hold 0 is the plain threshold.
 const heldNow = (s, key) => Boolean(s.sideHeld?.[key]);
-const sideOf = (s, key) => (!SIDES.on ? null : (SIDES[key].hold > 0 ? heldNow(s, key) : s.stats[key] >= SIDES[key].hi) ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
+const sideOf = (s, key) => (!SIDES.on ? null : (SIDES.teenStates && s.stage === 'baby' ? false : SIDES[key].hold > 0 ? heldNow(s, key) : s.stats[key] >= SIDES[key].hi) ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
 function stepHeld(s, rest) {
   if (!SIDES.on) return;
   s.sideHold ??= { charge: 0, sync: 0, heat: 0 };
@@ -667,7 +668,7 @@ function stepHeld(s, rest) {
   for (const key of ['charge', 'sync', 'heat']) {
     const c = SIDES[key];
     if (!(c.hold > 0) || (key === 'heat' && SIDES.owner !== null)) continue;
-    if (rest || s.stats[key] < c.exit) {
+    if (rest || s.stats[key] < c.exit || (SIDES.teenStates && s.stage === 'baby')) {
       s.sideHold[key] = 0;
       s.sideHeld[key] = false;
       if (key === 'sync') { s.wiredOver = 0; s.burnCount = 0; }
@@ -1128,7 +1129,7 @@ function answerRequest(s, action, game) {
 }
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
-export const overclocked = (s) => (SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
+export const overclocked = (s) => (SIDES.on && SIDES.teenStates && s.stage === 'baby' ? false : SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
 // Iron is the owner of Heat: with ironBenefit above 1 its Overclock benefits (win drops, visits) grow by that factor (1 = the 1.0 rule).
 const ocBoost = (m) => (SIDES.on && SIDES.owner === null ? 1 + (m - 1) * SIDES.ironBenefit : m);
 const visitMult = (s) => (overclocked(s) ? ocBoost(CFG.overclockVisitMult) : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
