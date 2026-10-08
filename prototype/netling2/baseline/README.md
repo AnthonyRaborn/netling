@@ -13,6 +13,8 @@ Everything here is a model with scripted players, not a measurement of people. R
 | `summary-balance.md` | Generated: 37 archetypes by 16 columns for each configuration, and each egg against core |
 | `results/` | One file per job (`.json` where the tool supports `JSON=1`, otherwise `.txt`), and `_run.log` (start, finish and duration of every job) |
 
+**Correction (same day).** The first run's `full-iron` configuration left out the final Charge and Sync pressure numbers that `clinic-final.mjs` applies to every egg, so `balance-full-iron`, `runcost-iron` and `egg-anomaly-iron` were rerun after fixing it. The first outputs are in `results/superseded/` and should not be used.
+
 ## Configurations
 
 | Name | Switches | Used by |
@@ -25,7 +27,7 @@ Everything here is a model with scripted players, not a measurement of people. R
 
 The pressure numbers are the ones `clinic-final.mjs`, `grace-sweep.mjs` and `hint-sweep.mjs` already use for the final design in `docs/NETLING_2_EGG_PRESSURES.md`.
 
-**Comparability note.** `runcost-sweep.mjs` and `egg-anomaly-sweep.mjs` default to a minimal Program and Wetware pressure (`hold` only). The runner passes the full final design instead (for Iron that adds the owner multiplier of 3 and the tripled Overclock benefits, which the scripts' own Iron default leaves out), so their tables are not directly comparable with the older tables in the notes.
+**Comparability note.** `runcost-sweep.mjs` and `egg-anomaly-sweep.mjs` default to a minimal Program and Wetware pressure (`hold` only). The runner passes the full final design instead (for Iron that adds the owner multiplier of 3, the tripled Overclock benefits and the final Charge and Sync numbers, which the scripts' own Iron default leaves out), so their tables are not directly comparable with the older tables in the notes.
 
 ## Sample sizes
 
@@ -39,17 +41,17 @@ The pressure numbers are the ones `clinic-final.mjs`, `grace-sweep.mjs` and `hin
 | archetype | core | Iron | Program | Wetware |
 |---|---:|---:|---:|---:|
 | attentive | 99.8 | 99.7 | 95.0 | 99.8 |
-| casual | 92.4 | 93.8 | 94.9 | 93.3 |
-| worker | 82.9 | 89.5 | 81.4 | 82.9 |
-| sysadmin | 99.5 | 99.8 | 92.2 | 99.1 |
-| daredevil | 99.8 | 99.5 | 93.6 | 99.4 |
-| overclocker | 96.2 | 94.9 | 96.8 | 96.8 |
-| ghosthunter | 100.0 | 99.7 | 80.5 | 98.6 |
-| steer-tune-corp | 100.0 | 100.0 | 67.5 | 99.1 |
-| steer-tune-street | 99.7 | 99.0 | 98.7 | 99.4 |
-| human-casual | 3.2 | 5.4 | 4.9 | 4.2 |
-| human-regular | 25.5 | 31.2 | 28.9 | 29.1 |
-| human-keen | 63.5 | 67.9 | 65.0 | 67.6 |
+| casual | 92.4 | 94.5 | 94.9 | 93.3 |
+| worker | 82.9 | 83.3 | 81.4 | 82.9 |
+| sysadmin | 99.5 | 99.2 | 92.2 | 99.1 |
+| daredevil | 99.8 | 99.3 | 93.6 | 99.4 |
+| overclocker | 96.2 | 94.0 | 96.8 | 96.8 |
+| ghosthunter | 100.0 | 98.0 | 80.5 | 98.6 |
+| steer-tune-corp | 100.0 | 99.7 | 67.5 | 99.1 |
+| steer-tune-street | 99.7 | 99.5 | 98.7 | 99.4 |
+| human-casual | 3.2 | 3.7 | 4.9 | 4.2 |
+| human-regular | 25.5 | 28.4 | 28.9 | 29.1 |
+| human-keen | 63.5 | 66.3 | 65.0 | 67.6 |
 
 Full tables: `summary-balance.md`.
 
@@ -57,7 +59,7 @@ Full tables: `summary-balance.md`.
 
 1. **Program with the Charge-drain perks.** Under Program, Tune corp (`chargeDrainMult` 0.8) and the hidden form (0.85 on Charge and Sync) lose a lot of full life: steer-tune-corp 100.0 to 67.5, ghosthunter and the hidden-path hunters 100 to about 81 or 82. Mechanism (read from the code, not isolated by an experiment): slower Charge drain keeps the bots in Overdrive's band longer, where the Integrity bleed accrues. `notes/perks-traits-notes.md` (line 49) listed this interaction as a check still to do; this is that check. Tune street (a Sync perk) is fine on Wetware (99.4). Caveat: the bots always top Charge up, so a person who stops feeding at the cost would not pay it.
 2. **Program costs ordinary heavy-Charge players 5 to 7 points** (attentive 4.8, sysadmin 7.3, daredevil 6.2). The older egg-pressure notes recorded a smaller figure (attentive 97%, sysadmin 94%, daredevil 93.5%); this run adds `NR2=all` and `PERKS=1`.
-3. **Iron helps the worker** (82.9 to 89.5) and the sparse human archetypes (+4 to +6). Not investigated.
+3. **Iron moves almost nothing.** With the final Charge and Sync numbers applied, no archetype is more than 3 points from core (worker 83.3 against 82.9, overclocker 94.0 against 96.2). The first baseline run showed Iron helping the worker (89.5) because its configuration left those numbers out; that output is kept in `results/superseded/`.
 4. **Wetware moves almost nothing** on full life. Its cost shows in infections (the `viruses` column of `summary-balance.md`); I did not tabulate temper.
 
 ## Follow-up: Program and the Charge-drain perks
@@ -115,15 +117,15 @@ Reading:
 
 | Job | Output | Seconds |
 |---|---|---:|
-| balance-core, -full-iron, -full-program, -full-wetware | `balance-*.json` | 736, 936, 914, 918 |
+| balance-core, -full-iron, -full-program, -full-wetware | `balance-*.json` | 736, 952, 914, 918 |
 | lineage-attentive, -daredevil, -casual | `lineage-*.json` | 173, 244, 397 |
 | bug, clinic, push, gap, human, hunter, temper, item, exchange-stock, role | `*.txt` | 80 to 507 |
 | clinic-final | `clinic-final.txt` | 1764 |
 | grace, hint, heat-hint, sides, stat-profile | `*.txt` | 150 to 863 |
 | iron, iron-cold | `*.txt` | 1311, 1335 |
-| runcost-iron, -program, -wetware | `runcost-*.txt` | 349, 343, 339 |
+| runcost-iron, -program, -wetware | `runcost-*.txt` | 343, 343, 339 |
 | netrun, challenge, foresight | `*.txt` | 74, 85, 191 |
-| egg-anomaly-iron, -program, -wetware | `egg-anomaly-*.txt` | 12 each |
+| egg-anomaly-iron, -program, -wetware | `egg-anomaly-*.txt` | 11, 12, 12 |
 | act-sweep-charge, -sync; band-sweep-charge, -sync | `*.txt` | 987, 998, 994, 1010 |
 
 `act-sweep` and `band-sweep` test designs the maintainer rejected (action-based and banded pressure); they are here only so "everything" is true.
