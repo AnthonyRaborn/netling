@@ -33,3 +33,5 @@
 2026-10-08T17:45:00.689Z start temper-sweep
 2026-10-08T17:46:42.076Z done push-sweep [rules] 302s
 2026-10-08T17:46:42.080Z start item-sweep
+2026-10-08T17:47:22.851Z done human-sweep [rules] 300s
+2026-10-08T17:47:22.854Z start exchange-stock
