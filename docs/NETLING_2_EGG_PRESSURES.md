@@ -43,7 +43,7 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 
 ## What players should be able to find out
 
-- The thresholds, the three-hour hold, the free band and the burnout count are hidden. Each state is shown by a bar label, a readout word, a sprite mark and a screen-reader value, and Overlink's brake by a tick on the Sync bar; the drafts are in `NETLING_2_CARE_DRAFTS.md`, State clues.
+- The thresholds, the three-hour hold, the free band and the burnout count are hidden. Each state is shown by a bar label, a readout word, a sprite mark and a screen-reader value, and Overlink's brake by a tick on the Sync bar; the drafts are in `NETLING_2_CARE_DRAFTS.md`, State clues and Temper and the states (the states do not move temper and have no tell of their own; the marks keep out of the tell's way).
 - Resting ends a state; a nap is the reset. Burnout is the only thing that blocks re-entry for a day.
 - The same bar means different things on different eggs: Overdrive for a Program owner is a decision; for another egg it is a mild side effect.
 - Overdrive and Overlink compete with Flow for the same attentive players, and the choice between them is the intended texture.

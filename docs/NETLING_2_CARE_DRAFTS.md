@@ -149,7 +149,7 @@ Wear exists only on Iron, so those two rows have one line. The two Iron lines ar
 
 ## State clues (drafts, first pass)
 
-How a player sees the states without a number. Patterned on 1.0's two: the Heat bar reads OC with a title and a screen-reader value, the readout line appends " · overclocked", and the sprite grows three heat wisps (`src/render.js`, `src/ui/hud.js`). Flow is a slow breathing outline and " · in flow". Rules kept from 1.0: nothing flashes more than three times a second (steps of 400 ms or more, double `FLASH_TOGGLE_MS`), every motion cue has a still version in calm mode, color is never the only signal (a label, a shape and a text value go with it), and no new sound (props have none). Not rendered or read on a device.
+How a player sees the states without a number. Patterned on 1.0's two: the Heat bar reads OC with a title and a screen-reader value, the readout line appends " · overclocked", and the sprite grows three heat wisps (`src/render.js`, `src/ui/hud.js`). Flow is a slow breathing outline and " · in flow". Rules kept from 1.0: nothing flashes more than three times a second (steps of 400 ms or more, double `FLASH_TOGGLE_MS`), every motion cue has a still version in calm mode, color is never the only signal (a label, a shape and a text value go with it), and no new sound (props have none). Not rendered or read on a device; the marks' timing and placement are in `prototype/netling2/marks.js` and tested.
 
 **Where each cue lives**
 
@@ -157,23 +157,42 @@ How a player sees the states without a number. Patterned on 1.0's two: the Heat 
 |---|---|---|---|
 | Bar label | OC replaces HEAT | OD replaces the Charge label | OL replaces the Sync label |
 | Readout line | " · overclocked" | " · overdrive" | " · overlink" |
-| Sprite | three wisps rise off the top edge | two sparks hop along its base, one step per 400 ms | two dots orbit its head, one step per 400 ms |
+| Sprite | three wisps rise off the top edge | two sparks hop along its base, under the feet, one step per 400 ms | two dots slide up and down at its sides, three columns out, one step per 400 ms |
 | Calm mode | wisps still, stacked | sparks still, one each side | dots still, one each side |
 | Screen-reader value | ", overclocked" | ", overdrive" | ", overlink" |
 | Title (hover) | what OC does | "Overdrive: a full buffer pays off, but overdrawing it hurts." | "Overlink: closely linked, but pushing it too far burns it out." |
 
-The three marks sit in different places (above, below, around) and have different shapes (rising pixels, hopping pixels, orbiting pixels), so two states at once (Overclock and Overlink, say) stay readable. Flow keeps its outline.
+The three marks sit in different places (above, below, beside) and have different shapes (rising pixels, hopping pixels, sliding pixels), so two states at once (Overclock and Overlink, say) stay readable. Flow keeps its outline.
 
 **Stages of Overlink** (the one with a brake; Overdrive has no brake and only the first two rows)
 
 | Stage | What the player sees | Why |
 |---|---|---|
 | Building (Sync high, under 3 hours) | nothing | the hold is the discovery; a countdown would give the number away |
-| Active | OL label, two orbiting dots, " · overlink", the begins log line; a thin tick appears on the Sync bar just under the top | the tick marks where playing stops being free, without a number |
+| Active | OL label, two sliding dots, " · overlink", the begins log line; a thin tick appears on the Sync bar just under the top | the tick marks where playing stops being free, without a number |
 | Strained (a play above the tick) | the tick fills in, one dot drops away, " · strained", the first-play log line | the warning that a second play burns it out |
 | Burned out | dots fall away, label back to the Sync name, " · spent", the burnout log line | the state is over and cannot return today |
 | Ready again | " · spent" clears, the log line "> it can link again." | the player learns when to try again |
 | Infection from a play | the existing virus alert and the penalty log line | the cost is an infection, shown as one |
+
+## Temper and the states (drafts, first pass)
+
+**Proposal: the states do not move temper and have no temper tell of their own.** Temper is personality (the maintainer: not a cost or a benefit), and the two measurements that tried to move it from these states (a Sync swing, Result 10, and faster decay of steady temper, Result 11) shifted the mean by two points or more and were dropped as a bias. As built, a state reaches temper only indirectly: it takes Flow time away from heavy players and its infections are faults (-1 each), which measured at -0.1 to -0.7 for attentive and sysadmin players with Overdrive and Overlink (Results 14 to 16).
+
+So the work is coexistence. The tell speaks through the body (pose, drift, settle, pulse, idle actions and chatter shape); the states speak through marks beside it. Rules, kept so a player can tell them apart:
+
+1. The marks are always regular: one step per 400 ms on a fixed clock, the same at every temper level and for every egg. Irregularity belongs to the tell alone, so a stuttering body inside steady marks reads as "unsteady netling, in a state", never as a stronger state.
+2. The marks sit outside the body's reach. The new ones are three columns out at the sides (Iron's strongest drift is two) and on rows h+1 and h+2 below the feet (Iron's settle drops the body one row). Overclock's wisps are 1.0's and sit above the top.
+3. Flash budget by region: the pose keeps its own budget (a change at most every 200 ms); the marks change at most every 400 ms, on that same grid. The marks never touch the pose.
+4. State log lines are system lines in the egg's register and are never shaped by the chatter tone (no beats, checklist, bell or burst). Only chatter is shaped.
+5. The Metronome and its twelve-hour clock follow the tell, not the states; a state does not pause or count toward it. Neglect works as in 1.0 (a state's cost is not neglect).
+6. The idle routine and strays stay as drafted; they are body actions and do not collide with the marks.
+
+What a player can read: a steady beat with steady marks (calm and in a state); a drifting or stuttering body with steady marks (unsteady and in a state); no marks (neither). The mix is the only new information, and it comes from existing channels.
+
+Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
+
+Open: whether a Dex or codex hint should mention the states (none drafted); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
 **Iron's wear** (Iron only; the other eggs show none):
 
