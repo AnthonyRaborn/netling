@@ -101,3 +101,13 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
   }
   return out;
 }
+
+// Which registered pose to draw, and which to place wearables from, for a tell result and the pose the netling is in ('awake',
+// 'sleep' or 'dead'). Program's blink draws the sleep pose for 200 ms, but wearables stay placed on the frame the netling would
+// show without the blink: placed on the closed-eye pose, eyewear changes shape (shades go from 17 cells to 9 on Program's baby,
+// and 66 form and wearable pairs differ), which would flicker the wearable on every beat.
+export function tellPose(tell, pose = 'awake') {
+  if (pose !== 'awake') return { draw: pose === 'dead' ? 'dead' : 'sleep', wear: pose === 'dead' ? 'dead' : 'sleep' };
+  const awake = tell.frame ? 'b' : 'a';
+  return { draw: tell.blink ? 'sleep' : awake, wear: awake };
+}
