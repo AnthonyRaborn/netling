@@ -65,9 +65,12 @@ function play(styleName, form, level, seed, region) {
 const sum = (rs) => {
   const share = (f) => Math.round((1000 * rs.filter(f).length) / rs.length) / 10;
   const avg = (k) => Math.round((100 * rs.reduce((a, x) => a + x[k], 0)) / rs.length) / 100;
-  return { disc: share((r) => r.result === 'disconnected'), exit: share((r) => r.exit), items: avg('items'), scrip: avg('scrip'), int: avg('intSpent'), hard: avg('hard'), ice: avg('ice'), slipped: avg('slipped'), forced: avg('forced') };
+  return { disc: share((r) => r.result === 'disconnected'), exit: share((r) => r.exit), items: avg('items'), scrip: avg('scrip'), value: Math.round((100 * rs.reduce((a, x) => a + x.items + x.scrip / VALUE_PER_ITEM, 0)) / rs.length) / 100, int: avg('intSpent'), hard: avg('hard'), ice: avg('ice'), slipped: avg('slipped'), forced: avg('forced') };
 };
 
+// The parity yardstick (settled at the maintainer's request; see notes/netrun-sim-notes.md): banked value per run, in common items
+// (items banked plus scrip over one common item's price, 15), and the exit rate. A disconnect banks nothing, so value includes survival.
+const VALUE_PER_ITEM = 15;
 const report = [];
 for (const c of cases) {
   apply(c);
@@ -87,15 +90,32 @@ else {
   let last = '';
   for (const r of report) {
     const head = `${r.case} | ${r.region} | ${r.style}`;
-    if (head !== last) console.log(`\n== ${head} ==\nform            lvl  disc%  exit%  items  scrip   int  ice  hard  slip  forced`);
+    if (head !== last) console.log(`\n== ${head} ==\nform            lvl  disc%  exit%  items  scrip  value   int  ice  hard  slip  forced`);
     last = head;
-    console.log(`${r.form.padEnd(15)} ${r.level}   ${String(r.disc).padStart(5)}  ${String(r.exit).padStart(5)}  ${String(r.items).padStart(5)}  ${String(r.scrip).padStart(5)}  ${String(r.int).padStart(4)}  ${String(r.ice).padStart(4)}  ${String(r.hard).padStart(4)}  ${String(r.slipped).padStart(4)}  ${String(r.forced).padStart(5)}`);
+    console.log(`${r.form.padEnd(15)} ${r.level}   ${String(r.disc).padStart(5)}  ${String(r.exit).padStart(5)}  ${String(r.items).padStart(5)}  ${String(r.scrip).padStart(5)}  ${String(r.value).padStart(5)}  ${String(r.int).padStart(4)}  ${String(r.ice).padStart(4)}  ${String(r.hard).padStart(4)}  ${String(r.slipped).padStart(4)}  ${String(r.forced).padStart(5)}`);
   }
 }
 if (!process.env.JSON) {
-  // Parity read-out: the mean and the spread (highest minus lowest) of the disconnect rate over the forms with an ability, per level.
+  // Parity read-out against the yardstick: every form's banked value within 20% of the mean of the forms at that level, every exit rate within
+  // 10 points of the mean, each form's elder no worse than its adult, and the elders' mean value at least 15% above the adults'.
   const groups = {};
-  for (const r of report) if (r.form !== 'none') (groups[`${r.case} | ${r.region} | ${r.style} | level ${r.level}`] ??= []).push(r.disc);
-  console.log('\n== parity (disconnect %, over forms: mean, spread, lowest, highest) ==');
-  for (const [k, v] of Object.entries(groups)) console.log(`${k}: mean ${(v.reduce((a, b) => a + b, 0) / v.length).toFixed(1)}, spread ${(Math.max(...v) - Math.min(...v)).toFixed(1)}, ${Math.min(...v)} to ${Math.max(...v)}`);
+  for (const r of report) if (r.form !== 'none') (groups[`${r.case} | ${r.region} | ${r.style}`] ??= []).push(r);
+  console.log('\n== parity against the yardstick (banked value per run, exit rate) ==');
+  for (const [k, rows] of Object.entries(groups)) {
+    const out = [];
+    const means = {};
+    for (const level of [1, 2]) {
+      const v = rows.filter((r) => r.level === level);
+      const mv = v.reduce((a, r) => a + r.value, 0) / v.length;
+      const me = v.reduce((a, r) => a + r.exit, 0) / v.length;
+      means[level] = mv;
+      const lowV = v.filter((r) => r.value < 0.8 * mv).map((r) => r.form);
+      const highV = v.filter((r) => r.value > 1.2 * mv).map((r) => r.form);
+      const offE = v.filter((r) => Math.abs(r.exit - me) > 10).map((r) => r.form);
+      out.push(`level ${level}: value mean ${mv.toFixed(2)} (${Math.min(...v.map((r) => r.value))} to ${Math.max(...v.map((r) => r.value))}), exit mean ${me.toFixed(1)}%; outside 20% of value: ${[...lowV.map((f) => f + ' low'), ...highV.map((f) => f + ' high')].join(', ') || 'none'}; exit more than 10 points off: ${offE.join(', ') || 'none'}`);
+    }
+    const worse = rows.filter((r) => r.level === 2).filter((e) => e.value < rows.find((a) => a.form === e.form && a.level === 1).value).map((e) => e.form);
+    out.push(`elder mean value ${(means[2] / means[1]).toFixed(2)}x the adult's (bar 1.15x); elder below own adult: ${worse.join(', ') || 'none'}`);
+    console.log(`${k}\n  ${out.join('\n  ')}`);
+  }
 }
