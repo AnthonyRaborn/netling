@@ -505,3 +505,20 @@ test('end-of-run choice: the loot and what is carried compete for the slots, the
   INV.stack = saved;
   reset();
 });
+
+test('Feast: a won ICE restores a little Integrity, for both Feast forms and more for the elder', () => {
+  set({ abilities: true });
+  const heal = (form, level) => {
+    const a = setup(form, level, 'ice');
+    moveTo(a.s, a.node.id, stub(0.99));
+    a.s.stats.integrity = 50;
+    resolveIce(a.s, true, stub(0.99));
+    return a.s.stats.integrity - 50;
+  };
+  assert.equal(heal('feastStreet', 1), NR2.ab.scavenge[1].winHeal);
+  assert.equal(heal('feastStreet', 2), NR2.ab.scavenge[2].winHeal);
+  assert.equal(heal('feastCorp', 1), NR2.ab.concession[1].winHeal);
+  assert.equal(heal('breachCorp', 1), 0, 'no one else');
+  assert.ok(heal('feastStreet', 2) > heal('feastStreet', 1));
+  reset();
+});

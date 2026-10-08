@@ -530,7 +530,8 @@ function resolveIceFight(pet, won, rng) {
   const tier2 = run.lastTier === 2;
   if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
   if (won) {
-    if (ab2(pet) === 'feastStreet' && NR2.ab.scavenge[lvl(pet)].winHeal) st.integrity = clamp(st.integrity + NR2.ab.scavenge[lvl(pet)].winHeal); // sustain from a win (when set; not decided)
+    const wh = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].winHeal : ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].winHeal : 0;
+    if (wh) st.integrity = clamp(st.integrity + wh); // Feast: a small sustain from feeding on a broken ICE (decided as fitting the theme)
     const acc = rng() < RUN_CFG.iceWinAccChance ? takeAccessory(run, rng) : '';
     if (rng() < (ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].iceWin : RUN_CFG.iceWinLootChance)) {
       const item = weighted(REGIONS[run.region].loot, rng);

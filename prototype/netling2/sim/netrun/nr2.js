@@ -20,7 +20,7 @@ export const NR2 = {
   inv: { stack: 3 },
   // The forced filled cache (Feast corp, elder level): one a run, in the layer after the one before halfway (decided: set interval,
   // about one a run, may displace any node but, decided later, never the relay: `relaySafe` is true).
-  forcedCache: { perRun: 3, relaySafe: true, every: 3 }, // every: with perRun above 1, a further cache this many layers on
+  forcedCache: { perRun: 1, relaySafe: true, every: 3 }, // every: with perRun above 1, a further cache this many layers on
 
   // ---- ICE tiers (decided: by region depth, speed as the lever, Breach 4-in-5, no extra pay, avoidance weaker against tier 2) ----
   tier: {
@@ -48,8 +48,8 @@ export const NR2 = {
     checkpoint: { dodgeCorp: { 1: false, 2: true }, dodgeStreet: { 1: false, 2: true }, hidden: { 1: true, 2: true } },
     sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
     upkeep: { tuneStreet: { 1: 0, 2: 6 } }, // Integrity restored per move
-    concession: { 1: { exchangePrice: 11, scrip: 6, exitItems: 1 }, 2: { exchangePrice: 11, scrip: 8, exitItems: 1 } }, // feastCorp: cheaper exchange, loose scrip on top, a company-store item at the exit (exitItems: tuned in, a proposal; scrip alone was too weak a part)
-    scavenge: { 1: { cache: 0.7, iceWin: 0.45 }, 2: { cache: 0.9, iceWin: 0.8 } }, // feastStreet: tuned to the parity yardstick (winHeal, a sustain part, is available but not used: Feast is loot)
+    concession: { 1: { exchangePrice: 11, scrip: 4, exitItems: 1, winHeal: 8 }, 2: { exchangePrice: 11, scrip: 6, exitItems: 1, winHeal: 12 } }, // feastCorp: cheaper exchange, loose scrip on top, a company-store item at the exit (exitItems: tuned in, a proposal; scrip alone was too weak a part)
+    scavenge: { 1: { cache: 0.6, iceWin: 0.4, winHeal: 8 }, 2: { cache: 0.8, iceWin: 0.6, winHeal: 16 } }, // feastStreet: tuned to the parity yardstick; winHeal is a small sustain (Integrity restored by a won ICE), decided as fitting the theme
     forcedCacheForms: ['feastCorp'], // level 2 only
   },
 
