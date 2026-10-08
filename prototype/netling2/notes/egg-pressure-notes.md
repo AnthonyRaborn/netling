@@ -280,3 +280,13 @@ Penalty: a play while Sync is at 85+ risks an infection (`SIDES.sync.penLine` 85
 - G1 also hits archetypes that never enter a state when they play past 85 (pen hits 0.3 to 1.9 a life): Wetware casual infections 7.4 -> 8.5, worker full-life 0.795 -> 0.715, human-regular full-life 0.29 -> 0.255.
 - B1: the penalty is avoidable; hits 0.0 to 0.1 a life, every archetype within noise of the Result 16 numbers. A budgeter plays about 40% fewer games (71 against 117).
 - Read: the penalty is a real choice but too small against the benefit, and it should be tied to the state, not the Sync line.
+
+## Result 19: graduated Sync penalty inside Wired
+
+Rule (`penStep`, `penFree`, `penCap`, `SYNCBOT=sip`): inside Wired, plays below Sync 90 are free; each play at 90+ adds `penStep` to the infection chance (x owner multiplier, capped), reset when the state ends. Penalty applies to every egg (x1 for non-owners). Config as Result 16/18. 200 lives per cell. Not unit-tested.
+
+- Ordinary archetypes that never enter a state are untouched (hits 0, results equal the no-penalty run).
+- Sipping (stop at 89): essentially free (0.01 hits a life) and keeps part of the benefit (attentive drops 12.6 -> 14.3 Wetware, sysadmin 13.7 -> 17.2; Wired 6% to 13% of time with this bot).
+- Greedy (play to full), Wetware, attentive / sysadmin: step 0 / 5% / 10% / 20%: infections 8.9 / 9.8 / 10.8 / 11.5 and 9.3 / 11.3 / 12.9 / 14.2 (off 7.5 and 7.8); hits a life 0 / 1.6 / 2.9 / 3.7 and 0 / 2.7 / 4.8 / 6.3; drops unchanged (38 / 48 against 21 / 22 off); full-life 0.985 to 1.0.
+- Program (non-owner x1) takes about half to two thirds of Wetware's hits; Iron fewer.
+- Read: the bot does not adapt, so these are costs paid by a player who ignores the penalty; greedy still nets about +80% drops (attentive) for +3 to +4 infections at 20%. The sip path is free by design. Whether greed pays depends on what an infection costs a human (a clinic visit). Open: a burnout rule (N plays at 90+ ends the state) instead of or on top of a chance.
