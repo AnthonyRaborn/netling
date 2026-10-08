@@ -41,3 +41,5 @@
 2026-10-08T17:49:52.905Z start grace-sweep
 2026-10-08T17:50:01.799Z done clinic-sweep [rules] 507s
 2026-10-08T17:50:01.803Z start heat-hint-sweep
+2026-10-08T17:52:52.780Z done heat-hint-sweep [rules] 171s
+2026-10-08T17:52:52.781Z start hint-sweep
