@@ -4,7 +4,15 @@ Status: simulator-tested working design, not in any game code. Numbers come from
 
 ## The idea
 
-Name warning: Surge and Wired are working names only. They clash with Chipped's elder (Surge), the Wired adult and the power-surge event; candidates are not drafted.
+Name warning: Surge and Wired are working names only. They clash with Chipped's elder (Surge), the Wired adult and the power-surge event. Proposals (not decided; none appears in `src/`, the 2.0 docs or the content catalog; Overvolt is already Iron's item and Boost a 1.0 buff, so both are out):
+
+| Set | Heat | Charge state | Sync state | Note |
+|---|---|---|---|---|
+| A (recommended) | Overclock | Overdrive | Overlink | One "Over-" family: a bar pushed past normal, which the cost side backs up. Overlink is coined. |
+| B | Overclock | Redline | Rapport | Plain words. Redline names the limit; Rapport is the plain word for the Sync bond (BOND, LOCK) and suits Wetware's plain register. |
+| C | Overclock | Overdrive | Rapport | Mixes the two. |
+
+One shared name per state is enough (only the meters have per-egg labels).
 
 Each egg manages one bar harder than the others, and that bar has a special state with a real benefit and a real risk. The same states exist for every egg; the owner's bar is stronger (x3 on every effect), so the egg decides which risk is worth taking. Pass bar: the ordinary archetypes (attentive, casual, worker, sysadmin, human-regular) stay within noise on full-life rate, infections and temper.
 
