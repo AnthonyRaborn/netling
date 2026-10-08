@@ -196,6 +196,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     challenge: CHALLENGE_REGIONS.includes(region) && CHALLENGE_IDS.includes(opts.challenge) ? opts.challenge : null,
     challengeVoid: false, // the rule was broken: the run goes on without it
     challengeWon: false, // reached the exit with the rule kept
+    ...(NR2.fate && !daily ? { fate: Math.floor(rng() * 4294967296) } : {}), // pre-rolled node contents (nr2.js fate): a per-run seed
     ...(daily ? { daily: true, day, seed: dailySeed(day), rollKey: null, rolls: 0, stake: newStake(pet.inventory), trail: [TRAIL.entry] } : {}),
   };
   if (pet.run.challenge) note(pet.run, `challenge: ${challengeById(pet.run.challenge).name.toUpperCase()}. ${challengeById(pet.run.challenge).rule}`);
@@ -331,7 +332,7 @@ function moveToNode(pet, nodeId, rng) {
       run.tally.caches++;
       const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(pet) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
       const sc = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)] : null;
-      if (node.filled || rng() < (sc ? sc.cache : region.cacheFind ?? RUN_CFG.cacheFindChance)) {
+      if (node.filled || (run.fate !== undefined && !run.daily ? cacheFate(run, nodeId) < (sc ? sc.cache : region.cacheFind ?? RUN_CFG.cacheFindChance) : rng() < (sc ? sc.cache : region.cacheFind ?? RUN_CFG.cacheFindChance))) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
         note(run, `cache cracked: ${ITEMS[item].name}.${frag}`);
@@ -386,7 +387,7 @@ function moveToNode(pet, nodeId, rng) {
         return { ok: true, kind: 'ice', phased: true };
       }
       // The daily trace picks the fight by node alone, so every form meets the same one there.
-      const game = GAME_IDS[Math.floor((run.daily ? seededRoll(run.seed, nodeId * 8 + LANE.game, 0) : rng()) * GAME_IDS.length)];
+      const game = GAME_IDS[Math.floor((fateSeed(run) !== undefined ? seededRoll(fateSeed(run), nodeId * 8 + LANE.game, 0) : rng()) * GAME_IDS.length)];
       run.phase = 'ice';
       run.pending = { game, tier };
       if (tier === 2) {
@@ -794,6 +795,8 @@ export function visibleNodeIds(pet) {
   if (form === 'daemon') nodesWithin(run, run.pos, upgraded(pet) ? RUN_CFG.initLookahead : 2).forEach((id) => ids.add(id));
   if (ab2(pet) === 'hidden') run.map.nodes.forEach((n) => ids.add(n.id));
   if (ab2(pet) === 'tuneCorp') nodesWithin(run, run.pos, NR2.ab.sight.tuneCorp[lvl(pet)]).forEach((id) => ids.add(id));
+  // Foresight (nr2.js): a Tune street netling sees the nodes whose contents it reads, so those within its depth are visible (the adult's depth 1 is the next step, already visible).
+  if (NR2.foresight.on && ab2(pet) === 'tuneStreet' && run.fate !== undefined) nodesWithin(run, run.pos, NR2.foresight.depth[lvl(pet)] ?? 0).forEach((id) => ids.add(id));
   return ids;
 }
 
@@ -1076,10 +1079,13 @@ function settleContract(pet, result) {
 
 
 // 2.0 (nr2.js): the tier of an ICE fight. 1 or 2. The daily trace rolls it from the node alone, so everyone meets the same fight.
+// The seed that decides what is in a node without the route: the daily trace's, or a run's `fate` (nr2.js); undefined when contents are rolled on arrival.
+const fateSeed = (run) => (run.daily ? run.seed : run.fate);
+
 function rollTier(run, nodeId, rng) {
   const share = tierShare(run.region);
   if (!share) return 1;
-  const r = run.daily ? seededRoll(run.seed, nodeId * 8 + 4, 0) : rng();
+  const r = fateSeed(run) !== undefined ? seededRoll(fateSeed(run), nodeId * 8 + 4, 0) : rng();
   return r < share ? 2 : 1;
 }
 
@@ -1100,6 +1106,33 @@ function lostFightCost(pet, run, rng) {
       COST_METER.wetwareInfections++;
     }
   }
+}
+
+// 2.0 (nr2.js fate): the roll that decides whether a cache is filled, known before arrival.
+const cacheFate = (run, nodeId) => seededRoll(run.fate, nodeId * 8 + 5, 0);
+
+// Foresight (nr2.js): what a Tune street netling can read inside the nodes within its depth: { nodeId: { game?, tier?, filled? } }. Empty for any other
+// netling, with the switch off, or without `fate`. Nodes already visited and the entry show nothing (they are spent).
+export function foresightView(pet) {
+  const run = pet.run;
+  if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done') return {};
+  const level = lvl(pet);
+  const depth = NR2.foresight.depth[level] ?? 0;
+  const fields = NR2.foresight.fields[level] ?? [];
+  const out = {};
+  for (const id of nodesWithin(run, run.pos, depth)) {
+    if (run.visited.includes(id)) continue;
+    const node = nodeById(run.map, id);
+    if (node.type === 'ice') {
+      const view = {};
+      if (fields.includes('game')) view.game = GAME_IDS[Math.floor(seededRoll(run.fate, id * 8 + LANE.game, 0) * GAME_IDS.length)];
+      if (fields.includes('tier')) view.tier = (() => { const sh = tierShare(run.region); return sh && seededRoll(run.fate, id * 8 + 4, 0) < sh ? 2 : 1; })();
+      if (Object.keys(view).length) out[id] = view;
+    } else if (node.type === 'cache' && fields.includes('cache')) {
+      out[id] = { filled: Boolean(node.filled) || cacheFate(run, id) < (REGIONS[run.region].cacheFind ?? RUN_CFG.cacheFindChance) };
+    }
+  }
+  return out;
 }
 
 // The forced filled cache (Feast corp, elder level): when the run reaches the layer before the halfway layer, one node in the next layer

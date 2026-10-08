@@ -278,3 +278,35 @@ In Integrity-equivalents a life, attentive / casual / daredevil: Iron about 2.4 
 
 **Not measured:** the 5 minute window with these costs (the bots act in one instant); the elder level or an ability on top (the sweeps ran with no ability); whether a real player jacks in hotter or fuller than the bots (Heat 20 to 50 at the run-level sweep, Charge 60 to 100); wear's own effects beyond infections (the LOCK Sync drain at wear 100 is in the life results through `wearMax` only); and anything the Iron wear caption or an infection log line does to behavior. The earlier tables that ran with `eggCost` on used Iron 1 minute a move; the run-level results do not change (Iron's cost never fired there), the life-level ones were not re-run.
 
+## 12. Foresight (Tune street): what the information is worth
+
+Built (all off by default): `NR2.fate` pre-rolls what is in a node (an ICE's game and tier, whether a cache is filled) from a per-run seed, so it can be known before arrival and does not depend on the route (the daily trace already worked this way); `NR2.foresight` (`on`, `depth` by level, `fields` by level) lets a Tune street netling read those contents within its depth, and makes the nodes it reads visible; `foresightView(pet)` in `run.js`; per-game skill in the bot (`style.spread`: the four games at the mean plus `spread` x 1, 1/3, -1/3, -1; clamped), a planner that values an ICE by how likely this player is to lose that game and tier, and a cache by whether it is filled; `sim/foresight-sweep.mjs`. Tests: the last 4 in `nr2.test.js`. All arms in a sweep use the same seeds and the same pre-rolled contents, so a difference is what the information bought.
+
+**The measurement is a model of a person, not a person.** The one number that decides the result is how uneven a player's skill is across the four games (`spread`), and it is not known: 0 is a player equally good at everything (Foresight then helps only through seeing further), 0.2 puts the games at about 80, 67, 53 and 40% around a 60% mean, 0.4 at 100, 73, 47 and 20%. The sweep reports 0, 0.2 and 0.4. It models routing by what is seen; it does not model preparing for a hard fight (healing first), choosing when to jack out, or reading a market's stock or an anomaly's kind (not simulated).
+
+**Adult (reads the next step), banked value as % of the mean of the nine forms blind; 3000 runs; careful / skilled** (blind: Deep 77 / 85, Source 71 / 77):
+| Variant | spread 0 | spread 0.2 | spread 0.4 |
+|---|---|---|---|
+| Deep, depth 1: game | 77 / 85 | 86 / 93 | 97 / 94 |
+| Deep, depth 1: game, tier | 79 / 86 | 87 / 93 | 97 / 95 |
+| Deep, depth 1: game, tier, cache | 81 / 88 | 89 / 95 | 99 / 97 |
+| Source, depth 1: game | 71 / 77 | 88 / 88 | 97 / 94 |
+The yardstick's floor is 80%: the adult is under it blind and reaches it when the player's skill is uneven (spread 0.2 and up); for a player equally good at everything the information is worth nothing at one step.
+
+**Elder (reads two steps), % of the mean of the nine forms; the elder's own repair per move (`ab.upkeep.tuneStreet[2]`, 6 in nr2.js) carries most of it: blind it is 60% with no repair, 75% with 3, 99% with 6 in the Deep, careful, spread 0.** Deep and Source, careful / skilled, depth 2 with the game only:
+| Repair per move | spread 0 | spread 0.2 | spread 0.4 |
+|---|---|---|---|
+| 6 (now), Deep | 105 / 104 | 114 / 108 | 123 / 113 |
+| 6 (now), Source | 109 / 115 | 125 / 127 | 145 / 140 |
+| 3, Deep | 81 / 92 | 89 / 98 | 97 / 101 |
+| 3, Source | 79 / 92 | 93 / 105 | 107 / 114 |
+| 0, Deep | 66 / 78 | 74 / 85 | 84 / 86 |
+Depth 1 at the elder with repair 6: Deep 99 / 101 at spread 0, 108 / 105 at 0.2, 116 / 109 at 0.4; Source 96 / 109, 116 / 121, 130 / 132.
+
+**Reading.**
+- **The ICE's game is the whole value.** The tier adds 0 to 5% (the tier-2 share is low and its win penalty small), a filled cache 1 to 5%. Depth 2 adds about 5 to 12 points over depth 1 at any spread (some of it from seeing further, not from the detail: at spread 0 depth 2 still gains 4 to 12%).
+- **Foresight at the current repair value is too strong for the elder in the Source** (125% and more at spread 0.2 and up, careful) and over the 120% bar for an uneven player in the Deep (123% at 0.4). With the repair halved to 3 the elder sits in the 80 to 120% band at every spread tried in both regions except Source careful at spread 0 (79%, the one cell under).
+- Tune street is the form that depends most on the player (0 at spread 0, a lot at 0.4); the others do not. That is by design (information for a player who can use it) and is the thing a playtest has to answer.
+
+**Not measured:** market stock and anomaly kinds (the bots buy by a fixed list and pick anomaly options by a style), preparing for a known ICE, the fog (lines only from the current node, elder sight showing lines: a drawing change that raises the worth of sight for a human), how much better than the planner a person routes, and whether the nodes two steps ahead stay visible when a fight or choice interrupts.
+

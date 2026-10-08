@@ -14,6 +14,13 @@ export const NR2 = {
   // A held pressure state resumes after a jack-out (decided), with a window before the bars can end it (decided: 5 minutes).
   // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
   graceMin: 5,
+  // Foresight (Tune street, docs/NETLING_2_NETRUN_DRAFTS.md section 3.3): what the netling sees INSIDE the nodes it can see. `fate` pre-rolls what is in
+  // a node (an ICE's game and tier, whether a cache is filled) from a per-run seed, so it can be known before arrival and does not depend on the route
+  // (the daily trace already works this way). Off by default; `fate` alone changes only which random numbers decide those rolls. `foresight.on` lets a
+  // Tune street netling read the nodes within `depth` steps (by level: adult 1 = the next step, elder 2), the `fields` it is allowed (game, tier, cache).
+  // The bots need per-game skill to use it (netrun-bot.mjs, style.spread). Starting values are mine.
+  fate: false,
+  foresight: { on: false, depth: { 1: 1, 2: 2 }, fields: { 1: ['game'], 2: ['game'] } }, // measured (notes section 12): the ICE's game is the whole value; the tier and a filled cache add 0 to 5%
   // The egg-flavored anomalies (decided as a go; options and numbers are mine): netrun/egg-anomalies.js. Not part of NR2=all yet.
   eggAnomalies: false,
   eggAnomaly: {

@@ -739,3 +739,114 @@ test('egg run costs: the meter counts lost fights, hot moves, bleeds and rolls, 
   assert.equal(COST_METER.wetwareRolls - before.wetwareRolls, 0, 'not a Wetware netling');
   reset();
 });
+
+// --- Foresight (Tune street) and the pre-rolled contents it reads (nr2.js `fate`, `foresight`) --------------------------------------
+const { foresightView } = await import('./sim/netrun/run.js');
+const { nodeById } = await import('../../src/netrun/map.js');
+
+function foresightRun(level, patch = {}, region = 'deep', form = 'tuneStreet', seed = 5, fate = true) {
+  set({ abilities: true, tiers: true, tier: { share: { deep: 0.5 } }, fate, foresight: { on: true, depth: { 1: 1, 2: 2 }, fields: { 1: ['game', 'tier', 'cache'], 2: ['game', 'tier', 'cache'] }, ...patch } });
+  const rng = mulberry32(seed);
+  const s = createScript({ now: 0, rng });
+  s.stage = level === 2 ? 'mainframe' : 'adult';
+  s.form = level === 2 ? `${form}Elder` : form;
+  Object.assign(s.stats, { charge: 100, integrity: 100, heat: 30 });
+  startRun(s, region, rng, []);
+  return { s, rng };
+}
+const within = (run, from, depth) => {
+  let frontier = [from];
+  const out = new Set();
+  for (let d = 0; d < depth; d++) {
+    frontier = frontier.flatMap((id) => nodeById(run.map, id).edges);
+    frontier.forEach((id) => out.add(id));
+  }
+  return [...out];
+};
+
+test('fate: off by default (nothing pre-rolled); on, a run carries a seed and the same node holds the same thing whatever the route or the rolls', () => {
+  reset();
+  const rng = mulberry32(5);
+  const plain = createScript({ now: 0, rng });
+  Object.assign(plain.stats, { charge: 100, integrity: 100 });
+  startRun(plain, 'deep', rng, []);
+  assert.equal(plain.run.fate, undefined);
+  set({ fate: true, tiers: true, tier: { share: { deep: 0.5 } } });
+  const games = [];
+  for (const rollValue of [0.1, 0.9]) {
+    const r2 = mulberry32(5);
+    const s = createScript({ now: 0, rng: r2 });
+    Object.assign(s.stats, { charge: 100, integrity: 100 });
+    startRun(s, 'deep', r2, []);
+    assert.equal(typeof s.run.fate, 'number');
+    const node = runOptions(s.run)[0];
+    node.type = 'ice';
+    const moved = moveTo(s, node.id, stub(rollValue));
+    games.push([moved.game, moved.tier]);
+  }
+  assert.deepEqual(games[0], games[1], 'the fight at a node does not depend on the rolls on arrival');
+  reset();
+});
+
+test('foresight: only Tune street, only with the switch and fate on; the adult reads the next step, the elder two steps; fields as allowed', () => {
+  const { s } = foresightRun(1);
+  const next = within(s.run, s.run.pos, 1);
+  const view = foresightView(s);
+  for (const id of Object.keys(view).map(Number)) assert.ok(next.includes(id), 'the adult reads only the next step');
+  const kinds = next.map((id) => nodeById(s.run.map, id).type);
+  assert.equal(Object.keys(view).length, kinds.filter((t) => t === 'ice' || t === 'cache').length, 'an entry for each ICE and cache it can see');
+  for (const [id, v] of Object.entries(view)) {
+    const t = nodeById(s.run.map, Number(id)).type;
+    if (t === 'ice') assert.deepEqual(Object.keys(v).sort(), ['game', 'tier']);
+    else assert.deepEqual(Object.keys(v), ['filled']);
+  }
+  // Fields can be limited: the adult's default is the game only.
+  const g = foresightRun(1, { fields: { 1: ['game'], 2: ['game'] } });
+  for (const v of Object.values(foresightView(g.s))) assert.deepEqual(Object.keys(v), ['game']);
+  // The elder reads two steps ahead (visited and the current node excluded).
+  const e = foresightRun(2);
+  const two = within(e.s.run, e.s.run.pos, 2).filter((id) => ['ice', 'cache'].includes(nodeById(e.s.run.map, id).type));
+  assert.deepEqual(Object.keys(foresightView(e.s)).map(Number).sort((a, b) => a - b), two.sort((a, b) => a - b));
+  // Not another form, not with the switch off, not without fate.
+  const other = foresightRun(1, {}, 'deep', 'tuneCorp');
+  assert.deepEqual(foresightView(other.s), {});
+  NR2.foresight.on = false;
+  assert.deepEqual(foresightView(s), {});
+  NR2.foresight.on = true;
+  const nofate = foresightRun(1, {}, 'deep', 'tuneStreet', 5, false);
+  assert.deepEqual(foresightView(nofate.s), {}, 'without fate there is nothing to read');
+  reset();
+});
+
+test('foresight tells the truth: what it shows of an ICE or a cache is what the player meets on arrival', () => {
+  for (const level of [1, 2]) {
+    for (const seed of [1, 2, 3, 4, 5, 6]) {
+      const { s, rng } = foresightRun(level, {}, 'deep', 'tuneStreet', seed);
+      const view = foresightView(s);
+      for (const node of runOptions(s.run)) {
+        const seen = view[node.id];
+        if (!seen) continue;
+        // Arrive with a different rng each time: the contents must match what was shown.
+        const clone = JSON.parse(JSON.stringify(s));
+        const res = moveTo(clone, node.id, stub(0.5));
+        if (node.type === 'ice' && res.kind === 'ice' && !res.phased) {
+          assert.equal(res.game, seen.game, `seed ${seed}: the game`);
+          assert.equal(res.tier, seen.tier, `seed ${seed}: the tier`);
+        }
+        if (node.type === 'cache') assert.equal(Boolean(res.item), seen.filled, `seed ${seed}: a cache shown filled cracks an item and one shown empty does not`);
+      }
+      assert.ok(rng);
+    }
+  }
+  reset();
+});
+
+test('foresight makes the nodes it reads visible: the elder sees two steps ahead, the adult only the next step', () => {
+  const e = foresightRun(2);
+  const vis = visibleNodeIds(e.s);
+  for (const id of within(e.s.run, e.s.run.pos, 2)) assert.ok(vis.has(id), `elder: node ${id}`);
+  NR2.foresight.on = false;
+  const two = within(e.s.run, e.s.run.pos, 2).filter((id) => !within(e.s.run, e.s.run.pos, 1).includes(id));
+  assert.ok(two.some((id) => !visibleNodeIds(e.s).has(id)), 'without Foresight the second step is not visible');
+  reset();
+});

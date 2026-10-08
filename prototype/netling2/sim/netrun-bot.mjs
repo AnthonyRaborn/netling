@@ -1,14 +1,31 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
-import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem } from './netrun/run.js';
+import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem, foresightView } from './netrun/run.js';
 import { INVENTORY_SLOTS, SCRIP, leanSeen, slotsUsed } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
 import { tierPenalty } from './netrun/nr2.js';
+import { REGIONS } from '../../../src/netrun/regions.js';
 
 // An assumption, not a measurement: how much likelier a player is to win a mini-game or ICE fight that runs
 // slower because the netling is overclocked (CFG.overclockGameSpeed). Shared with tools/balance.mjs.
 export const OVERCLOCK_WIN_BONUS = 0.08;
 // hot: whether this game runs slower (overclocked at home; for ICE, jacked in overclocked: run.hot).
 export const winChance = (hot, rate) => Math.min(0.95, rate + (hot ? OVERCLOCK_WIN_BONUS : 0));
+
+// Uneven skill (style.spread, for the Foresight measurement): a player is better at some mini-games than others, with the same mean. spread 0 is
+// the old flat bot; 0.2 puts the four games at the mean +0.2, +0.07, -0.07, -0.2; 0.4 at +0.4 ... -0.4 (clamped). An assumption, not a measurement of
+// people: how uneven real players are is unknown, so the Foresight sweep reports a range.
+const SKILL_SHAPE = { breach: 1, dodge: 1 / 3, tune: -1 / 3, feast: -1 };
+export const gameRate = (style, game) => Math.min(0.97, Math.max(0.03, style.winRate + (style.spread ?? 0) * (SKILL_SHAPE[game] ?? 0)));
+// The chance of losing an ICE fight of this game and tier, for the planner.
+const lossOf = (style, hot, game, tier) => 1 - winChance(hot, gameRate(style, game) - (tier === 2 ? tierPenalty({ tier: 2, game }) : 0));
+// What a netling that can read a node's contents (Foresight) expects of it, against the mean it expects when it cannot.
+function iceLoss(style, hot, detail) {
+  const mean = ['breach', 'dodge', 'tune', 'feast'].reduce((a, g) => a + lossOf(style, hot, g, 1), 0) / 4;
+  if (!detail || (!detail.game && !detail.tier)) return 1;
+  const games = detail.game ? [detail.game] : ['breach', 'dodge', 'tune', 'feast'];
+  const loss = games.reduce((a, g) => a + lossOf(style, hot, g, detail.tier ?? 1), 0) / games.length;
+  return loss / mean;
+}
 
 // plan: look a few steps ahead, using only the nodes the player can see (so a form's sight helps).
 // Without it the bot judges only the next step, as it always did.
@@ -82,27 +99,33 @@ function decide(pet, style, rng) {
 
 // How much a node is worth to the bot. Unseen nodes are worth nothing either way, so seeing
 // further (a form's sight, revealed layers) is the only thing planning gains.
-function nodeValue(type, hurt, node, seek) {
+function nodeValue(type, hurt, node, seek, detail = null, ctx = {}) {
   if (type === 'market' && seek && node.flavor === 'clinic') return 6; // bugged: a clinic is worth a detour
-  if (type === 'ice') return hurt ? -6 : -0.5;
+  // Foresight: an ICE whose game or tier is known is worth less or more than the average ICE by how likely this player is to lose it; a cache known
+  // to be filled is worth more than the average cache (2) and one known to be empty less.
+  if (type === 'ice') return (hurt ? -6 : -0.5) * (detail ? iceLoss(ctx.style, ctx.hot, detail) : 1);
+  if (type === 'cache' && detail && typeof detail.filled === 'boolean') {
+    const p = ctx.cacheFind ?? 0.4;
+    return detail.filled ? (2 - 0.5 * (1 - p)) / p : 0.5;
+  }
   if (type === 'relay') return hurt ? 4 : 0.5;
   return { cache: 2, exit: 1, market: 0.5, anomaly: 0.5, checkpoint: -0.5 }[type] ?? 0;
 }
 
-function pathValue(map, id, visible, depth, hurt, seek) {
+function pathValue(map, id, visible, depth, hurt, seek, view = null, ctx = {}) {
   const node = nodeById(map, id);
-  const here = visible.has(id) ? nodeValue(node.type, hurt, node, seek) : 0;
+  const here = visible.has(id) ? nodeValue(node.type, hurt, node, seek, view?.[id], ctx) : 0;
   if (depth === 0 || !node.edges.length) return here;
-  return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt, seek)));
+  return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt, seek, view, ctx)));
 }
 
 // Picks the next node by the best path up to `depth` steps, judged only on `visible` node ids.
 // Ties go to the first option, as the one-step bot does.
-export function planMove(map, options, visible, hurt, depth = 3, seek = false) {
+export function planMove(map, options, visible, hurt, depth = 3, seek = false, view = null, ctx = {}) {
   let best = options[0];
   let bestValue = -Infinity;
   for (const node of options) {
-    const value = pathValue(map, node.id, visible, depth, hurt, seek);
+    const value = pathValue(map, node.id, visible, depth, hurt, seek, view, ctx);
     if (value > bestValue) {
       bestValue = value;
       best = node;
@@ -144,7 +167,7 @@ export function playRun(pet, style, region, rng, codex = []) {
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 60) {
     const run = pet.run;
-    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, style.winRate - tierPenalty(run.pending)), rng);
+    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, gameRate(style, run.pending.game) - tierPenalty(run.pending)), rng);
     else if (run.phase === 'choice') {
       if (run.pending.kind === 'market' && !run.pending.counted) {
         run.pending.counted = true; // a clinic stays open after a fix: count and sell once
@@ -160,7 +183,7 @@ export function playRun(pet, style, region, rng, codex = []) {
       const hurt = pet.stats.integrity < style.avoidIceBelow;
       const seek = pet.bugs > 0 && style.seekClinic !== false && style.fix?.mode !== 'none'; // bugged, and willing to pay for a fix
       const pick = style.plan
-        ? planMove(run.map, opts, visibleNodeIds(pet), hurt, 3, seek)
+        ? planMove(run.map, opts, visibleNodeIds(pet), hurt, 3, seek, foresightView(pet), { style, hot: run.hot, cacheFind: REGIONS[run.region].cacheFind })
         : ((seek ? opts.find((n) => n.type === 'market' && n.flavor === 'clinic') : undefined) ??
           opts.find((n) => hurt && n.type === 'relay') ??
           opts.find((n) => !(hurt && n.type === 'ice') && n.type === 'cache') ??
