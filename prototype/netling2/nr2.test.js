@@ -688,3 +688,54 @@ test('egg anomalies: each option leans, through the same adapter as 1.0\'s (alle
   }
   reset();
 });
+
+// --- egg run cost sizes (notes/netrun-sim-notes.md, section 11) ----------------------------------------------------------------------
+const { COST_METER } = await import('./sim/netrun/run.js');
+
+test('egg run costs: the sizes in force, and Iron\'s wear a move is proportional to the minutes a move is worth', () => {
+  reset();
+  assert.deepEqual(NR2.cost, { ironMinutesPerMove: 2.5, programLostFightBleed: 4, wetwareLostFightInfect: 0.04 });
+  const added = (minutes) => {
+    set({ eggCost: true, cost: { ironMinutesPerMove: minutes } });
+    IRON.on = true;
+    const rng = mulberry32(2);
+    const s = createScript({ now: 0, rng });
+    s.stage = 'adult';
+    s.form = 'breachCorp';
+    s.stats.heat = 85;
+    s.stats.charge = 100;
+    startRun(s, 'public', rng, []);
+    const o = runOptions(s.run)[0];
+    o.type = 'cache';
+    moveTo(s, o.id, rng);
+    IRON.on = false;
+    return s.wear ?? 0;
+  };
+  const one = added(1);
+  assert.ok(one > 0);
+  assert.ok(Math.abs(added(2.5) - 2.5 * one) < 1e-9, 'wear a move scales with the minutes');
+  reset();
+});
+
+test('egg run costs: the meter counts lost fights, hot moves, bleeds and rolls, and only for the egg that pays', () => {
+  const before = { ...COST_METER };
+  set({ eggCost: true });
+  Object.assign(SIDES, { on: true, owner: 'charge', ownerMult: 3, teenStates: true });
+  IRON.on = false;
+  const rng = mulberry32(4);
+  const s = createScript({ now: 0, rng });
+  s.stage = 'adult';
+  s.form = 'breachCorp';
+  s.stats.charge = 95;
+  startRun(s, 'public', rng, []);
+  const o = runOptions(s.run)[0];
+  o.type = 'ice';
+  moveTo(s, o.id, rng);
+  resolveIce(s, false, () => 0);
+  SIDES.on = false;
+  assert.equal(COST_METER.lostFights - before.lostFights, 1);
+  assert.equal(COST_METER.programBleeds - before.programBleeds, 1);
+  assert.equal(COST_METER.programBled - before.programBled, NR2.cost.programLostFightBleed);
+  assert.equal(COST_METER.wetwareRolls - before.wetwareRolls, 0, 'not a Wetware netling');
+  reset();
+});

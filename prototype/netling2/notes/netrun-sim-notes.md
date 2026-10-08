@@ -237,3 +237,44 @@ Encounters a run (random): Bazaar 0.17, Corp Cache 0.08, Ruins 0.31, Deep 0.21 t
 **Reading.** Every egg anomaly is inside noise at the run level when its options are taken at random, which is the intent (flavor, not power). No single option moves a rate by more than about 1 point now. The loot options (PRY IT OPEN, TAKE A SAMPLE, and LET IT RUN with its 50% item) look 2 to 5% better on value than the maintenance options (FLASH IT, KILL IT) and GRAFT IT, because the bot's value counts items and scrip and nothing else; what FLASH IT does for wear and Heat, GRAFT for Sync, and CATCH IT for Integrity beyond survival is not in the metric. Iron's wear in a run is about 1 point either way (the run costs are light), so the patch has little to clear in these runs; for a hot Iron netling it is worth more than the bots show.
 
 **Not measured.** Players choosing options by their bars (a bot picks at random or by lean), the Overdrive overflow for a Program netling that is really at Charge 80+ when it unwinds (the careful bot's LET IT RUN in the Deep tore in 53% of 1122 uses, 6000 runs, because its Charge is usually high at an anomaly; a human who watches the bar can avoid it, which is the design), contracts, challenges (none of these options changes what Unplugged, Blackout, Glass or Bare metal forbid), the daily trace (excluded by rule), and wording.
+
+## 11. Egg run costs: sizes and the pass bar
+
+Built: `sim/runcost-sweep.mjs` (`EGG=iron|program|wetware node prototype/netling2/sim/runcost-sweep.mjs [lives] [archetypes] [cost-overrides-json]`: per archetype, whole lives with `NR2.eggCost` off and on, same seeds, with what each cost did a life from `COST_METER` in `run.js`), and `netrun-sweep.mjs` with `EGG=` for the run level. Tests: the last two in `nr2.test.js`. The costs are the decided direction (light, not decision points); the sizes are mine, a proposal for veto.
+
+**What each cost is, and what it did at the first sizes** (Iron 1 minute of wear a move at Heat over 75, Program 4 Integrity on a lost fight at Charge 80+, Wetware 4% infection on a lost fight; 500 lives; attentive / casual / daredevil, the three who netrun a lot; sysadmin and overclocker never netrun here, worker and human-regular about 2 to 3 runs a life):
+- Fired a life: lost fights 11.7 / 14.4 / 10.3. Iron: wear added 30 / 52 / 108 over 32 / 47 / 87 hot moves. Program: 1.8 / 6.1 / 2.1 bleeds, 7 / 25 / 8 Integrity. Wetware: 10.3 / 11.1 / 9.3 rolls, 0.39 / 0.40 / 0.34 infections.
+- Run level (`netrun-sweep`, 3000 runs, Ruins and Deep, careful and skilled): Iron 0.0 change in every column, because a run seldom takes Heat past 75 from the sweep's starting Heat (20 to 50); Program +0.0 to +0.3 points disconnect; Wetware -0.1 to +0.8. All inside noise.
+- Life level: every cost passes the bar (ordinary archetypes within noise on full-life rate, infections and temper) except that Wetware's infections show (+0.3 to +0.4 a life for a player who netruns a lot), which is the cost by design.
+
+**A common unit.** An infection costs about 13 Integrity for an attentive netling (4 at once, then 12 an hour until cured, 47 awake minutes on average), 18 for a casual one and 12 for a daredevil (`virusdur`, 150 lives each). In Integrity-equivalents a life, the first sizes were: Wetware 5.1 / 7.2 / 4.1, Program 7.1 / 24.5 / 8.2, Iron about 1.7 / 3.6 / 1.4 plus the wear itself. Iron was the lightest by a factor of 3.
+
+**Variants tried** (500 lives, paired seeds; infections change a life for attentive / casual / daredevil, noise about 0.15):
+| Cost | Infections | Other |
+|---|---|---|
+| Iron x1 (first size) | +0.13 / +0.20 / +0.12 | wear max +3 / +4 / +5 |
+| Iron x2 | +0.05 / +0.30 / +0.33 | casual full-life -0.8 |
+| Iron x3 | +0.24 / +0.24 / +0.62 | casual full-life -2.0, human-regular -1.6, daredevil temper -0.6 |
+| Program bleed 6 | -0.03 / +0.05 / -0.03 | casual disconnects +0.26 a life, +0.1 attentive |
+| Program bleed 8 | -0.03 / +0.08 / -0.02 | casual disconnects +0.38 a life |
+| Wetware 6% | +0.56 / +0.54 / +0.45 | (4% gave +0.36 / +0.31 / +0.26) |
+
+**Sizes chosen** (proposal): **Iron 2.5 minutes of wear a move** (from 1), **Program 4 Integrity** (unchanged), **Wetware 4%** (unchanged). Checked at 1000 lives, paired seeds, change from off to on:
+| | attentive | casual | worker | human-regular | daredevil |
+|---|---|---|---|---|---|
+| Iron 2.5: full-life | 0.998 to 0.998 | 0.911 to 0.909 | 0.815 to 0.826 | 0.290 to 0.291 | 0.995 to 0.992 |
+| Iron 2.5: infections | +0.17 | +0.34 | -0.03 | +0.06 | +0.56 |
+| Iron 2.5: wear max | 12.9 to 24.2 | 18.5 to 36.5 | 40.8 to 43.6 | 31.0 to 35.9 | 69.1 to 83.1 |
+| Program 4: full-life | 0.997 to 0.997 | 0.937 to 0.931 | 0.923 to 0.924 | 0.330 to 0.332 | 0.994 to 0.997 |
+| Program 4: casual disconnects a life | | 2.66 to 2.83 | | | |
+| Wetware 4%: full-life | 0.996 to 0.998 | 0.929 to 0.940 | 0.899 to 0.899 | 0.281 to 0.295 | 0.996 to 0.996 |
+| Wetware 4%: infections | +0.41 | +0.45 | +0.07 | +0.10 | +0.33 |
+In Integrity-equivalents a life, attentive / casual / daredevil: Iron about 2.4 / 6.1 / 6.7, Program 7.0 / 25 / 7.9, Wetware 5.3 / 8.1 / 4.0. The attentive netrunner pays 2 to 7 Integrity a life under any egg, which is light.
+
+**Reading.**
+- No full-life rate moves outside noise (1000 lives, about 1 point). The costs are present but small; the ordinary archetypes that netrun (attentive, casual) are unchanged on full life and temper, and pay in infections (Iron, Wetware) or Integrity (Program).
+- Who pays differs, as the pressures intend: Iron's cost falls on players who jack in hot (daredevil +0.56 infections, wear +14), Wetware's on anyone who loses fights (all netrunners +0.3 to +0.45), Program's on players who jack in with Charge full (casual 6 bleeds a life, attentive 1.8). Program's cost lands on casual players about 3 times as hard as on attentive ones: casual disconnects +0.17 a life (6%). If that is too heavy, raise the Charge line for the bleed to 90 or drop the bleed to 3; not tried.
+- The Iron run cost is the one the netrun-level bots cannot see (0.0 at the run level): it only fires for netlings that jack in hot, which the run-level sweep's starting Heat never produces.
+
+**Not measured:** the 5 minute window with these costs (the bots act in one instant); the elder level or an ability on top (the sweeps ran with no ability); whether a real player jacks in hotter or fuller than the bots (Heat 20 to 50 at the run-level sweep, Charge 60 to 100); wear's own effects beyond infections (the LOCK Sync drain at wear 100 is in the life results through `wearMax` only); and anything the Iron wear caption or an infection log line does to behavior. The earlier tables that ran with `eggCost` on used Iron 1 minute a move; the run-level results do not change (Iron's cost never fired there), the life-level ones were not re-run.
+

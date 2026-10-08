@@ -13,6 +13,7 @@
 | `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
 | `sim/push-sweep.mjs` | Whether the soft push gets a bugged player to a clinic (see Soft push to run) |
 | `sim/clinic-sweep.mjs` | The clinic against no clearing and home clearing, by share of market nodes (see The clinic) |
+| `sim/runcost-sweep.mjs` | The egg run costs at the life level: per archetype, lifetimes with `NR2.eggCost` off and on, and what each cost did (`EGG=iron|program|wetware`; netrun notes, section 11) |
 | `sim/egg-anomaly-sweep.mjs` | The egg-flavored anomalies: what each does to a run of its own egg (`EGG=iron|program|wetware`; see the netrun notes, section 10) |
 | `sim/gap-sweep.mjs`, `sim/human-sweep.mjs` | Survival against the longest gap between check-ins, and against irregular schedules (see Noisy players) |
 | `sim/bug-sweep.mjs` | How a player should handle bugs and what each way costs (see Bug policies) |

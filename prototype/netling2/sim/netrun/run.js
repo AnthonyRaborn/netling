@@ -130,6 +130,9 @@ const lvl = (pet) => levelOf(pet);
 // Which egg this netling is, for the light run costs: Iron (wear on), Program (Charge-owner), Wetware (Sync-owner).
 const eggOf = (pet) => (IRON.on ? 'iron' : SIDES.on && SIDES.owner === 'charge' ? 'program' : SIDES.on && SIDES.owner === 'sync' ? 'wetware' : null);
 
+// Counts of what the egg run costs did (nr2.js `cost`), for the run cost sweep: lost fights, Iron's wear added and the moves that added it, Program's bleeds, Wetware's rolls and the infections they gave.
+export const COST_METER = { lostFights: 0, ironWear: 0, ironMoves: 0, programBleeds: 0, programBled: 0, wetwareRolls: 0, wetwareInfections: 0 };
+
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
 // Minutes as "2h 5m", "2h" or "45m".
@@ -308,7 +311,12 @@ function moveToNode(pet, nodeId, rng) {
     if (up) st.integrity = clamp(st.integrity + up);
   }
   // Iron's own problem in a run: the redline builds wear for the minutes a node takes (the run itself takes no simulated time).
-  if (NR2.eggCost && eggOf(pet) === 'iron' && st.heat > IRON.heat) pet.wear = (pet.wear ?? 0) + IRON.rate * (st.heat - IRON.heat) * NR2.cost.ironMinutesPerMove;
+  if (NR2.eggCost && eggOf(pet) === 'iron' && st.heat > IRON.heat) {
+    const add = IRON.rate * (st.heat - IRON.heat) * NR2.cost.ironMinutesPerMove;
+    pet.wear = (pet.wear ?? 0) + add;
+    COST_METER.ironWear += add;
+    COST_METER.ironMoves++;
+  }
   if (st.heat >= RUN_CFG.throttleHeat) {
     st.integrity = clamp(st.integrity - RUN_CFG.throttleDamage);
     note(run, `thermal throttling. -${RUN_CFG.throttleDamage} integrity.`);
@@ -1079,8 +1087,19 @@ function rollTier(run, nodeId, rng) {
 function lostFightCost(pet, run, rng) {
   const egg = eggOf(pet);
   const st = pet.stats;
-  if (egg === 'program' && st.charge >= SIDES.charge.hi) st.integrity = clamp(st.integrity - NR2.cost.programLostFightBleed);
-  if (egg === 'wetware' && !pet.virus && rng() < NR2.cost.wetwareLostFightInfect) infect(pet, 4);
+  COST_METER.lostFights++;
+  if (egg === 'program' && st.charge >= SIDES.charge.hi) {
+    st.integrity = clamp(st.integrity - NR2.cost.programLostFightBleed);
+    COST_METER.programBleeds++;
+    COST_METER.programBled += NR2.cost.programLostFightBleed;
+  }
+  if (egg === 'wetware' && !pet.virus) {
+    COST_METER.wetwareRolls++;
+    if (rng() < NR2.cost.wetwareLostFightInfect) {
+      infect(pet, 4);
+      COST_METER.wetwareInfections++;
+    }
+  }
 }
 
 // The forced filled cache (Feast corp, elder level): when the run reaches the layer before the halfway layer, one node in the next layer

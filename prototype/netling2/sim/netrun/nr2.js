@@ -66,7 +66,7 @@ export const NR2 = {
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
   cost: {
-    ironMinutesPerMove: 1, // Iron: minutes of wear accrual a move is worth, at Heat over the wear line (the run itself takes no simulated time)
+    ironMinutesPerMove: 2.5, // Iron: minutes of wear accrual a move is worth, at Heat over the wear line (the run itself takes no simulated time). Sized by notes/netrun-sim-notes.md, section 11 (was 1)
     programLostFightBleed: 4, // Program: a lost fight at Charge 80+ costs this much more Integrity
     wetwareLostFightInfect: 0.04, // Wetware: a lost fight rolls an infection at this chance
   },
