@@ -141,6 +141,7 @@ Log lines for the states in the pressures doc, in the register of each egg. Ever
 | Sync state, first play at the top | > link at limit. more load will bite. | > lock at limit. more will strain it. | > it is wound too tight to play safely. |
 | Sync state, burnout | > link burned out. offline until tomorrow. | > lock burned out. it needs the day to settle. | > burned out. it needs the rest of the day. |
 | Sync state ends | > link settles. | > lock eases. | > the buzz fades. |
+| Sync state, ready again (24 hours after a burnout) | > link ready again. | > lock ready again. | > it can link again. |
 | Penalty hit (infection from a play) | > overloaded. !! virus signature detected. | > overloaded. !! drift detected. | > too wound up. !! rejection setting in. |
 | Wear passes the warning line (Iron only) | none | > tolerances are slipping. | none |
 | Wear from running cold (Iron only) | none | > running cold. it stiffens. | none |
@@ -214,7 +215,7 @@ What a player can read: a steady beat with steady marks (calm and in a state); a
 
 Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
 
-Open: whether a Dex or codex hint should mention the states (none drafted); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
+Open: the Dex hint and chatter lines for the states (the log, readout, title and manual lines exist: Pressure cues and State clues above; the codex drafts have none, and 1.0's Dex hints and chatter are what is missing); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
 ## Clinic and bug statements (drafts, first pass)
 
