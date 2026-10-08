@@ -788,7 +788,12 @@ function nodesWithin(run, fromId, depth) {
 export function visibleNodeIds(pet) {
   const run = pet.run;
   // Blackout: only where it has been and one step ahead; no reveals, no form sight.
-  if (run.challenge === 'blackout') return new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
+  if (run.challenge === 'blackout') {
+    const seen = new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
+    // A limited form of the Tune forms' sight survives where nr2.js `blackout` allows it (default: dark).
+    if (ab2(pet) === 'tuneCorp' && NR2.blackout.tuneCorp > 0) nodesWithin(run, run.pos, 1 + NR2.blackout.tuneCorp).forEach((id) => seen.add(id));
+    return seen;
+  }
   const ids = new Set([...run.visited, ...run.revealed, ...nodeById(run.map, run.pos).edges]);
   const form = ability(pet);
   if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
@@ -1115,10 +1120,10 @@ const cacheFate = (run, nodeId) => seededRoll(run.fate, nodeId * 8 + 5, 0);
 // netling, with the switch off, or without `fate`. Nodes already visited and the entry show nothing (they are spent).
 export function foresightView(pet) {
   const run = pet.run;
-  // Blackout is "you only see one step ahead", with no form sight: Foresight is form sight, so it is dark (a reading to confirm, drafts section 1, ground rule 5).
-  if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done' || run.challenge === 'blackout') return {};
+  if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done') return {};
   const level = lvl(pet);
-  const depth = NR2.foresight.depth[level] ?? 0;
+  // Blackout is "you only see one step ahead", with no form sight: Foresight is dark under it unless nr2.js `blackout.tuneStreet` allows a limited depth (default 0).
+  const depth = run.challenge === 'blackout' ? Math.min(NR2.foresight.depth[level] ?? 0, NR2.blackout.tuneStreet) : NR2.foresight.depth[level] ?? 0;
   const fields = NR2.foresight.fields[level] ?? [];
   const out = {};
   for (const id of nodesWithin(run, run.pos, depth)) {

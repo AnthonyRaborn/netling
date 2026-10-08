@@ -927,18 +927,32 @@ test('Glass: an elder Breach street\'s soft first loss counts as lost, and so do
   reset();
 });
 
-test('Blackout: no form sight at all: Tune corp, the hidden forms and Foresight see only the next step, and Foresight reads nothing', () => {
+test('Blackout: the hidden forms see only the next step; the Tune forms keep a limited sight (Tune corp two steps of types, Tune street the next step\'s ICE game); dark if the variant is off', () => {
   const extra = { fate: true, foresight: { on: true } };
-  for (const [form, level] of [['tuneCorp', 2], ['hidden', 1], ['tuneStreet', 2]]) {
-    const { s } = challengeRun(form, level, 'blackout', extra);
-    const run = s.run;
-    const expected = new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
-    assert.deepEqual([...visibleNodeIds(s)].sort(), [...expected].sort(), `${form}: only where it has been and one step ahead`);
+  const next = (s) => new Set([...s.run.visited, ...nodeById(s.run.map, s.run.pos).edges]);
+  const hidden = challengeRun('hidden', 1, 'blackout', extra);
+  assert.deepEqual([...visibleNodeIds(hidden.s)].sort(), [...next(hidden.s)].sort(), 'the hidden forms: only where it has been and one step ahead');
+  // Tune corp, at both levels: two steps of types, no more.
+  for (const level of [1, 2]) {
+    const c = challengeRun('tuneCorp', level, 'blackout', extra);
+    const two = new Set([...next(c.s), ...[...nodeById(c.s.run.map, c.s.run.pos).edges].flatMap((id) => nodeById(c.s.run.map, id).edges)]);
+    assert.deepEqual([...visibleNodeIds(c.s)].sort(), [...two].sort(), `Tune corp level ${level}`);
   }
-  const { s } = challengeRun('tuneStreet', 2, 'blackout', extra);
-  assert.deepEqual(foresightView(s), {}, 'Foresight is dark under Blackout');
+  // Tune street: no sight beyond the next step, and Foresight reads only the next step's contents (the elder's second step is dark).
+  const e = challengeRun('tuneStreet', 2, 'blackout', extra);
+  assert.deepEqual([...visibleNodeIds(e.s)].sort(), [...next(e.s)].sort());
+  const view = foresightView(e.s);
+  assert.ok(Object.keys(view).length > 0);
+  for (const id of Object.keys(view).map(Number)) assert.ok(nodeById(e.s.run.map, e.s.run.pos).edges.includes(id), 'only the next step');
+  // With the variant off, all of it is dark.
+  set({ abilities: true, ...extra, blackout: { tuneCorp: 0, tuneStreet: 0 } });
+  const off = challengeRun('tuneStreet', 2, 'blackout', { ...extra, blackout: { tuneCorp: 0, tuneStreet: 0 } });
+  assert.deepEqual(foresightView(off.s), {});
+  const offCorp = challengeRun('tuneCorp', 2, 'blackout', { ...extra, blackout: { tuneCorp: 0, tuneStreet: 0 } });
+  assert.deepEqual([...visibleNodeIds(offCorp.s)].sort(), [...next(offCorp.s)].sort());
+  // Outside Blackout nothing changed.
   const free = challengeRun('tuneStreet', 2, null, extra);
-  assert.ok(Object.keys(foresightView(free.s)).length > 0, 'and not otherwise');
+  assert.ok(Object.keys(foresightView(free.s)).length > 0);
   reset();
 });
 

@@ -319,7 +319,7 @@ Built: `sim/challenge-sweep.mjs` (`node prototype/netling2/sim/challenge-sweep.m
 **What each rule does to the 2.0 parts (checked in code and by test).**
 - **Glass:** every lost ICE fight breaks it, so Breach street's softened first loss counts as lost and Breach corp's insurance saves the netling but not the challenge. Dodge corp's phase, Dodge street's unseen and the hidden forms' slips are not losses, so they help most. Tier-2 ICE makes it harder (below).
 - **Unplugged:** relays are dark, so the elder relay patches (Breach corp, Tune corp) do nothing and no relay recharges. Tune street's repair per move is not a relay and keeps working.
-- **Blackout:** only visited nodes and the next step are seen. Tune corp's sight and the hidden forms' full sight go dark, as 1.0's Daemon and Ghost did, and **Foresight is dark too** (my reading of "no form sight"; it reads the next step's contents otherwise, which Blackout says you cannot see beyond the type). Avoidance and the other parts work.
+- **Blackout:** only visited nodes and the next step are seen. The hidden forms' full sight goes dark, as 1.0's Ghost's did. **Revised after the maintainer's note: the Tune forms keep a limited form of their ability** (`NR2.blackout`, both at 1; section 13, Blackout and the Tune forms): Tune corp sees node types two steps ahead at both levels (one step beyond Blackout's), and Tune street's Foresight reads the next step's ICE game at both levels (the elder's second step is dark). The first reading had both dark, which left them at the level of a netling with no ability. Avoidance and the other parts work.
 - **Bare metal:** buying an item breaks it. A clinic fix is a service and does not; a found item (cache, ICE win, anomaly) does not. Feast corp's cheaper exchange is moot because nothing is bought.
 
 **Mean completion of the nine forms, adult / elder** (careful / skilled; 1.0's adult-form bots in brackets, one flat bot with no abilities of this kind):
@@ -327,17 +327,37 @@ Built: `sim/challenge-sweep.mjs` (`node prototype/netling2/sim/challenge-sweep.m
 |---|---|---|---|---|
 | Glass | 15.8 / 19.8 (16) | 34.7 / 39.1 (41) | 6.7 / 9.2 (6) | 20.8 / 24.8 (27) |
 | Unplugged | 42.0 / 53.1 (37) | 67.5 / 76.7 (68) | 13.2 / 21.1 (10) | 34.4 / 46.8 (33) |
-| Blackout | 47.4 / 59.3 (45) | 72.7 / 81.1 (73) | 20.5 / 31.5 (19) | 45.8 / 58.9 (48) |
+| Blackout (with the limited Tune variant; fully dark: 47.4 / 59.3, 72.7 / 81.1, 20.5 / 31.5, 45.8 / 58.9) | 48.4 / 60.4 (45) | 73.7 / 81.9 (73) | 21.2 / 32.6 (19) | 47.1 / 60.4 (48) |
 | Bare metal | 49.0 / 61.5 (45) | 74.2 / 82.6 (73) | 21.8 / 33.7 (19) | 47.9 / 61.2 (48) |
 The 2.0 rates sit where 1.0's did. Every challenge is completable by every form (the lowest cell anywhere is 4.0%, Source careful Glass, Feast street elder).
 
 **Who it favors** (Deep, careful, adult / elder, percent complete):
 - Glass: Dodge corp 24 / 30, Dodge street 24 / 32 and the hidden forms 22 / 38 against Breach 12 / 12, Feast 11 to 12 / 11 to 14 and Tune 13 to 14 / 14 to 16: the skip-ICE forms complete it about 1.8 to 3.5 times as often, as in 1.0 (Glitch, Ghost, Panic, Whisper). Breach's defensive parts do nothing for Glass by rule.
 - Unplugged: Tune corp lowest (34 / 35) against hidden 48 / 66 and Breach street elder 62: the elder patches are the loss.
-- Blackout: Tune corp (36 / 44) and Tune street (36 / 50) lowest, at the level of a netling with no ability (36.5 adult); Breach corp elder highest (76). The forms whose ability is sight lose it.
+- Blackout, fully dark: Tune corp (36 / 44) and Tune street (36 / 50) lowest, at the level of a netling with no ability (36.5 adult); Breach corp elder highest (76). The forms whose ability is sight lose it. With the limited variant they are 40 / 49 and 41 / 55 (Deep careful), see below.
 - Bare metal: the same shape as Blackout, a little kinder to the Tune forms (40 / 50 and 41 / 58).
 
 **Tier-2 ICE costs every challenge 5 to 12 points** (mean completion adult, tiers on / off, Deep careful: Glass 15.8 / 21.5, Unplugged 42.0 / 49.7, Blackout 47.4 / 55.3, Bare metal 49.0 / 56.9; Source careful: Glass 6.7 / 11.6, Unplugged 13.2 / 20.3, Blackout 20.5 / 29.4, Bare metal 21.8 / 31.0), because the Deep and the Source have the most tier-2 ICE. Glass in the Source with careful play falls to 6.7% (a 42% drop in relative terms).
 
 **Not measured:** the bots plan three steps ahead at most and never use items mid-run, so Blackout and Bare metal read easier than they play for a person (1.0's note); the Foresight spread (0.2) is an assumption; the daily trace and Source-only anomalies under a challenge; a challenge with the egg run costs on (none of these sweeps has them on); and the rewards (cosmetics) are unchanged.
+
+**Did the Foresight bots run in these sweeps, and does it help in Unplugged? (maintainer's questions)** Yes to both. The challenge sweep switches `fate` and Foresight on, with per-game skill 0.2, and the planner uses `foresightView`; a direct check (3000 runs, Tune street, Deep, careful, completion with Foresight off against on):
+| Challenge | Adult, spread 0.2 | Elder, spread 0.2 | Adult / elder, spread 0 |
+|---|---|---|---|
+| Unplugged | 30.8 to 35.2 | 43.3 to 51.3 | 31.0 to 31.0 / 42.7 to 46.6 |
+| Glass | 11.7 to 13.9 | 11.7 to 15.9 | 11.9 to 11.9 / 11.9 to 13.0 |
+| Bare metal | 36.6 to 41.6 | 50.2 to 59.0 | 36.5 to 36.5 / 49.4 to 54.6 |
+| Blackout (dark) | 36.5 to 36.5 | 50.1 to 50.1 | no change |
+| No challenge (exit rate) | 23.8 to 27.9 | 33.6 to 38.9 | 23.4 to 23.4 / 32.8 to 35.0 |
+So Foresight helps in Unplugged (+4 points adult, +8 elder at spread 0.2; the elder gains 4 even at spread 0 from seeing two steps) and in Bare metal and Glass, and it did, in the tables above: the Tune street cell under Unplugged (35 / 51, Deep careful) already includes it. It did nothing under Blackout only because the first reading made it dark.
+
+**Blackout and the Tune forms: a limited variant** (`NR2.blackout`; 2000 runs; Tune corp / Tune street completion, percent of the nine-form mean in brackets; A dark, B Tune corp two steps of types, C Tune street's next-step Foresight, D both):
+| | A dark | B corp | C street | D both |
+|---|---|---|---|---|
+| Deep careful, adult | 36 (77) / 36 (77) | 40 (84) / 36 | 36 / 41 (86) | 40 (83) / 41 (85) |
+| Deep careful, elder | 44 (74) / 50 (83) | 48 (81) / 50 | 44 / 55 (91) | 48 (80) / 55 (91) |
+| Deep skilled, adult | 64 (88) / 64 (88) | 67 (92) / 64 | 64 / 71 (96) | 67 (91) / 71 (96) |
+| Source careful, elder | 20 (63) / 22 (69) | 24 (75) / 22 | 20 / 28 (87) | 24 (73) / 28 (86) |
+| Source skilled, elder | 44 (75) / 52 (88) | 49 (82) / 52 | 44 / 60 (100) | 49 (81) / 60 (99) |
+Tune street's limited Foresight is worth +4 to +8 points of completion (to 83 to 100% of the mean, from 67 to 93%); Tune corp's extra step +3 to +5 (to 73 to 92%). Both together (D, now the default) bring every Tune cell to 73 to 100% of the mean; Tune corp stays the lowest in the Source (73 to 83%), as it is a form with no defence. The other forms do not move.
 

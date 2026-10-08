@@ -21,6 +21,11 @@ export const NR2 = {
   // The bots need per-game skill to use it (netrun-bot.mjs, style.spread). Starting values are mine.
   fate: false,
   foresight: { on: false, depth: { 1: 1, 2: 2 }, fields: { 1: ['game'], 2: ['game'] } }, // measured (notes section 12): the ICE's game is the whole value; the tier and a filled cache add 0 to 5%
+  // Blackout ("you only see one step ahead", no form sight) and the Tune forms, whose abilities are sight: how much of each survives the challenge.
+  // 0 is dark (the first reading: nothing survives, so the Tune forms sit at the level of a netling with no ability). Tune corp: extra steps of node types
+  // beyond the one Blackout shows (1 = two steps in all). Tune street: the Foresight depth cap (1 = it reads the next step's ICE game, at both levels).
+  // Decided direction (maintainer: a limited variant to help the Tune forms): both at 1, measured in notes section 13. The hidden forms' sight stays dark.
+  blackout: { tuneCorp: 1, tuneStreet: 1 },
   // The egg-flavored anomalies (decided as a go; options and numbers are mine): netrun/egg-anomalies.js. Not part of NR2=all yet.
   eggAnomalies: false,
   eggAnomaly: {
