@@ -6,7 +6,7 @@
 // Registers (care drafts): Program is bureaucratic and technical, Iron physical and procedural, Wetware street-level and plain (no CP2020
 // jargon in game text). Meter words are the egg's own (care drafts, Meters): Program CHG, INT, HEAT; Iron PWR, INT, HEAT; Wetware FOOD,
 // HLTH, TEMP. The controls and the button names the player must find on screen (CONTINUE, JACK OUT, ARCHIVE > STYLE) and the node label
-// ICE stay as 1.0 has them, in every egg. Log lines take {item}, {dmg}, {bonus} and {scrip}.
+// ICE stay as 1.0 has them, in every egg (decided: ICE stays ICE in the log lines too, never "guard"; the run HUD follows each egg's meter words; the button names are the same in every egg). Log lines take {item}, {dmg}, {bonus} and {scrip}.
 //
 // Rules the tests check (checkTutorialText): two tip lines of at most TIP_WIDTH characters, hints of at most HINT_WIDTH, lowercase except
 // the fixed labels, no digit, no em dash, and every tip says what it has to teach.
@@ -65,17 +65,17 @@ export const TUTORIAL_TEXT = {
     nudge: 'i want to see what is out there. take me?',
     tips: {
       cache: [`moves burn food. ${CONTROLS}`, 'a pouch may hold items. this one does.'],
-      ice: ['ICE is a guard. beat the mini-game,', 'or it hurts, and that costs health.'],
+      ice: ['ICE stands in the way. beat the mini-game,', 'or it hurts, and that costs health.'],
       relay: ['relays are a rest. you eat and cool off.', 'bank your loot here, or push on.'],
       exit: ['the exit banks everything you carried,', 'plus a bonus. take it home.'],
       relayChoice: ['CONTINUE to reach the exit.', 'JACK OUT ends the run safely here.'],
     },
-    hints: { cache: 'a pouch. might hold an item.', ice: 'a guard game. lose and it hurts.', relay: 'rest, cool off, safe jack-out.', exit: 'bank it all + a bonus.' },
+    hints: { cache: 'a pouch. might hold an item.', ice: 'an ICE game. lose and it hurts.', relay: 'rest, cool off, safe jack-out.', exit: 'bank it all + a bonus.' },
     log: {
       cacheCracked: 'the pouch held {item}.',
       cacheEmpty: 'the pouch was empty.',
-      iceWon: 'the guard backed off. you got {item}.',
-      iceLost: 'the guard hurt you. -{dmg} health.',
+      iceWon: 'the ICE backed off. you got {item}.',
+      iceLost: 'the ICE hurt you. -{dmg} health.',
       relay: 'a relay. you rested and cooled off.',
       exit: 'the exit. you brought home {bonus}, {scrip} scrip.',
     },

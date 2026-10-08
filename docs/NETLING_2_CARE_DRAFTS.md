@@ -21,6 +21,8 @@ Rules for the words: Program is bureaucratic and technical, Iron is physical and
 | Heat `HEAT` | HEAT | HEAT | TEMP | "Running hot wears it out. Vent it." / "A fever hurts it. Cool it down." |
 | Cache (pips) `CACHE` | CACHE | ROT | WASTE | "Bit rot. Scrub it." / "Waste builds up. Flush it." |
 
+**Decided (maintainer): the run HUD follows these meter words** (FOOD, HLTH, TEMP for Wetware; PWR, LOCK for Iron), not only the home screen, so the netrun tips and log lines (NETLING_2_NETRUN_DRAFTS.md, section 7) read true. The netrun's button names (CONTINUE, JACK OUT) and the node label ICE are the same in every egg.
+
 ## Care buttons
 
 The 1.0 name is the rule; the egg name is only the label. Verb is the FDA kind the action belongs to (see Care verbs).

@@ -51,7 +51,7 @@ test('Wetware uses its own meter words (food, health) and no Program or Iron wor
 
 test('log lines fill their values and keep any unknown placeholder visible', () => {
   assert.equal(tutorialLog('program', 'iceLost', { dmg: 10 }), 'ICE retaliated. -10 integrity.');
-  assert.equal(tutorialLog('wetware', 'iceLost', { dmg: 10 }), 'the guard hurt you. -10 health.');
+  assert.equal(tutorialLog('wetware', 'iceLost', { dmg: 10 }), 'the ICE hurt you. -10 health.');
   assert.equal(tutorialLog('iron', 'exit', { bonus: 'Coolant cell', scrip: 3 }), 'exit node. hauled out: Coolant cell, 3 scrip.');
   assert.equal(tutorialLog('iron', 'iceWon', {}), 'ICE shut down. pulled {item}.');
 });
@@ -65,4 +65,12 @@ test('the width limits are the longest 1.0 lines', async () => {
   assert.equal(TIP_WIDTH, longest(block));
   assert.ok(HINT_WIDTH >= longest(hints.replace(/'[a-z]+'\s*:/g, '')), 'a hint is longer than the limit');
   assert.ok(tips.length > 0);
+});
+
+test('ICE stays ICE in every egg (decided): no egg calls it a guard, and the ICE tip and the ICE log lines name it (the node hint sits beside the label ICE)', () => {
+  for (const egg of TUTORIAL_EGGS) {
+    const t = TUTORIAL_TEXT[egg];
+    assert.doesNotMatch(JSON.stringify(t), /guard/i, `${egg}: "guard"`);
+    for (const line of [t.tips.ice[0], t.log.iceWon, t.log.iceLost]) assert.match(line, /ICE/, `${egg}: "${line}"`);
+  }
 });

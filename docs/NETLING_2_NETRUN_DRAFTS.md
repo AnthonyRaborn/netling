@@ -199,21 +199,21 @@ The egg anomalies are a go (maintainer). **Detailed first pass, built in the for
   |---|---|---|---|
   | Nudge | spare cycles logged. permission to go out? | idle. the queue is empty. take me out? | i want to see what is out there. take me? |
   | Tip: cache | moves draw charge. (controls) / caches may hold items. this one does. | moves draw power. (controls) / a sealed crate may hold items. this one does. | moves burn food. (controls) / a pouch may hold items. this one does. |
-  | Tip: ICE | ICE enforces access. pass the mini-game, / or it takes integrity as a penalty. | ICE is a lockout. clear the mini-game, / or it hammers integrity. | ICE is a guard. beat the mini-game, / or it hurts, and that costs health. |
+  | Tip: ICE | ICE enforces access. pass the mini-game, / or it takes integrity as a penalty. | ICE is a lockout. clear the mini-game, / or it hammers integrity. | ICE stands in the way. beat the mini-game, / or it hurts, and that costs health. |
   | Tip: relay | relays restore charge and shed heat. / bank your loot here, or continue. | relays top up power and vent heat. / bank your haul here, or press on. | relays are a rest. you eat and cool off. / bank your loot here, or push on. |
   | Tip: exit | the exit banks everything you found, / plus a bonus. end the session. | the exit banks everything you hauled, / plus a bonus. bring it home. | the exit banks everything you carried, / plus a bonus. take it home. |
   | Tip: relay choice | CONTINUE to reach the exit. / JACK OUT closes the run safely here. | CONTINUE to reach the exit. / JACK OUT stops the run safely here. | CONTINUE to reach the exit. / JACK OUT ends the run safely here. |
   | Hint: cache | may hold an item. | a sealed crate. may hold an item. | a pouch. might hold an item. |
-  | Hint: ICE | a mini-game. fail and it bites. | lockout game. lose and it hits. | a guard game. lose and it hurts. |
+  | Hint: ICE | a mini-game. fail and it bites. | lockout game. lose and it hits. | an ICE game. lose and it hurts. |
   | Hint: relay | recharge, cool down, safe jack-out. | top up power, vent heat, jack out. | rest, cool off, safe jack-out. |
   | Hint: exit | bank everything + a bonus. | bank the haul + a bonus. | bank it all + a bonus. |
   | Log: cache | cache opened: {item}. / cache empty. | crate forced: {item}. / crate was empty. | the pouch held {item}. / the pouch was empty. |
-  | Log: ICE won, lost | ICE cleared. recovered {item}. / ICE retaliated. -{dmg} integrity. | ICE shut down. pulled {item}. / ICE hit back. -{dmg} integrity. | the guard backed off. you got {item}. / the guard hurt you. -{dmg} health. |
+  | Log: ICE won, lost | ICE cleared. recovered {item}. / ICE retaliated. -{dmg} integrity. | ICE shut down. pulled {item}. / ICE hit back. -{dmg} integrity. | the ICE backed off. you got {item}. / the ICE hurt you. -{dmg} health. |
   | Log: relay | relay reached. charge restored, heat shed. | relay found. power topped up, heat vented. | a relay. you rested and cooled off. |
   | Log: exit | exit node. committed: {bonus}, {scrip} scrip. | exit node. hauled out: {bonus}, {scrip} scrip. | the exit. you brought home {bonus}, {scrip} scrip. |
   | Gift | issued: party hat. accessories live in ARCHIVE > STYLE. | a gift: party hat. fit it in ARCHIVE > STYLE. | a gift: party hat. dress up in ARCHIVE > STYLE. |
 
-  Questions for the maintainer: (1) Wetware's tips keep the label ICE but its log lines say "the guard" (plain words); does Wetware keep ICE in the log too, or does the label itself become plain in 2.0 (a node-label skin, out of this scope)? (2) The in-run HUD would need the egg's meter words (FOOD, HLTH, TEMP; PWR, LOCK) for these tips to read true; the care drafts reskin the home screen only, so confirm the run HUD follows. (3) The tips for CONTINUE and JACK OUT assume those two buttons keep their 1.0 names in every egg. (4) Unread in context and unplaytested; the voice is a first pass and the Iron nudge is the loosest.
+  **Decided (maintainer):** ICE stays ICE in every egg, including Wetware's log lines (no "guard"); the run HUD follows each egg's meter words (FOOD, HLTH, TEMP; PWR, LOCK) so the tips read true; the button names (CONTINUE, JACK OUT) are the same in every egg. Open: the tone is a first pass and unplaytested, and the Iron nudge is the loosest line.
 - **Contracts.** Keep the six kinds plus the clinic job already in the fork. No new kind is proposed.
 - **Challenges.** Unchanged; check abilities against them (ground rule 5).
 - **Daily trace.** Unchanged, but bump `DAILY.rules` whenever an ability changes the order of rolls.
