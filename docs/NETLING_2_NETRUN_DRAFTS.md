@@ -2,7 +2,7 @@
 
 Status: first-pass design drafts, revised after the maintainer's answers (see Decided below), for step 2 of the sketch's Next steps (netrun content per egg: abilities, 23 more elder upgrades, regions, events, tutorial run). Everything here is a proposal unless marked Decided. Nothing is in code, nothing is tuned and nothing has been measured; any number quoted is 1.0's, shown only as a starting point. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (the design record), [NETRUN.md](NETRUN.md) (1.0's netrun, the source of every hook named below) and [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) (item and meter wording). Spoilers throughout.
 
-**Decided (maintainer), recorded here:** (1) one ability per role and lean, at two levels (adult, elder), with the egg's flavor as the starting point of each egg's version; (2) egg pressures pause during a run, but each egg's own problem (Iron's wear and so on) can be made worse by a run; (3) no triggered abilities if avoidable; (4) a second, harder tier of ICE is mixed into runs at proportions that depend on the depth of the net (section 2.1). Everything else below is still a proposal.
+**Decided (maintainer), recorded here:** (1) one ability per role and lean, at two levels (adult, elder); egg flavor is text, with the same mechanics in every egg if possible; (2) egg pressures pause during a run, but each egg's own problem (Iron's wear and so on) can be made worse by a run; a held state resumes after the run, with a 5 minute window before the current bars can change it; (3) no triggered abilities if avoidable; (4) a second, harder tier of ICE is mixed into runs by net depth (region only, no layer effect), made harder by speed, with Breach given a different lever (section 2.1); avoidance abilities should work less often against harder ICE, especially at the adult level (a balance matter). Everything else below is still a proposal.
 
 ## 1. Scope and ground rules
 
@@ -13,7 +13,7 @@ Ground rules carried over (all from 1.0's netrun code and docs):
 2. **One ability, two levels (Decided).** The adult has the ability at level 1 and the elder at level 2. Caution from 1.0: its lines started with one effect, fell behind in The Deep, and got a second effect in balance pass 2, so a named ability may have two parts (for example 'takes less ICE damage, and the first loss each run barely scratches it'), and level 2 steps both parts up. That keeps 'one ability' without repeating 1.0's mistake.
 3. **Parity target (re-measured with the ICE tiers on).** In 1.0 no adult ability was more than about 4 points better than another at avoiding disconnects in The Deep, and the five mainframe upgrades sat within a few points of each other in the Source (careful disconnects 24 to 28%). The same bar applies to every 2.0 form, measured, not argued.
 4. **Daily trace.** Any ability that rolls must use the lane rng (`laneRng`), and any ability that takes or gives items or scrip must work with the stake ledger or be off in the daily. A change in the order of rolls bumps `DAILY.rules`.
-5. **Challenges.** Every ability is checked against Unplugged (no relay repair or venting), Blackout (no sight), Glass (a soft loss counts as lost) and Bare metal (no items).
+5. **Challenges (not tested yet, maintainer).** Challenges have not been played with 2.0 abilities or ICE tiers. When they are, check each ability against Unplugged (no relay repair or venting), Blackout (no sight), Glass (a soft loss counts as lost, and tier-2 ICE makes it harder) and Bare metal (no items). Nothing here assumes they work.
 6. **Ids are permanent** once the app uses them; use the form ids, not display names.
 
 ## 2. The hook inventory
@@ -38,23 +38,30 @@ Observation for design: the 1.0 five cover every existing hook once. Reusing the
 
 ### 2.1 ICE tiers (new input to everything below)
 
-Decided (maintainer): a second tier of harder ICE is mixed in at random, with the share of tier-2 ICE set by the depth of the net. My reading, to confirm: the shallow regions currently hold only the one kind of ICE, so they get an occasional harder fight, and the share grows toward The Source.
+Decided (maintainer): a second tier of harder ICE is mixed in at random, with the share of tier-2 ICE set by the depth of the net. Region and depth go together: the share depends on the region only, with no extra effect from the layer inside a map. My reading of 'lower difficulties' (confirm): the shallow regions currently hold only the one kind of ICE, so they get an occasional harder fight, and the share grows toward The Source.
 
-What the code gives us: an ICE fight is a random one of the four mini-games, played at `speed` 1, or 0.85 while jacked in overclocked; the region sets only the damage (35 in the Public Net up to 52 in the Source). Dodge and Feast also speed up over the course of a game. So the cheapest harder variant is a higher `speed` and, if wanted, a higher damage or better reward, using the lever overclock already uses. A per-game variant (a different Breach or Tune puzzle) is new content and needs its own design.
+**The levers (Decided in direction, maintainer).**
+- **Speed** is the easiest and the default: a tier-2 fight is played at a higher `speed` than 1 (the same lever overclock already uses, at 0.85). In the code, `speed` multiplies the game's elapsed time, so it directly affects Dodge, Tune and Feast, and also Breach's timer.
+- **Breach** needs a second lever instead of a shorter time. Proposal for the maintainer's '4 matches in 5 moves': a tier-2 Breach has a target of 4 codes and a buffer of 5 (today it is a target of 3 and a buffer of 4, with a 25 second timer), with the same one spare move and the same timer. The constructor builds the target as a slice of a legal path, so a longer path and slice keep it always solvable. This needs a small code change (a variant argument to the game) that the speed lever does not.
+- Higher damage or better rewards for tier 2 are not decided and not proposed.
+
+**Felt, not shown.** With speed as the only difference, the player feels the tier. The maintainer is considering a subtle visual clue as the fight loads; it is not built and not designed. Whatever it is must not rely on color alone and must keep every strobe under three a second (project rule 7).
+
+**Avoidance against harder ICE (maintainer, balance matter).** Avoidance abilities (phase, slip, never-notice) should probably work less often against tier-2 ICE, especially at the adult level, so the elder level narrows the gap. For example 1.0's Glitch slips the first ICE of a run for certain; against tier 2 it could be a chance at level 1 and closer to certain at level 2. Numbers come from the bots.
 
 What it changes in this work:
 1. **Re-baseline.** The disconnect targets (careful: 3% Public Net, 4% Bazaar, 6% Corp Grid, 10% Ruins, 34% Deep in 1.0) were set with one kind of ICE. Any tier share moves every one of them, so the targets and the parity bars (ground rule 3) must be re-measured with the mix on, and the shallow regions will no longer be near-risk-free.
-2. **Abilities that touch ICE gain value.** Damage reduction, avoidance and last stands are worth more against harder ICE, and Feast and Tune relatively less, so the Breach and Dodge abilities need re-balancing against Feast and Tune once the mix exists. This is the main reason to settle the ICE tiers before tuning any numbers.
-3. **Open design questions for the maintainer:** (a) depth by region only, or also by layer inside a map; (b) is the tier visible on the map or revealed at the fight; (c) harder means faster, or more damage, or both; do tier-2 wins pay more; (d) do avoidance abilities (phase, slip) treat tier 2 the same as tier 1 (proposal: yes, otherwise Dodge forms stop being Dodge forms); (e) how this fits the challenges (Glass becomes harder) and the daily trace (the tier roll must be seeded in the ice lane); (f) the flash rule: a faster game must still keep every strobe under three a second.
-4. **Not proposed here:** the shares themselves. They are a tuning output of the bots, not a design choice to guess at.
+2. **Abilities that touch ICE gain value.** Damage reduction, avoidance and last stands are worth more against harder ICE, and Feast and Tune relatively less. The Breach and Dodge abilities therefore need re-balancing against Feast and Tune once the mix exists, which is why the ICE tiers come first in the order.
+3. **The daily trace.** The tier roll must be seeded in the ice lane, so every player meets the same tier at a node; the order of rolls changing bumps `DAILY.rules`.
+4. **Still open:** whether tier-2 wins pay more; whether the summary or share line records the tier; the shares themselves, which come from the bots, not from a guess.
 
 ## 3. Adult abilities
 
 ### 3.1 Structure (Decided, maintainer)
 
-One ability per role and lean combination, at two levels (adult is level 1, elder is level 2). That is 8 abilities plus 3 hidden ones, each defined once and stepped once, so 11 abilities and 22 level definitions, not 27 adults with separate upgrades. The egg's flavor is the starting point for each egg's version of an ability.
+One ability per role and lean combination, at two levels (adult is level 1, elder is level 2). That is 8 abilities plus 3 hidden ones, each defined once and stepped once, so 11 abilities and 22 level definitions, not 27 adults with separate upgrades. The egg's flavor is the starting point for each egg's version of an ability, as text.
 
-**How I read 'egg flavor as the starting point' (please confirm):** the core ability is the same in every egg, so parity can be measured once; each egg adds a rider that comes from the problem it already manages (section 3.5). The alternative reading, three separately designed versions of every ability, is closer to the earlier option B or C and about three times the tuning; I have not assumed it.
+**Egg flavor is text (Decided, maintainer).** The core ability is the same mechanics in every egg, so parity is measured once. Each egg's version differs in its name, description and log lines (section 3.5), not in numbers. The eggs already differ in a run through their pressures (Iron's wear and so on), so the ability does not need to. If playtests show the eggs feel identical, a mechanical egg twist can be added later; none is proposed.
 
 ### 3.2 Roles and leans as ability themes
 
@@ -102,21 +109,21 @@ Each hidden form masters all four games and takes no side, and may break the for
 
 Open: whether Guru and Blank get full sight at all. Full sight removes the map's fog, which is its main uncertainty, so keeping it to Program's Ghost is a reasonable default.
 
-### 3.5 Egg riders (proposal, starting point)
+### 3.5 Egg flavor as text (proposal)
 
-Each egg adds a small rider to every one of its abilities, drawn from the egg's own bar (sketch, Egg pressures), so the same ability plays slightly differently per egg:
+Each of the 11 abilities gets three texts: a name, a one-line description and a log line, per egg, in the egg's vocabulary (Program: processes and interrupts; Iron: firmware, read-only, batch; Wetware: plain words about tissue and growth, no CP2020 jargon in-game). The numbers are shared. Example, for Breach street (placeholder wording, to be drafted properly with the rest of the text):
 
-| Egg | Bar | Rider theme |
-|---|---|---|
-| Iron | Heat | Heat in a run: a lost fight adds less Heat, or a relay vents more |
-| Program | Charge | Charge in a run: a move costs a little less, or a relay refills more |
-| Wetware | Sync | Sync in a run: a lost fight costs less Sync, or a loss never rolls an infection |
+| Egg | Name | Description | Log line |
+|---|---|---|---|
+| Program | Hardened | ICE hits you for less. The first loss each run barely scratches you. | `checksum held.` |
+| Iron | Burned in | ICE hits you for less. The first loss each run barely scratches you. | `nothing to overwrite.` |
+| Wetware | Scar tissue | ICE hits you for less. The first loss each run barely scratches you. | `it closes up fast.` |
 
-Cautions: 1.0 dropped an 'Airgap: no Heat from a lost fight' upgrade because Heat drives throttling damage, so it was worth far more than it looked; the Heat rider especially needs measuring. The riders should be small enough that no egg's abilities are ahead in The Deep. The riders are also where section 5's run pressure enters (a rider that eases Iron's Heat matters more because a run raises Heat).
+The flavor text is where the egg's lore (the sketch's Eggs and Story sections) reaches the netrun without touching balance. Level 2 reuses the same three texts with a changed name or an added word, to be decided when the text is drafted.
 
 ## 4. Elder level (level 2)
 
-Decided structure (3.1): the elder has the same ability as its adult at level 2, not a separate upgrade. That is 11 level-2 definitions, one per ability, shared by every form of that role and lean in every egg, plus the egg riders stepped to their level 2.
+Decided structure (3.1): the elder has the same ability as its adult at level 2, not a separate upgrade. That is 11 level-2 definitions, one per ability, shared by every form of that role and lean in every egg. Egg flavor is text (3.5), so there is nothing mechanical to step per egg.
 
 **Counting.** The sketch's 'about 23 more elder upgrades' (27 elders minus the 4 whose names come from 1.0: Whisper, Plat, Init and Daemon) is replaced by 11 level-2 definitions. The 1.0 names stay as names only; their old Mainframe upgrades are not carried over as such. This is a smaller job than the sketch assumed.
 
@@ -126,13 +133,14 @@ The elder is the only stage that enters the Source (13 layers, ICE weight 11, IC
 
 ## 5. How the three eggs differ inside a run
 
-Because the core abilities are shared (3.1), the eggs differ through the riders (3.5), the egg pressures and skin. This section is the open design area.
+Because the core abilities are shared (3.1), the eggs differ through the egg pressures, the flavor text (3.5) and skin. This section is the open design area.
 
-1. **Pressures pause in a run (Decided, maintainer).** The hold clocks of Overdrive and Overlink and the state benefits do not advance during a run. Iron's wear is the exception the maintainer named: an egg's own problem can get worse in a run. Proposal for each (starting points to measure, not set):
+1. **Pressures pause in a run (Decided, maintainer).** The hold clocks of Overdrive and Overlink and the state benefits do not advance during a run. An egg's own problem can get worse in a run (also decided; the specifics are proposals to measure):
    - **Iron:** wear keeps building. A run adds Heat on every move (5) and on a lost fight (12), so a run that gets hot builds wear, and the wear stays after the jack-out.
    - **Program:** Charge falls with every move (4), and the 'bleed and overflow' problem becomes a run problem, for example a lost fight at high Charge costs extra Integrity.
    - **Wetware:** Sync and infections: a lost fight rolls an infection at the usual chance, and a disconnect hurts Sync more.
-   Open: when the run ends, does a pressure state that was held resume where it stopped, or does it end at jack-in? Proposal: it resumes (pause means pause), which keeps a long run from silently punishing an attentive player.
+
+   **A held state resumes after the run (Decided, maintainer), with a 5 minute window.** Bars change in a run (a run starts at Charge 30 or more, falls 4 a move, and adds Heat), so the state is not re-checked against the current bars for 5 minutes after the jack-out; after that it follows the usual end conditions (Overdrive ends under Charge 65, Overlink under Sync 70, Overclock under Heat 65). The hold counter resumes where it stopped. My reading, to confirm: the window gives the player five minutes to feed or cool, not a free extension of the state. It does mean a run that leaves Charge low will usually lose Overdrive unless the player feeds within the window; whether that is the intent is for the maintainer. A disconnect, an abort and a jack-out all start the window; a burnout (Overlink's 24 hour lock) is not cleared by it.
 2. **Run texture, not rules.** Each egg gets its own wording for the same events: node labels, ICE names, relay text, the summary. This is a skin: Program (processes, interrupts), Iron (firmware, batch queue, read-only), Wetware (plain words, tissue, culture; no CP2020 jargon in-game).
 3. **One egg-flavored anomaly each** (section 6). This is where eggs can differ in play without touching ability parity.
 4. **Items.** Item names per egg are already proposed in the sketch (Coolant cell / Coolant loop / Cold pack, and so on); the effects are unchanged, so nothing here needs balancing.
@@ -171,25 +179,24 @@ The fork already carries the netrun rules: `prototype/netling2/sim/netrun/run.js
 3. Targets: the 1.0 parity bars in ground rule 3, per ability set, in The Deep and The Source; plus the "do not make The Deep trivial" check (careful adults 14 to 19% disconnect).
 4. Challenge and daily matrix: each ability against the four challenges and the daily's refund.
 5. Tests: one narrow test per ability in the 1.0 style ("Chrome: corp insurance saves it from one disconnect a run"), in `prototype/netling2` until a 2.0 app exists.
-6. Add the ICE tier mix to the fork first (2.1), then re-baseline, then tune abilities against it; abilities tuned before the mix will be wrong.
+6. Add the ICE tier mix to the fork first (2.1: a speed multiplier for Dodge, Tune and Feast, a 4-in-5 variant for Breach), then re-baseline, then tune abilities against it; abilities tuned before the mix will be wrong. The bots need the Breach variant: a bot that plays the speed lever only will under-model Breach.
 7. Record each result in `prototype/netling2/notes/` and summarize here; do not quote numbers before they are measured.
 
 ## 10. Open questions for the maintainer
 
-Answered (Decided, recorded at the top): ability structure (one per role and lean, two levels), egg flavor as the starting point, pressures pause, no triggered abilities, ICE tiers by depth.
+Answered (Decided, recorded at the top): ability structure (one per role and lean, two levels), egg flavor as text, pressures pause and resume with a 5 minute window, no triggered abilities, ICE tiers by region depth with speed as the lever and a 4-in-5 Breach variant, avoidance weaker against tier 2.
 
 Still open:
-1. **Egg flavor reading:** shared core with egg riders (3.1, 3.5, my reading), or three designed versions of each ability.
-2. **'One ability':** may a named ability have two parts, as proposed in ground rule 2, or must it be a single effect.
-3. **ICE tiers (2.1):** depth by region or also by layer; visible or hidden; faster, stronger or both; rewards; whether avoidance treats tier 2 as tier 1.
-4. **Pause semantics:** a held state resumes after a run (my proposal) or ends at jack-in.
-5. **Egg run problems (5.1):** the three proposals (Iron's wear, Program's overflow, Wetware's infections), or others.
-6. **Hidden forms:** do Guru and Blank get full sight, or is that Ghost's alone.
-7. **Feast:** loot and scrip (proposed) or sustain.
-8. **Tune:** overlap between its two forms.
-9. **Elder in the Source:** Feast corp and Breach corp need a part that works where there are no markets or checkpoints (4).
-10. **Egg-flavored anomalies:** the three proposed in section 6, or none.
-11. **Order:** ICE tiers first, then abilities, then elder level, then anomalies and wording, with Rogue last.
+1. **'One ability':** may a named ability have two parts, as proposed in ground rule 2, or must it be a single effect.
+2. **ICE tiers:** whether tier-2 wins pay more; the Breach variant's exact shape (4 codes in a buffer of 5 is my reading); whether the share line or summary shows the tier; the loading clue (not built).
+3. **The 5 minute window:** confirm it is a grace period, and whether a run that leaves Charge low should usually lose Overdrive.
+4. **Egg run problems (5.1):** the three proposals (Iron's wear, Program's overflow, Wetware's infections), or others.
+5. **Hidden forms:** do Guru and Blank get full sight, or is that Ghost's alone.
+6. **Feast:** loot and scrip (proposed) or sustain.
+7. **Tune:** overlap between its two forms.
+8. **Elder in the Source:** Feast corp and Breach corp need a part that works where there are no markets or checkpoints (4).
+9. **Egg-flavored anomalies:** the three proposed in section 6, or none.
+10. **Order:** ICE tiers first, then abilities, then elder level, then anomalies and wording, with Rogue last.
 
 ## 11. Not done
 
