@@ -192,3 +192,20 @@ Parity read-out after all the changes (final numbers): in the Deep and the Sourc
 | 30% / 40% | 126 / 102 / 118 / 103% |
 
 Lowering it to 30% at the adult level (Whisper then at 40%) puts the form about 18 to 26% above the mean at the adult level, and leaves the elder level at the mean. The cost is that the hidden forms no longer match 1.0's Ghost and Whisper numbers exactly (the maintainer decided that Guru and Blank follow Ghost exactly; the ability stays the same, only the chance changes). Full sight could not be trimmed without removing the ability's identity.
+
+### Hidden trim applied, and how the roles compare on progression
+
+The maintainer asked for 30% at the adult level and 55% at the elder level (not 40%) for the hidden forms' never-notice chance, so the elder stays ahead. Applied as `ab.hiddenUnseen` (Dodge street keeps Ghost's 45% and 50% in `ab.unseen`). Hidden value against the mean (Deep adult / Deep elder / Source adult / Source elder): 122 / 110 / 112 / 114%.
+
+Does Feast still come out weaker? Value per run, no: Feast corp 110 / 110 / 111 / 101% and Feast street 100 / 99 / 111 / 114%, inside the band. Progression, a little yes. Steered lineages of one role (attentive play, 60 lineages of 8 lives, the 2.0 page list, abilities, ICE tiers, inventory, stack 3, feat tiers; lives to finish the 18 egg pages across three eggs, median with p10 to p90, and the share reaching a first elder):
+
+| Steered role | First elder reached | Three eggs |
+|---|---|---|
+| Breach street | 98% | 8 (6 to 10) |
+| Dodge corp | 98% | 7 (6 to 10) |
+| Dodge street | 98% | 8 (6 to 11) |
+| Feast corp | 93% | 9 (6 to 13) |
+| Feast street | 87% | 9 (7 to 13) |
+| Tune corp | 87% | 9 (7 to 13) |
+
+So the Feast and Tune forms finish about one to two lives later (a life is about five real days), reach a first elder less often, and have a wider spread. The gap is survival in the Deep, not loot: the band measure counts banked value, while progression needs exits. About 60 lineages gives roughly one life of noise on these medians. Two ways to close it, if wanted: another small step of sustain for Feast, or leave it and let the playtest decide whether a loot role should progress a little slower.
