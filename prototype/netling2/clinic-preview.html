@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Clinic node preview</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+import { drawNode } from '/src/netrun/view.js';
+import { REGIONS } from '/src/netrun/regions.js';
+import { drawClinicNode, CLINIC_LABELS, CLINIC_HINTS } from './clinic-node.js';
+const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'exchange', 'anomaly', 'exit', 'clinic'];
+const names = { entry: 'entry', cache: 'cache', ice: 'ICE', relay: 'relay', checkpoint: 'checkpoint', market: 'black mkt', exchange: 'corp exch', anomaly: 'anomaly', exit: 'exit', clinic: 'CLINIC' };
+const regions = Object.entries(REGIONS);
+const S = 3, CELL = 56, ROW = 64, W = types.length * CELL + 20;
+const c = document.getElementById('c');
+c.width = W * S; c.height = (regions.length * ROW + 110) * S;
+const ctx = c.getContext('2d');
+ctx.scale(S, S);
+ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, c.height);
+regions.forEach(([id, r], row) => {
+  const y0 = row * ROW;
+  ctx.fillStyle = r.palette.bg; ctx.fillRect(0, y0, W, ROW - 2);
+  ctx.fillStyle = '#c7f9ff'; ctx.font = '9px monospace'; ctx.textAlign = 'left'; ctx.fillText(id, 3, y0 + 9);
+  types.forEach((t, i) => {
+    const x = 10 + CELL / 2 + i * CELL, y = y0 + 30;
+    if (t === 'clinic') drawClinicNode(ctx, x, y, false); else drawNode(ctx, t, x, y, r.palette, false);
+    ctx.fillStyle = '#c7f9ff'; ctx.font = '8px monospace'; ctx.textAlign = 'center'; ctx.fillText(names[t], x, y0 + 54);
+  });
+});
+// the spent (faded) pair, and the cursor-line text per egg
+const yb = regions.length * ROW + 8;
+ctx.fillStyle = '#0b2226'; ctx.fillRect(0, yb - 4, W, 106);
+ctx.fillStyle = '#c7f9ff'; ctx.textAlign = 'left'; ctx.font = '9px monospace';
+ctx.fillText('spent:', 6, yb + 8);
+drawNode(ctx, 'exchange', 70, yb + 5, REGIONS.public.palette ?? Object.values(REGIONS)[0].palette, true);
+drawClinicNode(ctx, 100, yb + 5, true);
+ctx.font = '9px monospace';
+['program', 'iron', 'wetware'].forEach((e, i) => ctx.fillText(`${CLINIC_LABELS[e]}  ${CLINIC_HINTS[e]}`, 6, yb + 24 + i * 12));
+ctx.fillText('CORP EXCHANGE  safe, pricier. leans corp.   (1.0, for comparison)', 6, yb + 24 + 3 * 12);
+document.title = 'ready';
+</script>

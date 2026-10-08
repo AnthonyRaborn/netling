@@ -252,4 +252,14 @@ The maintainer's direction: bugs are cleared at a clinic node on a netrun (a thi
 
 The pay choice (scrip, or 2 Standing as 2 corp, 1 and 1 or 2 street) keeps 1.0's market button style and needs no egg wording.
 
-Open: the clinic's look on the map; the corp exchange's stock without the healing items (the maintainer will revisit it); the clinic's share, fee and stock weights against the final design.
+**Clinic look on the map (draft, first pass).** Drawn like the 1.0 nodes in `src/netrun/view.js`: canvas rects, a fixed color in every region so the type reads at a glance, inside the same 20 px footprint, fading to 45% when spent. A thick plus (`prototype/netling2/clinic-node.js`), pink-lilac `#ff71ce`. Why this one: the markets are boxes (a tab on top for the black market, a counter across for the exchange), the relay is a circle with one bar, the checkpoint two bars, ICE a diamond in the region's accent (always `#ff2a6d`, red) and the cache a box in the region's main color, so a plain plus with four equal arms and no outline is the only unused shape, and no 1.0 node uses pink-lilac. Red was avoided on purpose (red means ICE and failure). The same icon serves all three eggs; only the label, hint and first-run caption change:
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Label (cursor line) | REPAIR SHOP | WORKSHOP | CLINIC |
+| Hint after it | fixes bugs. no side. | reworks errata. no side. | closes scars. no side. |
+| First-run caption | bugs only clear at a repair shop. / it takes no side. | errata only clear at a workshop. / it takes no side. | scars only close at a clinic. / it takes no side. |
+
+The preview is `docs/netling2-prototypes/clinic-node.png` (the real `drawNode` from 1.0 beside the clinic, in all seven region palettes, plus the spent fade and the three cursor lines against the 1.0 exchange line). Source: `prototype/netling2/clinic-preview.html`. Checked: the plus is inside the footprint, symmetric, one color and fades with the others (4 tests); the label, hint and caption are within the 1.0 sizes. Seen in headless Chromium at three times scale only, never at the real map size on a device. One resemblance to watch: ICE's diamond has a dark plus cut into it, so a clinic and an ICE both contain a plus, but the clinic is a solid pink cross with no diamond and the ICE is a red diamond; the label line separates them if a player is unsure. Not done: the clinic's map position rules (it replaces a market node, one in four) are the simulator's, not drawn.
+
+Open: the corp exchange's stock without the healing items (the maintainer will revisit it); the clinic's share, fee and stock weights against the final design.
