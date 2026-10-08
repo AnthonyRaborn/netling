@@ -84,7 +84,7 @@ Full tables: `summary-balance.md`.
 | runcost-iron, -program, -wetware | `runcost-*.txt` | 349, 343, 339 |
 | netrun, challenge, foresight | `*.txt` | 74, 85, 191 |
 | egg-anomaly-iron, -program, -wetware | `egg-anomaly-*.txt` | 12 each |
-| act-sweep-charge, -sync; band-sweep-charge, -sync | `*.txt` | 987 to 998 (band-sync: see `_run.log`) |
+| act-sweep-charge, -sync; band-sweep-charge, -sync | `*.txt` | 987, 998, 994, 1010 |
 
 `act-sweep` and `band-sweep` test designs the maintainer rejected (action-based and banded pressure); they are here only so "everything" is true.
 
