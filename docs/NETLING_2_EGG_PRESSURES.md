@@ -8,7 +8,7 @@ Each egg manages one bar harder than the others, and that bar has a special stat
 
 | Egg | Bar | State | Starts | Ends |
 |---|---|---|---|---|
-| Iron | Heat | Overclock (1.0 rule) plus wear | Heat 65+; wear builds above Heat 75 and below Heat 20, fades with rest; nap and sleep cool no lower than 20 | Heat under 65 |
+| Iron | Heat | Overclock (1.0 rule) plus wear | Heat 65+; wear builds above Heat 75 and below Heat 20 (0.08 a minute a point, eased from 0.12), fades with a 2 hour half-life and 4x faster at rest; nap and sleep cool no lower than 20 | Heat under 65 |
 | Program | Charge | Surge | Charge 80+ held 3 awake hours | Charge under 65, or rest |
 | Wetware | Sync | Wired | Sync 85+ held 3 awake hours | Sync under 70, rest, or burnout |
 
@@ -29,7 +29,7 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 - Wetware, plays to full, attentive / sysadmin: win drops 21.3 -> 28.7 and 21.6 -> 32.0 (+35% and +48%), visits 4.3 -> 6.0 and 4.4 -> 6.5, infections 7.5 -> 9.2 and 7.8 -> 9.6, full-life 0.995 to 1.0, 1.3 and 1.7 penalty hits and 2.1 to 2.5 burnouts a life.
 - Wetware, stops at 89: drops +13% and +26%, visits +19% and +23%, infections within 0.3 of off.
 - Program (Surge): attentive drops 21.3 -> 25.2, sysadmin 21.6 -> 27.0; full-life 0.965 for both when they play to full (0.975 when they stop at 89).
-- Iron: its own trade is wear (daredevil infections 9.6, overclocker 11.8 to 12.2 against 7.1 and 8.7 with no pressure). It is the heaviest of the three and still unreconciled with the other two (see below).
+- Iron: its own trade is wear, eased once (Result 22). Daredevil infections 8.2 (was 9.4; 7.3 with no pressure), overclocker 10.9 (was 12.2; 8.7 with no pressure), drops 18.4 and 15.3 against 15.6 and 13.1. The ordinary five are unchanged. Iron is still the riskiest egg for players who live hot, now close to Wetware's greedy cost for the daredevil (8.1).
 - Overclock as a held state was tried and rejected: heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit and leaves the wear cost.
 
 ## Play styles it pushes
@@ -50,5 +50,5 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 
 - The bots are not people: a human can nap to end a state, hold exactly 3 hours, or stay at 89 indefinitely.
 - Only drops, play Sync and visits were measured as benefits; the worth of an item is a design call.
-- Iron: wear plus Overclock is heavier than Surge or Wired and a human reads it as harder to hold. Options (ease wear, or tighten the others further) are open.
+- Iron: wear plus Overclock is still the hardest state to hold for players who live hot; the wear easing (Result 22) is measured on bots only.
 - Low-side rules are thin (Charge low is empty); the temper tells for these states are undesigned; nothing here has unit tests.

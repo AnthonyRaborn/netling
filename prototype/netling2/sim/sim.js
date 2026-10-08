@@ -582,7 +582,7 @@ function eventAnswered(s, t) {
 // cold: Heat under this while awake also builds wear (0 = off), at coldRate per minute per Heat point under it; restFloor: nap and sleep cool
 // no lower than this (0 = no floor, 1.0's behaviour: rest cools to about 0).
 // Adopted (maintainer): the hot line 75, the Sync effect at x1, the cold line 20 and the nap and sleep cooling floor 20 (a band of about 20 to 75).
-export const IRON = { on: false, heat: 75, rate: 0.12, decay: 1 / 180, restMult: 3, floor: 0.014, slope: 0.3, lock: 1, cold: 20, coldRate: 0.12, restFloor: 20, line: 50 };
+export const IRON = { on: false, heat: 75, rate: 0.08, decay: 1 / 120, restMult: 4, floor: 0.014, slope: 0.3, lock: 1, cold: 20, coldRate: 0.08, restFloor: 20, line: 50 }; // eased from rate 0.12, decay 1/180, restMult 3, coldRate 0.12 (Result 22)
 if (process.env.IRON) Object.assign(IRON, JSON.parse(process.env.IRON));
 function stepWear(s, t, rest) {
   const before = s.wear ?? 0;

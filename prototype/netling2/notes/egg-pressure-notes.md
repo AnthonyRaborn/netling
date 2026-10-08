@@ -311,3 +311,12 @@ Penalty rolls before burnout (the first version burned out first and skipped the
 - Sip: penalty hits 0.01, burnouts 0.01; Wetware drops 14.3 / 17.2 (off 12.6 / 13.7), infections 7.6 / 7.8.
 - Casual, worker, human-regular, overclocker: no entry; Program and Wetware rows equal the no-pressure rows.
 - Read: greedy play now costs about 1.7 infections and the state for about +35% to +48% drops; careful play keeps +13% to +26% free. The penalty hits are few because burnout caps the plays at 90+.
+
+## Result 22: easing Iron's wear
+
+Request: ease wear. Iron rows only (the other eggs and the pass bar do not change), final Wired rules and tripled benefits as Result 21, default bot, 200 lives per cell, all seven archetypes. E0 = old (rate 0.12, coldRate 0.12, decay 1/180, restMult 3). E1 = rate and coldRate 0.08. E2 = decay 1/120 and restMult 4. E3 = slope 0.2 and lock 0.6. E4 = E1 + E2. `sides-sweep.mjs` options `iron` (overrides) and `only` (eggs). Not unit-tested (`npm run proto:test` 165 pass).
+
+- Ordinary five: no meaningful change in any variant (mean wear 0.7 to 3.5 out of 100; full-life and infections within noise; worker 0.82 -> 0.85 / 0.855 for E2 / E4, back to its 0.84 baseline).
+- Daredevil (off infections 7.28, drops 15.6): E0 9.35 / 19.7, E1 8.52 / 19.3, E2 8.78 / 19.1, E3 8.62 / 18.8, E4 8.24 / 18.4; mean wear 23.5 -> 15.9 / 17.6 / 23.5 / 12.0.
+- Overclocker (off 8.66, drops 13.05): E0 12.22 / 16.9, E1 11.51, E2 11.66, E3 11.25, E4 10.90 / 15.3; mean wear 32.2 -> 26.1 / 26.4 / 32.5 / 20.8; temper -11.2 -> -10.4 (off -7.5).
+- Decision: E4 adopted as the new `IRON` defaults (rate 0.08, coldRate 0.08, decay 1/120, restMult 4). It halves the daredevil's excess infections (+2.1 -> +1.0) and trims the overclocker's by a third (+3.6 -> +2.2); Iron stays the riskiest egg for players who live hot, with the ordinary five untouched. Earlier Results (6 to 21) used the old values.
