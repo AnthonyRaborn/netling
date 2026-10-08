@@ -1,0 +1,49 @@
+{"base":"attentive","case":"off","fullLife":0.998,"infections":6.75,"mistakes":0.41,"temper":5.35,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"attentive","case":"line 50","fullLife":0.998,"infections":11.17,"mistakes":0.42,"temper":4.71,"earlyActionsALife":68.6,"strainMaxMedian":66.5}
+{"base":"attentive","case":"line 65","fullLife":0.997,"infections":10.53,"mistakes":0.43,"temper":4.77,"earlyActionsALife":57,"strainMaxMedian":56.9}
+{"base":"attentive","case":"line 80","fullLife":0.998,"infections":6.62,"mistakes":0.4,"temper":5.35,"earlyActionsALife":1.9,"strainMaxMedian":3.4}
+{"base":"attentive","case":"line 90","fullLife":0.998,"infections":6.52,"mistakes":0.4,"temper":5.35,"earlyActionsALife":0.3,"strainMaxMedian":0}
+{"base":"attentive","case":"line 65, budgeter","fullLife":1,"infections":6.8,"mistakes":0.44,"temper":4.94,"earlyActionsALife":4.1,"strainMaxMedian":6.6}
+{"base":"attentive","case":"line 80, budgeter","fullLife":0.998,"infections":6.62,"mistakes":0.4,"temper":5.35,"earlyActionsALife":1.9,"strainMaxMedian":3.4}
+{"base":"sysadmin","case":"off","fullLife":0.999,"infections":7.25,"mistakes":0.02,"temper":5.62,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"sysadmin","case":"line 50","fullLife":0.993,"infections":14.55,"mistakes":0.01,"temper":4.13,"earlyActionsALife":75.2,"strainMaxMedian":72.8}
+{"base":"sysadmin","case":"line 65","fullLife":0.991,"infections":13.19,"mistakes":0.01,"temper":4.44,"earlyActionsALife":62.3,"strainMaxMedian":62.6}
+{"base":"sysadmin","case":"line 80","fullLife":0.999,"infections":6.98,"mistakes":0.01,"temper":5.66,"earlyActionsALife":1,"strainMaxMedian":3}
+{"base":"sysadmin","case":"line 90","fullLife":0.999,"infections":6.89,"mistakes":0.01,"temper":5.67,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"sysadmin","case":"line 65, budgeter","fullLife":1,"infections":7.29,"mistakes":0.07,"temper":5.09,"earlyActionsALife":3.4,"strainMaxMedian":5.8}
+{"base":"sysadmin","case":"line 80, budgeter","fullLife":0.999,"infections":6.98,"mistakes":0.01,"temper":5.66,"earlyActionsALife":1,"strainMaxMedian":3}
+{"base":"casual","case":"off","fullLife":0.953,"infections":6.99,"mistakes":6.17,"temper":-0.78,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"casual","case":"line 50","fullLife":0.912,"infections":8.8,"mistakes":5.93,"temper":-0.97,"earlyActionsALife":35.2,"strainMaxMedian":37.2}
+{"base":"casual","case":"line 65","fullLife":0.941,"infections":7.85,"mistakes":6.1,"temper":-0.9,"earlyActionsALife":17.8,"strainMaxMedian":20.4}
+{"base":"casual","case":"line 80","fullLife":0.949,"infections":6.72,"mistakes":6.18,"temper":-0.76,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"casual","case":"line 90","fullLife":0.949,"infections":6.72,"mistakes":6.18,"temper":-0.75,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"casual","case":"line 65, budgeter","fullLife":0.949,"infections":6.59,"mistakes":6.85,"temper":-0.86,"earlyActionsALife":0.3,"strainMaxMedian":0}
+{"base":"casual","case":"line 80, budgeter","fullLife":0.949,"infections":6.72,"mistakes":6.18,"temper":-0.76,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"worker","case":"off","fullLife":0.824,"infections":6.37,"mistakes":8.58,"temper":-2.38,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"worker","case":"line 50","fullLife":0.77,"infections":7.6,"mistakes":8.5,"temper":-2.99,"earlyActionsALife":22.1,"strainMaxMedian":25.7}
+{"base":"worker","case":"line 65","fullLife":0.809,"infections":6.9,"mistakes":8.57,"temper":-2.6,"earlyActionsALife":10.7,"strainMaxMedian":13.6}
+{"base":"worker","case":"line 80","fullLife":0.846,"infections":6.16,"mistakes":8.6,"temper":-2.27,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"worker","case":"line 90","fullLife":0.846,"infections":6.16,"mistakes":8.6,"temper":-2.27,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"worker","case":"line 65, budgeter","fullLife":0.81,"infections":6,"mistakes":9.69,"temper":-2.62,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"worker","case":"line 80, budgeter","fullLife":0.846,"infections":6.16,"mistakes":8.6,"temper":-2.27,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"human-regular","case":"off","fullLife":0.29,"infections":4.04,"mistakes":5.04,"temper":-2.2,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"human-regular","case":"line 50","fullLife":0.227,"infections":5.05,"mistakes":4.62,"temper":-2.35,"earlyActionsALife":21.2,"strainMaxMedian":33.1}
+{"base":"human-regular","case":"line 65","fullLife":0.249,"infections":4.78,"mistakes":4.7,"temper":-2.24,"earlyActionsALife":14.5,"strainMaxMedian":22.6}
+{"base":"human-regular","case":"line 80","fullLife":0.278,"infections":4.13,"mistakes":4.96,"temper":-2.16,"earlyActionsALife":3.7,"strainMaxMedian":6.4}
+{"base":"human-regular","case":"line 90","fullLife":0.286,"infections":4,"mistakes":5.08,"temper":-2.19,"earlyActionsALife":1.5,"strainMaxMedian":3}
+{"base":"human-regular","case":"line 65, budgeter","fullLife":0.279,"infections":3.98,"mistakes":5.61,"temper":-2.36,"earlyActionsALife":0.4,"strainMaxMedian":0}
+{"base":"human-regular","case":"line 80, budgeter","fullLife":0.295,"infections":3.86,"mistakes":5.08,"temper":-2.06,"earlyActionsALife":0.3,"strainMaxMedian":0}
+{"base":"daredevil","case":"off","fullLife":0.999,"infections":6.5,"mistakes":1.53,"temper":-3.86,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"daredevil","case":"line 50","fullLife":0.991,"infections":10.03,"mistakes":1.56,"temper":-4.03,"earlyActionsALife":61.6,"strainMaxMedian":60.8}
+{"base":"daredevil","case":"line 65","fullLife":0.997,"infections":9.34,"mistakes":1.54,"temper":-3.91,"earlyActionsALife":49.2,"strainMaxMedian":50.1}
+{"base":"daredevil","case":"line 80","fullLife":0.998,"infections":6.37,"mistakes":1.52,"temper":-3.88,"earlyActionsALife":2.7,"strainMaxMedian":4.8}
+{"base":"daredevil","case":"line 90","fullLife":0.998,"infections":6.27,"mistakes":1.52,"temper":-3.88,"earlyActionsALife":1.2,"strainMaxMedian":3}
+{"base":"daredevil","case":"line 65, budgeter","fullLife":0.999,"infections":6.57,"mistakes":1.46,"temper":-2.55,"earlyActionsALife":4.3,"strainMaxMedian":6.8}
+{"base":"daredevil","case":"line 80, budgeter","fullLife":0.998,"infections":6.37,"mistakes":1.52,"temper":-3.88,"earlyActionsALife":2.7,"strainMaxMedian":4.8}
+{"base":"overclocker","case":"off","fullLife":0.958,"infections":8.66,"mistakes":1.74,"temper":-7.75,"earlyActionsALife":0,"strainMaxMedian":0}
+{"base":"overclocker","case":"line 50","fullLife":0.921,"infections":12.86,"mistakes":1.63,"temper":-8.35,"earlyActionsALife":51.4,"strainMaxMedian":52.3}
+{"base":"overclocker","case":"line 65","fullLife":0.945,"infections":10.4,"mistakes":1.81,"temper":-8.16,"earlyActionsALife":22.1,"strainMaxMedian":25}
+{"base":"overclocker","case":"line 80","fullLife":0.964,"infections":8.36,"mistakes":1.74,"temper":-7.69,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"overclocker","case":"line 90","fullLife":0.964,"infections":8.36,"mistakes":1.74,"temper":-7.68,"earlyActionsALife":0.1,"strainMaxMedian":0}
+{"base":"overclocker","case":"line 65, budgeter","fullLife":0.961,"infections":8.31,"mistakes":2.31,"temper":-6.76,"earlyActionsALife":0.2,"strainMaxMedian":0}
+{"base":"overclocker","case":"line 80, budgeter","fullLife":0.964,"infections":8.36,"mistakes":1.74,"temper":-7.69,"earlyActionsALife":0.1,"strainMaxMedian":0}
