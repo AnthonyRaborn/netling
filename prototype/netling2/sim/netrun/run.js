@@ -6,7 +6,7 @@ import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, reb
 import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
-import { nextFragment, fragmentById } from '../../../../src/netrun/codex.js';
+import { nextFragment as nextFragmentRaw, fragmentById } from '../codex2.js';
 import { rollAccessory, accessoryById, RARITY } from '../../../../src/accessories.js';
 import { ANOMALIES, anomaliesFor } from '../../../../src/netrun/anomalies.js';
 import { weighted } from '../../../../src/random.js';
@@ -256,12 +256,13 @@ export const codexRoom = (pet) => Math.max(0, RUN_CFG.codexPerLife - (pet.codexF
 
 // Picks up the region's next unread fragment, if any. Returns a log suffix.
 // Whether this region's codex still has a fragment the line has not found (this run's finds included).
-const fragmentsLeft = (run) => nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]) !== null;
+const nextFragment = (region, known, rootAccess = false) => nextFragmentRaw(region, known, rootAccess);
+const fragmentsLeft = (run, pet) => nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments], pet?.rootAccess) !== null;
 
 function takeFragment(pet) {
   const run = pet.run;
   if (REGIONS[run.region].noFragments) return '';
-  const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments]);
+  const id = nextFragment(REGIONS[run.region].codexRegion ?? run.region, [...run.known, ...run.fragments], pet.rootAccess);
   if (!id) return '';
   if (!codexRoom(pet)) return ' a codex fragment, but its memory is full: it will keep for the next generation.';
   run.fragments.push(id);
@@ -478,7 +479,7 @@ function moveToNode(pet, nodeId, rng) {
         title: ev.title,
         text: ev.text,
         // An option may say something else once the region's codex is complete (codexDoneHint).
-        options: ev.options.map(({ id, label, hint, codexDoneHint }) => ({ id, label, hint: codexDoneHint && !fragmentsLeft(run) ? codexDoneHint : hint })),
+        options: ev.options.map(({ id, label, hint, codexDoneHint }) => ({ id, label, hint: codexDoneHint && !fragmentsLeft(run, pet) ? codexDoneHint : hint })),
       });
       return { ok: true, kind: 'anomaly', event: ev.id };
     }
@@ -743,7 +744,7 @@ function chooseOption(pet, optionId, rng) {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
     const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
-    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run) });
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run, pet) });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
     st.sync = clamp(st.sync);
@@ -925,7 +926,7 @@ export const contractReady = (pet) =>
 function contractKinds(pet, region, codex) {
   return CONTRACT_KINDS.filter((kind) => {
     if (kind === 'market') return (REGIONS[region].nodes.market ?? 0) > 0 && (pet.scrip ?? 0) >= Math.min(...CHEAPEST.map((id) => SCRIP.price[id]));
-    if (kind === 'fragment') return codexRoom(pet) > 0 && nextFragment(region, codex) !== null;
+    if (kind === 'fragment') return codexRoom(pet) > 0 && nextFragment(region, codex, pet.rootAccess) !== null;
     if (kind === 'clinic') return pet.bugs > 0 && (REGIONS[region].nodes.market ?? 0) > 0;
     return true;
   });

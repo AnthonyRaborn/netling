@@ -18,7 +18,7 @@ const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, o
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
-const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('../../../src/netrun/codex.js');
+const { FRAGMENTS, ROOT_FRAGMENT_IDS } = await import('./codex2.js');
 // When a mainframe's extended life would end (docs/SIMULATION.md#mainframe).
 const mainframeEnd = (s) => s.life.lifespan + CFG.mainframeBonusMin;
 const { playRun, finishRun, surplusSlot, winChance, RUN_STYLES } = await import('./netrun-bot.mjs');

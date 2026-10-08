@@ -15,13 +15,13 @@ export const NR2 = {
   // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
   graceMin: 5,
   // The forced filled cache (Feast corp, elder level): one a run, in the layer after the one before halfway (decided: set interval,
-  // about one a run, may displace any node including the relay). `forcedCacheRelaySafe` is the balance lever (true keeps the relay).
-  forcedCache: { perRun: 1, relaySafe: false },
+  // about one a run, may displace any node but, decided later, never the relay: `relaySafe` is true).
+  forcedCache: { perRun: 1, relaySafe: true },
 
   // ---- ICE tiers (decided: by region depth, speed as the lever, Breach 4-in-5, no extra pay, avoidance weaker against tier 2) ----
   tier: {
-    // Share of ICE that is tier 2, by region. MINE, placeholders: the shares are a tuning output (tier-share-sweep.mjs).
-    share: { public: 0.1, bazaar: 0.2, corp: 0.25, ruins: 0.35, deep: 0.5, source: 0.6, daily: 0.25, tutorial: 0 },
+    // Share of ICE that is tier 2, by region. MINE, placeholders: the shares are a tuning output (netrun-sweep.mjs, CASES).
+    share: { public: 0.05, bazaar: 0.1, corp: 0.2, ruins: 0.3, deep: 0.5, source: 0.6, daily: 0.2, tutorial: 0 },
     speed: 1.25, // MINE: the game speed multiplier for tier 2 (Dodge, Tune, Feast; also applies to Breach's timer unless refunded)
     // ASSUMPTION, not a measurement: how much a player's win chance falls against tier 2. The bots have one skill number, not per-game
     // skill, so the cost of speed is a flat drop per 0.1 of extra speed, and Breach's longer target a flat drop of its own.

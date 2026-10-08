@@ -401,3 +401,27 @@ test('the daily trace rolls the ICE tier from the node alone, so every player me
   assert.ok(a.some(([, t]) => t === 2) && a.some(([, t]) => t === 1), 'a mix of both tiers');
   reset();
 });
+
+test('the 2.0 pages: 24 Root and 15 late, in drop order, late only once Root is held, and the Source opens on deep-6', async () => {
+  const { FRAGMENTS, ROOT_FRAGMENT_IDS, LATE_FRAGMENT_IDS, nextFragment } = await import('./sim/codex2.js');
+  const { regionLock } = await import('../../src/netrun/regions.js');
+  assert.equal(ROOT_FRAGMENT_IDS.length, 24);
+  assert.equal(LATE_FRAGMENT_IDS.length, 15);
+  assert.equal(new Set(FRAGMENTS.map((f) => f.id)).size, 39, 'ids are unique');
+  const byRegion = (r) => FRAGMENTS.filter((f) => f.region === r && f.tier === 'root').length;
+  assert.deepEqual(['public', 'corp', 'bazaar', 'ruins', 'deep', 'source'].map(byRegion), [5, 6, 5, 4, 4, 0]);
+  // A late page never drops before Root; the order inside a region is the array order.
+  const publicRoot = ROOT_FRAGMENT_IDS.filter((id) => id.startsWith('public'));
+  assert.equal(nextFragment('public', publicRoot, false), null, 'Root not held: the late pages wait');
+  assert.equal(nextFragment('public', publicRoot, true), 'public-6');
+  assert.equal(nextFragment('public', [...publicRoot, 'public-6'], true), 'public-7');
+  assert.equal(nextFragment('deep', ROOT_FRAGMENT_IDS, false), 'deep-5');
+  assert.equal(nextFragment('source', ROOT_FRAGMENT_IDS, false), 'source-1', 'all Root pages known counts as Root held');
+  // The Deep opens on ruins-4 (Root); the Source on deep-6 (late).
+  assert.equal(regionLock('source', 'mainframe', ['ruins-4'], ['public', 'bazaar', 'corp', 'ruins', 'deep']), 'the way down is still hidden.');
+  assert.equal(regionLock('source', 'mainframe', ['deep-6'], ['public', 'bazaar', 'corp', 'ruins', 'deep']), null);
+});
+
+test('the forced cache never displaces a relay by default', () => {
+  assert.equal(NR2.forcedCache.relaySafe, true);
+});

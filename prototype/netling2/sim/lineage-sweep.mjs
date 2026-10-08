@@ -10,7 +10,7 @@ process.env.TZ = 'UTC';
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
 const { CFG, lineOf } = await import('./sim.js');
 const { RUN_CFG } = await import('./netrun/run.js');
-const { ROOT_FRAGMENT_IDS } = await import('../../../src/netrun/codex.js');
+const { ROOT_FRAGMENT_IDS } = await import('./codex2.js');
 
 const [name, n = 200, lives = 10] = [process.argv[2], Number(process.argv[3] ?? 200), Number(process.argv[4] ?? 10)];
 if (!ARCHETYPES[name]) throw new Error(`unknown archetype ${name}`);
