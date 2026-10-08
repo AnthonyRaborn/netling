@@ -2,6 +2,7 @@
 import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem } from './netrun/run.js';
 import { INVENTORY_SLOTS, SCRIP, leanSeen } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
+import { tierPenalty } from './netrun/nr2.js';
 
 // An assumption, not a measurement: how much likelier a player is to win a mini-game or ICE fight that runs
 // slower because the netling is overclocked (CFG.overclockGameSpeed). Shared with tools/balance.mjs.
@@ -137,7 +138,7 @@ export function playRun(pet, style, region, rng, codex = []) {
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 60) {
     const run = pet.run;
-    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, style.winRate), rng);
+    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, style.winRate - tierPenalty(run.pending)), rng);
     else if (run.phase === 'choice') {
       if (run.pending.kind === 'market' && !run.pending.counted) {
         run.pending.counted = true; // a clinic stays open after a fix: count and sell once

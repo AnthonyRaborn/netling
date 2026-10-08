@@ -2,7 +2,8 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, infect } from '../sim.js';
+import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment, fragmentById } from '../../../../src/netrun/codex.js';
@@ -122,6 +123,11 @@ export const MAINFRAME_ABILITIES = {
 };
 const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? lineOf(pet.form) : null);
 const upgraded = (pet) => pet.stage === 'mainframe';
+// 2.0 abilities (nr2.js): the ability key is the adult form's id (breachCorp ... feastStreet, hidden); level 1 adult, 2 elder.
+const ab2 = (pet) => (NR2.abilities ? ability(pet) : null);
+const lvl = (pet) => levelOf(pet);
+// Which egg this netling is, for the light run costs: Iron (wear on), Program (Charge-owner), Wetware (Sync-owner).
+const eggOf = (pet) => (IRON.on ? 'iron' : SIDES.on && SIDES.owner === 'charge' ? 'program' : SIDES.on && SIDES.owner === 'sync' ? 'wetware' : null);
 
 const clamp = (v) => Math.min(100, Math.max(0, v));
 
@@ -295,6 +301,12 @@ function moveToNode(pet, nodeId, rng) {
   if (st.charge <= 0) return disconnect(pet, 'power drained mid-run.');
   const repair = upgraded(pet) ? RUN_CFG.initMoveRepair : RUN_CFG.daemonMoveRepair;
   if (ability(pet) === 'daemon' && repair) st.integrity = clamp(st.integrity + repair);
+  if (ab2(pet)) {
+    const up = NR2.ab.upkeep[ab2(pet)]?.[lvl(pet)] ?? 0; // Tune street, elder: repairs a little every move
+    if (up) st.integrity = clamp(st.integrity + up);
+  }
+  // Iron's own problem in a run: the redline builds wear for the minutes a node takes (the run itself takes no simulated time).
+  if (NR2.eggCost && eggOf(pet) === 'iron' && st.heat > IRON.heat) pet.wear = (pet.wear ?? 0) + IRON.rate * (st.heat - IRON.heat) * NR2.cost.ironMinutesPerMove;
   if (st.heat >= RUN_CFG.throttleHeat) {
     st.integrity = clamp(st.integrity - RUN_CFG.throttleDamage);
     note(run, `thermal throttling. -${RUN_CFG.throttleDamage} integrity.`);
@@ -303,25 +315,44 @@ function moveToNode(pet, nodeId, rng) {
 
   const node = nodeById(run.map, nodeId);
   const region = REGIONS[run.region];
+  forceCache(pet, run, node, rng);
   switch (node.type) {
     case 'cache': {
       run.tally.caches++;
       const frag = (rng() < RUN_CFG.cacheFragmentChance ? takeFragment(pet) : '') + (rng() < RUN_CFG.cacheAccChance ? takeAccessory(run, rng) : '');
-      if (rng() < (region.cacheFind ?? RUN_CFG.cacheFindChance)) {
+      const sc = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)] : null;
+      if (node.filled || rng() < (sc ? sc.cache : region.cacheFind ?? RUN_CFG.cacheFindChance)) {
         const item = weighted(region.loot, rng);
         run.loot.push(item);
         note(run, `cache cracked: ${ITEMS[item].name}.${frag}`);
         return { ok: true, kind: 'cache', item, fragment: Boolean(frag) };
       }
       if (rng() < RUN_CFG.cacheScripChance) {
-        run.scrip = (run.scrip ?? 0) + RUN_CFG.cacheScrip;
-        note(run, `cache held ${RUN_CFG.cacheScrip} loose scrip.${frag}`);
+        const cs = RUN_CFG.cacheScrip + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].scrip : 0);
+        run.scrip = (run.scrip ?? 0) + cs;
+        note(run, `cache held ${cs} loose scrip.${frag}`);
         return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
       }
       note(run, frag ? `cache held no items.${frag}` : 'cache was empty.');
       return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
     }
     case 'ice': {
+      // 2.0: a harder tier of ICE, mixed in by region depth. The daily trace rolls it by node alone (lane 4, beside the four in daily.js).
+      const tier = rollTier(run, nodeId, rng);
+      const am = avoidMult(tier, lvl(pet));
+      const key2 = ab2(pet);
+      if (key2) {
+        // Phase (Dodge corp): the first ICE (two at the elder level) for certain, then often; against tier 2 each works less often.
+        const ph = key2 === 'dodgeCorp' ? NR2.ab.phase[lvl(pet)] : null;
+        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' || key2 === 'hidden' ? NR2.ab.unseen[lvl(pet)] : 0;
+        if (chance > 0 && rng() < chance * am) {
+          if (ph && run.freePhases < ph.free) run.freePhases++;
+          run.tally.icePhased++;
+          markTrail(run, TRAIL.icePhased);
+          note(run, 'the ICE never noticed it.');
+          return { ok: true, kind: 'ice', phased: true };
+        }
+      }
       if (ability(pet) === 'ghost' && rng() < (upgraded(pet) ? RUN_CFG.whisperSlipChance : RUN_CFG.ghostSlipChance)) {
         run.tally.icePhased++;
         markTrail(run, TRAIL.icePhased);
@@ -347,8 +378,12 @@ function moveToNode(pet, nodeId, rng) {
       // The daily trace picks the fight by node alone, so every form meets the same one there.
       const game = GAME_IDS[Math.floor((run.daily ? seededRoll(run.seed, nodeId * 8 + LANE.game, 0) : rng()) * GAME_IDS.length)];
       run.phase = 'ice';
-      run.pending = { game };
-      return { ok: true, kind: 'ice', game };
+      run.pending = { game, tier };
+      if (tier === 2) {
+        run.tally.iceHard = (run.tally.iceHard ?? 0) + 1;
+        note(run, `tier 2 ICE: ${game}.`); // the tier can be logged (decided)
+      }
+      return { ok: true, kind: 'ice', game, tier };
     }
     case 'relay': {
       // Unplugged: the relay is dark. It still lets the runner out, but only the exit counts for the challenge.
@@ -368,7 +403,7 @@ function moveToNode(pet, nodeId, rng) {
       st.charge = clamp(st.charge + RUN_CFG.relayCharge);
       st.heat = clamp(st.heat - RUN_CFG.relayCool);
       // Corp relays: the grid services its own.
-      const patch = ability(pet) === 'chrome' ? (upgraded(pet) ? RUN_CFG.platRelayRepair : RUN_CFG.chromeRelayRepair) : 0;
+      const patch = (ability(pet) === 'chrome' ? (upgraded(pet) ? RUN_CFG.platRelayRepair : RUN_CFG.chromeRelayRepair) : 0) + (ab2(pet) ? NR2.ab.relayPatch[ab2(pet)]?.[lvl(pet)] ?? 0 : 0);
       const patched = patch > 0;
       if (patched) st.integrity = clamp(st.integrity + patch);
       note(run, patched ? `relay found. recharged, vented, and patched: +${patch} integrity (corp credentials).` : 'relay found. recharged and vented.');
@@ -385,7 +420,7 @@ function moveToNode(pet, nodeId, rng) {
     }
     case 'checkpoint': {
       const form = ability(pet);
-      if (form === 'chrome' || form === 'ghost') {
+      if (form === 'chrome' || form === 'ghost' || (ab2(pet) && NR2.ab.checkpoint[form]?.[lvl(pet)])) {
         note(run, form === 'chrome' ? 'checkpoint: credentials accepted.' : 'checkpoint: it never saw you.');
         return { ok: true, kind: 'checkpoint', auto: true };
       }
@@ -413,7 +448,7 @@ function moveToNode(pet, nodeId, rng) {
         const next = weighted(table, rng);
         if (next !== offers[0]) offers.push(next);
       }
-      const price = clinic ? RUN_CFG.clinicPrice : corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
+      const price = clinic ? RUN_CFG.clinicPrice : corp ? (ability(pet) === 'chrome' ? RUN_CFG.exchangeChromePrice : ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].exchangePrice : RUN_CFG.exchangePrice) : region.marketPrice ?? RUN_CFG.marketPrice;
       if (clinic) run.tally.clinics++;
       const accOffer = !clinic && !region.noStyleDrops && rng() < RUN_CFG.marketAccChance ? rollAccessory([...run.knownAcc, ...run.accessories], rng, run.region, corp ? 'exchange' : 'black') : null;
       openChoice(run, {
@@ -454,7 +489,7 @@ function moveToNode(pet, nodeId, rng) {
       }
       const bonus = Array.from({ length: region.exitBonus ?? 1 }, () => weighted(region.loot, rng));
       run.loot.push(...bonus);
-      run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip;
+      run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].scrip : 0);
       const exitFragment = region.exitFragment ?? (run.contract?.kind === 'fragment' ? 1 : RUN_CFG.exitFragmentChance);
       const frag = (rng() < exitFragment ? takeFragment(pet) : '') + (rng() < RUN_CFG.exitAccChance ? takeAccessory(run, rng) : '');
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
@@ -487,13 +522,15 @@ function resolveIceFight(pet, won, rng) {
   if (run.phase !== 'ice') return { ok: false };
   if (run.daily) rng = laneRng(run, run.pos, LANE.ice);
   if (PREF.on && PREF.ice && run.pending?.game) pushGame(pet, run.pending.game);
+  run.lastTier = run.pending?.tier ?? 1;
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
+  const tier2 = run.lastTier === 2;
   if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
   if (won) {
     const acc = rng() < RUN_CFG.iceWinAccChance ? takeAccessory(run, rng) : '';
-    if (rng() < RUN_CFG.iceWinLootChance) {
+    if (rng() < (ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].iceWin : RUN_CFG.iceWinLootChance)) {
       const item = weighted(REGIONS[run.region].loot, rng);
       run.loot.push(item);
       note(run, `ICE shattered. salvaged ${ITEMS[item].name}.${acc}`);
@@ -502,15 +539,17 @@ function resolveIceFight(pet, won, rng) {
     }
     return { ok: true, won };
   }
-  const soft = ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses;
+  const hd = ab2(pet) === 'breachStreet' ? NR2.ab.hardened[lvl(pet)] : null;
+  const soft = (ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses) || Boolean(hd?.soft && (run.softLosses ?? 0) < hd.soft);
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
   markTrail(run, TRAIL.iceLost);
   const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
   const dmg = Math.round(
-    REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? RUN_CFG.airgapSoftMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
+    REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? (hd ? NR2.ab.softMult : RUN_CFG.airgapSoftMult) : 1) * (hd ? hd.dmg : 1) * (NR2.tiers && tier2 ? NR2.tier.damageMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
   );
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
+  if (NR2.eggCost) lostFightCost(pet, run, rng);
   note(run, `ICE bit back${hot ? ' hard: overclocked' : ''}. -${dmg} integrity.`);
   if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
@@ -521,6 +560,15 @@ function resolveIceFight(pet, won, rng) {
 function insured(pet) {
   const run = pet.run;
   const used = Math.max(run.insuredTimes ?? 0, run.insured ? 1 : 0);
+  if (ab2(pet) === 'breachCorp') {
+    const ins = NR2.ab.insurance[lvl(pet)];
+    if (used >= ins.times) return false;
+    run.insured = true;
+    run.insuredTimes = used + 1;
+    pet.stats.integrity = ins.to;
+    note(run, `insurance paid out. integrity restored to ${ins.to}.`);
+    return true;
+  }
   if (ability(pet) !== 'chrome' || !RUN_CFG.chromeInsurance || used >= (upgraded(pet) ? RUN_CFG.platInsurance : 1)) return false;
   run.insured = true;
   run.insuredTimes = used + 1;
@@ -729,6 +777,8 @@ export function visibleNodeIds(pet) {
   const form = ability(pet);
   if (form === 'ghost') run.map.nodes.forEach((n) => ids.add(n.id));
   if (form === 'daemon') nodesWithin(run, run.pos, upgraded(pet) ? RUN_CFG.initLookahead : 2).forEach((id) => ids.add(id));
+  if (ab2(pet) === 'hidden') run.map.nodes.forEach((n) => ids.add(n.id));
+  if (ab2(pet) === 'tuneCorp') nodesWithin(run, run.pos, NR2.ab.sight.tuneCorp[lvl(pet)]).forEach((id) => ids.add(id));
   return ids;
 }
 
@@ -736,6 +786,8 @@ function endRun(pet, result) {
   const run = pet.run;
   run.phase = 'done';
   run.result = result;
+  // A held pressure state resumes after a jack-out; for a few minutes the bars cannot end it (decided). A failure or an abort gets no window.
+  if (result === 'jacked' && NR2.graceMin > 0) pet.graceUntil = pet.ageMin + NR2.graceMin;
   if (run.daily) return; // nothing at stake: no cooldown, and not counted among the netling's runs
   if (!REGIONS[run.region].noCooldown) {
     pet.lastRunEndAge = pet.ageMin;
@@ -981,4 +1033,38 @@ function settleContract(pet, result) {
   run.scrip = (run.scrip ?? 0) + c.scrip;
   if (c.item) run.loot.push(c.item);
   note(run, `contract complete: +${contractPay(c)}.`);
+}
+
+
+// 2.0 (nr2.js): the tier of an ICE fight. 1 or 2. The daily trace rolls it from the node alone, so everyone meets the same fight.
+function rollTier(run, nodeId, rng) {
+  const share = tierShare(run.region);
+  if (!share) return 1;
+  const r = run.daily ? seededRoll(run.seed, nodeId * 8 + 4, 0) : rng();
+  return r < share ? 2 : 1;
+}
+
+// Light extra costs of each egg's own problem in a run (nr2.js, decided as light; sizes are mine).
+function lostFightCost(pet, run, rng) {
+  const egg = eggOf(pet);
+  const st = pet.stats;
+  if (egg === 'program' && st.charge >= SIDES.charge.hi) st.integrity = clamp(st.integrity - NR2.cost.programLostFightBleed);
+  if (egg === 'wetware' && !pet.virus && rng() < NR2.cost.wetwareLostFightInfect) infect(pet, 4);
+}
+
+// The forced filled cache (Feast corp, elder level): when the run reaches the layer before the halfway layer, one node in the next layer
+// becomes a filled cache. May displace any node but the exit (and, with relaySafe, the relay).
+function forceCache(pet, run, node, rng) {
+  if (!NR2.abilities || !NR2.ab.forcedCacheForms.includes(ab2(pet)) || lvl(pet) < 2) return;
+  if ((run.forced ?? 0) >= NR2.forcedCache.perRun) return;
+  const region = REGIONS[run.region];
+  if (node.layer !== Math.ceil(region.layers / 2) - 1 || node.layer < 1) return;
+  const next = nodeById(run.map, run.pos).edges.map((id) => nodeById(run.map, id)).filter((n) => n.type !== 'exit' && n.type !== 'cache' && !(NR2.forcedCache.relaySafe && n.type === 'relay'));
+  if (!next.length) return;
+  const pick = next[Math.floor(rng() * next.length)];
+  pick.type = 'cache';
+  pick.filled = true;
+  run.forced = (run.forced ?? 0) + 1;
+  run.tally.forced = (run.tally.forced ?? 0) + 1;
+  note(run, 'a cache lights up ahead.');
 }

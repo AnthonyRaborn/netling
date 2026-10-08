@@ -1,0 +1,80 @@
+// Netling 2.0 netrun rules that are decided in docs/NETLING_2_NETRUN_DRAFTS.md, as switchable settings for the simulator fork.
+// Everything is OFF by default so the tables in docs/netling2-prototypes/README.md stay reproducible (no 2.0 form had a run
+// ability in them). Switch on with NR2='{"abilities":true,"tiers":true,...}' or NR2=all. Pure: imports nothing.
+//
+// What is DECIDED (maintainer) and what is MINE (starting values to measure) is marked on each block. Nothing here is tuned.
+
+export const NR2 = {
+  // One ability per role and lean at two levels: the adult is level 1, the elder level 2 (a mainframe-stage body in this fork).
+  abilities: false,
+  // A second, harder tier of ICE mixed in by region depth (speed for Dodge, Tune and Feast; a 4-in-5 variant for Breach).
+  tiers: false,
+  // Light extra costs of each egg's own problem during a run (decided as a direction; the sizes below are mine).
+  eggCost: false,
+  // A held pressure state resumes after a jack-out (decided), with a window before the bars can end it (decided: 5 minutes).
+  // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
+  graceMin: 5,
+  // The forced filled cache (Feast corp, elder level): one a run, in the layer after the one before halfway (decided: set interval,
+  // about one a run, may displace any node including the relay). `forcedCacheRelaySafe` is the balance lever (true keeps the relay).
+  forcedCache: { perRun: 1, relaySafe: false },
+
+  // ---- ICE tiers (decided: by region depth, speed as the lever, Breach 4-in-5, no extra pay, avoidance weaker against tier 2) ----
+  tier: {
+    // Share of ICE that is tier 2, by region. MINE, placeholders: the shares are a tuning output (tier-share-sweep.mjs).
+    share: { public: 0.1, bazaar: 0.2, corp: 0.25, ruins: 0.35, deep: 0.5, source: 0.6, daily: 0.25, tutorial: 0 },
+    speed: 1.25, // MINE: the game speed multiplier for tier 2 (Dodge, Tune, Feast; also applies to Breach's timer unless refunded)
+    // ASSUMPTION, not a measurement: how much a player's win chance falls against tier 2. The bots have one skill number, not per-game
+    // skill, so the cost of speed is a flat drop per 0.1 of extra speed, and Breach's longer target a flat drop of its own.
+    winPerSpeed: 0.04,
+    breachPenalty: 0.1, // Breach 4-in-5: the win chance drops this much
+    breachRefund: 0, // the maintainer's possible timer refund for the longer target: win chance given back (to test)
+    avoid: { 1: 0.5, 2: 0.75 }, // avoidance works this share as often against tier 2, adult (level 1) and elder (level 2)
+    damageMult: 1, // harder ICE does not pay more and (not decided) bites the same
+  },
+
+  // ---- Abilities: starting values taken from 1.0's constants (docs/NETRUN.md), by level (1 adult, 2 elder). MINE. ----
+  ab: {
+    insurance: { 1: { times: 1, to: 12 }, 2: { times: 2, to: 12 } }, // breachCorp (last stand)
+    relayPatch: { breachCorp: { 1: 0, 2: 20 }, tuneCorp: { 1: 0, 2: 20 } }, // relays also repair this much
+    hardened: { 1: { dmg: 0.5, soft: 0 }, 2: { dmg: 0.5, soft: 1 } }, // breachStreet: ICE damage share; soft: first loss deals softMult of it
+    softMult: 0.3,
+    phase: { 1: { free: 1, later: 0.35 }, 2: { free: 2, later: 0.35 } }, // dodgeCorp: ICE slipped for certain, then the chance
+    unseen: { 1: 0.45, 2: 0.5 }, // dodgeStreet and hidden: chance an ICE never notices it
+    checkpoint: { dodgeCorp: { 1: false, 2: true }, dodgeStreet: { 1: false, 2: true }, hidden: { 1: true, 2: true } },
+    sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
+    upkeep: { tuneStreet: { 1: 0, 2: 6 } }, // Integrity restored per move
+    concession: { 1: { exchangePrice: 11, scrip: 2 }, 2: { exchangePrice: 11, scrip: 2 } }, // feastCorp: cheaper exchange, loose scrip on top
+    scavenge: { 1: { cache: 0.5, iceWin: 0.3 }, 2: { cache: 0.55, iceWin: 0.4 } }, // feastStreet
+    forcedCacheForms: ['feastCorp'], // level 2 only
+  },
+
+  // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
+  cost: {
+    ironMinutesPerMove: 1, // Iron: minutes of wear accrual a move is worth, at Heat over the wear line (the run itself takes no simulated time)
+    programLostFightBleed: 4, // Program: a lost fight at Charge 80+ costs this much more Integrity
+    wetwareLostFightInfect: 0.04, // Wetware: a lost fight rolls an infection at this chance
+  },
+};
+
+if (process.env.NR2) {
+  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true } : JSON.parse(process.env.NR2);
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
+    else NR2[k] = val;
+  }
+}
+
+export const levelOf = (pet) => (pet.stage === 'mainframe' ? 2 : 1);
+
+// Chance a tier-2 roll is made for a fight in this region.
+export const tierShare = (region) => (NR2.tiers ? NR2.tier.share[region] ?? 0 : 0);
+
+// The win chance a bot gives up against a tier-2 fight of this game. Assumed, see NR2.tier.
+export function tierPenalty(pending) {
+  if (!NR2.tiers || pending?.tier !== 2) return 0;
+  if (pending.game === 'breach') return Math.max(0, NR2.tier.breachPenalty - NR2.tier.breachRefund);
+  return Math.max(0, (NR2.tier.speed - 1) * 10 * NR2.tier.winPerSpeed);
+}
+
+// How often an avoidance ability works against this fight, as a share of its normal chance.
+export const avoidMult = (tier, level) => (NR2.tiers && tier === 2 ? NR2.tier.avoid[level] ?? 1 : 1);

@@ -665,6 +665,8 @@ function stepHeld(s, rest) {
   if (!SIDES.on) return;
   s.sideHold ??= { charge: 0, sync: 0, heat: 0 };
   s.sideHeld ??= { charge: false, sync: false, heat: false };
+  // 2.0: after a jack-out the held states resume and the bars cannot end them for a few minutes (NR2.graceMin, nr2.js); the counters wait too.
+  if ((s.graceUntil ?? 0) > s.ageMin && !rest) return;
   for (const key of ['charge', 'sync', 'heat']) {
     const c = SIDES[key];
     if (!(c.hold > 0) || (key === 'heat' && SIDES.owner !== null)) continue;
@@ -1159,7 +1161,7 @@ function stepChatter(s, rng) {
   if (pool.length) s.chatter = { id: pick(pool, rng).id, startedAge: s.ageMin };
 }
 
-function infect(s, damage) {
+export function infect(s, damage) {
   s.virus = true;
   s.virusMin = 0;
   s.virusCount = (s.virusCount ?? 0) + 1;
