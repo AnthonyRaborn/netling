@@ -25,3 +25,5 @@
 2026-10-08T17:41:39.821Z start push-sweep
 2026-10-08T17:41:57.587Z done balance-full-iron [full-iron] 936s
 2026-10-08T17:41:57.588Z start gap-sweep
+2026-10-08T17:42:23.276Z done bug-sweep [rules] 321s
+2026-10-08T17:42:23.277Z start human-sweep
