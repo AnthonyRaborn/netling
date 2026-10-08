@@ -137,3 +137,37 @@ test('the idle runs at its own pace between beats, and is paused for 13% (steady
     assert.ok(Math.abs(run - span * (1 - share)) <= 1, `level ${level}: ${run} ms of idle in ${span} ms`);
   }
 });
+
+// --- visits: the layers pause, the sprite plays 1.0's bounce ---------------------------------------------------------------
+import { readFileSync as readSrc } from 'node:fs';
+import { visitLayers, visitMotion } from './visit.js';
+
+test('during a visit every layer is off: no tell, neglect, bugs, idle or marks; outside one the state is untouched', () => {
+  const state = { level: -2, neglect: 2, bugs: 5, idle: 'hover', marks: true, seed: 3 };
+  assert.deepEqual(visitLayers(state, false), state);
+  assert.deepEqual(visitLayers(state, true), { level: 0, neglect: 0, bugs: 0, idle: 'none', marks: false, seed: 3 });
+  // Level 0 is the 1.0 rhythm for every egg: no offset, no blink, full brightness.
+  for (const egg of EGGS) assert.deepEqual(temperTell({ egg, level: 0, time: 1234, seed: 3 }), { frame: Math.floor(1234 / 500) % 2, blink: false, dx: 0, dy: 0, shade: 1 });
+});
+
+test('the visit bounce matches src/render.js and keeps every form clear of the visitor and on screen', () => {
+  const src = readSrc(new URL('../../src/render.js', import.meta.url), 'utf8');
+  assert.match(src, /Math\.sin\(time \/ 700 \+ phase\) \+ 1\) \* 2/);
+  assert.match(src, /x = LCD_W - 1 - sprite\[0\]\.length - swing\(Math\.PI\)/);
+  assert.match(src, /y = 20 - sprite\.length - hop\(!frame\)/);
+  for (const { f } of every()) {
+    const w = f.a[0].length;
+    for (const visitorWidth of [12, 16, 18]) {
+      for (const calm of [false, true]) {
+        for (let time = 0; time < 10_000; time += 50) {
+          const m = visitMotion({ w, h: f.a.length, visitorWidth, time, calm });
+          assert.ok(m.x + w <= LCD.w && m.x >= 0, `${f.id}: off screen at ${time}`);
+          assert.ok(m.y >= 0, `${f.id}: off the top`);
+          // The visitor stands at the left (1 + its own swing, at most swingCap): the gap never closes below 2 columns.
+          const cap = Math.max(0, Math.floor((LCD.w - 4 - w - visitorWidth) / 2));
+          assert.ok(m.x - (1 + cap + visitorWidth) >= 2, `${f.id} vs ${visitorWidth}: closer than the 1.0 rule allows`);
+        }
+      }
+    }
+  }
+});

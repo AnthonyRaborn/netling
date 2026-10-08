@@ -10,18 +10,23 @@ import { neglected } from './neglect.js';
 import { glitched, MAX_BUGS } from './glitch.js';
 import { temperTell, tellPose, idleClock } from './tell.js';
 import { idleOffset, QUIRKS } from './idle.js';
+import { visitLayers, visitMotion } from './visit.js';
 import { drawSprite, paletteColors } from '../../src/sprites.js';
 import { PALETTES } from '../../src/sim.js';
 import { drawWorn } from '../../src/accessories.js';
 
 const SETS = { iron: () => forms('B'), program: programForms, wetware: wetwareForms };
 const CROP = { x: 5, y: 0, w: 30, h: 24 }; // the part of the 40x28 screen that holds a pet
+const FULL_WIDTH = { x: 0, y: 0, w: 40, h: 24 }; // a visiting pet stands at the right edge, outside CROP
 const LEVELS = [[-2, 'strongly unsteady'], [-1, 'unsteady'], [0, 'middle'], [1, 'steady'], [2, 'strongly steady']];
 const SEED = 1;
 let quirk = 'none'; // the 1.0 idle shown under the temper tell (the section's own control)
 
 // One picture: the form with a layer state, on the LCD background. `tell` null draws the still pose.
-function picture(env, f, { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg }) {
+function picture(env, f, state) {
+  const CROP_ = state.visit ? FULL_WIDTH : CROP;
+  // A visit pauses every layer and plays 1.0's bounce (visit.js).
+  const { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg } = { ...state, ...visitLayers(state, state.visit) };
   const t = tell ? temperTell({ egg, level, time, reduced, seed: SEED }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
   const { draw: key, wear } = tellPose(t, 'awake');
   const base = f[key];
@@ -30,17 +35,18 @@ function picture(env, f, { level = 0, neglect = 0, bugs = 0, time = 0, reduced =
   const look = bugs ? glitched(rusty, anchors, bugs, { time, reduced, seed: SEED }) : rusty;
   const shown = f.motion && key !== 'sleep' ? f.motion(look, anchors, { time, reduced }) : look;
   const wander = idle !== 'none' ? idleOffset(idle, base.length, idleClock({ egg, level, time })) : { x: 0, y: 0 };
-  const x = Math.floor((40 - base[0].length) / 2) + t.dx + wander.x - CROP.x;
-  const xShown = Math.floor((40 - shown[0].length) / 2) + t.dx + wander.x - CROP.x;
-  const y = 20 - base.length + t.dy + wander.y;
+  const bounce = state.visit ? visitMotion({ w: base[0].length, h: base.length, time, calm: reduced }) : null;
+  const x = (bounce ? bounce.x : Math.floor((40 - base[0].length) / 2) + t.dx + wander.x) - CROP_.x;
+  const xShown = (bounce ? bounce.x : Math.floor((40 - shown[0].length) / 2) + t.dx + wander.x) - CROP_.x;
+  const y = bounce ? bounce.y : 20 - base.length + t.dy + wander.y;
   const pal = PALETTES[env.palettes()[0]];
-  const canvas = env.el('canvas', { width: CROP.w, height: CROP.h });
+  const canvas = env.el('canvas', { width: CROP_.w, height: CROP_.h });
   const sc = Math.min(env.scale(), 4);
-  canvas.style.width = `${CROP.w * sc}px`;
-  canvas.style.height = `${CROP.h * sc}px`;
+  canvas.style.width = `${CROP_.w * sc}px`;
+  canvas.style.height = `${CROP_.h * sc}px`;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = env.tint().lcd;
-  ctx.fillRect(0, 0, CROP.w, CROP.h);
+  ctx.fillRect(0, 0, CROP_.w, CROP_.h);
   ctx.globalAlpha = t.shade;
   drawSprite(ctx, shown, xShown, y, paletteColors(pal));
   ctx.globalAlpha = 1;
@@ -93,6 +99,10 @@ export function layersSection(env, egg) {
   }
   bar.append(' a steady Iron holds the idle still around each beat. Level 0 is the 1.0 rhythm. Turn live on to see it move; with it off, the picture is the tell at the time set above (the beat is at 0, 6 s, 12 s; strong at every 3 s).');
   root.append(bar);
-  root.append(table(env, set, egg, LEVELS.map(([level, name]) => ({ head: `${level > 0 ? '+' : ''}${level} ${name}`, state: { level } })), true));
+  root.append(table(env, set, egg, [
+    ...LEVELS.map(([level, name]) => ({ head: `${level > 0 ? '+' : ''}${level} ${name}`, state: { level } })),
+    // A visit pauses every layer: asked for strongly unsteady, neglect 2 and 5 bugs, it shows none of them and plays 1.0's bounce.
+    { head: 'on a visit (layers paused)', state: { level: -2, neglect: 2, bugs: 5, visit: true } },
+  ], true));
   return root;
 }

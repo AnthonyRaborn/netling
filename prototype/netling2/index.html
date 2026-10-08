@@ -79,6 +79,7 @@
       import { ADULT_BODY, TEEN_BODY, OVERLAYS, LEAN_OVERLAYS, TEEN_OVERLAYS } from './art.js';
       import { temperTell, tellPose, idleClock, levelOf, guardedLevel, EGGS, GUARD } from './tell.js';
       import { idleOffset, QUIRKS } from './idle.js';
+      import { visitLayers, visitMotion } from './visit.js';
       import { neglected } from './neglect.js';
       import { guardedNeglect } from './needs.js';
       import { glitched, MAX_BUGS } from './glitch.js';
@@ -93,7 +94,7 @@
         const { ACCESSORIES, drawWorn } = await import('../../src/accessories.js');
 
         // temper is the hidden number; level is what the tell shows (it only moves GUARD past a threshold)
-        const state = { palette: 0, egg: 'auto', idle: 'none', temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
+        const state = { palette: 0, egg: 'auto', idle: 'none', visit: false, temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
         const A = forms('A');
         const B = forms('B');
         const LCD = { w: 40, h: 28 };
@@ -140,6 +141,7 @@
         flag('reduced', 'reduced motion ');
         flag('anchors', 'anchor rows ');
         flag('paused', 'pause ');
+        flag('visit', 'visit (layers paused) ');
         select('pose', [['awake', 'awake'], ['sleep', 'asleep'], ['dead', 'dead']], 'pose ');
         select('wear', [['', 'no wearable'], ...ACCESSORIES.filter((a) => a.slot !== 'prop').map((a) => [a.id, a.id])], 'wear ');
 
@@ -205,9 +207,11 @@
           ctx.fillStyle = BG;
           ctx.fillRect(0, 0, LCD.w, LCD.h);
           const awake = state.pose === 'awake';
-          const neglect = fixed?.neglect ?? state.neglect;
-          const nBugs = fixed ? fixed.bugs ?? 0 : state.bugs;
-          const tell = awake && !fixed ? temperTell({ egg: skinFor(f), level: state.level, time, reduced: state.reduced, seed: state.seed }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
+          // A visit pauses every layer (visit.js): no tell, neglect, bugs or idle; the sprite plays 1.0's bounce.
+          const v = visitLayers({ level: state.level, neglect: fixed?.neglect ?? state.neglect, bugs: fixed ? fixed.bugs ?? 0 : state.bugs, idle: state.idle }, awake && state.visit);
+          const neglect = v.neglect;
+          const nBugs = v.bugs;
+          const tell = awake && !fixed ? temperTell({ egg: skinFor(f), level: v.level, time, reduced: state.reduced, seed: state.seed }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
           const { draw: key, wear: wearKey } = tellPose(tell, state.pose);
           const sprite = f[key];
           const anchorsKey = key === 'dead' ? 'a' : key;
@@ -217,10 +221,11 @@
           // A form with a motion layer (Blank's elder) is drawn from that layer, which may be wider; wearables stay on the registered sprite.
           const shown = f.motion && key !== 'dead' && key !== 'sleep' ? f.motion(look, f.anchors[anchorsKey], { time, reduced: state.reduced }) : look;
           // 1.0's idle wander (a copy in idle.js), on the tell's own clock: a steady Iron holds it still around each beat.
-          const wander = awake && !fixed && state.idle !== 'none' ? idleOffset(state.idle, sprite.length, idleClock({ egg: skinFor(f), level: state.level, time })) : { x: 0, y: 0 };
-          const x = Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx + wander.x;
-          const xShown = Math.floor((LCD.w - shown[0].length) / 2) + tell.dx + wander.x;
-          const y = 20 - sprite.length + tell.dy + wander.y + (awake ? 0 : 1);
+          const wander = awake && !fixed && v.idle !== 'none' ? idleOffset(v.idle, sprite.length, idleClock({ egg: skinFor(f), level: v.level, time })) : { x: 0, y: 0 };
+          const bounce = awake && !fixed && state.visit ? visitMotion({ w: sprite[0].length, h: sprite.length, time, calm: state.reduced }) : null;
+          const x = bounce ? bounce.x : Math.floor((LCD.w - sprite[0].length) / 2) + tell.dx + wander.x;
+          const xShown = bounce ? bounce.x : Math.floor((LCD.w - shown[0].length) / 2) + tell.dx + wander.x;
+          const y = bounce ? bounce.y : 20 - sprite.length + tell.dy + wander.y + (awake ? 0 : 1);
           ctx.globalAlpha = tell.shade;
           drawSprite(ctx, shown, xShown, y, state.pose === 'dead' ? DEAD_COLORS : paletteColors(pal));
           ctx.globalAlpha = 1;
