@@ -13,6 +13,7 @@
 | `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
 | `sim/push-sweep.mjs` | Whether the soft push gets a bugged player to a clinic (see Soft push to run) |
 | `sim/clinic-sweep.mjs` | The clinic against no clearing and home clearing, by share of market nodes (see The clinic) |
+| `sim/challenge-sweep.mjs` | The four challenge runs under the 2.0 abilities and ICE tiers: completion by form and level (netrun notes, section 13) |
 | `sim/foresight-sweep.mjs` | What Foresight (Tune street) is worth: uneven per-game skill, pre-rolled node contents, depth and fields (netrun notes, section 12) |
 | `sim/runcost-sweep.mjs` | The egg run costs at the life level: per archetype, lifetimes with `NR2.eggCost` off and on, and what each cost did (`EGG=iron|program|wetware`; netrun notes, section 11) |
 | `sim/egg-anomaly-sweep.mjs` | The egg-flavored anomalies: what each does to a run of its own egg (`EGG=iron|program|wetware`; see the netrun notes, section 10) |

@@ -1115,7 +1115,8 @@ const cacheFate = (run, nodeId) => seededRoll(run.fate, nodeId * 8 + 5, 0);
 // netling, with the switch off, or without `fate`. Nodes already visited and the entry show nothing (they are spent).
 export function foresightView(pet) {
   const run = pet.run;
-  if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done') return {};
+  // Blackout is "you only see one step ahead", with no form sight: Foresight is form sight, so it is dark (a reading to confirm, drafts section 1, ground rule 5).
+  if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done' || run.challenge === 'blackout') return {};
   const level = lvl(pet);
   const depth = NR2.foresight.depth[level] ?? 0;
   const fields = NR2.foresight.fields[level] ?? [];

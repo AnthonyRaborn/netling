@@ -876,3 +876,88 @@ test('Tune street, decided: the elder repairs 3 a move, reads the ICE\'s game tw
   assert.equal(s.stats.integrity, 53);
   reset();
 });
+
+// --- challenges under the 2.0 abilities (drafts, ground rule 5; sim/challenge-sweep.mjs) ---------------------------------------------
+function challengeRun(form, level, challenge, patch = {}, seed = 5) {
+  set({ abilities: true, ...patch });
+  const rng = mulberry32(seed);
+  const s = createScript({ now: 0, rng });
+  s.stage = level === 2 ? 'mainframe' : 'adult';
+  s.form = level === 2 ? `${form}Elder` : form;
+  Object.assign(s.stats, { charge: 90, integrity: 50, heat: 30 });
+  startRun(s, 'deep', rng, [], [], { challenge });
+  return { s, rng };
+}
+const goTo = (s, type, rng, extra = {}) => {
+  const node = runOptions(s.run)[0];
+  Object.assign(node, { type }, extra);
+  return moveTo(s, node.id, rng);
+};
+
+test('Unplugged: the elder relay patches (Breach corp, Tune corp) are dark; Tune street\'s repair per move is not a relay and keeps working', () => {
+  for (const form of ['breachCorp', 'tuneCorp']) {
+    const lit = challengeRun(form, 2, null);
+    goTo(lit.s, 'relay', lit.rng);
+    assert.ok(lit.s.stats.integrity > 50, `${form}: the patch works on a lit relay`);
+    const dark = challengeRun(form, 2, 'unplugged');
+    goTo(dark.s, 'relay', dark.rng);
+    assert.equal(dark.s.stats.integrity, 50, `${form}: no patch on a dark relay`);
+    assert.ok(lit.s.stats.charge > dark.s.stats.charge, `${form}: and no recharge on a dark relay`);
+  }
+  const street = challengeRun('tuneStreet', 2, 'unplugged');
+  goTo(street.s, 'cache', street.rng);
+  assert.equal(street.s.stats.integrity, 53, 'the per-move repair (3) is not a relay');
+  reset();
+});
+
+test('Glass: an elder Breach street\'s soft first loss counts as lost, and so does a loss that Breach corp\'s insurance survives', () => {
+  const soft = challengeRun('breachStreet', 2, 'glass');
+  goTo(soft.s, 'ice', soft.rng);
+  resolveIce(soft.s, false, () => 0);
+  assert.equal(soft.s.run.challengeVoid, true, 'the soft loss voids Glass');
+  const ins = challengeRun('breachCorp', 1, 'glass');
+  ins.s.stats.integrity = 5;
+  goTo(ins.s, 'ice', ins.rng);
+  resolveIce(ins.s, false, () => 0);
+  assert.equal(ins.s.run.challengeVoid, true, 'a blow the insurance pays off is still a lost fight');
+  assert.equal(ins.s.run.phase === 'done' && ins.s.run.result === 'disconnected', false, 'and it survives');
+  const slip = challengeRun('dodgeCorp', 1, 'glass');
+  goTo(slip.s, 'ice', slip.rng);
+  assert.equal(slip.s.run.challengeVoid, false, 'slipping past an ICE is not losing a fight');
+  reset();
+});
+
+test('Blackout: no form sight at all: Tune corp, the hidden forms and Foresight see only the next step, and Foresight reads nothing', () => {
+  const extra = { fate: true, foresight: { on: true } };
+  for (const [form, level] of [['tuneCorp', 2], ['hidden', 1], ['tuneStreet', 2]]) {
+    const { s } = challengeRun(form, level, 'blackout', extra);
+    const run = s.run;
+    const expected = new Set([...run.visited, ...nodeById(run.map, run.pos).edges]);
+    assert.deepEqual([...visibleNodeIds(s)].sort(), [...expected].sort(), `${form}: only where it has been and one step ahead`);
+  }
+  const { s } = challengeRun('tuneStreet', 2, 'blackout', extra);
+  assert.deepEqual(foresightView(s), {}, 'Foresight is dark under Blackout');
+  const free = challengeRun('tuneStreet', 2, null, extra);
+  assert.ok(Object.keys(foresightView(free.s)).length > 0, 'and not otherwise');
+  reset();
+});
+
+test('Bare metal: buying an item breaks it, and a clinic fix, a cache, an ICE win and a found item do not', () => {
+  const buy = challengeRun('feastCorp', 2, 'baremetal');
+  buy.s.scrip = 100;
+  goTo(buy.s, 'market', buy.rng, { flavor: 'corp' });
+  choose(buy.s, 'buy0', buy.rng);
+  assert.equal(buy.s.run.challengeVoid, true, 'an item bought at the exchange');
+  const fix = challengeRun('breachCorp', 1, 'baremetal');
+  fix.s.scrip = 100;
+  fix.s.bugs = 1;
+  goTo(fix.s, 'market', fix.rng, { flavor: 'clinic' });
+  choose(fix.s, 'fixscrip', fix.rng);
+  assert.equal(fix.s.bugs, 0, 'the bug is fixed');
+  assert.equal(fix.s.run.challengeVoid, false, 'a fix is a service, not an item');
+  const found = challengeRun('feastStreet', 2, 'baremetal');
+  goTo(found.s, 'cache', found.rng, { filled: true });
+  assert.equal(found.s.run.challengeVoid, false, 'a found item is fine');
+  assert.ok(found.s.run.loot.length > 0);
+  reset();
+});

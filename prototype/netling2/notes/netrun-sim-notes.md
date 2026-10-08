@@ -312,3 +312,32 @@ Depth 1 at the elder with repair 6: Deep 99 / 101 at spread 0, 108 / 105 at 0.2,
 
 **Decided (maintainer): elder depth 2, repair 3.** `NR2.ab.upkeep.tuneStreet[2]` is now 3 (was 6), `NR2.foresight` keeps depth 1 and 2 with the game only, and `NR2=all` now also switches `fate` and Foresight on (a test checks it). Tables made earlier with the elder's repair at 6 (the parity read-out in section 3 and the Tune lines in sections 6 to 9) are not re-run: the Tune street elder is lower blind by the amount in the repair table above (99% to 75% of the mean in the Deep, careful, spread 0).
 
+## 13. Challenges under the 2.0 abilities
+
+Built: `sim/challenge-sweep.mjs` (`node prototype/netling2/sim/challenge-sweep.mjs [runs] [regions] [styles] [challenges]`; `SPREAD` for the bots' per-game skill, default 0.2; abilities, ICE tiers and Foresight on unless `NR2` is set), Foresight dark under Blackout in `foresightView`, and 4 tests in `nr2.test.js` (one per challenge rule against the abilities that touch it). Completion is reaching the exit with the rule kept; under a challenge the bot never banks at a relay and, for Bare metal, never buys an item (`netrun-bot.mjs`). 2000 runs a cell.
+
+**What each rule does to the 2.0 parts (checked in code and by test).**
+- **Glass:** every lost ICE fight breaks it, so Breach street's softened first loss counts as lost and Breach corp's insurance saves the netling but not the challenge. Dodge corp's phase, Dodge street's unseen and the hidden forms' slips are not losses, so they help most. Tier-2 ICE makes it harder (below).
+- **Unplugged:** relays are dark, so the elder relay patches (Breach corp, Tune corp) do nothing and no relay recharges. Tune street's repair per move is not a relay and keeps working.
+- **Blackout:** only visited nodes and the next step are seen. Tune corp's sight and the hidden forms' full sight go dark, as 1.0's Daemon and Ghost did, and **Foresight is dark too** (my reading of "no form sight"; it reads the next step's contents otherwise, which Blackout says you cannot see beyond the type). Avoidance and the other parts work.
+- **Bare metal:** buying an item breaks it. A clinic fix is a service and does not; a found item (cache, ICE win, anomaly) does not. Feast corp's cheaper exchange is moot because nothing is bought.
+
+**Mean completion of the nine forms, adult / elder** (careful / skilled; 1.0's adult-form bots in brackets, one flat bot with no abilities of this kind):
+| | Deep careful | Deep skilled | Source careful | Source skilled |
+|---|---|---|---|---|
+| Glass | 15.8 / 19.8 (16) | 34.7 / 39.1 (41) | 6.7 / 9.2 (6) | 20.8 / 24.8 (27) |
+| Unplugged | 42.0 / 53.1 (37) | 67.5 / 76.7 (68) | 13.2 / 21.1 (10) | 34.4 / 46.8 (33) |
+| Blackout | 47.4 / 59.3 (45) | 72.7 / 81.1 (73) | 20.5 / 31.5 (19) | 45.8 / 58.9 (48) |
+| Bare metal | 49.0 / 61.5 (45) | 74.2 / 82.6 (73) | 21.8 / 33.7 (19) | 47.9 / 61.2 (48) |
+The 2.0 rates sit where 1.0's did. Every challenge is completable by every form (the lowest cell anywhere is 4.0%, Source careful Glass, Feast street elder).
+
+**Who it favors** (Deep, careful, adult / elder, percent complete):
+- Glass: Dodge corp 24 / 30, Dodge street 24 / 32 and the hidden forms 22 / 38 against Breach 12 / 12, Feast 11 to 12 / 11 to 14 and Tune 13 to 14 / 14 to 16: the skip-ICE forms complete it about 1.8 to 3.5 times as often, as in 1.0 (Glitch, Ghost, Panic, Whisper). Breach's defensive parts do nothing for Glass by rule.
+- Unplugged: Tune corp lowest (34 / 35) against hidden 48 / 66 and Breach street elder 62: the elder patches are the loss.
+- Blackout: Tune corp (36 / 44) and Tune street (36 / 50) lowest, at the level of a netling with no ability (36.5 adult); Breach corp elder highest (76). The forms whose ability is sight lose it.
+- Bare metal: the same shape as Blackout, a little kinder to the Tune forms (40 / 50 and 41 / 58).
+
+**Tier-2 ICE costs every challenge 5 to 12 points** (mean completion adult, tiers on / off, Deep careful: Glass 15.8 / 21.5, Unplugged 42.0 / 49.7, Blackout 47.4 / 55.3, Bare metal 49.0 / 56.9; Source careful: Glass 6.7 / 11.6, Unplugged 13.2 / 20.3, Blackout 20.5 / 29.4, Bare metal 21.8 / 31.0), because the Deep and the Source have the most tier-2 ICE. Glass in the Source with careful play falls to 6.7% (a 42% drop in relative terms).
+
+**Not measured:** the bots plan three steps ahead at most and never use items mid-run, so Blackout and Bare metal read easier than they play for a person (1.0's note); the Foresight spread (0.2) is an assumption; the daily trace and Source-only anomalies under a challenge; a challenge with the egg run costs on (none of these sweeps has them on); and the rewards (cosmetics) are unchanged.
+
