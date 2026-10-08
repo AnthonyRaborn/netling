@@ -175,25 +175,6 @@ The three marks sit in different places (above, below, beside) and have differen
 | Ready again | " · spent" clears, the log line "> it can link again." | the player learns when to try again |
 | Infection from a play | the existing virus alert and the penalty log line | the cost is an infection, shown as one |
 
-## Temper and the states (drafts, first pass)
-
-**Proposal: the states do not move temper and have no temper tell of their own.** Temper is personality (the maintainer: not a cost or a benefit), and the two measurements that tried to move it from these states (a Sync swing, Result 10, and faster decay of steady temper, Result 11) shifted the mean by two points or more and were dropped as a bias. As built, a state reaches temper only indirectly: it takes Flow time away from heavy players and its infections are faults (-1 each), which measured at -0.1 to -0.7 for attentive and sysadmin players with Overdrive and Overlink (Results 14 to 16).
-
-So the work is coexistence. The tell speaks through the body (pose, drift, settle, pulse, idle actions and chatter shape); the states speak through marks beside it. Rules, kept so a player can tell them apart:
-
-1. The marks are always regular: one step per 400 ms on a fixed clock, the same at every temper level and for every egg. Irregularity belongs to the tell alone, so a stuttering body inside steady marks reads as "unsteady netling, in a state", never as a stronger state.
-2. The marks sit outside the body's reach. The new ones are three columns out at the sides (Iron's strongest drift is two) and on rows h+1 and h+2 below the feet (Iron's settle drops the body one row). Overclock's wisps are 1.0's and sit above the top.
-3. Flash budget by region: the pose keeps its own budget (a change at most every 200 ms); the marks change at most every 400 ms, on that same grid. The marks never touch the pose.
-4. State log lines are system lines in the egg's register and are never shaped by the chatter tone (no beats, checklist, bell or burst). Only chatter is shaped.
-5. The Metronome and its twelve-hour clock follow the tell, not the states; a state does not pause or count toward it. Neglect works as in 1.0 (a state's cost is not neglect).
-6. The idle routine and strays stay as drafted; they are body actions and do not collide with the marks.
-
-What a player can read: a steady beat with steady marks (calm and in a state); a drifting or stuttering body with steady marks (unsteady and in a state); no marks (neither). The mix is the only new information, and it comes from existing channels.
-
-Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
-
-Open: whether a Dex or codex hint should mention the states (none drafted); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
-
 **Iron's wear** (Iron only; the other eggs show none):
 
 | Stage | What the player sees |
@@ -214,7 +195,26 @@ Seams do not move, so they carry no flash risk and need no calm version. Titles:
 - a glow (Flow, the sprite note rather than a bar label): "Kept fed, in sync, sound and cool for hours in a row while awake, with nothing wrong, it glows. In flow, traces, intrusions, overflows and surges come less often, visitors drop by more often, and it leans steadier as it grows." Qualitative too (decided, maintainer); 1.0's entry prints the three hours, the 50 and 80 lines and the 60 Heat ceiling.
 - Not printed anywhere: the heat threshold, the hold time, the Charge and Sync lines and the free band's edge (the tick shows it without a number).
 
-Open: the colors of the sparks and dots (the palette's accent is taken by Flow's outline, the heat color by the wisps); whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted); a temper tell for the states (none).
+Open: the colors of the sparks and dots (the palette's accent is taken by Flow's outline, the heat color by the wisps); whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted).
+
+## Temper and the states (drafts, first pass)
+
+**Proposal: the states do not move temper and have no temper tell of their own.** Temper is personality (the maintainer: not a cost or a benefit), and the two measurements that tried to move it from these states (a Sync swing, Result 10, and faster decay of steady temper, Result 11) shifted the mean by two points or more and were dropped as a bias. As built, a state reaches temper only indirectly: it takes Flow time away from heavy players and its infections are faults (-1 each), which measured at -0.1 to -0.7 for attentive and sysadmin players with Overdrive and Overlink (Results 14 to 16).
+
+So the work is coexistence. The tell speaks through the body (pose, drift, settle, pulse, idle actions and chatter shape); the states speak through marks beside it. Rules, kept so a player can tell them apart:
+
+1. The marks are always regular: one step per 400 ms on a fixed clock, the same at every temper level and for every egg. Irregularity belongs to the tell alone, so a stuttering body inside steady marks reads as "unsteady netling, in a state", never as a stronger state.
+2. The marks sit outside the body's reach. The new ones are three columns out at the sides (Iron's strongest drift is two) and on rows h+1 and h+2 below the feet (Iron's settle drops the body one row). Overclock's wisps are 1.0's and sit above the top.
+3. Flash budget by region: the pose keeps its own budget (a change at most every 200 ms); the marks change at most every 400 ms, on that same grid. The marks never touch the pose.
+4. State log lines are system lines in the egg's register and are never shaped by the chatter tone (no beats, checklist, bell or burst). Only chatter is shaped.
+5. The Metronome and its twelve-hour clock follow the tell, not the states; a state does not pause or count toward it. Neglect works as in 1.0 (a state's cost is not neglect).
+6. The idle routine and strays stay as drafted; they are body actions and do not collide with the marks.
+
+What a player can read: a steady beat with steady marks (calm and in a state); a drifting or stuttering body with steady marks (unsteady and in a state); no marks (neither). The mix is the only new information, and it comes from existing channels.
+
+Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
+
+Open: whether a Dex or codex hint should mention the states (none drafted); whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
 ## Clinic and bug statements (drafts, first pass)
 
