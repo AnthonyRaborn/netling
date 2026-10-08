@@ -270,3 +270,13 @@ Base benefit strengths x3 (Charge held: play Sync 0.45, drops 0.75; Sync held: v
 - Daredevil drops 19.7 / 17.8 / 15.3; temper -5.8 / -5.1 / -4.2; infections 9.4 / 9.65 / 9.6. Overclocker drops 16.9 / 17.6 / 14.2, infections 12.2 / 12.0 / 12.1.
 - Attentive and sysadmin never reach Heat 65 (0.6% of time): unchanged. Casual, worker, human-regular: within noise (casual full-life 0.93 / 0.89 / 0.905 is the largest move).
 - Read: the daredevil and overclocker bots sit at Heat 65+ about half the time, so a hold barely filters them; it removes benefit and some temper cost but not the wear cost (wear follows Heat). Keep Overclock plain. Not unit-tested.
+
+## Result 18: Sync play penalty, greedy and budgeting players
+
+Penalty: a play while Sync is at 85+ risks an infection (`SIDES.sync.penLine` 85, `penP` 0.05 x owner multiplier, `penDmg` 4). Bots: `SYNCBOT=greedy` plays until Sync is full; `SYNCBOT=budget` never plays at or over the line; the default bot plays to 80 (90 for gamers). Config as Result 16 (tripled benefits, G costs, x3 owner). G0 = greedy, no penalty; G1 = greedy with penalty; B1 = budget with penalty. 200 lives per cell. Not unit-tested.
+
+- A greedy player holds the states far more than the default bot: Wired 37-41% (attentive) and 55-58% (sysadmin) of awake time against 6-12%; Surge likewise. Win drops attentive 21 (off, greedy) -> 39 Wetware (G0), sysadmin 22 -> 47. The benefits were sized for the 12% case.
+- G1 penalty: Wetware infections attentive 8.9 -> 11.7, sysadmin 9.3 -> 12.7 (off 7.5, 7.8), about 4.2 penalty hits a life; drops unchanged (38, 47). Greedy Wetware still nets about +80% drops for +4 infections. Program / Iron about +1.3 infections.
+- G1 also hits archetypes that never enter a state when they play past 85 (pen hits 0.3 to 1.9 a life): Wetware casual infections 7.4 -> 8.5, worker full-life 0.795 -> 0.715, human-regular full-life 0.29 -> 0.255.
+- B1: the penalty is avoidable; hits 0.0 to 0.1 a life, every archetype within noise of the Result 16 numbers. A budgeter plays about 40% fewer games (71 against 117).
+- Read: the penalty is a real choice but too small against the benefit, and it should be tied to the state, not the Sync line.
