@@ -1,0 +1,13 @@
+2026-10-08T16:10:44.448Z start balance-core
+2026-10-08T16:10:44.454Z start balance-full-iron
+2026-10-08T16:10:44.457Z start balance-full-program
+2026-10-08T16:10:44.468Z start balance-full-wetware
+2026-10-08T16:23:00.257Z done balance-core [core] 736s
+2026-10-08T16:23:00.258Z start lineage-attentive
+2026-10-08T17:18:24.437Z all 0 jobs finished
+2026-10-08T17:18:24.516Z start balance-full-iron
+2026-10-08T17:18:24.528Z start balance-full-program
+2026-10-08T17:18:24.538Z start balance-full-wetware
+2026-10-08T17:18:24.544Z start lineage-attentive
+2026-10-08T17:21:17.787Z done lineage-attentive [rules] 173s
+2026-10-08T17:21:17.788Z start lineage-daredevil
