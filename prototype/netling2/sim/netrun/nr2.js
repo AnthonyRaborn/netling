@@ -17,8 +17,8 @@ export const NR2 = {
   // The egg-flavored anomalies (decided as a go; options and numbers are mine): netrun/egg-anomalies.js. Not part of NR2=all yet.
   eggAnomalies: false,
   eggAnomaly: {
-    unwind: { charge: 25, overflowAt: 95, tear: 10 }, // Program: surge, then a tear if the buffer is over this
-    catch: { charge: 8, repair: 10 },
+    run: { charge: 25, overflowAt: 95, tear: 10, loot: 0.5 }, // Program: surge and maybe an item, then a tear if the buffer ends over the line
+    kill: { charge: 8, repair: 10 },
     flash: { charge: 12, cool: 20, wear: 30 }, // Iron
     pry: { heat: 10, loot: 0.6 },
     graft: { sync: 20, reject: 0.3, rejectDamage: 4 }, // Wetware

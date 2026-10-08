@@ -339,14 +339,6 @@ function moveToNode(pet, nodeId, rng) {
       return { ok: true, kind: 'cache', item: null, fragment: Boolean(frag) };
     }
     case 'ice': {
-      // 2.0: a stack overflow's free pass (egg-anomalies.js): the next ICE never fights, whatever its tier.
-      if (run.skipIce > 0) {
-        run.skipIce--;
-        run.tally.icePhased++;
-        markTrail(run, TRAIL.icePhased);
-        note(run, 'the ICE never saw it.');
-        return { ok: true, kind: 'ice', phased: true };
-      }
       // 2.0: a harder tier of ICE, mixed in by region depth. The daily trace rolls it by node alone (lane 4, beside the four in daily.js).
       const tier = rollTier(run, nodeId, rng);
       const am = avoidMult(tier, lvl(pet));
@@ -758,7 +750,7 @@ function chooseOption(pet, optionId, rng) {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
     const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
-    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run, pet), infect: (d) => infect(pet, d), skipIce: (n) => (run.skipIce = (run.skipIce ?? 0) + n) });
+    msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run, pet), infect: (d) => infect(pet, d) });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
     st.sync = clamp(st.sync);

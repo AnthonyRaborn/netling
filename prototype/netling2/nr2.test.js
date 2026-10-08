@@ -584,34 +584,34 @@ function pick(egg, optionId, stats = {}, rngValue = 0.5) {
   return { s, before, r };
 }
 
-test('stack overflow: UNWIND surges Charge and gives the next ICE a free pass whatever its tier; over the line it tears', () => {
-  set({ eggAnomalies: true, tiers: true, tier: { share: { public: 1 } } });
+test('stack overflow: LET IT RUN surges Charge and may find an item; if Charge ends over the line the stack tears; there is no free pass', () => {
+  set({ eggAnomalies: true });
   asEgg('program', () => {
-    const clean = pick('program', 'unwind', { charge: 50, integrity: 80 });
+    const clean = pick('program', 'run', { charge: 50, integrity: 80 }, 0.1);
     assert.equal(clean.s.stats.charge, 75);
     assert.equal(clean.s.stats.integrity, 80, 'no tear under the line');
-    assert.equal(clean.s.run.skipIce, 1);
-    const tear = pick('program', 'unwind', { charge: 80, integrity: 80 });
+    assert.equal(clean.s.run.loot.length, 1, 'a roll under 0.5 finds an item');
+    assert.equal(clean.s.run.skipIce, undefined, 'no ICE skip');
+    const tear = pick('program', 'run', { charge: 80, integrity: 80 }, 0.9);
     assert.equal(tear.s.stats.charge, 100);
-    assert.equal(tear.s.stats.integrity, 70, 'over 95 the buffer overflows: -10');
-    // The pass is used by the next ICE and then gone.
+    assert.equal(tear.s.stats.integrity, 70, 'over 95 the stack overflows: -10');
+    assert.equal(tear.s.run.loot.length, 0);
+    // The next ICE is an ordinary fight, whatever happened here.
+    set({ eggAnomalies: true, tiers: true, tier: { share: { public: 1 } } });
     const ice = runOptions(clean.s.run)[0];
     ice.type = 'ice';
-    const moved = moveTo(clean.s, ice.id, stub(0.5));
-    assert.equal(moved.phased, true, 'tier 2 ICE never saw it');
-    assert.equal(clean.s.run.skipIce, 0);
-    assert.equal(clean.s.run.phase, 'map', 'no fight began');
+    assert.equal(moveTo(clean.s, ice.id, stub(0.5)).phased, undefined);
+    assert.equal(clean.s.run.phase, 'ice');
   });
   reset();
 });
 
-test('stack overflow: CATCH IT costs Charge and repairs Integrity (capped at 100)', () => {
+test('stack overflow: KILL IT costs Charge and repairs Integrity (capped at 100)', () => {
   set({ eggAnomalies: true });
   asEgg('program', () => {
-    const a = pick('program', 'catch', { charge: 60, integrity: 70 });
+    const a = pick('program', 'kill', { charge: 60, integrity: 70 });
     assert.deepEqual([a.s.stats.charge, a.s.stats.integrity], [52, 80]);
-    assert.equal(pick('program', 'catch', { integrity: 95 }).s.stats.integrity, 100);
-    assert.equal(a.s.run.skipIce ?? 0, 0);
+    assert.equal(pick('program', 'kill', { integrity: 95 }).s.stats.integrity, 100);
   });
   reset();
 });
@@ -674,7 +674,7 @@ test('egg anomalies: every option is deterministic for a seed', () => {
 
 test('egg anomalies: each option leans, through the same adapter as 1.0\'s (allegiance becomes Standing, stability is temper)', () => {
   set({ eggAnomalies: true });
-  const leans = { unwind: [0, -1], catch: [0, 1], flash: [1, 0], pry: [-1, 0], graft: [0, -1], sample: [0, 1] };
+  const leans = { run: [0, -1], kill: [0, 1], flash: [1, 0], pry: [-1, 0], graft: [0, -1], sample: [0, 1] };
   for (const [egg, def] of Object.entries(EGG_ANOMALIES)) {
     for (const o of def.options) {
       asEgg(egg, () => {

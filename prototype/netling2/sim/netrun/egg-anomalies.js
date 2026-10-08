@@ -3,7 +3,7 @@
 // leaning Standing or temper through c.lean) that turns up only for netlings of its own egg, in any region but the Source, the daily
 // trace and the tutorial. Switch on with NR2='{"eggAnomalies":true}'. Pure: no imports.
 //
-// ctx is 1.0's (pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone) plus `infect(damage)` and `skipIce(n)` from run.js.
+// ctx is 1.0's (pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone) plus `infect(damage)` from run.js.
 // lean(allegiance, stability): allegiance 1 is corp and -1 street (Standing), stability 1 orderly and -1 entropy (temper).
 // Starting values (NR2.eggAnomaly): see nr2.js.
 import { NR2 } from './nr2.js';
@@ -17,29 +17,29 @@ export const EGG_ANOMALIES = {
     text: 'a call that never returns. the frames pile up, each a copy of the last.',
     options: [
       {
-        id: 'unwind',
-        label: 'UNWIND',
-        hint: 'charge surges, skips the next ICE, may tear',
-        // Overdrive-flavored: the surge is free until the buffer is full, then the unwinding tears something (overflow).
+        id: 'run',
+        label: 'LET IT RUN',
+        hint: 'charge surges, a stray item, may overflow',
+        // Overdrive-flavored: the surge is free until the buffer is full, then the stack overflows and tears something.
         apply: (c) => {
-          const a = A().unwind;
+          const a = A().run;
           c.pet.stats.charge += a.charge;
-          c.skipIce(1);
           c.lean(0, -1);
-          if (c.pet.stats.charge > a.overflowAt) return c.hurt(a.tear, 'unwound it, and the buffer overflowed on the way out. the next ICE will not see it.');
-          return 'unwound it clean. the next ICE will not see it.';
+          const found = c.rng() < a.loot ? ` ${c.loot()}` : '';
+          if (c.pet.stats.charge > a.overflowAt) return `${c.hurt(a.tear, 'the stack overflowed and tore on the way out.')}${found}`;
+          return `it ran itself out. charge surging.${found}`;
         },
       },
       {
-        id: 'catch',
-        label: 'CATCH IT',
+        id: 'kill',
+        label: 'KILL IT',
         hint: 'costs charge, repairs, order',
         apply: (c) => {
-          const a = A().catch;
+          const a = A().kill;
           c.pet.stats.charge -= a.charge;
           c.pet.stats.integrity = Math.min(100, c.pet.stats.integrity + a.repair);
           c.lean(0, 1);
-          return 'caught it at the top of the stack. the frames came off one by one.';
+          return 'killed the call. the frames came off one by one.';
         },
       },
     ],

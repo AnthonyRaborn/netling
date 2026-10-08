@@ -24,10 +24,10 @@ export const RUN_STYLES = {
 // Anomaly options a player picks when steering; anything not listed is picked at random.
 export const ANOMALY_PREFS = {
   random: [],
-  risky: ['salvage', 'raid', 'use', 'follow', 'listen', 'read', 'unwind', 'pry', 'graft'], // chaos and loot (and reading the purge order); the egg anomalies' loud options
-  orderly: ['repair', 'leave', 'follow', 'listen', 'catch', 'flash', 'sample'],
-  corp: ['repair', 'report', 'leave', 'follow', 'listen', 'flash', 'catch', 'sample'],
-  indie: ['raid', 'repair', 'leave', 'follow', 'listen', 'pry', 'unwind', 'graft'],
+  risky: ['salvage', 'raid', 'use', 'follow', 'listen', 'read', 'run', 'pry', 'graft'], // chaos and loot (and reading the purge order); the egg anomalies' loud options
+  orderly: ['repair', 'leave', 'follow', 'listen', 'kill', 'flash', 'sample'],
+  corp: ['repair', 'report', 'leave', 'follow', 'listen', 'flash', 'kill', 'sample'],
+  indie: ['raid', 'repair', 'leave', 'follow', 'listen', 'pry', 'run', 'graft'],
 };
 
 // The clinic fix a bot picks: scrip if the policy allows it and it has the scrip, else a Standing payment by the policy's split.
