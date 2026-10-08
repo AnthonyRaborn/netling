@@ -14,6 +14,6 @@ for (const [id, f] of Object.entries(wetwareForms())) {
 // The gallery's default form is Chrome, which is not here: start on the baby unless the link names a form.
 const hash = new URLSearchParams(location.hash.slice(1));
 if (!hash.has('form')) {
-  hash.set('form', wetwareKey('baby'));
+  hash.set('form', wetwareKey('wetwareBaby'));
   history.replaceState(null, '', `#${hash}`);
 }

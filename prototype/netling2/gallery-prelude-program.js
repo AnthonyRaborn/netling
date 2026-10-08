@@ -14,6 +14,6 @@ for (const [id, f] of Object.entries(programForms())) {
 // The gallery's default form is Chrome, which is not here: start on Tiger unless the link names a form.
 const hash = new URLSearchParams(location.hash.slice(1));
 if (!hash.has('form')) {
-  hash.set('form', programKey('tiger'));
+  hash.set('form', programKey('programAdultBreachCorp'));
   history.replaceState(null, '', `#${hash}`);
 }

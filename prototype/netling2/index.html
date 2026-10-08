@@ -177,7 +177,7 @@
 
         // Program: the same controls, on its own forms (registered with the wearable code by ready.js).
         const P = programForms();
-        make(document.getElementById('progTeensRow'), 'baby (1.0 Bitling)', P.baby);
+        make(document.getElementById('progTeensRow'), 'programBaby (1.0 Bitling)', P.programBaby);
         for (const id of PROGRAM_TEENS_ALL) make(document.getElementById('progTeensRow'), `${id} (teen, ${PROGRAM_FORMS[id].lean})`, P[id]);
         for (const id of PROGRAM_ADULTS_ALL) {
           const f = PROGRAM_FORMS[id];
@@ -187,7 +187,7 @@
 
         // Wetware: the same controls, on its own forms (registered with the wearable code by ready.js).
         const Wt = wetwareForms();
-        make(document.getElementById('wetTeensRow'), 'baby (organoid)', Wt.baby);
+        make(document.getElementById('wetTeensRow'), 'wetwareBaby (organoid)', Wt.wetwareBaby);
         for (const id of WETWARE_TEENS_ALL) make(document.getElementById('wetTeensRow'), `${id} (teen, ${WETWARE_FORMS[id].lean})`, Wt[id]);
         for (const id of WETWARE_NINE) {
           const f = WETWARE_FORMS[id];
@@ -248,7 +248,7 @@
         const nr = document.getElementById('neglectRow');
         for (const id of LINE) for (const level of [0, 1, 2]) cells.push({ ctx: canvasFor(nr, `${id}, neglect ${level}`, 4), f: B[id], fixed: { neglect: level } });
         const br = document.getElementById('bugRow');
-        for (let n = 0; n <= MAX_BUGS; n++) cells.push({ ctx: canvasFor(br, `gronk, ${n} bug${n === 1 ? '' : 's'}`, 4), f: B.gronk, fixed: { bugs: n } });
+        for (let n = 0; n <= MAX_BUGS; n++) cells.push({ ctx: canvasFor(br, `ironAdultBreachStreet, ${n} bug${n === 1 ? '' : 's'}`, 4), f: B.ironAdultBreachStreet, fixed: { bugs: n } });
 
         // Model A layers: body, role overlay, lean overlay, result.
         const layers = document.getElementById('layers');
@@ -275,7 +275,7 @@
           layers.append(fig);
         };
         layer('teenStreet = teen body + street lean', TEEN_BODY.a, null, TEEN_OVERLAYS.street.a, A.teenStreet.a, 14, 12);
-        layer('gronk = adult body + breach + street lean', ADULT_BODY.a, OVERLAYS.breach.a, LEAN_OVERLAYS.street.a, A.gronk.a, 16, 14);
+        layer('gronk = adult body + breach + street lean', ADULT_BODY.a, OVERLAYS.breach.a, LEAN_OVERLAYS.street.a, A.ironAdultBreachStreet.a, 16, 14);
 
         // Timeline.
         const tl = document.getElementById('timeline');
@@ -312,10 +312,10 @@
         const aB = authoring('B');
         const lA = lineOverlaps('A');
         const lB = lineOverlaps('B');
-        const gap = ['teenStreet', 'gronk'].map(modelGap);
+        const gap = ['ironTeenStreet', 'ironAdultBreachStreet'].map(modelGap);
         const teens = teenOverlaps();
         const elders = elderTable();
-        const rel = [['teenHidden', 'guru'], ['teenStreet', 'guru'], ['teenHidden', 'gronk']];
+        const rel = [['ironTeenHidden', 'ironAdultHidden'], ['ironTeenStreet', 'ironAdultHidden'], ['ironTeenHidden', 'ironAdultBreachStreet']];
         m.innerHTML = `
           <table>
             <tr><th>teen + adult</th><th>model A (composed)</th><th>model B (authored)</th></tr>

@@ -9,10 +9,11 @@
 //           opposite of Program's bright flatline; the dream ends, and the next one starts as a new culture).
 // Marks only: they replace body cells (never the eyes or the outline).
 import { pose, eyeGroups } from './models.js';
+import { idMaps, nameOf } from './form-ids.js';
 import { blankMotion } from './blank-motion.js';
 import { WETWARE_BABY, WETWARE_BABY_ANCHORS, WETWARE_TEENS, WETWARE_TEEN_ANCHORS, WETWARE_ADULTS, WETWARE_ADULT_ANCHORS, WETWARE_ELDERS, WETWARE_ELDER_ANCHORS } from './wetware-art.js';
 
-export const WETWARE_FORMS = {
+const OLD_FORMS = {
   baby: { stage: 'baby' },
   teenCorp: { stage: 'teen', lean: 'corp' },
   teenStreet: { stage: 'teen', lean: 'street' },
@@ -29,13 +30,22 @@ export const WETWARE_FORMS = {
   blank: { stage: 'adult', role: 'hidden' }, // the hidden adult, Blank's line
 };
 // One elder per adult, each a variant of the adult it grows from (Wired's is 1.0's Plat).
-for (const id of ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech', 'blank']) WETWARE_FORMS[`${id}Elder`] = { stage: 'elder', from: id };
-export const WETWARE_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
-export const WETWARE_HIDDEN_BRANCH = ['baby', 'teenHidden', 'blank'];
-export const WETWARE_ADULTS_ALL = ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech'];
+for (const id of ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech', 'blank']) OLD_FORMS[`${id}Elder`] = { stage: 'elder', from: id };
+const OLD_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
+const OLD_HIDDEN_BRANCH = ['baby', 'teenHidden', 'blank'];
+const OLD_ADULTS_ALL = ['razor', 'solo', 'wired', 'chipped', 'mentat', 'gibson', 'nutri', 'leech'];
 // The eight role forms plus the hidden adult (option C: nine adults an egg).
-export const WETWARE_NINE = [...WETWARE_ADULTS_ALL, 'blank'];
-export const WETWARE_ELDER_OF = (adult) => `${adult}Elder`;
+const OLD_NINE = [...OLD_ADULTS_ALL, 'blank'];
+
+const IDS = idMaps('wetware', OLD_FORMS);
+const N = IDS.toNew;
+const newEntry = (old, f) => ({ ...f, ...(f.stage === 'elder' ? { from: N[f.from] } : {}), id: N[old], art: old, name: nameOf(N[old]) });
+export const WETWARE_FORMS = Object.fromEntries(Object.entries(OLD_FORMS).map(([old, f]) => [N[old], newEntry(old, f)]));
+export const WETWARE_TEENS_ALL = OLD_TEENS_ALL.map((x) => N[x]);
+export const WETWARE_HIDDEN_BRANCH = OLD_HIDDEN_BRANCH.map((x) => N[x]);
+export const WETWARE_ADULTS_ALL = OLD_ADULTS_ALL.map((x) => N[x]);
+export const WETWARE_NINE = OLD_NINE.map((x) => N[x]);
+export const WETWARE_ELDER_OF = (adult) => N[`${IDS.toOld[adult]}Elder`];
 
 const FRAMES = { baby: WETWARE_BABY, ...WETWARE_TEENS, ...WETWARE_ADULTS, ...WETWARE_ELDERS };
 const ANCHORS = { baby: WETWARE_BABY_ANCHORS, ...WETWARE_TEEN_ANCHORS, ...WETWARE_ADULT_ANCHORS, ...WETWARE_ELDER_ANCHORS };
@@ -100,14 +110,18 @@ function chippedPose(a, anchors, kind, cols) {
 }
 // Blank's eyes sit in a dark face opening, so when they close or cross they go back into the dark ('x'), as the Shell's do in Program.
 const FILLS = { blank: 'x', blankElder: 'x' };
-export const wetwarePose = (a, anchors, kind, id) => wetwareMarks(LENS[id] ? chippedPose(a, anchors, kind, LENS[id]) : VISORS[id] && kind === 'dead' ? wiredDead(a, id) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow, FILLS[id] ?? '#') : pose(a, anchors.eyeRow, kind, FILLS[id] ?? '#'), anchors, kind, id === 'leechElder');
+export const wetwarePose = (a, anchors, kind, newOrOldId) => {
+  const id = IDS.toOld[newOrOldId] ?? newOrOldId;
+  return wetwarePoseOld(a, anchors, kind, id);
+};
+const wetwarePoseOld = (a, anchors, kind, id) => wetwareMarks(LENS[id] ? chippedPose(a, anchors, kind, LENS[id]) : VISORS[id] && kind === 'dead' ? wiredDead(a, id) : kind === 'dead' ? wetwareDead(a, anchors.eyeRow, FILLS[id] ?? '#') : pose(a, anchors.eyeRow, kind, FILLS[id] ?? '#'), anchors, kind, id === 'leechElder');
 
 function build(id) {
   const frames = FRAMES[id];
   const a = { ...ANCHORS[id] };
   return {
     id,
-    ...WETWARE_FORMS[id],
+    ...OLD_FORMS[id],
     a: frames.a,
     b: frames.b,
     sleep: wetwarePose(frames.a, a, 'sleep', id),
@@ -119,4 +133,4 @@ function build(id) {
 }
 let cache;
 // Memoized: src/accessories.js keys its anchor table on array identity (register.js).
-export const wetwareForms = () => (cache ??= Object.fromEntries(Object.keys(WETWARE_FORMS).map((id) => [id, build(id)])));
+export const wetwareForms = () => (cache ??= Object.fromEntries(Object.keys(OLD_FORMS).map((old) => [N[old], { ...build(old), ...newEntry(old, OLD_FORMS[old]) }])));

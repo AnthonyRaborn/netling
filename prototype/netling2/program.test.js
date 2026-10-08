@@ -14,17 +14,17 @@ const forms = Object.values(set);
 const key = (f, pose) => `${programKey(f.id)}${pose === 'a' ? 'A' : pose === 'b' ? 'B' : pose === 'sleep' ? 'Sleep' : 'Dead'}`;
 
 test('Program has a baby, three teens (corp, street, hidden), nine adults and nine elders, in the egg\'s own table', () => {
-  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => ['baby', 'teen'].includes(PROGRAM_FORMS[id].stage)), ['baby', 'teenCorp', 'teenStreet', 'teenHidden']);
+  assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => ['baby', 'teen'].includes(PROGRAM_FORMS[id].stage)), ['programBaby', 'programTeenCorp', 'programTeenStreet', 'programTeenHidden']);
   assert.deepEqual(Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'adult'), PROGRAM_ADULTS_ALL);
-  assert.deepEqual(PROGRAM_HIDDEN_BRANCH, ['baby', 'teenHidden', 'ghost']);
+  assert.deepEqual(PROGRAM_HIDDEN_BRANCH, ['programBaby', 'programTeenHidden', 'programAdultHidden']);
   assert.deepEqual(PROGRAM_TEENS_ALL.map((id) => PROGRAM_FORMS[id].lean), ['corp', 'street', 'hidden']);
 });
 
 test('the reused forms are 1.0\'s art: the A frame of Bitling, Kernel and Shell, unchanged', () => {
-  assert.deepEqual(set.baby.a, SPRITES.bitlingA);
-  assert.deepEqual(set.teenCorp.a, SPRITES.kernelA);
-  assert.deepEqual(set.teenHidden.a, SPRITES.shellA);
-  assert.deepEqual(set.ghost.a, SPRITES.ghostA);
+  assert.deepEqual(set.programBaby.a, SPRITES.bitlingA);
+  assert.deepEqual(set.programTeenCorp.a, SPRITES.kernelA);
+  assert.deepEqual(set.programTeenHidden.a, SPRITES.shellA);
+  assert.deepEqual(set.programAdultHidden.a, SPRITES.ghostA);
 });
 
 test('every sprite is rectangular, the stage\'s width, 9 to 15 rows, with known marks', () => {
@@ -33,7 +33,7 @@ test('every sprite is rectangular, the stage\'s width, 9 to 15 rows, with known 
       const rows = f[pose];
       assert.ok(rows.length >= 9 && rows.length <= 15, `${f.id}/${pose}: ${rows.length} rows`);
       assert.equal(new Set(rows.map((r) => r.length)).size, 1, `${f.id}/${pose}: ragged`);
-      assert.equal(rows[0].length, f.id === 'ghostElder' ? 14 : WIDTH[f.stage], `${f.id}/${pose}: width`); // the hidden elder keeps 1.0's size
+      assert.equal(rows[0].length, f.id === 'programElderHidden' ? 14 : WIDTH[f.stage], `${f.id}/${pose}: width`); // the hidden elder keeps 1.0's size
       assert.match(rows.join(''), /^[.#o+x]+$/, `${f.id}/${pose}: marks`);
       assert.equal(rows.length, f.a.length, `${f.id}/${pose}: same height as A`);
     }
@@ -86,27 +86,27 @@ test('the asleep and dead poses keep the awake outline; the eyes are the 1.0 sli
 
 test('the two main teens differ only slightly; the hidden-path teen stands clear of both by outline', () => {
   const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
-  const mains = iou('teenCorp', 'teenStreet');
-  const toCorp = iou('teenHidden', 'teenCorp');
-  const toStreet = iou('teenHidden', 'teenStreet');
+  const mains = iou('programTeenCorp', 'programTeenStreet');
+  const toCorp = iou('programTeenHidden', 'programTeenCorp');
+  const toStreet = iou('programTeenHidden', 'programTeenStreet');
   console.log(`  Program teen overlaps: corp/street ${mains.toFixed(2)}, hidden/corp ${toCorp.toFixed(2)}, hidden/street ${toStreet.toFixed(2)}`);
   assert.ok(mains >= 0.7 && mains <= 0.82, 'the main teens are close, and inside 1.0\'s 0.82 bar for a same-stage pair');
   assert.ok(toCorp < mains - 0.1 && toStreet < mains - 0.1 && toCorp < 0.72 && toStreet < 0.72, 'the hidden teen is more distinct than the main pair by 0.1');
-  assert.ok(poseDistance(set.teenHidden.a, set.teenStreet.a) >= 20 && poseDistance(set.teenHidden.a, set.teenCorp.a) >= 20, 'by outline cells, not marks');
-  assert.ok(poseDistance(set.teenCorp.a, set.teenStreet.a) >= 4 && poseDistance(set.teenCorp.a, set.teenStreet.a) < 25);
-  assert.ok(markDistance(set.teenCorp.a, set.teenStreet.a) > 0, 'the street lean also shows in a mark');
+  assert.ok(poseDistance(set.programTeenHidden.a, set.programTeenStreet.a) >= 20 && poseDistance(set.programTeenHidden.a, set.programTeenCorp.a) >= 20, 'by outline cells, not marks');
+  assert.ok(poseDistance(set.programTeenCorp.a, set.programTeenStreet.a) >= 4 && poseDistance(set.programTeenCorp.a, set.programTeenStreet.a) < 25);
+  assert.ok(markDistance(set.programTeenCorp.a, set.programTeenStreet.a) > 0, 'the street lean also shows in a mark');
 });
 
 test('the baby reads as the start of the line: closest to the corp and street teens, further from the hidden one', () => {
-  const iou = (id) => silhouetteIou(set.baby.a, set[id].a);
-  assert.ok(iou('teenCorp') < 0.82 && iou('teenStreet') < 0.82 && iou('teenHidden') < 0.82, 'the stages are distinct');
+  const iou = (id) => silhouetteIou(set.programBaby.a, set[id].a);
+  assert.ok(iou('programTeenCorp') < 0.82 && iou('programTeenStreet') < 0.82 && iou('programTeenHidden') < 0.82, 'the stages are distinct');
 });
 
 test('the hidden-path teen is the Shell: a hollow casing with a void inside, its eyes in the void', () => {
-  assert.ok(set.teenHidden.a.join('').includes('x'));
-  assert.ok(!set.teenCorp.a.join('').includes('x') && !set.baby.a.join('').includes('x'));
-  assert.ok(!set.teenHidden.sleep[set.teenHidden.anchors.a.eyeRow].includes('o'), 'asleep: the eye row is shut');
-  assert.ok(!set.teenHidden.dead.join('').includes('+'), 'dead: the Shell has no mouth');
+  assert.ok(set.programTeenHidden.a.join('').includes('x'));
+  assert.ok(!set.programTeenCorp.a.join('').includes('x') && !set.programBaby.a.join('').includes('x'));
+  assert.ok(!set.programTeenHidden.sleep[set.programTeenHidden.anchors.a.eyeRow].includes('o'), 'asleep: the eye row is shut');
+  assert.ok(!set.programTeenHidden.dead.join('').includes('+'), 'dead: the Shell has no mouth');
 });
 
 test('the wearable code sees every Program form\'s authored anchors, and the real head width', async () => {
@@ -198,7 +198,7 @@ test('the nine adults are distinct from one another: no pair overlaps more than 
 
 test('the two forms of a role are not look-alikes, and a hidden-path adult stands apart from the role forms', () => {
   const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
-  for (const [corp, street] of [['tiger', 'worm'], ['mouse', 'spoof'], ['parse', 'phreak'], ['gobble', 'snarf']]) {
+  for (const [corp, street] of [['programAdultBreachCorp', 'programAdultBreachStreet'], ['programAdultDodgeCorp', 'programAdultDodgeStreet'], ['programAdultTuneCorp', 'programAdultTuneStreet'], ['programAdultFeastCorp', 'programAdultFeastStreet']]) {
     assert.ok(iou(corp, street) < 0.8, `${corp}/${street}: ${iou(corp, street).toFixed(2)}`);
     assert.ok(poseDistance(set[corp].a, set[street].a) >= 20, `${corp}/${street}: outline`);
   }
@@ -206,28 +206,28 @@ test('the two forms of a role are not look-alikes, and a hidden-path adult stand
 
 test('each role form carries its motif: Breach teeth or jaws, Dodge ears or a hood, Tune a bracket or cups, Feast a big mouth', () => {
   const has = (id, re) => re.test(set[id].a.join('\n'));
-  assert.ok(has('tiger', /x.{12}x/) && set.tiger.a[set.tiger.anchors.a.mouthRow].includes('+'), 'Tiger: stripes and fangs');
-  assert.ok(has('worm', /#\+#\+##\+#\+#/), 'Worm: jaws');
-  assert.ok(set.mouse.a[0].replace(/\./g, '').length >= 8, 'Mouse: big ears');
-  assert.ok(set.spoof.a.slice(4, 8).every((r) => r.includes('x')), 'Spoof: half mask');
-  assert.ok(set.parse.a[0].startsWith('#.#') && set.parse.a[0].endsWith('#.#'), 'Parse: bracket antennae');
-  assert.ok(set.phreak.a[5].startsWith('#x#') && set.phreak.a[5].endsWith('#x#'), 'Phreak: headphone cups');
+  assert.ok(has('programAdultBreachCorp', /x.{12}x/) && set.programAdultBreachCorp.a[set.programAdultBreachCorp.anchors.a.mouthRow].includes('+'), 'Tiger: stripes and fangs');
+  assert.ok(has('programAdultBreachStreet', /#\+#\+##\+#\+#/), 'Worm: jaws');
+  assert.ok(set.programAdultDodgeCorp.a[0].replace(/\./g, '').length >= 8, 'Mouse: big ears');
+  assert.ok(set.programAdultDodgeStreet.a.slice(4, 8).every((r) => r.includes('x')), 'Spoof: half mask');
+  assert.ok(set.programAdultTuneCorp.a[0].startsWith('#.#') && set.programAdultTuneCorp.a[0].endsWith('#.#'), 'Parse: bracket antennae');
+  assert.ok(set.programAdultTuneStreet.a[5].startsWith('#x#') && set.programAdultTuneStreet.a[5].endsWith('#x#'), 'Phreak: headphone cups');
   const wide = (id) => set[id].a[set[id].anchors.a.mouthRow].split('+').length - 1;
-  assert.ok(wide('gobble') >= 6 && wide('snarf') >= 8, 'Feast: wide mouths');
-  assert.ok(set.snarf.a.some((r) => r.includes('xxxxxxxx')), 'Snarf: a dark maw');
+  assert.ok(wide('programAdultFeastCorp') >= 6 && wide('programAdultFeastStreet') >= 8, 'Feast: wide mouths');
+  assert.ok(set.programAdultFeastStreet.a.some((r) => r.includes('xxxxxxxx')), 'Snarf: a dark maw');
 });
 
 test('Ghost is the hidden adult the Shell grows into: 1.0\'s eyes, mouth and dome, with a frozen head', () => {
-  assert.equal(set.ghost.anchors.a.eyeRow, 4);
-  assert.deepEqual(set.ghost.a.slice(0, 11), SPRITES.ghostA.slice(0, 11));
-  assert.notDeepEqual(set.ghost.a, SPRITES.ghostB, '1.0\'s own B frame moves the mouth, so it is not used as is');
+  assert.equal(set.programAdultHidden.anchors.a.eyeRow, 4);
+  assert.deepEqual(set.programAdultHidden.a.slice(0, 11), SPRITES.ghostA.slice(0, 11));
+  assert.notDeepEqual(set.programAdultHidden.a, SPRITES.ghostB, '1.0\'s own B frame moves the mouth, so it is not used as is');
 });
 
 // --- elders: one per adult --------------------------------------------------------------------------------------------------------
 test('every adult has exactly one elder; the role forms\' are variants: 18 columns, one row taller (never past 15), the adult\'s marks kept', () => {
   const elders = Object.keys(PROGRAM_FORMS).filter((id) => PROGRAM_FORMS[id].stage === 'elder');
   assert.deepEqual(elders.map((id) => PROGRAM_FORMS[id].from).sort(), [...PROGRAM_ADULTS_ALL].sort());
-  for (const adult of PROGRAM_ADULTS_ALL.filter((id) => id !== 'ghost')) {
+  for (const adult of PROGRAM_ADULTS_ALL.filter((id) => id !== 'programAdultHidden')) {
     const elder = set[PROGRAM_ELDER_OF(adult)];
     assert.equal(PROGRAM_FORMS[elder.id].from, adult);
     assert.equal(elder.a[0].length, 18, `${elder.id}: width`);
@@ -237,7 +237,7 @@ test('every adult has exactly one elder; the role forms\' are variants: 18 colum
 });
 
 test('each elder is closest, after scaling, to the adult it grows from among all nine adults (the sibling of its role included)', () => {
-  const rows = PROGRAM_ADULTS_ALL.filter((id) => id !== 'ghost').map((adult) => {
+  const rows = PROGRAM_ADULTS_ALL.filter((id) => id !== 'programAdultHidden').map((adult) => {
     const elder = set[PROGRAM_ELDER_OF(adult)].a;
     const ranked = PROGRAM_ADULTS_ALL.map((x) => ({ x, v: scaledOverlap(elder, set[x].a) })).sort((p, q) => q.v - p.v);
     const other = ranked.find((r) => r.x !== adult);
@@ -261,18 +261,18 @@ test('the nine Program elders are distinct from one another (under 1.0\'s 0.82 f
 });
 
 test('Ghost\'s elder is 1.0\'s Whisper (a hidden form keeps 1.0\'s size): smaller than the Ghost, its tail thinning, the head still between frames', () => {
-  const elder = set.ghostElder;
-  assert.equal(PROGRAM_FORMS.ghostElder.from, 'ghost');
+  const elder = set.programElderHidden;
+  assert.equal(PROGRAM_FORMS.programElderHidden.from, 'programAdultHidden');
   assert.deepEqual(elder.a, SPRITES.whisperA);
   assert.equal(elder.a[0].length, 14);
   const cells = (rows) => rows.join('').replace(/\./g, '').length;
-  assert.ok(cells(elder.a) < cells(set.ghost.a), 'smaller than the Ghost');
+  assert.ok(cells(elder.a) < cells(set.programAdultHidden.a), 'smaller than the Ghost');
   assert.deepEqual(elder.b.slice(0, 9), elder.a.slice(0, 9), '1.0\'s B frame moves the mouth; here the head is still');
   assert.ok(elder.a.at(-1).replace(/\./g, '').length < elder.a[10].replace(/\./g, '').length, 'the tail thins');
 });
 
 test('Gobble\'s mouth sits right under its eyes and reads as a mouth: teeth over a dark maw', () => {
-  const g = set.gobble;
+  const g = set.programAdultFeastCorp;
   const { eyeRow, mouthRow } = g.anchors.a;
   assert.equal(mouthRow, eyeRow + 2, 'the mouth is directly under the eyes');
   assert.ok(g.a[mouthRow].split('+').length - 1 >= 8, 'a wide row of teeth');
@@ -280,7 +280,7 @@ test('Gobble\'s mouth sits right under its eyes and reads as a mouth: teeth over
 });
 
 test('Worm\'s body is a plain column with stripes: the same width all the way down, no side bumps', () => {
-  const w = set.worm;
+  const w = set.programAdultBreachStreet;
   const spans = w.a.slice(9, 13).map((r) => [r.indexOf('#') < 0 ? r.indexOf('x') : Math.min(...['#', 'x'].map((c) => r.indexOf(c)).filter((i) => i >= 0)), r.length - Math.max(r.lastIndexOf('#'), r.lastIndexOf('x')) - 1]);
   assert.equal(new Set(spans.map((s) => s.join())).size, 1, 'one width for every body row');
   assert.ok(w.a.slice(9, 13).some((r) => r.includes('xxxxxxxx')), 'stripes');

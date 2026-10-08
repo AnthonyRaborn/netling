@@ -13,6 +13,6 @@ for (const [id, f] of Object.entries(forms('B'))) {
 // The gallery's default form is Chrome, which is not here: start on Gronk unless the link names a form.
 const hash = new URLSearchParams(location.hash.slice(1));
 if (!hash.has('form')) {
-  hash.set('form', protoKey('B', 'gronk'));
+  hash.set('form', protoKey('B', 'ironAdultBreachStreet'));
   history.replaceState(null, '', `#${hash}`);
 }

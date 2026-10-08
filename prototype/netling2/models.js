@@ -7,11 +7,13 @@
 // The main line is four forms, baby to elder: Baby, a street-leaning Teen, Gronk (Breach, street lean) and Gronk's Elder. Beside it
 // are the other main teen and the hidden branch (hidden-path teen and Guru), authored only. The sketch's full tree (3 teens and 9
 // adults per egg) was prototyped earlier and is in git history at commit 580db88.
+import { idMaps, nameOf } from './form-ids.js';
 import { BABY, ELDER, ELDERS, TEEN_BODY, TEEN_OVERLAYS, TEENS, ADULT_BODY, OVERLAYS, LEAN_OVERLAYS, ADULTS, ANCHORS } from './art.js';
 
 // Form id -> what it is, in life order. `authoredOnly` forms exist in model B only: the composed model was rejected, so it is not
 // extended to them.
-export const FORMS = {
+// The authoring table, on the old keys the art tables use; the exports below carry the new ids (form-ids.js).
+const OLD_FORMS = {
   baby: { stage: 'baby' },
   teenStreet: { stage: 'teen', lean: 'street' },
   gronk: { stage: 'adult', role: 'breach', lean: 'street' },
@@ -39,12 +41,21 @@ export const FORMS = {
   guruElder: { stage: 'elder', from: 'guru', authoredOnly: true },
 };
 // Iron's nine adults and their elders, in option C order (corp then street within a role, hidden last).
-export const ADULTS_ALL = ['splat', 'gronk', 'jiff', 'bamf', 'ping', 'feep', 'munch', 'thrash', 'guru'];
-export const ELDER_OF = (adult) => `${adult}Elder`;
+const OLD_ADULTS_ALL = ['splat', 'gronk', 'jiff', 'bamf', 'ping', 'feep', 'munch', 'thrash', 'guru'];
 // The main line, baby to elder, and the hidden branch (baby is shared, then the hidden-path teen and its adult).
-export const LINE = ['baby', 'teenStreet', 'gronk', 'gronkElder'];
-export const HIDDEN_BRANCH = ['baby', 'teenHidden', 'guru'];
-export const TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
+const OLD_LINE = ['baby', 'teenStreet', 'gronk', 'gronkElder'];
+const OLD_HIDDEN_BRANCH = ['baby', 'teenHidden', 'guru'];
+const OLD_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
+
+const IDS = idMaps('iron', OLD_FORMS);
+const N = IDS.toNew;
+const newEntry = (old, f) => ({ ...f, ...(f.stage === 'elder' ? { from: N[f.from] } : {}), id: N[old], art: old, name: nameOf(N[old]) });
+export const FORMS = Object.fromEntries(Object.entries(OLD_FORMS).map(([old, f]) => [N[old], newEntry(old, f)]));
+export const ADULTS_ALL = OLD_ADULTS_ALL.map((x) => N[x]);
+export const ELDER_OF = (adult) => N[`${IDS.toOld[adult]}Elder`];
+export const LINE = OLD_LINE.map((x) => N[x]);
+export const HIDDEN_BRANCH = OLD_HIDDEN_BRANCH.map((x) => N[x]);
+export const TEENS_ALL = OLD_TEENS_ALL.map((x) => N[x]);
 
 // Merge an overlay onto a body: '_' erases, any other non-'.' replaces.
 export function compose(body, overlay) {
@@ -124,11 +135,11 @@ function build(id, frames, anchors, stable = false) {
   const dead = ironMarks(pose(frames.a, anchors.a.eyeRow, 'dead'), anchors.a, 'dead');
   // `stable` (the authored model): the B frame keeps the head, eyes, mouth and neck exactly where A has them and animates only the lower
   // body, so the anchors, and every wearable placed from them, do not move between frames. The composed model squashed the head.
-  return { id, ...FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: stable ? anchors.a : anchors.b, sleep: anchors.a } };
+  return { id, ...OLD_FORMS[id], a: frames.a, b: frames.b, sleep, dead, anchors: { a: anchors.a, b: stable ? anchors.a : anchors.b, sleep: anchors.a } };
 }
 
 function framesA(id) {
-  const { stage, role, lean } = FORMS[id];
+  const { stage, role, lean } = OLD_FORMS[id];
   const both = (body, ...overlays) => Object.fromEntries(['a', 'b'].map((f) => [f, overlays.reduce((rows, o) => compose(rows, o[f]), body[f])]));
   if (stage === 'baby') return BABY;
   if (stage === 'elder') return ELDER;
@@ -136,14 +147,14 @@ function framesA(id) {
   return both(ADULT_BODY, OVERLAYS[role], LEAN_OVERLAYS[lean]);
 }
 function framesB(id) {
-  const { stage } = FORMS[id];
+  const { stage } = OLD_FORMS[id];
   if (stage === 'baby') return BABY;
   if (stage === 'elder') return ELDERS[id];
   return stage === 'teen' ? TEENS[id] : ADULTS[id];
 }
 // Model A's forms share the body's anchors (that is its premise); model B authors each form's own.
 function anchorsA(id) {
-  const { stage } = FORMS[id];
+  const { stage } = OLD_FORMS[id];
   if (stage === 'teen') return ANCHORS.teenBody;
   if (stage === 'adult') return ANCHORS.adultBody;
   // Baby and elder are shared with the authored model, whose B frame no longer moves the head: same anchors in both frames.
@@ -152,6 +163,11 @@ function anchorsA(id) {
 
 const cache = {};
 // Memoized: the same arrays every call, because src/accessories.js keys its anchor table on array identity (register.js).
+function oldForms(model) {
+  return (cache[model] ??= Object.fromEntries(Object.keys(OLD_FORMS).filter((id) => model === 'B' || !OLD_FORMS[id].authoredOnly).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id], model === 'B')])));
+}
+const keyed = {};
+// The same forms under the new ids (and the old key as `art`). Memoized too: the arrays are shared, so identity holds.
 export function forms(model) {
-  return (cache[model] ??= Object.fromEntries(Object.keys(FORMS).filter((id) => model === 'B' || !FORMS[id].authoredOnly).map((id) => [id, build(id, model === 'A' ? framesA(id) : framesB(id), model === 'A' ? anchorsA(id) : ANCHORS[id], model === 'B')])));
+  return (keyed[model] ??= Object.fromEntries(Object.entries(oldForms(model)).map(([old, f]) => [N[old], { ...f, ...newEntry(old, OLD_FORMS[old]) }])));
 }

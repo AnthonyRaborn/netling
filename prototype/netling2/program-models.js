@@ -8,9 +8,10 @@
 // Marks only: they replace body cells (never the eyes or the outline), on the first chest row they fit.
 import { ANCHOR_ROWS } from '../../src/sprites.js';
 import { pose } from './models.js';
+import { idMaps, nameOf } from './form-ids.js';
 import { PROGRAM_BABY, PROGRAM_TEENS, PROGRAM_ADULTS, PROGRAM_ADULT_ANCHORS, PROGRAM_ELDERS, PROGRAM_ELDER_ANCHORS } from './program-art.js';
 
-export const PROGRAM_FORMS = {
+const OLD_FORMS = {
   baby: { stage: 'baby', from: 'bitling' },
   teenCorp: { stage: 'teen', lean: 'corp', from: 'kernel' },
   teenStreet: { stage: 'teen', lean: 'street' },
@@ -27,11 +28,19 @@ export const PROGRAM_FORMS = {
   ghost: { stage: 'adult', role: 'hidden', from: 'ghost' }, // 1.0's hidden adult
 };
 // One elder per adult, each a variant of the adult it grows from.
-for (const id of ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost']) PROGRAM_FORMS[`${id}Elder`] = { stage: 'elder', from: id };
-export const PROGRAM_ELDER_OF = (adult) => `${adult}Elder`;
-export const PROGRAM_ADULTS_ALL = ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost'];
-export const PROGRAM_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
-export const PROGRAM_HIDDEN_BRANCH = ['baby', 'teenHidden', 'ghost'];
+for (const id of ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost']) OLD_FORMS[`${id}Elder`] = { stage: 'elder', from: id };
+const OLD_ADULTS_ALL = ['tiger', 'worm', 'mouse', 'spoof', 'parse', 'phreak', 'gobble', 'snarf', 'ghost'];
+const OLD_TEENS_ALL = ['teenCorp', 'teenStreet', 'teenHidden'];
+const OLD_HIDDEN_BRANCH = ['baby', 'teenHidden', 'ghost'];
+
+const IDS = idMaps('program', OLD_FORMS);
+const N = IDS.toNew;
+const newEntry = (old, f) => ({ ...f, ...(f.stage === 'elder' ? { from: N[f.from] } : {}), id: N[old], art: old, name: nameOf(N[old]) });
+export const PROGRAM_FORMS = Object.fromEntries(Object.entries(OLD_FORMS).map(([old, f]) => [N[old], newEntry(old, f)]));
+export const PROGRAM_ADULTS_ALL = OLD_ADULTS_ALL.map((x) => N[x]);
+export const PROGRAM_ELDER_OF = (adult) => N[`${IDS.toOld[adult]}Elder`];
+export const PROGRAM_TEENS_ALL = OLD_TEENS_ALL.map((x) => N[x]);
+export const PROGRAM_HIDDEN_BRANCH = OLD_HIDDEN_BRANCH.map((x) => N[x]);
 
 const FRAMES = { baby: PROGRAM_BABY, ...PROGRAM_TEENS, ...PROGRAM_ADULTS, ...PROGRAM_ELDERS };
 // 1.0's anchors for the forms reused as they are. Their B anchors equal A's (the head does not move), and sleep takes A's.
@@ -62,7 +71,8 @@ export function programMarks(rows, anchors, kind, fill) {
   throw new Error('no chest row fits the flatline');
 }
 // The Shell is a void ('x') casing: its eyes go back into the void, and when dead its highlight does too (1.0).
-export function programPose(id, a, anchors, kind) {
+export function programPose(newOrOldId, a, anchors, kind) {
+  const id = IDS.toOld[newOrOldId] ?? newOrOldId;
   const fill = id === 'teenHidden' ? 'x' : '#';
   let g = pose(a, anchors.eyeRow, kind, fill);
   if (id === 'teenHidden' && kind === 'dead') g = g.map((r) => r.replace(/\+/g, 'x'));
@@ -74,7 +84,7 @@ function build(id) {
   const a = anchorsOf(id);
   return {
     id,
-    ...PROGRAM_FORMS[id],
+    ...OLD_FORMS[id],
     a: frames.a,
     b: frames.b,
     sleep: programPose(id, frames.a, a, 'sleep'),
@@ -84,4 +94,4 @@ function build(id) {
 }
 let cache;
 // Memoized: src/accessories.js keys its anchor table on array identity (register.js).
-export const programForms = () => (cache ??= Object.fromEntries(Object.keys(PROGRAM_FORMS).map((id) => [id, build(id)])));
+export const programForms = () => (cache ??= Object.fromEntries(Object.keys(OLD_FORMS).map((old) => [N[old], { ...build(old), ...newEntry(old, OLD_FORMS[old]) }])));

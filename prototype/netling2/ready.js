@@ -11,7 +11,7 @@ import { ANCHORS } from './art.js';
 
 register(SPRITES, ANCHOR_ROWS);
 const { anchorsFor } = await import('../../src/accessories.js');
-const probe = anchorsFor(SPRITES[`${protoKey('B', 'guru')}A`]);
+const probe = anchorsFor(SPRITES[`${protoKey('B', 'ironAdultHidden')}A`]);
 if (probe.eyeRow !== ANCHORS.guru.a.eyeRow) {
   throw new Error(`the wearable code is guessing the prototype anchors (Guru eye row ${probe.eyeRow}, authored ${ANCHORS.guru.a.eyeRow}): import prototype/netling2/ready.js before src/sim.js or src/accessories.js`);
 }

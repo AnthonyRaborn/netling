@@ -22,14 +22,14 @@ const everyForm = () => [...Object.values(forms('B')), ...Object.values(programF
 
 // --- the line ---------------------------------------------------------------------------------------------------------------
 test('the main line is four forms in life order; the other main teen and the hidden branch exist in the authored model only', () => {
-  assert.deepEqual(LINE, ['baby', 'teenStreet', 'gronk', 'gronkElder']);
+  assert.deepEqual(LINE, ['ironBaby', 'ironTeenStreet', 'ironAdultBreachStreet', 'ironElderBreachStreet']);
   assert.deepEqual(LINE.map((id) => FORMS[id].stage), ['baby', 'teen', 'adult', 'elder']);
   assert.deepEqual(Object.keys(forms('A')), LINE);
   assert.deepEqual(Object.keys(forms('B')), Object.keys(FORMS));
   assert.equal(Object.keys(FORMS).filter((id) => FORMS[id].stage === 'adult').length, 9);
   assert.equal(Object.keys(FORMS).filter((id) => FORMS[id].stage === 'elder').length, 9, 'one elder per adult');
-  assert.deepEqual(HIDDEN_BRANCH, ['baby', 'teenHidden', 'guru']);
-  assert.deepEqual(TEENS_ALL, ['teenCorp', 'teenStreet', 'teenHidden']);
+  assert.deepEqual(HIDDEN_BRANCH, ['ironBaby', 'ironTeenHidden', 'ironAdultHidden']);
+  assert.deepEqual(TEENS_ALL, ['ironTeenCorp', 'ironTeenStreet', 'ironTeenHidden']);
 });
 
 // --- art ------------------------------------------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ for (const model of MODELS) {
 test('the two models share baby and the elder, and build the teen and Gronk differently', () => {
   const A = forms('A');
   const B = forms('B');
-  for (const id of ['baby', 'gronkElder']) assert.deepEqual(A[id].a, B[id].a);
-  for (const id of ['teenStreet', 'gronk']) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
+  for (const id of ['ironBaby', 'ironElderBreachStreet']) assert.deepEqual(A[id].a, B[id].a);
+  for (const id of ['ironTeenStreet', 'ironAdultBreachStreet']) assert.notDeepEqual(A[id].a, B[id].a, `${id} should differ between models`);
 });
 
 test('compose merges, erases and rejects a mismatched overlay', () => {
@@ -102,46 +102,46 @@ test('every overlay is its body size in both frames, and changes the body', () =
 // --- one elder per adult --------------------------------------------------------------------------------------------------------
 test('the elder is a variant of its adult: wider, no taller than 15 rows, closest in outline to the adult it grows from', () => {
   const set = forms('B');
-  const elder = set.gronkElder;
-  assert.equal(FORMS.gronkElder.from, 'gronk');
-  assert.ok(elder.a[0].length > set.gronk.a[0].length && elder.a.length <= 15);
+  const elder = set.ironElderBreachStreet;
+  assert.equal(FORMS.ironElderBreachStreet.from, 'ironAdultBreachStreet');
+  assert.ok(elder.a[0].length > set.ironAdultBreachStreet.a[0].length && elder.a.length <= 15);
   const overlap = (id) => silhouetteIou(elder.a, set[id].a);
-  console.log(`  elder against gronk ${overlap('gronk').toFixed(2)}, teen ${overlap('teenStreet').toFixed(2)}, baby ${overlap('baby').toFixed(2)}`);
+  console.log(`  elder against gronk ${overlap('ironAdultBreachStreet').toFixed(2)}, teen ${overlap('ironTeenStreet').toFixed(2)}, baby ${overlap('ironBaby').toFixed(2)}`);
   // 1.0's mainframes sit at 0.77 to 0.82 of their adult line, and closer to it than to any other form.
-  assert.ok(overlap('gronk') > overlap('teenStreet') && overlap('gronk') > overlap('baby'));
-  assert.ok(scaledOverlap(elder.a, set.gronk.a) >= 0.75 && overlap('gronk') < 0.9, `${scaledOverlap(elder.a, set.gronk.a).toFixed(2)} scaled, ${overlap('gronk').toFixed(2)} raw`);
+  assert.ok(overlap('ironAdultBreachStreet') > overlap('ironTeenStreet') && overlap('ironAdultBreachStreet') > overlap('ironBaby'));
+  assert.ok(scaledOverlap(elder.a, set.ironAdultBreachStreet.a) >= 0.75 && overlap('ironAdultBreachStreet') < 0.9, `${scaledOverlap(elder.a, set.ironAdultBreachStreet.a).toFixed(2)} scaled, ${overlap('ironAdultBreachStreet').toFixed(2)} raw`);
   // It keeps the adult's marks: the horns on the top row, the toothed jaw and the arms apart from the torso.
   const marks = (rows) => ({ horns: rows[0].includes('#'), teeth: rows.some((r) => r.includes('+#+')), arms: rows.some((r) => /^###\.#/.test(r)) });
-  assert.deepEqual(marks(elder.a), marks(set.gronk.a));
-  assert.deepEqual(marks(set.gronk.a), { horns: true, teeth: true, arms: true });
+  assert.deepEqual(marks(elder.a), marks(set.ironAdultBreachStreet.a));
+  assert.deepEqual(marks(set.ironAdultBreachStreet.a), { horns: true, teeth: true, arms: true });
 });
 
 // --- the hidden path: distinct, not marks over the others' outline (decided) --------------------------------------------------
 test('the hidden-path teen is the most distinct of the three: further from each main teen than the main teens are from each other', () => {
   const set = forms('B');
   const iou = (x, y) => silhouetteIou(set[x].a, set[y].a);
-  const mains = iou('teenCorp', 'teenStreet');
-  const toCorp = iou('teenHidden', 'teenCorp');
-  const toStreet = iou('teenHidden', 'teenStreet');
+  const mains = iou('ironTeenCorp', 'ironTeenStreet');
+  const toCorp = iou('ironTeenHidden', 'ironTeenCorp');
+  const toStreet = iou('ironTeenHidden', 'ironTeenStreet');
   console.log(`  teen overlaps: corp/street ${mains.toFixed(2)}, hidden/corp ${toCorp.toFixed(2)}, hidden/street ${toStreet.toFixed(2)}`);
   // The two main teens may differ only slightly (decided); the hidden one has to stand clear of both.
   assert.ok(mains >= 0.7, 'the main teens are meant to be close');
   assert.ok(toCorp < mains - 0.1 && toStreet < mains - 0.1, 'the hidden teen is not clearly more distinct than the main teens are from each other');
   assert.ok(toCorp < 0.7 && toStreet < 0.7);
   // And by a real outline difference, not marks: many cells that are painted in one and empty in the other.
-  assert.ok(poseDistance(set.teenHidden.a, set.teenStreet.a) >= 20 && poseDistance(set.teenHidden.a, set.teenCorp.a) >= 20);
-  assert.ok(poseDistance(set.teenCorp.a, set.teenStreet.a) < poseDistance(set.teenHidden.a, set.teenStreet.a));
+  assert.ok(poseDistance(set.ironTeenHidden.a, set.ironTeenStreet.a) >= 20 && poseDistance(set.ironTeenHidden.a, set.ironTeenCorp.a) >= 20);
+  assert.ok(poseDistance(set.ironTeenCorp.a, set.ironTeenStreet.a) < poseDistance(set.ironTeenHidden.a, set.ironTeenStreet.a));
 });
 
 test('the hidden-path teen foreshadows Guru: a crown and a third eye above the eyes, taller than the other teens', () => {
   const set = forms('B');
-  const hidden = set.teenHidden;
+  const hidden = set.ironTeenHidden;
   const eye = hidden.anchors.a.eyeRow;
   assert.ok(hidden.a[eye - 1].includes('oo'), 'third eye');
   assert.ok(hidden.a[0].includes('#.#'), 'crown');
-  assert.ok(set.guru.a[0].includes('#.#') && set.guru.a[set.guru.anchors.a.eyeRow - 1].includes('oo'), 'Guru has the same marks');
-  assert.ok(hidden.a.length > set.teenStreet.a.length && hidden.a.length > set.teenCorp.a.length);
-  assert.equal(FORMS.teenHidden.lean, 'hidden');
+  assert.ok(set.ironAdultHidden.a[0].includes('#.#') && set.ironAdultHidden.a[set.ironAdultHidden.anchors.a.eyeRow - 1].includes('oo'), 'Guru has the same marks');
+  assert.ok(hidden.a.length > set.ironTeenStreet.a.length && hidden.a.length > set.ironTeenCorp.a.length);
+  assert.equal(FORMS.ironTeenHidden.lean, 'hidden');
 });
 
 // --- one elder per adult: all nine of Iron's ------------------------------------------------------------------------------------
@@ -200,8 +200,8 @@ test('for one line the models cost about the same: composing only pays once bodi
 });
 
 test('where the models differ: the teen is the same outline, Gronk differs by a visible number of cells', () => {
-  const teen = modelGap('teenStreet');
-  const gronk = modelGap('gronk');
+  const teen = modelGap('ironTeenStreet');
+  const gronk = modelGap('ironAdultBreachStreet');
   console.log(`  composed against authored: teen ${teen.outline} outline and ${teen.marks} mark cells, Gronk ${gronk.outline} outline and ${gronk.marks} mark cells, overlap ${gronk.iou.toFixed(2)}`);
   assert.equal(teen.outline, 0);
   assert.ok(gronk.outline >= 8 && gronk.iou < 1);
@@ -518,7 +518,7 @@ test('the twitch is one column on the small forms (baby, teens) and up to two on
 });
 
 test('the twitch: in motion one extra row tears for 400 ms every 3 s; under reduced motion there is none; no change closer than 200 ms', () => {
-  const f = forms('B').gronk;
+  const f = forms('B').ironAdultBreachStreet;
   const a = f.anchors.a;
   const still = glitched(f.a, a, 2, { reduced: true, seed: 3 });
   let changes = 0;
@@ -542,7 +542,7 @@ test('the twitch: in motion one extra row tears for 400 ms every 3 s; under redu
 });
 
 test('neglect marks and bug glitches are separate channels and combine: rust then tears', () => {
-  const f = forms('B').gronk;
+  const f = forms('B').ironAdultBreachStreet;
   const rust = neglected(f.a, f.anchors.a, 2, 4);
   const both = glitched(rust, f.anchors.a, 3, { reduced: true, seed: 4 });
   const tearsOnly = glitched(f.a, f.anchors.a, 3, { reduced: true, seed: 4 });
@@ -700,6 +700,6 @@ test('the three eggs read differently at the same level', () => {
 });
 
 test('the anchor table covers every form, and the shared bodies', () => {
-  for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[id], id);
-  assert.ok(spriteCells(forms('B').gronkElder.a).length > spriteCells(forms('B').gronk.a).length);
+  for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[FORMS[id]?.art ?? id], id);
+  assert.ok(spriteCells(forms('B').ironElderBreachStreet.a).length > spriteCells(forms('B').ironAdultBreachStreet.a).length);
 });
