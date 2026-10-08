@@ -122,7 +122,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 
 ## Open
 
-1. Egg pressures have a working design (Iron's drift band and wear, a Charge state, a Sync state; see the pressures doc). Open here: the state names (Surge and Wired clash with existing names), and whether the cue lines below are enough of a signal.
+1. Egg pressures have a working design (Iron's drift band and wear, a Charge state, a Sync state; see the pressures doc). The states are named Overdrive (Charge) and Overlink (Sync). Open here: whether the cue lines below are enough of a signal.
 2. Bug clearing in netruns: the maintainer's direction is a clinic, a third unaligned kind of market that fixes bugs and sells the healing items (see the prototypes README, The clinic); names for it per egg are not drafted (Program clinic or repair shop, Iron workshop, Wetware clinic).
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.

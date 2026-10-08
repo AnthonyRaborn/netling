@@ -4,48 +4,40 @@ Status: simulator-tested working design, not in any game code. Numbers come from
 
 ## The idea
 
-Name warning: Surge and Wired are working names only. They clash with Chipped's elder (Surge), the Wired adult and the power-surge event. Proposals (not decided; none appears in `src/`, the 2.0 docs or the content catalog; Overvolt is already Iron's item and Boost a 1.0 buff, so both are out):
-
-| Set | Heat | Charge state | Sync state | Note |
-|---|---|---|---|---|
-| A (recommended) | Overclock | Overdrive | Overlink | One "Over-" family: a bar pushed past normal, which the cost side backs up. Overlink is coined. |
-| B | Overclock | Redline | Rapport | Plain words. Redline names the limit; Rapport is the plain word for the Sync bond (BOND, LOCK) and suits Wetware's plain register. |
-| C | Overclock | Overdrive | Rapport | Mixes the two. |
-
-One shared name per state is enough (only the meters have per-egg labels).
+Names (decided, maintainer): Heat's state is Overclock, Charge's is **Overdrive** and Sync's is **Overlink**, one shared name per state. They replace the working names Surge and Wired, which clashed with Chipped's elder (Surge), the Wired adult and the power-surge event. Results 6 to 22 in the notes still say Surge and Wired for these states.
 
 Each egg manages one bar harder than the others, and that bar has a special state with a real benefit and a real risk. The same states exist for every egg; the owner's bar is stronger (x3 on every effect), so the egg decides which risk is worth taking. Pass bar: the ordinary archetypes (attentive, casual, worker, sysadmin, human-regular) stay within noise on full-life rate, infections and temper.
 
 | Egg | Bar | State | Starts | Ends |
 |---|---|---|---|---|
 | Iron | Heat | Overclock (1.0 rule) plus wear | Heat 65+; wear builds above Heat 75 and below Heat 20 (0.08 a minute a point, eased from 0.12), fades with a 2 hour half-life and 4x faster at rest; nap and sleep cool no lower than 20 | Heat under 65 |
-| Program | Charge | Surge | Charge 80+ held 3 awake hours | Charge under 65, or rest |
-| Wetware | Sync | Wired | Sync 85+ held 3 awake hours | Sync under 70, rest, or burnout |
+| Program | Charge | Overdrive | Charge 80+ held 3 awake hours | Charge under 65, or rest |
+| Wetware | Sync | Overlink | Sync 85+ held 3 awake hours | Sync under 70, rest, or burnout |
 
-Tested strengths (base, before the x3 owner multiplier). Surge: play Sync +45%, win drops +75%; costs: Integrity bleeds 8 an hour, overflow events x3. Wired: visits +75%, win drops +75%; cost: infection hazard x2.2 (virus 1.2). Sync low (30 or under): win drops x0.77 (focus). Charge has no low-side rule and already refuses feeds at 95 ("buffer full"). Non-owner eggs get the same states at x1. Flow stays Heat-gated (Charge and Sync 50+, Integrity 80+, Heat under 60, 180 minutes): gating Flow on Surge or Wired removed it for attentive players in every test.
+Tested strengths (base, before the x3 owner multiplier). Overdrive: play Sync +45%, win drops +75%; costs: Integrity bleeds 8 an hour, overflow events x3. Overlink: visits +75%, win drops +75%; cost: infection hazard x2.2 (virus 1.2). Sync low (30 or under): win drops x0.77 (focus). Charge has no low-side rule and already refuses feeds at 95 ("buffer full"). Non-owner eggs get the same states at x1. Flow stays Heat-gated (Charge and Sync 50+, Integrity 80+, Heat under 60, 180 minutes): gating Flow on Overdrive or Overlink removed it for attentive players in every test.
 
-## Wired: playing too high
+## Overlink: playing too high
 
-Sync has no ceiling (a game can always be played), so Wired needs a brake:
-- Plays at Sync 85 to 89 inside Wired are free.
-- A play at Sync 90+ inside Wired rolls an infection (10% x the number of such plays so far x3 for the owner, capped at 90%).
-- The second play at 90+ burns the netling out: Wired ends and cannot be re-entered for 24 hours (a night's rest alone does not reset it).
+Sync has no ceiling (a game can always be played), so Overlink needs a brake:
+- Plays at Sync 85 to 89 inside Overlink are free.
+- A play at Sync 90+ inside Overlink rolls an infection (10% x the number of such plays so far x3 for the owner, capped at 90%).
+- The second play at 90+ burns the netling out: Overlink ends and cannot be re-entered for 24 hours (a night's rest alone does not reset it).
 
 A player who stops at 89 pays essentially nothing and keeps a small benefit; a player who plays to full pays infections and loses the state.
 
 ## Numbers (tripled benefits, doubled costs, x3 owner, burnout 2 plays / 24 h, +10% step, 200 lives a cell)
 
-- Time in a state: attentive, sysadmin and daredevil enter (Wired 19% to 23% if they play to full, 6% to 13% if they stop at 89). Casual, worker, human-regular and overclocker never enter and are unchanged from the no-pressure baseline.
+- Time in a state: attentive, sysadmin and daredevil enter (Overlink 19% to 23% if they play to full, 6% to 13% if they stop at 89). Casual, worker, human-regular and overclocker never enter and are unchanged from the no-pressure baseline.
 - Wetware, plays to full, attentive / sysadmin: win drops 21.3 -> 28.7 and 21.6 -> 32.0 (+35% and +48%), visits 4.3 -> 6.0 and 4.4 -> 6.5, infections 7.5 -> 9.2 and 7.8 -> 9.6, full-life 0.995 to 1.0, 1.3 and 1.7 penalty hits and 2.1 to 2.5 burnouts a life.
 - Wetware, stops at 89: drops +13% and +26%, visits +19% and +23%, infections within 0.3 of off.
-- Program (Surge): attentive drops 21.3 -> 25.2, sysadmin 21.6 -> 27.0; full-life 0.965 for both when they play to full (0.975 when they stop at 89).
+- Program (Overdrive): attentive drops 21.3 -> 25.2, sysadmin 21.6 -> 27.0; full-life 0.965 for both when they play to full (0.975 when they stop at 89).
 - Iron: its own trade is wear, eased once (Result 22). Daredevil infections 8.2 (was 9.4; 7.3 with no pressure), overclocker 10.9 (was 12.2; 8.7 with no pressure), drops 18.4 and 15.3 against 15.6 and 13.1. The ordinary five are unchanged. Iron is still the riskiest egg for players who live hot, now close to Wetware's greedy cost for the daredevil (8.1).
 - Overclock as a held state was tried and rejected: heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit and leaves the wear cost.
 
 ## Play styles it pushes
 
 - Iron: a thermostat player. Run warm for drops, rest before wear builds, do not chase cold (it wears too). The risky read is "one more game while hot".
-- Program: a feeder who keeps Charge topped. Three steady hours reaches Surge; greed is feeding past it into overflow and Integrity loss.
+- Program: a feeder who keeps Charge topped. Three steady hours reaches Overdrive; greed is feeding past it into overflow and Integrity loss.
 - Wetware: a player who keeps Sync high, plays up to 89 for visits and drops, and stops. Playing to full costs infections and the state.
 - Casual, worker and human-regular players never reach a state, so for them the egg changes forms, names and codex but not the care loop. Whether that is enough difference is a design question.
 
@@ -53,8 +45,8 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 
 - The thresholds, the three-hour hold, the free band and the burnout count are hidden. They need a visible cue when a state starts, when it is close to burning out, and when it ends, or it will feel random.
 - Resting ends a state; a nap is the reset. Burnout is the only thing that blocks re-entry for a day.
-- The same bar means different things on different eggs: Surge for a Program owner is a decision; for another egg it is a mild side effect.
-- Surge and Wired compete with Flow for the same attentive players, and the choice between them is the intended texture.
+- The same bar means different things on different eggs: Overdrive for a Program owner is a decision; for another egg it is a mild side effect.
+- Overdrive and Overlink compete with Flow for the same attentive players, and the choice between them is the intended texture.
 
 ## Not verified
 
