@@ -187,14 +187,15 @@ The three marks sit in different places (above, below, around) and have differen
 
 Seams do not move, so they carry no flash risk and need no calm version. Titles: "Worn: running outside its range wears it down. Rest to recover." and "Cold: running too cool wears it down too."
 
-**Field manual lines (draft, in the existing style).** Decided (maintainer): qualitative, no numbers, for the three states. 1.0's own OC entry prints numbers (generated from `CFG`); the 2.0 manual does not.
+**Field manual lines (draft, in the existing style).** Decided (maintainer): qualitative, no numbers, for the three states and Flow. 1.0's own OC entry prints numbers (generated from `CFG`); the 2.0 manual does not.
 
 - OC · Overclocked: "Heat held high. Mini-games and ICE run slower and wins find more, but a lost game costs Sync and Integrity, lost ICE bites harder, and trouble and visitors come more often. Cool it down to end it." Second line kept from 1.0: "Running hot or cool leans it one way or the other as it grows."
 - OD · Overdrive: "Charge held full for hours. Games pay more and wins find more, but the buffer overflows more often and it loses Integrity. Rest or a drop in Charge ends it."
 - OL · Overlink: "Sync held high for hours. Visitors drop by more, wins find more, and infections come easier. Play inside the tick and it holds; play past it and it can burn out for a day."
+- a glow (Flow, the sprite note rather than a bar label): "Kept fed, in sync, sound and cool for hours in a row while awake, with nothing wrong, it glows. In flow, traces, intrusions, overflows and surges come less often, visitors drop by more often, and it leans steadier as it grows." Qualitative too (decided, maintainer); 1.0's entry prints the three hours, the 50 and 80 lines and the 60 Heat ceiling.
 - Not printed anywhere: the heat threshold, the hold time, the Charge and Sync lines and the free band's edge (the tick shows it without a number).
 
-Open: Flow's manual entry (1.0 prints its numbers: three hours, Charge and Sync 50+, Integrity 80+, Heat under 60) and whether it goes qualitative too; the colors of the sparks and dots (the palette's accent is taken by Flow's outline, the heat color by the wisps); whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted); a temper tell for the states (none).
+Open: the colors of the sparks and dots (the palette's accent is taken by Flow's outline, the heat color by the wisps); whether Iron's seams need a design pass per form (they sit on a sprite edge and 22 forms differ); a pre-state hint for new players (none is drafted); a temper tell for the states (none).
 
 ## Clinic and bug statements (drafts, first pass)
 
