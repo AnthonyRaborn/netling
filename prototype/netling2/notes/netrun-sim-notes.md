@@ -32,6 +32,8 @@ Not modelled: Tune street's Foresight (the bots have one skill number, so knowin
 
 ### Parity of the abilities, careful play, 500 runs a cell (about plus or minus 2 points at 30%)
 
+**Superseded; current read-out in `prototype/netling2/baseline/results/netrun-sweep.txt`** (abilities and tiers on, elder repair 3, perks on). Deep careful there: adult value mean 1.74, elder 2.28 (elder 1.31x the adult, over the 1.15x bar; Source 1.42x); outside the 20% band, Feast corp high in most cells and the Tune forms low in the Source; Breach street is no longer over the band in the Deep (114% at the elder level). The challenge (section 13), Foresight at repair 3 (section 12) and Program and Wetware egg anomaly (section 10) tables agree with the baseline within noise. The run-cost life results (section 11) were re-run there with each egg's full pressure on, so they are not comparable with the table below and are left to the egg pressure work.
+
 1.0's bar was no adult more than about 4 points apart in The Deep, and the five mainframe upgrades close together in the Source (24 to 28%). Disconnect rate over the nine forms, with abilities on and no ICE tiers:
 
 | Region | Level | Mean | Lowest to highest | Spread |
