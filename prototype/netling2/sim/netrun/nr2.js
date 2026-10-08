@@ -65,7 +65,7 @@ export const NR2 = {
     hiddenUnseen: { 1: 0.3, 2: 0.55 }, // the hidden forms: trimmed from Ghost's and Whisper's numbers to the parity yardstick (the elder above Whisper's 50% to keep it ahead)
     checkpoint: { dodgeCorp: { 1: false, 2: true }, dodgeStreet: { 1: false, 2: true }, hidden: { 1: true, 2: true } },
     sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
-    upkeep: { tuneStreet: { 1: 0, 2: 6 } }, // Integrity restored per move
+    upkeep: { tuneStreet: { 1: 0, 2: 3 } }, // Integrity restored per move (the street elder's second part; 6 until Foresight was measured, decided 3 with Foresight at depth 2: notes section 12)
     concession: { 1: { exchangePrice: 11, scrip: 3, exitItems: 1, winHeal: 11 }, 2: { exchangePrice: 11, scrip: 4, exitItems: 1, winHeal: 18 } }, // feastCorp: cheaper exchange, loose scrip on top, a company-store item at the exit (exitItems: tuned in, a proposal; scrip alone was too weak a part)
     scavenge: { 1: { cache: 0.55, iceWin: 0.35, winHeal: 11 }, 2: { cache: 0.7, iceWin: 0.5, winHeal: 22 } }, // feastStreet: tuned to the parity yardstick; winHeal is a small sustain (Integrity restored by a won ICE), decided as fitting the theme
     forcedCacheForms: ['feastCorp'], // level 2 only
@@ -80,7 +80,7 @@ export const NR2 = {
 };
 
 if (process.env.NR2) {
-  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true, inventory: true } : JSON.parse(process.env.NR2);
+  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true, inventory: true, fate: true, foresight: { on: true } } : JSON.parse(process.env.NR2);
   for (const [k, val] of Object.entries(v)) {
     if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
     else NR2[k] = val;

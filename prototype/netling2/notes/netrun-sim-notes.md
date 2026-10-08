@@ -310,3 +310,5 @@ Depth 1 at the elder with repair 6: Deep 99 / 101 at spread 0, 108 / 105 at 0.2,
 
 **Not measured:** market stock and anomaly kinds (the bots buy by a fixed list and pick anomaly options by a style), preparing for a known ICE, the fog (lines only from the current node, elder sight showing lines: a drawing change that raises the worth of sight for a human), how much better than the planner a person routes, and whether the nodes two steps ahead stay visible when a fight or choice interrupts.
 
+**Decided (maintainer): elder depth 2, repair 3.** `NR2.ab.upkeep.tuneStreet[2]` is now 3 (was 6), `NR2.foresight` keeps depth 1 and 2 with the game only, and `NR2=all` now also switches `fate` and Foresight on (a test checks it). Tables made earlier with the elder's repair at 6 (the parity read-out in section 3 and the Tune lines in sections 6 to 9) are not re-run: the Tune street elder is lower blind by the amount in the repair table above (99% to 75% of the mean in the Deep, careful, spread 0).
+

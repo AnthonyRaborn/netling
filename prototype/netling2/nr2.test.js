@@ -850,3 +850,29 @@ test('foresight makes the nodes it reads visible: the elder sees two steps ahead
   assert.ok(two.some((id) => !visibleNodeIds(e.s).has(id)), 'without Foresight the second step is not visible');
   reset();
 });
+
+test('Tune street, decided: the elder repairs 3 a move, reads the ICE\'s game two steps ahead (the adult one step), and NR2=all switches Foresight on', async () => {
+  reset();
+  assert.deepEqual(NR2.ab.upkeep.tuneStreet, { 1: 0, 2: 3 });
+  assert.deepEqual(NR2.foresight.depth, { 1: 1, 2: 2 });
+  assert.deepEqual(NR2.foresight.fields, { 1: ['game'], 2: ['game'] });
+  const { execFileSync } = await import('node:child_process');
+  const out = execFileSync('node', ['--input-type=module', '-e', "const { NR2 } = await import('./prototype/netling2/sim/netrun/nr2.js'); console.log(JSON.stringify([NR2.fate, NR2.foresight.on, NR2.foresight.depth, NR2.foresight.fields]))"], { env: { ...process.env, NR2: 'all' }, cwd: new URL('../..', import.meta.url).pathname }).toString().trim();
+  assert.equal(out, JSON.stringify([true, true, { 1: 1, 2: 2 }, { 1: ['game'], 2: ['game'] }]));
+  // A Tune street elder gets 3 Integrity a move.
+  const s = (() => {
+    const rng = mulberry32(5);
+    const x = createScript({ now: 0, rng });
+    x.stage = 'mainframe';
+    x.form = 'tuneStreetElder';
+    set({ abilities: true });
+    Object.assign(x.stats, { charge: 100, integrity: 50, heat: 30 });
+    startRun(x, 'public', rng, []);
+    const node = runOptions(x.run)[0];
+    node.type = 'cache';
+    moveTo(x, node.id, rng);
+    return x;
+  })();
+  assert.equal(s.stats.integrity, 53);
+  reset();
+});
