@@ -47,11 +47,7 @@ test('the temper shapes hold on every line: the machine voicing of each passes c
     for (const level of [-2, -1, 1, 2]) {
       for (const seed of [0, 3, 9]) {
         const out = chatterTone({ egg: c.egg, level, text: c.text, seed });
-        // voice.js's machine voicing of an unsteady Program line may be the two halves swapped, which checkShape (the rule for
-        // hand-written voicings: a clipped clause) rejects. For that case check that no word was lost or added instead.
-        const swapped = c.egg === 'program' && level === -1 && !/ -( |$)/.test(out);
-        if (swapped) assert.deepEqual(out.split(/\s+/).sort(), c.text.split(/\s+/).sort(), `${c.id}: ${out}`);
-        else assert.deepEqual(checkShape({ egg: c.egg, level, text: out }), [], `${c.id} L${level}: ${out}`);
+        assert.deepEqual(checkShape({ egg: c.egg, level, text: out }), [], `${c.id} L${level}: ${out}`);
       }
     }
   }

@@ -19,7 +19,7 @@
 // Chatter tone. 1.0 shows one line every few hours (chatterChancePerHour 0.15), so a gap between lines is far too long to
 // time. The tone therefore lives INSIDE a line, in a shape the player can count:
 //   program   steady: beats of fixed word count, " / " between them (4 words a beat, 2 strongly).
-//             unsteady: clipped, or two halves swapped; strongly, clipped and said twice.
+//             unsteady: clipped (how much varies with the seed); strongly, clipped and said twice.
 //   iron      steady: a checklist, three numbered items then "ok." (strongly, "ok" after every item).
 //             unsteady: a fault bell: the first few words in capitals, "!" (strongly, prefixed FAULT).
 //   wetware   steady: a pause "..." after every third word (every second strongly).
@@ -109,14 +109,10 @@ function steadyTone(egg, level, w) {
 function unsteadyTone(egg, level, w, seed) {
   const strong = level === -2;
   if (egg === 'program') {
-    const keep = Math.max(1, Math.ceil(w.length * (strong ? 0.4 + 0.2 * hash(w.length * 5 + seed) : 0.6)));
+    // Always a clipped clause, the shape checkShape asks of hand-written voicings (a swapped-halves variant was dropped: it had no clip).
+    const keep = Math.max(1, Math.ceil(w.length * (strong ? 0.4 + 0.2 * hash(w.length * 5 + seed) : 0.5 + 0.25 * hash(w.length * 7 + seed))));
     const clipped = `${w.slice(0, keep).join(' ')} -`;
-    if (strong) return `${clipped} ${clipped}`;
-    if (hash(w.length * 7 + seed) < 0.5) {
-      const mid = Math.ceil(w.length / 2);
-      return [...w.slice(mid), ...w.slice(0, mid)].join(' ');
-    }
-    return clipped;
+    return strong ? `${clipped} ${clipped}` : clipped;
   }
   if (egg === 'iron') {
     const loud = Math.min(w.length, strong ? 2 : 3);
