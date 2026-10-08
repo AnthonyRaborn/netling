@@ -90,3 +90,14 @@
 2026-10-08T20:39:45.657Z start balance-brake-program
 2026-10-08T20:39:45.681Z start balance-brake-wetware
 2026-10-08T20:41:00Z NOTE: the five 'start' lines at 20:39:45 (balance-full-iron, balance-brake-iron/program/wetware) were an accidental import of run-all.mjs while checking syntax; the processes were killed within a minute and wrote no output. The real balance-full-iron rerun started at 20:37:25 (Iron configuration fixed to include the final Charge and Sync numbers; earlier outputs are in superseded/).
+2026-10-08T20:53:17.395Z done balance-full-iron [full-iron] 952s
+2026-10-08T20:53:17.396Z all 1 jobs finished
+2026-10-08T20:53:17.454Z start runcost-iron
+2026-10-08T20:58:52.685Z start balance-brake-iron
+2026-10-08T20:58:52.695Z start balance-brake-program
+2026-10-08T20:58:52.699Z start balance-brake-wetware
+2026-10-08T20:59:00.565Z done runcost-iron [full-iron] 343s
+2026-10-08T20:59:00.566Z all 1 jobs finished
+2026-10-08T20:59:00.625Z start egg-anomaly-iron
+2026-10-08T20:59:11.490Z done egg-anomaly-iron [full-iron] 11s
+2026-10-08T20:59:11.491Z all 1 jobs finished
