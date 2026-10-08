@@ -584,7 +584,7 @@ function pick(egg, optionId, stats = {}, rngValue = 0.5) {
   return { s, before, r };
 }
 
-test('stack overflow: LET IT RUN surges Charge and may find an item; if Charge ends over the line the stack tears; there is no free pass', () => {
+test('stack overflow: RUN IT surges Charge and may find an item; if Charge ends over the line the stack tears; there is no free pass', () => {
   set({ eggAnomalies: true });
   asEgg('program', () => {
     const clean = pick('program', 'run', { charge: 50, integrity: 80 }, 0.1);
@@ -606,7 +606,7 @@ test('stack overflow: LET IT RUN surges Charge and may find an item; if Charge e
   reset();
 });
 
-test('stack overflow: KILL IT costs Charge and repairs Integrity (capped at 100)', () => {
+test('stack overflow: TERMINATE costs Charge and repairs Integrity (capped at 100)', () => {
   set({ eggAnomalies: true });
   asEgg('program', () => {
     const a = pick('program', 'kill', { charge: 60, integrity: 70 });
@@ -616,7 +616,7 @@ test('stack overflow: KILL IT costs Charge and repairs Integrity (capped at 100)
   reset();
 });
 
-test('bit-rot patch: FLASH IT cools and clears wear at a cost in Charge; PRY IT OPEN runs hot for likely loot', () => {
+test('bit-rot patch: FLASH IT cools and clears wear at a cost in Charge; PRY OPEN runs hot for likely loot and a little power', () => {
   set({ eggAnomalies: true });
   asEgg('iron', () => {
     const s = anomalyNode('iron');
@@ -629,8 +629,9 @@ test('bit-rot patch: FLASH IT cools and clears wear at a cost in Charge; PRY IT 
     low.wear = 10;
     choose(low, 'flash', stub(0.5));
     assert.deepEqual([low.stats.heat, low.wear], [0, 0], 'heat and wear floor at 0');
-    const got = pick('iron', 'pry', { heat: 30 }, 0.1);
+    const got = pick('iron', 'pry', { heat: 30, charge: 50 }, 0.1);
     assert.equal(got.s.stats.heat, 40);
+    assert.equal(got.s.stats.charge, 58, 'salvage: a little power as well');
     assert.equal(got.s.run.loot.length, 1, 'a roll under 0.6 finds a part');
     const none = pick('iron', 'pry', { heat: 30 }, 0.9);
     assert.equal(none.s.run.loot.length, 0);
@@ -638,7 +639,7 @@ test('bit-rot patch: FLASH IT cools and clears wear at a cost in Charge; PRY IT 
   reset();
 });
 
-test('graft: GRAFT IT surges Sync and may be rejected (an infection); TAKE A SAMPLE costs Sync for maybe loot', () => {
+test('graft: GRAFT IT surges Sync and may be rejected (an infection); SAMPLE costs Sync for maybe loot', () => {
   set({ eggAnomalies: true });
   asEgg('wetware', () => {
     const took = pick('wetware', 'graft', { sync: 40, integrity: 80 }, 0.9);

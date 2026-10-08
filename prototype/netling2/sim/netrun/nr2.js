@@ -32,7 +32,7 @@ export const NR2 = {
     run: { charge: 25, overflowAt: 95, tear: 10, loot: 0.5 }, // Program: surge and maybe an item, then a tear if the buffer ends over the line
     kill: { charge: 8, repair: 10 },
     flash: { charge: 12, cool: 20, wear: 30 }, // Iron
-    pry: { heat: 10, loot: 0.6 },
+    pry: { heat: 10, loot: 0.6, charge: 8 }, // salvage: a little power as well as the part
     graft: { sync: 20, reject: 0.3, rejectDamage: 4 }, // Wetware
     sample: { sync: 6, loot: 0.5 },
   },

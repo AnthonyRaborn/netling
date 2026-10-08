@@ -172,16 +172,25 @@ The egg anomalies are a go (maintainer). **Detailed first pass, built in the for
 
 | Egg | Anomaly | Option | Effect (starting values) | Leans |
 |---|---|---|---|---|
-| Program | STACK OVERFLOW: "a call that never returns. the frames pile up, each a copy of the last." | LET IT RUN | +25 Charge; 50% a loot item; if Charge ends over 95 the stack overflows: -10 Integrity | temper, entropy |
-| | | KILL IT | -8 Charge, +10 Integrity | temper, order |
-| Iron | BIT-ROT PATCH: "a read-only region is flipping bits. a signed patch lies beside it, one build old." | FLASH IT | -12 Charge, -20 Heat, -30 wear | corp (signed patch) |
-| | | PRY IT OPEN | +10 Heat; 60% a loot item | street |
-| Wetware | GRAFT: "a bed of living tissue, still viable, the right shape to take a graft." | GRAFT IT | +20 Sync; 30% rejection (an infection, -4 Integrity; none if already infected) | temper, entropy |
-| | | TAKE A SAMPLE | -6 Sync; 50% a loot item | temper, order |
+| Program | STACK OVERFLOW: "a call with no return address. the stack grows a frame at a time." | RUN IT | +25 Charge; 50% a loot item; if Charge ends over 95 the stack overflows: -10 Integrity | temper, entropy |
+| | | TERMINATE | -8 Charge, +10 Integrity | temper, order |
+| Iron | BIT-ROT PATCH: "a read-only region is flipping bits. a signed patch sits on the bench beside it, one build old." | FLASH IT | -12 Charge, -20 Heat, -30 wear | corp (signed patch) |
+| | | PRY OPEN | +10 Heat, +8 Charge; 60% a loot item | street |
+| Wetware | GRAFT: "a bed of living tissue, still alive, the right shape for a graft." | GRAFT IT | +20 Sync; 30% rejection (an infection, -4 Integrity; none if already infected) | temper, entropy |
+| | | SAMPLE | -6 Sync; 50% a loot item | temper, order |
 
 - **Flavor, kept small.** Each anomaly sits on its egg's bar: the overflow's surge is **Overdrive-flavored** (the surge is free until the buffer is full, then the stack overflows and tears, so a Program netling already holding Charge pays for the greed), the patch is **maintenance for Iron's wear** (Heat and wear down, at a cost in Charge, against loot that runs hot), the graft is **Overlink-flavored** (Sync up, with the infection risk Wetware already lives with). Nothing needs the egg's pressure to be on, except that the patch's wear part does nothing for a netling with no wear.
-- **Decided (maintainer): hints are numberless**, like the 2.0 state clues (1.0's anomaly hints show numbers; these do not). **Decided: no free ICE pass** for the stack overflow (the first draft had UNWIND skip the next ICE; dropped, so none of the three adds a run mechanic, they only move bars, Integrity and items). Program's options were reworded (UNWIND and CATCH IT became LET IT RUN and KILL IT; wording still for review). Wetware's text stays plain (no CP2020 jargon); Program's and Iron's use their own substrate words.
+- **Decided (maintainer): hints are numberless**, like the 2.0 state clues (1.0's anomaly hints show numbers; these do not). **Decided: no free ICE pass** for the stack overflow (the first draft had UNWIND skip the next ICE; dropped, so none of the three adds a run mechanic, they only move bars, Integrity and items). Program's options were reworded (UNWIND and CATCH IT became LET IT RUN and KILL IT, then RUN IT and TERMINATE with the wording pass below). Wetware's text stays plain (no CP2020 jargon); Program's and Iron's use their own substrate words.
 - **Measured against the yardstick** (bots, 4000 runs a cell, careful and skilled, no ability and Breach corp, Bazaar to Deep): taking the options at random and averaging over the styles and forms, each egg anomaly moves the disconnect rate by less than 1 point, the exit rate by 1.5 points or less and banked value by under 2.5%, in every region (single cells reach 1.1 and 1.5 points); neither option of any anomaly is more than about 5% of value better than its pair. The largest single option effect is LET IT RUN (+0.4 points disconnect and -1.1 exit in the Ruins, +1.4% value in the Bazaar). The bots cannot value what the Iron patch does to wear and Heat or the graft's Sync (they bank loot, not bars), so FLASH IT looks about 2% worse than PRY IT on value and is probably better than it looks for a hot Iron netling.
+
+**Wording (Decided, maintainer; care drafts' register).** Labels stay at 9 characters or fewer until the 2.0 UI is revisited. Hints use each egg's meter words (Iron: power; Wetware: bond), still numberless. Run messages carry no `> ` prefix: the run panel shows them as they are and the home log adds `> netrun (region): ` in front of the last one, so a prefix in the string would double it. The care drafts' `!!` marks the two penalty lines. Text, hints and messages are in `sim/netrun/egg-anomalies.js`.
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Option 1 | RUN IT: "charge surges, may find a stray item, may overflow"; "call finished. buffers full. charge up."; over the line "stack overflow. !! it tore on the way out. -10 integrity." | FLASH IT: "costs power, cools, eases wear, corp"; "flashed. fans spin down. tolerances hold." | GRAFT IT: "bond surges, may reject"; "it took. the new tissue hums along with the rest."; rejected "it took, then it turned. !! rejection setting in." |
+| Option 2 | TERMINATE: "costs charge, repairs, order"; "call terminated. frames released one by one." | PRY OPEN: "likely salvage, a little power, runs hot, indie"; "module pried out. [item]" or "pried at it. the module was already dead." | SAMPLE: "costs bond, maybe a find, order"; "a clean sample. [item]" or "the sample failed. nothing worth keeping." |
+
+**PRY OPEN gives +8 Charge (Decided, maintainer's suggestion; the size is mine).** It had no power gain only because it was copied from 1.0's SALVAGE option; with power it matches Iron's street feed (SALVAGE) and mirrors RUN IT. Measured with `egg-anomaly-sweep.mjs` (3000 runs a cell, careful and skilled, four regions): the sweep output is **identical** with and without it, and also with +60 as a probe. The bots do not use Iron's power in a run (it is neither banked nor near zero), so the sweep says only that the gain cannot move the exit, disconnect or value figures; it cannot say whether +8 is the right size. The gap between the two options is unchanged (PRY IT OPEN about 1 to 3% of value ahead of FLASH IT in the old figures, which the bots also cannot offset with wear and Heat).
 
 ## 7. Regions, the tutorial run and contracts
 
@@ -251,7 +260,7 @@ Still open (the decisions above are not repeated):
 6. **Second parts** and the elder level are candidates with starting values, tuned only against the bots. Tune corp and Tune street sit under the band on the bots' measure and are not a bot target.
 7. **Feast progression:** still up to a life behind the defensive forms to a first elder and the three-egg total; accepted for a loot role, to be judged in a playtest.
 8. **Challenges:** tried (ground rule 5 and the netrun notes, section 13). **Decided (maintainer): Glass stays the hardest** (tier-2 ICE included). The Tune forms get a limited sight under Blackout (see ground rule 5; the numbers are in the netrun notes, section 13). Open: whether Tune corp deserves anything under Unplugged, where its elder relay patch is dark (it is the lowest form there, 34 / 35 Deep careful).
-9. **Egg anomalies:** options are designed and measured in the fork (section 6). Open: the wording of all three (Program's options in particular), from the care drafts' register; and a playtest, since the bots cannot value the Iron patch's wear and Heat or the graft's Sync.
+9. **Egg anomalies:** options are designed and measured in the fork (section 6). **Wording decided (maintainer), in the care drafts' register** (section 6, Wording). Open: a playtest, since the bots cannot value the Iron patch's wear and Heat, PRY OPEN's power or the graft's Sync.
 10. **Stack size** (3) and the keep-or-sell screen need a playtest.
 
 ## 11. Not done

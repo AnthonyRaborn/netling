@@ -14,32 +14,32 @@ export const EGG_ANOMALIES = {
   program: {
     id: 'overflow',
     title: 'STACK OVERFLOW',
-    text: 'a call that never returns. the frames pile up, each a copy of the last.',
+    text: 'a call with no return address. the stack grows a frame at a time.',
     options: [
       {
         id: 'run',
-        label: 'LET IT RUN',
-        hint: 'charge surges, a stray item, may overflow',
+        label: 'RUN IT',
+        hint: 'charge surges, may find a stray item, may overflow',
         // Overdrive-flavored: the surge is free until the buffer is full, then the stack overflows and tears something.
         apply: (c) => {
           const a = A().run;
           c.pet.stats.charge += a.charge;
           c.lean(0, -1);
           const found = c.rng() < a.loot ? ` ${c.loot()}` : '';
-          if (c.pet.stats.charge > a.overflowAt) return `${c.hurt(a.tear, 'the stack overflowed and tore on the way out.')}${found}`;
-          return `it ran itself out. charge surging.${found}`;
+          if (c.pet.stats.charge > a.overflowAt) return `${c.hurt(a.tear, 'stack overflow. !! it tore on the way out.')}${found}`;
+          return `call finished. buffers full. charge up.${found}`;
         },
       },
       {
         id: 'kill',
-        label: 'KILL IT',
+        label: 'TERMINATE',
         hint: 'costs charge, repairs, order',
         apply: (c) => {
           const a = A().kill;
           c.pet.stats.charge -= a.charge;
           c.pet.stats.integrity = Math.min(100, c.pet.stats.integrity + a.repair);
           c.lean(0, 1);
-          return 'killed the call. the frames came off one by one.';
+          return 'call terminated. frames released one by one.';
         },
       },
     ],
@@ -47,30 +47,31 @@ export const EGG_ANOMALIES = {
   iron: {
     id: 'bitrot',
     title: 'BIT-ROT PATCH',
-    text: 'a read-only region is flipping bits. a signed patch lies beside it, one build old.',
+    text: 'a read-only region is flipping bits. a signed patch sits on the bench beside it, one build old.',
     options: [
       {
         id: 'flash',
         label: 'FLASH IT',
-        hint: 'costs charge, cools, clears wear, corp',
+        hint: 'costs power, cools, eases wear, corp',
         apply: (c) => {
           const a = A().flash;
           c.pet.stats.charge -= a.charge;
           c.pet.stats.heat = Math.max(0, c.pet.stats.heat - a.cool);
           if (c.pet.wear) c.pet.wear = Math.max(0, c.pet.wear - a.wear);
           c.lean(1, 0);
-          return 'flashed the patch. tolerances back inside spec.';
+          return 'flashed. fans spin down. tolerances hold.';
         },
       },
       {
         id: 'pry',
-        label: 'PRY IT OPEN',
-        hint: 'likely loot, runs hot, indie',
+        label: 'PRY OPEN',
+        hint: 'likely salvage, a little power, runs hot, indie',
         apply: (c) => {
           const a = A().pry;
           c.pet.stats.heat += a.heat;
+          c.pet.stats.charge += a.charge;
           c.lean(-1, 0);
-          return c.rng() < a.loot ? `pried the module out. ${c.loot()}` : 'pried at it. the module was already dead.';
+          return c.rng() < a.loot ? `module pried out. ${c.loot()}` : 'pried at it. the module was already dead.';
         },
       },
     ],
@@ -78,32 +79,32 @@ export const EGG_ANOMALIES = {
   wetware: {
     id: 'graft',
     title: 'GRAFT',
-    text: 'a bed of living tissue, still viable, the right shape to take a graft.',
+    text: 'a bed of living tissue, still alive, the right shape for a graft.',
     options: [
       {
         id: 'graft',
         label: 'GRAFT IT',
-        hint: 'sync surges, may reject',
+        hint: 'bond surges, may reject',
         apply: (c) => {
           const a = A().graft;
           c.pet.stats.sync += a.sync;
           c.lean(0, -1);
           if (!c.pet.virus && c.rng() < a.reject) {
             c.infect(a.rejectDamage);
-            return 'it took, then it turned. the rejection spread.';
+            return 'it took, then it turned. !! rejection setting in.';
           }
-          return 'it took. the new tissue hums with the rest of you.';
+          return 'it took. the new tissue hums along with the rest.';
         },
       },
       {
         id: 'sample',
-        label: 'TAKE A SAMPLE',
-        hint: 'costs sync, maybe loot, order',
+        label: 'SAMPLE',
+        hint: 'costs bond, maybe a find, order',
         apply: (c) => {
           const a = A().sample;
           c.pet.stats.sync -= a.sync;
           c.lean(0, 1);
-          return c.rng() < a.loot ? `a clean sample. ${c.loot()}` : 'a clean sample. nothing worth keeping.';
+          return c.rng() < a.loot ? `a clean sample. ${c.loot()}` : 'the sample failed. nothing worth keeping.';
         },
       },
     ],
