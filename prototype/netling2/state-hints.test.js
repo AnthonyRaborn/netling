@@ -24,8 +24,8 @@ test('the captions do not give away the hold: no time, no number, no threshold w
 });
 
 test('the caption is due once, after the build time, and only when nothing urgent is on screen', () => {
-  assert.equal(hintDue({ buildMin: 59, shown: false, busy: false }), false);
-  assert.equal(hintDue({ buildMin: 60, shown: false, busy: false }), true);
+  assert.equal(hintDue({ buildMin: 119, shown: false, busy: false }), false);
+  assert.equal(hintDue({ buildMin: 120, shown: false, busy: false }), true);
   assert.equal(hintDue({ buildMin: 200, shown: true, busy: false }), false);
   assert.equal(hintDue({ buildMin: 200, shown: false, busy: true }), false);
 });
