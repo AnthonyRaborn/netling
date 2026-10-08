@@ -320,3 +320,12 @@ Request: ease wear. Iron rows only (the other eggs and the pass bar do not chang
 - Daredevil (off infections 7.28, drops 15.6): E0 9.35 / 19.7, E1 8.52 / 19.3, E2 8.78 / 19.1, E3 8.62 / 18.8, E4 8.24 / 18.4; mean wear 23.5 -> 15.9 / 17.6 / 23.5 / 12.0.
 - Overclocker (off 8.66, drops 13.05): E0 12.22 / 16.9, E1 11.51, E2 11.66, E3 11.25, E4 10.90 / 15.3; mean wear 32.2 -> 26.1 / 26.4 / 32.5 / 20.8; temper -11.2 -> -10.4 (off -7.5).
 - Decision: E4 adopted as the new `IRON` defaults (rate 0.08, coldRate 0.08, decay 1/120, restMult 4). It halves the daredevil's excess infections (+2.1 -> +1.0) and trims the overclocker's by a third (+3.6 -> +2.2); Iron stays the riskiest egg for players who live hot, with the ordinary five untouched. Earlier Results (6 to 21) used the old values.
+
+## Result 23: Iron's cost against the other two eggs
+
+Consistent run with the final design (eased wear, Overdrive and Overlink rules, Overlink brake), 200 lives per cell, default and greedy bots (`n21`), then Iron's Overclock benefits scaled by the owner factor (`SIDES.ironBenefit`, Iron rows only: win drops 1 + 0.5 x f, visits 1 + 0.25 x f, against 1.5 and 1.25 in 1.0). Not unit-tested.
+
+- The asymmetry: the owner x3 multiplier amplified Overdrive and Overlink benefits but not Overclock's, so Iron's heavy players paid wear on top of Overclock's own costs for the 1.0 benefit. Overclocker (default bot): +2.2 infections, +1.4 mistakes, temper -2.9, drops +2.2 (about 1 drop per extra infection); daredevil +1.0 infections, drops +2.8. Program and Wetware heavy players: 4 to 6 drops per extra infection (Wetware greedy attentive +7.5 drops for +1.7 infections; Program greedy attentive +3.9 for +0.7).
+- ironBenefit 1 / 2 / 3, Iron rows, delta against off: daredevil drops +2.8 / +6.2 / +8.9, visits +0.1 / +0.7 / +1.2, infections +0.96 / +0.92 / +0.83; overclocker drops +2.2 / +4.9 / +7.6, visits -0.2 / +0.4 / +0.8, infections +2.2 / +2.3 / +2.4, temper -2.9 / -2.6 / -2.1. Ordinary five unchanged (infections within 0.7, full-life within 0.035).
+- Ratio of extra drops to extra infections: daredevil 2.9 / 6.7 / 10.7; overclocker 1.0 / 2.1 / 3.2.
+- Decision: ironBenefit 3 (the owner multiplier, as for the other bars) is the new default: Iron's Overclock then multiplies win drops by 2.5 and visits by 1.75. The overclocker's trade is still the worst of the heavy archetypes (3.2) and the daredevil's the best (10.7); x2 is the fallback if x3 is too generous to the daredevil.

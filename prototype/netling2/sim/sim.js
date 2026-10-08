@@ -647,7 +647,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
-  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 1,
+  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
   sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },

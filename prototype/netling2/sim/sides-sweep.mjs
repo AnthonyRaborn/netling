@@ -16,7 +16,7 @@ const apply = (on, owner) => {
   Object.assign(SIDES.sync, over.sync ?? {});
   Object.assign(SIDES.heat, over.heat ?? {});
   Object.assign(IRON, freshIron, over.iron ?? {});
-  SIDES.on = on; SIDES.owner = owner; SIDES.ownerMult = over.ownerMult ?? fresh.ownerMult; SIDES.lowOwnerOnly = over.lowOwnerOnly ?? fresh.lowOwnerOnly; SIDES.flowShared = over.flowShared ?? false; SIDES.ironBenefit = over.ironBenefit ?? 1; IRON.on = Boolean(over.ironWear) && owner === null && on;
+  SIDES.on = on; SIDES.owner = owner; SIDES.ownerMult = over.ownerMult ?? fresh.ownerMult; SIDES.lowOwnerOnly = over.lowOwnerOnly ?? fresh.lowOwnerOnly; SIDES.flowShared = over.flowShared ?? false; SIDES.ironBenefit = over.ironBenefit ?? fresh.ironBenefit; IRON.on = Boolean(over.ironWear) && owner === null && on;
 };
 for (const base of bases) {
   for (const [egg, owner] of [['off', null], ...Object.entries(eggs)].filter(([e]) => !over.only || over.only.includes(e))) {

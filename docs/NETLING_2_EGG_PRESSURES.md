@@ -10,7 +10,7 @@ Each egg manages one bar harder than the others, and that bar has a special stat
 
 | Egg | Bar | State | Starts | Ends |
 |---|---|---|---|---|
-| Iron | Heat | Overclock (1.0 rule) plus wear | Heat 65+; wear builds above Heat 75 and below Heat 20 (0.08 a minute a point, eased from 0.12), fades with a 2 hour half-life and 4x faster at rest; nap and sleep cool no lower than 20 | Heat under 65 |
+| Iron | Heat | Overclock plus wear (Iron's Overclock benefits are amplified like the others) | Heat 65+; wear builds above Heat 75 and below Heat 20 (0.08 a minute a point, eased from 0.12), fades with a 2 hour half-life and 4x faster at rest; nap and sleep cool no lower than 20 | Heat under 65 |
 | Program | Charge | Overdrive | Charge 80+ held 3 awake hours | Charge under 65, or rest |
 | Wetware | Sync | Overlink | Sync 85+ held 3 awake hours | Sync under 70, rest, or burnout |
 
@@ -31,7 +31,8 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 - Wetware, plays to full, attentive / sysadmin: win drops 21.3 -> 28.7 and 21.6 -> 32.0 (+35% and +48%), visits 4.3 -> 6.0 and 4.4 -> 6.5, infections 7.5 -> 9.2 and 7.8 -> 9.6, full-life 0.995 to 1.0, 1.3 and 1.7 penalty hits and 2.1 to 2.5 burnouts a life.
 - Wetware, stops at 89: drops +13% and +26%, visits +19% and +23%, infections within 0.3 of off.
 - Program (Overdrive): attentive drops 21.3 -> 25.2, sysadmin 21.6 -> 27.0; full-life 0.965 for both when they play to full (0.975 when they stop at 89).
-- Iron: its own trade is wear, eased once (Result 22). Daredevil infections 8.2 (was 9.4; 7.3 with no pressure), overclocker 10.9 (was 12.2; 8.7 with no pressure), drops 18.4 and 15.3 against 15.6 and 13.1. The ordinary five are unchanged. Iron is still the riskiest egg for players who live hot, now close to Wetware's greedy cost for the daredevil (8.1).
+- Iron: its own trade is wear, eased once (Result 22), and its Overclock benefits are amplified by the owner multiplier (Result 23: win drops x2.5 and visits x1.75 while overclocked, against 1.5 and 1.25 in 1.0; the other eggs keep the 1.0 values). Daredevil infections 8.2 (was 9.4; 7.3 with no pressure), overclocker 10.9 (was 12.2; 8.7 with no pressure), drops 18.4 and 15.3 against 15.6 and 13.1. The ordinary five are unchanged. Iron is still the riskiest egg for players who live hot, now close to Wetware's greedy cost for the daredevil (8.1).
+- Iron's cost against the others (Result 23): without the amplification the overclocker earned about 1 drop per extra infection and the other eggs' heavy players 4 to 6. With it: daredevil +8.9 drops, +1.2 visits for +0.8 infections; overclocker +7.6 drops, +0.8 visits for +2.4 infections, temper -2.1. The ordinary five are unchanged. The overclocker is still the heaviest trade.
 - Overclock as a held state was tried and rejected: heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit and leaves the wear cost.
 
 ## Play styles it pushes
@@ -52,5 +53,5 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 
 - The bots are not people: a human can nap to end a state, hold exactly 3 hours, or stay at 89 indefinitely.
 - Only drops, play Sync and visits were measured as benefits; the worth of an item is a design call.
-- Iron: wear plus Overclock is still the hardest state to hold for players who live hot; the wear easing (Result 22) is measured on bots only.
+- Iron: wear plus Overclock is still the hardest state to hold for players who live hot; the wear easing and the amplified Overclock benefits (Results 22 and 23) are measured on bots only. Overclock's amplified benefits are a change to a 1.0 rule for Iron only; the other eggs keep the 1.0 values.
 - Low-side rules are thin (Charge low is empty); the temper tells for these states are undesigned; nothing here has unit tests.
