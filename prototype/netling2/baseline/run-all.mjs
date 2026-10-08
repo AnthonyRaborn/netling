@@ -68,7 +68,9 @@ add('challenge-sweep', 'challenge-sweep.mjs', [RUNS(2000)], 'rules', {}, 300);
 add('foresight-sweep', 'foresight-sweep.mjs', [RUNS(3000)], 'rules', {}, 300);
 for (const egg of ['iron', 'program', 'wetware']) add(`egg-anomaly-${egg}`, 'egg-anomaly-sweep.mjs', [RUNS(3000)], `full-${egg}`, { EGG: egg }, 200);
 
-const todo = jobs.filter((j) => !filter || j.name.includes(filter)).sort((a, b) => b.est - a.est);
+const outFile = (j) => join(out, `${j.name}.${j.env.JSON ? 'json' : 'txt'}`);
+// Resumable: a job whose output exists is skipped (outputs are written only after a clean exit). --force reruns everything.
+const todo = jobs.filter((j) => (!filter || j.name.includes(filter)) && (process.argv.includes('--force') || !existsSync(outFile(j)))).sort((a, b) => b.est - a.est);
 const log = join(out, '_run.log');
 const say = (m) => { const l = `${new Date().toISOString()} ${m}`; console.log(l); writeFileSync(log, `${existsSync(log) ? readFileSync(log, 'utf8') : ''}${l}\n`); };
 
@@ -80,8 +82,7 @@ const run = (j) => new Promise((resolve) => {
   const chunks = []; const errs = [];
   p.stdout.on('data', (d) => chunks.push(d)); p.stderr.on('data', (d) => errs.push(d));
   p.on('close', (code) => {
-    const ext = j.env.JSON ? 'json' : 'txt';
-    writeFileSync(join(out, `${j.name}.${ext}`), Buffer.concat(chunks));
+    writeFileSync(code === 0 ? outFile(j) : `${outFile(j)}.failed`, Buffer.concat(chunks));
     if (errs.length) writeFileSync(join(out, `${j.name}.err`), Buffer.concat(errs));
     say(`${code === 0 ? 'done' : `FAILED(${code})`} ${j.name} [${j.config}] ${Math.round((Date.now() - t0) / 1000)}s`);
     resolve();
