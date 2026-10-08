@@ -26,9 +26,9 @@ for (const base of bases) {
         if (s.stage === 'dead' || s.asleep || s.nap) return;
         awake++;
         if (s.flowMin >= 180) share.flow++;
-        if (s.stats.charge >= SIDES.charge.hi) share.cHi++;
+        if (SIDES.charge.hold > 0 ? s.sideHeld?.charge : s.stats.charge >= SIDES.charge.hi) share.cHi++;
         if (s.stats.charge <= SIDES.charge.lo) share.cLo++;
-        if (s.stats.sync >= SIDES.sync.hi) share.sHi++;
+        if (SIDES.sync.hold > 0 ? s.sideHeld?.sync : s.stats.sync >= SIDES.sync.hi) share.sHi++;
         if (s.stats.sync <= SIDES.sync.lo) share.sLo++;
       };
       rs.push(simulate({ ...ARCHETYPES[base] }, i));

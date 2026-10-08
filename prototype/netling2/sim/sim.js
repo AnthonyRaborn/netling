@@ -647,13 +647,32 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
-  charge: { hi: 85, lo: 30, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
-  sync: { hi: 85, lo: 30, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
+  charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
+  sync: { hi: 85, lo: 30, hold: 0, exit: 75, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
 };
 if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.env.SIDES))) {
   if (typeof v === 'object' && v) Object.assign(SIDES[k], v); else SIDES[k] = v;
 }
-const sideOf = (s, key) => (!SIDES.on ? null : s.stats[key] >= SIDES[key].hi ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
+// Held state: with hold > 0 the high side is entered only after the stat has been at hi or over for `hold` awake minutes (dips down to
+// `exit` do not break it), and left when it falls under `exit` or the netling rests. hold 0 is the plain threshold.
+const heldNow = (s, key) => Boolean(s.sideHeld?.[key]);
+const sideOf = (s, key) => (!SIDES.on ? null : (SIDES[key].hold > 0 ? heldNow(s, key) : s.stats[key] >= SIDES[key].hi) ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
+function stepHeld(s, rest) {
+  if (!SIDES.on) return;
+  s.sideHold ??= { charge: 0, sync: 0 };
+  s.sideHeld ??= { charge: false, sync: false };
+  for (const key of ['charge', 'sync']) {
+    const c = SIDES[key];
+    if (!(c.hold > 0)) continue;
+    if (rest || s.stats[key] < c.exit) {
+      s.sideHold[key] = 0;
+      s.sideHeld[key] = false;
+    } else if (s.stats[key] >= c.hi) {
+      s.sideHold[key]++;
+      if (s.sideHold[key] >= c.hold) s.sideHeld[key] = true;
+    }
+  }
+}
 const dropSides = (s) =>
   (sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.drop * sideM('charge') : 1) *
   (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.drop * sideM('sync') : 1) /
@@ -807,6 +826,7 @@ function step(s, t, rng) {
 
   if (IRON.on) stepWear(s, t, rest);
   for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
+  stepHeld(s, rest);
   if (WET.on) stepShock(s);
   stepActs(s);
 
