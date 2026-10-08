@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>State marks preview</title>
+<style>body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+import { stateMarks, MARK_COLORS } from './marks.js';
+import { simulate, LCD } from './mark-colors.mjs';
+import { PALETTES } from '../../src/sim.js';
+// One cell per body palette, all three marks at once (Overclock above, Overdrive below, Overlink at the sides), in normal vision and
+// three color-blind simulations. The body is a stand-in block with two accent eyes, not a real sprite.
+const S = 5, W = 16, H = 16, CELL = 46, ROW = 66, LEFT = 70;
+const views = ['normal', 'protan', 'deutan', 'tritan'];
+const c = document.getElementById('c');
+c.width = (LEFT + PALETTES.length * CELL + 6) * S; c.height = (views.length * ROW + 8) * S;
+const ctx = c.getContext('2d'); ctx.scale(S, S);
+ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+const f = (hex, v) => (v === 'normal' ? hex : simulate(hex, v));
+views.forEach((v, row) => {
+  const y0 = 4 + row * ROW;
+  ctx.fillStyle = '#c7f9ff'; ctx.font = '7px monospace'; ctx.textAlign = 'left';
+  ctx.fillText(v === 'normal' ? 'normal' : v, 3, y0 + 30);
+  PALETTES.forEach((p, pi) => {
+    const cx = LEFT + pi * CELL + CELL / 2, cy = y0 + 31;
+    ctx.fillStyle = f(LCD, v); ctx.fillRect(cx - 21, y0, 42, ROW - 4);
+    const bx = cx - 8, by = cy - 8;
+    ctx.fillStyle = f(p.main, v); ctx.fillRect(bx, by, W, H);
+    ctx.fillStyle = f(p.accent, v); ctx.fillRect(bx + 4, by + 5, 2, 2); ctx.fillRect(bx + 10, by + 5, 2, 2);
+    for (const k of ['overclock', 'overdrive', 'overlink']) { ctx.fillStyle = f(MARK_COLORS[k], v); for (const [dx, dy] of stateMarks({ kind: k, time: 400, w: W, h: H })) ctx.fillRect(bx + dx, by + dy, 1, 1); }
+  });
+});
+document.title = 'ready';
+</script>

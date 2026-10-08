@@ -12,6 +12,7 @@ import { SLOT_MS } from './tell.js';
 
 export const STATE_STEP_MS = 400; // 1.0's HEAT_RISE_MS in src/render.js
 export const KINDS = ['overclock', 'overdrive', 'overlink'];
+export { MARK_COLORS } from './mark-colors.mjs'; // colors: see mark-colors.mjs (contrast and color-vision checks)
 
 export const stepOf = (time) => Math.floor(time / STATE_STEP_MS);
 

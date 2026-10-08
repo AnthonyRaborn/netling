@@ -2,7 +2,9 @@
 // change instants to the temper tell.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stateMarks, KINDS, STATE_STEP_MS, SLOT } from './marks.js';
+import { stateMarks, KINDS, STATE_STEP_MS, SLOT, MARK_COLORS } from './marks.js';
+import { LCD, contrast, minDistance, distance, KINDS_SEEN } from './mark-colors.mjs';
+import { PALETTES } from '../../src/sim.js';
 import { temperTell, EGGS } from './tell.js';
 
 const sig = (v) => JSON.stringify(v);
@@ -105,4 +107,18 @@ test('the new marks never touch the body, whatever the temper tell does to it (d
       }
     }
   }
+});
+
+test('mark colors: 3:1 against the LCD, far apart for normal and color-blind vision, and Overclock keeps 1.0 orange', () => {
+  assert.equal(MARK_COLORS.overclock, '#ff9f1c');
+  const colors = KINDS.map((k) => MARK_COLORS[k]);
+  assert.equal(new Set(colors).size, 3);
+  for (const c of colors) assert.ok(contrast(c, LCD) >= 3, `${c} on the LCD: ${contrast(c, LCD).toFixed(1)}`);
+  assert.ok(minDistance(colors) >= 40, `closest pair ${minDistance(colors).toFixed(1)}`);
+  for (const kind of KINDS_SEEN) assert.ok(distance(MARK_COLORS.overdrive, MARK_COLORS.overlink, kind) >= 40, kind);
+});
+
+test('the new mark colors differ from every body main color and accent, so a mark never reads as part of the body', () => {
+  const body = new Set(PALETTES.flatMap((p) => [p.main, p.accent]));
+  for (const c of [MARK_COLORS.overdrive, MARK_COLORS.overlink]) assert.ok(!body.has(c), c);
 });
