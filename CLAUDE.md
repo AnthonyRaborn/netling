@@ -20,7 +20,7 @@ npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, 
 npm run serve     # http://localhost:5174
 
 # Netling 2.0 sprite prototype (prototype/netling2/, not shipped; see docs/NETLING_2_SPRITES.md)
-npm run proto:test     # its tests (263)
+npm run proto:test     # its tests (271)
 npm run proto:temper   # the temper tell against 1.0's idle and wearables (measurements, not rules)
 npm run proto:balance  # the 2.0 core-rules simulator (prototype/netling2/sim/): lifetime simulations per archetype, same settings as npm run balance plus CLEAR, PREF, PREFBOT, BUGS
 npm run proto:audit    # the real sprite audit on Iron's forms (EGG=program, EGG=wetware or EGG=all; proto:audit:program, proto:audit:wetware)

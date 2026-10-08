@@ -73,4 +73,8 @@ Drops and stock in the fork: Decoy drops from HIDE (weight 2) and wins (1); Salv
 
 ## Not done
 
-Per-egg names and wording for the new items, art, hover text, the Dex lines for the perks, and any 2.0 game code. The fork's results are in `prototype/netling2/notes/perks-traits-notes.md` once measured.
+Per-egg names and wording for the new items, art, hover text, the Dex lines for the perks, and any 2.0 game code. 
+
+## First balance pass (bots, `PERKS=1`)
+
+Full results: `prototype/netling2/notes/perks-traits-notes.md`. In short: no outlier above about 12 points. For a worker (full-life rate 80% before) the forms run from 82 (Feast) to 90 (Breach, Tune corp) with the perk, the level I trait and the keepsake; Hardened (Breach) is the strongest, Foraging (Feast) the weakest (about +1 to +3). No perk or trait rescues the fatal long gap (human-casual 5%), so none becomes a gap cure. Casual and overclocker play barely move (a ceiling). Not measured: the egg pressure states, steering, the new items in a run, a human. Open (not decided): leave until a playtest, lift Foraging or a Feast perk, or trim Hardened's cap to 1.25.
