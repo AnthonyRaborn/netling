@@ -245,6 +245,8 @@ test('each elder is closest, after scaling, to the adult it grows from among all
   });
   console.log('  Program elder against its adult (scaled), best other: ' + rows.map((r) => `${r.adult} ${r.own.toFixed(2)} vs ${r.other} ${r.otherValue.toFixed(2)}`).join(', '));
   for (const r of rows) assert.ok(r.own > r.otherValue && r.own >= 0.75, `${r.adult}: ${r.own.toFixed(2)} against ${r.other} ${r.otherValue.toFixed(2)}`);
+  // Margin over the closest other adult: Parse was redrawn to 0.087; Mouse's elder is the thinnest (0.038).
+  for (const r of rows) assert.ok(r.own - r.otherValue >= 0.035, `${r.adult}: margin ${(r.own - r.otherValue).toFixed(3)} over ${r.other}`);
 });
 
 test('the nine Program elders are distinct from one another (under 1.0\'s 0.82 for a pair of different roles)', () => {

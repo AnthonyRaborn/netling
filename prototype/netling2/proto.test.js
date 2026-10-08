@@ -165,6 +165,8 @@ test('each elder is closest, after scaling, to the adult it grows from, among al
   for (const r of table) assert.ok(r.own > r.otherValue, `${r.adult}: its elder is closer to ${r.other} (${r.otherValue.toFixed(2)}) than to it (${r.own.toFixed(2)})`);
   // The margins are thin for a few; this records them so a redraw that loses one is caught.
   for (const r of table) assert.ok(r.own >= 0.75, `${r.adult}: only ${r.own.toFixed(2)}`);
+  // Margin over the closest other adult: Gronk, Ping, Munch and Thrash were redrawn to 0.07 or more; Bamf's elder is the thinnest (0.042).
+  for (const r of table) assert.ok(r.own - r.otherValue >= 0.04, `${r.adult}: margin ${(r.own - r.otherValue).toFixed(3)} over ${r.other}`);
 });
 
 test('the nine elders are distinct from one another (1.0 flags nothing above 0.82 within a stage, siblings of a role aside)', () => {
