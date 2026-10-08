@@ -9,6 +9,7 @@
 //   Care preferences  a steady temper likes routine, an unsteady one novelty (a small Sync bonus).
 // Netrun code (netrun/run.js here) still writes the signed `axes` pair; `axes` is an adapter onto standing and temper.
 // Pure-ish: every function takes the state, a time (ms epoch) and an rng, so tests can drive it deterministically.
+import { NR2 } from './netrun/nr2.js';
 import { accessoryById, rollWornAccessory } from '../../../src/accessories.js';
 import { weighted } from '../../../src/random.js';
 import { clearedForStage } from '../../../src/netrun/regions.js';
@@ -185,7 +186,7 @@ export const EVENTS = {
 export const GAME_IDS = ['breach', 'dodge', 'tune', 'feast'];
 
 // 2.0 inventory experiments (INV='{"slots":8,"stack":2,"scrap":0.5}'): slots, how many of one kind share a slot, and the share of price a full-inventory scrap pays.
-export const INV = { slots: 6, stack: 1, ...(process.env.INV ? JSON.parse(process.env.INV) : {}) };
+export const INV = { slots: 6, stack: NR2.inventory ? NR2.inv.stack : 1, ...(process.env.INV ? JSON.parse(process.env.INV) : {}) };
 export const INVENTORY_SLOTS = INV.slots;
 // Slots a list of items takes: one per `stack` of a kind.
 export const slotsUsed = (inv) => {

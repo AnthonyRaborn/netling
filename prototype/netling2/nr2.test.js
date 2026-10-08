@@ -461,3 +461,47 @@ test('the forced cache repeats every few layers up to perRun, and never past the
   assert.ok(s.run.tally.forced >= 2 && s.run.tally.forced <= 3, `forced ${s.run.tally.forced}`);
   reset();
 });
+
+test('stacking: items of a kind share a slot up to the stack size, and a further copy opens another slot of the same kind', async () => {
+  const { INV, slotsUsed, hasRoom, INVENTORY_SLOTS } = await import('./sim/sim.js');
+  const saved = INV.stack;
+  INV.stack = 3;
+  assert.equal(slotsUsed(['coolant', 'coolant', 'coolant']), 1);
+  assert.equal(slotsUsed(['coolant', 'coolant', 'coolant', 'coolant']), 2, 'a fourth copy takes a second slot');
+  assert.equal(slotsUsed(['coolant', 'repair', 'coolant', 'repair']), 2);
+  const full = Array.from({ length: INVENTORY_SLOTS * 3 }, () => 'coolant');
+  assert.equal(slotsUsed(full), INVENTORY_SLOTS, 'six slots hold eighteen of one kind');
+  assert.equal(hasRoom(full, 'coolant'), false);
+  assert.equal(hasRoom(full, 'repair'), false);
+  assert.equal(hasRoom(full.slice(0, 15), 'repair'), true);
+  INV.stack = 1;
+  assert.equal(slotsUsed(['coolant', 'coolant']), 2, 'one to a slot is the 1.0 rule');
+  INV.stack = saved;
+});
+
+test('end-of-run choice: the loot and what is carried compete for the slots, the best are kept and the rest scrapped; off, loot is scrapped in the order found', async () => {
+  const { INV } = await import('./sim/sim.js');
+  const saved = INV.stack;
+  INV.stack = 1;
+  const run = (inventory) => {
+    const a = setup('breachCorp', 1, 'relay');
+    a.s.inventory = [...inventory];
+    a.s.scrip = 0;
+    a.s.run.loot = ['overclock'];
+    a.s.run.phase = 'map';
+    jackOut(a.s);
+    return a.s;
+  };
+  const six = ['coolant', 'coolant', 'coolant', 'coolant', 'coolant', 'coolant'];
+  set({ inventory: false });
+  let s = run(six);
+  assert.equal(s.inventory.includes('overclock'), false, 'off: the chip found last is the one scrapped');
+  assert.equal(s.scrip, 12, 'a quarter of 50');
+  set({ inventory: true });
+  s = run(six);
+  assert.equal(s.inventory.includes('overclock'), true, 'on: the player keeps the chip');
+  assert.equal(s.inventory.length, 6);
+  assert.equal(s.scrip, 3, 'and a coolant cell is scrapped instead (a quarter of 15)');
+  INV.stack = saved;
+  reset();
+});

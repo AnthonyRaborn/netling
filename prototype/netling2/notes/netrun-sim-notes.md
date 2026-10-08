@@ -16,7 +16,7 @@ Written for step 2 of the sketch (netrun content per egg). Companion to `docs/NE
 
 **Parity yardstick (settled at the maintainer's request; my proposal, veto welcome).** Banked value per run, in common items (items plus scrip over 15; a disconnect banks nothing), with the exit rate. Bar, in the Deep and the Source with careful play and ICE tiers on, at both levels: every form's value within 20% of the mean, every exit rate within 10 points of the mean, each elder no worse than its own adult, the elder level's mean value at least 15% above the adult level's. `netrun-sweep.mjs` prints the read-out. First reading (400 runs, ICE tiers on, placeholder numbers): Deep, adult level, Tune corp, Tune street and Feast corp are more than 20% below the mean value and Breach street, Dodge corp and the hidden form more than 20% above; at elder level Feast corp and Feast street are low and Breach street and Dodge corp high; the elder level's mean value is 1.24 times the adult's in the Deep and 1.35 times in the Source, so that bar is met, and no elder is worse than its own adult now that the cache keeps the relay. The Feast forms are the clearest gap: their loot parts are too small to match what the defensive forms bank by surviving.
 
-Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 214 tests (it was 190); `npm test` is 503, unchanged.
+Other changes to the fork: the codex cap is 12 (decided; was 8), Root Access arrives mid-life when the codex completes (`CFG.rootMid`, decided), the elder feat can follow the account (`CFG.featFor`, used by `lineage-sweep.mjs`), `simulate` returns the final `form`, `POSTRUN=skip` makes a bot not top Charge up again after a netrun, and `infect` is exported from `sim.js`. `npm run proto:test` is 216 tests (it was 190); `npm test` is 503, unchanged.
 
 Not modelled: Tune street's Foresight (the bots have one skill number, so knowing an ICE's game changes nothing for them), the fog change (a drawing change; the bots plan from the rules and are not affected, which is why it can wait for the 2.0 app), the share line, the Breach variant's real difficulty (an assumed win-chance drop), and an error-out.
 
@@ -143,3 +143,24 @@ Findings:
 Tune forms, per the maintainer's note: Tune corp (types two steps ahead, relay patch at the elder level) is 20% or more below the mean in the Deep at the adult level and at the elder level; Tune street at the adult level (Foresight, which the bots cannot use) is low in both regions, as expected. These are not a tuning target for the bots: the read-out is a floor for them, and the real check is a playtest of what the extra information does for a person. The fog change (lines only from the current node, elder sight showing lines) makes sight worth more to a human and nothing to a bot, so it widens this gap.
 
 Remaining outliers on the yardstick (800 runs): Breach street is more than 20% above the mean at both levels in the Deep and the Source (it is the strongest form); the hidden form is high at the adult level; Dodge corp is high at some cells; Tune corp and Tune street are low. These are the next things to tune once the Feast question (sustain or a relaxed exit bar) is answered.
+
+## 7. Inventory (decided: stacks plus a choice at the end of a run)
+
+The maintainer felt in 1.0 that there are too many items and that the end-of-run discard takes away choice. Measured first (`sim/item-sweep.mjs`, lives, 120 to 150 a cell, ICE tiers and abilities on): about a third of all items granted are scrapped because the six slots are full, even though the bots sell surplus and scrap at home perfectly (attentive 82 granted and 30 scrapped a life, casual 55 and 20, Feast street 87 and 37). More slots barely help (10 slots: 36% down to 33%) because far more come in than are used; stacking helps most.
+
+Decided (maintainer): items of a kind stack in a slot, and at the end of a run the player chooses what to keep, for 2.0. Built as switches (`NR2.inventory`, on with `NR2=all`; `NR2.inv.stack` is 3 as a starting value, mine):
+- **Stacking.** Each slot holds up to `stack` items of one kind, and **a further copy opens another slot of the same kind** (six slots at stack 3 hold eighteen of one kind). `slotsUsed` and `hasRoom` in `sim.js`.
+- **The choice.** At jack-out the loot and what is already carried compete for the slots: the best are kept and the rest are scrapped (a quarter of price). A bot keeps what it has a use for, then by price; a person chooses.
+
+Results (scrapped share of items granted, attentive / casual / Feast street):
+
+| Setting | Scrapped share | Scrap scrip a life (attentive) |
+|---|---|---|
+| 1.0: one to a slot, auto-scrap in the order found | 36% / 35% / 42% | 116 |
+| One to a slot, with the choice | 36% / 33% / 41% | 103 |
+| Stack 2, with the choice | 21% / 20% / 26% | 63 |
+| **Stack 3, with the choice** | 14% / 13% / 21% | 41 |
+
+The choice does not cut the count of scrapped items; it changes which ones: it scraps the cheap ones and keeps the dear ones (scrap scrip falls 12% at one to a slot), which is the feel the maintainer asked for. Stacking is what cuts the count. At stack 3 a bot holds up to 13 items at its peak.
+
+**What this means for the yardstick.** `netrun-sweep.mjs` starts every run with an empty inventory, so it cannot see overflow, and it values a banked item as a whole item. In a life, an item found with a full inventory is worth about a quarter of its price. The Feast numbers in section 6 were tuned before this change and against an empty inventory; with stacking they will be worth more, with the overflow they were worth less. The right check is lives: `item-sweep.mjs` with `NR2=all` (items kept = granted minus scrapped). Retune Feast after the stack size is settled.

@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, infect } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom } from '../sim.js';
 import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
@@ -818,9 +818,30 @@ export function jackOut(pet) {
   pet.stats.integrity = clamp(pet.stats.integrity + restored);
   const kept = [];
   const lost = []; // scrapped for scrip: the inventory was full
-  for (const item of run.loot) {
-    if (grantItem(pet, item).includes('full')) lost.push(item);
-    else kept.push(item);
+  if (NR2.inventory && run.loot.length) {
+    // The player chooses what to keep (decided): the loot and what is already carried compete for the slots, and the rest is scrapped. A bot
+    // keeps what it has a use for (pet.keepList), then by price.
+    const rank = (id) => (pet.keepList?.includes(id) ? 1000 : 0) + (SCRIP.price[id] ?? 0);
+    const all = [...pet.inventory, ...run.loot];
+    const order = all.map((id, i) => ({ id, i, from: i < pet.inventory.length ? 'carried' : 'loot' })).sort((a, b) => rank(b.id) - rank(a.id) || a.i - b.i);
+    const keep = [];
+    for (const it of order) if (hasRoom(keep.map((k) => k.id), it.id)) keep.push(it);
+    const keepIdx = new Set(keep.map((k) => k.i));
+    pet.inventory = all.filter((_, i) => keepIdx.has(i));
+    for (const it of order) {
+      if (keepIdx.has(it.i)) continue;
+      addScrip(pet, sellValue(it.id));
+      lost.push(it.id);
+    }
+    for (const it of keep) if (it.from === 'loot') kept.push(it.id);
+    ITEM_METER.granted += run.loot.length;
+    ITEM_METER.scrapped += lost.length;
+    ITEM_METER.scrapScrip += lost.reduce((n, id) => n + sellValue(id), 0);
+  } else {
+    for (const item of run.loot) {
+      if (grantItem(pet, item).includes('full')) lost.push(item);
+      else kept.push(item);
+    }
   }
   const scrapped = lost.reduce((n, id) => n + sellValue(id), 0);
   const loose = run.scrip ?? 0;

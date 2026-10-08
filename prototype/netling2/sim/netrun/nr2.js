@@ -14,6 +14,10 @@ export const NR2 = {
   // A held pressure state resumes after a jack-out (decided), with a window before the bars can end it (decided: 5 minutes).
   // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
   graceMin: 5,
+  // Inventory (decided, maintainer): items of a kind stack in a slot, and at the end of a run the player chooses what to keep. The stack size and the
+  // ranking a bot uses are mine. NR2=all switches it on.
+  inventory: false,
+  inv: { stack: 3 },
   // The forced filled cache (Feast corp, elder level): one a run, in the layer after the one before halfway (decided: set interval,
   // about one a run, may displace any node but, decided later, never the relay: `relaySafe` is true).
   forcedCache: { perRun: 3, relaySafe: true, every: 3 }, // every: with perRun above 1, a further cache this many layers on
@@ -58,7 +62,7 @@ export const NR2 = {
 };
 
 if (process.env.NR2) {
-  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true } : JSON.parse(process.env.NR2);
+  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true, inventory: true } : JSON.parse(process.env.NR2);
   for (const [k, val] of Object.entries(v)) {
     if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
     else NR2[k] = val;
