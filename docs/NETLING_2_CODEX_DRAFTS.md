@@ -225,10 +225,10 @@ Drafts for the three bar states (Overclock for Heat, Overdrive for Charge, Overl
 | Overlink | link at saturation. your input arrives early. / latency near zero. do not look away. | locked tight. every move lands. do not slip. / your hand, my gears. one motion. | i can feel you from here. it is a lot. / we are so close. i hum when you play. |
 
 Notes:
-- Two lines per state per egg (18 lines), so a chatter pool for a state is small; the 1.0 groups have four to seven. More can be added once the register is approved.
+- Two lines per state per egg (18 lines) is enough (decided, maintainer), though the 1.0 groups have four to seven. The Archive order is Overclock, Overdrive, Overlink (decided).
 - No line names a state or a number, and none says how to enter the state. The hints say only when to listen.
 - Tested: lowercase, no digits, no em dash, 62 characters or less, ids and groups new, and every line keeps its shape in the machine voicing at all four temper levels. The machine voicing of an unsteady Program line used to be able to swap the two halves, which `checkShape` rejects; it is now always a clipped clause, so the machine and hand-written rules agree.
-- Open: whether the Overclock lines should exist for netlings that never reach the state (they are only said inside it, as designed); whether the group order in the Archive is Overclock, Overdrive, Overlink.
+- Open: nothing further for this section.
 
 ## Cross-checks
 
