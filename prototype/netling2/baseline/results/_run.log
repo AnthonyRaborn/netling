@@ -47,3 +47,5 @@
 2026-10-08T17:53:04.462Z start role-sweep
 2026-10-08T17:55:34.243Z done role-sweep [rules] 150s
 2026-10-08T17:55:34.244Z start sides-sweep
+2026-10-08T17:55:45.428Z done hint-sweep [rules] 173s
+2026-10-08T17:55:45.432Z start iron-sweep
