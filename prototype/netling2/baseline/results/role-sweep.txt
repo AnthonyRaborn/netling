@@ -1,0 +1,6 @@
+{"focusShare":0,"roleCertain":0.01,"adultInTheRole":0.28,"hidden":0}
+{"focusShare":0.1,"roleCertain":0.09,"adultInTheRole":0.47,"hidden":0.01}
+{"focusShare":0.2,"roleCertain":0.31,"adultInTheRole":0.65,"hidden":0}
+{"focusShare":0.3,"roleCertain":0.62,"adultInTheRole":0.83,"hidden":0}
+{"focusShare":0.5,"roleCertain":0.95,"adultInTheRole":0.98,"hidden":0}
+{"focusShare":0.8,"roleCertain":1,"adultInTheRole":1,"hidden":0}
