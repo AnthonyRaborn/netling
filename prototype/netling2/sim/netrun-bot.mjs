@@ -1,6 +1,6 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
 import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem } from './netrun/run.js';
-import { INVENTORY_SLOTS, SCRIP, leanSeen } from './sim.js';
+import { INVENTORY_SLOTS, SCRIP, leanSeen, slotsUsed } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
 import { tierPenalty } from './netrun/nr2.js';
 
@@ -61,7 +61,7 @@ function decide(pet, style, rng) {
       const fix = pickFix(pet, style.fix, has);
       if (fix) return fix;
     }
-    const room = pet.inventory.length + pet.run.loot.length < INVENTORY_SLOTS;
+    const room = slotsUsed([...pet.inventory, ...pet.run.loot]) < INVENTORY_SLOTS;
     const wanted = p.options.find((o) => o.id.startsWith('buy') && o.id !== 'buyacc' && !o.disabled && (!style.keep || style.keep.includes(p.offers[Number(o.id.slice(3))])));
     // Each kind of market leans its own way: a player steering one way only shops on that side.
     const side = p.flavor === 'corp' ? 'corp' : 'indie';
@@ -122,7 +122,7 @@ export function surplusSlot(inventory, keep = null) {
 // At a market, sells surplus down to one free slot. Returns how many it sold.
 export function sellAtMarket(pet, keep = null) {
   let sold = 0;
-  while (pet.inventory.length >= INVENTORY_SLOTS - 1) {
+  while (slotsUsed(pet.inventory) >= INVENTORY_SLOTS - 1) {
     const slot = surplusSlot(pet.inventory, keep);
     if (slot === null) break;
     sellItem(pet, slot);

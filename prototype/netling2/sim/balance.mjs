@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, temperLevel, clearBug, leanSeen } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, temperLevel, clearBug, leanSeen, slotsUsed } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -177,7 +177,7 @@ export function checkIn(s, p, now, rng, ctx) {
   ctx.checkIns = (ctx.checkIns ?? 0) + 1;
   ctx.bugPeak = Math.max(ctx.bugPeak ?? 0, s.bugs);
   fixBugs(s, p, ctx);
-  if (s.inventory.length >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
+  if (slotsUsed(s.inventory) >= INVENTORY_SLOTS) ctx.fullChecks = (ctx.fullChecks ?? 0) + 1;
   // Only a player steering for a Stub keeps a Segfault (as a baby); everyone else scraps it.
   const wantsFaults = p.babyFaults && s.stage === 'baby' && s.careMistakes < p.babyFaults;
   for (let i = s.inventory.length - 1; i >= 0 && !wantsFaults && !p.useSegfault; i--) if (s.inventory[i] === 'segfault') doAct('discard', { slot: i });
@@ -187,7 +187,7 @@ export function checkIn(s, p, now, rng, ctx) {
   if (p.trace !== 'hide') keep.push('voucher');
   if (p.gamer) keep.push('booster');
   if (wantsFaults) keep.push('segfault');
-  if (s.inventory.length >= INVENTORY_SLOTS && !p.noItems) {
+  if (slotsUsed(s.inventory) >= INVENTORY_SLOTS && !p.noItems) {
     const slot = surplusSlot(s.inventory, keep);
     if (slot !== null) doAct('discard', { slot });
   }

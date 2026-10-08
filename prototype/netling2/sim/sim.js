@@ -184,7 +184,16 @@ export const EVENTS = {
 
 export const GAME_IDS = ['breach', 'dodge', 'tune', 'feast'];
 
-export const INVENTORY_SLOTS = 6;
+// 2.0 inventory experiments (INV='{"slots":8,"stack":2,"scrap":0.5}'): slots, how many of one kind share a slot, and the share of price a full-inventory scrap pays.
+export const INV = { slots: 6, stack: 1, ...(process.env.INV ? JSON.parse(process.env.INV) : {}) };
+export const INVENTORY_SLOTS = INV.slots;
+// Slots a list of items takes: one per `stack` of a kind.
+export const slotsUsed = (inv) => {
+  const counts = {};
+  for (const id of inv) counts[id] = (counts[id] ?? 0) + 1;
+  return Object.values(counts).reduce((n, c) => n + Math.ceil(c / INV.stack), 0);
+};
+export const hasRoom = (inv, id) => slotsUsed([...inv, id]) <= INVENTORY_SLOTS;
 export const ITEM_CFG = {
   winDropChance: 0.25,
   hideDropChance: 0.3,
@@ -215,7 +224,7 @@ export const SCRIP = {
   max: 100, // anything over the cap is lost, so spending stays a choice
   inherit: 0.5, // the next generation starts with half, rounded down
   sellMarket: 0.5, // selling at a netrun market pays half the price
-  sellElsewhere: 0.25, // scrapping at home, or a pickup that meets a full inventory, a quarter
+  sellElsewhere: process.env.INV && JSON.parse(process.env.INV).scrap !== undefined ? JSON.parse(process.env.INV).scrap : 0.25, // scrapping at home, or a pickup that meets a full inventory, a quarter
   price: { coolant: 15, antivirus: 15, repair: 15, booster: 15, memory: 15, blackice: 25, voucher: 25, segfault: 25, overclock: 50 },
 };
 
@@ -1203,9 +1212,14 @@ export const runCooldownAtFloor = (s) => runCooldownTotal(s) <= CFG.runCooldownF
 export const shielded = (s) => (s.buffs?.shieldUntilAge ?? 0) > s.ageMin;
 
 // Adds an item if there's room. Returns a log suffix.
+export const ITEM_METER = { granted: 0, scrapped: 0, scrapScrip: 0, byId: {} }; // sums over lives, for item-sweep.mjs (what the inventory could not hold)
 export function grantItem(s, id) {
-  if (s.inventory.length >= INVENTORY_SLOTS) {
+  ITEM_METER.granted++;
+  ITEM_METER.byId[id] = (ITEM_METER.byId[id] ?? 0) + 1;
+  if (!hasRoom(s.inventory, id)) {
     const value = sellValue(id);
+    ITEM_METER.scrapped++;
+    ITEM_METER.scrapScrip += value;
     const over = addScrip(s, value);
     return ` found ${ITEMS[id].name}, but inventory is full: scrapped for ${value} scrip${over ? ' (scrip full)' : ''}.`;
   }
