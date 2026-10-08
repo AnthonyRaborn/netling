@@ -329,3 +329,10 @@ Consistent run with the final design (eased wear, Overdrive and Overlink rules, 
 - ironBenefit 1 / 2 / 3, Iron rows, delta against off: daredevil drops +2.8 / +6.2 / +8.9, visits +0.1 / +0.7 / +1.2, infections +0.96 / +0.92 / +0.83; overclocker drops +2.2 / +4.9 / +7.6, visits -0.2 / +0.4 / +0.8, infections +2.2 / +2.3 / +2.4, temper -2.9 / -2.6 / -2.1. Ordinary five unchanged (infections within 0.7, full-life within 0.035).
 - Ratio of extra drops to extra infections: daredevil 2.9 / 6.7 / 10.7; overclocker 1.0 / 2.1 / 3.2.
 - Decision: ironBenefit 3 (the owner multiplier, as for the other bars) is the new default: Iron's Overclock then multiplies win drops by 2.5 and visits by 1.75. The overclocker's trade is still the worst of the heavy archetypes (3.2) and the daredevil's the best (10.7); x2 is the fallback if x3 is too generous to the daredevil.
+
+## Result 24: states are teen and later
+
+`SIDES.teenStates` (default true): a baby holds no Overclock, Overdrive or Overlink (maintainer; lore: too young, inexperienced and unstable); the hold counters stay at zero until the teen stage; Iron's wear unchanged. Tests: `sides.test.js`. Default bots, final design, 200 lives per cell.
+- Before the rule (Result 24 baseline, hint sweep): Overdrive first reached as a baby in 59% of attentive lives (sysadmin 63%, daredevil 68%), Overlink in 29% (46%, 49%); the teen-stage captions never showed for them.
+- After: no state reached as a baby; captions Charge 100% and Sync 99% to 100% for attentive, sysadmin and daredevil, about 2 hours before the state; human-regular 16% and 3%; casual and worker 0%.
+- Ordinary five unchanged (infections within 0.5, full-life within 0.03). Iron heavy players: drops over the no-pressure run daredevil +8.9 -> +7.3, overclocker +7.6 -> +6.3 (babies no longer overclock); infections unchanged (8.2 and 10.7). Other eggs within noise.

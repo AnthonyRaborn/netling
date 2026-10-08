@@ -35,6 +35,10 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 - Iron's cost against the others (Result 23): without the amplification the overclocker earned about 1 drop per extra infection and the other eggs' heavy players 4 to 6. With it: daredevil +8.9 drops, +1.2 visits for +0.8 infections; overclocker +7.6 drops, +0.8 visits for +2.4 infections, temper -2.1. The ordinary five are unchanged. The overclocker is still the heaviest trade.
 - Overclock as a held state was tried and rejected: heavy players live at Heat 65+ half the time, so a hold only shrinks the benefit and leaves the wear cost.
 
+## Stage rule
+
+Every state is teen and later (decided, maintainer). Lore: a baby is too young, inexperienced and unstable to maintain the intense states, so a baby holds no Overclock, Overdrive or Overlink at any bar level and the hold counters do not start until the teen stage. Iron's wear is not a state and still builds in a baby. In the simulator this is `SIDES.teenStates` (true by default, with the pressures on). Effect: the ordinary archetypes are unchanged; Iron's amplified Overclock benefit shrinks a little (daredevil drops +8.9 to +7.3 over its no-pressure run, overclocker +7.6 to +6.3).
+
 ## Play styles it pushes
 
 - Iron: a thermostat player. Run warm for drops, rest before wear builds, do not chase cold (it wears too). The risky read is "one more game while hot".
