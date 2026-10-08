@@ -1,0 +1,1 @@
+{"chargePerks":true,"bot":"greedy","archetype":"steer-tune-corp","fullLife":0.684,"collapse":0.316,"inOverdrive":0.336,"drops":20.8,"playGain":1661,"feeds":88.6,"faults":0.33}

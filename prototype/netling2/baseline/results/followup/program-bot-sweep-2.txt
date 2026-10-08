@@ -1,0 +1,1 @@
+{"chargePerks":true,"bot":"greedy","archetype":"attentive","fullLife":0.962,"collapse":0.038,"inOverdrive":0.122,"drops":16.9,"playGain":1500,"feeds":106.3,"faults":0.39}
