@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, temperLevel, clearBug, leanSeen } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, temperLevel, clearBug, leanSeen } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -306,7 +306,10 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.balanceGames || s.games[s.request.game].won <= minWins(s) + 1) && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), skill()) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
-  const syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
+  let syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
+  // SYNCBOT=greedy plays until Sync is full; SYNCBOT=budget never plays at or over the Sync penalty line (SIDES.sync.penLine).
+  if (process.env.SYNCBOT === 'greedy') syncTarget = 100;
+  else if (process.env.SYNCBOT === 'budget' && SIDES.on && SIDES.sync.penLine > 0) syncTarget = Math.min(syncTarget, SIDES.sync.penLine);
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play') && !(process.env.ACTBOT === 'budget' && ACTS.sync.on && s.stats.sync >= ACTS.sync.line); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
