@@ -22,3 +22,13 @@ export const STATE_HINTS = {
 export function hintDue({ buildMin, shown, busy, hintMin = 120 }) {
   return !shown && !busy && buildMin >= hintMin;
 }
+
+// Heat is different: Overclock has no hold (it starts the moment Heat reaches the line and the OC label shows), so its caption is shown
+// once per netling the first time it is overclocked, not before. Iron alone also gets a wear caption the first time its wear passes
+// the warning line (hidden wear; the cold side is covered by the same line).
+export const OVERCLOCK_HINTS = {
+  program: ['it is running hot.', 'wins find more, but a loss costs it.'],
+  iron: ['it is running past rating.', 'wins find more, but a loss costs it.'],
+  wetware: ['it is running hot all over.', 'wins find more, but a loss costs it.'],
+};
+export const IRON_WEAR_HINT = ['running too hot or too cold wears it.', 'rest lets it recover.'];

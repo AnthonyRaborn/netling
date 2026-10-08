@@ -1,7 +1,7 @@
 // Tests for state-hints.js: the one-time captions keep the house rules and the trigger fires once, only when idle.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { STATE_HINTS, hintDue } from './state-hints.js';
+import { STATE_HINTS, hintDue, OVERCLOCK_HINTS, IRON_WEAR_HINT } from './state-hints.js';
 import { EGGS } from './voice.js';
 
 test('every egg has a two-line caption for each bar, lowercase, short, no em dash, no digit, no state name', () => {
@@ -28,4 +28,17 @@ test('the caption is due once, after the build time, and only when nothing urgen
   assert.equal(hintDue({ buildMin: 120, shown: false, busy: false }), true);
   assert.equal(hintDue({ buildMin: 200, shown: true, busy: false }), false);
   assert.equal(hintDue({ buildMin: 200, shown: false, busy: true }), false);
+});
+
+test('the Overclock captions (every egg) and the Iron wear caption keep the house rules and give nothing away', () => {
+  const all = [...EGGS.flatMap((egg) => OVERCLOCK_HINTS[egg]), ...IRON_WEAR_HINT];
+  assert.equal(OVERCLOCK_HINTS.iron.length, 2);
+  for (const egg of EGGS) assert.equal(OVERCLOCK_HINTS[egg].length, 2, egg);
+  assert.equal(IRON_WEAR_HINT.length, 2);
+  for (const line of all) {
+    assert.ok(line.length <= 46, `${line.length} characters: ${line}`);
+    assert.equal(line, line.toLowerCase());
+    assert.ok(!/\d/.test(line) && !line.includes('\u2014'), line);
+    assert.ok(!/overclock|overdrive|overlink|fever|degrees|percent|wear \d/.test(line), line);
+  }
 });

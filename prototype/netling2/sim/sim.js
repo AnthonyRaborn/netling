@@ -593,6 +593,7 @@ function stepWear(s, t, rest) {
   s.wear = w;
   s.wearMax = Math.max(s.wearMax ?? 0, w);
   if (w >= IRON.line) s.wearHighMin = (s.wearHighMin ?? 0) + 1;
+  if (w >= IRON.line) s.wearAt ??= s.ageMin; // first minute wear passes the warning line (for the one-time Iron caption)
   if (before < IRON.line && w >= IRON.line) log(s, t, '> tolerances are slipping.');
 }
 // 2.0 egg pressure as a band on one meter (maintainer: Iron manages Heat, Wetware Charge, Program Sync). Hidden strain builds while the stat is
@@ -830,6 +831,7 @@ function step(s, t, rng) {
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
   const heatBefore = st.heat;
+  if (st.heat >= CFG.overclockHeat && !rest) s.ocAt ??= s.ageMin; // first minute overclocked (for the one-time Overclock caption)
   st.heat = clamp(
     st.heat + (rest ? -CFG.heatCoolWhileAsleepPerHour : CFG.heatDriftPerHour * chargeLo * (1 + BUG_CFG.heat * s.bugs)) / 60,
   );
