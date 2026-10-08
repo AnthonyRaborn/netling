@@ -6,7 +6,7 @@ Read this first for any sprite work. It is the current state only. The log of ev
 
 - All three eggs have all 22 forms drawn, in `prototype/netling2/` (not shipped, not in `sw.js`, not in `npm test`): baby, 3 teens (corp, street, hidden), 9 adults (4 roles x corp/street, plus hidden), 9 elders (one per adult).
 - Authored in full, not composed (maintainer). Everything is a first draft judged only from screenshots; **nothing has been seen on a device or in the real renderer.** `npm run smoke` has not been run.
-- Verified by machine: `npm test` 503 pass, `npm run proto:test` 283 pass (sprite, care and bug layers on all 66 forms, dead X mirroring, tell and temper pass, visit rules, gallery maker, voice, metronome, simulator and netrun rules, state marks, clinic node, state lines and hints, tutorial text), the unchanged 1.0 sprite audit on each egg (nothing new flagged), review page and three galleries load in headless Chromium.
+- Verified by machine: `npm test` 503 pass, `npm run proto:test` 286 pass (sprite, care and bug layers on all 66 forms, dead X mirroring, tell and temper pass, visit rules, gallery maker, voice, metronome, simulator and netrun rules, state marks, clinic node, state lines and hints, tutorial text), the unchanged 1.0 sprite audit on each egg (nothing new flagged), review page and three galleries load in headless Chromium.
 - **State marks (new, overlays, not sprite art):** Overclock wisps above the body, Overdrive sparks on rows h+1 and h+2 below the feet, Overlink dots three columns out at the sides, all one pixel, 400 ms steps, still in calm mode (`prototype/netling2/marks.js`, colors in `mark-colors.mjs`, preview `docs/netling2-prototypes/state-mark-colors.png`). They stay clear of Iron's drift (two columns) and settle (one row). **Open for the sprite phase:** Iron's wear seams (a small static mark on a sprite edge, one per wear level) are specified but not drawn; the 22 Iron forms differ, so each needs a placement. Not seen on a real sprite or a device.
 - Wearables: all 41 1.0 wearables are placed by the game's own code on every form; none leave the screen (except the 1 px holologo clip that 1.0's own 15 row forms have) and none move between frames.
 
@@ -64,7 +64,7 @@ All are pure functions, applied by the review page; the real renderer and the ga
 | Metronome prop | `metronome.js` | a pendulum that swings on the tell's beat when steady (6 s, 3 s strongly), at irregular moments when unsteady, still at the middle; pure function of level, time and seed | 6 tests in `metronome.test.js`: exact beat, seed ignored when steady, irregular when unsteady, 200 ms floor, reduced motion | not drawn: no sprite or prop art is rendered, no real prop slot, no sound by decision; see the sketch |
 | Blank elder motion | `blank-motion.js` | camouflage scan band sweeps hood to feet and back, plus a dim ghost dub sliding 3 cells either way; 12 steps of 400 ms; 24 columns wide; registered A and B frames still obey the rules; reduced motion parks it | 5 tests in `wetware.test.js` | real renderer and gallery do not run it; how wearables sit on the moving figure unchecked; device flicker check owed |
 
-Neglect and bugs are meant to appear together (neglect leads to faults, faults roll bugs). Bugs are cleared with scrip, Standing or a netrun debug station (see the sketch).
+Neglect and bugs are meant to appear together (neglect leads to faults, faults roll bugs). Bugs are cleared only at a clinic node on a netrun, for scrip or Standing (see the sketch, Bugs).
 
 ## Next phase
 

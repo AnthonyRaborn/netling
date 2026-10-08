@@ -65,7 +65,7 @@ export const EGG_ANOMALIES = {
       {
         id: 'pry',
         label: 'PRY OPEN',
-        hint: 'likely salvage, a little power, runs hot, indie',
+        hint: 'likely salvage, a little power, runs hot, street',
         apply: (c) => {
           const a = A().pry;
           c.pet.stats.heat += a.heat;

@@ -231,7 +231,7 @@ Built: `sim/netrun/egg-anomalies.js` (the three anomalies), the switch `NR2='{"e
 
 **Results** (4000 runs a cell, careful and skilled bots, no ability and Breach corp, adult level, tiers and egg costs on, inventory on; each cell compared with the same seeds without the anomaly in the pool). Averages over the styles and forms, change against `off` (disconnect and exit in points, value in %). Sampling noise: about 1 point on a rate near 30%, about 1% on value; the random pool pick changes the rolls after the first anomaly, so cells are not paired past that point.
 
-| Egg, variant | Bazaar | Corp Cache | Ruins | Deep |
+| Egg, variant | Bazaar | Corp Grid | Ruins | Deep |
 |---|---|---|---|---|
 | Program, random | -0.1 / +0.3 / -0.3 | -0.1 / +0.1 / 0.0 | 0.0 / -0.3 / -0.3 | -0.1 / +0.2 / 0.0 |
 | Program, LET IT RUN only | 0.0 / 0.0 / +1.4 | -0.1 / -0.1 / +0.3 | +0.4 / -1.1 / +1.2 | +0.2 / -0.5 / +0.6 |
@@ -243,7 +243,7 @@ Built: `sim/netrun/egg-anomalies.js` (the three anomalies), the switch `NR2='{"e
 | Wetware, GRAFT only | -0.1 / +0.1 / -2.3 | 0.0 / -0.1 / -1.1 | +0.1 / 0.0 / -2.5 | -0.3 / +0.4 / -1.4 |
 | Wetware, TAKE A SAMPLE only | -0.2 / +0.3 / +1.9 | -0.1 / +0.1 / +0.6 | +0.1 / -0.3 / +1.9 | -0.1 / +0.4 / +2.6 |
 
-Encounters a run (random): Bazaar 0.17, Corp Cache 0.08, Ruins 0.31, Deep 0.21 to 0.22 (the Source and the daily trace have none).
+Encounters a run (random): Bazaar 0.17, Corp Grid 0.08, Ruins 0.31, Deep 0.21 to 0.22 (the Source and the daily trace have none).
 
 **Names since (wording pass, maintainer).** The tables above use the names at measurement time. Now: LET IT RUN is RUN IT, KILL IT is TERMINATE, PRY IT OPEN is PRY OPEN, TAKE A SAMPLE is SAMPLE. PRY OPEN also gives +8 Charge; the sweep (3000 runs a cell, Iron, all four regions) is bit-identical with and without it and with +60 as a probe, so the bots do not use Iron's power in a run and the figures above stand. The size is unmeasured.
 

@@ -1,6 +1,6 @@
 # Netling 2.0: egg pressures (working design)
 
-Status: simulator-tested working design, not in any game code. Numbers come from `prototype/netling2/sim/` bots, never from players. Full measurements: `prototype/netling2/notes/egg-pressure-notes.md` (Results 6 to 21). Commands: `docs/netling2-prototypes/README.md` (`sides-sweep.mjs`, `SIDES`, `SYNCBOT`).
+Status: simulator-tested working design, not in any game code. Numbers come from `prototype/netling2/sim/` bots, never from players. Full measurements: `prototype/netling2/notes/egg-pressure-notes.md` (Results 6 to 23). Commands: `docs/netling2-prototypes/README.md` (`sides-sweep.mjs`, `SIDES`, `SYNCBOT`).
 
 ## The idea
 
@@ -58,4 +58,4 @@ Every state is teen and later (decided, maintainer). Lore: a baby is too young, 
 - The bots are not people: a human can nap to end a state, hold exactly 3 hours, or stay at 89 indefinitely.
 - Only drops, play Sync and visits were measured as benefits; the worth of an item is a design call.
 - Iron: wear plus Overclock is still the hardest state to hold for players who live hot; the wear easing and the amplified Overclock benefits (Results 22 and 23) are measured on bots only. Overclock's amplified benefits are a change to a 1.0 rule for Iron only; the other eggs keep the 1.0 values.
-- Low-side rules are thin (Charge low is empty); the temper tells for these states are undesigned; nothing here has unit tests.
+- Low-side rules are thin (Charge low is empty); the states have no temper tell by decision (care drafts, Temper and the states); the stage rule and the states have five simulator tests (`prototype/netling2/sides.test.js`), no game tests.

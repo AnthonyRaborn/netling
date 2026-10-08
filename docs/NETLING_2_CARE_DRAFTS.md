@@ -1,6 +1,6 @@
 # Netling 2.0 care drafts
 
-Status: first-pass proposals for step 1 of the sketch's next steps (per-egg meters and care buttons). Nothing here is implemented or playtested; the per-egg pressure the wording sits on is measured on the simulator ([NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md)). Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions) and [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (page text and the same three registers).
+Status: first-pass proposals for the per-egg meters and care buttons (sketch, Next steps). Nothing here is implemented or playtested; the per-egg pressure the wording sits on is measured on the simulator ([NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md)). Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions) and [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (page text and the same three registers).
 
 ## Frame (maintainer answers, first pass, not set in stone)
 
@@ -72,7 +72,7 @@ Notes:
 Notes:
 - Program's death register, Iron's and Wetware's are the sketch's. "Care mistake" is internal and shown only in log text.
 - Wetware's rejection is the sketch's failure model used as the name of the virus. Its closest mechanism now is the Sync state: infections are likelier inside it, and playing past 90 inside it rolls one. It still does not grow with augmentation (open).
-- **Bug clearing goes through netruns (maintainer, first pass).** The control bar stays fixed. How is undecided: either a new node type in the existing netrun (the debug station anomaly in the sketch is one entry in the anomaly pool, which would grow into a node that needs rebalancing), or netruns split into a dive (JACK IN, the current expedition) and a market-like open mode. Scrip (15) and Standing (2, any split) remain the prices. Both options touch `netrun/` and its balance tools, so they come after the balance-bot update.
+- **Bug clearing goes through netruns (decided, maintainer, first pass): a clinic node.** The control bar stays fixed. The clinic is a third, unaligned kind of market (Clinic and bug statements, below; the prototypes README, The clinic); the first draft's debug-station anomaly and the idea of splitting netruns into a dive and a market-like mode are set aside. Scrip (15) and Standing (2, any split) remain the prices, plus the market's Charge fee.
 
 ## Items
 
@@ -129,7 +129,7 @@ The FDA glossary has no preventive entry, so feeding is labeled upkeep and sits 
 3. Names: SHUTTER, SIGN OFF, DUCK, SUBMIT, INVADER, FIGHT, HAIL, WAVE, VAT MIX and SCRAPS are first guesses; HIDE and COMPLY keep their Standing meaning (street, corp) under every name.
 4. The Dex hints for temper and the chatter use these words, so they follow once the names settle.
 5. Everything here is untested: label widths on the real control bar, the readout line length, the field manual (generated from `CFG`, so it needs egg-aware text).
-6. The balance tools model 1.0 only and need updating for the current rules before they can check any of this (maintainer, this session).
+6. Resolved: the 2.0 simulator fork (`prototype/netling2/sim/`) models the current rules; it measures the pressures and the clinic, not the wording.
 
 ## Pressure cues (drafts, first pass)
 
@@ -217,7 +217,7 @@ So the work is coexistence. The tell speaks through the body (pose, drift, settl
 
 What a player can read: a steady beat with steady marks (calm and in a state); a drifting or stuttering body with steady marks (unsteady and in a state); no marks (neither). The mix is the only new information, and it comes from existing channels.
 
-Verified (marks.js and marks.test.js, 172 prototype tests pass): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
+Verified (marks.js and marks.test.js; the prototype suite passes): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
 
 Archive hints and chatter lines for the states are drafted in `NETLING_2_CODEX_DRAFTS.md`, State chatter and Archive hints. Open: whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
@@ -259,7 +259,7 @@ The maintainer's direction: bugs are cleared at a clinic node on a netrun (a thi
 
 **Healing items keep their egg names at the clinic (proposal).** Coolant cell / Coolant loop / Cold pack, Repair kit / Spare parts / Skin patch, Antivirus patch / Shielding / Immune booster, as in Items. The clinic is where they are bought, and each egg already reads them in its own voice, so no clinic-only names are needed.
 
-**Hover text (draft).** Numbers are the simulator's first guesses (12 Charge plus 15 scrip, or 2 Standing, any split; not tuned against the final pressure design) and 1.0 shows prices on market buttons, so these show them too.
+**Hover text (draft).** Numbers are the simulator's (12 Charge plus 15 scrip, or 2 Standing, any split; the share and fee were re-measured against the final pressure design and kept, see the end of this section) and 1.0 shows prices on market buttons, so these show them too.
 
 | | Program | Iron | Wetware |
 |---|---|---|---|
