@@ -19,3 +19,7 @@
 2026-10-08T17:30:25.265Z start lineage-casual
 2026-10-08T17:37:02.569Z done lineage-casual [rules] 397s
 2026-10-08T17:37:02.570Z start bug-sweep
+2026-10-08T17:41:35.150Z done balance-full-program [full-program] 914s
+2026-10-08T17:41:35.152Z start clinic-sweep
+2026-10-08T17:41:39.820Z done balance-full-wetware [full-wetware] 918s
+2026-10-08T17:41:39.821Z start push-sweep
