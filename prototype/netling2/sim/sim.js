@@ -647,7 +647,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
 export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
-  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false,
+  on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 1,
   charge: { hi: 85, lo: 30, hold: 0, exit: 75, playGain: 0.15, drop: 0.25, overflow: 0.5, bleed: 1.5, slow: 0.25, gate: 5 },
   heat: { hi: 65, hold: 0, exit: 55 }, // Overclock as a held state (Iron's bar), hold 0 is the plain threshold
   sync: { hi: 85, lo: 30, hold: 0, exit: 75, penLine: 0, penP: 0.05, penDmg: 4, penStep: 0, penFree: 90, penCap: 0.6, burnN: 0, burnCool: 240, visit: 0.25, drop: 0.25, virus: 0.3, swing: 0.002, steadyDecay: 0, calm: 0.2, dull: 0.3 },
@@ -1120,7 +1120,9 @@ function answerRequest(s, action, game) {
 
 export const inFlow = (s) => s.flowMin >= CFG.flowAfterMin;
 export const overclocked = (s) => (SIDES.on && SIDES.owner === null && SIDES.heat.hold > 0 ? Boolean(s.sideHeld?.heat) : s.stats.heat >= CFG.overclockHeat);
-const visitMult = (s) => (overclocked(s) ? CFG.overclockVisitMult : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
+// Iron is the owner of Heat: with ironBenefit above 1 its Overclock benefits (win drops, visits) grow by that factor (1 = the 1.0 rule).
+const ocBoost = (m) => (SIDES.on && SIDES.owner === null ? 1 + (m - 1) * SIDES.ironBenefit : m);
+const visitMult = (s) => (overclocked(s) ? ocBoost(CFG.overclockVisitMult) : inFlow(s) ? CFG.flowVisitMult : 1) * (sideOf(s, 'sync') === 'hi' ? 1 + SIDES.sync.visit * sideM('sync') : 1);
 // How fast mini-games and ICE run: slower while overclocked.
 export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 
@@ -1610,7 +1612,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         : hot
           ? `${game}: lost, overclocked. it took that hard.`
           : `${game}: lost. it had fun anyway.`;
-      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance * (hot ? CFG.overclockDropMult : 1) * dropSides(s), rng);
+      if (won) msg += maybeDrop(s, 'win', ITEM_CFG.winDropChance * (hot ? ocBoost(CFG.overclockDropMult) : 1) * dropSides(s), rng);
       const asked = answerRequest(s, 'play', game);
       if (asked) msg += ' just what it asked for.';
       res = { ...ok(msg, won ? 'win' : 'lose'), requestMet: asked };
