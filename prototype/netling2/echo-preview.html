@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Echo options (Whisper, Init, Cipher)</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+import './ready.js';
+import { drawSprite, paletteColors } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+import { forms } from './models.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
+import { PROGRAM_OPTIONS, IRON_OPTIONS, STEP_MS } from './echo-motion.js';
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 5);
+const STEPS = [0, 2, 4, 6, 8, 10];
+const rows = [
+  { label: 'Cipher (Wetware, decided; reference)', form: wetwareForms().wetwareElderHidden, fn: (s, a, o) => wetwareForms().wetwareElderHidden.motion(s, a, o) },
+  ...Object.values(PROGRAM_OPTIONS).map((o) => ({ label: 'Whisper (Program) ' + o.name, form: programForms().programElderHidden, fn: o.fn })),
+  ...Object.values(IRON_OPTIONS).map((o) => ({ label: 'Init (Iron) ' + o.name, form: forms('B').ironElderHidden, fn: o.fn })),
+];
+const W = 34, H = 17, GAP = 4, LABEL = 24;
+const c = document.getElementById('c');
+c.width = (STEPS.length * (W + GAP) + GAP + 2 * W + GAP) * SC; c.height = rows.length * (H + LABEL / SC + 2) * SC + 10;
+const ctx = c.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const pal = paletteColors(PALETTES[Number(hash.get('palette') ?? 0)]);
+let y0 = 0;
+for (const r of rows) {
+  ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(10, SC * 2)}px monospace`; ctx.textBaseline = 'top';
+  ctx.fillText(r.label, 4, y0 + 2);
+  y0 += LABEL;
+  STEPS.forEach((s, i) => {
+    const x0 = GAP + i * (W + GAP) * 1;
+    ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+    ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+    const sprite = r.fn(r.form.a, r.form.anchors.a, { time: s * STEP_MS });
+    drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, pal);
+    ctx.fillStyle = '#c7f9ff66'; ctx.font = '2px monospace'; ctx.fillText('step ' + s, 1, 0);
+    ctx.restore();
+  });
+  // the calm version (reduced motion) and the plain frame at the end of the row
+  [['calm', { time: 0, reduced: true }], ['frame', null]].forEach(([name, o], i) => {
+    const x0 = GAP + STEPS.length * (W + GAP) + i * (W + GAP);
+    ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+    ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+    const sprite = o ? r.fn(r.form.a, r.form.anchors.a, o) : r.form.a;
+    drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, pal);
+    ctx.fillStyle = '#c7f9ff66'; ctx.font = '2px monospace'; ctx.fillText(name, 1, 0);
+    ctx.restore();
+  });
+  y0 += H * SC + 6;
+}
+</script>
