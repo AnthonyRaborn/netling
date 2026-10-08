@@ -52,11 +52,11 @@ const diffTable = (cfg) => {
 };
 // The break (BRAKE in sim.js) against the same egg without it, when those runs exist.
 import { existsSync } from 'node:fs';
-const brakeTable = (egg) => {
-  const f = join(here, 'results', `balance-brake-${egg}.json`);
+const brakeTable = (egg, tag = 'brake', line = 40) => {
+  const f = join(here, 'results', `balance-${tag}-${egg}.json`);
   if (!existsSync(f)) return null;
   const br = JSON.parse(readFileSync(f, 'utf8')).archetypes;
-  const rows = [`| archetype | full-${egg} full life % | with break % | change (points) | faults change | viruses change | netruns change |`, '|---|---:|---:|---:|---:|---:|---:|'];
+  const rows = [`| archetype | full-${egg} full life % | with the break at ${line} % | change (points) | faults change | viruses change | netruns change |`, '|---|---:|---:|---:|---:|---:|---:|'];
   for (const n of names) {
     const a = data[`full-${egg}`].archetypes[n];
     const b = br[n];
@@ -72,7 +72,7 @@ const out = [
   '',
   ...configs.flatMap((c) => [`## ${c}`, '', table(c), '']),
   ...configs.slice(1).flatMap((c) => [`## ${c} against core`, '', diffTable(c), '']),
-  ...['iron', 'program', 'wetware'].flatMap((e) => { const t = brakeTable(e); return t ? [`## ${e} with the break against without`, '', t, ''] : []; }),
+  ...[['brake', 40], ['brake55', 55]].flatMap(([tag, line]) => ['iron', 'program', 'wetware'].flatMap((e) => { const t = brakeTable(e, tag, line); return t ? [`## ${e} with the break at ${line} against without`, '', t, ''] : []; })),
 ];
 writeFileSync(join(here, 'summary-balance.md'), out.join('\n'));
 console.log(`wrote summary-balance.md (${names.length} archetypes, ${configs.length} configurations)`);

@@ -102,11 +102,12 @@ Reading:
 - A player who ignores the cost (the default bot) still loses 18 to 32 points as Tune corp or the hidden form. That is the worst case, not the typical one.
 - Assumptions: the 70 threshold for `watch`, and that the player understands the state and its cost at all. The thresholds are hidden by design (`docs/NETLING_2_EGG_PRESSURES.md`), so a first-time player is the greedy case once.
 
-**With the break** (`BRAKE='{"on":true}'`; design in `docs/NETLING_2_EGG_PRESSURES.md`, "The break"): `balance-brake-iron`, `-program` and `-wetware`, 1000 lives of 37 archetypes each, compared with the same egg without it in `summary-balance.md`.
-- Program: every archetype that lost full life recovers: steer-tune-corp 67.5 to 99.7, ghosthunter 80.5 to 98.6, the hidden-path hunters from about 81 to between 98.6 and 99.4, sysadmin 92.2 to 98.6, attentive 95.0 to 99.6. Nothing gets worse. Netruns a life rise by 1 to 6 because the netling is healthier.
-- Iron and Wetware: no archetype moves by 1.5 points or more, and none gains or loses a fault.
-- The bot sweep (`results/followup/program-bot-sweep-brake-*.txt`) shows the cost: for greedy Tune corp the win drops fall from 20.8 to 15.1 a life, and a player who watches the bar ends with about the same benefit as one who does not (15.0 against 15.1), because the lockout removes access for a day after each break.
-- Untested: the break line and the warning line (55 and 70), other lockout lengths, and an Iron-specific trigger.
+**With the break** (`BRAKE='{"on":true}'`; design in `docs/NETLING_2_EGG_PRESSURES.md`, "The break"): `balance-brake-iron`, `-program` and `-wetware` use the maintainer's line, **Integrity 40** (the first test, at 55, is kept as `balance-brake55-*` and `followup/program-bot-sweep-brake55-*`). 1000 lives of 37 archetypes each; `summary-balance.md` compares each with the same egg without it.
+- Program, full life without the break, at 55 and at 40: steer-tune-corp 67.5, 99.7, 99.1; ghosthunter 80.5, 98.6, 98.3; the hidden-path hunters about 81, 98.6 to 99.4, 97.7 to 98.3; sysadmin 92.2, 98.6, 97.5; attentive 95.0, 99.6, 99.3. At 40 every Program archetype is at 97.5 or better and nothing is worse than with no break.
+- Iron and Wetware: no archetype moves by 1.5 points or more at either line.
+- Bot sweep (Charge perks on), full life / win drops a life, no break, 55, 40: greedy Tune corp 68.4 / 20.8, 99.8 / 15.1, 99.2 / 17.2; watching Tune corp 99.2 / 18.0, 99.5 / 15.0, 99.5 / 17.4; greedy ghosthunter 82.3 / 28.9, 98.6 / 23.1, 98.1 / 24.7; watching ghosthunter 97.9 / 25.7, 98.4 / 23.5, 97.8 / 25.3.
+- Reading: the lower line costs 0.3 to 1.5 points of full life and returns about 85% to 96% of the unbraked benefit. A careful player and a careless one end up with almost the same benefit (17.4 against 17.2 for Tune corp), so the break protects the careless without rewarding the careful.
+- Untested: the warning line (70), other lockout lengths, and an Iron-specific trigger.
 
 ## Against the figures in the docs
 

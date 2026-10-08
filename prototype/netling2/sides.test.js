@@ -72,21 +72,25 @@ test('with the break on, a held Overdrive ends below breakInt, the bar drops, an
   let dropViolations = 0;
   let breaks = 0;
   let prevLock = false;
+  let prevUnder = false;
   globalThis.__sample = (s) => {
     if (s.stage === 'dead') return;
-    if (s.sideHeld?.charge && s.stats.integrity < BRAKE.breakInt - 1) minutesHeldUnder++;
+    // A sudden hit (a landed intrusion, an overflow crash) can take Integrity under the line inside one minute; the break fires on the next tick.
+    const under = Boolean(s.sideHeld?.charge) && s.stats.integrity < BRAKE.breakInt - 1;
+    if (under && prevUnder) minutesHeldUnder++;
+    prevUnder = under;
     if ((s.brakeUntil?.charge ?? 0) > s.ageMin && s.sideHeld?.charge) lockViolations++;
     const lockNow = (s.brakeUntil?.charge ?? 0) > s.ageMin;
     if (lockNow && !prevLock) { breaks++; if (s.stats.charge > BRAKE.drop.charge + 1) dropViolations++; } // Overdrive's own break (Overlink's drops Sync)
     prevLock = lockNow;
   };
-  for (let i = 1; i <= 30; i++) { prevLock = false; simulate({ ...ARCHETYPES['steer-tune-corp'] }, i); }
+  for (let i = 1; i <= 30; i++) { prevLock = false; prevUnder = false; simulate({ ...ARCHETYPES['steer-tune-corp'] }, i); }
   globalThis.__sample = undefined;
   BRAKE.on = false;
   configure(false);
   assert.ok(SIDE_METER.brakes > 0, 'a greedy Tune corp netling hits the break in some of 30 lives');
   assert.ok(SIDE_METER.brakeWarns >= SIDE_METER.brakes, 'every break is preceded by a warning');
-  assert.equal(minutesHeldUnder, 0, 'a state is not held while Integrity is more than 1 under breakInt');
+  assert.equal(minutesHeldUnder, 0, 'a state is never held for two samples in a row while Integrity is more than 1 under breakInt');
   assert.equal(lockViolations, 0, 'Overdrive is not held during the lockout');
   assert.equal(dropViolations, 0, 'the bar is at or under the drop level when the break fires');
   assert.ok(breaks > 0);
