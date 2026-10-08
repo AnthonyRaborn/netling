@@ -57,3 +57,5 @@ Commands: `FORCE_ADULT=<form> PERKS=1 [TRAIT=<form> [TRAIT_LEVEL=3]] NR2=all JSO
 1. Leave the first versions until a playtest (the first pass found no outlier above 12 points, the strongest being Hardened at level III for a worker).
 2. Lift the Feast care value: Foraging to +35%, or a Feast corp perk that helps Charge (the line's loot is its job; this is a care top-up).
 3. Trim Hardened's cap (1.5) to 1.25 like the other traits, for a worker +12 becomes about +10.
+
+**Decided (maintainer): option 3 only; the rest waits for a playtest.** The cap is 1.25 under `PERKS.on` in `sim.js`. The tables above were measured at 1.5, so the level III column for Breach (+12) is stale: at 1.25 a level III Hardened is -62.5% infections instead of -75%. Not re-run.

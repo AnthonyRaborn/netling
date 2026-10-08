@@ -29,7 +29,7 @@ Status: designed with the maintainer on paper, then built as switches in the sim
 
 | Role | Trait | Effect at strength 1 | Cap | Source |
 |---|---|---|---|---|
-| Breach | Hardened | infection chance -50% | 1.5 | 1.0 |
+| Breach | Hardened | infection chance -50% | 1.25 (Decided after the first balance pass; 1.0's was 1.5) | 1.0 |
 | Dodge | Evasive | timed events (trace, intrusion, overflow) give 25% more minutes to answer | 1.25 | new |
 | Tune | Persistent | drains 30% slower while resting | 1.25 | 1.0 |
 | Feast | Foraging | both packet types restore +25% Charge | 1.5 | Licensed, generalised so it does not steer Standing |
@@ -46,7 +46,7 @@ Evasive is the one trait that changes timing, not frequency, so it does not over
 | Dodge corp | Bypass chip |
 | Dodge street | Decoy (new) |
 | Tune corp | Coolant cell |
-| Tune street | Signal booster (proposal: the Signal Tune game's own item; to confirm) |
+| Tune street | Signal booster (Decided: the Signal Tune game's own item) |
 | Feast corp | Corp voucher |
 | Feast street | Salvage cell (new) |
 | Hidden | Memory shard |
@@ -77,4 +77,4 @@ Per-egg names and wording for the new items, art, hover text, the Dex lines for 
 
 ## First balance pass (bots, `PERKS=1`)
 
-Full results: `prototype/netling2/notes/perks-traits-notes.md`. In short: no outlier above about 12 points. For a worker (full-life rate 80% before) the forms run from 82 (Feast) to 90 (Breach, Tune corp) with the perk, the level I trait and the keepsake; Hardened (Breach) is the strongest, Foraging (Feast) the weakest (about +1 to +3). No perk or trait rescues the fatal long gap (human-casual 5%), so none becomes a gap cure. Casual and overclocker play barely move (a ceiling). Not measured: the egg pressure states, steering, the new items in a run, a human. Open (not decided): leave until a playtest, lift Foraging or a Feast perk, or trim Hardened's cap to 1.25.
+Full results: `prototype/netling2/notes/perks-traits-notes.md`. In short: no outlier above about 12 points. For a worker (full-life rate 80% before) the forms run from 82 (Feast) to 90 (Breach, Tune corp) with the perk, the level I trait and the keepsake; Hardened (Breach) is the strongest, Foraging (Feast) the weakest (about +1 to +3). No perk or trait rescues the fatal long gap (human-casual 5%), so none becomes a gap cure. Casual and overclocker play barely move (a ceiling). Not measured: the egg pressure states, steering, the new items in a run, a human. **Decided (maintainer): trim Hardened's cap to 1.25 and leave the rest to playtesting.** The worker may need some tuning down; fine for now. Foraging and the Feast perks stay as they are until the playtest.

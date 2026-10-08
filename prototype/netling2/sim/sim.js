@@ -323,7 +323,7 @@ export const TRAIT_CFG = {
   maxLevel: 3,
   full: { licensed: 0.25, hardened: 0.5, persistent: 0.3, volatile: 0.5, untraceable: 0.6, evasive: 0.25, foraging: 0.25 },
   volatileIntegrity: 0.75,
-  cap: { licensed: 1.5, hardened: 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25, evasive: 1.25, foraging: 1.5 },
+  cap: { licensed: 1.5, hardened: PERKS.on ? 1.25 : 1.5, persistent: 1.25, volatile: 1.25, untraceable: 1.25, evasive: 1.25, foraging: 1.5 }, // 2.0 (decided, maintainer): Hardened capped at 1.25 like the others
 };
 
 export const levelStrength = (level) => 1 + TRAIT_CFG.levelStep * (Math.min(Math.max(level ?? 1, 1), TRAIT_CFG.maxLevel) - 1);
