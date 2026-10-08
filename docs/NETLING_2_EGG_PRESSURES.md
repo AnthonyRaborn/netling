@@ -37,7 +37,7 @@ A player who stops at 89 pays essentially nothing and keeps a small benefit; a p
 
 ## Stage rule
 
-Every state is teen and later (decided, maintainer). Lore: a baby is too young, inexperienced and unstable to maintain the intense states, so a baby holds no Overclock, Overdrive or Overlink at any bar level and the hold counters do not start until the teen stage. Iron's wear is not a state and still builds in a baby. In the simulator this is `SIDES.teenStates` (true by default, with the pressures on). Effect: the ordinary archetypes are unchanged; Iron's amplified Overclock benefit shrinks a little (daredevil drops +8.9 to +7.3 over its no-pressure run, overclocker +7.6 to +6.3).
+Every state is teen and later (decided, maintainer). Lore: a baby is too young, inexperienced and unstable to maintain the intense states, so a baby holds no Overclock, Overdrive or Overlink at any bar level and the hold counters do not start until the teen stage. Iron's wear is not a state and still builds in a baby. A baby at a high bar shows nothing: no cue, no line (decided, maintainer). In the simulator this is `SIDES.teenStates` (true by default, with the pressures on). Effect: the ordinary archetypes are unchanged; Iron's amplified Overclock benefit shrinks a little (daredevil drops +8.9 to +7.3 over its no-pressure run, overclocker +7.6 to +6.3).
 
 ## Play styles it pushes
 
