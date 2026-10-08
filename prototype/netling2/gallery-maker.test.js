@@ -21,6 +21,7 @@ test('the maker writes three galleries, each with the layers section wired in fo
     assert.match(html, /'crests', 'colors', 'layers'\]/);
     assert.ok(html.includes(`}, "${egg}");`), `${egg}: wrong egg in the builder`);
     assert.ok(html.includes('22 forms'), `${egg}: heading`);
+    assert.ok(html.includes("['1', '2', '3', '4', '5', '6', '8']") && !html.includes('Math.max(3, scale()'), `${egg}: the 1x and 2x scales`);
   }
 });
 

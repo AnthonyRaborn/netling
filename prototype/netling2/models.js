@@ -98,7 +98,11 @@ export function pose(a, eyeRow, kind, fill = '#') {
   a.forEach((row, y) => y < eyeRow && y >= eyeRow - 2 && [...row].forEach((ch, x) => ch === 'o' && (g[y][x] = fill)));
   for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
   for (const cells of groups) {
-    const mx = Math.round(cells.reduce((n, [x]) => n + x, 0) / cells.length);
+    // A half-cell centre (every two-cell eye) rounds toward the middle of the sprite, not to the right as 1.0 does, so the dead X's of a
+    // symmetric pair mirror each other (Wetware's dead pose has done this since the review; Iron and Program use this one).
+    const cx = cells.reduce((n, [x]) => n + x, 0) / cells.length;
+    const middle = (a[0].length - 1) / 2;
+    const mx = cx % 1 === 0.5 ? (cx < middle ? Math.ceil(cx) : Math.floor(cx)) : Math.round(cx);
     const my = Math.round(cells.reduce((n, [, y]) => n + y, 0) / cells.length);
     if (kind === 'dead') {
       for (const [dx, dy] of [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]]) if (g[my + dy]?.[mx + dx] !== undefined && g[my + dy][mx + dx] !== '.') g[my + dy][mx + dx] = 'o';

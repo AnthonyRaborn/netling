@@ -27,6 +27,21 @@ for (const egg of EGGS) {
   const LAYERS_IMPORT = "      import { layersSection } from '../../prototype/netling2/gallery-layers.js';\n";
   const BUILDER = `      build.layers = () => layersSection({ el, section, grid, palettes, tint, scale, worn, P, addCell: (c) => cells.push(c) }, ${JSON.stringify(egg.egg)});\n\n      // --- page`;
   let patched = html;
+  // 1x and 2x for the prototype galleries (1.0's lowest is 3x, and several sections clamp their sub-scales to 3): every form at its real
+  // size, many to a screen. 1.0's own gallery.html is left alone.
+  // The clinic (a 2.0 node kind, clinic-node.js) joins the netrun node markers: one more column, drawn by the prototype's own drawClinicNode.
+  const CLINIC = [
+    ["const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'exchange', 'anomaly', 'exit'];", "const types = ['entry', 'cache', 'ice', 'relay', 'checkpoint', 'market', 'exchange', 'clinic', 'anomaly', 'exit'];"],
+    ['drawNode(ctx, type, 20, 20, REGIONS[region].palette, spent);', "type === 'clinic' ? drawClinicNode(ctx, 20, 20, spent) : drawNode(ctx, type, 20, 20, REGIONS[region].palette, spent);"],
+    ['The nine map markers (a market draws as a black market or a corp exchange)', "The ten map markers (a market draws as a black market or a corp exchange; the clinic is the 2.0 prototype\\'s third kind, a plus, from prototype/netling2/clinic-node.js)"],
+    ["      import { renderLCD,", "      import { drawClinicNode } from '../../prototype/netling2/clinic-node.js';\n      import { renderLCD,"],
+  ];
+  for (const [from, to] of CLINIC) {
+    if (!patched.includes(from)) throw new Error(`gallery.html changed: could not find ${from}`);
+    patched = patched.replace(from, () => to);
+  }
+  for (const need of ["['3', '4', '5', '6', '8']", 'Math.max(3, scale()']) if (!patched.includes(need)) throw new Error(`gallery.html changed: could not find ${need}`);
+  patched = patched.replace("['3', '4', '5', '6', '8']", "['1', '2', '3', '4', '5', '6', '8']").replaceAll('Math.max(3, scale()', 'Math.max(1, scale()');
   for (const [from, to] of [
     ["      import { renderLCD,", LAYERS_IMPORT + "      import { renderLCD,"],
     ["'crests', 'colors'];", "'crests', 'colors', 'layers'];"],
