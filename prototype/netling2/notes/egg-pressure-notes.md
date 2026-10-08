@@ -212,3 +212,13 @@ Changes from Result 10: low-side benefits (slower Charge drain and Heat drift, c
 - Full-life, ordinary five: within noise in A and S (0.82 to 1.0 against off 0.84 to 1.0). C hurts heavy owners: overclocker Program 0.95 -> 0.86, daredevil Program 0.935, sysadmin Program 0.965.
 - A (x3, 85/30) gives the cleanest owner contrast without full-life harm. Sharper thresholds (S, C) add owner cost for the heavy archetypes and little contrast for the ordinary ones.
 - Open: steadyDecay costs Wetware attentive players Steady; Iron's equivalent of the owner-only low benefit (extra reward for running cold) is unbuilt.
+
+## Result 12: one special state per bar (Surge, Wired, Overclock), low sides as deficits only
+
+Config: x3 owner multiplier, high at 85, low at 30; low-side benefits removed (slow 0, calm 0), low-side costs kept for every egg (gate 10, dull 0.3); high-side costs as Result 11 (bleed 4, overflow 1, virus 0.6), no steady decay; Iron rows run with the adopted wear model (Heat is Iron's bar). P = Flow unchanged. Q = Flow also blocked while Charge or Sync is in its high state (`flowShared`). 200 lives per cell, `sides-sweep.mjs`; not unit-tested.
+
+- Q fails: attentive and sysadmin sit at 85+ a third of the time, so the Flow share goes from 0.27/0.32 to 0 and their temper drops from 4.9/5.5 to 2.6 (Steady lost). 85 is where good players normally are, so it is not a special state yet.
+- Time on a high side by threshold (awake, off, attentive/sysadmin/casual/worker, 60 lives): 85 about 34-42% / 32-41% / 10-12% / 5-7%; 90 about 19-24% / 17-24% / 6% / 3-4%; 95 about 7-9% / 6-10% / 2% / 1-2%. 95 is "special".
+- P: worker full-life 0.84 -> 0.77 (Iron, with wear), 0.785 (Program), 0.805 (Wetware); casual Program 0.875 (off 0.94). The low-side gate (10 more Charge to play under 30) costs sparse players on every egg, and Program's worker no longer has the slower-drain benefit.
+- P infections, ordinary five: within +-0.7 of off (attentive 7.4 to 8.1, sysadmin 7.6 to 8.4 Wetware, worker 6.1 to 6.6, human-regular 3.8 to 4.6). Daredevil and overclocker pay on Iron (9.5, 12.0 against 7.3, 8.7) because of the wear model; not a new effect.
+- Open: raise the special-state threshold (95); make the low-side gate owner-only or drop it; Flow stays Heat-gated unless the special states are made rare enough to gate it.
