@@ -162,7 +162,23 @@ Because the core abilities are shared (3.1), the eggs differ through the egg pre
 | Purge order | Keep in the Source; unchanged rule, the three readings (the order can never run) |
 | Source anomalies | 1.0's Source pulls from all six; 2.0 should keep the Source's own selection mostly un-egg-flavored |
 
-The egg anomalies are a go (maintainer); their exact options are still proposals. They are small content, not a new mechanic, but they do add rules and need tests. Each should respect the fork's `lean` adapter (allegiance becomes Standing; temper is its own value).
+The egg anomalies are a go (maintainer). **Detailed first pass, built in the fork and measured on bots** (`sim/netrun/egg-anomalies.js`, switch `NR2='{"eggAnomalies":true}'`, `nr2.test.js`; results in `prototype/netling2/notes/netrun-sim-notes.md`, section 10). All numbers are my starting values.
+
+- **Who meets them, and where.** A netling meets only its own egg's anomaly, as **one more entry in the region's anomaly pool** (so about one anomaly node in six of its own, the same as any of 1.0's), in every region except the Source, the daily trace and the tutorial. The daily trace stays the same for every egg; the Source keeps its own selection (the purge order and the five shared ones). Measured, a netling meets its egg's anomaly about 0.17 times a run in the Bazaar, 0.08 in the Corp Cache, 0.31 in the Ruins and 0.22 in the Deep.
+- **Each has two options like 1.0's, and each option leans** (allegiance becomes Standing, stability is temper), through the same `lean` adapter:
+
+| Egg | Anomaly | Option | Effect (starting values) | Leans |
+|---|---|---|---|---|
+| Program | STACK OVERFLOW: "a call that never returns. the frames pile up, each a copy of the last." | UNWIND | +25 Charge; the next ICE never fights, whatever its tier; if Charge ends over 95 the buffer overflows: -10 Integrity | temper, entropy |
+| | | CATCH IT | -8 Charge, +10 Integrity | temper, order |
+| Iron | BIT-ROT PATCH: "a read-only region is flipping bits. a signed patch lies beside it, one build old." | FLASH IT | -12 Charge, -20 Heat, -30 wear | corp (signed patch) |
+| | | PRY IT OPEN | +10 Heat; 60% a loot item | street |
+| Wetware | GRAFT: "a bed of living tissue, still viable, the right shape to take a graft." | GRAFT IT | +20 Sync; 30% rejection (an infection, -4 Integrity; none if already infected) | temper, entropy |
+| | | TAKE A SAMPLE | -6 Sync; 50% a loot item | temper, order |
+
+- **Flavor, kept small.** Each anomaly sits on its egg's bar: the overflow's surge is **Overdrive-flavored** (it is free until the buffer is full, then it tears, so a Program netling already holding Charge pays for the greed), the patch is **maintenance for Iron's wear** (Heat and wear down, at a cost in Charge, against loot that runs hot), the graft is **Overlink-flavored** (Sync up, with the infection risk Wetware already lives with). Nothing needs the egg's pressure to be on, except that the patch's wear part does nothing for a netling with no wear. The stack overflow's free pass is the only new run mechanic (`run.skipIce`: one pass, any tier, consumed by the next ICE).
+- **Wording rules.** Wetware's text stays plain (no CP2020 jargon); Program's and Iron's use their own substrate words. Hints: see open question 9 (1.0's hints show numbers; the 2.0 state clues are numberless).
+- **Measured against the yardstick** (bots, 4000 runs a cell, careful and skilled, no ability and Breach corp, Bazaar to Deep): taking the options at random and averaging over the styles and forms, each egg anomaly moves the disconnect rate by less than 1 point, the exit rate by 1.5 points or less and banked value by under 2.5%, in every region (single cells reach 1.1 and 1.5 points); neither option of any anomaly is more than about 5% of value better than its pair. Stack overflow in the Deep is the strongest (UNWIND alone: disconnect -1.3 points, exit +2.1, because a skipped fight in the Deep is worth most there). The bots cannot value what the Iron patch does to wear and Heat or the graft's Sync (they bank loot, not bars), so FLASH IT looks about 2% worse than PRY IT on value and is probably better than it looks for a hot Iron netling.
 
 ## 7. Regions, the tutorial run and contracts
 
@@ -210,7 +226,7 @@ Still open (the decisions above are not repeated):
 6. **Second parts** and the elder level are candidates with starting values, tuned only against the bots. Tune corp and Tune street sit under the band on the bots' measure and are not a bot target.
 7. **Feast progression:** still up to a life behind the defensive forms to a first elder and the three-egg total; accepted for a loot role, to be judged in a playtest.
 8. **Challenges** have not been tried with any of this.
-9. **Egg anomalies:** options for stack overflow, bit-rot patch and graft are drafted, not designed in detail.
+9. **Egg anomalies:** options are designed and measured in the fork (section 6). Open: whether the hints show numbers as 1.0's do or stay qualitative like the 2.0 state clues (the drafts' hints are qualitative); whether the stack overflow's free pass should be Overdrive-only or work for every egg's pass (it is only offered to Program); the wording of all three, from the care drafts' register; and a playtest, since the bots cannot value the Iron patch's wear and Heat or the graft's Sync.
 10. **Stack size** (3) and the keep-or-sell screen need a playtest.
 
 ## 11. Not done

@@ -24,10 +24,10 @@ export const RUN_STYLES = {
 // Anomaly options a player picks when steering; anything not listed is picked at random.
 export const ANOMALY_PREFS = {
   random: [],
-  risky: ['salvage', 'raid', 'use', 'follow', 'listen', 'read'], // chaos and loot (and reading the purge order)
-  orderly: ['repair', 'leave', 'follow', 'listen'],
-  corp: ['repair', 'report', 'leave', 'follow', 'listen'],
-  indie: ['raid', 'repair', 'leave', 'follow', 'listen'],
+  risky: ['salvage', 'raid', 'use', 'follow', 'listen', 'read', 'unwind', 'pry', 'graft'], // chaos and loot (and reading the purge order); the egg anomalies' loud options
+  orderly: ['repair', 'leave', 'follow', 'listen', 'catch', 'flash', 'sample'],
+  corp: ['repair', 'report', 'leave', 'follow', 'listen', 'flash', 'catch', 'sample'],
+  indie: ['raid', 'repair', 'leave', 'follow', 'listen', 'pry', 'unwind', 'graft'],
 };
 
 // The clinic fix a bot picks: scrip if the policy allows it and it has the scrip, else a Standing payment by the policy's split.
@@ -68,6 +68,11 @@ function decide(pet, style, rng) {
     const fits = p.flavor === 'clinic' || (style.lean === 'corp' || style.lean === 'indie' ? style.lean === side : style.lean === 'balance' ? (leanSeen(pet, style.shown) > 0) === (side === 'indie') : true);
     const bare = pet.run.challenge === 'baremetal' && !pet.run.challengeVoid; // keeps Bare metal: no items bought
     return style.shop !== false && !bare && fits && room && wanted && pet.stats.charge > 50 ? wanted.id : 'leave';
+  }
+  // 'only:<option id>': always that option when it is offered (the egg anomaly sweep forces one option at a time), else random.
+  if (typeof style.anomaly === 'string' && style.anomaly.startsWith('only:')) {
+    const only = style.anomaly.slice(5);
+    return has(only) ? only : p.options[Math.floor(rng() * p.options.length)].id;
   }
   const prefs = ANOMALY_PREFS[style.anomaly ?? 'random'];
   const preferred = prefs.find((id) => has(id));

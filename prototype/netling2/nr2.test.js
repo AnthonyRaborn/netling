@@ -522,3 +522,169 @@ test('Feast: a won ICE restores a little Integrity, for both Feast forms and mor
   assert.ok(heal('feastStreet', 2) > heal('feastStreet', 1));
   reset();
 });
+
+// --- the egg-flavored anomalies (sim/netrun/egg-anomalies.js) ---------------------------------------------------------------------
+const { EGG_ANOMALIES, EGG_ANOMALY_IDS } = await import('./sim/netrun/egg-anomalies.js');
+// Runs `fn` with the pressure that makes a netling this egg (the fork tells the egg from the pressure switches), then puts them back.
+function asEgg(egg, fn) {
+  const before = { iron: IRON.on, on: SIDES.on, owner: SIDES.owner };
+  IRON.on = egg === 'iron';
+  SIDES.on = egg !== 'iron';
+  SIDES.owner = egg === 'program' ? 'charge' : egg === 'wetware' ? 'sync' : SIDES.owner;
+  try { return fn(); } finally { IRON.on = before.iron; SIDES.on = before.on; SIDES.owner = before.owner; }
+}
+// Opens an anomaly node with a stub rng that picks the LAST entry of the pool (the egg's own, when it is there).
+function anomalyNode(egg, { region = 'public', daily = false } = {}) {
+  const { s, node } = setup('breachStreet', 1, 'anomaly', region);
+  s.run.region = region;
+  s.run.daily = daily;
+  moveTo(s, node.id, stub(0.999));
+  return s;
+}
+
+test('egg anomalies: off by default, and then no netling meets one', () => {
+  reset();
+  assert.equal(NR2.eggAnomalies, false);
+  for (const egg of ['iron', 'program', 'wetware']) asEgg(egg, () => assert.ok(!EGG_ANOMALY_IDS.includes(anomalyNode(egg).run.pending.event)));
+});
+
+test('egg anomalies: each egg meets its own, one entry in the pool, and never another egg\'s', () => {
+  set({ eggAnomalies: true });
+  for (const [egg, id] of [['program', 'overflow'], ['iron', 'bitrot'], ['wetware', 'graft']]) {
+    asEgg(egg, () => {
+      const s = anomalyNode(egg);
+      assert.equal(s.run.pending.event, id, `${egg}: its own anomaly`);
+      assert.equal(s.run.tally.eggAnomaly, 1);
+      assert.equal(s.run.pending.options.length, 2, 'two options, like 1.0\'s');
+    });
+    // The first entry of the pool is 1.0's (stub 0 picks it): the pool only gained one entry.
+    asEgg(egg, () => {
+      const { s, node } = setup('breachStreet', 1, 'anomaly');
+      moveTo(s, node.id, stub(0));
+      assert.ok(!EGG_ANOMALY_IDS.includes(s.run.pending.event));
+    });
+  }
+  reset();
+});
+
+test('egg anomalies: not in the Source, the daily trace or the tutorial', () => {
+  set({ eggAnomalies: true });
+  asEgg('iron', () => {
+    for (const opts of [{ region: 'source' }, { region: 'tutorial' }, { daily: true }]) assert.ok(!EGG_ANOMALY_IDS.includes(anomalyNode('iron', opts).run.pending.event), JSON.stringify(opts));
+  });
+  reset();
+});
+
+// The option made on a fresh anomaly node, with the stats set first.
+function pick(egg, optionId, stats = {}, rngValue = 0.5) {
+  const s = anomalyNode(egg);
+  Object.assign(s.stats, stats);
+  const before = { ...s.stats };
+  const r = choose(s, optionId, stub(rngValue));
+  return { s, before, r };
+}
+
+test('stack overflow: UNWIND surges Charge and gives the next ICE a free pass whatever its tier; over the line it tears', () => {
+  set({ eggAnomalies: true, tiers: true, tier: { share: { public: 1 } } });
+  asEgg('program', () => {
+    const clean = pick('program', 'unwind', { charge: 50, integrity: 80 });
+    assert.equal(clean.s.stats.charge, 75);
+    assert.equal(clean.s.stats.integrity, 80, 'no tear under the line');
+    assert.equal(clean.s.run.skipIce, 1);
+    const tear = pick('program', 'unwind', { charge: 80, integrity: 80 });
+    assert.equal(tear.s.stats.charge, 100);
+    assert.equal(tear.s.stats.integrity, 70, 'over 95 the buffer overflows: -10');
+    // The pass is used by the next ICE and then gone.
+    const ice = runOptions(clean.s.run)[0];
+    ice.type = 'ice';
+    const moved = moveTo(clean.s, ice.id, stub(0.5));
+    assert.equal(moved.phased, true, 'tier 2 ICE never saw it');
+    assert.equal(clean.s.run.skipIce, 0);
+    assert.equal(clean.s.run.phase, 'map', 'no fight began');
+  });
+  reset();
+});
+
+test('stack overflow: CATCH IT costs Charge and repairs Integrity (capped at 100)', () => {
+  set({ eggAnomalies: true });
+  asEgg('program', () => {
+    const a = pick('program', 'catch', { charge: 60, integrity: 70 });
+    assert.deepEqual([a.s.stats.charge, a.s.stats.integrity], [52, 80]);
+    assert.equal(pick('program', 'catch', { integrity: 95 }).s.stats.integrity, 100);
+    assert.equal(a.s.run.skipIce ?? 0, 0);
+  });
+  reset();
+});
+
+test('bit-rot patch: FLASH IT cools and clears wear at a cost in Charge; PRY IT OPEN runs hot for likely loot', () => {
+  set({ eggAnomalies: true });
+  asEgg('iron', () => {
+    const s = anomalyNode('iron');
+    Object.assign(s.stats, { charge: 70, heat: 50 });
+    s.wear = 45;
+    choose(s, 'flash', stub(0.5));
+    assert.deepEqual([s.stats.charge, s.stats.heat, s.wear], [58, 30, 15]);
+    const low = anomalyNode('iron');
+    Object.assign(low.stats, { charge: 70, heat: 10 });
+    low.wear = 10;
+    choose(low, 'flash', stub(0.5));
+    assert.deepEqual([low.stats.heat, low.wear], [0, 0], 'heat and wear floor at 0');
+    const got = pick('iron', 'pry', { heat: 30 }, 0.1);
+    assert.equal(got.s.stats.heat, 40);
+    assert.equal(got.s.run.loot.length, 1, 'a roll under 0.6 finds a part');
+    const none = pick('iron', 'pry', { heat: 30 }, 0.9);
+    assert.equal(none.s.run.loot.length, 0);
+  });
+  reset();
+});
+
+test('graft: GRAFT IT surges Sync and may be rejected (an infection); TAKE A SAMPLE costs Sync for maybe loot', () => {
+  set({ eggAnomalies: true });
+  asEgg('wetware', () => {
+    const took = pick('wetware', 'graft', { sync: 40, integrity: 80 }, 0.9);
+    assert.deepEqual([took.s.stats.sync, took.s.stats.integrity, Boolean(took.s.virus)], [60, 80, false]);
+    const rejected = pick('wetware', 'graft', { sync: 40, integrity: 80 }, 0.1);
+    assert.deepEqual([rejected.s.stats.sync, rejected.s.stats.integrity, rejected.s.virus], [60, 76, true]);
+    const already = anomalyNode('wetware');
+    already.virus = true;
+    already.stats.integrity = 80;
+    choose(already, 'graft', stub(0.1));
+    assert.equal(already.stats.integrity, 80, 'no second infection while infected');
+    const sample = pick('wetware', 'sample', { sync: 40 }, 0.1);
+    assert.equal(sample.s.stats.sync, 34);
+    assert.equal(sample.s.run.loot.length, 1);
+  });
+  reset();
+});
+
+test('egg anomalies: every option is deterministic for a seed', () => {
+  set({ eggAnomalies: true });
+  for (const [egg, def] of Object.entries(EGG_ANOMALIES)) {
+    for (const o of def.options) {
+      asEgg(egg, () => {
+        const a = pick(egg, o.id, {}, 0.5);
+        const b = pick(egg, o.id, {}, 0.5);
+        assert.deepEqual(a.s.stats, b.s.stats, `${egg}/${o.id}`);
+        assert.equal(a.s.run.messages.at(-1), b.s.run.messages.at(-1));
+      });
+    }
+  }
+  reset();
+});
+
+test('egg anomalies: each option leans, through the same adapter as 1.0\'s (allegiance becomes Standing, stability is temper)', () => {
+  set({ eggAnomalies: true });
+  const leans = { unwind: [0, -1], catch: [0, 1], flash: [1, 0], pry: [-1, 0], graft: [0, -1], sample: [0, 1] };
+  for (const [egg, def] of Object.entries(EGG_ANOMALIES)) {
+    for (const o of def.options) {
+      asEgg(egg, () => {
+        const s = anomalyNode(egg);
+        const before = JSON.stringify({ axes: s.axes, standing: s.standing });
+        choose(s, o.id, stub(0.5));
+        const moved = JSON.stringify({ axes: s.axes, standing: s.standing }) !== before;
+        assert.equal(moved, leans[o.id].some((x) => x !== 0), `${egg}/${o.id}: lean ${leans[o.id]}`);
+      });
+    }
+  }
+  reset();
+});

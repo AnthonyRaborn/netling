@@ -213,3 +213,27 @@ So the Feast and Tune forms finish about one to two lives later (a life is about
 ### One more small step of Feast sustain
 
 Applied at the maintainer's request: the Integrity a won ICE restores is now 11 at the adult level for both Feast forms and 22 (Feast street) and 18 (Feast corp) at the elder level, with the loot trimmed to keep the value in the band (Feast street cache find 0.55 and 0.7, ICE-win loot 0.35 and 0.5; Feast corp scrip +3 and +4). Value against the mean (Deep adult / Deep elder / Source adult / Source elder): Feast corp 114 / 115 / 115 / 107%, Feast street 100 / 98 / 117 / 114%. Progression (100 lineages of 8 lives, steered role, lives to finish the 18 egg pages across three eggs, median with p10 to p90, and the share reaching a first elder): Feast corp 8 (6 to 12) and 95% (was 9 and 93%), Feast street 9 (6 to 13) and 92% (was 9 and 87%), against Breach street 8 (6 to 10) and 98% and Tune corp 9 (7 to 13) and 90%. The gap has narrowed, not closed: the Feast forms still finish up to a life later than the defensive forms, with a wider spread, which is within what a loot role might be expected to cost.
+
+## 10. Egg-flavored anomalies (first pass)
+
+Built: `sim/netrun/egg-anomalies.js` (the three anomalies), the switch `NR2='{"eggAnomalies":true}'` (not part of `NR2=all` yet; options and numbers in `NR2.eggAnomaly`), a `skipIce` hook in `run.js` (the stack overflow's free pass: the next ICE never fights, any tier), the bot's `only:<option id>` anomaly style and the sweep `sim/egg-anomaly-sweep.mjs` (`EGG=iron|program|wetware FORMS=none,breachCorp node prototype/netling2/sim/egg-anomaly-sweep.mjs 4000`; variants `off`, `random`, and each option forced). Tests: the last 9 in `nr2.test.js`. The design is in `docs/NETLING_2_NETRUN_DRAFTS.md`, section 6.
+
+**Results** (4000 runs a cell, careful and skilled bots, no ability and Breach corp, adult level, tiers and egg costs on, inventory on; each cell compared with the same seeds without the anomaly in the pool). Averages over the styles and forms, change against `off` (disconnect and exit in points, value in %). Sampling noise: about 1 point on a rate near 30%, about 1% on value; the random pool pick changes the rolls after the first anomaly, so cells are not paired past that point.
+
+| Egg, variant | Bazaar | Corp Cache | Ruins | Deep |
+|---|---|---|---|---|
+| Program, random | -0.2 / +0.7 / -2.2 | -0.1 / +0.3 / -1.0 | -0.3 / +0.5 / -2.2 | -0.8 / +1.5 / -0.2 |
+| Program, UNWIND only | -0.2 / +0.6 / -2.4 | -0.2 / +0.2 / -1.2 | -0.4 / +0.6 / -2.7 | -1.3 / +2.1 / +0.7 |
+| Program, CATCH IT only | -0.1 / +0.4 / -2.0 | -0.1 / +0.2 / -1.0 | -0.1 / +0.4 / -2.3 | -0.4 / +1.2 / -0.3 |
+| Iron, random | -0.1 / +0.2 / +0.2 | -0.1 / 0.0 / -0.1 | +0.1 / -0.1 / +0.4 | -0.2 / +0.3 / +0.5 |
+| Iron, FLASH IT only | -0.1 / +0.1 / -2.1 | -0.1 / 0.0 / -1.1 | 0.0 / 0.0 / -2.7 | -0.6 / +0.9 / -0.6 |
+| Iron, PRY IT OPEN only | -0.1 / +0.2 / +2.1 | 0.0 / 0.0 / +1.0 | +0.3 / -0.5 / +2.6 | +0.3 / -0.2 / +1.9 |
+| Wetware, random | -0.1 / +0.2 / 0.0 | 0.0 / 0.0 / 0.0 | +0.1 / -0.2 / -0.4 | -0.1 / +0.7 / +1.0 |
+| Wetware, GRAFT only | -0.1 / +0.1 / -2.3 | 0.0 / -0.1 / -1.1 | +0.1 / 0.0 / -2.5 | -0.3 / +0.4 / -1.4 |
+| Wetware, TAKE A SAMPLE only | -0.2 / +0.3 / +1.9 | -0.1 / +0.1 / +0.6 | +0.1 / -0.3 / +1.9 | -0.1 / +0.4 / +2.6 |
+
+Encounters a run (random): Bazaar 0.17, Corp Cache 0.08, Ruins 0.31, Deep 0.22 (the Source and the daily trace have none).
+
+**Reading.** Every egg anomaly is inside noise at the run level when its options are taken at random, which is the intent (flavor, not power). The largest single effect is the stack overflow's UNWIND in the Deep (-1.3 points disconnect, +2.1 exit): a skipped fight is worth most where ICE bites hardest. The loot options (PRY IT OPEN, TAKE A SAMPLE) look 4 to 5% better on value than the maintenance or surge options, because the bot's value counts items and scrip and nothing else; what FLASH IT does for wear and Heat, GRAFT for Sync, and CATCH IT for Integrity beyond survival is not in the metric. Iron's wear in a run is about 1 point either way (the run costs are light), so the patch has little to clear in these runs; for a hot Iron netling it is worth more than the bots show.
+
+**Not measured.** Players choosing options by their bars (a bot picks at random or by lean), the Overdrive overflow for a Program netling that is really at Charge 80+ when it unwinds (the careful bot's UNWIND in the Deep tore in 53% of 1117 unwinds, 6000 runs, because its Charge is usually high at an anomaly; a human who watches the bar can avoid it, which is the design), the value of the free pass stacked with an avoidance ability (Dodge, Hidden), contracts, challenges (Unplugged and Blackout do not change these options; Glass counts a lost fight, which the free pass avoids), the daily trace (excluded by rule), and wording.

@@ -14,6 +14,16 @@ export const NR2 = {
   // A held pressure state resumes after a jack-out (decided), with a window before the bars can end it (decided: 5 minutes).
   // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
   graceMin: 5,
+  // The egg-flavored anomalies (decided as a go; options and numbers are mine): netrun/egg-anomalies.js. Not part of NR2=all yet.
+  eggAnomalies: false,
+  eggAnomaly: {
+    unwind: { charge: 25, overflowAt: 95, tear: 10 }, // Program: surge, then a tear if the buffer is over this
+    catch: { charge: 8, repair: 10 },
+    flash: { charge: 12, cool: 20, wear: 30 }, // Iron
+    pry: { heat: 10, loot: 0.6 },
+    graft: { sync: 20, reject: 0.3, rejectDamage: 4 }, // Wetware
+    sample: { sync: 6, loot: 0.5 },
+  },
   // Inventory (decided, maintainer): items of a kind stack in a slot, and at the end of a run the player chooses what to keep. The stack size and the
   // ranking a bot uses are mine. NR2=all switches it on.
   inventory: false,
