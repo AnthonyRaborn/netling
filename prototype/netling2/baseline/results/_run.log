@@ -57,3 +57,5 @@
 2026-10-08T18:08:57.408Z start runcost-iron
 2026-10-08T18:14:45.980Z done runcost-iron [full-iron] 349s
 2026-10-08T18:14:45.983Z start runcost-program
+2026-10-08T18:17:36.437Z done iron-sweep [rules] 1311s
+2026-10-08T18:17:36.440Z start runcost-wetware
