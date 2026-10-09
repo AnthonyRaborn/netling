@@ -1,0 +1,24 @@
+Part 1: share of visits that offer each item (2 distinct offers), 20000 visits
+S0 voucher 3, memory 1 (now)         voucher 100%  memory 96% | 2 distinct pairs
+S1 + booster 2                       voucher 85%  booster 73%  memory 42% | 4 distinct pairs
+S2 + booster 2, bypass 1             voucher 74%  booster 60%  memory 33%  overclock 33% | 7 distinct pairs
+S3 + booster 2, bypass 2, memory 2   voucher 62%  overclock 46%  memory 46%  booster 46% | 6 distinct pairs
+black market (public net) stock, healing removed: {"blackice":3,"booster":2,"overclock":2,"memory":2,"segfault":1,"decoy":1,"salvage":1}
+
+Part 2: bots (full life / infections / standing corp, street / scrip spent / runs)
+attentive  S0 full 1 inf 7.24 corp 57.5 street 56.1 scripSpent 1.5 runs 1000
+attentive  S1 full 1 inf 7.2 corp 56.7 street 56.3 scripSpent 1.4 runs 1000
+attentive  S2 full 0.998 inf 7.18 corp 56.4 street 56.3 scripSpent 1.5 runs 1000
+attentive  S3 full 0.998 inf 7.16 corp 56.4 street 56.4 scripSpent 1.4 runs 1000
+casual     S0 full 0.935 inf 6.78 corp 42.6 street 42.3 scripSpent 16.2 runs 1000
+casual     S1 full 0.944 inf 6.91 corp 42.5 street 42.6 scripSpent 15.8 runs 1000
+casual     S2 full 0.944 inf 6.9 corp 42.3 street 42.9 scripSpent 16.5 runs 1000
+casual     S3 full 0.938 inf 6.91 corp 41.9 street 42.6 scripSpent 15.9 runs 1000
+worker     S0 full 0.645 inf 5.83 corp 19.9 street 18.7 scripSpent 0.9 runs 1000
+worker     S1 full 0.643 inf 5.84 corp 20.0 street 18.7 scripSpent 0.9 runs 1000
+worker     S2 full 0.645 inf 5.84 corp 20.0 street 18.8 scripSpent 0.8 runs 1000
+worker     S3 full 0.644 inf 5.81 corp 20.0 street 18.8 scripSpent 0.9 runs 1000
+sysadmin   S0 full 0.997 inf 7.61 corp 30.5 street 37.1 scripSpent 0 runs 1000
+sysadmin   S1 full 0.997 inf 7.61 corp 30.5 street 37.1 scripSpent 0 runs 1000
+sysadmin   S2 full 0.997 inf 7.61 corp 30.5 street 37.1 scripSpent 0 runs 1000
+sysadmin   S3 full 0.997 inf 7.61 corp 30.5 street 37.1 scripSpent 0 runs 1000

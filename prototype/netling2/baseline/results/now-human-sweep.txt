@@ -1,0 +1,24 @@
+{"case":"random times","perDay":4,"fullLife":0.066,"medianDays":1.47,"faults":7.32,"adult":0.374}
+{"case":"random times","perDay":6,"fullLife":0.317,"medianDays":2.98,"faults":8.85,"adult":0.649}
+{"case":"random times","perDay":8,"fullLife":0.599,"medianDays":5,"faults":9.03,"adult":0.81}
+{"case":"random times","perDay":10,"fullLife":0.749,"medianDays":5,"faults":7.98,"adult":0.882}
+{"case":"random times","perDay":12,"fullLife":0.853,"medianDays":5,"faults":6.89,"adult":0.922}
+{"case":"random times","perDay":16,"fullLife":0.932,"medianDays":5,"faults":5.41,"adult":0.97}
+{"case":"+ lapses","perDay":4,"fullLife":0.029,"medianDays":1.22,"faults":6.51,"adult":0.279}
+{"case":"+ lapses","perDay":6,"fullLife":0.195,"medianDays":2.33,"faults":8.42,"adult":0.559}
+{"case":"+ lapses","perDay":8,"fullLife":0.405,"medianDays":3.92,"faults":8.61,"adult":0.689}
+{"case":"+ lapses","perDay":10,"fullLife":0.651,"medianDays":5,"faults":8.06,"adult":0.824}
+{"case":"+ lapses","perDay":12,"fullLife":0.758,"medianDays":5,"faults":7.4,"adult":0.881}
+{"case":"+ lapses","perDay":16,"fullLife":0.884,"medianDays":5,"faults":5.87,"adult":0.949}
+{"case":"+ busy and off days","perDay":4,"fullLife":0.007,"medianDays":0.96,"faults":5.7,"adult":0.207}
+{"case":"+ busy and off days","perDay":6,"fullLife":0.061,"medianDays":1.37,"faults":6.49,"adult":0.36}
+{"case":"+ busy and off days","perDay":8,"fullLife":0.132,"medianDays":1.71,"faults":6.73,"adult":0.451}
+{"case":"+ busy and off days","perDay":10,"fullLife":0.145,"medianDays":1.78,"faults":6.43,"adult":0.476}
+{"case":"+ busy and off days","perDay":12,"fullLife":0.166,"medianDays":1.82,"faults":5.94,"adult":0.485}
+{"case":"+ busy and off days","perDay":16,"fullLife":0.203,"medianDays":2.07,"faults":5.48,"adult":0.515}
+{"case":"+ both","perDay":4,"fullLife":0.006,"medianDays":0.82,"faults":5.3,"adult":0.153}
+{"case":"+ both","perDay":6,"fullLife":0.041,"medianDays":1.19,"faults":6.05,"adult":0.288}
+{"case":"+ both","perDay":8,"fullLife":0.077,"medianDays":1.4,"faults":6.24,"adult":0.346}
+{"case":"+ both","perDay":10,"fullLife":0.13,"medianDays":1.6,"faults":6.23,"adult":0.43}
+{"case":"+ both","perDay":12,"fullLife":0.138,"medianDays":1.68,"faults":6.02,"adult":0.454}
+{"case":"+ both","perDay":16,"fullLife":0.18,"medianDays":1.93,"faults":5.63,"adult":0.503}

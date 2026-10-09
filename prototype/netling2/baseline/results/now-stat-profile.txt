@@ -1,0 +1,7 @@
+{"stat":"heat","base":"attentive","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[6,5,26,26,26,10,1,0],"restPct":[67,11,10,7,4,1,0,0],"onWaking":20,"lifeMinMedian":0}
+{"stat":"heat","base":"casual","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[9,2,21,23,25,18,2,1],"restPct":[61,11,11,8,6,2,0,0],"onWaking":20.95000000000015,"lifeMinMedian":0}
+{"stat":"heat","base":"worker","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[10,6,17,19,21,20,5,2],"restPct":[63,11,10,8,5,3,0,0],"onWaking":24.34999999999971,"lifeMinMedian":0}
+{"stat":"heat","base":"human-regular","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[9,6,19,21,22,17,4,2],"restPct":[59,12,11,9,6,3,1,0],"onWaking":24.76666666666611,"lifeMinMedian":0}
+{"stat":"heat","base":"sysadmin","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[6,4,26,26,26,11,1,0],"restPct":[66,11,10,7,4,1,0,0],"onWaking":20.266666666665518,"lifeMinMedian":0}
+{"stat":"heat","base":"daredevil","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[6,1,2,4,9,33,35,12],"restPct":[40,11,10,10,10,12,6,1],"onWaking":45.2333333333325,"lifeMinMedian":0}
+{"stat":"heat","base":"overclocker","bands":"<10 <20 <30 <40 <50 <65 <80 80+","awakePct":[7,1,1,2,5,32,33,18],"restPct":[32,11,10,10,10,15,9,2],"onWaking":51.2499999999995,"lifeMinMedian":0}

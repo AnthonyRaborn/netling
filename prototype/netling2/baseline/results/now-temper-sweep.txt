@@ -1,0 +1,15 @@
+{"name":"seek-steady","checkInsADay":17,"hold12h":0.787,"medianDay":3.2,"hold24h":0.528,"fullLife":0.999,"faults":0.33,"bugsAtCeiling":0}
+{"name":"seek-steady","checkInsADay":9,"hold12h":0.356,"medianDay":3.4,"hold24h":0.143,"fullLife":0.997,"faults":1.23,"bugsAtCeiling":0}
+{"name":"seek-steady","checkInsADay":6,"hold12h":0.004,"medianDay":4.1,"hold24h":0.001,"fullLife":0.955,"faults":4.71,"bugsAtCeiling":0.063}
+{"name":"seek-steady","checkInsADay":5,"hold12h":0,"medianDay":null,"hold24h":0,"fullLife":0.757,"faults":10.92,"bugsAtCeiling":0.257}
+{"name":"seek-steady","checkInsADay":3,"hold12h":0,"medianDay":null,"hold24h":0,"fullLife":0.106,"faults":10.46,"bugsAtCeiling":0.235}
+{"name":"seek-unsteady","checkInsADay":17,"hold12h":0.335,"medianDay":3.1,"hold24h":0.109,"fullLife":0.999,"faults":1.55,"bugsAtCeiling":0}
+{"name":"seek-unsteady","checkInsADay":9,"hold12h":0.298,"medianDay":3.1,"hold24h":0.085,"fullLife":0.985,"faults":2.66,"bugsAtCeiling":0.004}
+{"name":"seek-unsteady","checkInsADay":6,"hold12h":0.28,"medianDay":3.3,"hold24h":0.055,"fullLife":0.898,"faults":5.94,"bugsAtCeiling":0.102}
+{"name":"seek-unsteady","checkInsADay":5,"hold12h":0.301,"medianDay":3.3,"hold24h":0.027,"fullLife":0.577,"faults":11.49,"bugsAtCeiling":0.285}
+{"name":"seek-unsteady","checkInsADay":3,"hold12h":0.023,"medianDay":3.5,"hold24h":0.001,"fullLife":0.055,"faults":9.55,"bugsAtCeiling":0.216}
+{"name":"seek-unsteady-segfault","checkInsADay":17,"hold12h":0.914,"medianDay":2.1,"hold24h":0.738,"fullLife":0.997,"faults":14.32,"bugsAtCeiling":0.158}
+{"name":"seek-unsteady-segfault","checkInsADay":9,"hold12h":0.861,"medianDay":2.2,"hold24h":0.615,"fullLife":0.992,"faults":13.11,"bugsAtCeiling":0.14}
+{"name":"seek-unsteady-segfault","checkInsADay":6,"hold12h":0.441,"medianDay":3.1,"hold24h":0.098,"fullLife":0.84,"faults":9.33,"bugsAtCeiling":0.279}
+{"name":"seek-unsteady-segfault","checkInsADay":5,"hold12h":0.337,"medianDay":3.2,"hold24h":0.028,"fullLife":0.489,"faults":13.71,"bugsAtCeiling":0.415}
+{"name":"seek-unsteady-segfault","checkInsADay":3,"hold12h":0.022,"medianDay":4,"hold24h":0,"fullLife":0.051,"faults":10.13,"bugsAtCeiling":0.244}

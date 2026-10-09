@@ -1,0 +1,7 @@
+attentive      overclock caption 56% (median day 2.2) | Iron wear caption 5% (median day 3.3)
+sysadmin       overclock caption 53% (median day 2.1) | Iron wear caption 4% (median day 3.5)
+casual         overclock caption 76% (median day 1.7) | Iron wear caption 11% (median day 2.2)
+worker         overclock caption 88% (median day 1.4) | Iron wear caption 26% (median day 2.4)
+human-regular  overclock caption 60% (median day 1.4) | Iron wear caption 12% (median day 2.3)
+daredevil      overclock caption 100% (median day 0.3) | Iron wear caption 95% (median day 1.2)
+overclocker    overclock caption 100% (median day 0.3) | Iron wear caption 99% (median day 1.1)

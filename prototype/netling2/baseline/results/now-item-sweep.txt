@@ -1,0 +1,6 @@
+{"base":"attentive","granted":84.19,"scrapped":13.42,"scrapShare":0.159,"scrapScrip":49.22,"peakHeld":12.22,"inventoryFullAtCheckIn":0.33,"mostGranted":"coolant 2.45, repair 1.74, blackice 1.69, antivirus 1.68"}
+{"base":"casual","granted":54.25,"scrapped":7.94,"scrapShare":0.146,"scrapScrip":29.25,"peakHeld":11.35,"inventoryFullAtCheckIn":0.34,"mostGranted":"coolant 1.75, repair 1.27, salvage 1.18, blackice 1.17"}
+{"base":"worker","granted":10.74,"scrapped":0.13,"scrapShare":0.012,"scrapScrip":0.49,"peakHeld":4.64,"inventoryFullAtCheckIn":0.02,"mostGranted":"coolant 1.29, repair 0.92, blackice 0.84, booster 0.83"}
+{"base":"steer-feast-corp","granted":89.34,"scrapped":14.36,"scrapShare":0.161,"scrapScrip":52.1,"peakHeld":12.89,"inventoryFullAtCheckIn":0.32,"mostGranted":"coolant 2.25, repair 1.63, booster 1.56, antivirus 1.47"}
+{"base":"steer-feast-street","granted":85.44,"scrapped":15.13,"scrapShare":0.177,"scrapScrip":58.37,"peakHeld":13.09,"inventoryFullAtCheckIn":0.31,"mostGranted":"coolant 2.34, blackice 1.78, salvage 1.56, repair 1.44"}
+{"base":"sysadmin","granted":17.57,"scrapped":0.17,"scrapShare":0.01,"scrapScrip":0.78,"peakHeld":8.3,"inventoryFullAtCheckIn":0.04,"mostGranted":"coolant 2.89, antivirus 2.02, blackice 2, repair 1.96"}

@@ -1,0 +1,5 @@
+{"winRate":0.75,"checkInsADay":17,"hiddenTeen":0.57,"hiddenAdult":0.92,"fullLife":1,"wins":78.4}
+{"winRate":0.75,"checkInsADay":9,"hiddenTeen":0.01,"hiddenAdult":0.32,"fullLife":0.99,"wins":66}
+{"winRate":0.75,"checkInsADay":6,"hiddenTeen":0,"hiddenAdult":0,"fullLife":0.83,"wins":50.6}
+{"winRate":0.75,"checkInsADay":5,"hiddenTeen":0,"hiddenAdult":0,"fullLife":0.55,"wins":36.1}
+{"winRate":0.75,"checkInsADay":3,"hiddenTeen":0,"hiddenAdult":0,"fullLife":0.04,"wins":10.9}
