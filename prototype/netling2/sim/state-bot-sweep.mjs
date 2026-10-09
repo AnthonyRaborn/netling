@@ -34,7 +34,9 @@ const BOTS = {
 }[egg];
 const wantBots = process.argv[5]?.split(',');
 const { ARCHETYPES, simulate, stats } = await import('./balance.mjs');
-const { SIDE_METER, overclocked } = await import('./sim.js');
+const { SIDE_METER, BRAKE, overclocked, inFlow } = await import('./sim.js');
+// ALLOC=0 reproduces the first build (only Iron's Overclock breaks); the rule now is every egg's (BRAKE.allOverclock).
+if (process.env.ALLOC === '0') BRAKE.allOverclock = false;
 const inState = { iron: (s) => overclocked(s), program: (s) => Boolean(s.sideHeld?.charge), wetware: (s) => Boolean(s.sideHeld?.sync) }[egg];
 const per = (n) => +(n / lives).toFixed(2);
 for (const bot of BOTS) {
@@ -45,12 +47,19 @@ for (const bot of BOTS) {
     for (const k of Object.keys(SIDE_METER)) SIDE_METER[k] = 0;
     let awake = 0;
     let held = 0;
+    // Lives that reach each state at least once (teen or later, awake), so every egg can be checked to reach all four.
+    const reached = { overclock: new Set(), overdrive: new Set(), overlink: new Set(), flow: new Set() };
     globalThis.__sample = (s) => {
       if (s.stage === 'dead' || s.asleep || s.nap) return;
       awake++;
       if (inState(s)) held++;
+      if (s.stage === 'baby') return;
+      if (overclocked(s)) reached.overclock.add(s);
+      if (s.sideHeld?.charge) reached.overdrive.add(s);
+      if (s.sideHeld?.sync) reached.overlink.add(s);
+      if (inFlow(s)) reached.flow.add(s);
     };
     const st = stats(Array.from({ length: lives }, (_, i) => simulate({ ...ARCHETYPES[n] }, i + 1)));
-    console.log(JSON.stringify({ egg, bot: bot.label, archetype: n, fullLife: st.fullLife, breaks: per(SIDE_METER.brakes), byState: { overdrive: per(SIDE_METER.brakeCharge), overlink: per(SIDE_METER.brakeSync), overclock: per(SIDE_METER.brakeHeat) }, warns: per(SIDE_METER.brakeWarns), inState: +(held / Math.max(1, awake)).toFixed(3), drops: per(SIDE_METER.drops), playGain: Math.round(SIDE_METER.playGain / lives), faults: st.mistakes, bugs: st.bugs?.avg, burns: per(SIDE_METER.burns), temper: st.temper }));
+    console.log(JSON.stringify({ egg, bot: bot.label, archetype: n, fullLife: st.fullLife, breaks: per(SIDE_METER.brakes), byState: { overdrive: per(SIDE_METER.brakeCharge), overlink: per(SIDE_METER.brakeSync), overclock: per(SIDE_METER.brakeHeat) }, warns: per(SIDE_METER.brakeWarns), inState: +(held / Math.max(1, awake)).toFixed(3), drops: per(SIDE_METER.drops), playGain: Math.round(SIDE_METER.playGain / lives), faults: st.mistakes, bugs: st.bugs?.avg, burns: per(SIDE_METER.burns), temper: st.temper, reached: Object.fromEntries(Object.entries(reached).map(([k, v]) => [k, per(v.size)])) }));
   }
 }

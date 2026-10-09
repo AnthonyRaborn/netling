@@ -78,9 +78,15 @@ Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on 
 - The community sketch moves to after the sprite review.
 - Next: build the Iron and Wetware break bots and suggest wording (done, above), then work through the remaining open items one at a time.
 
+## Decisions of 2026-10-09, evening (maintainer)
+
+- **Principle for the egg pressures:** every egg manages all three bars and can reach every state (Flow included); each egg gets extra benefits from one state. Slight thematic difference, not exclusion.
+- **The break covers every state on every egg**, Overclock included (`BRAKE.allOverclock`, default true). Measured: within 1 point of full life everywhere; hot players take the new breaks.
+- **Iron's wear is mirrored** (`OVERUSE`, off by default; design and numbers in EGG_PRESSURES, "Overuse and owner strain"): basic Integrity costs for overfeeding, overplaying and overheating on every egg; Program's overfeed strain ("out of swap") and Wetware's overplay strain ("cyberpsychosis") as the owners' extra costs; the states' costs at x1 (symmetric, decided); action-based (decided); overfeeding allowed up to the refusal at 95; pass bar the same average (decided). Averages match within noise at 200 lives; the 1000-life confirmation is in `results/followup/overuse/final-*`. Open: heavy-user parity (Wetware step 15), wording (care drafts, "Overuse and owner strain").
+
 ## Working notes for the next session
 
 - The container restarts when idle and kills background jobs (it happened several times). Prefer `setsid nohup`, keep jobs resumable, and wait in the foreground with `timeout 590 tail --pid=<pid> -f /dev/null` (find the real pid with `pgrep -af`; a launching shell's pid exits at once). The run log is overwritten if two runners write it at the same time.
 - Keep earlier results under their own names when a rule changes (`balance-brake55-*`, `balance-brake40-lock24-*`, `results/superseded/`), so a table can always be traced to the rules that made it.
-- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break), `statebot.test.js` (the watch bots; 328 prototype tests pass), `bugcost.test.js`.
+- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break), `statebot.test.js` (the watch bots), `overuse.test.js` (OVERUSE; 334 prototype tests pass), `bugcost.test.js`.
 - Test notes: two of the break's own tests were first written wrongly (one mixed up Overdrive's and Overlink's breaks, one ignored the one-minute lag after a sudden Integrity hit); both are fixed and the reasons are in the test comments.

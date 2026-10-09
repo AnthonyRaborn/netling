@@ -709,6 +709,34 @@ function stepActs(s) {
   if (!s.act) return;
   for (const k of Object.keys(ACTS)) if (ACTS[k].on) s.act[k] *= 0.5 ** (1 / ACTS[k].halfLifeMin);
 }
+// 2.0 overuse (maintainer, 2026-10-09; off by default, OVERUSE='{"on":true}'): every egg manages every bar, and the owner pays an extra,
+// hidden strain on its own bar, as Iron does with wear. Basic costs for every egg: a feed taken with Charge at feedLine or over, a game played
+// with Sync at playLine or over, and a game played with Heat at heatLine or over each cost `int` Integrity (1.0's Integrity loss at Heat 85+
+// stays for every egg; feeding is still refused at 95, the overfeed limit). Owner strain (Program: overfeeding, "out of swap"; Wetware:
+// overplaying, cyberpsychosis): each overfeed (Program) or overplay (Wetware) adds strain.add, which fades like Iron's wear (decay a minute,
+// x restMult at rest); strain drives the base infection hazard as wear does (floor + slope * strain / 100; floor null is 1.0's base, so an unstrained netling is as in 1.0) plus one effect of its own: Program
+// buffer overflows more often (x 1 + overflow * strain / 100), Wetware burns Charge faster (x 1 + chargeDrain * strain / 100). Iron keeps its
+// wear (IRON). costsX1: the owner's x3 applies to the states' benefits only and their costs stay at x1, as for Iron's Overclock (symmetric).
+export const OVERUSE = { on: false, feedLine: 85, playLine: 90, heatLine: 75, int: 2, costsX1: true, strain: { add: 10, decay: 1 / 1000, restMult: 4, floor: null, slope: 0.3, line: 50, overflow: 2, chargeDrain: 1 } };
+if (process.env.OVERUSE) {
+  const v = JSON.parse(process.env.OVERUSE);
+  Object.assign(OVERUSE, v, { strain: { ...OVERUSE.strain, ...(v.strain ?? {}) } });
+}
+const ownerStrain = () => OVERUSE.on && SIDES.on && (SIDES.owner === 'charge' || SIDES.owner === 'sync');
+function addStrain(s, t) {
+  const before = s.ostrain ?? 0;
+  s.ostrain = Math.min(100, before + OVERUSE.strain.add);
+  s.ostrainMax = Math.max(s.ostrainMax ?? 0, s.ostrain);
+  SIDE_METER.strainAdds++;
+  if (before < OVERUSE.strain.line && s.ostrain >= OVERUSE.strain.line && t !== undefined) log(s, t, SIDES.owner === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is jittery. too much, too close.');
+}
+function stepStrain(s, rest) {
+  if (!ownerStrain() || !s.ostrain) return;
+  s.ostrain = Math.max(0, s.ostrain * (1 - OVERUSE.strain.decay * (rest ? OVERUSE.strain.restMult : 1)));
+  if (s.ostrain >= OVERUSE.strain.line) s.ostrainHighMin = (s.ostrainHighMin ?? 0) + 1;
+}
+// The multiplier for a state's costs: the owner's x3 unless OVERUSE moves the owner's extra cost into its strain.
+const costM = (key) => (OVERUSE.on && OVERUSE.costsX1 ? 1 : sideM(key));
 const actOn = () => (ACTS.charge.on ? 'charge' : ACTS.sync.on ? 'sync' : null);
 const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null);
 // 2.0 egg pressure, two-sided meters: Charge and Sync each get a high side (hi or over) and a low side (lo or under) with a benefit
@@ -718,7 +746,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, overfeeds: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -736,7 +764,10 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // `faults` ordinary faults (care mistakes, temper, a bug roll each; maintainer: 1) and `integrityHit` Integrity lost when the break fires (0; 10 was tried and costs
 // more survival without a visible cue). Iron's Overclock is a plain Heat band, so its lockout turns the
 // Overclock rules (benefits and costs) off while it lasts. The trigger is Integrity for all three; the design doc may choose another for Iron.
-export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0 };
+// allOverclock (maintainer, 2026-10-09: every egg manages every bar and reaches every state; only the owner's benefits are larger): Overclock
+// breaks on every egg, as Overdrive and Overlink do. false is the first build, where only Iron's Overclock broke (the decided-* and state-bot
+// results made before this date).
+export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0, allOverclock: true };
 if (process.env.BRAKE) {
   const v = JSON.parse(process.env.BRAKE);
   Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
@@ -782,7 +813,7 @@ function stepBrake(s, rest, t) {
   s.brakeWarn ??= { charge: false, sync: false, heat: false };
   const st = s.stats;
   for (const key of ['charge', 'sync', 'heat']) {
-    if (key === 'heat' && SIDES.owner !== null) continue; // Overclock's break is Iron's
+    if (key === 'heat' && SIDES.owner !== null && !BRAKE.allOverclock) continue; // first build: Overclock's break was Iron's alone
     const active = !rest && (key === 'heat' ? overclocked(s) : Boolean(s.sideHeld?.[key]));
     if (!active) { s.brakeWarn[key] = false; continue; }
     if (st.integrity < BRAKE.breakInt) {
@@ -842,6 +873,7 @@ const baseVirusPerHour = (s) => {
   const b = bandOn();
   const a = actOn();
   if (a && !IRON.on && !WET.on && !b) return ACTS[a].floor + (ACTS[a].slope * (s.act?.[a] ?? 0)) / 100;
+  if (ownerStrain() && !IRON.on) return (OVERUSE.strain.floor ?? CFG.virusBasePerHour) + (OVERUSE.strain.slope * (s.ostrain ?? 0)) / 100;
   if (b && !IRON.on && !WET.on) return BANDS[b].floor + (BANDS[b].slope * (s.strain?.[b] ?? 0)) / 100;
   return IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
 };
@@ -975,7 +1007,7 @@ function step(s, t, rng) {
   if (STAGE.rest.on && s.tired) rate *= STAGE.rest.tiredDrain;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
   const chargeLo = sideOf(s, 'charge') === 'lo' ? 1 / (1 + SIDES.charge.slow * lowM('charge')) : 1;
-  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * chargeLo * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
+  st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * chargeLo * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs) * (ownerStrain() && SIDES.owner === 'sync' ? 1 + (OVERUSE.strain.chargeDrain * (s.ostrain ?? 0)) / 100 : 1));
   const dark = !rest && !s.lightsOn ? CFG.darkAwakeSyncMult : 1;
   st.sync = clamp(st.sync - (CFG.drainPerHour.sync / 60) * rate * dark * drainCurve(st.sync) * mod(s, 'syncDrainMult') * (1 + BUG_CFG.sync * s.bugs) * (IRON.on ? 1 + IRON.lock * ((s.wear ?? 0) / 100) : 1));
   const heatBefore = st.heat;
@@ -993,6 +1025,7 @@ function step(s, t, rng) {
   stepRest(s, t, rest);
   if (WET.on) stepShock(s);
   stepActs(s);
+  stepStrain(s, rest);
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin * (STAGE.on ? STAGE.cache[s.stage] ?? 1 : 1)) {
     s.cache++;
@@ -1003,7 +1036,7 @@ function step(s, t, rng) {
   // No fresh infections while it rests: it's offline, not browsing.
   if (!s.virus && !shielded(s) && !rest) {
     let perHour = baseVirusPerHour(s) + CFG.virusPerCachePerHour * s.cache;
-    if (sideOf(s, 'sync') === 'hi') perHour *= 1 + SIDES.sync.virus * sideM('sync');
+    if (sideOf(s, 'sync') === 'hi') perHour *= 1 + SIDES.sync.virus * costM('sync');
     perHour *= 1 - traitEffect(s, 'hardened');
     perHour *= mod(s, 'virusMult');
     if (rng() < perHour / 60) {
@@ -1021,7 +1054,7 @@ function step(s, t, rng) {
   if (s.cache >= 3) dInt -= 5;
   if (st.heat >= 85) dInt -= 8;
   if (st.charge <= 0) dInt -= 6;
-  if (sideOf(s, 'charge') === 'hi' && !rest) dInt -= SIDES.charge.bleed * sideM('charge');
+  if (sideOf(s, 'charge') === 'hi' && !rest) dInt -= SIDES.charge.bleed * costM('charge');
   // Real rest (asleep in the dark, or a nap) repairs faster; a restless sleep with the lights on doesn't.
   const deepRest = s.nap || (s.asleep && !s.lightsOn);
   // 2.0 bugs: regeneration is cut by regenCut a bug (0 until chosen), damage is multiplied by (1 + integrity a bug), and integrityFlat an
@@ -1102,7 +1135,7 @@ function stepEvents(s, t, rng) {
   // Overclocked draws trouble; flow keeps it away (the two never overlap: flow needs Heat under 60).
   let hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
   if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * lowM('sync');
-  const overflowMult = sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * sideM('charge') : 1;
+  const overflowMult = (sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * costM('charge') : 1) * (ownerStrain() && SIDES.owner === 'charge' ? 1 + (OVERUSE.strain.overflow * (s.ostrain ?? 0)) / 100 : 1);
   if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable')) * mod(s, 'traceMult')) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
@@ -1688,6 +1721,11 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     case 'scav': {
       if (st.charge >= 95) return fail('buffer full. refused.');
       actEarly(s, 'charge');
+      if (OVERUSE.on && st.charge >= OVERUSE.feedLine) { // overfeeding: every egg pays a little Integrity, Program also builds strain
+        st.integrity = clamp(st.integrity - OVERUSE.int);
+        SIDE_METER.overfeeds++;
+        if (ownerStrain() && SIDES.owner === 'charge') addStrain(s, now);
+      }
       let gain = action === 'corp' ? 30 : 25;
       if (STAGE.on) gain *= STAGE.meal[s.stage] ?? 1;
       if (STAGE.rest.on) s.demand = Math.max(0, (s.demand ?? 0) - STAGE.rest.feedSub);
@@ -1729,6 +1767,15 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       const hot = overclocked(s); // it played at this Heat, before this game's own
       actEarly(s, 'sync');
+      if (OVERUSE.on && st.sync >= OVERUSE.playLine) { // overplaying: every egg pays a little Integrity, Wetware also builds strain
+        st.integrity = clamp(st.integrity - OVERUSE.int);
+        SIDE_METER.overplays++;
+        if (ownerStrain() && SIDES.owner === 'sync') addStrain(s, now);
+      }
+      if (OVERUSE.on && st.heat >= OVERUSE.heatLine) { // overheating: every egg pays a little Integrity (Iron's wear is its extra strain)
+        st.integrity = clamp(st.integrity - OVERUSE.int);
+        SIDE_METER.overheats++;
+      }
       let gain = won ? CFG.playWinSync : CFG.playLoseSync;
       gain *= 1 + traitEffect(s, 'volatile');
       if (sideOf(s, 'charge') === 'hi') gain *= 1 + SIDES.charge.playGain * sideM('charge');
@@ -1737,7 +1784,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       // infection chance (x owner multiplier, capped at penCap) until the state ends.
       if (SIDES.on && SIDES.sync.penStep > 0 && heldNow(s, 'sync') && st.sync >= SIDES.sync.penFree) {
         s.wiredOver = (s.wiredOver ?? 0) + 1;
-        if (!s.virus && !shielded(s) && rng() < Math.min(SIDES.sync.penCap, SIDES.sync.penStep * s.wiredOver * sideM('sync'))) {
+        if (!s.virus && !shielded(s) && rng() < Math.min(SIDES.sync.penCap, SIDES.sync.penStep * s.wiredOver * costM('sync'))) {
           SIDE_METER.penHits++;
           infect(s, SIDES.sync.penDmg);
           log(s, now, '> too wired to play. !! virus signature detected.');
@@ -1756,7 +1803,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         }
       }
       // Playing while Sync is at penLine or over risks an infection (penP x owner multiplier): too wired to play safely.
-      if (SIDES.on && SIDES.sync.penLine > 0 && st.sync >= SIDES.sync.penLine && !s.virus && !shielded(s) && rng() < SIDES.sync.penP * sideM('sync')) {
+      if (SIDES.on && SIDES.sync.penLine > 0 && st.sync >= SIDES.sync.penLine && !s.virus && !shielded(s) && rng() < SIDES.sync.penP * costM('sync')) {
         SIDE_METER.penHits++;
         infect(s, SIDES.sync.penDmg);
         log(s, now, '> too wired to play. !! virus signature detected.');

@@ -3,7 +3,7 @@
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference; PROGBOT=avoid|watch makes the bots mind Program's Overdrive (see chargeTarget below; needs SIDES on with owner 'charge');
-// IRONBOT=watch and SYNCBOT=avoid|watch are the same for Iron's Overclock and Wetware's Overlink, and STATEBOT=watch watches every bar
+// FEEDBOT=greedy feeds until the buffer refuses (95); IRONBOT=watch and SYNCBOT=avoid|watch are the same for Iron's Overclock and Wetware's Overlink, and STATEBOT=watch watches every bar
 // (see chargeTarget, coolAt and syncTarget below; state-bot-sweep.mjs);
 // BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear and WET='{"on":true}' Wetware's shock (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
@@ -226,6 +226,7 @@ export function checkIn(s, p, now, rng, ctx) {
   const watchInt = Number(process.env.STATEBOT_INT ?? 70);
   const chargeTarget = () => {
     if (topUp) return 94;
+    if (process.env.FEEDBOT === 'greedy') return 95; // overfeeds: feeds until the buffer refuses (OVERUSE's Program strain)
     // STATEBOT=watch: a player who watches every bar the netling holds a state on (Overdrive is held on every egg, only the owner's is x3).
     if (watchAll && SIDES.on && SIDES.charge.hold > 0 && s.stats.integrity < watchInt) return Math.min(85, SIDES.charge.hi - 31);
     if (!process.env.PROGBOT || !SIDES.on || SIDES.owner !== 'charge') return 85;
@@ -322,9 +323,9 @@ export function checkIn(s, p, now, rng, ctx) {
   if (process.env.IRONBOT === 'avoid' && IRON.on && (s.wear ?? 0) >= IRON.line * 0.6) coolAt = Math.min(coolAt, IRON.heat - 5);
   // IRONBOT=chill: a player who keeps it cold (cools at 30 and over) whatever the wear.
   if (process.env.IRONBOT === 'chill' && IRON.on) coolAt = Math.min(coolAt, 30);
-  // IRONBOT=watch (the break, BRAKE in sim.js): Iron's counterpart of PROGBOT=watch. Cools as usual until Integrity falls under IRONBOT_INT (70,
+  // IRONBOT=watch (the break, BRAKE in sim.js): Iron's counterpart of PROGBOT=watch (STATEBOT=watch does the same on every egg, since every egg's Overclock breaks). Cools as usual until Integrity falls under IRONBOT_INT (70,
   // the break's warning line), then keeps Heat a game's worth (12) under Overclock's line until it recovers, so Overclock lapses and is not re-entered.
-  if ((process.env.IRONBOT === 'watch' || (watchAll && IRON.on && SIDES.owner === null)) && s.stats.integrity < Number(process.env.IRONBOT_INT ?? watchInt)) coolAt = Math.min(coolAt, CFG.overclockHeat - 13);
+  if ((process.env.IRONBOT === 'watch' || (watchAll && SIDES.on)) && s.stats.integrity < Number(process.env.IRONBOT_INT ?? watchInt)) coolAt = Math.min(coolAt, CFG.overclockHeat - 13);
   if (s.stats.heat > coolAt && !lapse()) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
   // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
