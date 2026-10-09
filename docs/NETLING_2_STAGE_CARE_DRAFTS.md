@@ -153,10 +153,7 @@ All of it runs on the scripted bots; none of it can say whether a rest call is a
 
 ## 4. Open questions for the maintainer
 
-Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes, the rest answered by the relabelled nap button, Care on by default, evolution notices in Care, attention requests in Events. Still open:
-
-1. Cooldowns default (on or off; off is my suggestion).
-2. The baby: drain, bug rule and Standing (section 7 has the numbers and three options).
+Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes, the rest answered by the relabelled nap button, Care on by default, evolution notices in Care, attention requests in Events. Both questions that were still open here were answered later the same day (section 13): the Cooldowns class defaults to off, and the baby keeps the 2.4 drain with its faults rolling bugs (option A), with Standing gain 2 and no baby feed multiplier. Nothing in this list is open now; the elder stage is still to be simulated (section 13).
 
 ## 5. Constraints and risks
 
