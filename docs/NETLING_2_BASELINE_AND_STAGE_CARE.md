@@ -44,12 +44,12 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 - Constraints to respect: a work-day gap stays fatal (decided earlier), so a rest call must not become a safety net; the care drafts decided "reskins, fixed button count, flavor-only rhythm" and stage curves reopen the rhythm part.
 - How to test: stage tables in the fork for drain, cache chance and meal size, calibrated so a whole life keeps its difficulty; the safe longest gap per stage with `gap-sweep` and `human-sweep`; a response-probability model for rest calls (an assumption, to be labelled one).
 
-## Map width and ICE tiers (decided scope; built in the fork and measured, numbers not chosen)
+## Map width and ICE tiers (decided and built in the fork)
 
-- Deep and Source only (decided). Switches (off by default): `NR2.map` (widths and second-link chance per region, `sim/netrun/map2.js`) and `NR2.tier.layer` (the tier-2 share rising along the run). Tests in `nr2.test.js`. Measurements and tables: `prototype/netling2/baseline/README.md`, "Follow-up: wider Deep and Source maps".
-- Findings: wider layers give real lanes (no two-lane jumps, fewer lane changes), but at the old second-link chance (.5) the runs get harder (lanes lock). The **second-link chance** is the lever: about .65 in the Deep and .75 in the Source is difficulty-neutral for the bots; .75 in both is slightly easier and brings Tune street with Foresight to 91 to 96% of the mean at the adult level (86 to 92 before), with Foresight's lift about 1.1 to 1.5 times larger. The Rogue gate comes about a life sooner for attentive and casual players; whole-life balance does not move.
-- The tier gradient (g .8) moves hard fights to the end of the run and lowers the number met per run by 0 to 18%; scale the shares up to compensate if the total should stay.
-- To choose: widths (Deep [3,4], Source [3,5] or [4,5]), the link chance per region, whether to use the gradient and at what strength. Not measured: the phone map (about 55 to 60 nodes), the fog, how a person scans a bigger map, and the route-guarantee cost on wider maps.
+- **Decided (maintainer, 2026-10-09):** Deep layers [3,4] wide with a second-link chance of **0.65**, Source [3,5] with **0.75**; **no tier gradient** along the run (the switch `NR2.tier.layer` stays in the fork, off). The widths and chances are the defaults of `NR2.map`, and `NR2=all` now switches the wider maps on (`sim/netrun/nr2.js`, `sim/netrun/map2.js`; tests in `nr2.test.js`).
+- Why those numbers: wider layers give real lanes (no two-lane jumps, fewer lane changes), but at the old chance of .5 the runs get harder because lanes lock; the second-link chance is the lever. About .65 in the Deep and .75 in the Source is roughly difficulty-neutral for the bots, and it lifts Tune street with Foresight toward the mean of the nine forms. Measurements and tables: `prototype/netling2/baseline/README.md`, "Follow-up: wider Deep and Source maps".
+- The netrun-class baseline outputs (netrun, challenge, Foresight, egg anomalies, lineage) were rerun with the chosen maps; the earlier outputs are in `results/superseded/narrow-maps/`. Whole-life balance does not move with the maps (no archetype by 1.5 points), so the other baseline outputs were not rerun.
+- Not measured: the phone map (about 55 to 60 nodes), the fog, how a person scans a bigger map, and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps.
 
 ## Parked
 
@@ -58,8 +58,8 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 
 ## Next steps, in the agreed order
 
-1. Map width and the ICE tier by layer: built and measured (above); choose the numbers, then check the route guarantees and the phone map.
-2. The stage-care draft document (this section made into a draft, with the rest call and the notification budget).
+1. Map width: decided and built (above); still to check: the route guarantees and the phone map. The tier gradient was declined.
+2. The stage-care draft document: **started**, [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) (what care is today, the baby, elder, cache and rest call proposals with starting numbers, the notification budget, a test plan and seven open questions). Next: the maintainer's answers to those questions, then the stage tables in the fork.
 3. A community sketch (document only).
 4. Alongside: a Program budgeting bot is in (`PROGBOT`), but Iron and Wetware have no equivalent for the break; the hunter binger; chatter, care wording and captions for the break (warning, discharge, throttle, crash).
 
