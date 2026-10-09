@@ -177,7 +177,7 @@ test('Program and Wetware: the owner state breaks on its strain; another egg sta
 
 // The strain warning (maintainer, 2026-10-09, option 3): only while the owner's state is active, on crossing the line or on entering the
 // state with strain already past it; once per stay in the state.
-const WARN = { heat: '> tolerances are slipping.', charge: '> swap is filling up. it is thrashing.', sync: '> it is jittery. too much, too close.' };
+const WARN = { heat: '> tolerances are slipping.', charge: '> swap is filling up. it is thrashing.', sync: '> it is frayed. too much, too close.' };
 const warnings = (s, key) => s.log.filter((e) => e.msg === WARN[key]).length;
 
 test('Iron: the wear warning shows in Overclock only, once a stay, and again on the next entry', () => {

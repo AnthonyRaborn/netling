@@ -835,7 +835,7 @@ function stepStrainWarn(s, rest, t) {
   if (s.strainWarned) return;
   s.strainWarned = true;
   SIDE_METER.strainWarns++;
-  log(s, t, key === 'heat' ? '> tolerances are slipping.' : key === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is jittery. too much, too close.');
+  log(s, t, key === 'heat' ? '> tolerances are slipping.' : key === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is frayed. too much, too close.');
 }
 function stepBrake(s, rest, t) {
   if (!BRAKE.on || !SIDES.on) return;

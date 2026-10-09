@@ -295,7 +295,7 @@ The clinic's share (25%) and fee (15 scrip or 2 Standing) were re-measured again
 
 Wording for the break (decided rule: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "The break"): while a state is held, Integrity under 70 warns once; under 40 the state ends, the bar drops well below its exit line, the netling takes one fault and the state is locked out for 12 hours. Every egg manages every bar and can reach every state, and only the owner's benefits are larger (maintainer, 2026-10-09), so every egg needs all three rows, Overclock included (its break applies on every egg: `BRAKE.allOverclock`). Nothing here is implemented, read in context or read on a device.
 
-Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 1.0's other bad news; no state name and no number in log lines or chatter (the label and readout word carry the name, as for the states themselves); the 12 hours is said as "half a day", as Overlink's burnout says "until tomorrow"; words already taken are avoided: "patch" (Program's cure), "reset" (Program's rest word), "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "fever" (Wetware's power surge); the fault word follows Failures (fault, fault, slip).
+Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 1.0's other bad news; no state name and no number in log lines or chatter (the label and readout word carry the name, as for the states themselves); the 12 hours was said as "half a day" in option A, as Overlink's burnout says "until tomorrow" (the decided option B says "for a while"); words already taken are avoided: "patch" (Program's cure), "reset" (Program's rest word), "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "fever" (Wetware's power surge); the fault word follows Failures (fault, fault, slip).
 
 **Log lines**
 
@@ -311,7 +311,7 @@ Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 
 | Lockout over, Overlink | > relink available. | > lock free again. | > it can get close again. |
 | Lockout over, Overclock | > clock limit lifted. | > cutout cleared. it can run hot again. | > it can run hot again. |
 
-**Alert lines** (the warning only; stat-alert style, sentence case). Proposal: the warning is a **Care** notification (not counted against the Events budget of 6 a day), once per state per entry, like the simulator's one-time warning; the break itself and the end of the lockout are log lines only, since by then there is nothing to answer.
+**Alert lines** (the warning only; stat-alert style, sentence case). Decided (maintainer, 2026-10-09): the warning is a **Care** notification (not counted against the Events budget of 6 a day), once per state per entry, like the simulator's one-time warning; the break itself and the end of the lockout are log lines only, since by then there is nothing to answer.
 
 | Key | Program | Iron | Wetware |
 |---|---|---|---|
@@ -341,13 +341,13 @@ Why "ease off" and not "stop": the watch bots (baseline README, "players who min
 
 | Break | Program | Iron | Wetware |
 |---|---|---|---|
-| Overdrive (discharge) | > !! buffers dumped. boost blocked for half a day. fault. | > !! breaker tripped. held under spec for half a day. fault. | > !! it ate too much. no gorging for half a day. slip. |
-| Overlink (crash) | > !! link dropped. no relink for half a day. fault. | > !! lock slipped its gears. no lock for half a day. fault. | > !! it pulled away hard. distant for half a day. slip. |
-| Overclock (throttle) | > !! thermal limit hit. throttled for half a day. fault. | > !! thermal cutout. held under rating for half a day. fault. | > !! it overheated. no running hot for half a day. slip. |
+| Overdrive (discharge) | > !! buffers dumped. boost blocked for a while. fault. | > !! breaker tripped. held under spec for a while. fault. | > !! it ate too much. no gorging for a while. slip. |
+| Overlink (crash) | > !! link dropped. no relink for a while. fault. | > !! lock slipped its gears. no lock for a while. fault. | > !! it pulled away hard. distant for a while. slip. |
+| Overclock (throttle) | > !! thermal limit hit. throttled for a while. fault. | > !! thermal cutout. held under rating for a while. fault. | > !! it overheated. no running hot for a while. slip. |
 
-**Decided (maintainer, 2026-10-09): option B on every egg** for the three break lines. The warning, lockout-over and alert lines above are unchanged; option A's rows, including its Wetware discharge ("ate too much and crashed"), are the record only. Wetware's discharge was "it brought it all up" and became "it ate too much" (maintainer, 2026-10-09: no vomiting image). Lengths measured as strings only (51 to 61 characters); not read in context or on a device.
+**Decided (maintainer, 2026-10-09): option B on every egg** for the three break lines. The warning, lockout-over and alert lines above are unchanged; option A's rows, including its Wetware discharge ("ate too much and crashed"), are the record only. Wetware's discharge was "it brought it all up" and became "it ate too much" (maintainer, 2026-10-09: no vomiting image). **"For a while", not "half a day" (decided, maintainer, 2026-10-09)**: the decided lines hide the 12 hours entirely, as the field manual line already does; option A keeps "half a day" as the record. Lengths measured as strings only (48 to 58 characters after the change); not read in context or on a device.
 
-Open: whether the warning should notify at all (it is the only state line that asks for an action); "half a day" against "for a while" (the second hides the number entirely); Iron's trigger: since 2026-10-09 the owner's state also breaks on its strain (Iron's wear; EGG_PRESSURES, "The strain trigger"), so a strain break is preceded by the strain's own line ("tolerances are slipping.", "swap is filling up.", "it is jittery."), not by the Integrity warning; the maintainer reads them as warnings already, since they show only while the state is active (decided: on crossing the line in the state or on entering the state past it; EGG_PRESSURES, "Where the warning fires"). The wording stays.
+Decided (maintainer, 2026-10-09): the warning notifies, in the **Care** class (once per state per entry, as drafted under Alert lines), and the break lines say "for a while". Iron's trigger: since 2026-10-09 the owner's state also breaks on its strain (Iron's wear; EGG_PRESSURES, "The strain trigger"), so a strain break is preceded by the strain's own line ("tolerances are slipping.", "swap is filling up.", "it is frayed."), not by the Integrity warning; the maintainer reads them as warnings already, since they show only while the state is active (decided: on crossing the line in the state or on entering the state past it; EGG_PRESSURES, "Where the warning fires"). The wording stays.
 
 ## Overuse and owner strain (drafts, first pass)
 
@@ -360,7 +360,7 @@ Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EG
 | Overplay (a game past the line, every egg; inside Overlink the existing "first play at the top" cue replaces it, one line a game) | > link at limit. that game cost it. | > lock at limit. that one strained it. | > too wound up to play safely. that hurt. |
 | Overheat (a game past the line, every egg) | > too hot to run clean. that cost it. | > past rating. that wore on it. | > it played too hot. that hurt. |
 | Feed refused (after three overfeeds; Program's is 1.0's line) | > buffer full. refused. | > at capacity. refused. | > it is full. it turns away. |
-| Owner strain past the warning line | > swap is filling up. it is thrashing. | > tolerances are slipping. (wear, existing) | > it is jittery. too much, too close. |
+| Owner strain past the warning line | > swap is filling up. it is thrashing. | > tolerances are slipping. (wear, existing) | > it is frayed. too much, too close. (was "jittery"; decided 2026-10-09) |
 | Owner strain back under the line | > swap clearing. | > back within spec. (existing) | > it is calming down. |
 
 **Readout words** (owner's egg only, while strain is past the line, as Iron's " · worn"): Program " · thrashing", Wetware " · frayed". Screen-reader values match. **Sprite mark (decided, maintainer, 2026-10-09): the seam on every egg**, the same mark as Iron's wear (one seam past the warning line, a second at heavy strain), so the readout word carries each egg's flavor. Per-egg marks (a stuck pixel for Program, a fray for Wetware) were rendered and not chosen: the stuck pixel reads as a tooth or highlight, the fray changes the outline (`docs/netling2-prototypes/shots/strain-marks-options.png`, `prototype/netling2/strain-marks-preview.html`). Placement is `seams.js`'s rule on all 66 forms, with Wired and Plat pinned by hand; the hidden forms the rule misses (Shell, Blank, Cipher) show no seam (maintainer: hidden forms may break the rules).
@@ -373,13 +373,15 @@ Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EG
 
 **Reviewed with the maintainer (2026-10-09).** Fixed: Iron's overfeed no longer says "surge" (Iron's LINE SURGE event; the word was dropped as a state name for the same reason); one line a game inside Overlink and one line for the third overfeed; Wetware's overheat line says the game was played; the field manual is one accurate line; Iron's Overdrive end is "> power back to rating." so "> back within spec." means only that wear has recovered (Pressure cues). Decided: Program's three basic lines all end "cost it" and Wetware's all end "that hurt" (one repeated signal per egg; Wetware's overfeed was "its stomach hurts"). The strain mark is the seam on every egg (decided; Readout words, below).
 
-Open: "cyberpsychosis" is the maintainer's theme for Wetware's strain; in-game Wetware text stays plain (The eggs), so the word itself does not appear; "frayed" and "jittery" carry it. Program's "out of swap" likewise shows as "thrashing".
+Open: "cyberpsychosis" is the maintainer's theme for Wetware's strain; in-game Wetware text stays plain (The eggs), so the word itself does not appear; "frayed" carries it (the warning line said "jittery" until 2026-10-09, when the maintainer made it "frayed" to match the readout). Program's "out of swap" likewise shows as "thrashing".
 
 ## Stage care and notifications (drafts, first pass)
 
 Wording for the stage-care rules ([NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), section 2) and the three notification classes (its section 2.6), plus a review of the strain readout words. Drafted 2026-10-09 for the maintainer to choose and edit; nothing here is implemented, read in context, read on a device or played. Rules followed, as above: lowercase log lines with `> `, sentence case for alert and notification text, button names in capitals, no state name and no hidden number, the egg's register (Program bureaucratic and technical, Iron physical and procedural, Wetware street-level and plain), the egg's fault word. Words kept out because they are taken: "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "cool" (a care button), "drift" (Iron's virus), "true" and "out of true" (Iron's bugs), "worn" (Iron's wear readout), "fever" (Wetware's surge), "slip" outside a fault (Wetware's fault word), "spent", "drained" and "throttled" (the lockout readout words).
 
 ### The rest call
+
+**Decided (maintainer, 2026-10-09): the lines below stand as drafted.**
 
 The call, the answer and its end follow the stage-care draft (section 2.5): the call fires, the nap button shows the egg's rest verb, answering in the first 30 minutes is on time, later in the 60 minute window is late, a lapse sets tired. The call line names no window (as 1.0's virus alert names none; the 30 minute on-time part stays hidden, as PATCH's does). The rest length is printed when the rest starts ("back in 25m"), as Iron's decided line does; it is the real random length, 20 to 30 minutes.
 
@@ -396,9 +398,11 @@ The call, the answer and its end follow the stage-care draft (section 2.5): the 
 
 The late line is neutral on purpose (the rule is neutral; only a lapse costs). Iron's decided "> calibrating. back in 25m." becomes the two answered rows; if one line for both is wanted, it stands as decided. **No reminder before the lapse (decided, maintainer, 2026-10-09):** one notification a call; the lapse line is the only follow-up.
 
-**A collision to fix in 1.0's nap text.** The nap button's refusal says "not tired yet. 3h until it can nap again." (`src/sim.js`, kept in the fork). With a tired state in 2.0 that line would read as a statement about tired. Proposal, per egg: Program "no nap needed yet. 3h until the next.", Iron "no idle needed yet. 3h until the next.", Wetware "it is not sleepy yet. 3h until it can doze."
+**A collision to fix in 1.0's nap text.** The nap button's refusal says "not tired yet. 3h until it can nap again." (`src/sim.js`, kept in the fork). With a tired state in 2.0 that line would read as a statement about tired. **Decided (maintainer, 2026-10-09)**, per egg: Program "no sleep needed yet. 3h until the next." (sleep as in putting a computer or program to sleep), Iron "no idle needed yet. 3h until the next.", Wetware "no nap needed yet. 3h until it can doze." The first draft was Program "no nap needed yet." and Wetware "it is not sleepy yet."
 
 ### Tired
+
+**Decided (maintainer, 2026-10-09): the first set**, " · degraded", " · sluggish", " · tired", with the titles and field manual lines below.
 
 Tired is not a meter, so its "meter word" is a readout word, as Iron's " · worn" is: the readout line carries it while tired holds, the screen-reader value matches, and the title explains it. No bar label changes and no sprite mark (it would compete with the seams and the state marks; the drain shows on the bars).
 
@@ -409,9 +413,11 @@ Tired is not a meter, so its "meter word" is a readout word, as Iron's " · worn
 | Title (hover) | Degraded: it missed a reset. It drains faster and will not reach flow until it rests. | Sluggish: it missed a calibration. It drains faster and will not reach flow until it rests. | Tired: it missed its rest. It gets hungry and lonely faster and will not glow until it rests. |
 | Field manual (qualitative) | Now and then it asks for a reset. Answer soon and it steadies; let the call pass and it runs degraded, draining faster, until it rests or sleeps. | Now and then it asks for calibration. Answer soon and it steadies; let the call pass and it runs sluggish, draining faster, until it rests or sleeps. | Now and then it needs rest. Let it lie down soon and it steadies; let the moment pass and it runs tired, getting hungry and lonely faster, until it rests or sleeps. |
 
-Alternatives: Program " · lagging" (plainer, but lag is also a network word the netrun uses loosely); Iron " · uncalibrated" (ties to the verb, but at 12 letters it would be the longest one-word readout state; 1.0's longest is " · overclocked" at 11). Wetware's word is the plain word, as the rules ask.
+Alternatives considered, not chosen: Program " · lagging" (plainer, but lag is also a network word the netrun uses loosely); Iron " · uncalibrated" (ties to the verb, but at 12 letters it would be the longest one-word readout state; 1.0's longest is " · overclocked" at 11). Wetware's word is the plain word, as the rules ask.
 
 ### The baby
+
+**Decided (maintainer, 2026-10-09): the lines below stand as drafted.**
 
 A baby drains at x2.4 and writes cache at x2 (stage-care draft, 2.1), so it is hungry and messy more often than any later stage. The lines say so once, as the stage's own explanation, then fall back to the ordinary ones. Proposal: the baby variants replace the ordinary alert and log line only while the netling is a baby; the alert keys and thresholds are 1.0's.
 
@@ -425,6 +431,8 @@ The ordinary lines (Alert lines; 1.0's "> corrupted cache file written.") return
 
 ### The elder's "nothing to purge" line
 
+**Decided (maintainer, 2026-10-09): the lines below stand as drafted.**
+
 PURGE with an empty cache returns 1.0's refusal "cache is clean." (no `> `, as the other action refusals). An elder writes cache at a quarter of the rate (decided), so it sees this refusal far more often than any other stage; its version says why, without a number.
 
 | | Program | Iron | Wetware |
@@ -433,6 +441,8 @@ PURGE with an empty cache returns 1.0's refusal "cache is clean." (no `> `, as t
 | Nothing to purge (elder) | cache is clean. it keeps it that way now. | no rot to scrub. old sectors hold. | nothing to flush. it keeps itself clean now. |
 
 ### Notification texts
+
+**Decided (maintainer, 2026-10-09): the titles and bodies below stand as drafted**, with the break warning's body as edited by the maintainer (Iron's Overclock strain alert ends "Integrity is dropping.", The break, Alert lines).
 
 1.0 sends one title per kind ("Netling needs you" with the alert line as body; "Netling wants something"; "A visitor pinged in"; "A contract came in"; "Netling is evolving") under one tag, so a new notification replaces the last (`src/notify.js`). 2.0 keeps that and adds the class (decided: Events, Care, Cooldowns; visitors never notify). Proposal: the title names the kind in the egg's register; the body is the alert line already drafted (Alert lines, and The break's alert lines), so a notification and the in-app alert never disagree.
 
@@ -464,12 +474,14 @@ Notes:
 
 ### The strain readout words (review)
 
+**Decided (maintainer, 2026-10-09): all three kept** (" · thrashing", " · frayed", " · worn"), and Wetware's warning line changed from "it is jittery." to "it is frayed." so the log, readout, title and field manual use one word.
+
 Proposal so far: Program " · thrashing", Wetware " · frayed", Iron " · worn". Checked against the forms, the other readout words and the log lines:
 
 | Word | Fits | Watch | Recommendation |
 |---|---|---|---|
 | Program " · thrashing" | Matches its warning line ("it is thrashing.") and the field manual ("it thrashes"); real memory-pressure jargon. | Iron's Feast street adult is named Thrash, and its elder Swap ("swap is filling up"). Both are another egg's forms, so a Program player meets them only as visitors. | Keep. Alternatives if the collision matters: " · swapping", " · paging". |
-| Wetware " · frayed" | Matches the title and the field manual ("it frays"); plain; carries the cyberpsychosis theme without the word. | The warning line says "it is jittery", so the log and the readout use two words for one condition. | Keep " · frayed" (the condition) and the decided line (the moment). If one word is wanted, " · jittery" in the readout is the smaller change. |
+| Wetware " · frayed" | Matches the title and the field manual ("it frays"); plain; carries the cyberpsychosis theme without the word. | The warning line says "it is jittery", so the log and the readout use two words for one condition. | Kept, and the warning line now says "it is frayed" too (decided). |
 | Iron " · worn" | Physical; drafted first; matches "Worn:" in its title. | None found; 1.0 has no readout "worn". | Keep. |
 
 None of the three collides with a readout word already in use (" · overclocked", " · overdrive", " · overlink", " · strained", " · spent", " · drained", " · throttled", " · in flow") or with the tired words above.
