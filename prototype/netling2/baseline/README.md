@@ -161,6 +161,10 @@ Fork-only, off by default: `NR2.map` (`sim/netrun/map2.js`, a parameterized copy
 
 Not modelled or not checked: how a person reads a bigger map (the bots look ahead over what they can see), the fog, the phone screen (about 55 to 60 nodes against 27 to 35), and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps, which was not measured.
 
+## Follow-up: stage care (first build)
+
+Fork switches `STAGE` (the stage tables and the rest call; off by default). Findings, tables and the options for the baby are in [docs/NETLING_2_STAGE_CARE_DRAFTS.md](../../../docs/NETLING_2_STAGE_CARE_DRAFTS.md), section 7; outputs are `results/followup/stage-*` and `notification-count-real.txt`. In short (1000 lives, wider maps on, no egg pressure): the rest call alone changes nothing (mean full life 90.6% against 90.5%; long-gap survival unchanged); the stage tables cost the sparse players through the baby drain (x2.4: worker 82.4% to 63.7%, mean 90.5% to 89.5%), partly recovered when a baby's faults roll no bugs and almost fully at a drain of 1.6; Standing at the teen check falls and the teen tie rate rises from 53% to 58% on average. A bot artifact (bots never woke a call-rest) was found and fixed on the way. Not measured: the three eggs' pressures and the break on top, the elder, the hidden-teen binger.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |

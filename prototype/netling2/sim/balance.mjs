@@ -165,6 +165,9 @@ const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games
 
 export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
+  // A person who finds the netling in a call-rest (STAGE.rest.on) wakes it with the nap button; the bots never nap otherwise, so without this a check-in
+  // inside a rest could not feed (an artifact the first rest-call measurements had, before 2026-10-09).
+  if (s.nap?.callRest) doAct('nap');
   // Human-like noise (only for archetypes that set these; the others consume no extra rng): a lapse is a chore skipped this time, the
   // mood moves the mini-game win rate a little each check-in, and a favorite game is played more than the others.
   const lapse = () => Boolean(p.lapse) && rng() < p.lapse;

@@ -14,6 +14,7 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 6. **Notifications (decided 2026-10-09):** visitors never notify (they exist to encourage keeping the game open). Timed events (trace, surge, attack, overflow) do notify and are the class the budget of 6 a day counts. Care events, rest calls included, do not count against it. That gives three classes with their own toggles: **Events, Care, Cooldowns** (a netrun being ready is the cooldown example). Evolution notices were left out of the count and are not yet placed in a class. Counts per class are in section 2.6.
 7. **Clustered, predictable adult events: not yet.**
 8. **Elder cache is less often, not zero, so PURGE is unchanged** (decided 2026-10-09).
+9. **Iron's button label: CALIBRATE** (decided 2026-10-09; 9 characters).
 
 ## 1. What care is today
 
@@ -78,7 +79,7 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
   | | Ordinary nap button (care drafts) | During a call | While resting | Call line (not limited to 9) |
   |---|---|---|---|---|
   | Program | NAP | RESET | WAKE UP | "> reset due." |
-  | Iron | IDLE | CALIBRATE (exactly 9; CALIB if the layout needs 5) | WAKE UP | "> calibration due." / "> calibrating. back in 25m." |
+  | Iron | IDLE | CALIBRATE (9 characters; decided) | WAKE UP | "> calibration due." / "> calibrating. back in 25m." |
   | Wetware | DOZE | REST | WAKE UP | "> it needs rest." |
 
   Shorter Iron labels, if CALIBRATE is too wide on a phone: CALIB (5), TRIM (4, trimming out drift), ZERO (4, zeroing a gauge); not TUNE (a role name). CALIBRATING (11) does not fit and would only ever be the status text.
@@ -154,8 +155,8 @@ All of it runs on the scripted bots; none of it can say whether a rest call is a
 
 Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes, the rest answered by the relabelled nap button, Care on by default, evolution notices in Care, attention requests in Events. Still open:
 
-1. Iron's button label: CALIBRATION is 11 characters and the label rule is 9. CALIBRATE (9) is the same word and fits; CALIB, TRIM or ZERO are shorter. Or a one-off exception to the rule for this label.
-2. Cooldowns default (on or off; off is my suggestion).
+1. Cooldowns default (on or off; off is my suggestion).
+2. The baby: drain, bug rule and Standing (section 7 has the numbers and three options).
 
 ## 5. Constraints and risks
 
@@ -169,3 +170,31 @@ Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder c
 ## 6. Wording (not drafted)
 
 Needed from the care-drafts register: the rest call line per egg (call, on time, late, lapsed), the tired state's meter word, the baby's hungry and messy lines, the elder's "nothing to purge" line, and the notification texts for each class. The warning, discharge, throttle and crash lines for the break are also still to write.
+
+## 7. The first build and what the simulator says (2026-10-09)
+
+**Built in the fork** (`prototype/netling2/sim/sim.js`, `STAGE`; off by default so every older table is unchanged; tests in `stage.test.js`): `STAGE='{"on":true}'` switches on the stage tables (a 7 hour baby, adult age 46 hours, baby drain, cache by stage, a meal-size table left at 1); `STAGE='{"rest":{"on":true}}'` switches on the rest call, the nap-button answer, the call-rest (no nap cooldown, held states paused) and tired; `babyBugs` (default 1) sets how often a baby's faults roll a bug. The bots answer a call with probability `CALLANSWER` (default 0.7, an assumption) at a random minute of the window, and wake a netling found in a call-rest. Measured with the wider maps on, `NR2=all PERKS=1`, 1000 lives, no egg pressure; files `prototype/netling2/baseline/results/followup/stage-*`.
+
+**The rest call is harmless in the simulator and a little helpful.**
+- Alone, mean full life is 90.6% against 90.5% with no stage care; the sparse archetypes gain (worker 82.4 to 84.5, human-regular 28.8 to 31.7).
+- Long awake gaps are unchanged (casual, full life at 4, 5 and 6 hour gaps: 91.0, 64.3, 22.8 against 90.8, 61.8, 23.0), so a work-day gap stays fatal as decided. How often the player answers hardly matters (5 hour gap: 53 to 57% whether 50% or 100% answer; measured before the bot fix below, so the level is lower than now but the small spread across answer rates is the point).
+- Real calls are more frequent than the shadow model: 4.3 to 4.7 per 15 awake hours in the baby stage, 3.2 to 3.4 as a teen, 1.3 as an adult, about 10 a life. With the assumed 70% answer rate and a random response time, about 35% are on time, 31% late and 27% lapse, and the netling is tired for 12 to 15% of its life. Tired may be more than intended for "a good start"; the response model is the assumption behind it.
+- Fixed on the way: the bots never napped, so a check-in inside a call-rest could not feed. That made the first run look as if the rest call cost 6 to 10 points at long gaps; with the bots waking a call-rest the cost is gone.
+
+**The stage tables cost the sparse players, and the cost is the baby drain.**
+- Lengths and cache by stage cost nothing (baby drain 1: a 5 hour gap survives 63.0% against 61.8%).
+- With the baby drain at 2.4, mean full life falls from 90.5% to 89.5%, but the worker falls from 82.4% to 63.7% and the casual archetype from 95.5% to 93.5%. At a 5 hour gap, 61.8% falls to 51.3%. The deaths show up in the teen stage (9.8% to 27.8%), not the baby stage: a baby that starves for hours racks up faults, bugs and Integrity damage, and dies after it has grown.
+- A baby's faults rolling no bugs (`babyBugs` 0) recovers part: the worker 71.8%, the 4 hour gap back to 90.5% (today 90.8%), the 5 hour gap 58.5% (61.8%).
+- The baby drain sweep (candidate with `babyBugs` 0 and the rest call on): worker full life 82.0 / 81.8 / 73.5 at drain 1 / 1.6 / 2.0 (and 75.9 at 2.4); casual 92.1 / 93.9 / 94.8 (and 93.7); human-regular 28.5 / 30.2 / 29.3 (and 29.4); attentive 100 at every setting. Faults rise with drain (worker 8.4 / 12.2 / 13.7).
+
+**Standing at the teen check is not preserved, and the teen form gets more random.**
+- I estimated that a 2.4 drain would keep the teen-check Standing level. The bots do not show it: casual 3.1 and 2.8 (17 hour baby) become 1.6 and 1.7 at 7 hours, attentive 3.9 and 3.5 become 2.9 and 2.8. The bots can only feed when they check in, so a faster drain does not make them feed more. Higher drain does raise it (attentive 1.9 / 2.4 / 2.6 at drain 1 / 1.6 / 2.0) but never back to today's level.
+- The teen tie rate rises from 53% to 58% on average (casual 73% to 84%, worker 82% to 98%). A person who feeds more often would do better than the bots; that is not measured.
+- Hidden-path hunters that do not binge reach the hidden teen in 58 to 61% of lives against 87% today (the binger test is not built).
+
+**Options for the baby (the maintainer chooses).**
+1. **Baby drain 1.6 with `babyBugs` 0.** Keeps the worker where it is today (81.8% against 82.4%), keeps long-gap survival near today's, recovers about half of the lost teen-check Standing. The baby is still needier than a teen, by 60%.
+2. **Keep 2.4 and `babyBugs` 0.** The baby is much needier, and sparse players pay (worker about 75%, casual about 2 points).
+3. Either of the above plus a **Standing multiplier on a baby's feeds** (for example x1.5 or x2) to restore the teen check, if the teen form should stay as steerable as today. Not built.
+
+**Not measured:** the hidden-teen binger test; the three eggs with their pressures and the break on top of the stage care (only the unpressured rules were run); the elder (no archetype reaches the elder stage in these runs); meal size by stage; and any real player.

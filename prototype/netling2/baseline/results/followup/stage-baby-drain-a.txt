@@ -1,0 +1,6 @@
+{"babyDrain":1,"archetype":"worker","fullLife":0.82,"faults":8.39,"tie":0.977,"standing":[0.77,0.53],"bugs":0.76}
+{"babyDrain":1,"archetype":"casual","fullLife":0.921,"faults":6.21,"tie":0.908,"standing":[1.31,1.17],"bugs":0.26}
+{"babyDrain":1.6,"archetype":"worker","fullLife":0.818,"faults":12.2,"tie":0.978,"standing":[0.79,0.6],"bugs":1.1}
+{"babyDrain":1.6,"archetype":"casual","fullLife":0.939,"faults":6.28,"tie":0.858,"standing":[1.5,1.55],"bugs":0.25}
+{"babyDrain":2,"archetype":"worker","fullLife":0.735,"faults":13.71,"tie":0.973,"standing":[0.8,0.59],"bugs":1.28}
+{"babyDrain":2,"archetype":"casual","fullLife":0.948,"faults":6.5,"tie":0.869,"standing":[1.55,1.69],"bugs":0.25}

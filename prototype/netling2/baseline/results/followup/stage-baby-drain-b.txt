@@ -1,0 +1,6 @@
+{"babyDrain":1,"archetype":"human-regular","fullLife":0.285,"faults":4.97,"tie":0.943,"standing":[1,0.84],"bugs":0.37}
+{"babyDrain":1,"archetype":"attentive","fullLife":1,"faults":0.46,"tie":0.829,"standing":[1.95,1.81],"bugs":0.01}
+{"babyDrain":1.6,"archetype":"human-regular","fullLife":0.302,"faults":5.6,"tie":0.936,"standing":[1.14,1],"bugs":0.4}
+{"babyDrain":1.6,"archetype":"attentive","fullLife":1,"faults":0.44,"tie":0.798,"standing":[2.39,2.32],"bugs":0.02}
+{"babyDrain":2,"archetype":"human-regular","fullLife":0.293,"faults":6.12,"tie":0.936,"standing":[1.19,1.1],"bugs":0.4}
+{"babyDrain":2,"archetype":"attentive","fullLife":0.999,"faults":0.48,"tie":0.79,"standing":[2.6,2.57],"bugs":0.02}

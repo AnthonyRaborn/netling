@@ -393,6 +393,7 @@ export const STAGE = {
   teenAtMin: 7 * 60,
   adultAtMin: 46 * 60,
   babyDrain: 2.4,
+  babyBugs: 1, // the share of a baby's faults that roll a bug chance (1 = as for everyone; 0 = a baby's faults leave no bug)
   cache: { baby: 2, teen: 1, adult: 1, mainframe: 0.25 },
   meal: { baby: 1, teen: 1, adult: 1, mainframe: 1 },
   rest: {
@@ -1035,6 +1036,7 @@ function step(s, t, rng) {
   s.tLevel = guardedLevel(s.temper, s.tLevel ?? 0);
   while (s.faultRolls > 0) {
     s.faultRolls--;
+    if (STAGE.on && STAGE.babyBugs < 1 && s.stage === 'baby' && rng() >= STAGE.babyBugs) continue;
     // The netling says so, and points to the way out (a clinic on a netrun).
     if (rollBug(s, rng)) log(s, t, s.bugs >= 3 ? '> it is badly glitched. a clinic out on the net could fix it.' : '> a glitch has settled in. a clinic out on the net could fix it.');
   }
