@@ -122,7 +122,7 @@ if (!process.env.JSON) {
       out.push(`level ${level}: value mean ${mv.toFixed(2)} (${Math.min(...v.map((r) => r.value))} to ${Math.max(...v.map((r) => r.value))}), exit mean ${me.toFixed(1)}%; outside 20% of value: ${[...lowV.map((f) => f + ' low'), ...highV.map((f) => f + ' high')].join(', ') || 'none'}; exit more than 10 points off: ${offE.join(', ') || 'none'}`);
     }
     const worse = rows.filter((r) => r.level === 2).filter((e) => e.value < rows.find((a) => a.form === e.form && a.level === 1).value).map((e) => e.form);
-    out.push(`elder mean value ${(means[2] / means[1]).toFixed(2)}x the adult's (bar 1.15x); elder below own adult: ${worse.join(', ') || 'none'}`);
+    out.push(`elder mean value ${(means[2] / means[1]).toFixed(2)}x the adult's (floor 1.15x, no ceiling: elders may be stronger, decided); elder below own adult: ${worse.join(', ') || 'none'}`);
     console.log(`${k}\n  ${out.join('\n  ')}`);
   }
 }

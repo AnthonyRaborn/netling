@@ -199,7 +199,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     ...(NR2.fate && !daily ? { fate: Math.floor(rng() * 4294967296) } : {}), // pre-rolled node contents (nr2.js fate): a per-run seed
     ...(daily ? { daily: true, day, seed: dailySeed(day), rollKey: null, rolls: 0, stake: newStake(pet.inventory), trail: [TRAIL.entry] } : {}),
   };
-  rollEggPage(pet, rng);
+  pet.run.eggPages = []; // egg pages found this run (NR2.eggPages): rolled on the way out, banked on jack-out
   if (pet.run.challenge) note(pet.run, `challenge: ${challengeById(pet.run.challenge).name.toUpperCase()}. ${challengeById(pet.run.challenge).rule}`);
   // An open contract for this region comes along, and the map is fixed so every route can meet it.
   const c = pet.contract;
@@ -218,13 +218,14 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
   return pet.run;
 }
 
-// Egg pages (NR2.eggPages): one roll a run at jack-in, carried until the run is banked. pet.egg names the egg (default program: the eggs share
-// every rule in this fork) and pet.eggPages holds the line's egg pages so far. Draws no random number when off or when nothing is left to find.
+// Egg pages (NR2.eggPages): one roll a run, made on the way out (decided, maintainer): at the exit node or when the runner leaves by a relay, so
+// jacking straight back out never rolls. pet.egg names the egg (default program: the eggs share every rule in this fork) and pet.eggPages holds
+// the line's egg pages so far. Draws no random number when off or when nothing is left to find.
 const EGG_ROLL_REGIONS = ['public', 'bazaar', 'corp', 'ruins'];
 function rollEggPage(pet, rng) {
   const run = pet.run;
-  run.eggPages = [];
-  if (!NR2.eggPages?.on || run.daily || REGIONS[run.region].tutorial) return;
+  run.eggPages ??= [];
+  if (!NR2.eggPages?.on || typeof rng !== 'function' || run.daily || REGIONS[run.region].tutorial) return;
   const egg = pet.egg ?? 'program';
   const known = pet.eggPages ?? [];
   const kind = run.region === 'deep' ? 'hidden' : EGG_ROLL_REGIONS.includes(run.region) && (pet.cleared ?? []).includes(run.region) ? 'role' : null;
@@ -527,6 +528,7 @@ function moveToNode(pet, nodeId, rng) {
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
       const opened = !region.tutorial && !region.daily && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
+      rollEggPage(pet, rng);
       // The egg's Source page: guaranteed at a Source exit until the egg has it (decided: the first Source exit of an egg).
       if (run.region === 'source' && NR2.eggPages?.on) {
         const id = nextEggPage(pet.egg ?? 'program', 'source', [...(pet.eggPages ?? []), ...(run.eggPages ?? [])]);
@@ -719,7 +721,10 @@ function chooseOption(pet, optionId, rng) {
   let boughtItem = false;
 
   if (p.kind === 'relay') {
-    if (optionId === 'out') return jackOut(pet);
+    if (optionId === 'out') {
+      rollEggPage(pet, rng);
+      return jackOut(pet);
+    }
     return { ok: true };
   }
   if (p.kind === 'checkpoint') {
@@ -795,7 +800,7 @@ function chooseOption(pet, optionId, rng) {
 }
 
 // Kept for older callers: relay decisions go through choose().
-export const relayChoice = (pet, choice) => choose(pet, choice === 'out' ? 'out' : 'continue');
+export const relayChoice = (pet, choice, rng) => choose(pet, choice === 'out' ? 'out' : 'continue', rng);
 
 function nodesWithin(run, fromId, depth) {
   let frontier = [fromId];

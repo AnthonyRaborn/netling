@@ -995,13 +995,25 @@ test('Bare metal: buying an item breaks it, and a clinic fix, a cache, an ICE wi
   reset();
 });
 
-// Egg pages as real drops (NR2.eggPages; codex2.js EGG_PAGES).
-const eggRun = (region, { egg = 'iron', known = [], cleared = [region], rng = stub(0), stage = 'adult' } = {}) => {
+// Egg pages as real drops (NR2.eggPages; codex2.js EGG_PAGES). One roll a run on the way out: the exit node or a relay jack-out.
+const eggStart = (region, { egg = 'iron', known = [], cleared = [region], stage = 'adult' } = {}) => {
   const s = createScript({ now: 0, rng: mulberry32(5) });
   Object.assign(s, { stage, form: 'breachCorp', egg, eggPages: [...known], cleared: [...cleared] });
   Object.assign(s.stats, { charge: 90, integrity: 90, heat: 30 });
-  startRun(s, region, rng, []);
+  startRun(s, region, mulberry32(9), []);
   return s;
+};
+// Leave the run: 'exit' (the exit node), 'relay' (a relay, then out), 'jack' (a plain jack-out), 'disconnect' or 'abort'. -> the line's egg pages.
+const leave = (s, how, rng = stub(0)) => {
+  if (how === 'exit' || how === 'relay') {
+    const node = runOptions(s.run)[0];
+    node.type = how;
+    moveTo(s, node.id, rng);
+    if (how === 'relay') choose(s, 'out', rng);
+  } else if (how === 'jack') jackOut(s);
+  else if (how === 'disconnect') disconnect(s, 'power drained mid-run.');
+  else abortRun(s);
+  return s.eggPages;
 };
 
 test('egg pages: 18 ids, six per egg (four role pages in order, the hidden page, the Source page), none a story page id', () => {
@@ -1014,70 +1026,51 @@ test('egg pages: 18 ids, six per egg (four role pages in order, the hidden page,
   assert.equal(nextEggPage('wetware', 'hidden', ['wetware-blank']), null);
 });
 
-test('egg pages are off by default and then draw no random number, so the earlier tables reproduce', () => {
+test('egg pages are off by default and then draw no random number, so the earlier tables reproduce; on, one roll a run', () => {
   reset();
   assert.equal(NR2.eggPages.on, false);
-  let draws = 0;
-  const counting = () => { draws++; return 0; };
-  const s = createScript({ now: 0, rng: mulberry32(5) });
-  s.cleared = ['public'];
-  set({ eggPages: { on: false } });
-  startRun(s, 'public', counting, []);
-  const off = draws;
-  draws = 0;
-  const t = createScript({ now: 0, rng: mulberry32(5) });
-  t.cleared = ['public'];
-  set({ eggPages: { on: true } });
-  startRun(t, 'public', counting, []);
-  assert.equal(draws, off + 1, 'one roll a run when on');
-  assert.deepEqual(s.run.eggPages, []);
+  const draws = (on) => {
+    set({ eggPages: { on } });
+    let n = 0;
+    leave(eggStart('public'), 'exit', () => { n++; return 0.99; });
+    return n;
+  };
+  const off = draws(false);
+  assert.equal(draws(true), off + 1);
   reset();
 });
 
-test('egg pages: a role page drops in a cleared non-Deep region, in order and never a repeat; not in an uncleared region; banked on jack-out', () => {
+test('egg pages roll only on the way out: at the exit node or a relay jack-out, never on a plain jack-out, a disconnect or an abort', () => {
   set({ eggPages: { on: true } });
-  const a = eggRun('bazaar', { known: ['iron-breach'] });
-  assert.deepEqual(a.run.eggPages, ['iron-dodge']);
-  jackOut(a);
-  assert.deepEqual(a.eggPages, ['iron-breach', 'iron-dodge']);
-  assert.deepEqual(eggRun('corp', { cleared: [] }).run.eggPages, [], 'the region must be cleared');
-  assert.deepEqual(eggRun('public', { rng: stub(0.99) }).run.eggPages, [], 'the roll can miss');
-  assert.deepEqual(eggRun('ruins', { known: EGG_PAGES.iron.role }).run.eggPages, [], 'nothing left: no repeat');
+  assert.deepEqual(leave(eggStart('public'), 'exit'), ['iron-breach']);
+  assert.deepEqual(leave(eggStart('public'), 'relay'), ['iron-breach']);
+  for (const how of ['jack', 'disconnect', 'abort']) assert.deepEqual(leave(eggStart('public'), how), [], how);
   reset();
 });
 
-test('egg pages: the hidden page drops only on a Deep run, at its own rate; the role pages do not drop there', () => {
+test('egg pages: a role page in a cleared non-Deep region, in order and never a repeat; not in an uncleared region; the roll can miss', () => {
   set({ eggPages: { on: true } });
-  assert.deepEqual(eggRun('deep', { rng: stub(0.4) }).run.eggPages, ['iron-guru'], 'under 0.5');
-  assert.deepEqual(eggRun('public', { rng: stub(0.4) }).run.eggPages, [], 'over 0.2');
-  assert.deepEqual(eggRun('deep', { known: ['iron-guru'] }).run.eggPages, []);
+  assert.deepEqual(leave(eggStart('bazaar', { known: ['iron-breach'] }), 'exit'), ['iron-breach', 'iron-dodge']);
+  assert.deepEqual(leave(eggStart('corp', { cleared: [] }), 'relay'), [], 'the region must be cleared before this run');
+  assert.deepEqual(leave(eggStart('public'), 'exit', stub(0.99)), [], 'the roll can miss');
+  assert.deepEqual(leave(eggStart('ruins', { known: EGG_PAGES.iron.role }), 'exit'), EGG_PAGES.iron.role, 'nothing left: no repeat');
   reset();
 });
 
-test('egg pages: a disconnect or an abort loses the page found; the per-life codex cap does not apply', () => {
+test('egg pages: the hidden page only on a Deep run, at its own rate; the per-life codex cap does not apply', () => {
   set({ eggPages: { on: true } });
-  const a = eggRun('public');
-  disconnect(a, 'power drained mid-run.');
-  assert.deepEqual(a.eggPages, []);
-  const b = eggRun('public');
-  abortRun(b);
-  assert.deepEqual(b.eggPages, []);
-  const c = eggRun('public');
+  assert.deepEqual(leave(eggStart('deep'), 'relay', stub(0.4)), ['iron-guru'], 'under 0.5');
+  assert.deepEqual(leave(eggStart('public'), 'relay', stub(0.4)), [], 'over 0.2');
+  assert.deepEqual(leave(eggStart('deep', { known: ['iron-guru'] }), 'relay'), ['iron-guru']);
+  const c = eggStart('public');
   c.codexFound = 99; // far over the cap of 12
-  jackOut(c);
-  assert.deepEqual(c.eggPages, ['iron-breach']);
+  assert.deepEqual(leave(c, 'exit'), ['iron-breach']);
   reset();
 });
 
 test('egg pages: a Source exit guarantees the egg\'s Source page once; another egg\'s pages are its own', () => {
   set({ eggPages: { on: true } });
-  const exit = (opts) => {
-    const s = eggRun('source', { stage: 'mainframe', rng: stub(0.99), ...opts });
-    const node = runOptions(s.run)[0];
-    node.type = 'exit';
-    moveTo(s, node.id, mulberry32(3));
-    return s.eggPages;
-  };
+  const exit = (opts) => leave(eggStart('source', { stage: 'mainframe', ...opts }), 'exit', stub(0.99));
   assert.deepEqual(exit({}), ['iron-source']);
   assert.deepEqual(exit({ known: ['iron-source'] }), ['iron-source'], 'not twice');
   assert.deepEqual(exit({ egg: 'wetware', known: ['iron-source'] }), ['iron-source', 'wetware-source']);
