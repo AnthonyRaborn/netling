@@ -754,7 +754,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, overfeeds: 0, overfeedCaches: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeByStrain: 0, brakeWarns: 0, overfeeds: 0, overfeedCaches: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -775,7 +775,12 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // allOverclock (maintainer, 2026-10-09: every egg manages every bar and reaches every state; only the owner's benefits are larger): Overclock
 // breaks on every egg, as Overdrive and Overlink do. false is the first build, where only Iron's Overclock broke (the decided-* and state-bot
 // results made before this date).
-export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0, allOverclock: true };
+// strainBreak (maintainer, 2026-10-09: option 3, the same on every egg; null = off, the Integrity trigger alone): the owner's state also breaks
+// when the owner's hidden strain reaches this while the state is active (Iron's Overclock on wear, Program's Overdrive on its overfeed strain,
+// Wetware's Overlink on its overplay strain; the last two need OVERUSE). The strain's own line (50) and its log line are the warning. A
+// non-owner's state has no strain and breaks on Integrity only. The break is the same as Integrity's (drop, lockout, fault); it does not clear
+// strain, which fades on its own (faster at rest).
+export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0, allOverclock: true, strainBreak: null };
 if (process.env.BRAKE) {
   const v = JSON.parse(process.env.BRAKE);
   Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
@@ -824,7 +829,10 @@ function stepBrake(s, rest, t) {
     if (key === 'heat' && SIDES.owner !== null && !BRAKE.allOverclock) continue; // first build: Overclock's break was Iron's alone
     const active = !rest && (key === 'heat' ? overclocked(s) : Boolean(s.sideHeld?.[key]));
     if (!active) { s.brakeWarn[key] = false; continue; }
-    if (st.integrity < BRAKE.breakInt) {
+    const strain = BRAKE.strainBreak == null ? null : key === 'heat' && IRON.on ? s.wear ?? 0 : key === SIDES.owner && ownerStrain() ? s.ostrain ?? 0 : null;
+    const byStrain = strain !== null && strain >= BRAKE.strainBreak;
+    if (st.integrity < BRAKE.breakInt || byStrain) {
+      if (byStrain && st.integrity >= BRAKE.breakInt) SIDE_METER.brakeByStrain++;
       if (key !== 'heat') {
         s.sideHeld[key] = false;
         s.sideHold[key] = 0;

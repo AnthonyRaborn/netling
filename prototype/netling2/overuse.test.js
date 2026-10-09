@@ -112,3 +112,65 @@ test('costsX1: a held Overdrive bleeds Integrity at x1 for its owner, not x3', (
   const x1 = bleedFor(true);
   assert.ok(x1 < x3, `x1 ${x1} against x3 ${x3}`);
 });
+
+// The break on the owner's strain (BRAKE.strainBreak; maintainer, 2026-10-09, option 3: the same rule on every egg). Off by default (null).
+const { BRAKE, IRON } = await import('./sim/sim.js');
+const withBreak = (line, fn) => {
+  const keep = { on: BRAKE.on, strainBreak: BRAKE.strainBreak };
+  BRAKE.on = true; BRAKE.strainBreak = line;
+  try { fn(); } finally { Object.assign(BRAKE, keep); IRON.on = false; restore(); }
+};
+const oneMinute = (s) => tick(s, s.lastTick + MIN, stub(0.99));
+const broke = (s, key) => (s.brakeUntil?.[key] ?? 0) > s.ageMin;
+
+test('the strain trigger is off by default', () => {
+  assert.equal(BRAKE.strainBreak, null);
+  withBreak(null, () => {
+    IRON.on = true; Object.assign(SIDES, { on: true, owner: null, ownerMult: 3, teenStates: true });
+    const s = make({ heat: 90 });
+    s.wear = 95;
+    oneMinute(s);
+    assert.equal(broke(s, 'heat'), false, 'Integrity is full, so nothing breaks');
+  });
+});
+
+test('Iron: Overclock breaks on wear at the line with full Integrity, not under it, and the break is the usual one', () => {
+  withBreak(80, () => {
+    IRON.on = true; Object.assign(SIDES, { on: true, owner: null, ownerMult: 3, teenStates: true }); OVERUSE.on = true;
+    const under = make({ heat: 90 });
+    under.wear = 70; // a minute at Heat 90 adds 1.2 and fades 0.6: still under 80
+    oneMinute(under);
+    assert.equal(broke(under, 'heat'), false);
+    const over = make({ heat: 90 });
+    over.wear = 85;
+    const mistakes = over.careMistakes;
+    oneMinute(over);
+    assert.equal(broke(over, 'heat'), true);
+    assert.ok(over.stats.heat <= BRAKE.drop.heat, 'Heat throttled');
+    assert.equal(over.careMistakes, mistakes + 1, 'one fault');
+    assert.ok(over.wear > 80, 'the break does not clear wear; it fades on its own');
+  });
+});
+
+test('Program and Wetware: the owner state breaks on its strain; another egg state does not, and the owner strain does not break Overclock', () => {
+  for (const [owner, bar, line] of [['charge', 'charge', 50], ['sync', 'sync', 55]]) {
+    withBreak(80, () => {
+      egg(owner);
+      const s = make({ [bar]: 96, heat: 90 });
+      s.sideHeld = { charge: false, sync: false, heat: false, [bar]: true };
+      s.sideHold = { charge: 999, sync: 999, heat: 0 };
+      s.ostrain = 85;
+      oneMinute(s);
+      assert.equal(broke(s, bar), true, `${owner}: the owner state breaks`);
+      assert.ok(s.stats[bar] <= line, `${owner}: the bar is pushed down`);
+      assert.equal(broke(s, 'heat'), false, `${owner}: Overclock has no strain of its own on this egg`);
+      const other = owner === 'charge' ? 'sync' : 'charge';
+      const t = make({ [other]: 96 });
+      t.sideHeld = { charge: false, sync: false, heat: false, [other]: true };
+      t.sideHold = { charge: 999, sync: 999, heat: 0 };
+      t.ostrain = 85;
+      oneMinute(t);
+      assert.equal(broke(t, other), false, `${owner}: the non-owner state breaks on Integrity only`);
+    });
+  }
+});
