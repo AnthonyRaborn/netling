@@ -335,6 +335,20 @@ Alternative for Wetware's discharge if "threw it all up" is too much: "> !! it a
 
 Why "ease off" and not "stop": the watch bots (baseline README, "players who mind the break") show that feeding or playing less while Integrity is low saves a player who will be back soon but costs a sparse player 2 to 3 points of full life over the next gap, so the lines ask for less, not none.
 
+**Second pass (2026-10-09, proposal; the first draft above is option A).** The rows above were written before the strain trigger, so a break now has two causes: Integrity under 40, or the owner's strain at 80. The lines above name no cause, so they fit both and need no change for it. What a second read found, and option B for the three break lines:
+
+- Program's Overlink line says "link crashed". 1.0's overflow line is "buffers burst. crashed: ... rebooting...", so a Program player may expect a reboot after "crashed" and none comes. Option B says "dropped".
+- Option A runs long: the Wetware discharge is 74 characters with the prefix and so is Iron's, against 68 for 1.0's longest event line (the overflow crash, "> !! buffers burst. crashed: -15 integrity, cache full. rebooting..."). Option B keeps every break line at 61 or under.
+- The fork's own break line (`sim/sim.js`, the generic simulator text) ends "care mistake."; the drafts use the egg's fault word, as the Failures table does. The app should take the drafts' word.
+
+| Break | Program | Iron | Wetware |
+|---|---|---|---|
+| Overdrive (discharge) | > !! buffers dumped. boost blocked for half a day. fault. | > !! breaker tripped. held under spec for half a day. fault. | > !! it brought it all up. no gorging for half a day. slip. |
+| Overlink (crash) | > !! link dropped. no relink for half a day. fault. | > !! lock slipped its gears. no lock for half a day. fault. | > !! it pulled away hard. distant for half a day. slip. |
+| Overclock (throttle) | > !! thermal limit hit. throttled for half a day. fault. | > !! thermal cutout. held under rating for half a day. fault. | > !! it overheated. no running hot for half a day. slip. |
+
+My recommendation: option B on every egg (the "crashed" collision and the length); option A's Wetware discharge alternative ("it ate too much and crashed") has the same "crashed" problem. Lengths measured as strings only (51 to 61 characters); neither option is read in context or on a device.
+
 Open: whether the warning should notify at all (it is the only state line that asks for an action); "half a day" against "for a while" (the second hides the number entirely); Iron's trigger: since 2026-10-09 the owner's state also breaks on its strain (Iron's wear; EGG_PRESSURES, "The strain trigger"), so a strain break is preceded by the strain's own line ("tolerances are slipping.", "swap is filling up.", "it is jittery."), not by the Integrity warning; the maintainer reads them as warnings already, since they show only while the state is active (decided: on crossing the line in the state or on entering the state past it; EGG_PRESSURES, "Where the warning fires"). The wording stays.
 
 ## Overuse and owner strain (drafts, first pass)
@@ -362,3 +376,101 @@ Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EG
 **Reviewed with the maintainer (2026-10-09).** Fixed: Iron's overfeed no longer says "surge" (Iron's LINE SURGE event; the word was dropped as a state name for the same reason); one line a game inside Overlink and one line for the third overfeed; Wetware's overheat line says the game was played; the field manual is one accurate line; Iron's Overdrive end is "> power back to rating." so "> back within spec." means only that wear has recovered (Pressure cues). Decided: Program's three basic lines all end "cost it" and Wetware's all end "that hurt" (one repeated signal per egg; Wetware's overfeed was "its stomach hurts"). The strain mark is the seam on every egg (decided; Readout words, below).
 
 Open: "cyberpsychosis" is the maintainer's theme for Wetware's strain; in-game Wetware text stays plain (The eggs), so the word itself does not appear; "frayed" and "jittery" carry it. Program's "out of swap" likewise shows as "thrashing".
+
+## Stage care and notifications (drafts, first pass)
+
+Wording for the stage-care rules ([NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), section 2) and the three notification classes (its section 2.6), plus a review of the strain readout words. Drafted 2026-10-09 for the maintainer to choose and edit; nothing here is implemented, read in context, read on a device or played. Rules followed, as above: lowercase log lines with `> `, sentence case for alert and notification text, button names in capitals, no state name and no hidden number, the egg's register (Program bureaucratic and technical, Iron physical and procedural, Wetware street-level and plain), the egg's fault word. Words kept out because they are taken: "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "cool" (a care button), "drift" (Iron's virus), "true" and "out of true" (Iron's bugs), "worn" (Iron's wear readout), "fever" (Wetware's surge), "slip" outside a fault (Wetware's fault word), "spent", "drained" and "throttled" (the lockout readout words).
+
+### The rest call
+
+The call, the answer and its end follow the stage-care draft (section 2.5): the call fires, the nap button shows the egg's rest verb, answering in the first 30 minutes is on time, later in the 60 minute window is late, a lapse sets tired. The call line names no window (as 1.0's virus alert names none; the 30 minute on-time part stays hidden, as PATCH's does). The rest length is printed when the rest starts ("back in 25m"), as Iron's decided line does; it is the real random length, 20 to 30 minutes.
+
+| Moment | Program | Iron | Wetware |
+|---|---|---|---|
+| Call (log) | > reset due. downtime requested. | > calibration due. (decided) | > it needs rest. (drafted earlier) |
+| Answered, on time | > reset on schedule. back in 25m. | > calibrating on schedule. back in 25m. | > it lies down right away. back in 25m. |
+| Answered, late | > reset started behind schedule. back in 25m. | > calibrating, overdue. back in 25m. | > it finally lies down. back in 25m. |
+| Status while resting (readout, as 1.0's " · napping, 1h left") | " · resetting, 25m left" | " · calibrating, 25m left" | " · resting, 25m left" |
+| Rest over | > reset complete. back online. | > calibrated. back online. | > it gets up, rested. |
+| Woken early (WAKE UP during a call-rest) | > reset cut short. | > calibration cut short. | > it gets up too soon. |
+| Lapsed (sets tired) | > reset window missed. running degraded. | > calibration missed. it runs sluggish. | > it never got its rest. it is running tired. |
+| Tired clears (a rest of 20 minutes or a night) | > back to nominal. | > running smooth again. | > it has its energy back. |
+
+The late line is neutral on purpose (the rule is neutral; only a lapse costs). Iron's decided "> calibrating. back in 25m." becomes the two answered rows; if one line for both is wanted, it stands as decided. Not drafted: a reminder before the lapse (the stage-care draft lists unanswered-call reminders as unmeasured; proposal: none, one notification a call).
+
+**A collision to fix in 1.0's nap text.** The nap button's refusal says "not tired yet. 3h until it can nap again." (`src/sim.js`, kept in the fork). With a tired state in 2.0 that line would read as a statement about tired. Proposal, per egg: Program "no nap needed yet. 3h until the next.", Iron "no idle needed yet. 3h until the next.", Wetware "it is not sleepy yet. 3h until it can doze."
+
+### Tired
+
+Tired is not a meter, so its "meter word" is a readout word, as Iron's " · worn" is: the readout line carries it while tired holds, the screen-reader value matches, and the title explains it. No bar label changes and no sprite mark (it would compete with the seams and the state marks; the drain shows on the bars).
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Readout word | " · degraded" | " · sluggish" | " · tired" |
+| Screen-reader value | ", degraded" | ", sluggish" | ", tired" |
+| Title (hover) | Degraded: it missed a reset. It drains faster and will not reach flow until it rests. | Sluggish: it missed a calibration. It drains faster and will not reach flow until it rests. | Tired: it missed its rest. It gets hungry and lonely faster and will not glow until it rests. |
+| Field manual (qualitative) | Now and then it asks for a reset. Answer soon and it steadies; let the call pass and it runs degraded, draining faster, until it rests or sleeps. | Now and then it asks for calibration. Answer soon and it steadies; let the call pass and it runs sluggish, draining faster, until it rests or sleeps. | Now and then it needs rest. Let it lie down soon and it steadies; let the moment pass and it runs tired, getting hungry and lonely faster, until it rests or sleeps. |
+
+Alternatives: Program " · lagging" (plainer, but lag is also a network word the netrun uses loosely); Iron " · uncalibrated" (ties to the verb, but at 12 letters it would be the longest one-word readout state; 1.0's longest is " · overclocked" at 11). Wetware's word is the plain word, as the rules ask.
+
+### The baby
+
+A baby drains at x2.4 and writes cache at x2 (stage-care draft, 2.1), so it is hungry and messy more often than any later stage. The lines say so once, as the stage's own explanation, then fall back to the ordinary ones. Proposal: the baby variants replace the ordinary alert and log line only while the netling is a baby; the alert keys and thresholds are 1.0's.
+
+| Moment | Program | Iron | Wetware |
+|---|---|---|---|
+| Hungry (the charge alert, baby) | Charge is running low. New builds burn through it fast. | Power is running low. New units draw hard. | It is hungry. Babies eat a lot. |
+| A cache file is written (log, baby) | > corrupted cache file written. new builds leak. | > bit rot spreading. new parts shed while they settle. | > it made a mess. babies do. |
+| Cache piling up (the cache alert, baby) | Corrupted cache is piling up. Young processes leak fast. | Bit rot is spreading. New parts shed fast. | Waste is piling up. Babies make a lot of it. |
+
+The ordinary lines (Alert lines; 1.0's "> corrupted cache file written.") return at the teen stage. Not drafted: baby chatter about food or mess (chatter is body lines shaped by temper, and each baby already has one base line in `body-lines.js`).
+
+### The elder's "nothing to purge" line
+
+PURGE with an empty cache returns 1.0's refusal "cache is clean." (no `> `, as the other action refusals). An elder writes cache at a quarter of the rate (decided), so it sees this refusal far more often than any other stage; its version says why, without a number.
+
+| | Program | Iron | Wetware |
+|---|---|---|---|
+| Nothing to purge (every stage before the elder) | cache is clean. (1.0) | no rot to scrub. | nothing to flush. |
+| Nothing to purge (elder) | cache is clean. it keeps it that way now. | no rot to scrub. old sectors hold. | nothing to flush. it keeps itself clean now. |
+
+### Notification texts
+
+1.0 sends one title per kind ("Netling needs you" with the alert line as body; "Netling wants something"; "A visitor pinged in"; "A contract came in"; "Netling is evolving") under one tag, so a new notification replaces the last (`src/notify.js`). 2.0 keeps that and adds the class (decided: Events, Care, Cooldowns; visitors never notify). Proposal: the title names the kind in the egg's register; the body is the alert line already drafted (Alert lines, and The break's alert lines), so a notification and the in-app alert never disagree.
+
+| Class | Kind | Program title | Iron title | Wetware title | Body |
+|---|---|---|---|---|---|
+| Events | trace, intrusion, overflow | Netling: incident open | Netling: alarm raised | Netling needs you now | the alert line (Alert lines, keys trace, attack, overflow), with its minutes |
+| Events | attention request | Netling: request queued | Netling: service call | Netling wants you | request text, below |
+| Care | rest call | Netling: reset due | Netling: calibration due | Netling needs rest | rest call body, below |
+| Care | stat alert (virus, charge, sync, heat, lights, cache) | Netling needs you (1.0) | Netling: check the gauges | Netling needs you | the alert line (Alert lines; the baby lines above while a baby) |
+| Care | the break's warning (if it notifies; open in The break) | Netling needs you | Netling: check the gauges | Netling needs you | The break's alert line |
+| Care | evolution | Netling is evolving (1.0) | Netling: refit complete | Netling is growing | evolution body, below |
+| Cooldowns | netrun ready | Netling: netrun ready | Netling: netrun ready | Netling: netrun ready | cooldown body, below |
+
+Bodies not drafted before:
+
+| Body | Program | Iron | Wetware |
+|---|---|---|---|
+| Rest call | Scheduled reset requested. Press RESET. | Its readings have wandered. CALIBRATE it. | It can barely keep its eyes open. Let it REST. |
+| Request, a game | It wants to play TUNE. (1.0) | It is asking for a run of TUNE. | It wants to play TUNE. |
+| Request, a cool | It is running warm and wants a COOL. (1.0) | It is running warm and wants a VENT. | It feels warm and wants a CHILL. |
+| Evolution | It recompiled into NAME. (1.0) | It was rebuilt as NAME. | It grew into NAME. |
+| Netrun ready | Cooldown complete. The net is open. | Cleared to go out again. | It is ready to go out again. |
+
+Notes:
+- The surge is not here: it needs no answer, and 1.0 does not notify it. Contracts are not in a class yet (1.0 posts them only while the app is open, so a background notification is rare); proposal: Cooldowns, since they are a convenience.
+- The NAME in the evolution body is the form's name in capitals, as 1.0 does. Evolution to an elder uses the same line.
+- The Iron "check the gauges" title is the one place Iron's title differs between stat alerts and events; it tells an Iron player that nothing timed is running. Program and Wetware keep 1.0's split (events by kind, stat alerts "needs you").
+
+### The strain readout words (review)
+
+Proposal so far: Program " · thrashing", Wetware " · frayed", Iron " · worn". Checked against the forms, the other readout words and the log lines:
+
+| Word | Fits | Watch | Recommendation |
+|---|---|---|---|
+| Program " · thrashing" | Matches its warning line ("it is thrashing.") and the field manual ("it thrashes"); real memory-pressure jargon. | Iron's Feast street adult is named Thrash, and its elder Swap ("swap is filling up"). Both are another egg's forms, so a Program player meets them only as visitors. | Keep. Alternatives if the collision matters: " · swapping", " · paging". |
+| Wetware " · frayed" | Matches the title and the field manual ("it frays"); plain; carries the cyberpsychosis theme without the word. | The warning line says "it is jittery", so the log and the readout use two words for one condition. | Keep " · frayed" (the condition) and the decided line (the moment). If one word is wanted, " · jittery" in the readout is the smaller change. |
+| Iron " · worn" | Physical; drafted first; matches "Worn:" in its title. | None found; 1.0 has no readout "worn". | Keep. |
+
+None of the three collides with a readout word already in use (" · overclocked", " · overdrive", " · overlink", " · strained", " · spent", " · drained", " · throttled", " · in flow") or with the tired words above.

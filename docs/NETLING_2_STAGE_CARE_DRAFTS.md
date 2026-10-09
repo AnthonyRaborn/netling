@@ -164,9 +164,9 @@ Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder c
 - Rest ends the pressure states; the call-rest exemption is the only thing keeping answering a call from costing a held Overdrive or Overlink.
 - XP and per-stage power curves were set aside; this package covers most of that goal without a new system.
 
-## 6. Wording (not drafted)
+## 6. Wording (drafted, for choice)
 
-Needed from the care-drafts register: the rest call line per egg (call, on time, late, lapsed), the tired state's meter word, the baby's hungry and messy lines, the elder's "nothing to purge" line, and the notification texts for each class. The warning, discharge, throttle and crash lines for the break are also still to write.
+Drafted 2026-10-09 in [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md), "Stage care and notifications": the rest call lines per egg (call, on time, late, rest over, woken early, lapsed, tired clears), the tired state's readout word, title and field manual line, the baby's hungry and messy lines, the elder's "nothing to purge" line, the notification titles and bodies for each class, and a review of the strain readout words. The break's warning, discharge, crash and throttle lines were already drafted (care drafts, "The break", option A); a second pass there adds a shorter option B. None of it is chosen, read in context or read on a device. Found on the way: 1.0's nap refusal "not tired yet." collides with the tired state (a per-egg replacement is drafted).
 
 ## 7. The first build and what the simulator says (2026-10-09)
 
