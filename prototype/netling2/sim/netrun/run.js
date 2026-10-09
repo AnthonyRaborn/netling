@@ -3,7 +3,8 @@
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
 import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS } from '../sim.js';
-import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
+import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
+import { generateMap2 } from './map2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment as nextFragmentRaw, fragmentById, nextEggPage } from '../codex2.js';
@@ -164,7 +165,8 @@ export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
 export function startRun(pet, region, rng, codex = [], ownedAccessories = [], opts = {}) {
   const daily = Boolean(REGIONS[region].daily);
   const day = daily ? opts.day ?? DAILY.epoch : null;
-  const map = generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
+  const over = NR2.map.on && !daily ? NR2.map.region[region] : null; // 2.0 fork: wider maps for the regions listed (nr2.js map)
+  const map = over ? generateMap2(region, rng, over) : generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
   if (!daily) clinicKinds(map, rng);
   pet.run = {
     region,
@@ -1116,8 +1118,11 @@ function settleContract(pet, result) {
 // The seed that decides what is in a node without the route: the daily trace's, or a run's `fate` (nr2.js); undefined when contents are rolled on arrival.
 const fateSeed = (run) => (run.daily ? run.seed : run.fate);
 
+// How far along the run a node is: 0 at the entry, 1 at the exit.
+const layerFraction = (run, nodeId) => (run.map.layerCount > 1 ? nodeById(run.map, nodeId).layer / (run.map.layerCount - 1) : 0);
+
 function rollTier(run, nodeId, rng) {
-  const share = tierShare(run.region);
+  const share = tierShareAt(run.region, layerFraction(run, nodeId));
   if (!share) return 1;
   const r = fateSeed(run) !== undefined ? seededRoll(fateSeed(run), nodeId * 8 + 4, 0) : rng();
   return r < share ? 2 : 1;
@@ -1161,7 +1166,7 @@ export function foresightView(pet) {
     if (node.type === 'ice') {
       const view = {};
       if (fields.includes('game')) view.game = GAME_IDS[Math.floor(seededRoll(run.fate, id * 8 + LANE.game, 0) * GAME_IDS.length)];
-      if (fields.includes('tier')) view.tier = (() => { const sh = tierShare(run.region); return sh && seededRoll(run.fate, id * 8 + 4, 0) < sh ? 2 : 1; })();
+      if (fields.includes('tier')) view.tier = (() => { const sh = tierShareAt(run.region, layerFraction(run, id)); return sh && seededRoll(run.fate, id * 8 + 4, 0) < sh ? 2 : 1; })();
       if (Object.keys(view).length) out[id] = view;
     } else if (node.type === 'cache' && fields.includes('cache')) {
       out[id] = { filled: Boolean(node.filled) || cacheFate(run, id) < (REGIONS[run.region].cacheFind ?? RUN_CFG.cacheFindChance) };

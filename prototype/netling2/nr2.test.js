@@ -5,7 +5,9 @@ import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
 const { createScript, tick, mulberry32, SIDES, IRON } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce, runOptions, jackOut, abortRun, disconnect, visibleNodeIds, choose } = await import('./sim/netrun/run.js');
-const { NR2, tierPenalty, avoidMult } = await import('./sim/netrun/nr2.js');
+const { NR2, tierPenalty, avoidMult, tierShareAt } = await import('./sim/netrun/nr2.js');
+const { generateMap2 } = await import('./sim/netrun/map2.js');
+const { generateMap } = await import('../../src/netrun/map.js');
 const { EGG_PAGES, EGG_PAGE_IDS, nextEggPage, FRAGMENTS } = await import('./sim/codex2.js');
 const { REGIONS } = await import('../../src/netrun/regions.js');
 
@@ -1074,5 +1076,72 @@ test('egg pages: a Source exit guarantees the egg\'s Source page once; another e
   assert.deepEqual(exit({}), ['iron-source']);
   assert.deepEqual(exit({ known: ['iron-source'] }), ['iron-source'], 'not twice');
   assert.deepEqual(exit({ egg: 'wetware', known: ['iron-source'] }), ['iron-source', 'wetware-source']);
+  reset();
+});
+
+// Wider Deep and Source maps and the tier share rising along the run (NR2.map, NR2.tier.layer; both off by default).
+test('the parameterized map generator draws the same map as the real one at the region\'s own width and a link chance of 0.5', () => {
+  for (const region of ['public', 'bazaar', 'corp', 'ruins', 'deep', 'source']) {
+    for (let seed = 1; seed <= 25; seed++) {
+      const real = generateMap(region, mulberry32(seed));
+      const copy = generateMap2(region, mulberry32(seed), { width: REGIONS[region].width, link2: 0.5 });
+      assert.deepEqual(copy, real, `${region} seed ${seed}`);
+    }
+  }
+});
+
+test('a width override changes the layers, every node has a way forward and is reachable, and the entry and exit stay single', () => {
+  for (const [region, width] of [['deep', [3, 4]], ['source', [4, 5]]]) {
+    let widest = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const map = generateMap2(region, mulberry32(seed), { width, link2: 0.75 });
+      const byLayer = new Map();
+      for (const n of map.nodes) byLayer.set(n.layer, [...(byLayer.get(n.layer) ?? []), n]);
+      assert.equal(byLayer.get(0).length, 1);
+      assert.equal(byLayer.get(map.layerCount - 1).length, 1);
+      for (let L = 1; L < map.layerCount - 1; L++) {
+        const c = byLayer.get(L).length;
+        assert.ok(c >= width[0] && c <= width[1], `${region} layer ${L} has ${c}`);
+        widest = Math.max(widest, c);
+      }
+      const reached = new Set([map.nodes[0].id]);
+      for (const n of map.nodes) for (const e of n.edges) reached.add(e);
+      for (const n of map.nodes) {
+        assert.ok(reached.has(n.id), `${region} seed ${seed}: node ${n.id} unreachable`);
+        if (n.layer < map.layerCount - 1) assert.ok(n.edges.length >= 1, `${region} seed ${seed}: node ${n.id} is a dead end`);
+      }
+    }
+    assert.equal(widest, width[1], `${region} reaches its widest layer`);
+  }
+});
+
+test('with NR2.map on, a Deep run uses the wider map; off, it is the real one', () => {
+  const countWidths = (seed) => {
+    const pet = createScript(Date.UTC(2026, 0, 1), seed);
+    const run = startRun(pet, 'deep', mulberry32(seed));
+    return Math.max(...[...new Set(run.map.nodes.map((n) => n.layer))].map((l) => run.map.nodes.filter((n) => n.layer === l).length));
+  };
+  reset();
+  const off = Math.max(...[1, 2, 3, 4, 5, 6].map(countWidths));
+  assert.ok(off <= REGIONS.deep.width[1], 'off: no layer wider than the real maximum');
+  set({ map: { on: true, region: { deep: { width: [4, 5], link2: 0.5 } } } });
+  const on = Math.min(...[1, 2, 3, 4, 5, 6].map(countWidths));
+  reset();
+  assert.ok(on >= 4, 'on: every Deep map has a layer of at least the new minimum width');
+});
+
+test('the tier share rises along the run when the gradient is on, keeps the region\'s mean, and is the region share when off', () => {
+  set({ tiers: true });
+  assert.equal(tierShareAt('deep', 0), NR2.tier.share.deep);
+  assert.equal(tierShareAt('deep', 1), NR2.tier.share.deep);
+  set({ tiers: true, tier: { layer: { on: true, g: 0.8 } } });
+  const lo = tierShareAt('deep', 0);
+  const hi = tierShareAt('deep', 1);
+  const mean = Array.from({ length: 101 }, (_, i) => tierShareAt('deep', i / 100)).reduce((a, b) => a + b, 0) / 101;
+  assert.ok(lo < NR2.tier.share.deep && hi > NR2.tier.share.deep && lo < hi);
+  assert.ok(Math.abs(mean - NR2.tier.share.deep) < 1e-9, 'Deep (0.5) is mean-preserving at g 0.8 (no cap reached)');
+  assert.ok(tierShareAt('source', 1) <= 1, 'capped at 1');
+  set({ tiers: false, tier: { layer: { on: true, g: 0.8 } } });
+  assert.equal(tierShareAt('deep', 1), 0, 'no tiers, no share');
   reset();
 });
