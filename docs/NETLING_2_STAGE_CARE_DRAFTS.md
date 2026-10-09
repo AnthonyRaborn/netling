@@ -9,7 +9,7 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 1. **Adult age: split the difference** between keeping 51 hours and moving to 41: **46 hours**. With a 7 hour baby the teen stage is 39 hours and the adult stage 74 hours of the 120 hour life.
 2. **Baby drain x2.4 works for now** (kept as a starting value, to be measured).
 3. **Elder cache: reduce it** (x0.25), do not remove it.
-4. **Rest call response window: try 60 minutes** (not 90), and **the first 30 minutes still count as on time** (decided 2026-10-09). Iron's rest theme is **calibration** (decided as the right theme); the button label has to fit 9 characters, see section 2.5.
+4. **Rest call response window: try 60 minutes** (not 90), and **the first 30 minutes still count as on time** (decided 2026-10-09). The rest is answered with the relabelled nap button (decided). Iron's word is **calibration** (decided); the button label has to fit 9 characters, and CALIBRATION is 11, so the working label is CALIBRATE (9), awaiting confirmation (section 2.5).
 5. **Tired: the size is a good start** (drain x1.16, flow blocked).
 6. **Notifications (decided 2026-10-09):** visitors never notify (they exist to encourage keeping the game open). Timed events (trace, surge, attack, overflow) do notify and are the class the budget of 6 a day counts. Care events, rest calls included, do not count against it. That gives three classes with their own toggles: **Events, Care, Cooldowns** (a netrun being ready is the cooldown example). Evolution notices were left out of the count and are not yet placed in a class. Counts per class are in section 2.6.
 7. **Clustered, predictable adult events: not yet.**
@@ -103,32 +103,37 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 On an APK every event can be a notification, so volume is the constraint. Decided (2026-10-09):
 
 - **Visitors never notify.** They exist to encourage keeping the game open.
-- **Events** (timed events: trace, surge, attack, overflow) **notify and count against the budget of 6 a day.**
-- **Care** events do **not** count against it. Care includes the rest call (and stat alerts; attention requests are placed here too, my assumption).
+- **Events** (timed events: trace, surge, attack, overflow, **and attention requests**) **notify and count against the budget of 6 a day.** Attention requests were placed here by the maintainer: they are games or COOL only, never food, and an unanswered one costs nothing ([ATTENTION.md](ATTENTION.md)).
+- **Care** events do **not** count against it. Care includes the rest call, stat alerts and **evolution notices** (decided).
 - **Cooldowns** are a third class (a netrun being ready is the example).
-- Each class has its own toggle. Evolution notices are not yet placed in a class.
+- Each class has its own toggle. **Defaults: Events on, Care on** (decided); Cooldowns not decided (off is my suggestion for a convenience ping).
+- This changes 1.0's attention rule 4 ("a request or visitor arriving in the background notifies once"): in 2.0 visitors never notify, and requests notify as part of Events.
 
 **What each class would send today and under the draft's rest call** (`sim/notification-count.mjs`, 200 lives each, `prototype/netling2/baseline/results/followup/notification-count.txt`). Per 15 awake hours, stages by age as proposed (baby under 7 hours, teen to 46, adult after); the rest call is a shadow of section 2.5 that changes nothing and assumes every call is answered:
 
-| Player | Stage | Events (counted) | Rest calls (care) | Attention requests (care) | Visitors (no notification) |
-|---|---|---:|---:|---:|---:|
-| attentive | baby | 2.1 | 3.9 | 3.0 | 0.8 |
-| attentive | teen | 1.7 | 2.2 | 2.9 | 0.9 |
-| attentive | adult | 1.6 | 1.0 | 3.0 | 1.0 |
-| casual | baby | 1.9 | 3.6 | 3.2 | 0.8 |
-| casual | teen | 2.0 | 2.2 | 2.4 | 0.7 |
-| casual | adult | 1.8 | 1.0 | 2.5 | 0.8 |
-| daredevil | adult | 2.0 | 1.0 | 3.0 | 0.9 |
-| sysadmin | adult | 1.7 | 1.0 | 3.0 | 0.9 |
-| human-regular | adult | 1.9 | 1.0 | 1.9 | 0.7 |
+| Player | Stage | Events (counted) | Attention requests (counted) | Events + requests | Rest calls (Care) | Visitors (silent) |
+|---|---|---:|---:|---:|---:|---:|
+| attentive | baby | 2.1 | 3.0 | 5.1 | 3.9 | 0.8 |
+| attentive | teen | 1.7 | 2.9 | 4.6 | 2.2 | 0.9 |
+| attentive | adult | 1.6 | 3.0 | 4.6 | 1.0 | 1.0 |
+| casual | baby | 1.9 | 3.2 | 5.1 | 3.6 | 0.8 |
+| casual | teen | 2.0 | 2.4 | 4.4 | 2.2 | 0.7 |
+| casual | adult | 1.8 | 2.5 | 4.3 | 1.0 | 0.8 |
+| daredevil | baby | 2.2 | 3.2 | 5.4 | 3.9 | 1.1 |
+| daredevil | adult | 2.0 | 3.0 | 5.0 | 1.0 | 0.9 |
+| sysadmin | adult | 1.7 | 3.0 | 4.7 | 1.0 | 0.9 |
+| human-regular | adult | 1.9 | 1.9 | 3.8 | 1.0 | 0.7 |
+
+How often attention requests come: the chance is 0.25 an hour (about 3.75 per 15 awake hours); measured, **1.9 to 3.2 per 15 awake hours**, below the rate because a request is not posted while the netling rests, runs, reboots or has an event open.
 
 What it says:
-- **The Events class is far under 6 a day**: 1.6 to 2.2 per 15 awake hours at every stage, lower than the 2.6 the rates suggest, because an open event blocks new ones and rest suppresses them. A budget of 6 is not binding for events; it would only bind if new timed events are added later (it leaves room for three to four more a day).
-- **The Care class is where the volume is**: rest calls plus requests are about 6.9 per 15 hours in the baby stage, 4.6 to 5.1 in the teen stage and 2.9 to 4.0 for an adult, before stat alerts (not measured). Its own toggle is what keeps that manageable; requests are opt-in rewards and could be a separate sub-setting.
-- **Cooldowns** were not simulated. The most one can send is one per netrun cooldown (240 minutes for a baby, 210 teen, 180 adult), so up to about 4 to 5 per 15 awake hours for a player who runs every time; the bots make 3 to 5 runs a day. Default off is the natural choice for a convenience ping.
+- **Events plus requests come to 3.8 to 5.4 per 15 awake hours, under the budget of 6 at every stage and player measured**, with 0.6 to 2.2 of headroom (the baby and a daredevil are the tightest). Counting requests as events fits, as the maintainer expected. It leaves room for about one more timed event a day for the busiest players, and for two or three for the sparse ones.
+- **Events alone are 1.6 to 2.2** (lower than the 2.6 the rates suggest, because an open event blocks new ones and rest suppresses them); requests are the larger half.
+- **The Care class** (rest calls, evolution, stat alerts) is 3.6 to 3.9 rest calls per 15 hours in the baby stage, 2.2 in the teen stage and 1.0 for an adult, plus stat alerts and evolution notices that were not measured. It is on by default and has its own toggle.
+- **Cooldowns** were not simulated. The most one can send is one per netrun cooldown (240 minutes for a baby, 210 teen, 180 adult), so up to about 4 to 5 per 15 awake hours for a player who runs every time; the bots make 3 to 5 runs a day.
 - The elder was not simulated.
 
-Not counted or not measured: stat alerts, evolution, the cooldown class, unanswered-call reminders, the elder, and anything a person does that the bots do not.
+Not counted or not measured: stat alerts, evolution notices, the cooldown class, unanswered-call reminders, the elder, and anything a person does that the bots do not.
 
 ## 3. How each part would be tested
 
@@ -141,18 +146,16 @@ Not counted or not measured: stat alerts, evolution, the cooldown class, unanswe
 | Elder wear | an Integrity drain at the elder stage | Integrity and full life against the no-cache elder | stage totals match today's elder |
 | Rest call | a demand model, a response-probability model in the bots, `gap-sweep` and `human-sweep` | calls a day by stage, tired share of time, full life, the longest survivable gap | gap survival unchanged (still fatal at 6 hours); the response probability is an assumption and is labelled one |
 | Rest and held states | `sides-sweep` with the pause rule | how often a call lands inside a held state and what the pause costs | no net loss of benefit for answering |
-| Notifications | `sim/notification-count.mjs` (shadow rest call; add stat alerts, cooldown readiness and the elder) | items a day per class and stage | Events at or under 6 a day; Care and Cooldowns reported, not budgeted |
+| Notifications | `sim/notification-count.mjs` (shadow rest call; add stat alerts, evolution, cooldown readiness and the elder) | items a day per class and stage | Events plus requests at or under 6 a day; Care and Cooldowns reported, not budgeted |
 
 All of it runs on the scripted bots; none of it can say whether a rest call is annoying, only how often it fires and what it costs.
 
 ## 4. Open questions for the maintainer
 
-Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes. Still open:
+Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes, the rest answered by the relabelled nap button, Care on by default, evolution notices in Care, attention requests in Events. Still open:
 
-1. Is the rest answered with the relabelled nap button (section 2.5), and is the Iron label CALIBRATE (9 characters), CALIB, TRIM or ZERO?
-2. Which classes default on: Events yes; Care and Cooldowns? (A missed rest call costs a tired state, so Care off means the player sees it only in the game.)
-3. Where do evolution notices go (their own class, or Events)?
-4. Are attention requests Care (my assumption) or their own sub-setting?
+1. Iron's button label: CALIBRATION is 11 characters and the label rule is 9. CALIBRATE (9) is the same word and fits; CALIB, TRIM or ZERO are shorter. Or a one-off exception to the rule for this label.
+2. Cooldowns default (on or off; off is my suggestion).
 
 ## 5. Constraints and risks
 
