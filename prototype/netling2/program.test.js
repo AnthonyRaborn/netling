@@ -75,8 +75,8 @@ test('the asleep and dead poses keep the awake outline; the eyes are the 1.0 sli
       assert.deepEqual(generic, f[kind]);
     }
     // The chest mark: sleep is one block (a cursor), dead is a run across a single row; both below the mouth.
-    const changed = (pose) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === 'o' && f.a[y][x] !== 'o' && y > a.mouthRow ? [x, y] : null)).filter(Boolean));
-    const cursor = changed('sleep');
+    const changed = (pose, ink = 'o') => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === ink && f.a[y][x] !== ink && y > a.mouthRow ? [x, y] : null)).filter(Boolean));
+    const cursor = changed('sleep', f.a.join('').includes('#') && !f.id.endsWith('TeenHidden') ? 'x' : '#'); // dim (the Shell: body colour)
     const line = changed('dead').filter(([, y]) => y >= a.neckRow);
     assert.ok(cursor.length >= 2 && new Set(cursor.map(([, y]) => y)).size === 1, `${f.id}: cursor`);
     assert.ok(line.length >= 4 && new Set(line.map(([, y]) => y)).size === 1, `${f.id}: flatline ${line.length} cells`);
@@ -245,6 +245,8 @@ test('each elder is closest, after scaling, to the adult it grows from among all
   });
   console.log('  Program elder against its adult (scaled), best other: ' + rows.map((r) => `${r.adult} ${r.own.toFixed(2)} vs ${r.other} ${r.otherValue.toFixed(2)}`).join(', '));
   for (const r of rows) assert.ok(r.own > r.otherValue && r.own >= 0.75, `${r.adult}: ${r.own.toFixed(2)} against ${r.other} ${r.otherValue.toFixed(2)}`);
+  // Margin over the closest other adult: Parse (0.087) and Mouse (0.074) were redrawn; Tiger's elder is the thinnest (0.053).
+  for (const r of rows) assert.ok(r.own - r.otherValue >= 0.05, `${r.adult}: margin ${(r.own - r.otherValue).toFixed(3)} over ${r.other}`);
 });
 
 test('the nine Program elders are distinct from one another (under 1.0\'s 0.82 for a pair of different roles)', () => {

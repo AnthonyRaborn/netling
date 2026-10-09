@@ -165,6 +165,8 @@ test('each elder is closest, after scaling, to the adult it grows from, among al
   for (const r of table) assert.ok(r.own > r.otherValue, `${r.adult}: its elder is closer to ${r.other} (${r.otherValue.toFixed(2)}) than to it (${r.own.toFixed(2)})`);
   // The margins are thin for a few; this records them so a redraw that loses one is caught.
   for (const r of table) assert.ok(r.own >= 0.75, `${r.adult}: only ${r.own.toFixed(2)}`);
+  // Margin over the closest other adult: Gronk, Ping, Munch, Thrash and Bamf were redrawn to 0.07 or more; Bamf's is the thinnest (0.070).
+  for (const r of table) assert.ok(r.own - r.otherValue >= 0.07, `${r.adult}: margin ${(r.own - r.otherValue).toFixed(3)} over ${r.other}`);
 });
 
 test('the nine elders are distinct from one another (1.0 flags nothing above 0.82 within a stage, siblings of a role aside)', () => {
@@ -364,8 +366,10 @@ test('Iron poses: asleep shows a queue of dots on the chest, dead a read-only re
   for (const model of MODELS) {
     for (const f of Object.values(forms(model))) {
       const a = f.anchors.a;
-      const changed = (pose) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === 'o' && f.a[y][x] === '#' ? [x, y] : null)).filter(Boolean));
-      const queue = changed('sleep').filter(([, y]) => y > a.mouthRow);
+      const changed = (pose, ink = 'o') => f[pose].flatMap((row, y) => [...row].map((c, x) => (c === ink && f.a[y][x] === '#' ? [x, y] : null)).filter(Boolean));
+      // The queue is dim fill and starts below the neck (accent dots under the mouth read as extra eyes, highlight ones as teeth).
+      const queue = changed('sleep', 'x').filter(([, y]) => y > a.mouthRow);
+      assert.ok(queue.every(([, y]) => y > a.neckRow), `${f.id}: the queue sits below the neck`);
       const record = changed('dead').filter(([, y]) => y >= a.neckRow);
       assert.ok(queue.length >= 3 && new Set(queue.map(([, y]) => y)).size === 1, `${f.id}: queue ${queue.length} dots`);
       assert.ok(record.length >= 4 && new Set(record.map(([, y]) => y)).size === 1, `${f.id}: record ${record.length} cells`);
@@ -671,7 +675,7 @@ test('unsteady Program stutters (more when strong) and hops one row only when st
   assert.ok(sample('program', -2, 0, false).some((x) => x.dy === -1));
   for (const level of [-1, -2]) {
     const w = sample('wetware', level, 0, false, 60_000, 10);
-    assert.ok(w.every((x) => x.dx === 0 && x.dy === 0 && x.shade >= 0.75 - 1e-9 && x.shade <= 1 + 1e-9));
+    assert.ok(w.every((x) => x.dx === 0 && x.dy === 0 && x.shade >= 0.8 - 1e-9 && x.shade <= 1 + 1e-9));
     assert.ok(Math.max(...w.map((x) => x.shade)) - Math.min(...w.map((x) => x.shade)) > 0.1, 'it should visibly pulse');
     for (let i = 1; i < w.length; i++) assert.ok(Math.abs(w[i].shade - w[i - 1].shade) < 0.01, 'no brightness jump');
   }
@@ -702,4 +706,22 @@ test('the three eggs read differently at the same level', () => {
 test('the anchor table covers every form, and the shared bodies', () => {
   for (const id of [...Object.keys(FORMS), 'adultBody', 'teenBody']) assert.ok(ANCHORS[FORMS[id]?.art ?? id], id);
   assert.ok(spriteCells(forms('B').ironElderBreachStreet.a).length > spriteCells(forms('B').ironAdultBreachStreet.a).length);
+});
+
+test('the Wetware dip keeps every palette\'s body at 3:1 or more against the screen (and the dark screen) at its deepest', async () => {
+  const { SHADE_DIP, temperTell } = await import('./tell.js');
+  const { PALETTES } = await import('../../src/sim.js');
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const lum = (c) => c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((n, v, i) => n + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  let lowest = 1;
+  for (const level of [2, 1, -1, -2]) for (let t = 0; t < 60_000; t += 25) lowest = Math.min(lowest, temperTell({ egg: 'wetware', level, time: t, seed: 3 }).shade);
+  assert.ok(lowest >= 1 - SHADE_DIP - 1e-9, `the deepest dip is ${lowest}`);
+  for (const bgHex of ['#0b2226', '#03090a']) { // src/render.js LCD_BG and LCD_BG_DARK
+    const bg = rgb(bgHex);
+    for (const p of PALETTES) {
+      const body = rgb(p.main).map((v, i) => Math.round(bg[i] + (v - bg[i]) * lowest));
+      assert.ok(ratio(body, bg) >= 3, `${p.name} on ${bgHex}: ${ratio(body, bg).toFixed(2)}`);
+    }
+  }
 });

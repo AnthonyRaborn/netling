@@ -6,6 +6,7 @@ process.env.TZ = 'UTC';
 const { createScript, tick, mulberry32, SIDES, IRON } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce, runOptions, jackOut, abortRun, disconnect, visibleNodeIds, choose } = await import('./sim/netrun/run.js');
 const { NR2, tierPenalty, avoidMult } = await import('./sim/netrun/nr2.js');
+const { EGG_PAGES, EGG_PAGE_IDS, nextEggPage, FRAGMENTS } = await import('./sim/codex2.js');
 const { REGIONS } = await import('../../src/netrun/regions.js');
 
 const DEFAULT = JSON.parse(JSON.stringify(NR2));
@@ -991,5 +992,87 @@ test('Bare metal: buying an item breaks it, and a clinic fix, a cache, an ICE wi
   goTo(found.s, 'cache', found.rng, { filled: true });
   assert.equal(found.s.run.challengeVoid, false, 'a found item is fine');
   assert.ok(found.s.run.loot.length > 0);
+  reset();
+});
+
+// Egg pages as real drops (NR2.eggPages; codex2.js EGG_PAGES). One roll a run on the way out: the exit node or a relay jack-out.
+const eggStart = (region, { egg = 'iron', known = [], cleared = [region], stage = 'adult' } = {}) => {
+  const s = createScript({ now: 0, rng: mulberry32(5) });
+  Object.assign(s, { stage, form: 'breachCorp', egg, eggPages: [...known], cleared: [...cleared] });
+  Object.assign(s.stats, { charge: 90, integrity: 90, heat: 30 });
+  startRun(s, region, mulberry32(9), []);
+  return s;
+};
+// Leave the run: 'exit' (the exit node), 'relay' (a relay, then out), 'jack' (a plain jack-out), 'disconnect' or 'abort'. -> the line's egg pages.
+const leave = (s, how, rng = stub(0)) => {
+  if (how === 'exit' || how === 'relay') {
+    const node = runOptions(s.run)[0];
+    node.type = how;
+    moveTo(s, node.id, rng);
+    if (how === 'relay') choose(s, 'out', rng);
+  } else if (how === 'jack') jackOut(s);
+  else if (how === 'disconnect') disconnect(s, 'power drained mid-run.');
+  else abortRun(s);
+  return s.eggPages;
+};
+
+test('egg pages: 18 ids, six per egg (four role pages in order, the hidden page, the Source page), none a story page id', () => {
+  assert.equal(EGG_PAGE_IDS.length, 18);
+  assert.equal(new Set(EGG_PAGE_IDS).size, 18);
+  assert.ok(EGG_PAGE_IDS.every((id) => !FRAGMENTS.some((f) => f.id === id)));
+  assert.deepEqual(EGG_PAGES.iron.role, ['iron-breach', 'iron-dodge', 'iron-tune', 'iron-feast']);
+  assert.deepEqual([EGG_PAGES.program.hidden[0], EGG_PAGES.iron.hidden[0], EGG_PAGES.wetware.hidden[0]], ['program-ghost', 'iron-guru', 'wetware-blank']);
+  assert.equal(nextEggPage('wetware', 'role', ['wetware-breach']), 'wetware-dodge');
+  assert.equal(nextEggPage('wetware', 'hidden', ['wetware-blank']), null);
+});
+
+test('egg pages are off by default and then draw no random number, so the earlier tables reproduce; on, one roll a run', () => {
+  reset();
+  assert.equal(NR2.eggPages.on, false);
+  const draws = (on) => {
+    set({ eggPages: { on } });
+    let n = 0;
+    leave(eggStart('public'), 'exit', () => { n++; return 0.99; });
+    return n;
+  };
+  const off = draws(false);
+  assert.equal(draws(true), off + 1);
+  reset();
+});
+
+test('egg pages roll only on the way out: at the exit node or a relay jack-out, never on a plain jack-out, a disconnect or an abort', () => {
+  set({ eggPages: { on: true } });
+  assert.deepEqual(leave(eggStart('public'), 'exit'), ['iron-breach']);
+  assert.deepEqual(leave(eggStart('public'), 'relay'), ['iron-breach']);
+  for (const how of ['jack', 'disconnect', 'abort']) assert.deepEqual(leave(eggStart('public'), how), [], how);
+  reset();
+});
+
+test('egg pages: a role page in a cleared non-Deep region, in order and never a repeat; not in an uncleared region; the roll can miss', () => {
+  set({ eggPages: { on: true } });
+  assert.deepEqual(leave(eggStart('bazaar', { known: ['iron-breach'] }), 'exit'), ['iron-breach', 'iron-dodge']);
+  assert.deepEqual(leave(eggStart('corp', { cleared: [] }), 'relay'), [], 'the region must be cleared before this run');
+  assert.deepEqual(leave(eggStart('public'), 'exit', stub(0.99)), [], 'the roll can miss');
+  assert.deepEqual(leave(eggStart('ruins', { known: EGG_PAGES.iron.role }), 'exit'), EGG_PAGES.iron.role, 'nothing left: no repeat');
+  reset();
+});
+
+test('egg pages: the hidden page only on a Deep run, at its own rate; the per-life codex cap does not apply', () => {
+  set({ eggPages: { on: true } });
+  assert.deepEqual(leave(eggStart('deep'), 'relay', stub(0.4)), ['iron-guru'], 'under 0.5');
+  assert.deepEqual(leave(eggStart('public'), 'relay', stub(0.4)), [], 'over 0.2');
+  assert.deepEqual(leave(eggStart('deep', { known: ['iron-guru'] }), 'relay'), ['iron-guru']);
+  const c = eggStart('public');
+  c.codexFound = 99; // far over the cap of 12
+  assert.deepEqual(leave(c, 'exit'), ['iron-breach']);
+  reset();
+});
+
+test('egg pages: a Source exit guarantees the egg\'s Source page once; another egg\'s pages are its own', () => {
+  set({ eggPages: { on: true } });
+  const exit = (opts) => leave(eggStart('source', { stage: 'mainframe', ...opts }), 'exit', stub(0.99));
+  assert.deepEqual(exit({}), ['iron-source']);
+  assert.deepEqual(exit({ known: ['iron-source'] }), ['iron-source'], 'not twice');
+  assert.deepEqual(exit({ egg: 'wetware', known: ['iron-source'] }), ['iron-source', 'wetware-source']);
   reset();
 });

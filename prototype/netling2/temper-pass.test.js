@@ -185,3 +185,17 @@ test('the visit bounce matches src/render.js and keeps every form clear of the v
     }
   }
 });
+
+test('Iron\'s drift never passes the edge of 1.0\'s idle wander: at the edge it drifts inward, by the same amount', async () => {
+  const { driftWithin, IDLE_MAX_X, temperTell } = await import('./tell.js');
+  assert.equal(IDLE_MAX_X, 8);
+  for (let idleX = -8; idleX <= 8; idleX++) {
+    for (let t = 0; t < 24_000; t += 50) {
+      const { dx } = temperTell({ egg: 'iron', level: -2, time: t, seed: 4 });
+      const d = driftWithin(dx, idleX);
+      assert.ok(Math.abs(idleX + d) <= 8, `idle ${idleX}, drift ${dx}`);
+      assert.equal(Math.abs(d), Math.abs(dx), 'the drift keeps its size, so the tell stays visible');
+    }
+  }
+  assert.equal(driftWithin(2, 0), 2, 'away from the edge it is unchanged');
+});

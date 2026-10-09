@@ -6,10 +6,10 @@ Decided means the maintainer chose it. Proposal means it was discussed or sugges
 
 ## Branch state (read first)
 
-- `claude/game-egg-differentiation-xkl6x2` is the integration branch. It already contains this session's earlier commits up to `e64a0fb` (the baseline runner and the first baseline results).
-- This branch has newer commits it lacks (everything after `e64a0fb`): the break at Integrity 40, the 12 hour lockout, the fault consequence, and their tests and docs. It also lacks that branch's newer commits (sprite cleanup, text drafts, a handoff refresh, and simulator changes such as egg pages rolled on the way out and elders allowed to be stronger).
-- A dry run (`git merge-tree`) found no textual conflicts. The merge itself was not done: the attempt was denied by the environment's permission check, so it is the maintainer's call (or a session with that permission).
-- After merging, rerun `npm test` (503 at this branch) and `npm run proto:test` (287 at this branch), and check a sample of the baseline: the other branch changed simulator rules (`sim/balance.mjs`, `sim/codex2.js`, `sim/netrun/*`), and the baseline here was taken before those changes. Their defaults may leave the numbers unchanged, but that was not verified.
+- `claude/game-egg-differentiation-xkl6x2` is the integration branch. Before this merge it already contained this session's earlier commits up to `e64a0fb`; this branch had the newer ones (the break at Integrity 40, the 12 hour lockout, the fault consequence, their tests and docs), and the other branch had newer sprite cleanup, text drafts, a handoff refresh and simulator changes (egg pages rolled on the way out, elders allowed to be stronger).
+- On 2026-10-09 the integration branch (`a7eaba7`) was merged into this one with a merge commit. One conflict, in the sketch's Handoff, was resolved by keeping their text and re-adding this session's two pointer lines. `npm test` passes (503) and `npm run proto:test` passes (308).
+- Baseline check after the merge: three archetypes (steer-tune-corp, attentive, human-keen) at 300 lives under the final configuration (`NR2=all PERKS=1`, Program's pressure design, the break on) give byte-identical JSON before and after the merge, so the other branch's simulator changes do not alter those numbers. That is a sample, not a full rerun; rerun `node prototype/netling2/baseline/run-all.mjs --force` if a number matters.
+- This branch is now ahead of the integration branch by the merge and this session's newest commits; bring it back by merging this branch into `claude/game-egg-differentiation-xkl6x2` (the session only pushes to its own branch).
 
 ## The baseline
 
@@ -66,5 +66,5 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 
 - The container restarts when idle and kills background jobs (it happened several times). Prefer `setsid nohup`, keep jobs resumable, and wait in the foreground with `timeout 590 tail --pid=<pid> -f /dev/null` (find the real pid with `pgrep -af`; a launching shell's pid exits at once). The run log is overwritten if two runners write it at the same time.
 - Keep earlier results under their own names when a rule changes (`balance-brake55-*`, `balance-brake40-lock24-*`, `results/superseded/`), so a table can always be traced to the rules that made it.
-- Tools added: `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 287 prototype tests pass).
+- Tools added: `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 308 prototype tests pass after the merge).
 - Test notes: two of the break's own tests were first written wrongly (one mixed up Overdrive's and Overlink's breaks, one ignored the one-minute lag after a sudden Integrity hit); both are fixed and the reasons are in the test comments.

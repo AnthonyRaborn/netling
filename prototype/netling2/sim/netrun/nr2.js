@@ -28,6 +28,11 @@ export const NR2 = {
   blackout: { tuneCorp: 1, tuneStreet: 1 },
   // The egg-flavored anomalies (decided as a go; options and numbers are mine): netrun/egg-anomalies.js. Not part of NR2=all yet.
   eggAnomalies: false,
+  // Egg pages as real drops (decided rates and rules: sketch, Codex; codex2.js EGG_PAGES). One roll a run on the way out (decided: at the exit node
+  // or a relay jack-out; a plain jack-out, a disconnect or an abort rolls nothing): `role` in a cleared non-Deep region (public, bazaar, corp, ruins),
+  // `hidden` on a Deep run; the egg's Source page at a Source exit. Off by default (it draws a random number a run, which would
+  // shift every table); lineage-sweep.mjs switches it on. Not part of NR2=all.
+  eggPages: { on: false, role: 0.2, hidden: 0.5 },
   eggAnomaly: {
     run: { charge: 25, overflowAt: 95, tear: 10, loot: 0.5 }, // Program: surge and maybe an item, then a tear if the buffer ends over the line
     kill: { charge: 8, repair: 10 },

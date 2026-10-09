@@ -8,7 +8,7 @@ import './ready.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
-import { temperTell, idleClock, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
+import { temperTell, idleClock, driftWithin, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
 import { idleOffset, QUIRKS } from './idle.js';
 import { placeWorn, ACCESSORIES } from '../../src/accessories.js';
 
@@ -37,7 +37,7 @@ for (const [egg, set] of Object.entries(sets)) {
     const up = Math.max(0, Math.min(3, 20 - f.a.length - 5));
     const ids = new Set();
     for (const id of wear) for (const iy of [-up, 1]) for (const ix of [-8, 8]) for (const tdy of e.dy) for (const tdx of e.dx) {
-      if ((tdy || tdx) && !offScreen(f, id, iy, 0, ix, 0) && offScreen(f, id, iy, tdy, ix, tdx)) ids.add(id);
+      if ((tdy || tdx) && !offScreen(f, id, iy, 0, ix, 0) && offScreen(f, id, iy, tdy, ix, driftWithin(tdx, ix))) ids.add(id);
     }
     if (ids.size) { caused += ids.size; console.log(`   ${egg}/${f.id}: ${[...ids].join(', ')}`); }
   }

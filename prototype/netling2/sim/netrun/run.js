@@ -6,7 +6,7 @@ import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, reb
 import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
-import { nextFragment as nextFragmentRaw, fragmentById } from '../codex2.js';
+import { nextFragment as nextFragmentRaw, fragmentById, nextEggPage } from '../codex2.js';
 import { rollAccessory, accessoryById, RARITY } from '../../../../src/accessories.js';
 import { ANOMALIES, anomaliesFor } from '../../../../src/netrun/anomalies.js';
 import { EGG_ANOMALIES, eggAnomalyFor } from './egg-anomalies.js';
@@ -199,6 +199,7 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     ...(NR2.fate && !daily ? { fate: Math.floor(rng() * 4294967296) } : {}), // pre-rolled node contents (nr2.js fate): a per-run seed
     ...(daily ? { daily: true, day, seed: dailySeed(day), rollKey: null, rolls: 0, stake: newStake(pet.inventory), trail: [TRAIL.entry] } : {}),
   };
+  pet.run.eggPages = []; // egg pages found this run (NR2.eggPages): rolled on the way out, banked on jack-out
   if (pet.run.challenge) note(pet.run, `challenge: ${challengeById(pet.run.challenge).name.toUpperCase()}. ${challengeById(pet.run.challenge).rule}`);
   // An open contract for this region comes along, and the map is fixed so every route can meet it.
   const c = pet.contract;
@@ -215,6 +216,21 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
   return pet.run;
+}
+
+// Egg pages (NR2.eggPages): one roll a run, made on the way out (decided, maintainer): at the exit node or when the runner leaves by a relay, so
+// jacking straight back out never rolls. pet.egg names the egg (default program: the eggs share every rule in this fork) and pet.eggPages holds
+// the line's egg pages so far. Draws no random number when off or when nothing is left to find.
+const EGG_ROLL_REGIONS = ['public', 'bazaar', 'corp', 'ruins'];
+function rollEggPage(pet, rng) {
+  const run = pet.run;
+  run.eggPages ??= [];
+  if (!NR2.eggPages?.on || typeof rng !== 'function' || run.daily || REGIONS[run.region].tutorial) return;
+  const egg = pet.egg ?? 'program';
+  const known = pet.eggPages ?? [];
+  const kind = run.region === 'deep' ? 'hidden' : EGG_ROLL_REGIONS.includes(run.region) && (pet.cleared ?? []).includes(run.region) ? 'role' : null;
+  const id = kind && nextEggPage(egg, kind, known);
+  if (id && rng() < NR2.eggPages[kind]) run.eggPages.push(id);
 }
 
 // The healing items: sold only at clinics (they are still found as loot and dropped).
@@ -512,6 +528,12 @@ function moveToNode(pet, nodeId, rng) {
       // Reaching an exit opens the next region down, for this netling. The tutorial doesn't count.
       const opened = !region.tutorial && !region.daily && !(pet.cleared ??= []).includes(run.region);
       if (opened) pet.cleared.push(run.region);
+      rollEggPage(pet, rng);
+      // The egg's Source page: guaranteed at a Source exit until the egg has it (decided: the first Source exit of an egg).
+      if (run.region === 'source' && NR2.eggPages?.on) {
+        const id = nextEggPage(pet.egg ?? 'program', 'source', [...(pet.eggPages ?? []), ...(run.eggPages ?? [])]);
+        if (id) run.eggPages.push(id);
+      }
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
         const d = pet.deepExits ?? { all: 0, clean: 0 };
@@ -699,7 +721,10 @@ function chooseOption(pet, optionId, rng) {
   let boughtItem = false;
 
   if (p.kind === 'relay') {
-    if (optionId === 'out') return jackOut(pet);
+    if (optionId === 'out') {
+      rollEggPage(pet, rng);
+      return jackOut(pet);
+    }
     return { ok: true };
   }
   if (p.kind === 'checkpoint') {
@@ -775,7 +800,7 @@ function chooseOption(pet, optionId, rng) {
 }
 
 // Kept for older callers: relay decisions go through choose().
-export const relayChoice = (pet, choice) => choose(pet, choice === 'out' ? 'out' : 'continue');
+export const relayChoice = (pet, choice, rng) => choose(pet, choice === 'out' ? 'out' : 'continue', rng);
 
 function nodesWithin(run, fromId, depth) {
   let frontier = [fromId];
@@ -885,6 +910,7 @@ export function jackOut(pet) {
   );
   // The codex lives outside the pet (shared across generations); main.js drains this inbox into it.
   pet.codexInbox = [...(pet.codexInbox ?? []), ...run.fragments];
+  if (run.eggPages?.length) pet.eggPages = [...(pet.eggPages ?? []), ...run.eggPages]; // the game would drain these into the shared codex too
   pet.accessoryInbox = [...(pet.accessoryInbox ?? []), ...(run.accessories ?? [])];
   endRun(pet, 'jacked');
   return { ok: true, result: 'jacked', kept, lost, fragments: [...run.fragments], contract: run.contract?.settled ?? null };

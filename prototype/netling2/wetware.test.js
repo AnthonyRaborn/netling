@@ -105,7 +105,8 @@ test('the wearable code sees every Wetware form\'s authored anchors, and the rea
     const used = anchorsFor(sprite);
     const painted = [...sprite[f.anchors.a.headTop]].map((c, x) => (c !== '.' ? x : -1)).filter((x) => x >= 0);
     assert.deepEqual([used.headLeft, used.headRight], [painted[0], painted.at(-1)], f.id);
-    assert.ok(used.eyeCols.every((x) => sprite[f.anchors.a.eyeRow][x] === 'o'), `${f.id}: eye columns`);
+    const eyeCell = (x) => sprite[f.anchors.a.eyeRow][x] === 'o' || (f.id.endsWith('DodgeStreet') && sprite[f.anchors.a.eyeRow][x] === '+'); // Chipped's lens is '+'
+    assert.ok(used.eyeCols.every(eyeCell), `${f.id}: eye columns`);
   }
 });
 
@@ -373,4 +374,21 @@ test('reduced motion: no movement, the camouflage as drawn and the dub parked tw
   assert.equal(new Set(still).size, 1);
   const rows = b.motion(b.a, b.anchors.a, { time: 0, reduced: true });
   assert.deepEqual(rows.map((r) => r.slice(PAD, PAD + 18)).map((r, y) => [...r].map((c, x) => (c === 'x' && b.a[y][x] === '.' ? '.' : c)).join('')), b.a, 'the sprite itself is untouched');
+});
+
+test('Chipped and its elder: eyewear finds both eyes, the accent eye and the highlight lens, awake and asleep', async () => {
+  const { anchorsFor } = await import('../../src/accessories.js');
+  for (const id of ['wetwareAdultDodgeStreet', 'wetwareElderDodgeStreet']) {
+    for (const pose of ['A', 'B', 'Sleep']) {
+      const sprite = SPRITES[`${wetwareKey(id)}${pose}`];
+      const a = anchorsFor(sprite);
+      const lens = [...sprite[a.eyeRow]].map((c, x) => (c === '+' ? x : -1)).filter((x) => x >= 0);
+      const lensBelow = [...sprite[a.eyeRow + 1]].map((c, x) => (c === '+' ? x : -1)).filter((x) => x >= 0);
+      const lensCols = lens.length ? lens : lensBelow;
+      assert.ok(lensCols.length, `${id} ${pose}: has a lens`);
+      for (const x of lensCols) assert.ok(a.eyeCols.includes(x), `${id} ${pose}: eyewear covers lens column ${x}`);
+      assert.ok(a.eyeCols.some((x) => x < a.cx) && a.eyeCols.some((x) => x > a.cx), `${id} ${pose}: an eye on each side`);
+      assert.equal(a.eyeRight, Math.max(...a.eyeCols));
+    }
+  }
 });

@@ -6,7 +6,7 @@
 
 **What 1.0 already uses.** Software theme, network security, corp against street; Daemon, Glitch, Chrome, Ghost, Black ICE, Kernel, Shell, Stub, flatline. Heat is already a hardware meter (magic smoke, fry). Gaps the 2.0 eggs fill: everything was software, and there was one failure model.
 
-**What the eggs took from here (decided in the sketch).** Iron: Jargon machine sounds and timings, drift corrected by calibration, batch rhythm. Wetware: CP2020 biosoft and street slang, rejection as failure, polling rhythm. Program: software and network folklore, interrupt rhythm. Care verbs: the FDA's corrective, adaptive and perfective. Hidden egg: Rogue (CP2020 `rogue`, `rogue hunter`). Not chosen: Replicator (wabbit, worm; a population game, large build) and Variant (same meters, different tree; low contrast). The word "chrome" is spoken for by 1.0's corp form; Wetware avoids it in game text.
+**What the eggs took from here (decided in the sketch).** Iron: Jargon machine sounds and timings, drift corrected by calibration, batch rhythm. Wetware: CP2020 biosoft and street slang, rejection as failure, polling rhythm. Program: software and network folklore, interrupt rhythm. (Since then the rhythms are wording only and care reskins 1.0's meters; see the care drafts.) Care verbs: the FDA's corrective, adaptive and perfective. Hidden egg: Rogue (CP2020 `rogue`, `rogue hunter`). Not chosen: Replicator (wabbit, worm; a population game, large build) and Variant (same meters, different tree; low contrast). The word "chrome" is spoken for by 1.0's corp form; Wetware avoids it in game text.
 
 ## Vocabulary by use
 

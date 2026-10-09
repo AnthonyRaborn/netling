@@ -32,6 +32,8 @@ Not modelled: Tune street's Foresight (the bots have one skill number, so knowin
 
 ### Parity of the abilities, careful play, 500 runs a cell (about plus or minus 2 points at 30%)
 
+**Superseded; current read-out in `prototype/netling2/baseline/results/netrun-sweep.txt`** (abilities and tiers on, elder repair 3, perks on). Deep careful there: adult value mean 1.74, elder 2.28 (elder 1.31x the adult, over the 1.15x floor; Source 1.42x; elders may be stronger, decided, so this is not an outlier); outside the 20% band, Feast corp high in most cells and the Tune forms low in the Source; Breach street is no longer over the band in the Deep (114% at the elder level). The challenge (section 13), Foresight at repair 3 (section 12) and Program and Wetware egg anomaly (section 10) tables agree with the baseline within noise. The run-cost life results (section 11) were re-run there with each egg's full pressure on, so they are not comparable with the table below and are left to the egg pressure work.
+
 1.0's bar was no adult more than about 4 points apart in The Deep, and the five mainframe upgrades close together in the Source (24 to 28%). Disconnect rate over the nine forms, with abilities on and no ICE tiers:
 
 | Region | Level | Mean | Lowest to highest | Spread |
@@ -95,7 +97,7 @@ Reading it. The abilities matter a lot for pacing, because without any ability t
 |---|---|
 | 2.0 run abilities, ICE tiers, forced cache, grace, egg costs | Added this stretch (section 1) |
 | Codex cap 12, Root at once, elder feat tiers, page rates 0.20 and 0.50, first-exit Source page | Updated in the fork (defaults and `lineage-sweep.mjs`); the older drivers in `docs/netling2-prototypes/` still run on a scratch copy of 1.0 |
-| The Root list | **Updated.** `sim/codex2.js` holds the 24 Root pages and 15 late pages by region as in `docs/NETLING_2_CODEX_DRAFTS.md` (late pages drop only once Root is held; the Source opens on `deep-6`). The 18 egg pages stay rates in `lineage-sweep.mjs` |
+| The Root list | **Updated.** `sim/codex2.js` holds the 24 Root pages and 15 late pages by region as in `docs/NETLING_2_CODEX_DRAFTS.md` (late pages drop only once Root is held; the Source opens on `deep-6`). The 18 egg pages are real drops now (`EGG_PAGES` in `codex2.js`, `NR2.eggPages`; section 14, Egg pages as real drops) |
 | The ending's 39 story pages and the Source story pages | **Tracked** in `lineage-sweep.mjs` (section 14): the pages drop in the fork already (`codex2.js`); the sweep now times the ending and the Rogue gate |
 | Older fork tables (role, hunters, temper seekers, noisy players, bug policies, clinic, push, gap, human, fidelity, steerers, the clinic against the final pressure design) | **Refreshed** with `NR2=all` (abilities, ICE tiers, light costs), cap 12, Root mid-life and the 2.0 page list; the figures are in `docs/netling2-prototypes/README.md`. Most agree with the earlier ones within noise. Moved by more than noise: casual and worker end more unsteady, the Segfault route reaches the bug ceiling more often (14% against 5%), survival at 4 and 5 hour gaps is lower (the earlier gap table predates the stronger bugs), and the human-casual and human-keen full-life rates fall (4% and 65%, from 8% and 72%) |
 | Egg pressure sweeps (`iron-sweep`, `sides-sweep`, `band`, hint sweeps), exchange stock | Not re-run: the netrun changes do not touch them; rerun the pass bar with `NR2.eggCost` once the cost sizes are chosen. The clinic against the final pressure design was re-run (README) |
@@ -231,7 +233,7 @@ Built: `sim/netrun/egg-anomalies.js` (the three anomalies), the switch `NR2='{"e
 
 **Results** (4000 runs a cell, careful and skilled bots, no ability and Breach corp, adult level, tiers and egg costs on, inventory on; each cell compared with the same seeds without the anomaly in the pool). Averages over the styles and forms, change against `off` (disconnect and exit in points, value in %). Sampling noise: about 1 point on a rate near 30%, about 1% on value; the random pool pick changes the rolls after the first anomaly, so cells are not paired past that point.
 
-| Egg, variant | Bazaar | Corp Cache | Ruins | Deep |
+| Egg, variant | Bazaar | Corp Grid | Ruins | Deep |
 |---|---|---|---|---|
 | Program, random | -0.1 / +0.3 / -0.3 | -0.1 / +0.1 / 0.0 | 0.0 / -0.3 / -0.3 | -0.1 / +0.2 / 0.0 |
 | Program, LET IT RUN only | 0.0 / 0.0 / +1.4 | -0.1 / -0.1 / +0.3 | +0.4 / -1.1 / +1.2 | +0.2 / -0.5 / +0.6 |
@@ -243,7 +245,7 @@ Built: `sim/netrun/egg-anomalies.js` (the three anomalies), the switch `NR2='{"e
 | Wetware, GRAFT only | -0.1 / +0.1 / -2.3 | 0.0 / -0.1 / -1.1 | +0.1 / 0.0 / -2.5 | -0.3 / +0.4 / -1.4 |
 | Wetware, TAKE A SAMPLE only | -0.2 / +0.3 / +1.9 | -0.1 / +0.1 / +0.6 | +0.1 / -0.3 / +1.9 | -0.1 / +0.4 / +2.6 |
 
-Encounters a run (random): Bazaar 0.17, Corp Cache 0.08, Ruins 0.31, Deep 0.21 to 0.22 (the Source and the daily trace have none).
+Encounters a run (random): Bazaar 0.17, Corp Grid 0.08, Ruins 0.31, Deep 0.21 to 0.22 (the Source and the daily trace have none).
 
 **Names since (wording pass, maintainer).** The tables above use the names at measurement time. Now: LET IT RUN is RUN IT, KILL IT is TERMINATE, PRY IT OPEN is PRY OPEN, TAKE A SAMPLE is SAMPLE. PRY OPEN also gives +8 Charge; the sweep (3000 runs a cell, Iron, all four regions) is bit-identical with and without it and with +60 as a probe, so the bots do not use Iron's power in a run and the figures above stand. The size is unmeasured.
 
@@ -399,3 +401,22 @@ Rogue needs the ending to have played and all 18 egg pages (sketch, Hidden egg).
 - **The Source pages are the slow part for casual play.** The ending needs a Source exit and the four Source pages, which only an elder reaches; casual median first elder is life 8 (88% reach), and the Source then drops pages under the cap like everywhere else.
 - **Sysadmin and human-regular:** sysadmin never held Root within 26 lives in this model (the sweep now says so instead of crashing on an empty pool). Human-regular reaches Root in 25% of lineages and the gate is in the hundreds of lives: the figure is not meaningful, it says only that this archetype does not unlock Rogue in the model.
 - **Not modelled:** the egg pages are drops by roll (0.20 a non-Deep run for four role pages, 0.50 a Deep run for the hidden page, a guaranteed Source page at the first Source exit) and each roll finds a new page, so a repeat find would lengthen the gate slightly; the egg pages are not a codex object in the fork. Later eggs are assumed to start with the codex full, and the ending's lives come from egg 1's lineage extended past that egg's own pages. Bots, not people.
+
+### Egg pages as real drops (re-measured)
+
+Built: `EGG_PAGES`, `EGG_PAGE_IDS` and `nextEggPage` in `sim/codex2.js` (the drafts' 18 ids: per egg four role pages in the order breach, dodge, tune, feast, the hidden-form page and the Source page), the switch `NR2.eggPages` (`on`, `role` 0.20, `hidden` 0.50; off by default and outside `NR2=all`, because the roll draws a random number a run and would shift every table; with it off the balance output is byte-identical, checked on 40 casual lives), the roll in `netrun/run.js` (`rollEggPage`, at the exit node and a relay jack-out) and `pet.egg` and `pet.eggPages` set by `simulate` (`egg`, `eggPages` options). Rules as decided: one roll a run, **made on the way out (decided, maintainer, after the first build rolled at jack-in): at the exit node or when the runner leaves by a relay**, a role page only in a cleared non-Deep region (public, bazaar, corp, ruins), the hidden page only on a Deep run, in order, no repeats, outside the codex cap; the egg's Source page at a Source exit until it has it. A plain jack-out, a disconnect or an abort rolls nothing, so jacking straight back out cannot farm the roll; daily traces and the tutorial roll nothing. Tests: the last 6 in `nr2.test.js`.
+
+`lineage-sweep.mjs` now switches the drops on and reports them ("drops") beside the old roll model run on the same lives ("rolls"); `ROLE` and `HID` set both. Each lineage finishes its own egg's six pages (egg 1 as Program from a fresh codex, eggs 2 and 3 as Iron from post-Root lives); an egg that has not finished within the lives simulated is counted at lives + 1 (a lower bound). `NR2=all`, 100 lineages of 14 lives (attentive), 60 of 14 (daredevil), 60 of 26 (casual):
+
+| Archetype | Egg 1 (median / p90) | Three eggs, drops (p10 to p90) | Three eggs, rolls | Rogue gate, drops (p10 to p90) | Rogue gate, rolls | Eggs unfinished |
+|---|---|---|---|---|---|---|
+| attentive | 5 / 8 | 9 (7 to 12) | 9 (7 to 12) | 9 (7 to 13) | 9 (7 to 13) | 0% |
+| daredevil | 5 / 9 | 10 (8 to 14) | 10 (7 to 14) | 10 (8 to 14) | 10 (7 to 14) | 0% |
+| casual | 10 / 27 | 20 (13 to 35) | 20 (12 to 36) | 22 (14 to 35) | 22 (14 to 36) | 4% (egg 1 finished 88% within 26) |
+
+(Re-measured with the roll on the way out. With the first build's roll at jack-in, carried and lost on a disconnect, the figures were within a life of these: attentive 9 (7 to 14), daredevil 10 (8 to 13), casual 22 (14 to 35).)
+
+**Reading.** The real drops confirm the roll model: the Rogue gate stays at about 9 lives for attentive play, 10 for daredevil and 22 for casual (the table above this section). The exit roll and the old roll model agree within a life at every quantile: the bots reach an exit or a relay on most runs, so moving the roll there costs little. The ending is the later of the two in 2% to 21% of trials, as before. Casual figures stay lower bounds: 10% of casual first eggs had not finished their pages within 26 lives.
+
+**Not measured:** how often a person leaves by a relay against the bots (a relay jack-out rolls, so a cautious player loses nothing by banking early); the three eggs differ only by page ids here, as everywhere in the fork.
+
