@@ -133,6 +133,32 @@ Reading:
 - The greedy and heavy Program players break often (ghosthunter 4.9 and Tune corp 3.4 a life with the default bot, against 0.7 when watching), which a 12 hour lockout allows (a life is about 5 days).
 - Iron's hot players (overclocker) lose the most there (0.7 points with a fault); Wetware barely registers it, because the break fires 0.17 times a life even for the greedy bot.
 
+## Follow-up: wider Deep and Source maps and the tier share along the run
+
+Fork-only, off by default: `NR2.map` (`sim/netrun/map2.js`, a parameterized copy of the real generator that draws the identical map at the real settings; tested) and `NR2.tier.layer` (tier-2 share times 1 - g + 2 g f along the run, f from entry 0 to exit 1; tested). Scripts and outputs: `sim/map-metrics.mjs`, `results/followup/map-metrics.txt`, `netrun-width-sweep.txt`, `foresight-width-*.txt`, `lineage-wide75-*.json`, `balance-wide75.json` and its reference `balance-nowmap-reference.json`. Netrun sweeps are 1000 runs per form (Foresight 3000), abilities and tiers on.
+
+**Shape** (2000 maps). Today 46% of links change lane (upper, middle, lower by place in the layer) and 11% jump two lanes; at [3,4] Deep and [3,5] Source no link jumps two lanes and 31% to 43% change lane, depending on the second-link chance. Routes from entry to exit (median): Deep 97 now, 37 / 139 / 536 at link chance .25 / .5 / .75 with [3,4]; Source 340 now, 128 / 666 / 3432 with [3,5]. The best route has fewer ICE than today (Deep 3.7 to 3.0 at .75) while the worst stays near 8 to 9, so choosing well matters more.
+
+**Difficulty** (mean over the 18 forms; disconnect % / exit % / value):
+
+| | Deep careful | Deep skilled | Source careful | Source skilled |
+|---|---|---|---|---|
+| now | 28.1 / 38.4 / 1.95 | 15.9 / 71.5 / 3.29 | 45.8 / 15.8 / 1.38 | 34.4 / 45.0 / 2.93 |
+| wide, link .25 | 37.4 / 37.8 / 1.92 | 20.3 / 69.8 / 3.28 | 56.2 / 13.1 / 1.11 | 40.9 / 42.5 / 2.73 |
+| wide, link .5 | 32.1 / 40.5 / 2.11 | 17.5 / 71.9 / 3.42 | 51.8 / 15.7 / 1.31 | 37.2 / 45.2 / 2.95 |
+| wide, link .75 | 25.7 / 44.7 / 2.36 | 13.8 / 75.5 / 3.62 | 45.8 / 18.7 / 1.55 | 32.9 / 48.8 / 3.20 |
+| widest [4,5], link .5 | 32.5 / 40.4 / 2.12 | 17.6 / 71.7 / 3.41 | 51.8 / 16.7 / 1.44 | 37.4 / 45.3 / 3.00 |
+
+- **The second-link chance is the lever, not the width.** Wider layers at the same link chance (.5) make runs harder, because lanes lock (more disconnects, +4 points in the Deep and +6 in the Source for careful players). A difficulty-neutral wide map needs a link chance of about .65 in the Deep and .75 in the Source; .75 in both is easier than today in the Deep and equal in the Source.
+- **Tier share along the run** (g .8): disconnects barely move, but fewer tier-2 fights are met per run (Source careful 1.97 to 1.62, Deep careful 1.34 to 1.24, Source skilled 2.65 to 2.50, Deep skilled unchanged), because runs that end early never reach the hard end and the share is capped at 1 near the exit. To keep the total, scale the shares up (the `tier.scale` knob, 10% to 20%); not tested.
+- **Parity.** The spread of disconnect % among forms is 17 to 20 points between adults in every case, today's maps included, so the old 4 point bar (1.0's) is not met in the fork at all; the value yardstick is the one in use.
+
+**Foresight** (Tune street, value over the same form blind; adult sees one step, elder two): lift at the current maps / link .5 / link .75: Deep careful adult 12.9 / 14.9 / 18.4 percent, elder 16.4 / 24.0 / 24.8; Source careful adult 22.2 / 17.9 / 32.6, elder 36.6 / 35.8 / 50.6; Source skilled elder 23.9 / 23.8 / 25.7. At link .5 it is no better than today; at .75 it is. Tune street with Foresight against the mean of the nine forms (100 = at the mean), adult / elder: today 86 to 92 and 88 to 103; at link .75 91 to 96 and 97 to 110 (Source skilled elder 110, above the mean; elders have no upper bar, decided on the planning branch).
+
+**Rogue gate and whole life** (link .75): attentive 9 to 8 lives, daredevil 9 to 9, casual 20 to 18; first elder life for casual 10 to 8. Whole-life results are unchanged: no archetype moves by 1.5 points, mean full life 90.5% either way, mean disconnects 0.35, mean scrip 50.9. Netruns in these regions are a small part of a life.
+
+Not modelled or not checked: how a person reads a bigger map (the bots look ahead over what they can see), the fog, the phone screen (about 55 to 60 nodes against 27 to 35), and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps, which was not measured.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |

@@ -44,11 +44,12 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 - Constraints to respect: a work-day gap stays fatal (decided earlier), so a rest call must not become a safety net; the care drafts decided "reskins, fixed button count, flavor-only rhythm" and stage curves reopen the rhythm part.
 - How to test: stage tables in the fork for drain, cache chance and meal size, calibrated so a whole life keeps its difficulty; the safe longest gap per stage with `gap-sweep` and `human-sweep`; a response-probability model for rest calls (an assumption, to be labelled one).
 
-## Map width and ICE tiers (decided scope, not built)
+## Map width and ICE tiers (decided scope; built in the fork and measured, numbers not chosen)
 
-- Deep and Source only. Deep layers [3,4] wide, Source [3,5] or [4,5], so routes meander but still read as upper, middle and lower lanes. The current rule (each node links to its nearest in the next layer by position, plus a 50% second link) gives lane persistence only at widths of about 4 to 5; at 2 to 3 it produces arbitrary lane switches.
-- Proposal: make the second-link chance a region knob (lanes persist versus mix), and let the **tier-2 ICE share rise along the run** (by layer) so a deep run gets harder as it descends, instead of adding a flat third tier.
-- To build in the fork, not in `src/`: a width override (an `NR2` switch), a map-metrics script (lane switches, distinct routes, spread between best and worst route), then `netrun-sweep` cases, `foresight-sweep` at each width, and `lineage-sweep` for the Rogue gate. Expect the parity yardstick to shift up (better routes) and `ensureOnEveryRoute` to get harder; the phone map (about 58 nodes) is a UI question the simulator cannot answer.
+- Deep and Source only (decided). Switches (off by default): `NR2.map` (widths and second-link chance per region, `sim/netrun/map2.js`) and `NR2.tier.layer` (the tier-2 share rising along the run). Tests in `nr2.test.js`. Measurements and tables: `prototype/netling2/baseline/README.md`, "Follow-up: wider Deep and Source maps".
+- Findings: wider layers give real lanes (no two-lane jumps, fewer lane changes), but at the old second-link chance (.5) the runs get harder (lanes lock). The **second-link chance** is the lever: about .65 in the Deep and .75 in the Source is difficulty-neutral for the bots; .75 in both is slightly easier and brings Tune street with Foresight to 91 to 96% of the mean at the adult level (86 to 92 before), with Foresight's lift about 1.1 to 1.5 times larger. The Rogue gate comes about a life sooner for attentive and casual players; whole-life balance does not move.
+- The tier gradient (g .8) moves hard fights to the end of the run and lowers the number met per run by 0 to 18%; scale the shares up to compensate if the total should stay.
+- To choose: widths (Deep [3,4], Source [3,5] or [4,5]), the link chance per region, whether to use the gradient and at what strength. Not measured: the phone map (about 55 to 60 nodes), the fog, how a person scans a bigger map, and the route-guarantee cost on wider maps.
 
 ## Parked
 
@@ -57,7 +58,7 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 
 ## Next steps, in the agreed order
 
-1. Map width override and the ICE tier by layer, with the measurements above.
+1. Map width and the ICE tier by layer: built and measured (above); choose the numbers, then check the route guarantees and the phone map.
 2. The stage-care draft document (this section made into a draft, with the rest call and the notification budget).
 3. A community sketch (document only).
 4. Alongside: a Program budgeting bot is in (`PROGBOT`), but Iron and Wetware have no equivalent for the break; the hunter binger; chatter, care wording and captions for the break (warning, discharge, throttle, crash).
@@ -66,5 +67,5 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 
 - The container restarts when idle and kills background jobs (it happened several times). Prefer `setsid nohup`, keep jobs resumable, and wait in the foreground with `timeout 590 tail --pid=<pid> -f /dev/null` (find the real pid with `pgrep -af`; a launching shell's pid exits at once). The run log is overwritten if two runners write it at the same time.
 - Keep earlier results under their own names when a rule changes (`balance-brake55-*`, `balance-brake40-lock24-*`, `results/superseded/`), so a table can always be traced to the rules that made it.
-- Tools added: `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 308 prototype tests pass after the merge).
+- Tools added: `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 308 prototype tests pass after the merge).
 - Test notes: two of the break's own tests were first written wrongly (one mixed up Overdrive's and Overlink's breaks, one ignored the one-minute lag after a sudden Integrity hit); both are fixed and the reasons are in the test comments.
