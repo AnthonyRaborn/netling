@@ -63,6 +63,12 @@ for (const egg of ['iron', 'program', 'wetware']) CONFIG[`final-${egg}`] = { ...
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`binge-${egg}`] = { ...CONFIG[`final-${egg}`], BINGE: '1' };
 // The decided settings (2026-10-09): stage care as in STAGE_A (baby drain 2.4, a baby's faults roll bugs, the rest call), Standing gain 2, the fix rule and a Standing cost of 5.
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`decided-${egg}`] = { ...CONFIG[`stageA-${egg}`], STANDINGGAIN: '2', BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }) };
+// The decided rules as of 2026-10-09, night ("now"): decided-<egg> plus OVERUSE (overuse and owner strain, decided that evening) and, through
+// BRAKE's defaults, the break on every state and the strain trigger at 80. now-rules is the same without an egg pressure, for the sweeps that set
+// their own (as "rules" is for the 2026-10-08 baseline). decided-<egg> is kept as it was, so its results stay traceable.
+const NOW_COMMON = { STAGE: STAGE_A, STANDINGGAIN: '2', BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}' };
+CONFIG['now-rules'] = { ...CONFIG.rules, ...NOW_COMMON };
+for (const egg of ['iron', 'program', 'wetware']) CONFIG[`now-${egg}`] = { ...CONFIG[`decided-${egg}`], OVERUSE: '{"on":true}' };
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
@@ -108,6 +114,20 @@ add('netrun-sweep', 'netrun-sweep.mjs', [LIVES], 'rules', {}, 300);
 add('challenge-sweep', 'challenge-sweep.mjs', [RUNS(2000)], 'rules', {}, 300);
 add('foresight-sweep', 'foresight-sweep.mjs', [RUNS(3000)], 'rules', {}, 300);
 for (const egg of ['iron', 'program', 'wetware']) add(`egg-anomaly-${egg}`, 'egg-anomaly-sweep.mjs', [RUNS(3000)], `full-${egg}`, { EGG: egg }, 200);
+
+// The "now" set (run with the filter "now-"): the decided-rules re-run of the balance, lineage, life, per-egg and netrun sweeps, plus the elder
+// sweep. The rejected act and band designs are left out.
+for (const egg of ['iron', 'program', 'wetware']) add(`now-balance-${egg}`, 'balance.mjs', [LIVES], `now-${egg}`, { JSON: '1' }, 900);
+for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`now-lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'now-rules', { JSON: '1' }, 600);
+for (const [n] of lifeSweeps) add(`now-${n}`, `${n}.mjs`, [LIVES], 'now-rules', {}, 600);
+for (const egg of ['iron', 'program', 'wetware']) {
+  add(`now-runcost-${egg}`, 'runcost-sweep.mjs', [LIVES], `now-${egg}`, { EGG: egg }, 400);
+  add(`now-egg-anomaly-${egg}`, 'egg-anomaly-sweep.mjs', [RUNS(3000)], `now-${egg}`, { EGG: egg }, 200);
+  add(`now-elder-${egg}`, 'elder-sweep.mjs', [egg, LIVES], 'now-rules', {}, 900);
+}
+add('now-netrun-sweep', 'netrun-sweep.mjs', [LIVES], 'now-rules', {}, 300);
+add('now-challenge-sweep', 'challenge-sweep.mjs', [RUNS(2000)], 'now-rules', {}, 300);
+add('now-foresight-sweep', 'foresight-sweep.mjs', [RUNS(3000)], 'now-rules', {}, 300);
 
 const outFile = (j) => join(out, `${j.name}.${j.env.JSON ? 'json' : 'txt'}`);
 // Resumable: a job whose output exists is skipped (outputs are written only after a clean exit). --force reruns everything.
