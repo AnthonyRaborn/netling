@@ -712,20 +712,28 @@ function stepActs(s) {
 // 2.0 overuse (maintainer, 2026-10-09; off by default, OVERUSE='{"on":true}'): every egg manages every bar, and the owner pays an extra,
 // hidden strain on its own bar, as Iron does with wear. Basic costs for every egg: a feed taken with Charge at feedLine or over, a game played
 // with Sync at playLine or over, and a game played with Heat at heatLine or over each cost `int` Integrity (1.0's Integrity loss at Heat 85+
-// stays for every egg; feeding is still refused at 95, the overfeed limit). Owner strain (Program: overfeeding, "out of swap"; Wetware:
+// stays for every egg). Overfeeding (maintainer, 2026-10-09, after Digimon's overfeeds): 1.0 refuses a feed at Charge 95; with OVERUSE a full
+// netling takes up to maxOverfeeds (3) more feeds (no Charge, still Standing and the care preference), the count resets once Charge falls under
+// resetLine (85), the next is refused, and the last allowed one writes a cache file (overfeedCache). Owner strain (Program: overfeeding, "out of swap"; Wetware:
 // overplaying, cyberpsychosis): each overfeed (Program) or overplay (Wetware) adds strain.add, which fades like Iron's wear (decay a minute,
 // x restMult at rest); strain drives the base infection hazard as wear does (floor + slope * strain / 100; floor null is 1.0's base, so an unstrained netling is as in 1.0) plus one effect of its own: Program
 // buffer overflows more often (x 1 + overflow * strain / 100), Wetware burns Charge faster (x 1 + chargeDrain * strain / 100). Iron keeps its
 // wear (IRON). costsX1: the owner's x3 applies to the states' benefits only and their costs stay at x1, as for Iron's Overclock (symmetric).
-export const OVERUSE = { on: false, feedLine: 85, playLine: 90, heatLine: 75, int: 2, costsX1: true, strain: { add: 10, decay: 1 / 1000, restMult: 4, floor: null, slope: 0.3, line: 50, overflow: 2, chargeDrain: 1 } };
+export const OVERUSE = { on: false, feedLine: 95, maxOverfeeds: 3, resetLine: 85, overfeedCache: true, playLine: 90, heatLine: 75, int: 2, costsX1: true, strain: { add: 10, decay: 1 / 1000, restMult: 4, floor: null, slope: 0.3, line: 50, overflow: 2, chargeDrain: 1, charge: { add: 8, slope: 0.1 }, sync: {} } };
 if (process.env.OVERUSE) {
   const v = JSON.parse(process.env.OVERUSE);
-  Object.assign(OVERUSE, v, { strain: { ...OVERUSE.strain, ...(v.strain ?? {}) } });
+  Object.assign(OVERUSE, v, { strain: { ...OVERUSE.strain, ...(v.strain ?? {}), charge: { ...OVERUSE.strain.charge, ...(v.strain?.charge ?? {}) }, sync: { ...OVERUSE.strain.sync, ...(v.strain?.sync ?? {}) } } });
 }
+// The owner's strain settings: strain.charge (Program) or strain.sync (Wetware) override the shared add and slope (overfeeding past full is
+// rarer and already costs every egg cache files through digestion, so Program's strain is calibrated with a smaller slope: 2026-10-09).
+const strainCfg = (k) => {
+  const o = OVERUSE.strain[SIDES.owner] ?? {};
+  return o[k] ?? OVERUSE.strain[k];
+};
 const ownerStrain = () => OVERUSE.on && SIDES.on && (SIDES.owner === 'charge' || SIDES.owner === 'sync');
 function addStrain(s, t) {
   const before = s.ostrain ?? 0;
-  s.ostrain = Math.min(100, before + OVERUSE.strain.add);
+  s.ostrain = Math.min(100, before + strainCfg('add'));
   s.ostrainMax = Math.max(s.ostrainMax ?? 0, s.ostrain);
   SIDE_METER.strainAdds++;
   if (before < OVERUSE.strain.line && s.ostrain >= OVERUSE.strain.line && t !== undefined) log(s, t, SIDES.owner === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is jittery. too much, too close.');
@@ -746,7 +754,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, overfeeds: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, overfeeds: 0, overfeedCaches: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -873,7 +881,7 @@ const baseVirusPerHour = (s) => {
   const b = bandOn();
   const a = actOn();
   if (a && !IRON.on && !WET.on && !b) return ACTS[a].floor + (ACTS[a].slope * (s.act?.[a] ?? 0)) / 100;
-  if (ownerStrain() && !IRON.on) return (OVERUSE.strain.floor ?? CFG.virusBasePerHour) + (OVERUSE.strain.slope * (s.ostrain ?? 0)) / 100;
+  if (ownerStrain() && !IRON.on) return (OVERUSE.strain.floor ?? CFG.virusBasePerHour) + (strainCfg('slope') * (s.ostrain ?? 0)) / 100;
   if (b && !IRON.on && !WET.on) return BANDS[b].floor + (BANDS[b].slope * (s.strain?.[b] ?? 0)) / 100;
   return IRON.on ? IRON.floor + (IRON.slope * (s.wear ?? 0)) / 100 : WET.on ? WET.floor + (WET.slope * (s.shock ?? 0)) / 100 : CFG.virusBasePerHour;
 };
@@ -1026,6 +1034,7 @@ function step(s, t, rng) {
   if (WET.on) stepShock(s);
   stepActs(s);
   stepStrain(s, rest);
+  if (OVERUSE.on && s.overfed && s.stats.charge < OVERUSE.resetLine) s.overfed = 0;
 
   if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin * (STAGE.on ? STAGE.cache[s.stage] ?? 1 : 1)) {
     s.cache++;
@@ -1719,12 +1728,19 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
   switch (action) {
     case 'corp':
     case 'scav': {
-      if (st.charge >= 95) return fail('buffer full. refused.');
+      if (OVERUSE.on && st.charge < OVERUSE.resetLine) s.overfed = 0;
+      if (st.charge >= 95 && !(OVERUSE.on && (s.overfed ?? 0) < OVERUSE.maxOverfeeds)) return fail('buffer full. refused.');
       actEarly(s, 'charge');
       if (OVERUSE.on && st.charge >= OVERUSE.feedLine) { // overfeeding: every egg pays a little Integrity, Program also builds strain
         st.integrity = clamp(st.integrity - OVERUSE.int);
         SIDE_METER.overfeeds++;
+        if (st.charge >= 95) s.overfed = (s.overfed ?? 0) + 1;
         if (ownerStrain() && SIDES.owner === 'charge') addStrain(s, now);
+        if (OVERUSE.overfeedCache && s.overfed >= OVERUSE.maxOverfeeds && s.cache < CFG.maxCache) { // the last overfeed spills into the cache
+          s.cache++;
+          SIDE_METER.overfeedCaches++;
+          log(s, now, '> overfed. corrupted cache file written.');
+        }
       }
       let gain = action === 'corp' ? 30 : 25;
       if (STAGE.on) gain *= STAGE.meal[s.stage] ?? 1;

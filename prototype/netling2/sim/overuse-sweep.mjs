@@ -37,9 +37,9 @@ for (const n of names) {
     if (v > peak) peak = v;
   };
   const st = stats(Array.from({ length: lives }, (_, i) => simulate({ ...ARCHETYPES[n] }, i + 1)));
-  const r = { egg, archetype: n, fullLife: st.fullLife, faults: st.mistakes, infections: st.pressure?.viruses, overfeeds: per(SIDE_METER.overfeeds), overplays: per(SIDE_METER.overplays), overheats: per(SIDE_METER.overheats), strainHigh: +(high / Math.max(1, awake)).toFixed(3), breaks: per(SIDE_METER.brakes), drops: per(SIDE_METER.drops) };
+  const r = { egg, archetype: n, fullLife: st.fullLife, faults: st.mistakes, infections: st.pressure?.viruses, overfeeds: per(SIDE_METER.overfeeds), overplays: per(SIDE_METER.overplays), overheats: per(SIDE_METER.overheats), strainHigh: +(high / Math.max(1, awake)).toFixed(3), breaks: per(SIDE_METER.brakes), drops: per(SIDE_METER.drops), overfeedCaches: per(SIDE_METER.overfeedCaches), teenCertain: st.atTeen?.leanCertain ?? null, teenTied: st.atTeen?.tied ?? null, teenGap: st.atTeen?.gap ?? null };
   rows.push(r);
   console.log(JSON.stringify(r));
 }
 const mean = (k) => +(rows.reduce((a, r) => a + (r[k] ?? 0), 0) / rows.length).toFixed(3);
-console.log(JSON.stringify({ egg, variant, bot: process.argv[6] ?? null, archetypes: rows.length, mean: { fullLife: mean('fullLife'), faults: mean('faults'), infections: mean('infections'), overfeeds: mean('overfeeds'), overplays: mean('overplays'), overheats: mean('overheats'), strainHigh: mean('strainHigh'), drops: mean('drops') } }));
+console.log(JSON.stringify({ egg, variant, bot: process.argv[6] ?? null, archetypes: rows.length, mean: { fullLife: mean('fullLife'), faults: mean('faults'), infections: mean('infections'), overfeeds: mean('overfeeds'), overplays: mean('overplays'), overheats: mean('overheats'), strainHigh: mean('strainHigh'), drops: mean('drops'), teenTied: mean('teenTied'), teenCertain: mean('teenCertain'), teenGap: mean('teenGap'), overfeedCaches: mean('overfeedCaches') } }));

@@ -42,7 +42,7 @@ test('every egg: a feed at the line costs Integrity and one under it does not; P
     const high = make({ charge: OVERUSE.feedLine });
     act(high, 'corp', T0, stub(0.99));
     assert.equal(high.stats.integrity, 100 - OVERUSE.int, `owner ${owner}: an overfeed costs int`);
-    assert.equal(high.ostrain ?? 0, owner === 'charge' ? OVERUSE.strain.add : 0);
+    assert.equal(high.ostrain ?? 0, owner === 'charge' ? OVERUSE.strain.charge.add ?? OVERUSE.strain.add : 0);
     restore();
   }
 });
@@ -53,7 +53,7 @@ test('every egg: a game at the Sync line or the Heat line costs Integrity; Wetwa
     const s = make({ sync: OVERUSE.playLine, heat: 30 });
     act(s, 'play', T0, stub(0.99), { game: 'breach', won: true });
     assert.equal(s.stats.integrity, 100 - OVERUSE.int, `owner ${owner}: overplay`);
-    assert.equal(s.ostrain ?? 0, owner === 'sync' ? OVERUSE.strain.add : 0);
+    assert.equal(s.ostrain ?? 0, owner === 'sync' ? OVERUSE.strain.sync.add ?? OVERUSE.strain.add : 0);
     const h = make({ sync: 50, heat: OVERUSE.heatLine });
     act(h, 'play', T0, stub(0.99), { game: 'breach', won: true });
     assert.ok(h.stats.integrity <= 100 - OVERUSE.int, `owner ${owner}: overheat`);
@@ -62,12 +62,23 @@ test('every egg: a game at the Sync line or the Heat line costs Integrity; Wetwa
   }
 });
 
-test('feeding is still refused at 95: the overfeed limit', () => {
+test('overfeeding: a full netling takes three more feeds, the third writes a cache file, the fourth is refused, and the count resets under 85', () => {
   egg('charge');
-  const s = make({ charge: 95 });
-  assert.equal(act(s, 'corp', T0, stub(0.99)).ok, false);
-  assert.equal(s.stats.integrity, 100);
+  const s = make({ charge: 96 });
+  s.cache = 0;
+  for (let i = 1; i <= OVERUSE.maxOverfeeds; i++) {
+    assert.equal(act(s, 'corp', T0, stub(0.99)).ok, true, `overfeed ${i}`);
+    assert.equal(s.cache, i === OVERUSE.maxOverfeeds ? 1 : 0, `cache after overfeed ${i}`);
+  }
+  assert.equal(s.stats.integrity, 100 - OVERUSE.maxOverfeeds * OVERUSE.int);
+  assert.equal(act(s, 'corp', T0, stub(0.99)).ok, false, 'the fourth is refused');
+  s.stats.charge = OVERUSE.resetLine - 1;
+  tick(s, s.lastTick + MIN, stub(0.99));
+  s.stats.charge = 96;
+  assert.equal(act(s, 'corp', T0, stub(0.99)).ok, true, 'a new fill allows overfeeds again');
   restore();
+  const off = make({ charge: 95 });
+  assert.equal(act(off, 'corp', T0, stub(0.99)).ok, false, 'with OVERUSE off, 1.0 refuses at 95');
 });
 
 test('strain fades over time, and faster at rest', () => {
