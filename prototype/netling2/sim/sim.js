@@ -383,7 +383,30 @@ export function rollQuirk(rng, { origin = false } = {}) {
 
 // The seven-day life every netling had before lives were shortened; saves without s.life get it.
 export const LEGACY_LIFE = { teenAt: 24 * 60, adultAt: 72 * 60, lifespan: 7 * 24 * 60 };
-const lifeFromCfg = () => ({ teenAt: CFG.teenAtMin, adultAt: CFG.adultAtMin, lifespan: CFG.lifespanMin });
+// 2.0 stage care (docs/NETLING_2_STAGE_CARE_DRAFTS.md; off by default so every older table is unchanged). STAGE='{"on":true}' switches on the stage tables:
+// a shorter baby (7 hours) and the adult age at 46 hours (decided), a baby drain multiplier (x2.4, kept for now), cache chance by stage (decided: baby x2,
+// elder x0.25; the elder is the 'mainframe' stage in this fork) and a meal size by stage (proposal, all 1 = unchanged). STAGE='{"rest":{"on":true}}'
+// switches on the rest call and tired (starting values from the draft: a hidden sleep demand that rises while awake, a call at 60 answered with the nap
+// button for a 20 to 30 minute rest, a 60 minute window of which the first 30 are on time, and a tired state, x1.16 drain and no flow, if it lapses).
+export const STAGE = {
+  on: false,
+  teenAtMin: 7 * 60,
+  adultAtMin: 46 * 60,
+  babyDrain: 2.4,
+  cache: { baby: 2, teen: 1, adult: 1, mainframe: 0.25 },
+  meal: { baby: 1, teen: 1, adult: 1, mainframe: 1 },
+  rest: {
+    on: false,
+    demandPerHour: { baby: 20, teen: 12, adult: 6, mainframe: 4 },
+    runAdd: 10, gameAdd: 2, feedSub: 1, napSub: 40, threshold: 60,
+    windowMin: 60, onTimeMin: 30, restMin: [20, 30], restDemand: 10, lapseDemand: 40,
+    tiredDrain: 1.16, onTimeTemper: 1, lapseTemper: -1,
+  },
+};
+if (process.env.STAGE) for (const [k, v] of Object.entries(JSON.parse(process.env.STAGE))) {
+  if (typeof v === 'object' && v && !Array.isArray(v)) Object.assign(STAGE[k], v); else STAGE[k] = v;
+}
+const lifeFromCfg = () => (STAGE.on ? { teenAt: STAGE.teenAtMin, adultAt: STAGE.adultAtMin, lifespan: CFG.lifespanMin } : { teenAt: CFG.teenAtMin, adultAt: CFG.adultAtMin, lifespan: CFG.lifespanMin });
 
 // When a life ends: its own lifespan, plus the day a mainframe gains (s.lifeBonus).
 export const lifeEnd = (s) => s.life.lifespan + (s.lifeBonus ?? 0);
@@ -718,6 +741,7 @@ const heldNow = (s, key) => Boolean(s.sideHeld?.[key]);
 const sideOf = (s, key) => (!SIDES.on ? null : (SIDES.teenStates && s.stage === 'baby' ? false : SIDES[key].hold > 0 ? heldNow(s, key) : s.stats[key] >= SIDES[key].hi) ? 'hi' : s.stats[key] <= SIDES[key].lo ? 'lo' : null);
 function stepHeld(s, rest) {
   if (!SIDES.on) return;
+  if (STAGE.rest.on && rest && s.nap?.callRest) return; // a rest that answers a call pauses the held states: nothing counts and nothing resets (decided)
   s.sideHold ??= { charge: 0, sync: 0, heat: 0 };
   s.sideHeld ??= { charge: false, sync: false, heat: false };
   // 2.0: after a jack-out the held states resume and the bars cannot end them for a few minutes (NR2.graceMin, nr2.js); the counters wait too.
@@ -773,6 +797,30 @@ function stepBrake(s, rest, t) {
       SIDE_METER.brakeWarns++;
       log(s, t, `> ${{ charge: 'overdrive', sync: 'overlink', heat: 'overclock' }[key]} is costing integrity. ease off.`);
     }
+  }
+}
+function stepRest(s, t, rest) {
+  const R = STAGE.rest;
+  if (!R.on || s.stage === 'dead' || s.stage === 'script') return;
+  s.demand ??= 0;
+  s.restStats ??= { calls: 0, onTime: 0, late: 0, lapsed: 0, tiredMin: 0 };
+  if (s.run && !s.demandRun) { s.demand = Math.min(100, s.demand + R.runAdd); s.demandRun = true; } else if (!s.run) s.demandRun = false;
+  if (s.tired) s.restStats.tiredMin++;
+  if (!rest) s.demand = Math.min(100, s.demand + (R.demandPerHour[s.stage] ?? R.demandPerHour.adult) / 60);
+  if (s.call) {
+    if (s.asleep) { s.call = null; return; } // bedtime settles it, without a penalty
+    if (s.ageMin - s.call.startedAge >= R.windowMin) {
+      s.call = null;
+      s.tired = true;
+      s.temper += R.lapseTemper;
+      s.demand = R.lapseDemand;
+      s.restStats.lapsed++;
+      log(s, t, '> missed the rest call. running tired.');
+    }
+  } else if (!rest && s.demand >= R.threshold && !s.run && !s.event) {
+    s.call = { startedAge: s.ageMin };
+    s.restStats.calls++;
+    log(s, t, '> rest due.');
   }
 }
 const dropSides = (s) =>
@@ -898,8 +946,8 @@ function step(s, t, rng) {
     s.zone = deviceZone(t);
     shouldSleep = isSleepHour(localHour(t, s.zone), s.quirk.sleepOffset);
   }
-  if (s.nap && (shouldSleep || s.ageMin - s.nap.startedAge >= CFG.napMaxMin)) {
-    endNap(s, t, shouldSleep ? null : '> nap over. back online.');
+  if (s.nap && (shouldSleep || s.ageMin >= (s.nap.callRest ? s.nap.endsAge : s.nap.startedAge + CFG.napMaxMin))) {
+    endNap(s, t, shouldSleep ? null : s.nap.callRest ? '> rest over. back online.' : '> nap over. back online.');
   }
   if (shouldSleep && !s.asleep) {
     s.asleep = true;
@@ -908,12 +956,15 @@ function step(s, t, rng) {
     s.asleep = false;
     s.lightsOn = true;
     s.wokeAt = t; // a new day: the daily check-in keys off this (checkin.js)
+    if (STAGE.rest.on) { s.demand = 0; s.tired = false; s.call = null; } // a night's sleep settles the rest call
     log(s, t, '> resuming from low-power mode.');
   }
 
   const st = s.stats;
   const rest = resting(s);
   let rate = s.asleep ? (s.lightsOn ? CFG.sleepDrainMult : CFG.sleepDarkDrainMult) : s.nap ? CFG.napDrainMult : 1;
+  if (STAGE.on && s.stage === 'baby') rate *= STAGE.babyDrain;
+  if (STAGE.rest.on && s.tired) rate *= STAGE.rest.tiredDrain;
   if (rest) rate *= 1 - traitEffect(s, 'persistent');
   const chargeLo = sideOf(s, 'charge') === 'lo' ? 1 / (1 + SIDES.charge.slow * lowM('charge')) : 1;
   st.charge = clamp(st.charge - (CFG.drainPerHour.charge / 60) * chargeLo * rate * drainCurve(st.charge) * mod(s, 'chargeDrainMult') * (1 + BUG_CFG.charge * s.bugs));
@@ -931,10 +982,11 @@ function step(s, t, rng) {
   for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
   stepHeld(s, rest);
   stepBrake(s, rest, t);
+  stepRest(s, t, rest);
   if (WET.on) stepShock(s);
   stepActs(s);
 
-  if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin) {
+  if (!rest && s.sinceFed < CFG.digestMinutes && s.cache < CFG.maxCache && rng() < CFG.cacheChancePerMin * (STAGE.on ? STAGE.cache[s.stage] ?? 1 : 1)) {
     s.cache++;
     log(s, t, '> corrupted cache file written.');
   }
@@ -1232,7 +1284,7 @@ export const gameSpeed = (s) => (overclocked(s) ? CFG.overclockGameSpeed : 1);
 
 function stepFlow(s) {
   const st = s.stats;
-  const good = !s.asleep && !s.nap && !s.run && !s.event && !s.virus && s.cache < 3 && rebootMinutesLeft(s) === 0 &&
+  const good = !(STAGE.rest.on && s.tired) && !s.asleep && !s.nap && !s.run && !s.event && !s.virus && s.cache < 3 && rebootMinutesLeft(s) === 0 &&
     st.charge >= CFG.flowMinStat && st.sync >= CFG.flowMinStat && st.integrity >= CFG.flowMinIntegrity && st.heat < CFG.flowMaxHeat &&
     !(SIDES.on && SIDES.flowShared && (sideOf(s, 'charge') === 'hi' || sideOf(s, 'sync') === 'hi'));
   s.flowMin = good ? s.flowMin + 1 : 0;
@@ -1522,12 +1574,14 @@ function flatline(s, t, cause, rng = null) {
 // --- naps ---------------------------------------------------------------------------------
 
 function endNap(s, t, msg) {
+  if (STAGE.rest.on && s.ageMin - s.nap.startedAge >= 20) s.tired = false; // a rest of 20 minutes or more settles tired
+  const callRest = Boolean(s.nap.callRest);
   s.nap = null;
-  s.lastNapEndAge = s.ageMin;
+  if (!callRest) s.lastNapEndAge = s.ageMin; // a rest that answers a call does not start the nap cooldown
   if (msg) log(s, t, msg);
 }
 
-export const napMinutesLeft = (s) => (s.nap ? Math.max(0, CFG.napMaxMin - (s.ageMin - s.nap.startedAge)) : 0);
+export const napMinutesLeft = (s) => (s.nap ? Math.max(0, s.nap.callRest ? s.nap.endsAge - s.ageMin : CFG.napMaxMin - (s.ageMin - s.nap.startedAge)) : 0);
 
 export function napCooldownLeft(s) {
   if (s.lastNapEndAge == null) return 0;
@@ -1626,6 +1680,8 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (st.charge >= 95) return fail('buffer full. refused.');
       actEarly(s, 'charge');
       let gain = action === 'corp' ? 30 : 25;
+      if (STAGE.on) gain *= STAGE.meal[s.stage] ?? 1;
+      if (STAGE.rest.on) s.demand = Math.max(0, (s.demand ?? 0) - STAGE.rest.feedSub);
       if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
       gain *= 1 + traitEffect(s, 'foraging');
       st.charge = clamp(st.charge + gain);
@@ -1660,6 +1716,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'play': {
       const { game, won = false } = opts;
+      if (STAGE.rest.on) s.demand = Math.min(100, (s.demand ?? 0) + STAGE.rest.gameAdd);
       if (!GAME_IDS.includes(game)) return fail('unknown game.');
       const hot = overclocked(s); // it played at this Heat, before this game's own
       actEarly(s, 'sync');
@@ -1831,8 +1888,21 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         res = ok('woke it from its nap.', 'boot');
         break;
       }
+      if (STAGE.rest.on && s.call && !s.asleep && !s.run) {
+        // The nap button answers an open rest call: a short rest, no nap cooldown, held states paused (decided).
+        const R = STAGE.rest;
+        const onTime = s.ageMin - s.call.startedAge <= R.onTimeMin;
+        if (onTime) { s.temper += R.onTimeTemper; s.restStats.onTime++; } else s.restStats.late++;
+        s.call = null;
+        const len = R.restMin[0] + Math.floor(rng() * (R.restMin[1] - R.restMin[0] + 1));
+        s.nap = { startedAge: s.ageMin, callRest: true, endsAge: s.ageMin + len };
+        s.demand = R.restDemand;
+        res = ok(`resting. back online in ${len}m.`, 'lights');
+        break;
+      }
       const blockedNap = napBlockReason(s);
       if (blockedNap) return fail(blockedNap);
+      if (STAGE.rest.on) s.demand = Math.max(0, (s.demand ?? 0) - STAGE.rest.napSub);
       s.nap = { startedAge: s.ageMin };
       res = ok(`napping. up to ${CFG.napMaxMin / 60}h of low drain.`, 'lights');
       break;
