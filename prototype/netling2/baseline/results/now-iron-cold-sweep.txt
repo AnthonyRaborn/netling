@@ -1,0 +1,63 @@
+{"base":"attentive","case":"off","fullLife":0.998,"infections":7.18,"mistakes":0.48,"temper":4.34,"unsteady12h":0,"steady12h":0.295,"wearHigh":0,"wearMax":0}
+{"base":"attentive","case":"hot only (75, lock 1)","fullLife":0.999,"infections":7.26,"mistakes":0.56,"temper":4.04,"unsteady12h":0,"steady12h":0.253,"wearHigh":0,"wearMax":24}
+{"base":"attentive","case":"hot + cold 20, no floor","fullLife":0.999,"infections":7.26,"mistakes":0.56,"temper":4.04,"unsteady12h":0,"steady12h":0.253,"wearHigh":0,"wearMax":24}
+{"base":"attentive","case":"hot + cold 20, floor 20","fullLife":0.999,"infections":7.26,"mistakes":0.56,"temper":4.04,"unsteady12h":0,"steady12h":0.253,"wearHigh":0,"wearMax":24}
+{"base":"attentive","case":"hot + cold 15, floor 15","fullLife":0.998,"infections":7.21,"mistakes":0.52,"temper":4.25,"unsteady12h":0,"steady12h":0.268,"wearHigh":0,"wearMax":20.6}
+{"base":"attentive","case":"hot + cold 25, floor 25","fullLife":0.999,"infections":7.77,"mistakes":0.51,"temper":4.12,"unsteady12h":0,"steady12h":0.267,"wearHigh":0.001,"wearMax":35.6}
+{"base":"attentive","case":"hot only, floor 20","fullLife":0.999,"infections":7.26,"mistakes":0.56,"temper":4.04,"unsteady12h":0,"steady12h":0.253,"wearHigh":0,"wearMax":24}
+{"base":"attentive","case":"hot + cold 20, floor 20, chiller","fullLife":0.998,"infections":11.11,"mistakes":0.8,"temper":3.94,"unsteady12h":0,"steady12h":0.233,"wearHigh":0.229,"wearMax":99.5}
+{"base":"attentive","case":"hot only, chiller","fullLife":0.998,"infections":11.11,"mistakes":0.8,"temper":3.94,"unsteady12h":0,"steady12h":0.233,"wearHigh":0.229,"wearMax":99.5}
+{"base":"sysadmin","case":"off","fullLife":0.997,"infections":7.61,"mistakes":0.09,"temper":4.32,"unsteady12h":0,"steady12h":0.265,"wearHigh":0,"wearMax":0}
+{"base":"sysadmin","case":"hot only (75, lock 1)","fullLife":0.997,"infections":7.36,"mistakes":0.08,"temper":4.36,"unsteady12h":0,"steady12h":0.26,"wearHigh":0,"wearMax":11.9}
+{"base":"sysadmin","case":"hot + cold 20, no floor","fullLife":0.997,"infections":7.36,"mistakes":0.08,"temper":4.36,"unsteady12h":0,"steady12h":0.26,"wearHigh":0,"wearMax":11.9}
+{"base":"sysadmin","case":"hot + cold 20, floor 20","fullLife":0.997,"infections":7.36,"mistakes":0.08,"temper":4.36,"unsteady12h":0,"steady12h":0.26,"wearHigh":0,"wearMax":11.9}
+{"base":"sysadmin","case":"hot + cold 15, floor 15","fullLife":0.997,"infections":7.21,"mistakes":0.1,"temper":4.36,"unsteady12h":0,"steady12h":0.251,"wearHigh":0,"wearMax":4.4}
+{"base":"sysadmin","case":"hot + cold 25, floor 25","fullLife":0.997,"infections":7.79,"mistakes":0.1,"temper":4.26,"unsteady12h":0,"steady12h":0.214,"wearHigh":0.001,"wearMax":30.4}
+{"base":"sysadmin","case":"hot only, floor 20","fullLife":0.997,"infections":7.36,"mistakes":0.08,"temper":4.36,"unsteady12h":0,"steady12h":0.26,"wearHigh":0,"wearMax":11.9}
+{"base":"sysadmin","case":"hot + cold 20, floor 20, chiller","fullLife":0.995,"infections":13.32,"mistakes":0.51,"temper":3.64,"unsteady12h":0,"steady12h":0.177,"wearHigh":0.2,"wearMax":98.6}
+{"base":"sysadmin","case":"hot only, chiller","fullLife":0.995,"infections":13.32,"mistakes":0.51,"temper":3.64,"unsteady12h":0,"steady12h":0.177,"wearHigh":0.2,"wearMax":98.6}
+{"base":"casual","case":"off","fullLife":0.944,"infections":6.9,"mistakes":7.35,"temper":-0.82,"unsteady12h":0.008,"steady12h":0,"wearHigh":0,"wearMax":0}
+{"base":"casual","case":"hot only (75, lock 1)","fullLife":0.94,"infections":7.04,"mistakes":7.79,"temper":-1.17,"unsteady12h":0.01,"steady12h":0,"wearHigh":0.001,"wearMax":34.5}
+{"base":"casual","case":"hot + cold 20, no floor","fullLife":0.94,"infections":7.04,"mistakes":7.79,"temper":-1.17,"unsteady12h":0.01,"steady12h":0,"wearHigh":0.001,"wearMax":34.5}
+{"base":"casual","case":"hot + cold 20, floor 20","fullLife":0.94,"infections":7.04,"mistakes":7.79,"temper":-1.17,"unsteady12h":0.01,"steady12h":0,"wearHigh":0.001,"wearMax":34.5}
+{"base":"casual","case":"hot + cold 15, floor 15","fullLife":0.939,"infections":7.02,"mistakes":7.86,"temper":-1.14,"unsteady12h":0.007,"steady12h":0.001,"wearHigh":0.002,"wearMax":35.3}
+{"base":"casual","case":"hot + cold 25, floor 25","fullLife":0.935,"infections":7.18,"mistakes":8.17,"temper":-1.34,"unsteady12h":0.009,"steady12h":0,"wearHigh":0.001,"wearMax":37}
+{"base":"casual","case":"hot only, floor 20","fullLife":0.94,"infections":7.04,"mistakes":7.79,"temper":-1.17,"unsteady12h":0.01,"steady12h":0,"wearHigh":0.001,"wearMax":34.5}
+{"base":"casual","case":"hot + cold 20, floor 20, chiller","fullLife":0.909,"infections":8.95,"mistakes":8.88,"temper":-1.28,"unsteady12h":0.015,"steady12h":0,"wearHigh":0.15,"wearMax":96.3}
+{"base":"casual","case":"hot only, chiller","fullLife":0.909,"infections":8.95,"mistakes":8.88,"temper":-1.28,"unsteady12h":0.015,"steady12h":0,"wearHigh":0.15,"wearMax":96.3}
+{"base":"worker","case":"off","fullLife":0.645,"infections":5.84,"mistakes":15.41,"temper":-3.91,"unsteady12h":0.009,"steady12h":0,"wearHigh":0,"wearMax":0}
+{"base":"worker","case":"hot only (75, lock 1)","fullLife":0.626,"infections":5.87,"mistakes":15.84,"temper":-4.23,"unsteady12h":0.019,"steady12h":0,"wearHigh":0.009,"wearMax":41.6}
+{"base":"worker","case":"hot + cold 20, no floor","fullLife":0.626,"infections":5.87,"mistakes":15.84,"temper":-4.23,"unsteady12h":0.019,"steady12h":0,"wearHigh":0.009,"wearMax":41.6}
+{"base":"worker","case":"hot + cold 20, floor 20","fullLife":0.626,"infections":5.87,"mistakes":15.84,"temper":-4.23,"unsteady12h":0.019,"steady12h":0,"wearHigh":0.009,"wearMax":41.6}
+{"base":"worker","case":"hot + cold 15, floor 15","fullLife":0.616,"infections":5.73,"mistakes":15.58,"temper":-4.07,"unsteady12h":0.011,"steady12h":0,"wearHigh":0.009,"wearMax":39.9}
+{"base":"worker","case":"hot + cold 25, floor 25","fullLife":0.644,"infections":6.03,"mistakes":16.12,"temper":-4.4,"unsteady12h":0.017,"steady12h":0,"wearHigh":0.009,"wearMax":46.5}
+{"base":"worker","case":"hot only, floor 20","fullLife":0.626,"infections":5.87,"mistakes":15.84,"temper":-4.23,"unsteady12h":0.019,"steady12h":0,"wearHigh":0.009,"wearMax":41.6}
+{"base":"worker","case":"hot + cold 20, floor 20, chiller","fullLife":0.501,"infections":6.6,"mistakes":16.36,"temper":-4.54,"unsteady12h":0.005,"steady12h":0,"wearHigh":0.076,"wearMax":80.5}
+{"base":"worker","case":"hot only, chiller","fullLife":0.501,"infections":6.6,"mistakes":16.36,"temper":-4.54,"unsteady12h":0.005,"steady12h":0,"wearHigh":0.076,"wearMax":80.5}
+{"base":"human-regular","case":"off","fullLife":0.248,"infections":3.86,"mistakes":6.8,"temper":-2.28,"unsteady12h":0.003,"steady12h":0,"wearHigh":0,"wearMax":0}
+{"base":"human-regular","case":"hot only (75, lock 1)","fullLife":0.249,"infections":3.88,"mistakes":6.91,"temper":-2.55,"unsteady12h":0.004,"steady12h":0,"wearHigh":0.011,"wearMax":28.8}
+{"base":"human-regular","case":"hot + cold 20, no floor","fullLife":0.249,"infections":3.88,"mistakes":6.91,"temper":-2.55,"unsteady12h":0.004,"steady12h":0,"wearHigh":0.011,"wearMax":28.8}
+{"base":"human-regular","case":"hot + cold 20, floor 20","fullLife":0.249,"infections":3.88,"mistakes":6.91,"temper":-2.55,"unsteady12h":0.004,"steady12h":0,"wearHigh":0.011,"wearMax":28.8}
+{"base":"human-regular","case":"hot + cold 15, floor 15","fullLife":0.269,"infections":3.89,"mistakes":7.05,"temper":-2.59,"unsteady12h":0.002,"steady12h":0.001,"wearHigh":0.011,"wearMax":28.8}
+{"base":"human-regular","case":"hot + cold 25, floor 25","fullLife":0.241,"infections":3.85,"mistakes":7.07,"temper":-2.66,"unsteady12h":0.004,"steady12h":0,"wearHigh":0.011,"wearMax":36.6}
+{"base":"human-regular","case":"hot only, floor 20","fullLife":0.249,"infections":3.88,"mistakes":6.91,"temper":-2.55,"unsteady12h":0.004,"steady12h":0,"wearHigh":0.011,"wearMax":28.8}
+{"base":"human-regular","case":"hot + cold 20, floor 20, chiller","fullLife":0.192,"infections":4.69,"mistakes":7.49,"temper":-2.49,"unsteady12h":0,"steady12h":0,"wearHigh":0.104,"wearMax":73.5}
+{"base":"human-regular","case":"hot only, chiller","fullLife":0.192,"infections":4.69,"mistakes":7.49,"temper":-2.49,"unsteady12h":0,"steady12h":0,"wearHigh":0.104,"wearMax":73.5}
+{"base":"daredevil","case":"off","fullLife":0.996,"infections":6.81,"mistakes":1.57,"temper":-3.8,"unsteady12h":0.302,"steady12h":0,"wearHigh":0,"wearMax":0}
+{"base":"daredevil","case":"hot only (75, lock 1)","fullLife":0.995,"infections":8.05,"mistakes":1.8,"temper":-5.35,"unsteady12h":0.513,"steady12h":0,"wearHigh":0.031,"wearMax":80.1}
+{"base":"daredevil","case":"hot + cold 20, no floor","fullLife":0.995,"infections":8.05,"mistakes":1.8,"temper":-5.35,"unsteady12h":0.513,"steady12h":0,"wearHigh":0.031,"wearMax":80.1}
+{"base":"daredevil","case":"hot + cold 20, floor 20","fullLife":0.995,"infections":8.05,"mistakes":1.8,"temper":-5.35,"unsteady12h":0.513,"steady12h":0,"wearHigh":0.031,"wearMax":80.1}
+{"base":"daredevil","case":"hot + cold 15, floor 15","fullLife":0.997,"infections":7.95,"mistakes":1.76,"temper":-4.96,"unsteady12h":0.471,"steady12h":0,"wearHigh":0.029,"wearMax":78.8}
+{"base":"daredevil","case":"hot + cold 25, floor 25","fullLife":0.997,"infections":8.02,"mistakes":1.78,"temper":-5.12,"unsteady12h":0.502,"steady12h":0,"wearHigh":0.031,"wearMax":79.7}
+{"base":"daredevil","case":"hot only, floor 20","fullLife":0.995,"infections":8.05,"mistakes":1.8,"temper":-5.35,"unsteady12h":0.513,"steady12h":0,"wearHigh":0.031,"wearMax":80.1}
+{"base":"daredevil","case":"hot + cold 20, floor 20, chiller","fullLife":0.998,"infections":10.45,"mistakes":0.79,"temper":0.83,"unsteady12h":0.006,"steady12h":0.016,"wearHigh":0.232,"wearMax":99.5}
+{"base":"daredevil","case":"hot only, chiller","fullLife":0.998,"infections":10.45,"mistakes":0.79,"temper":0.83,"unsteady12h":0.006,"steady12h":0.016,"wearHigh":0.232,"wearMax":99.5}
+{"base":"overclocker","case":"off","fullLife":0.95,"infections":8.65,"mistakes":2.05,"temper":-7.53,"unsteady12h":0.82,"steady12h":0,"wearHigh":0,"wearMax":0}
+{"base":"overclocker","case":"hot only (75, lock 1)","fullLife":0.928,"infections":10.26,"mistakes":3.15,"temper":-10.06,"unsteady12h":0.911,"steady12h":0,"wearHigh":0.074,"wearMax":93.2}
+{"base":"overclocker","case":"hot + cold 20, no floor","fullLife":0.928,"infections":10.26,"mistakes":3.15,"temper":-10.06,"unsteady12h":0.911,"steady12h":0,"wearHigh":0.074,"wearMax":93.2}
+{"base":"overclocker","case":"hot + cold 20, floor 20","fullLife":0.928,"infections":10.26,"mistakes":3.15,"temper":-10.06,"unsteady12h":0.911,"steady12h":0,"wearHigh":0.074,"wearMax":93.2}
+{"base":"overclocker","case":"hot + cold 15, floor 15","fullLife":0.927,"infections":10.3,"mistakes":2.89,"temper":-9.46,"unsteady12h":0.91,"steady12h":0,"wearHigh":0.068,"wearMax":92.6}
+{"base":"overclocker","case":"hot + cold 25, floor 25","fullLife":0.926,"infections":10.42,"mistakes":3.14,"temper":-10.28,"unsteady12h":0.928,"steady12h":0,"wearHigh":0.078,"wearMax":94.3}
+{"base":"overclocker","case":"hot only, floor 20","fullLife":0.928,"infections":10.26,"mistakes":3.15,"temper":-10.06,"unsteady12h":0.911,"steady12h":0,"wearHigh":0.074,"wearMax":93.2}
+{"base":"overclocker","case":"hot + cold 20, floor 20, chiller","fullLife":0.961,"infections":11.84,"mistakes":2.57,"temper":-0.82,"unsteady12h":0.005,"steady12h":0,"wearHigh":0.139,"wearMax":96.6}
+{"base":"overclocker","case":"hot only, chiller","fullLife":0.961,"infections":11.84,"mistakes":2.57,"temper":-0.82,"unsteady12h":0.005,"steady12h":0,"wearHigh":0.139,"wearMax":96.6}

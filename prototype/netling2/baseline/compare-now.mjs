@@ -38,10 +38,12 @@ for (const f of readdirSync(dir).filter((f) => f.startsWith('now-') && !f.endsWi
   }
   const RA = jsonLines(a), RB = jsonLines(b);
   if (RA.length && RB.length) {
-    const byKey = new Map(RA.map((r) => [keyOf(r), r]));
+    // Rows with the same text fields (or none) are matched in order: the nth such row against the nth.
+    const keyed = (rows) => { const seen = {}; return rows.map((r) => { const k = keyOf(r); seen[k] = (seen[k] ?? 0) + 1; return [`${k} #${seen[k]}`, r]; }); };
+    const byKey = new Map(keyed(RA));
     let n = 0, unmatched = 0; const out = [];
-    for (const rb of RB) {
-      const ra = byKey.get(keyOf(rb)); if (!ra) { unmatched++; continue; }
+    for (const [kb, rb] of keyed(RB)) {
+      const ra = byKey.get(kb); if (!ra) { unmatched++; continue; }
       const fa = Object.fromEntries(flat(ra));
       const ch = flat(rb).filter(([k, v]) => k in fa && moved(k, fa[k], v)).map(([k, v]) => `${k} ${+fa[k].toFixed(3)} -> ${+v.toFixed(3)}`);
       if (ch.length) { n++; if (all || out.length < 12) out.push(`  ${keyOf(rb)}: ${ch.join(', ')}`); }

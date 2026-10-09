@@ -1,0 +1,14 @@
+  fired a life: lost fights 11.27, rolls 10.16, infections 0.43
+wetware attentive      full-life 0.998 -> 0.996 (-0.00)  infections 7.22 -> 7.65 (0.43)  temper 4.05 -> 4.11 (0.06)  mistakes 0.62 -> 0.6  runs 23.98 disconnects 0.4 -> 0.41
+  fired a life: lost fights 0, rolls 0, infections 0
+wetware sysadmin       full-life 0.994 -> 0.994 (0.00)  infections 7.72 -> 7.72 (0.00)  temper 4.3 -> 4.3 (0.00)  mistakes 0.1 -> 0.1  runs 0 disconnects 0 -> 0
+  fired a life: lost fights 15.08, rolls 11.91, infections 0.49
+wetware casual         full-life 0.943 -> 0.959 (0.02)  infections 6.85 -> 7.38 (0.53)  temper -0.92 -> -0.9 (0.02)  mistakes 7.47 -> 7.66  runs 17.77 disconnects 2.36 -> 2.43
+  fired a life: lost fights 0.79, rolls 0.64, infections 0.02
+wetware worker         full-life 0.618 -> 0.618 (0.00)  infections 5.78 -> 5.87 (0.09)  temper -4.22 -> -4.19 (0.03)  mistakes 16.52 -> 16.52  runs 1.47 disconnects 0.05 -> 0.04
+  fired a life: lost fights 1.29, rolls 1.05, infections 0.04
+wetware human-regular  full-life 0.235 -> 0.23 (-0.00)  infections 3.95 -> 3.95 (0.00)  temper -2.44 -> -2.43 (0.01)  mistakes 7.34 -> 7.42  runs 2.55 disconnects 0.07 -> 0.08
+  fired a life: lost fights 10.06, rolls 9.36, infections 0.36
+wetware daredevil      full-life 0.992 -> 0.995 (0.00)  infections 7.01 -> 7.35 (0.34)  temper -3.68 -> -3.72 (-0.04)  mistakes 2.62 -> 2.62  runs 23.47 disconnects 0.99 -> 1.03
+  fired a life: lost fights 0, rolls 0, infections 0
+wetware overclocker    full-life 0.957 -> 0.957 (0.00)  infections 8.71 -> 8.71 (0.00)  temper -7.62 -> -7.62 (0.00)  mistakes 2.55 -> 2.55  runs 0 disconnects 0 -> 0

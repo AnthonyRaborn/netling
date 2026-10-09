@@ -1,0 +1,14 @@
+  fired a life: lost fights 11.2, wear added 71.14 over 30.37 hot moves
+iron attentive      full-life 0.997 -> 0.998 (0.00)  infections 6.93 -> 7.22 (0.29)  temper 4.01 -> 4.1 (0.09)  mistakes 0.66 -> 0.66  runs 23.88 disconnects 0.44 -> 0.47  wearMax 13.1 -> 23.3
+  fired a life: lost fights 0, wear added 0 over 0 hot moves
+iron sysadmin       full-life 0.994 -> 0.994 (0.00)  infections 7.34 -> 7.34 (0.00)  temper 4.25 -> 4.25 (0.00)  mistakes 0.13 -> 0.13  runs 0 disconnects 0 -> 0  wearMax 11.9 -> 11.9
+  fired a life: lost fights 14.82, wear added 139.56 over 50.44 hot moves
+iron casual         full-life 0.94 -> 0.935 (-0.00)  infections 6.74 -> 6.98 (0.24)  temper -1.21 -> -1.25 (-0.04)  mistakes 7.9 -> 7.99  runs 17.74 disconnects 2.59 -> 2.62  wearMax 15.6 -> 33.5
+  fired a life: lost fights 0.8, wear added 8 over 3.14 hot moves
+iron worker         full-life 0.627 -> 0.612 (-0.02)  infections 5.78 -> 5.81 (0.03)  temper -4.36 -> -4.39 (-0.03)  mistakes 16.82 -> 16.82  runs 1.44 disconnects 0.04 -> 0.05  wearMax 28.7 -> 30.6
+  fired a life: lost fights 1.4, wear added 15 over 5.54 hot moves
+iron human-regular  full-life 0.254 -> 0.262 (0.01)  infections 3.77 -> 3.9 (0.13)  temper -2.38 -> -2.39 (-0.01)  mistakes 7.37 -> 7.41  runs 2.65 disconnects 0.08 -> 0.08  wearMax 16.3 -> 21.5
+  fired a life: lost fights 10.23, wear added 240.72 over 78.43 hot moves
+iron daredevil      full-life 0.993 -> 0.989 (-0.00)  infections 7.44 -> 7.91 (0.47)  temper -4.33 -> -4.48 (-0.15)  mistakes 2.77 -> 3.03  runs 23.4 disconnects 1.02 -> 1  wearMax 62.6 -> 74.2
+  fired a life: lost fights 0, wear added 0 over 0 hot moves
+iron overclocker    full-life 0.936 -> 0.936 (0.00)  infections 10.42 -> 10.42 (0.00)  temper -9.32 -> -9.32 (0.00)  mistakes 5.24 -> 5.24  runs 0 disconnects 0 -> 0  wearMax 84.4 -> 84.4
