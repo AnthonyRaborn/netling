@@ -7,7 +7,7 @@ Decided means the maintainer chose it. Proposal means it was discussed or sugges
 ## Branch state (read first)
 
 - `claude/game-egg-differentiation-xkl6x2` is the integration branch. Before this merge it already contained this session's earlier commits up to `e64a0fb`; this branch had the newer ones (the break at Integrity 40, the 12 hour lockout, the fault consequence, their tests and docs), and the other branch had newer sprite cleanup, text drafts, a handoff refresh and simulator changes (egg pages rolled on the way out, elders allowed to be stronger).
-- On 2026-10-09 the integration branch (`a7eaba7`) was merged into this one with a merge commit. One conflict, in the sketch's Handoff, was resolved by keeping their text and re-adding this session's two pointer lines. `npm test` passes (503) and `npm run proto:test` passes (308 at the merge, 320 now).
+- On 2026-10-09 the integration branch (`a7eaba7`) was merged into this one with a merge commit. One conflict, in the sketch's Handoff, was resolved by keeping their text and re-adding this session's two pointer lines. `npm test` passes (503) and `npm run proto:test` passes (308 at the merge, 323 now).
 - Baseline check after the merge: three archetypes (steer-tune-corp, attentive, human-keen) at 300 lives under the final configuration (`NR2=all PERKS=1`, Program's pressure design, the break on) give byte-identical JSON before and after the merge, so the other branch's simulator changes do not alter those numbers. That is a sample, not a full rerun; rerun `node prototype/netling2/baseline/run-all.mjs --force` if a number matters.
 - This branch is now ahead of the integration branch by the merge and this session's newest commits; bring it back by merging this branch into `claude/game-egg-differentiation-xkl6x2` (the session only pushes to its own branch).
 
@@ -52,6 +52,10 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 - The netrun-class baseline outputs (netrun, challenge, Foresight, egg anomalies, lineage) were rerun with the chosen maps; the earlier outputs are in `results/superseded/narrow-maps/`. Whole-life balance does not move with the maps (no archetype by 1.5 points), so the other baseline outputs were not rerun.
 - Not measured: the phone map (about 55 to 60 nodes), the fog, how a person scans a bigger map, and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps.
 
+## Standing gain and the bug fix cost (measured, not decided)
+
+Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on Program with the break and option 1, gain 2 gives about 44 to 59% teen ties for regular play and about 0% for strict guided play (the maintainer's target); sparse play stays tied. The bug fix rule (`standingOnlyIfShort`) and a cost of 5 change nothing measurable in the bots; recommended as asked. Open: confirm gain 2 on Iron and Wetware (config entries `gain<g>-<egg>` exist), the hidden-path band at a higher gain, and whether to pair gain with a baby feed multiplier.
+
 ## Parked
 
 - **XP with per-stage caps** (0, 1, 2 and 3 level-ups for baby, teen, adult, elder; a choice of themed sidegrade options at each; stacking up to three with curves like 1.1, 1.25, 1.5; reset at death): a thought experiment. Stage care covers most of what it was for. If revived: random offers weighted toward owned options (pure random almost never lets a player specialize), costs that scale with stacks, and a pick-rate-when-offered check for dominance.
@@ -68,5 +72,5 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 
 - The container restarts when idle and kills background jobs (it happened several times). Prefer `setsid nohup`, keep jobs resumable, and wait in the foreground with `timeout 590 tail --pid=<pid> -f /dev/null` (find the real pid with `pgrep -af`; a launching shell's pid exits at once). The run log is overwritten if two runners write it at the same time.
 - Keep earlier results under their own names when a rule changes (`balance-brake55-*`, `balance-brake40-lock24-*`, `results/superseded/`), so a table can always be traced to the rules that made it.
-- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 320 prototype tests pass).
+- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 323 prototype tests pass), `bugcost.test.js`.
 - Test notes: two of the break's own tests were first written wrongly (one mixed up Overdrive's and Overlink's breaks, one ignored the one-minute lag after a sudden Integrity hit); both are fixed and the reasons are in the test comments.

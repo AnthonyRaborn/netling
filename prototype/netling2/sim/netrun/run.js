@@ -255,9 +255,9 @@ export function clinicKinds(map, rng) {
 // The ways to pay for a fix, offered only while the netling has bugs.
 const fixOptions = (pet) => (pet.bugs > 0 ? [
   { id: 'fixscrip', label: `FIX A BUG ${BUG_CFG.clearScrip}$` },
-  { id: 'fix2corp', label: 'FIX A BUG 2 CORP' },
-  { id: 'fix1each', label: 'FIX A BUG 1+1 STANDING' },
-  { id: 'fix2street', label: 'FIX A BUG 2 STREET' },
+  { id: 'fix2corp', label: `FIX A BUG ${BUG_CFG.clearStanding} CORP` },
+  { id: 'fix1each', label: BUG_CFG.clearStanding === 2 ? 'FIX A BUG 1+1 STANDING' : `FIX A BUG ${Math.floor(BUG_CFG.clearStanding / 2)}+${BUG_CFG.clearStanding - Math.floor(BUG_CFG.clearStanding / 2)} STANDING` },
+  { id: 'fix2street', label: `FIX A BUG ${BUG_CFG.clearStanding} STREET` },
 ] : []);
 
 export const runOptions = (run) => nodeById(run.map, run.pos).edges.map((id) => nodeById(run.map, id));
@@ -642,11 +642,14 @@ export function refreshMarket(pet) {
     if (o.id === 'leave') continue;
     if (o.id.startsWith('fix')) {
       const { corp, street } = pet.standing;
+      const cost = BUG_CFG.clearStanding;
+      const half = Math.floor(cost / 2);
       const short = charge <= p.price + 5 ? `needs ${p.price + 5}+ charge`
         : o.id === 'fixscrip' ? (scrip < BUG_CFG.clearScrip ? `needs ${BUG_CFG.clearScrip} scrip, has ${scrip}` : null)
-        : o.id === 'fix2corp' ? (corp < 2 ? 'needs 2 corp standing' : null)
-        : o.id === 'fix2street' ? (street < 2 ? 'needs 2 street standing' : null)
-        : corp < 1 || street < 1 ? 'needs 1 of each standing' : null;
+        : BUG_CFG.standingOnlyIfShort && scrip >= BUG_CFG.clearScrip ? 'pay with scrip while you have it'
+        : o.id === 'fix2corp' ? (corp < cost ? `needs ${cost} corp standing` : null)
+        : o.id === 'fix2street' ? (street < cost ? `needs ${cost} street standing` : null)
+        : corp < half || street < cost - half ? 'needs standing of each' : null;
       o.disabled = Boolean(short);
       o.hint = short ?? `-${p.price} chg`;
       continue;
@@ -754,7 +757,7 @@ function chooseOption(pet, optionId, rng) {
   } else if (p.kind === 'market') {
     if (optionId.startsWith('fix')) {
       st.charge = clamp(st.charge - p.price);
-      const corp = optionId === 'fix2corp' ? 2 : optionId === 'fix1each' ? 1 : 0;
+      const corp = optionId === 'fix2corp' ? BUG_CFG.clearStanding : optionId === 'fix1each' ? Math.floor(BUG_CFG.clearStanding / 2) : 0;
       const how = optionId === 'fixscrip' ? { pay: 'scrip' } : { pay: 'standing', corp };
       if (!clearBugAt(pet, how)) return { ok: false, msg: 'could not pay.' };
       run.tally.fixed++;

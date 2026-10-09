@@ -138,9 +138,10 @@ export const CODEX_PRESETS = {
 const clearMode = process.env.CLEAR ?? 'scrip';
 function standingCorp(s, split) {
   const { corp, street } = s.standing;
-  if (split === 'leader') return corp >= street ? 2 : 0;
-  if (split === 'trailer') return corp >= street ? 0 : 2;
-  return corp >= 1 && street >= 1 ? 1 : corp >= street ? 2 : 0;
+  const c = BUG_CFG.clearStanding;
+  if (split === 'leader') return corp >= street ? c : 0;
+  if (split === 'trailer') return corp >= street ? 0 : c;
+  return corp >= 1 && street >= 1 ? Math.floor(c / 2) : corp >= street ? c : 0;
 }
 export function fixBugs(s, p, ctx) {
   const f = p.fix ?? { mode: clearMode };

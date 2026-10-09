@@ -173,3 +173,10 @@
 2026-10-09T12:28:35.177Z done balance-gain3-program [gain3-program] 301s
 2026-10-09T12:28:36.018Z done balance-gain2-program [gain2-program] 302s
 2026-10-09T12:28:36.019Z all 4 jobs finished
+2026-10-09T12:46:45.613Z start balance-bug-rule2-program
+2026-10-09T12:46:45.620Z start balance-bug-rule5-program
+2026-10-09T12:46:45.623Z start balance-bug-cost5-program
+2026-10-09T12:51:33.153Z done balance-bug-rule5-program [bug-rule5-program] 288s
+2026-10-09T12:51:34.250Z done balance-bug-rule2-program [bug-rule2-program] 289s
+2026-10-09T12:51:34.614Z done balance-bug-cost5-program [bug-cost5-program] 289s
+2026-10-09T12:51:34.615Z all 3 jobs finished

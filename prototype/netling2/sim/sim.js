@@ -549,7 +549,7 @@ function attachAxes(s) {
 // BUGS='{"homeClear":true}' brings back the earlier home-clearing rules for comparison.
 // Effects per bug (maintainer, after measuring that the first values barely killed): Charge and Sync drain +16%, Heat gain +20%, damage to Integrity +8%,
 // and 0.5 Integrity an hour lost whatever else is going on. The first values were 8%, 8%, 10%, 4% and 0.
-export const BUG_CFG = { homeClear: false, regenCut: 0, integrityFlat: 0.5, chance: 0.3, max: 5, charge: 0.16, sync: 0.16, heat: 0.2, integrity: 0.08, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2 };
+export const BUG_CFG = { homeClear: false, regenCut: 0, integrityFlat: 0.5, chance: 0.3, max: 5, charge: 0.16, sync: 0.16, heat: 0.2, integrity: 0.08, segfault: [0.25, 0.6, 0.15], clearScrip: 15, clearStanding: 2, standingOnlyIfShort: false }; // standingOnlyIfShort (maintainer idea): a Standing payment is allowed only while the netling has less scrip than a scrip fix costs
 if (process.env.BUGS) Object.assign(BUG_CFG, JSON.parse(process.env.BUGS));
 
 export function rollBug(s, rng, chance = BUG_CFG.chance) {
@@ -569,6 +569,7 @@ export function clearBug(s, { pay = 'scrip', corp = 1, where = 'home' } = {}) {
     if ((s.scrip ?? 0) < BUG_CFG.clearScrip) return false;
     s.scrip -= BUG_CFG.clearScrip;
   } else {
+    if (BUG_CFG.standingOnlyIfShort && (s.scrip ?? 0) >= BUG_CFG.clearScrip) return false;
     const street = BUG_CFG.clearStanding - corp;
     if (corp < 0 || street < 0 || s.standing.corp < corp || s.standing.street < street) return false;
     s.standing.corp -= corp;

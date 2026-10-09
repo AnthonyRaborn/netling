@@ -228,7 +228,7 @@ Archetypes that move by 3 points or more (full life, points):
 
 ## 9. Standing gain (maintainer idea, 2026-10-09): raise every source, flat
 
-Idea: Standing gain is too low to steer, so multiply all of it. Target set by the maintainer: about 50% teen ties for relatively unguided play, close to 0% for strict guided play. Built as `STANDINGGAIN` in the fork (`GAIN` in `sim/sim.js`; 1 by default, so every older table is unchanged): feeds, games, events, trace and netrun Standing are all multiplied; bug-clearing costs (2 Standing), the tie weights and the hidden-path band (1) stay in absolute points, so a gain of 2 is the same as every cutpoint being half as far. Tested on Program with the break and option 1 (baby drain 1.6, no baby bugs, rest call), 300 lives per archetype for the gains and the 1000 life option B run for gain 1; `results/balance-gain{1.5,2,3,4}-program.json`. Simulator only; no test file covers `GAIN` (the default path is covered by the existing 320 prototype tests).
+Idea: Standing gain is too low to steer, so multiply all of it. Target set by the maintainer: about 50% teen ties for relatively unguided play, close to 0% for strict guided play. Built as `STANDINGGAIN` in the fork (`GAIN` in `sim/sim.js`; 1 by default, so every older table is unchanged): feeds, games, events, trace and netrun Standing are all multiplied; bug-clearing costs (2 Standing), the tie weights and the hidden-path band (1) stay in absolute points, so a gain of 2 is the same as every cutpoint being half as far. Tested on Program with the break and option 1 (baby drain 1.6, no baby bugs, rest call), 300 lives per archetype for the gains and the 1000 life option B run for gain 1; `results/balance-gain{1.5,2,3,4}-program.json`. Simulator only; no test file covers `GAIN` (the default path is covered by the existing prototype tests).
 
 Teen tie rate (gap under 2) / adult lean certain (gap 5 or more):
 
@@ -250,3 +250,19 @@ Teen tie rate (gap under 2) / adult lean certain (gap 5 or more):
 - Whole life does not move (mean full life 87% at every gain; the worker 81 to 78 at 300 lives, inside the noise of that sample).
 - Side effects to decide on: a bug cleared for Standing costs 2 points, so at gain 2 it is half the price in effect. The maintainer's lean: keep it cheap, but payable only when the netling lacks the scrip. That rule is not built (the bots pay scrip first by default, `CLEAR`). The hidden-path band stays at 1 absolute point, so a hidden-path player has half the room; the hunter archetypes' tie rate is unchanged at 98 to 100%, but the hidden-path rate was not measured here.
 - Not run: Iron and Wetware (config entries exist: `gain<g>-iron`, `gain<g>-wetware` in `baseline/run-all.mjs`), the clinic cost rule, any real player.
+
+## 10. Bug fix cost in Standing (2026-10-09)
+
+Built in the fork: `BUG_CFG.standingOnlyIfShort` (`BUGS='{"standingOnlyIfShort":true}'`) allows a Standing payment only while the netling holds less scrip than a scrip fix costs (15); `BUG_CFG.clearStanding` (default 2) is now honoured everywhere, including the clinic options (`fix2corp` and `fix2street` cost the full amount from one track, `fix1each` takes half, rounded down, from corp and the rest from street). Tests: `bugcost.test.js` (3; 323 prototype tests pass). Measured on Program with the break, option 1 and Standing gain 2, 300 lives per archetype, 37 archetypes (`results/balance-bug-{rule2,rule5,cost5}-program.json` against `balance-gain2-program.json`).
+
+| | full life % | bugs avg | bug ceiling % | bugs fixed a life | Standing spent a life | adult lean certain % |
+|---|---:|---:|---:|---:|---:|---:|
+| today (cost 2, no rule) | 87.5 | 0.23 | 1.8 | 0.48 | 0.3 | 51.8 |
+| rule, cost 2 | 87.5 | 0.23 | 1.8 | 0.48 | 0.3 | 51.8 |
+| rule, cost 5 | 87.5 | 0.23 | 1.7 | 0.48 | 0.7 | 51.6 |
+| cost 5, no rule | 87.5 | 0.23 | 1.7 | 0.48 | 0.7 | 51.6 |
+
+- **Nothing moves.** The bots already pay scrip first and use Standing only when scrip is short, so the rule matches their play exactly (rule and no rule are identical), and a cost of 5 only raises the Standing they spend from 0.3 to 0.7 a life. The worker spends the most (1.0 to 2.4) and casual 0.9 to 2.4; their teen ties, full life and bug levels are unchanged.
+- **Why it is so quiet:** bugs are cleared only at clinic nodes in this fork (about 3.4 visits and 0.48 fixes a life, home clearing off), and the average bug count is 0.23. A fix is rare, and a Standing fix rarer.
+- **What this does not test:** a player who prefers to pay Standing and keeps scrip (the rule is what stops that, and the bots do not play that way), and a world where bugs are more common (for example babyBugs 1 at drain 2.4). If bug pressure rises, the cost matters more; with these rules 5 is safe, and 2 is also safe. The cost is a flavor choice: a feed gives 0.5 Standing at gain 2, so cost 5 is 10 feeds' worth against 8 at gain 1 and cost 2: slightly dearer than the old price in real terms. Cost 4 would keep it exactly where it was.
+- Recommendation (not a decision): rule on, cost 5 at gain 2, as asked. Nothing in the numbers argues against 2, 4 or 5.
