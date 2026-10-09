@@ -10,6 +10,7 @@ const { generateMap2 } = await import('./sim/netrun/map2.js');
 const { generateMap } = await import('../../src/netrun/map.js');
 const { EGG_PAGES, EGG_PAGE_IDS, nextEggPage, FRAGMENTS } = await import('./sim/codex2.js');
 const { REGIONS } = await import('../../src/netrun/regions.js');
+import { execFileSync } from 'node:child_process';
 
 const DEFAULT = JSON.parse(JSON.stringify(NR2));
 const set = (patch) => {
@@ -1144,4 +1145,14 @@ test('the tier share rises along the run when the gradient is on, keeps the regi
   set({ tiers: false, tier: { layer: { on: true, g: 0.8 } } });
   assert.equal(tierShareAt('deep', 1), 0, 'no tiers, no share');
   reset();
+});
+
+test('the chosen map settings are the defaults and NR2=all switches the wider maps on; the tier gradient stays off', () => {
+  assert.deepEqual(DEFAULT.map.region.deep, { width: [3, 4], link2: 0.65 });
+  assert.deepEqual(DEFAULT.map.region.source, { width: [3, 5], link2: 0.75 });
+  assert.equal(DEFAULT.map.on, false, 'off unless NR2 switches it on');
+  assert.equal(DEFAULT.tier.layer.on, false);
+  const out = (env) => JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', "const { NR2 } = await import('./prototype/netling2/sim/netrun/nr2.js'); console.log(JSON.stringify({ map: NR2.map.on, layer: NR2.tier.layer.on, tiers: NR2.tiers }));"], { cwd: new URL('../../', import.meta.url), env: { ...process.env, ...env }, encoding: 'utf8' }));
+  assert.deepEqual(out({ NR2: 'all' }), { map: true, layer: false, tiers: true });
+  assert.deepEqual(out({ NR2: '' }), { map: false, layer: false, tiers: false });
 });
