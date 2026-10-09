@@ -9,3 +9,5 @@ Command for one cell (here Iron, line 80):
     node prototype/netling2/sim/overuse-sweep.mjs iron 200 all '{"on":true}' '{"BRAKE":"{\"on\":true,\"strainBreak\":80}"}'
 
 Add `,"FEEDBOT":"greedy"` (or another bot) inside the last JSON for the bot cells.
+
+Confirmation (`confirm/`): the same cells at 1000 lives for line 80 (now `BRAKE.strainBreak`'s default) and off (pass `"strainBreak":null` in the BRAKE json, since the default is no longer off).

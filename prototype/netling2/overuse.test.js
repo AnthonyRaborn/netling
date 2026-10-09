@@ -113,7 +113,7 @@ test('costsX1: a held Overdrive bleeds Integrity at x1 for its owner, not x3', (
   assert.ok(x1 < x3, `x1 ${x1} against x3 ${x3}`);
 });
 
-// The break on the owner's strain (BRAKE.strainBreak; maintainer, 2026-10-09, option 3: the same rule on every egg). Off by default (null).
+// The break on the owner's strain (BRAKE.strainBreak; maintainer, 2026-10-09, option 3: the same rule on every egg; line 80). null switches it off.
 const { BRAKE, IRON } = await import('./sim/sim.js');
 const withBreak = (line, fn) => {
   const keep = { on: BRAKE.on, strainBreak: BRAKE.strainBreak };
@@ -123,8 +123,8 @@ const withBreak = (line, fn) => {
 const oneMinute = (s) => tick(s, s.lastTick + MIN, stub(0.99));
 const broke = (s, key) => (s.brakeUntil?.[key] ?? 0) > s.ageMin;
 
-test('the strain trigger is off by default', () => {
-  assert.equal(BRAKE.strainBreak, null);
+test('the strain trigger is at 80 by default, and null switches it off', () => {
+  assert.equal(BRAKE.strainBreak, 80);
   withBreak(null, () => {
     IRON.on = true; Object.assign(SIDES, { on: true, owner: null, ownerMult: 3, teenStates: true });
     const s = make({ heat: 90 });

@@ -775,12 +775,13 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // allOverclock (maintainer, 2026-10-09: every egg manages every bar and reaches every state; only the owner's benefits are larger): Overclock
 // breaks on every egg, as Overdrive and Overlink do. false is the first build, where only Iron's Overclock broke (the decided-* and state-bot
 // results made before this date).
-// strainBreak (maintainer, 2026-10-09: option 3, the same on every egg; null = off, the Integrity trigger alone): the owner's state also breaks
+// strainBreak (maintainer, 2026-10-09: option 3, the same on every egg; line 80 decided after a sweep of 60 to 90; null = off, the Integrity
+// trigger alone, as every result made before this date): the owner's state also breaks
 // when the owner's hidden strain reaches this while the state is active (Iron's Overclock on wear, Program's Overdrive on its overfeed strain,
 // Wetware's Overlink on its overplay strain; the last two need OVERUSE). The strain's own line (50) and its log line are the warning. A
 // non-owner's state has no strain and breaks on Integrity only. The break is the same as Integrity's (drop, lockout, fault); it does not clear
 // strain, which fades on its own (faster at rest).
-export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0, allOverclock: true, strainBreak: null };
+export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0, allOverclock: true, strainBreak: 80 };
 if (process.env.BRAKE) {
   const v = JSON.parse(process.env.BRAKE);
   Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
