@@ -180,3 +180,10 @@
 2026-10-09T12:51:34.250Z done balance-bug-rule2-program [bug-rule2-program] 289s
 2026-10-09T12:51:34.614Z done balance-bug-cost5-program [bug-cost5-program] 289s
 2026-10-09T12:51:34.615Z all 3 jobs finished
+2026-10-09T12:56:24.217Z start balance-final-iron
+2026-10-09T12:56:24.225Z start balance-final-program
+2026-10-09T12:56:24.229Z start balance-final-wetware
+2026-10-09T13:12:44.481Z done balance-final-program [final-program] 980s
+2026-10-09T13:12:58.580Z done balance-final-wetware [final-wetware] 994s
+2026-10-09T13:13:42.656Z done balance-final-iron [final-iron] 1038s
+2026-10-09T13:13:42.658Z all 3 jobs finished

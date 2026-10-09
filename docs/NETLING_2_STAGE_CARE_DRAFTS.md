@@ -266,3 +266,16 @@ Built in the fork: `BUG_CFG.standingOnlyIfShort` (`BUGS='{"standingOnlyIfShort":
 - **Why it is so quiet:** bugs are cleared only at clinic nodes in this fork (about 3.4 visits and 0.48 fixes a life, home clearing off), and the average bug count is 0.23. A fix is rare, and a Standing fix rarer.
 - **What this does not test:** a player who prefers to pay Standing and keeps scrip (the rule is what stops that, and the bots do not play that way), and a world where bugs are more common (for example babyBugs 1 at drain 2.4). If bug pressure rises, the cost matters more; with these rules 5 is safe, and 2 is also safe. The cost is a flavor choice: a feed gives 0.5 Standing at gain 2, so cost 5 is 10 feeds' worth against 8 at gain 1 and cost 2: slightly dearer than the old price in real terms. Cost 4 would keep it exactly where it was.
 - Recommendation (not a decision): rule on, cost 5 at gain 2, as asked. Nothing in the numbers argues against 2, 4 or 5.
+
+## 11. The candidate final settings on all three eggs (2026-10-09)
+
+Option 1 (baby drain 1.6, no baby bugs, rest call, stage tables), Standing gain 2, the fix rule and a Standing cost of 5, each egg's pressure and the break; 1000 lives, 37 archetypes (`results/balance-final-{iron,program,wetware}.json`, config `final-<egg>` in `baseline/run-all.mjs`).
+
+| egg | mean full life, break only | option 1 (gain 1) | final | mean teen tie, option 1 | final |
+|---|---:|---:|---:|---:|---:|
+| Iron | 87.6 | 87.5 | 87.4 | 60.9 | 47.0 |
+| Program | 87.4 | 87.1 | 87.1 | 60.9 | 46.7 |
+| Wetware | 87.7 | 87.6 | 87.6 | 60.8 | 46.4 |
+
+- **Gain 2 holds on all three eggs.** Teen ties for regular play: attentive 44 to 47, casual 53 to 56, human-keen 58, human-regular 63 to 64 (worker 74). Strict guided archetypes: 0 to 1%. No archetype moves its full life by 3 points against the break alone except Iron's worker (-4.4, the same sparse-player cost seen before).
+- **Hidden teen: the stage length, not the gain, removes it for the bots.** Hunter archetypes that reached the hidden teen in 86 to 87% of lives with no stage care reach it in 2 to 4% with the 7 hour baby, at every gain (Program: hunter-exact 86% break only, 3% at option 1 and gain 1, 2% at gain 2). The hidden adult is still reached in 76 to 82% of lives. The hunters never binge games, and three wins in every game before 7 hours is more than they play. Whether a person can do it is the open binger test; until it is built, the hidden teen's reachability under a 7 hour baby is unknown, and the 3 wins per game could need to move (for example counted across the whole teen window, or lowered).
