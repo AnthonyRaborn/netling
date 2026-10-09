@@ -45,6 +45,10 @@ export const NR2 = {
   // ranking a bot uses are mine. NR2=all switches it on.
   inventory: false,
   inv: { stack: 3 },
+  // Wider Deep and Source maps (decided, maintainer: those two regions only; Deep [3,4] at a second-link chance of 0.65, Source [3,5] at 0.75; measured
+  // in baseline/README.md). `region` maps a region id to { width: [lo, hi] nodes a layer, link2: chance of a second link }; src/netrun/regions.js has
+  // [2, 3] and 0.5. Fork only (netrun/map2.js). On in NR2=all; the tier share along the run (tier.layer) was tried and declined.
+  map: { on: false, region: { deep: { width: [3, 4], link2: 0.65 }, source: { width: [3, 5], link2: 0.75 } } },
   // The forced filled cache (Feast corp, elder level): one a run, in the layer after the one before halfway (decided: set interval,
   // about one a run, may displace any node but, decided later, never the relay: `relaySafe` is true).
   forcedCache: { perRun: 1, relaySafe: true, every: 3 }, // every: with perRun above 1, a further cache this many layers on
@@ -53,6 +57,9 @@ export const NR2 = {
   tier: {
     // Share of ICE that is tier 2, by region. MINE, placeholders: the shares are a tuning output (netrun-sweep.mjs, CASES).
     share: { public: 0.05, bazaar: 0.1, corp: 0.2, ruins: 0.3, deep: 0.5, source: 0.6, daily: 0.2, tutorial: 0 },
+    // Tier 2 rising along the run (proposal): with layer.on, the share at a node is the region's share times (1 - g + 2 g f), f being the node's
+    // place from the entry (0) to the exit (1), so a run gets harder as it descends and the region's mean share stays (before the cap at 1).
+    layer: { on: false, g: 0.8 }, // tried and declined by the maintainer (baseline/README.md); kept as a switch
     speed: 1.25, // MINE: the game speed multiplier for tier 2 (Dodge, Tune, Feast; also applies to Breach's timer unless refunded)
     // ASSUMPTION, not a measurement: how much a player's win chance falls against tier 2. The bots have one skill number, not per-game
     // skill, so the cost of speed is a flat drop per 0.1 of extra speed, and Breach's longer target a flat drop of its own.
@@ -91,7 +98,7 @@ export const NR2 = {
 };
 
 if (process.env.NR2) {
-  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true, inventory: true, fate: true, foresight: { on: true } } : JSON.parse(process.env.NR2);
+  const v = process.env.NR2 === 'all' ? { abilities: true, tiers: true, eggCost: true, inventory: true, fate: true, foresight: { on: true }, map: { on: true } } : JSON.parse(process.env.NR2);
   for (const [k, val] of Object.entries(v)) {
     if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
     else NR2[k] = val;
@@ -102,6 +109,14 @@ export const levelOf = (pet) => (pet.stage === 'mainframe' ? 2 : 1);
 
 // Chance a tier-2 roll is made for a fight in this region.
 export const tierShare = (region) => (NR2.tiers ? Math.min(1, (NR2.tier.share[region] ?? 0) * (NR2.tier.scale ?? 1)) : 0);
+
+// The share at a node a fraction f of the way along the run (0 entry, 1 exit); the region's share when the gradient is off.
+export const tierShareAt = (region, f) => {
+  const base = tierShare(region);
+  if (!base || !NR2.tier.layer?.on) return base;
+  const g = NR2.tier.layer.g;
+  return Math.min(1, Math.max(0, base * (1 - g + 2 * g * f)));
+};
 
 // The win chance a bot gives up against a tier-2 fight of this game. Assumed, see NR2.tier.
 export function tierPenalty(pending) {

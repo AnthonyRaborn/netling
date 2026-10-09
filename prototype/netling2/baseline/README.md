@@ -13,6 +13,8 @@ Everything here is a model with scripted players, not a measurement of people. R
 | `summary-balance.md` | Generated: 37 archetypes by 16 columns for each configuration, and each egg against core |
 | `results/` | One file per job (`.json` where the tool supports `JSON=1`, otherwise `.txt`), and `_run.log` (start, finish and duration of every job) |
 
+**Correction (same day).** The first run's `full-iron` configuration left out the final Charge and Sync pressure numbers that `clinic-final.mjs` applies to every egg, so `balance-full-iron`, `runcost-iron` and `egg-anomaly-iron` were rerun after fixing it. The first outputs are in `results/superseded/` and should not be used.
+
 ## Configurations
 
 | Name | Switches | Used by |
@@ -25,7 +27,7 @@ Everything here is a model with scripted players, not a measurement of people. R
 
 The pressure numbers are the ones `clinic-final.mjs`, `grace-sweep.mjs` and `hint-sweep.mjs` already use for the final design in `docs/NETLING_2_EGG_PRESSURES.md`.
 
-**Comparability note.** `runcost-sweep.mjs` and `egg-anomaly-sweep.mjs` default to a minimal Program and Wetware pressure (`hold` only). The runner passes the full final design instead (for Iron that adds the owner multiplier of 3 and the tripled Overclock benefits, which the scripts' own Iron default leaves out), so their tables are not directly comparable with the older tables in the notes.
+**Comparability note.** `runcost-sweep.mjs` and `egg-anomaly-sweep.mjs` default to a minimal Program and Wetware pressure (`hold` only). The runner passes the full final design instead (for Iron that adds the owner multiplier of 3, the tripled Overclock benefits and the final Charge and Sync numbers, which the scripts' own Iron default leaves out), so their tables are not directly comparable with the older tables in the notes.
 
 ## Sample sizes
 
@@ -39,17 +41,17 @@ The pressure numbers are the ones `clinic-final.mjs`, `grace-sweep.mjs` and `hin
 | archetype | core | Iron | Program | Wetware |
 |---|---:|---:|---:|---:|
 | attentive | 99.8 | 99.7 | 95.0 | 99.8 |
-| casual | 92.4 | 93.8 | 94.9 | 93.3 |
-| worker | 82.9 | 89.5 | 81.4 | 82.9 |
-| sysadmin | 99.5 | 99.8 | 92.2 | 99.1 |
-| daredevil | 99.8 | 99.5 | 93.6 | 99.4 |
-| overclocker | 96.2 | 94.9 | 96.8 | 96.8 |
-| ghosthunter | 100.0 | 99.7 | 80.5 | 98.6 |
-| steer-tune-corp | 100.0 | 100.0 | 67.5 | 99.1 |
-| steer-tune-street | 99.7 | 99.0 | 98.7 | 99.4 |
-| human-casual | 3.2 | 5.4 | 4.9 | 4.2 |
-| human-regular | 25.5 | 31.2 | 28.9 | 29.1 |
-| human-keen | 63.5 | 67.9 | 65.0 | 67.6 |
+| casual | 92.4 | 94.5 | 94.9 | 93.3 |
+| worker | 82.9 | 83.3 | 81.4 | 82.9 |
+| sysadmin | 99.5 | 99.2 | 92.2 | 99.1 |
+| daredevil | 99.8 | 99.3 | 93.6 | 99.4 |
+| overclocker | 96.2 | 94.0 | 96.8 | 96.8 |
+| ghosthunter | 100.0 | 98.0 | 80.5 | 98.6 |
+| steer-tune-corp | 100.0 | 99.7 | 67.5 | 99.1 |
+| steer-tune-street | 99.7 | 99.5 | 98.7 | 99.4 |
+| human-casual | 3.2 | 3.7 | 4.9 | 4.2 |
+| human-regular | 25.5 | 28.4 | 28.9 | 29.1 |
+| human-keen | 63.5 | 66.3 | 65.0 | 67.6 |
 
 Full tables: `summary-balance.md`.
 
@@ -57,7 +59,7 @@ Full tables: `summary-balance.md`.
 
 1. **Program with the Charge-drain perks.** Under Program, Tune corp (`chargeDrainMult` 0.8) and the hidden form (0.85 on Charge and Sync) lose a lot of full life: steer-tune-corp 100.0 to 67.5, ghosthunter and the hidden-path hunters 100 to about 81 or 82. Mechanism (read from the code, not isolated by an experiment): slower Charge drain keeps the bots in Overdrive's band longer, where the Integrity bleed accrues. `notes/perks-traits-notes.md` (line 49) listed this interaction as a check still to do; this is that check. Tune street (a Sync perk) is fine on Wetware (99.4). Caveat: the bots always top Charge up, so a person who stops feeding at the cost would not pay it.
 2. **Program costs ordinary heavy-Charge players 5 to 7 points** (attentive 4.8, sysadmin 7.3, daredevil 6.2). The older egg-pressure notes recorded a smaller figure (attentive 97%, sysadmin 94%, daredevil 93.5%); this run adds `NR2=all` and `PERKS=1`.
-3. **Iron helps the worker** (82.9 to 89.5) and the sparse human archetypes (+4 to +6). Not investigated.
+3. **Iron moves almost nothing.** With the final Charge and Sync numbers applied, no archetype is more than 3 points from core (worker 83.3 against 82.9, overclocker 94.0 against 96.2). The first baseline run showed Iron helping the worker (89.5) because its configuration left those numbers out; that output is kept in `results/superseded/`.
 4. **Wetware moves almost nothing** on full life. Its cost shows in infections (the `viruses` column of `summary-balance.md`); I did not tabulate temper.
 
 ## Follow-up: Program and the Charge-drain perks
@@ -100,6 +102,69 @@ Reading:
 - A player who ignores the cost (the default bot) still loses 18 to 32 points as Tune corp or the hidden form. That is the worst case, not the typical one.
 - Assumptions: the 70 threshold for `watch`, and that the player understands the state and its cost at all. The thresholds are hidden by design (`docs/NETLING_2_EGG_PRESSURES.md`), so a first-time player is the greedy case once.
 
+**Final break settings** (maintainer: Integrity 40, a 12 hour lockout, one fault a break; `BRAKE='{"on":true}'` is the final configuration): `balance-brake-iron`, `-program`, `-wetware` (1000 lives of 37 archetypes) and `results/followup/program-bot-sweep-final-*.txt`.
+- Program, full life without the break to with it: steer-tune-corp 67.5 to 99.5, ghosthunter 80.5 to 98.1, the hidden-path hunters about 81 to 97.6 to 98.3, sysadmin 92.2 to 97.9, attentive 95.0 to 99.1, steer-glitch 90.9 to 99.4. Every Program archetype that is not a human archetype or the neglectful one is at 97.6 or better. The cost is faults: heavy greedy players take 3.3 to 3.6 more a life (hunters, ghosthunter, Tune corp; bugs +0.4), ordinary ones 1 to 2.
+- Iron: nothing moves by 1.5 points except worker (83.3 to 82.1, within noise at 1000 lives); faults rise by 0.5 to 1.0 for the unsteady and daredevil archetypes.
+- Wetware: nothing moves by 1.5 points; two archetypes take 0.5 more faults.
+- Bot sweep (Charge perks on), no break to final, full life / win drops / faults: greedy Tune corp 68.4 to 99.3 / 20.8 to 18.2 / 0.33 to 3.11; watching Tune corp 99.2 to 99.4 / 18.0 to 17.7 / 0.42 to 1.03; greedy ghosthunter 82.3 to 98.2 / 28.9 to 25.1 / 0 to 2.09; watching ghosthunter 97.9 to 97.8 / 25.7 to 25.5 / 0.02 to 0.36; the avoiding player is unchanged. A player who minds the bar now pays about a third of what a careless one does in faults, for the same benefit.
+
+**Earlier break tests** (kept for the record; the final settings above replace them): the first break was at Integrity 55 with a 24 hour lockout and no consequence (`balance-brake55-*`), then at 40 (`balance-brake40-lock24-*`). Notes on those and on the lockout tests:
+
+**With the break** (`BRAKE='{"on":true}'`; design in `docs/NETLING_2_EGG_PRESSURES.md`, "The break"): These were the first runs at **Integrity 40** with a 24 hour lockout and no consequence (now `balance-brake40-lock24-*` and `followup/program-bot-sweep-brake40-lock24-*`; the test at 55 is `balance-brake55-*` and `followup/program-bot-sweep-brake55-*`). 1000 lives of 37 archetypes each; `summary-balance.md` compares each with the same egg without it.
+- Program, full life without the break, at 55 and at 40: steer-tune-corp 67.5, 99.7, 99.1; ghosthunter 80.5, 98.6, 98.3; the hidden-path hunters about 81, 98.6 to 99.4, 97.7 to 98.3; sysadmin 92.2, 98.6, 97.5; attentive 95.0, 99.6, 99.3. At 40 every Program archetype is at 97.5 or better and nothing is worse than with no break.
+- Iron and Wetware: no archetype moves by 1.5 points or more at either line.
+- Bot sweep (Charge perks on), full life / win drops a life, no break, 55, 40: greedy Tune corp 68.4 / 20.8, 99.8 / 15.1, 99.2 / 17.2; watching Tune corp 99.2 / 18.0, 99.5 / 15.0, 99.5 / 17.4; greedy ghosthunter 82.3 / 28.9, 98.6 / 23.1, 98.1 / 24.7; watching ghosthunter 97.9 / 25.7, 98.4 / 23.5, 97.8 / 25.3.
+- Reading: the lower line costs 0.3 to 1.5 points of full life and returns about 83% to 96% of the unbraked benefit. A careful player and a careless one end up with almost the same benefit (17.4 against 17.2 for Tune corp), so the break protects the careless without rewarding the careful.
+- **Lockout length** (break line 40; Program only; `results/followup/program-bot-sweep-brake-lock{8,12}-*.txt`, `results/balance-brake-lock{8,12}-program.json`), no break / 24h / 12h / 8h: greedy Tune corp full life 68.4 / 99.2 / 99.6 / 99.6, win drops 20.8 / 17.2 / 18.1 / 18.1, time in Overdrive 33.6 / 15.3 / 19.9 / 19.9 percent; greedy ghosthunter win drops 28.9 / 24.7 / 25.7 / 25.7; watching players barely move (Tune corp 18.0 / 17.4 / 17.7 / 17.7). No archetype in the 37 moves by 1 point or more between 24h, 12h and 8h; mean netruns a life 13.43, 13.26, 13.25 (12.81 with no break). 8 and 12 hours are identical to the digit, probably because both end before the netling wakes (sleep is 22:00 to 07:00 and a hold needs 3 awake hours); not isolated. A shorter lockout gives greedy play about 5% more benefit and puts it level with, or just above, careful play (Tune corp 18.1 against 17.7), so it does not help the break reward care.
+- Decided since: the maintainer chose a 12 hour lockout. Untested: the warning line (70), and an Iron-specific trigger.
+
+**Break consequences, all three eggs** (`sim/break-consequence-sweep.mjs`, `results/followup/break-consequence-*.txt`; line 40, 12 hour lockout, 1000 lives; Iron 6 archetypes, Program 7 with the default bot and with `PROGBOT=watch`, Wetware 6 with the default bot and `SYNCBOT=greedy`). Mean over archetypes, plain break against the break plus a consequence (the human-keen archetype, near 65% full life everywhere, is the minimum in every row and is not an effect of the break):
+
+| egg / bot | breaks a life | full life % plain / +1 fault / +10 integrity / both | faults a life plain / +1 fault |
+|---|---:|---|---|
+| Iron / default | 0.35 | 93.3 / 93.3 / 93.2 / 93.0 | 1.50 / 1.90 |
+| Program / default | 1.74 | 93.8 / 93.6 / 93.4 / 93.3 | 1.13 / 2.63 |
+| Program / watch | 0.30 | 94.1 / 94.0 / 93.9 / 93.8 | 1.17 / 1.48 |
+| Wetware / default | 0.17 | 93.7 / 93.7 / 93.7 / 93.6 | 1.28 / 1.46 |
+| Wetware / greedy | 0.19 | 93.2 / 93.2 / 93.2 / 93.2 | 1.26 / 1.45 |
+
+- A fault a break is cheap in survival (largest single loss 0.8 points, Program ghosthunter) and separates the two Program players: a greedy ghosthunter takes 0.02 faults a life with the plain break and 3.55 with a fault, a watching one 0.02 and 0.73; Tune corp 0.43 and 3.63 against 0.45 and 1.12. Bugs per life for the default Program bot rise from 0.08 to 0.19 and temper falls from 1.23 to 0.78.
+- Ten Integrity a break costs more survival than a fault (ghosthunter 1.7 points, no faults) and leaves no trace the player can read. Both together is the largest loss (2.1 points).
+- The greedy and heavy Program players break often (ghosthunter 4.9 and Tune corp 3.4 a life with the default bot, against 0.7 when watching), which a 12 hour lockout allows (a life is about 5 days).
+- Iron's hot players (overclocker) lose the most there (0.7 points with a fault); Wetware barely registers it, because the break fires 0.17 times a life even for the greedy bot.
+
+## Follow-up: wider Deep and Source maps and the tier share along the run
+
+Fork-only, off by default: `NR2.map` (`sim/netrun/map2.js`, a parameterized copy of the real generator that draws the identical map at the real settings; tested) and `NR2.tier.layer` (tier-2 share times 1 - g + 2 g f along the run, f from entry 0 to exit 1; tested). Scripts and outputs: `sim/map-metrics.mjs`, `results/followup/map-metrics.txt`, `netrun-width-sweep.txt`, `foresight-width-*.txt`, `lineage-wide75-*.json`, `balance-wide75.json` and its reference `balance-nowmap-reference.json`. Netrun sweeps are 1000 runs per form (Foresight 3000), abilities and tiers on.
+
+**Shape** (2000 maps). Today 46% of links change lane (upper, middle, lower by place in the layer) and 11% jump two lanes; at [3,4] Deep and [3,5] Source no link jumps two lanes and 31% to 43% change lane, depending on the second-link chance. Routes from entry to exit (median): Deep 97 now, 37 / 139 / 536 at link chance .25 / .5 / .75 with [3,4]; Source 340 now, 128 / 666 / 3432 with [3,5]. The best route has fewer ICE than today (Deep 3.7 to 3.0 at .75) while the worst stays near 8 to 9, so choosing well matters more.
+
+**Difficulty** (mean over the 18 forms; disconnect % / exit % / value):
+
+| | Deep careful | Deep skilled | Source careful | Source skilled |
+|---|---|---|---|---|
+| now | 28.1 / 38.4 / 1.95 | 15.9 / 71.5 / 3.29 | 45.8 / 15.8 / 1.38 | 34.4 / 45.0 / 2.93 |
+| wide, link .25 | 37.4 / 37.8 / 1.92 | 20.3 / 69.8 / 3.28 | 56.2 / 13.1 / 1.11 | 40.9 / 42.5 / 2.73 |
+| wide, link .5 | 32.1 / 40.5 / 2.11 | 17.5 / 71.9 / 3.42 | 51.8 / 15.7 / 1.31 | 37.2 / 45.2 / 2.95 |
+| wide, link .75 | 25.7 / 44.7 / 2.36 | 13.8 / 75.5 / 3.62 | 45.8 / 18.7 / 1.55 | 32.9 / 48.8 / 3.20 |
+| widest [4,5], link .5 | 32.5 / 40.4 / 2.12 | 17.6 / 71.7 / 3.41 | 51.8 / 16.7 / 1.44 | 37.4 / 45.3 / 3.00 |
+
+- **The second-link chance is the lever, not the width.** Wider layers at the same link chance (.5) make runs harder, because lanes lock (more disconnects, +4 points in the Deep and +6 in the Source for careful players). A difficulty-neutral wide map needs a link chance of about .65 in the Deep and .75 in the Source; .75 in both is easier than today in the Deep and equal in the Source.
+- **Tier share along the run** (g .8): disconnects barely move, but fewer tier-2 fights are met per run (Source careful 1.97 to 1.62, Deep careful 1.34 to 1.24, Source skilled 2.65 to 2.50, Deep skilled unchanged), because runs that end early never reach the hard end and the share is capped at 1 near the exit. To keep the total, scale the shares up (the `tier.scale` knob, 10% to 20%); not tested.
+- **Parity.** The spread of disconnect % among forms is 17 to 20 points between adults in every case, today's maps included, so the old 4 point bar (1.0's) is not met in the fork at all; the value yardstick is the one in use.
+
+**Foresight** (Tune street, value over the same form blind; adult sees one step, elder two): lift at the current maps / link .5 / link .75: Deep careful adult 12.9 / 14.9 / 18.4 percent, elder 16.4 / 24.0 / 24.8; Source careful adult 22.2 / 17.9 / 32.6, elder 36.6 / 35.8 / 50.6; Source skilled elder 23.9 / 23.8 / 25.7. At link .5 it is no better than today; at .75 it is. Tune street with Foresight against the mean of the nine forms (100 = at the mean), adult / elder: today 86 to 92 and 88 to 103; at link .75 91 to 96 and 97 to 110 (Source skilled elder 110, above the mean; elders have no upper bar, decided on the planning branch).
+
+**Rogue gate and whole life** (link .75): attentive 9 to 8 lives, daredevil 9 to 9, casual 20 to 18; first elder life for casual 10 to 8. Whole-life results are unchanged: no archetype moves by 1.5 points, mean full life 90.5% either way, mean disconnects 0.35, mean scrip 50.9. Netruns in these regions are a small part of a life.
+
+**Chosen settings** (maintainer, 2026-10-09: Deep [3,4] at link .65, Source [3,5] at .75, no tier gradient). They are the defaults of `NR2.map` and `NR2=all` now switches them on, so the netrun-class outputs here (netrun, challenge, Foresight, egg anomalies, lineage) were rerun with them; the earlier outputs are in `results/superseded/narrow-maps/`. Rogue gate at the chosen settings, old maps to chosen: attentive 9 to 8 lives (p10 to p90 7 to 13, then 6 to 12), daredevil 9 to 9, casual 20 to 20; first elder life attentive 4 to 4, daredevil 5 to 4, casual 10 to 9. The other baseline outputs (whole-life balance and the life-level sweeps) were not rerun: whole life does not move with the maps (no archetype by 1.5 points at link .75).
+
+Not modelled or not checked: how a person reads a bigger map (the bots look ahead over what they can see), the fog, the phone screen (about 55 to 60 nodes against 27 to 35), and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps, which was not measured.
+
+## Follow-up: stage care (first build)
+
+Fork switches `STAGE` (the stage tables and the rest call; off by default). Findings, tables and the options for the baby are in [docs/NETLING_2_STAGE_CARE_DRAFTS.md](../../../docs/NETLING_2_STAGE_CARE_DRAFTS.md), section 7; outputs are `results/followup/stage-*` and `notification-count-real.txt`. In short (1000 lives, wider maps on, no egg pressure): the rest call alone changes nothing (mean full life 90.6% against 90.5%; long-gap survival unchanged); the stage tables cost the sparse players through the baby drain (x2.4: worker 82.4% to 63.7%, mean 90.5% to 89.5%), partly recovered when a baby's faults roll no bugs and almost fully at a drain of 1.6; Standing at the teen check falls and the teen tie rate rises from 53% to 58% on average. A bot artifact (bots never woke a call-rest) was found and fixed on the way. On top of each egg's pressure and the break (draft section 8; `results/balance-stage{A,B}-{iron,program,wetware}.json`, 1000 lives, 37 archetypes; A = decided tables with baby drain 2.4, B = drain 1.6 and no bugs from a baby's faults): mean full life break only / A / B is Iron 87.6 / 86.7 / 87.5, Program 87.4 / 86.4 / 87.1, Wetware 87.7 / 86.8 / 87.6. Under A the worker falls 20.3 (Iron), 16.6 (Program), 18.7 (Wetware) and hunter-casual 5 to 6; under B only Iron's worker stays down more than 3 (-3.8). Teen tie rate 53.7 to 59.7 (A) and 60.9 (B). About 9.9 rest calls a life, tired 13.3 to 13.6% of a life under A. Not measured: the elder, the hidden-teen binger.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |
@@ -115,15 +180,15 @@ Reading:
 
 | Job | Output | Seconds |
 |---|---|---:|
-| balance-core, -full-iron, -full-program, -full-wetware | `balance-*.json` | 736, 936, 914, 918 |
+| balance-core, -full-iron, -full-program, -full-wetware | `balance-*.json` | 736, 952, 914, 918 |
 | lineage-attentive, -daredevil, -casual | `lineage-*.json` | 173, 244, 397 |
 | bug, clinic, push, gap, human, hunter, temper, item, exchange-stock, role | `*.txt` | 80 to 507 |
 | clinic-final | `clinic-final.txt` | 1764 |
 | grace, hint, heat-hint, sides, stat-profile | `*.txt` | 150 to 863 |
 | iron, iron-cold | `*.txt` | 1311, 1335 |
-| runcost-iron, -program, -wetware | `runcost-*.txt` | 349, 343, 339 |
+| runcost-iron, -program, -wetware | `runcost-*.txt` | 343, 343, 339 |
 | netrun, challenge, foresight | `*.txt` | 74, 85, 191 |
-| egg-anomaly-iron, -program, -wetware | `egg-anomaly-*.txt` | 12 each |
+| egg-anomaly-iron, -program, -wetware | `egg-anomaly-*.txt` | 11, 12, 12 |
 | act-sweep-charge, -sync; band-sweep-charge, -sync | `*.txt` | 987, 998, 994, 1010 |
 
 `act-sweep` and `band-sweep` test designs the maintainer rejected (action-based and banded pressure); they are here only so "everything" is true.

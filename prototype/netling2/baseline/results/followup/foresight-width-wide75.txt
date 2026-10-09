@@ -1,0 +1,88 @@
+
+== deep | careful | spread 0.2 | level 1 (mean value of the nine forms, blind: 2.078) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             37.2   28.6  1.605         0         77         -9.3
+tune corp, blind               31.7   31.6  1.829        14         88         -6.3
+depth 1: game                  31.5     35    1.9      18.4         91         -2.9
+depth 1: game, tier            31.1   35.2  1.919      19.6         92         -2.7
+depth 1: game, tier, cache     32.1   35.3  1.936      20.6         93         -2.6
+depth 2: game                  26.8   37.9  2.105      31.2        101            0
+depth 2: game, tier            26.3   38.6  2.138      33.2        103          0.7
+depth 2: game, tier, cache     27.4   37.6  2.152      34.1        104         -0.3
+
+== deep | careful | spread 0.2 | level 2 (mean value of the nine forms, blind: 2.616) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             29.8     39  2.026         0         77        -11.1
+tune corp, blind               32.6   44.9  2.267      11.9         87         -5.2
+depth 1: game                  24.1   46.3   2.34      15.5         89         -3.8
+depth 1: game, tier              24   46.6  2.356      16.3         90         -3.5
+depth 1: game, tier, cache     24.2   46.8  2.382      17.6         91         -3.3
+depth 2: game                  20.4   48.9  2.529      24.8         97         -1.2
+depth 2: game, tier              20   49.6  2.561      26.4         98         -0.5
+depth 2: game, tier, cache     20.6     49  2.613        29        100         -1.1
+
+== deep | skilled | spread 0.2 | level 1 (mean value of the nine forms, blind: 3.313) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             23.7   58.8  2.819         0         85         -9.2
+tune corp, blind               20.5   60.6  2.998       6.3         91         -7.4
+depth 1: game                    17   67.4   3.18      12.8         96         -0.6
+depth 1: game, tier            16.4   68.3  3.217      14.1         97          0.3
+depth 1: game, tier, cache     17.4   67.6  3.216      14.1         97         -0.4
+depth 2: game                  15.6   68.8  3.324      17.9        100          0.8
+depth 2: game, tier              15   69.9   3.37      19.5        102          1.9
+depth 2: game, tier, cache     15.6   69.4  3.447      22.3        104          1.4
+
+== deep | skilled | spread 0.2 | level 2 (mean value of the nine forms, blind: 3.812) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             16.8   74.8  3.374         0         89         -3.6
+tune corp, blind               20.2   75.1  3.478       3.1         91         -3.3
+depth 1: game                  11.5   81.2  3.658       8.4         96          2.8
+depth 1: game, tier            11.1     82  3.692       9.4         97          3.6
+depth 1: game, tier, cache     11.3   81.9  3.718      10.2         98          3.5
+depth 2: game                   9.9   83.2  3.826      13.4        100          4.8
+depth 2: game, tier             9.3   84.3  3.869      14.7        102          5.9
+depth 2: game, tier, cache      9.6   83.9  3.965      17.5        104          5.5
+
+== source | careful | spread 0.2 | level 1 (mean value of the nine forms, blind: 1.327) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             57.9    8.1  0.913         0         69         -5.5
+tune corp, blind               50.9    9.7  1.096        20         83         -3.9
+depth 1: game                  53.3     12  1.211      32.6         91         -1.6
+depth 1: game, tier            53.3   12.2  1.227      34.4         92         -1.4
+depth 1: game, tier, cache     54.2   12.6  1.253      37.2         94           -1
+depth 2: game                  47.2   13.7   1.38      51.2        104          0.1
+depth 2: game, tier            46.9   13.8   1.39      52.2        105          0.2
+depth 2: game, tier, cache       47   13.8  1.461        60        110          0.2
+
+== source | careful | spread 0.2 | level 2 (mean value of the nine forms, blind: 1.849) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             52.1   14.1   1.28         0         69         -7.8
+tune corp, blind               55.3   17.8  1.456      13.7         79         -4.1
+depth 1: game                  46.5   19.5   1.67      30.5         90         -2.4
+depth 1: game, tier            46.1     20  1.702        33         92         -1.9
+depth 1: game, tier, cache     46.7   20.3  1.735      35.5         94         -1.6
+depth 2: game                  40.5   22.9  1.928      50.6        104            1
+depth 2: game, tier            39.9   23.3  1.957      52.9        106          1.4
+depth 2: game, tier, cache     39.3     23  2.045      59.8        111          1.1
+
+== source | skilled | spread 0.2 | level 1 (mean value of the nine forms, blind: 2.946) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind             46.4   29.1  2.173         0         74        -11.6
+tune corp, blind               41.9   32.1  2.432      11.9         83         -8.6
+depth 1: game                  38.1   39.8  2.828      30.1         96         -0.9
+depth 1: game, tier            37.4   40.4  2.877      32.4         98         -0.3
+depth 1: game, tier, cache     38.4   39.9  2.869        32         97         -0.8
+depth 2: game                  34.9   41.7  3.016      38.8        102            1
+depth 2: game, tier            34.8   42.2  3.043        40        103          1.5
+depth 2: game, tier, cache     33.2   43.7  3.249      49.5        110            3
+
+== source | skilled | spread 0.2 | level 2 (mean value of the nine forms, blind: 3.75) ==
+variant                       disc%  exit%  value  vs blind%  % of mean  exit vs mean
+tune street, blind               37   49.7  3.275         0         87         -4.3
+tune corp, blind               43.1   48.1  3.167      -3.3         84         -5.9
+depth 1: game                  28.4   60.2  3.937      20.2        105          6.2
+depth 1: game, tier              28   60.4  3.958      20.9        106          6.4
+depth 1: game, tier, cache     27.9     60  3.985      21.7        106            6
+depth 2: game                  25.6   62.3  4.118      25.7        110          8.3
+depth 2: game, tier            25.6   62.2  4.112      25.6        110          8.2
+depth 2: game, tier, cache     23.9   64.1  4.386      33.9        117         10.1

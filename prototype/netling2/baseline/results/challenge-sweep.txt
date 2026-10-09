@@ -1,400 +1,400 @@
 
-== glass | deep | careful | level 1 (mean completion of the nine forms: 15.7%) ==
+== glass | deep | careful | level 1 (mean completion of the nine forms: 18.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                11.6   24.6   40.6         88.4  0.74
-breachCorp          11.6   29.9   22.9         88.4  0.74
-breachStreet        11.6   34.9   27.6         88.4  0.74
-dodgeCorp           23.4   42.1   29.9         76.7  1.49
-dodgeStreet         23.7     41   27.4         76.3  1.51
-tuneCorp            13.2   25.6   35.8         86.8  0.84
-tuneStreet          13.7   28.2   37.4         86.3  0.87
-feastCorp           11.6   30.1   37.4         88.4  0.74
-feastStreet         10.8   29.3   38.9         89.3  0.69
-hidden              21.4     38   24.8         78.6  1.37
+none                13.5   27.5   41.3         86.5  0.72
+breachCorp          13.5   34.7   24.2         86.5  0.72
+breachStreet        13.5   38.7   28.5         86.5  0.72
+dodgeCorp           26.4   45.2   30.6         73.6  1.41
+dodgeStreet         27.3   44.5   27.4         72.7  1.46
+tuneCorp            14.9   30.5   34.5           85  0.80
+tuneStreet          18.6   33.2   36.1         81.3  1.00
+feastCorp           13.6   34.6   36.8         86.4  0.73
+feastStreet         13.2   34.4   36.7         86.8  0.71
+hidden              27.1   42.9   25.6         72.9  1.45
 
-== glass | deep | careful | level 2 (mean completion of the nine forms: 19.7%) ==
+== glass | deep | careful | level 2 (mean completion of the nine forms: 22.9%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          11.6   47.5   13.3         88.4  0.59
-breachStreet        11.6   55.4   20.3         88.4  0.59
-dodgeCorp           29.6   51.2   24.1         70.4  1.51
-dodgeStreet         31.6   49.5   22.1         68.3  1.61
-tuneCorp            13.7   37.8   37.3         86.3  0.70
-tuneStreet          16.1   38.9   26.1           84  0.82
-feastCorp           13.8   37.1   35.5         86.2  0.70
-feastStreet         10.4   33.9   36.1         89.5  0.53
-hidden              38.5     54   16.3         61.5  1.96
+breachCorp          13.6   53.3   14.1         86.5  0.59
+breachStreet        13.5   62.3   17.8         86.5  0.59
+dodgeCorp           35.5   54.5   25.4         64.5  1.55
+dodgeStreet           35   51.6   23.3           65  1.53
+tuneCorp            16.6     43   34.3         83.3  0.73
+tuneStreet          19.1   47.7   22.3         80.8  0.83
+feastCorp           17.3   42.3   33.4         82.7  0.76
+feastStreet         12.8   38.4   34.6         87.3  0.56
+hidden              42.6   59.1   15.8         57.4  1.86
 
-== glass | deep | skilled | level 1 (mean completion of the nine forms: 34.6%) ==
+== glass | deep | skilled | level 1 (mean completion of the nine forms: 39.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                29.4   53.4   27.4         70.6  0.85
-breachCorp          29.4   60.5   13.8         70.6  0.85
-breachStreet        29.4   67.8   16.8         70.6  0.85
-dodgeCorp           42.6   67.3   18.8         57.4  1.23
-dodgeStreet         42.6   66.1   18.2         57.4  1.23
-tuneCorp              32   55.3   24.2           68  0.92
-tuneStreet          35.7   60.5   22.6         64.3  1.03
-feastCorp           29.4   66.5   22.8         70.6  0.85
-feastStreet         28.4   66.2   23.4         71.5  0.82
-hidden              41.9   64.8   16.9         58.1  1.21
+none                  34   57.4   26.3           66  0.86
+breachCorp            34   64.5   14.5           66  0.86
+breachStreet          34     71   17.1           66  0.86
+dodgeCorp           46.3     69   18.8         53.8  1.17
+dodgeStreet         49.2   70.7   16.6         50.8  1.24
+tuneCorp            36.6   59.8   22.6         63.3  0.92
+tuneStreet          42.2   64.5   19.6         57.8  1.06
+feastCorp             34     69   21.9           66  0.86
+feastStreet           34   68.7   22.3           66  0.86
+hidden              46.6     69   15.5         53.4  1.18
 
-== glass | deep | skilled | level 2 (mean completion of the nine forms: 38.9%) ==
+== glass | deep | skilled | level 2 (mean completion of the nine forms: 43.5%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          29.4   80.3    6.5         70.6  0.75
-breachStreet        29.4   85.6    9.1         70.6  0.75
-dodgeCorp             50   73.4   14.7           50  1.28
-dodgeStreet         50.4   72.2   13.5         49.6  1.29
-tuneCorp            33.2   70.8   24.6         66.8  0.85
-tuneStreet          39.5   76.8   13.9         60.5  1.01
-feastCorp           32.7   72.4   19.6         67.3  0.84
-feastStreet         28.7   72.3   19.2         71.3  0.74
-hidden              57.2     76   10.1         42.8  1.47
+breachCorp            34   82.2    7.5           66  0.78
+breachStreet          34   87.3    7.7           66  0.78
+dodgeCorp           54.4   75.5   14.4         45.5  1.25
+dodgeStreet         55.8   75.3   13.6         44.2  1.28
+tuneCorp            38.2   74.5   20.9         61.7  0.88
+tuneStreet          44.2   81.4   11.2         55.7  1.02
+feastCorp           36.5   74.5   18.4         63.5  0.84
+feastStreet         33.1   74.5   19.3         66.8  0.76
+hidden              61.7   79.5    9.2         38.3  1.42
 
-== glass | source | careful | level 1 (mean completion of the nine forms: 6.7%) ==
+== glass | source | careful | level 1 (mean completion of the nine forms: 8.3%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                 4.4    7.7     57         95.5  0.66
-breachCorp           4.4    9.8   40.3         95.5  0.66
-breachStreet         4.4   10.9   49.3         95.5  0.66
-dodgeCorp            9.1   15.8   49.7         90.6  1.37
-dodgeStreet         11.4   17.6   45.3         88.4  1.71
-tuneCorp             4.8    8.4   52.5           95  0.72
-tuneStreet           6.2   10.9   53.7         93.8  0.93
-feastCorp            4.5   12.5   54.6         95.5  0.68
-feastStreet          4.9   11.9   54.5         95.1  0.74
-hidden              10.2   15.8   43.3         89.7  1.53
+none                 5.3    9.2   59.2         94.5  0.64
+breachCorp           5.3   12.6     42         94.5  0.64
+breachStreet         5.3   13.3   47.8         94.5  0.64
+dodgeCorp           12.1   20.6   48.1         87.5  1.45
+dodgeStreet         14.2   21.9   46.4         85.3  1.70
+tuneCorp             6.4     11   52.5         93.5  0.77
+tuneStreet           8.1   13.3   55.1         91.7  0.97
+feastCorp            5.3   13.7   54.2         94.5  0.64
+feastStreet          4.9   12.8   55.2           95  0.59
+hidden              13.4   20.1   42.9         86.3  1.61
 
-== glass | source | careful | level 2 (mean completion of the nine forms: 9.2%) ==
+== glass | source | careful | level 2 (mean completion of the nine forms: 11.3%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp           4.4   20.9   26.9         95.6  0.48
-breachStreet         4.4   25.4     39         95.5  0.48
-dodgeCorp           14.3   22.4   42.9         85.3  1.55
-dodgeStreet         17.1   24.4     39         82.5  1.86
-tuneCorp             5.7   16.1   55.5         94.3  0.62
-tuneStreet           6.8   17.6   44.3         93.3  0.74
-feastCorp            4.6   16.9   54.5         95.4  0.50
-feastStreet            4   16.8   52.4           96  0.43
-hidden              21.5   29.6   33.6         78.1  2.34
+breachCorp           5.3   22.8   29.9         94.5  0.47
+breachStreet         5.3   27.1   39.5         94.5  0.47
+dodgeCorp           16.9   26.6   44.4         82.5  1.49
+dodgeStreet         19.5   27.7   41.1         79.8  1.72
+tuneCorp             7.3   18.6   55.1         92.5  0.64
+tuneStreet           8.9   23.1   40.2         90.9  0.79
+feastCorp            6.4     18   53.5         93.6  0.57
+feastStreet          5.2   18.5   52.6         94.8  0.46
+hidden              27.1   36.6   31.3         72.3  2.39
 
-== glass | source | skilled | level 1 (mean completion of the nine forms: 20.8%) ==
+== glass | source | skilled | level 1 (mean completion of the nine forms: 24.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                15.9   25.6   46.6         83.8  0.76
-breachCorp          16.1   31.6   30.1         83.8  0.77
-breachStreet        15.9   37.2   38.6         83.8  0.76
-dodgeCorp           26.3     39   38.5         73.2  1.26
-dodgeStreet         29.2     42   33.1         70.3  1.40
-tuneCorp              18   28.1     43         81.7  0.86
-tuneStreet          21.1   32.2   41.8         78.5  1.01
-feastCorp           16.2   45.4   40.9         83.7  0.78
-feastStreet         16.6   45.7   40.6         83.3  0.80
-hidden              28.1   39.1   33.8         71.5  1.35
+none                18.9   30.3   45.9         80.6  0.77
+breachCorp          19.1   37.5   29.3         80.6  0.77
+breachStreet        18.9   43.5     35         80.6  0.77
+dodgeCorp           29.7     44   36.5         69.4  1.20
+dodgeStreet         32.1   45.9     34           67  1.30
+tuneCorp            22.4   32.6   42.5         77.2  0.91
+tuneStreet          28.6   41.5   37.5         70.7  1.16
+feastCorp           19.1     49   36.5         80.6  0.77
+feastStreet         19.4   48.9   36.5         80.5  0.79
+hidden              32.6   44.9   32.4         66.8  1.32
 
-== glass | source | skilled | level 2 (mean completion of the nine forms: 24.8%) ==
+== glass | source | skilled | level 2 (mean completion of the nine forms: 28.5%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          16.1     54   18.3         83.8  0.65
-breachStreet        15.9   58.4   26.7         83.8  0.64
-dodgeCorp           34.8   47.3   30.9         64.5  1.40
-dodgeStreet         37.4     50   27.8         61.9  1.51
-tuneCorp            18.9   44.5   45.5         80.8  0.76
-tuneStreet          23.4   54.7   30.1         76.5  0.94
-feastCorp           17.9   51.3   36.9         81.9  0.72
-feastStreet         16.3   54.5   34.8         83.7  0.66
-hidden              42.4   53.8   24.3         57.1  1.71
+breachCorp          19.1   57.6   19.3         80.6  0.67
+breachStreet        18.9   62.3   25.1         80.6  0.66
+dodgeCorp           37.1   50.9   31.8         61.9  1.30
+dodgeStreet         40.4   52.3   29.4         58.5  1.42
+tuneCorp            22.9   48.4   42.7         76.7  0.80
+tuneStreet          30.6     63   25.1         69.3  1.07
+feastCorp           21.8   53.9   34.1           78  0.77
+feastStreet         19.1   56.8   32.9         80.7  0.67
+hidden              46.5   58.9   21.8         52.2  1.63
 
-== unplugged | deep | careful | level 1 (mean completion of the nine forms: 42.0%) ==
+== unplugged | deep | careful | level 1 (mean completion of the nine forms: 47.5%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                30.9   30.9     69            0  0.73
-breachCorp          41.8   41.8   58.2            0  0.99
-breachStreet        41.5   41.5   58.5            0  0.99
-dodgeCorp             49     49     51            0  1.17
-dodgeStreet         49.5   49.5   50.5            0  1.18
-tuneCorp            34.3   34.3   65.8            0  0.82
-tuneStreet            35     35     65            0  0.83
-feastCorp           39.8   39.8   60.3            0  0.95
-feastStreet         39.5   39.5   60.5            0  0.94
-hidden                48     48     52            0  1.14
+none                35.5   35.5   64.5            0  0.75
+breachCorp          46.5   46.5   53.5            0  0.98
+breachStreet        46.3   46.3   53.8            0  0.98
+dodgeCorp           53.9   53.9   46.1            0  1.14
+dodgeStreet         54.5   54.5   45.5            0  1.15
+tuneCorp              41     41     59            0  0.86
+tuneStreet          42.3   42.3   57.8            0  0.89
+feastCorp           44.4   44.4   55.6            0  0.94
+feastStreet         44.8   44.8   55.2            0  0.94
+hidden              53.4   53.4   46.6            0  1.13
 
-== unplugged | deep | careful | level 2 (mean completion of the nine forms: 53.1%) ==
+== unplugged | deep | careful | level 2 (mean completion of the nine forms: 59.0%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          56.9   56.9   43.1            0  1.07
-breachStreet        61.6   61.6   38.4            0  1.16
-dodgeCorp           58.6   58.6   41.4            0  1.10
-dodgeStreet         58.3   58.3   41.7            0  1.10
-tuneCorp            35.3   35.3   64.7            0  0.66
-tuneStreet          50.8   50.8   49.3            0  0.96
-feastCorp           46.9   46.9   53.1            0  0.88
-feastStreet         44.2   44.2   55.8            0  0.83
-hidden              65.5   65.5   34.5            0  1.23
+breachCorp          63.1   63.1   36.9            0  1.07
+breachStreet        67.8   67.8   32.2            0  1.15
+dodgeCorp           61.7   61.7   38.3            0  1.05
+dodgeStreet         61.6   61.6   38.4            0  1.04
+tuneCorp              43     43     57            0  0.73
+tuneStreet          60.9   60.9   39.1            0  1.03
+feastCorp           52.9   52.9   47.1            0  0.90
+feastStreet           49     49     51            0  0.83
+hidden              70.7   70.7   29.4            0  1.20
 
-== unplugged | deep | skilled | level 1 (mean completion of the nine forms: 67.5%) ==
+== unplugged | deep | skilled | level 1 (mean completion of the nine forms: 71.9%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                57.4   57.4   42.6            0  0.85
-breachCorp          68.3   68.3   31.8            0  1.01
-breachStreet        68.2   68.2   31.8            0  1.01
-dodgeCorp           70.2   70.2   29.8            0  1.04
-dodgeStreet         69.8   69.8   30.1            0  1.03
-tuneCorp            59.8   59.8   40.3            0  0.89
-tuneStreet          64.2   64.2   35.9            0  0.95
-feastCorp           69.1   69.1   30.9            0  1.02
-feastStreet         68.5   68.5   31.5            0  1.01
-hidden              69.6   69.6   30.4            0  1.03
+none                61.8   61.8   38.3            0  0.86
+breachCorp          72.7   72.7   27.4            0  1.01
+breachStreet        72.7   72.7   27.4            0  1.01
+dodgeCorp           72.6   72.6   27.4            0  1.01
+dodgeStreet           74     74     26            0  1.03
+tuneCorp            65.8   65.8   34.2            0  0.92
+tuneStreet          69.3   69.3   30.7            0  0.96
+feastCorp           73.1   73.1   26.9            0  1.02
+feastStreet         72.7   72.7   27.3            0  1.01
+hidden              74.3   74.3   25.6            0  1.03
 
-== unplugged | deep | skilled | level 2 (mean completion of the nine forms: 76.7%) ==
+== unplugged | deep | skilled | level 2 (mean completion of the nine forms: 79.9%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          81.5   81.5   18.5            0  1.06
-breachStreet        84.8   84.8   15.3            0  1.11
-dodgeCorp           76.5   76.5   23.5            0  1.00
-dodgeStreet         75.9   75.9   24.1            0  0.99
-tuneCorp            61.5   61.5   38.5            0  0.80
-tuneStreet          78.9   78.9   21.1            0  1.03
-feastCorp           74.8   74.8   25.2            0  0.98
-feastStreet         75.1   75.1   24.9            0  0.98
-hidden                81     81   19.1            0  1.06
+breachCorp          83.7   83.7   16.4            0  1.05
+breachStreet        87.2   87.2   12.8            0  1.09
+dodgeCorp           78.7   78.7   21.3            0  0.98
+dodgeStreet         78.8   78.8   21.3            0  0.99
+tuneCorp            67.3   67.3   32.7            0  0.84
+tuneStreet          84.3   84.3   15.7            0  1.05
+feastCorp           78.2   78.2   21.9            0  0.98
+feastStreet         77.2   77.2   22.9            0  0.97
+hidden                84     84   16.1            0  1.05
 
-== unplugged | source | careful | level 1 (mean completion of the nine forms: 13.2%) ==
+== unplugged | source | careful | level 1 (mean completion of the nine forms: 16.1%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                 7.5    7.5   92.5            0  0.57
-breachCorp          11.8   11.8   88.2            0  0.89
-breachStreet        11.7   11.7   88.3            0  0.89
-dodgeCorp           13.8   13.8   86.2            0  1.04
-dodgeStreet         16.6   16.6   83.4            0  1.26
-tuneCorp             8.3    8.3   91.7            0  0.63
-tuneStreet           9.9    9.9     90            0  0.75
-feastCorp             16     16     84            0  1.21
-feastStreet         15.6   15.6   84.4            0  1.18
-hidden              15.2   15.2   84.8            0  1.15
+none                 8.2    8.2   91.8            0  0.51
+breachCorp          14.7   14.7   85.3            0  0.91
+breachStreet        13.8   13.8   86.3            0  0.86
+dodgeCorp           19.4   19.4   80.7            0  1.20
+dodgeStreet         20.3   20.3   79.8            0  1.26
+tuneCorp            10.3   10.3   89.7            0  0.64
+tuneStreet          12.3   12.3   87.7            0  0.76
+feastCorp           17.8   17.8   82.2            0  1.10
+feastStreet         17.2   17.2   82.8            0  1.07
+hidden              19.4   19.4   80.7            0  1.20
 
-== unplugged | source | careful | level 2 (mean completion of the nine forms: 21.1%) ==
+== unplugged | source | careful | level 2 (mean completion of the nine forms: 25.1%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          20.1   20.1   79.9            0  0.95
-breachStreet        21.2   21.2   78.8            0  1.00
-dodgeCorp           20.5   20.5   79.5            0  0.97
-dodgeStreet         23.2   23.2   76.8            0  1.10
-tuneCorp             9.2    9.2   90.8            0  0.44
-tuneStreet            24     24     76            0  1.14
-feastCorp           21.4   21.4   78.5            0  1.01
-feastStreet         21.9   21.9   78.2            0  1.04
-hidden              28.8   28.8   71.2            0  1.36
+breachCorp          22.9   22.9   77.1            0  0.91
+breachStreet        26.8   26.8   73.2            0  1.07
+dodgeCorp           25.1   25.1     75            0  1.00
+dodgeStreet         26.7   26.7   73.3            0  1.07
+tuneCorp            11.6   11.6   88.5            0  0.46
+tuneStreet          30.6   30.6   69.4            0  1.22
+feastCorp           23.6   23.6   76.4            0  0.94
+feastStreet         22.9   22.9     77            0  0.91
+hidden              35.4   35.4   64.6            0  1.41
 
-== unplugged | source | skilled | level 1 (mean completion of the nine forms: 34.4%) ==
+== unplugged | source | skilled | level 1 (mean completion of the nine forms: 39.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                21.5   21.5   78.5            0  0.63
-breachCorp          31.1   31.1   68.8            0  0.90
-breachStreet        31.6   31.6   68.4            0  0.92
-dodgeCorp           33.5   33.5   66.5            0  0.97
-dodgeStreet         36.5   36.5   63.5            0  1.06
-tuneCorp            24.4   24.4   75.7            0  0.71
-tuneStreet          27.5   27.5   72.5            0  0.80
-feastCorp             45     45     55            0  1.31
-feastStreet           45     45     55            0  1.31
-hidden              34.7   34.7   65.3            0  1.01
+none                25.9   25.9     74            0  0.65
+breachCorp          37.4   37.4   62.6            0  0.94
+breachStreet          37     37     63            0  0.93
+dodgeCorp           39.5   39.5   60.5            0  1.00
+dodgeStreet         40.9   40.9   59.1            0  1.03
+tuneCorp            29.5   29.5   70.5            0  0.74
+tuneStreet          36.2   36.2   63.8            0  0.91
+feastCorp           48.6   48.6   51.4            0  1.22
+feastStreet         48.1   48.1   51.9            0  1.21
+hidden              39.9   39.9   60.1            0  1.01
 
-== unplugged | source | skilled | level 2 (mean completion of the nine forms: 46.8%) ==
+== unplugged | source | skilled | level 2 (mean completion of the nine forms: 51.3%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          45.5   45.5   54.5            0  0.97
-breachStreet        50.9   50.9   49.1            0  1.09
-dodgeCorp           42.9   42.9   57.1            0  0.92
-dodgeStreet         44.5   44.5   55.5            0  0.95
-tuneCorp            25.1   25.1     75            0  0.54
-tuneStreet          55.4   55.4   44.6            0  1.18
-feastCorp           52.5   52.5   47.5            0  1.12
-feastStreet         54.9   54.9   45.1            0  1.17
-hidden              49.4   49.4   50.6            0  1.06
+breachCorp            51     51     49            0  0.99
+breachStreet        56.8   56.8   43.2            0  1.11
+dodgeCorp           46.2   46.2   53.8            0  0.90
+dodgeStreet         47.5   47.5   52.5            0  0.93
+tuneCorp            31.2   31.2   68.8            0  0.61
+tuneStreet          63.5   63.5   36.5            0  1.24
+feastCorp           55.4   55.4   44.6            0  1.08
+feastStreet         56.4   56.4   43.6            0  1.10
+hidden              53.8   53.8   46.3            0  1.05
 
-== blackout | deep | careful | level 1 (mean completion of the nine forms: 48.4%) ==
+== blackout | deep | careful | level 1 (mean completion of the nine forms: 53.6%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                36.8   36.8   63.3            0  0.76
-breachCorp          55.2   55.2   44.8            0  1.14
-breachStreet        51.5   51.5   48.5            0  1.06
-dodgeCorp           54.4   54.4   45.6            0  1.12
-dodgeStreet         56.4   56.4   43.6            0  1.17
-tuneCorp            40.5   40.5   59.5            0  0.84
-tuneStreet          41.3   41.3   58.8            0  0.85
-feastCorp           43.6   43.6   56.4            0  0.90
-feastStreet         43.1   43.1   56.9            0  0.89
-hidden              49.5   49.5   50.5            0  1.02
+none                40.9   40.9   59.1            0  0.76
+breachCorp          59.8   59.8   40.3            0  1.12
+breachStreet        56.1   56.1   43.9            0  1.05
+dodgeCorp           58.8   58.8   41.3            0  1.10
+dodgeStreet           62     62     38            0  1.16
+tuneCorp            46.6   46.6   53.4            0  0.87
+tuneStreet          48.1   48.1   51.9            0  0.90
+feastCorp           48.3   48.3   51.8            0  0.90
+feastStreet         48.1   48.1   51.9            0  0.90
+hidden              54.3   54.3   45.7            0  1.01
 
-== blackout | deep | careful | level 2 (mean completion of the nine forms: 60.5%) ==
+== blackout | deep | careful | level 2 (mean completion of the nine forms: 64.9%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          75.8   75.8   24.3            0  1.25
-breachStreet          69     69   31.1            0  1.14
-dodgeCorp           64.6   64.6   35.4            0  1.07
-dodgeStreet         64.8   64.8   35.2            0  1.07
-tuneCorp            48.7   48.7   51.3            0  0.81
-tuneStreet          54.8   54.8   45.3            0  0.91
-feastCorp           50.4   50.4   49.6            0  0.83
-feastStreet         48.3   48.3   51.8            0  0.80
-hidden              67.7   67.7   32.3            0  1.12
+breachCorp          79.4   79.4   20.6            0  1.22
+breachStreet          75     75     25            0  1.16
+dodgeCorp           66.7   66.7   33.3            0  1.03
+dodgeStreet         68.4   68.4   31.6            0  1.05
+tuneCorp            53.3   53.3   46.7            0  0.82
+tuneStreet          61.4   61.4   38.6            0  0.95
+feastCorp           55.3   55.3   44.7            0  0.85
+feastStreet         52.6   52.6   47.4            0  0.81
+hidden                72     72     28            0  1.11
 
-== blackout | deep | skilled | level 1 (mean completion of the nine forms: 73.7%) ==
+== blackout | deep | skilled | level 1 (mean completion of the nine forms: 76.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                  64     64     36            0  0.87
-breachCorp          78.7   78.7   21.3            0  1.07
-breachStreet        76.5   76.5   23.4            0  1.04
-dodgeCorp             76     76     24            0  1.03
-dodgeStreet         76.8   76.8   23.2            0  1.04
-tuneCorp            66.9   66.9   33.1            0  0.91
-tuneStreet          70.7   70.7   29.4            0  0.96
-feastCorp           72.9   72.9   27.1            0  0.99
-feastStreet         72.5   72.5   27.6            0  0.98
-hidden              72.1   72.1   27.9            0  0.98
+none                68.2   68.2   31.9            0  0.89
+breachCorp          80.7   80.7   19.3            0  1.05
+breachStreet        78.9   78.9   21.1            0  1.03
+dodgeCorp           77.3   77.3   22.8            0  1.01
+dodgeStreet         80.4   80.4   19.6            0  1.05
+tuneCorp              72     72   27.9            0  0.94
+tuneStreet          75.5   75.5   24.5            0  0.98
+feastCorp           75.1   75.1   24.9            0  0.98
+feastStreet         74.8   74.8   25.1            0  0.98
+hidden              75.7   75.7   24.4            0  0.99
 
-== blackout | deep | skilled | level 2 (mean completion of the nine forms: 82.0%) ==
+== blackout | deep | skilled | level 2 (mean completion of the nine forms: 83.9%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          91.8   91.8    8.3            0  1.12
-breachStreet        89.1   89.1   10.9            0  1.09
-dodgeCorp           81.5   81.5   18.4            0  0.99
-dodgeStreet         82.5   82.5   17.5            0  1.01
-tuneCorp            72.5   72.5   27.5            0  0.88
-tuneStreet          80.5   80.5   19.6            0  0.98
-feastCorp           77.5   77.5   22.4            0  0.95
-feastStreet           78     78   21.9            0  0.95
-hidden              84.2   84.2   15.8            0  1.03
+breachCorp            91     91      9            0  1.08
+breachStreet          91     91    9.1            0  1.08
+dodgeCorp           83.2   83.2   16.8            0  0.99
+dodgeStreet         84.3   84.3   15.7            0  1.00
+tuneCorp            76.5   76.5   23.6            0  0.91
+tuneStreet          84.5   84.5   15.6            0  1.01
+feastCorp           79.5   79.5   20.5            0  0.95
+feastStreet         79.1   79.1   20.9            0  0.94
+hidden              86.2   86.2   13.8            0  1.03
 
-== blackout | source | careful | level 1 (mean completion of the nine forms: 21.2%) ==
+== blackout | source | careful | level 1 (mean completion of the nine forms: 24.7%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                13.8   13.8   86.3            0  0.65
-breachCorp          22.3   22.3   77.8            0  1.05
-breachStreet        20.3   20.3   79.7            0  0.96
-dodgeCorp           23.4   23.4   76.6            0  1.11
-dodgeStreet         27.6   27.6   72.5            0  1.30
-tuneCorp            15.7   15.7   84.3            0  0.74
-tuneStreet          17.9   17.9   82.2            0  0.85
-feastCorp           21.3   21.3   78.8            0  1.01
-feastStreet         20.6   20.6   79.3            0  0.97
-hidden              21.3   21.3   78.7            0  1.01
+none                14.8   14.8   85.3            0  0.60
+breachCorp          25.9   25.9   74.2            0  1.05
+breachStreet        22.7   22.7   77.3            0  0.92
+dodgeCorp           29.4   29.4   70.7            0  1.19
+dodgeStreet         31.8   31.8   68.2            0  1.29
+tuneCorp            19.1   19.1   80.9            0  0.77
+tuneStreet          21.9   21.9     78            0  0.89
+feastCorp             23     23     77            0  0.93
+feastStreet         22.4   22.4   77.6            0  0.91
+hidden              25.9   25.9   74.1            0  1.05
 
-== blackout | source | careful | level 2 (mean completion of the nine forms: 32.6%) ==
+== blackout | source | careful | level 2 (mean completion of the nine forms: 35.5%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          45.1   45.1   54.9            0  1.38
-breachStreet        34.1   34.1   65.8            0  1.05
-dodgeCorp           32.3   32.3   67.7            0  0.99
-dodgeStreet           37     37     63            0  1.13
-tuneCorp            23.8   23.8   76.3            0  0.73
-tuneStreet          28.1   28.1     72            0  0.86
-feastCorp           26.6   26.6   73.5            0  0.82
-feastStreet         26.6   26.6   73.4            0  0.82
-hidden                40     40     60            0  1.23
+breachCorp          47.4   47.4   52.6            0  1.33
+breachStreet        38.4   38.4   61.6            0  1.08
+dodgeCorp           36.3   36.3   63.8            0  1.02
+dodgeStreet         39.4   39.4   60.6            0  1.11
+tuneCorp            26.2   26.2   73.8            0  0.74
+tuneStreet            33     33     67            0  0.93
+feastCorp           27.6   27.6   72.5            0  0.78
+feastStreet         28.7   28.7   71.3            0  0.81
+hidden              42.9   42.9   57.1            0  1.21
 
-== blackout | source | skilled | level 1 (mean completion of the nine forms: 47.1%) ==
+== blackout | source | skilled | level 1 (mean completion of the nine forms: 51.8%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                34.7   34.7   65.3            0  0.74
-breachCorp          48.4   48.4   51.6            0  1.03
-breachStreet        45.6   45.6   54.4            0  0.97
-dodgeCorp           47.4   47.4   52.6            0  1.01
-dodgeStreet         51.7   51.7   48.3            0  1.10
-tuneCorp            38.9   38.9   61.1            0  0.83
-tuneStreet          42.3   42.3   57.7            0  0.90
-feastCorp           52.3   52.3   47.8            0  1.11
-feastStreet         52.1   52.1   47.9            0  1.11
-hidden              45.4   45.4   54.6            0  0.96
+none                38.6   38.6   61.4            0  0.75
+breachCorp          53.5   53.5   46.5            0  1.03
+breachStreet        51.3   51.3   48.8            0  0.99
+dodgeCorp           52.3   52.3   47.7            0  1.01
+dodgeStreet         55.4   55.4   44.6            0  1.07
+tuneCorp            42.7   42.7   57.3            0  0.82
+tuneStreet          50.9   50.9   49.1            0  0.98
+feastCorp           55.4   55.4   44.6            0  1.07
+feastStreet           55     55     45            0  1.06
+hidden              49.5   49.5   50.5            0  0.96
 
-== blackout | source | skilled | level 2 (mean completion of the nine forms: 60.4%) ==
+== blackout | source | skilled | level 2 (mean completion of the nine forms: 62.8%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp            71     71   28.9            0  1.18
-breachStreet          65     65     35            0  1.08
-dodgeCorp           57.2   57.2   42.8            0  0.95
-dodgeStreet         60.4   60.4   39.6            0  1.00
-tuneCorp              49     49     51            0  0.81
-tuneStreet            60     60     40            0  0.99
-feastCorp           57.6   57.6   42.4            0  0.95
-feastStreet         60.5   60.5   39.5            0  1.00
-hidden              62.6   62.6   37.4            0  1.04
+breachCorp          72.9   72.9   27.1            0  1.16
+breachStreet        67.8   67.8   32.2            0  1.08
+dodgeCorp           59.8   59.8   40.2            0  0.95
+dodgeStreet         60.9   60.9   39.1            0  0.97
+tuneCorp            50.8   50.8   49.3            0  0.81
+tuneStreet          67.7   67.7   32.4            0  1.08
+feastCorp           59.9   59.9   40.1            0  0.95
+feastStreet         62.3   62.3   37.7            0  0.99
+hidden              62.8   62.8   37.2            0  1.00
 
-== baremetal | deep | careful | level 1 (mean completion of the nine forms: 49.1%) ==
+== baremetal | deep | careful | level 1 (mean completion of the nine forms: 54.2%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                36.8   36.8   63.3            0  0.75
-breachCorp          55.3   55.3   44.7            0  1.13
-breachStreet        51.5   51.5   48.5            0  1.05
-dodgeCorp           54.5   54.5   45.5            0  1.11
-dodgeStreet         56.5   56.5   43.5            0  1.15
-tuneCorp            40.5   40.5   59.5            0  0.83
-tuneStreet          41.3   41.3   58.8            0  0.84
-feastCorp           43.6   43.6   56.4            0  0.89
-feastStreet         43.1   43.1   56.9            0  0.88
-hidden              55.5   55.5   44.5            0  1.13
+none                40.9   40.9   59.1            0  0.75
+breachCorp          59.8   59.8   40.2            0  1.10
+breachStreet        56.1   56.1   43.9            0  1.04
+dodgeCorp           58.8   58.8   41.2            0  1.08
+dodgeStreet         61.9   61.9   38.1            0  1.14
+tuneCorp            46.6   46.6   53.4            0  0.86
+tuneStreet          48.1   48.1   51.9            0  0.89
+feastCorp           48.2   48.2   51.8            0  0.89
+feastStreet           48     48     52            0  0.89
+hidden              60.3   60.3   39.7            0  1.11
 
-== baremetal | deep | careful | level 2 (mean completion of the nine forms: 61.5%) ==
+== baremetal | deep | careful | level 2 (mean completion of the nine forms: 66.5%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          75.7   75.7   24.3            0  1.23
-breachStreet          69     69     31            0  1.12
-dodgeCorp           64.7   64.7   35.4            0  1.05
-dodgeStreet         64.8   64.8   35.1            0  1.05
-tuneCorp            50.5   50.5   49.5            0  0.82
-tuneStreet          58.5   58.5   41.5            0  0.95
-feastCorp           50.3   50.3   49.7            0  0.82
-feastStreet           48     48     52            0  0.78
-hidden              72.3   72.3   27.6            0  1.17
+breachCorp          79.4   79.4   20.6            0  1.19
+breachStreet        75.2   75.2   24.9            0  1.13
+dodgeCorp           66.8   66.8   33.3            0  1.00
+dodgeStreet         68.3   68.3   31.7            0  1.03
+tuneCorp            56.5   56.5   43.5            0  0.85
+tuneStreet          67.2   67.2   32.8            0  1.01
+feastCorp           55.3   55.3   44.7            0  0.83
+feastStreet         52.6   52.6   47.4            0  0.79
+hidden              77.5   77.5   22.6            0  1.16
 
-== baremetal | deep | skilled | level 1 (mean completion of the nine forms: 74.1%) ==
+== baremetal | deep | skilled | level 1 (mean completion of the nine forms: 77.2%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                  64     64     36            0  0.86
-breachCorp          78.7   78.7   21.3            0  1.06
-breachStreet        76.5   76.5   23.6            0  1.03
-dodgeCorp             76     76   23.9            0  1.03
-dodgeStreet         76.8   76.8   23.1            0  1.04
-tuneCorp            66.9   66.9   33.1            0  0.90
-tuneStreet          70.5   70.5   29.4            0  0.95
-feastCorp           72.8   72.8   27.2            0  0.98
-feastStreet         72.3   72.3   27.7            0  0.98
-hidden              76.5   76.5   23.4            0  1.03
+none                68.3   68.3   31.8            0  0.88
+breachCorp          80.7   80.7   19.3            0  1.04
+breachStreet          79     79   21.1            0  1.02
+dodgeCorp           77.3   77.3   22.7            0  1.00
+dodgeStreet         80.4   80.4   19.6            0  1.04
+tuneCorp              72     72   27.9            0  0.93
+tuneStreet          75.5   75.5   24.4            0  0.98
+feastCorp           75.2   75.2   24.9            0  0.97
+feastStreet         74.8   74.8   25.1            0  0.97
+hidden              80.3   80.3   19.7            0  1.04
 
-== baremetal | deep | skilled | level 2 (mean completion of the nine forms: 82.6%) ==
+== baremetal | deep | skilled | level 2 (mean completion of the nine forms: 84.8%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          91.8   91.8    8.3            0  1.11
-breachStreet        89.2   89.2   10.8            0  1.08
-dodgeCorp           81.5   81.5   18.4            0  0.99
-dodgeStreet         82.5   82.5   17.5            0  1.00
-tuneCorp            74.2   74.2   25.8            0  0.90
-tuneStreet          82.3   82.3   17.7            0  1.00
-feastCorp           77.5   77.5   22.6            0  0.94
-feastStreet           78     78   22.1            0  0.94
-hidden              86.3   86.3   13.7            0  1.04
+breachCorp            91     91      9            0  1.07
+breachStreet          91     91    9.1            0  1.07
+dodgeCorp           83.3   83.3   16.7            0  0.98
+dodgeStreet         84.3   84.3   15.7            0  0.99
+tuneCorp            78.3   78.3   21.6            0  0.92
+tuneStreet          87.2   87.2   12.8            0  1.03
+feastCorp           79.5   79.5   20.5            0  0.94
+feastStreet         79.1   79.1   20.9            0  0.93
+hidden              89.1   89.1   10.9            0  1.05
 
-== baremetal | source | careful | level 1 (mean completion of the nine forms: 21.8%) ==
+== baremetal | source | careful | level 1 (mean completion of the nine forms: 25.6%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                13.8   13.8   86.3            0  0.63
-breachCorp          22.3   22.3   77.8            0  1.02
-breachStreet        20.2   20.2   79.8            0  0.93
-dodgeCorp           23.5   23.5   76.5            0  1.08
-dodgeStreet         27.7   27.7   72.3            0  1.27
-tuneCorp            15.6   15.6   84.4            0  0.72
-tuneStreet          17.9   17.9   82.2            0  0.82
-feastCorp           21.2   21.2   78.8            0  0.97
-feastStreet         20.6   20.6   79.4            0  0.95
-hidden              26.9   26.9     73            0  1.24
+none                  15     15     85            0  0.59
+breachCorp          26.3   26.3   73.8            0  1.03
+breachStreet        23.1   23.1     77            0  0.90
+dodgeCorp           29.7   29.7   70.3            0  1.16
+dodgeStreet         32.4   32.4   67.7            0  1.27
+tuneCorp            19.1   19.1   80.9            0  0.75
+tuneStreet          22.1   22.1     78            0  0.86
+feastCorp           23.1   23.1     77            0  0.90
+feastStreet         22.6   22.6   77.5            0  0.88
+hidden              31.6   31.6   68.4            0  1.24
 
-== baremetal | source | careful | level 2 (mean completion of the nine forms: 33.7%) ==
+== baremetal | source | careful | level 2 (mean completion of the nine forms: 37.4%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          45.5   45.5   54.5            0  1.35
-breachStreet          34     34     66            0  1.01
-dodgeCorp           32.8   32.8   67.3            0  0.97
-dodgeStreet         37.2   37.2   62.8            0  1.10
-tuneCorp            25.5   25.5   74.5            0  0.76
-tuneStreet          31.1   31.1     69            0  0.92
-feastCorp           26.6   26.6   73.4            0  0.79
-feastStreet         26.4   26.4   73.5            0  0.78
-hidden              43.9   43.9   56.1            0  1.30
+breachCorp          47.5   47.5   52.5            0  1.27
+breachStreet        38.5   38.5   61.5            0  1.03
+dodgeCorp           36.6   36.6   63.4            0  0.98
+dodgeStreet         39.5   39.5   60.5            0  1.06
+tuneCorp            28.1   28.1   71.8            0  0.75
+tuneStreet          38.3   38.3   61.8            0  1.02
+feastCorp           28.3   28.3   71.7            0  0.76
+feastStreet         28.9   28.9   71.1            0  0.77
+hidden              50.9   50.9   49.1            0  1.36
 
-== baremetal | source | skilled | level 1 (mean completion of the nine forms: 47.9%) ==
+== baremetal | source | skilled | level 1 (mean completion of the nine forms: 52.6%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-none                34.9   34.9   65.1            0  0.73
-breachCorp          48.5   48.5   51.5            0  1.01
-breachStreet        45.9   45.9   54.1            0  0.96
-dodgeCorp           47.9   47.9   52.1            0  1.00
-dodgeStreet         51.8   51.8   48.3            0  1.08
-tuneCorp              39     39     61            0  0.81
-tuneStreet          42.5   42.5   57.5            0  0.89
-feastCorp           52.5   52.5   47.5            0  1.10
-feastStreet         52.4   52.4   47.6            0  1.09
-hidden              50.8   50.8   49.2            0  1.06
+none                  39     39     61            0  0.74
+breachCorp          53.8   53.8   46.3            0  1.02
+breachStreet        51.8   51.8   48.3            0  0.98
+dodgeCorp           52.1   52.1   47.9            0  0.99
+dodgeStreet         55.7   55.7   44.3            0  1.06
+tuneCorp            42.7   42.7   57.3            0  0.81
+tuneStreet            51     51     49            0  0.97
+feastCorp           55.6   55.6   44.4            0  1.06
+feastStreet         55.5   55.5   44.5            0  1.05
+hidden              55.5   55.5   44.5            0  1.05
 
-== baremetal | source | skilled | level 2 (mean completion of the nine forms: 61.2%) ==
+== baremetal | source | skilled | level 2 (mean completion of the nine forms: 64.1%) ==
 form            complete%  exit%  disc%  rule broken%  vs mean
-breachCorp          71.8   71.8   28.3            0  1.17
-breachStreet        65.2   65.2   34.8            0  1.06
-dodgeCorp           57.5   57.5   42.5            0  0.94
-dodgeStreet         60.5   60.5   39.5            0  0.99
-tuneCorp            49.4   49.4   50.6            0  0.81
-tuneStreet          63.8   63.8   36.3            0  1.04
-feastCorp           57.6   57.6   42.4            0  0.94
-feastStreet         60.6   60.6   39.4            0  0.99
-hidden              64.8   64.8   35.1            0  1.06
+breachCorp          73.2   73.2   26.9            0  1.14
+breachStreet        67.8   67.8   32.1            0  1.06
+dodgeCorp           59.9   59.9   40.1            0  0.93
+dodgeStreet           61     61     39            0  0.95
+tuneCorp              53     53     47            0  0.83
+tuneStreet          70.2   70.2   29.9            0  1.10
+feastCorp           60.4   60.4   39.6            0  0.94
+feastStreet         62.5   62.5   37.5            0  0.98
+hidden              68.7   68.7   31.4            0  1.07

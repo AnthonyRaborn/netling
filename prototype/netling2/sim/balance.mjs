@@ -14,7 +14,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, temperLevel, clearBug, leanSeen, slotsUsed } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -138,9 +138,10 @@ export const CODEX_PRESETS = {
 const clearMode = process.env.CLEAR ?? 'scrip';
 function standingCorp(s, split) {
   const { corp, street } = s.standing;
-  if (split === 'leader') return corp >= street ? 2 : 0;
-  if (split === 'trailer') return corp >= street ? 0 : 2;
-  return corp >= 1 && street >= 1 ? 1 : corp >= street ? 2 : 0;
+  const c = BUG_CFG.clearStanding;
+  if (split === 'leader') return corp >= street ? c : 0;
+  if (split === 'trailer') return corp >= street ? 0 : c;
+  return corp >= 1 && street >= 1 ? Math.floor(c / 2) : corp >= street ? c : 0;
 }
 export function fixBugs(s, p, ctx) {
   const f = p.fix ?? { mode: clearMode };
@@ -165,6 +166,9 @@ const leastWon = (s) => GAME_IDS.reduce((best, id) => (s.games[id].won < s.games
 
 export function checkIn(s, p, now, rng, ctx) {
   const doAct = (a, opts) => act(s, a, now, rng, opts);
+  // A person who finds the netling in a call-rest (STAGE.rest.on) wakes it with the nap button; the bots never nap otherwise, so without this a check-in
+  // inside a rest could not feed (an artifact the first rest-call measurements had, before 2026-10-09).
+  if (s.nap?.callRest) doAct('nap');
   // Human-like noise (only for archetypes that set these; the others consume no extra rng): a lapse is a chore skipped this time, the
   // mood moves the mini-game win rate a little each check-in, and a favorite game is played more than the others.
   const lapse = () => Boolean(p.lapse) && rng() < p.lapse;
@@ -324,6 +328,16 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.balanceGames || s.games[s.request.game].won <= minWins(s) + 1) && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), skill()) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
+  // BINGE=1 (hunters, balanceGames): a player after the hidden teen plays through the baby stage until every game has the wins the hidden teen needs,
+  // feeding and cooling as it goes; the ordinary hunter stops at its Sync target and so never gets there inside a 7 hour baby.
+  if (process.env.BINGE && p.balanceGames && s.stage === 'baby' && mayPlay) {
+    for (let i = 0; i < 24 && minWins(s) < CFG.shellMinWinsEach && !blockReason(s, 'play'); i++) {
+      if (s.stats.charge < 30) feed();
+      if (blockReason(s, 'play')) break;
+      doAct('play', { game: leastWon(s), won: rng() < winChance(overclocked(s), skill()) });
+      if (s.stats.heat > coolAt + 10) doAct('cool');
+    }
+  }
   let syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
   // SYNCBOT=greedy plays until Sync is full; SYNCBOT=budget never plays at or over the Sync penalty line (SIDES.sync.penLine).
   if (process.env.SYNCBOT === 'greedy') syncTarget = 100;
@@ -404,6 +418,12 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     const integrityBefore = s.stats.integrity;
     tick(s, t0 + minute * MIN, rng);
     globalThis.__sample?.(s, minute);
+    // The rest call (STAGE.rest.on) with notifications: a person answers with probability CALLANSWER (an ASSUMPTION, default 0.7; an archetype may set
+    // `callAnswer`) at a uniformly random minute of the response window; the others let it lapse. The scheduled check-ins do not answer it separately.
+    if (STAGE.rest.on && s.call) {
+      if (s.call.planAt === undefined) s.call.planAt = rng() < (p.callAnswer ?? Number(process.env.CALLANSWER ?? 0.7)) ? s.ageMin + Math.floor(rng() * STAGE.rest.windowMin) : Infinity;
+      if (s.ageMin >= s.call.planAt) act(s, 'nap', t0 + minute * MIN, rng);
+    }
     ctx.bugMin += s.bugs;
     if (s.bugs >= BUG_CFG.max) ctx.ceilMin++;
     for (const k of Object.keys(s.flagged)) {
@@ -478,6 +498,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     wearHighMin: s.wearHighMin ?? 0,
     awakeMin: s.ageMin,
     eventsAnswered: s.eventsAnswered ?? 0,
+    restStats: s.restStats ?? { calls: 0, onTime: 0, late: 0, lapsed: 0, tiredMin: 0 },
     eventsTotal: events,
     prefMatches: s.prefMatches ?? 0,
     prefBonus: s.prefBonus ?? 0,
@@ -650,6 +671,7 @@ export function stats(results) {
     neglect2Hours: round(avg(results.map((r) => r.neglect2Min / 60)), 2),
     bugs: { end: round(avg(results.map((r) => r.bugsEnd)), 2), peak: round(avg(results.map((r) => r.bugPeak)), 2), fixed: round(avg(results.map((r) => r.bugsFixed)), 2), atCeiling: rate((r) => r.bugPeak >= BUG_CFG.max), avg: round(avg(results.map((r) => r.bugAvg)), 2), ceilingTime: round(avg(results.map((r) => r.bugCeilingShare))), scripSpent: round(avg(results.map((r) => r.scripSpent)), 1), standingSpent: round(avg(results.map((r) => r.standingSpent)), 1), clinicVisits: round(avg(results.map((r) => r.clinicVisits)), 2) },
     // Egg pressure (Program's rattle timer, RATTLE='{"on":true}'): infections a life, and how often the timer was set and bit.
+    rest: { calls: round(avg(results.map((r) => r.restStats.calls)), 2), onTime: round(avg(results.map((r) => r.restStats.onTime)), 2), late: round(avg(results.map((r) => r.restStats.late)), 2), lapsed: round(avg(results.map((r) => r.restStats.lapsed)), 2), tiredShare: round(avg(results.map((r) => r.restStats.tiredMin / Math.max(1, r.ageMin))), 3) },
     pressure: { viruses: round(avg(results.map((r) => r.viruses)), 2), events: round(avg(results.map((r) => r.eventsTotal)), 2), answered: round(avg(results.map((r) => r.eventsAnswered)), 2), rattles: round(avg(results.map((r) => r.rattles)), 2), rattledEvents: round(avg(results.map((r) => r.rattledEvents)), 2), rattlePaid: round(avg(results.map((r) => r.rattlePaid)), 2), wearMax: round(avg(results.map((r) => r.wearMax)), 1), switches: round(avg(results.map((r) => r.switches)), 1), feeds: round(avg(results.map((r) => r.feeds)), 1), shockMax: round(avg(results.map((r) => r.shockMax)), 1), shockHighShare: round(avg(results.map((r) => r.shockHighMin / Math.max(1, r.awakeMin))), 3), wearHighShare: round(avg(results.map((r) => r.wearHighMin / Math.max(1, r.awakeMin))), 3) },
     pref: { actions: round(avg(results.map((r) => r.prefActions)), 1), matches: round(avg(results.map((r) => r.prefMatches)), 1), bonus: round(avg(results.map((r) => r.prefBonus)), 1) },
     atAdult: adults.length

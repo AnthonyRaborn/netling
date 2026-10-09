@@ -90,3 +90,114 @@
 2026-10-08T20:39:45.657Z start balance-brake-program
 2026-10-08T20:39:45.681Z start balance-brake-wetware
 2026-10-08T20:41:00Z NOTE: the five 'start' lines at 20:39:45 (balance-full-iron, balance-brake-iron/program/wetware) were an accidental import of run-all.mjs while checking syntax; the processes were killed within a minute and wrote no output. The real balance-full-iron rerun started at 20:37:25 (Iron configuration fixed to include the final Charge and Sync numbers; earlier outputs are in superseded/).
+2026-10-08T20:53:17.395Z done balance-full-iron [full-iron] 952s
+2026-10-08T20:53:17.396Z all 1 jobs finished
+2026-10-08T20:53:17.454Z start runcost-iron
+2026-10-08T20:58:52.685Z start balance-brake-iron
+2026-10-08T20:58:52.695Z start balance-brake-program
+2026-10-08T20:58:52.699Z start balance-brake-wetware
+2026-10-08T20:59:00.565Z done runcost-iron [full-iron] 343s
+2026-10-08T20:59:00.566Z all 1 jobs finished
+2026-10-08T20:59:00.625Z start egg-anomaly-iron
+2026-10-08T20:59:11.490Z done egg-anomaly-iron [full-iron] 11s
+2026-10-08T20:59:11.491Z all 1 jobs finished
+2026-10-08T22:18:36.407Z start balance-brake-iron
+2026-10-08T22:18:36.425Z start balance-brake-program
+2026-10-08T22:18:36.431Z start balance-brake-wetware
+2026-10-08T22:34:03.050Z done balance-brake-program [brake-program] 927s
+2026-10-08T22:34:13.482Z done balance-brake-wetware [brake-wetware] 937s
+2026-10-08T22:34:58.137Z done balance-brake-iron [brake-iron] 982s
+2026-10-08T22:34:58.138Z all 3 jobs finished
+2026-10-08T22:50:29.249Z start balance-brake-iron
+2026-10-08T22:50:29.258Z start balance-brake-program
+2026-10-08T22:50:29.261Z start balance-brake-wetware
+2026-10-08T23:07:42.623Z done balance-brake-program [brake-program] 1033s
+2026-10-08T23:07:56.839Z done balance-brake-wetware [brake-wetware] 1048s
+2026-10-08T23:08:35.289Z done balance-brake-iron [brake-iron] 1086s
+2026-10-08T23:08:35.290Z all 3 jobs finished
+2026-10-08T23:16:07.208Z start balance-brake-lock8-program
+2026-10-08T23:16:07.237Z start balance-brake-lock12-program
+2026-10-08T23:35:50.270Z done balance-brake-lock12-program [brake-program-lock12] 1183s
+2026-10-08T23:35:56.914Z done balance-brake-lock8-program [brake-program-lock8] 1190s
+2026-10-08T23:35:56.915Z all 2 jobs finished
+2026-10-09T00:11:47.022Z start balance-brake-iron
+2026-10-09T00:11:47.031Z start balance-brake-program
+2026-10-09T00:11:47.038Z start balance-brake-wetware
+2026-10-09T00:27:56.320Z done balance-brake-wetware [brake-wetware] 969s
+2026-10-09T00:27:56.843Z done balance-brake-program [brake-program] 970s
+2026-10-09T00:28:36.624Z done balance-brake-iron [brake-iron] 1010s
+2026-10-09T00:28:36.625Z all 3 jobs finished
+2026-10-09T01:30:15.161Z start netrun-sweep
+2026-10-09T01:31:18.452Z done netrun-sweep [rules] 63s
+2026-10-09T01:31:18.453Z all 1 jobs finished
+2026-10-09T01:31:18.498Z start challenge-sweep
+2026-10-09T01:32:44.021Z done challenge-sweep [rules] 86s
+2026-10-09T01:32:44.022Z all 1 jobs finished
+2026-10-09T01:32:44.070Z start foresight-sweep
+2026-10-09T01:35:59.589Z done foresight-sweep [rules] 196s
+2026-10-09T01:35:59.590Z all 1 jobs finished
+2026-10-09T01:35:59.636Z start egg-anomaly-iron
+2026-10-09T01:35:59.642Z start egg-anomaly-program
+2026-10-09T01:35:59.646Z start egg-anomaly-wetware
+2026-10-09T01:36:10.159Z done egg-anomaly-iron [full-iron] 11s
+2026-10-09T01:36:10.247Z done egg-anomaly-program [full-program] 11s
+2026-10-09T01:36:10.579Z done egg-anomaly-wetware [full-wetware] 11s
+2026-10-09T01:36:10.580Z all 3 jobs finished
+2026-10-09T01:36:10.623Z start lineage-attentive
+2026-10-09T01:36:10.629Z start lineage-daredevil
+2026-10-09T01:36:10.632Z start lineage-casual
+2026-10-09T01:38:51.763Z done lineage-attentive [rules] 161s
+2026-10-09T01:39:48.742Z done lineage-daredevil [rules] 218s
+2026-10-09T01:42:19.088Z done lineage-casual [rules] 368s
+2026-10-09T01:42:19.089Z all 3 jobs finished
+2026-10-09T02:46:45.273Z all 0 jobs finished
+2026-10-09T02:46:56.991Z start balance-stageA-iron
+2026-10-09T02:46:56.997Z start balance-stageB-iron
+2026-10-09T02:46:57.001Z start balance-stageA-program
+2026-10-09T02:46:57.004Z start balance-stageB-program
+2026-10-09T03:03:24.725Z done balance-stageA-program [stageA-program] 988s
+2026-10-09T03:03:24.726Z start balance-stageA-wetware
+2026-10-09T03:03:27.498Z done balance-stageB-program [stageB-program] 990s
+2026-10-09T03:03:27.499Z start balance-stageB-wetware
+2026-10-09T03:04:20.268Z done balance-stageA-iron [stageA-iron] 1043s
+2026-10-09T03:04:41.156Z done balance-stageB-iron [stageB-iron] 1064s
+2026-10-09T03:19:19.545Z done balance-stageA-wetware [stageA-wetware] 955s
+2026-10-09T03:19:21.776Z done balance-stageB-wetware [stageB-wetware] 954s
+2026-10-09T03:19:21.777Z all 6 jobs finished
+2026-10-09T12:23:33.709Z start balance-gain1.5-program
+2026-10-09T12:23:33.724Z start balance-gain2-program
+2026-10-09T12:23:33.728Z start balance-gain3-program
+2026-10-09T12:23:33.731Z start balance-gain4-program
+2026-10-09T12:28:33.002Z done balance-gain4-program [gain4-program] 299s
+2026-10-09T12:28:34.240Z done balance-gain1.5-program [gain1.5-program] 301s
+2026-10-09T12:28:35.177Z done balance-gain3-program [gain3-program] 301s
+2026-10-09T12:28:36.018Z done balance-gain2-program [gain2-program] 302s
+2026-10-09T12:28:36.019Z all 4 jobs finished
+2026-10-09T12:46:45.613Z start balance-bug-rule2-program
+2026-10-09T12:46:45.620Z start balance-bug-rule5-program
+2026-10-09T12:46:45.623Z start balance-bug-cost5-program
+2026-10-09T12:51:33.153Z done balance-bug-rule5-program [bug-rule5-program] 288s
+2026-10-09T12:51:34.250Z done balance-bug-rule2-program [bug-rule2-program] 289s
+2026-10-09T12:51:34.614Z done balance-bug-cost5-program [bug-cost5-program] 289s
+2026-10-09T12:51:34.615Z all 3 jobs finished
+2026-10-09T12:56:24.217Z start balance-final-iron
+2026-10-09T12:56:24.225Z start balance-final-program
+2026-10-09T12:56:24.229Z start balance-final-wetware
+2026-10-09T13:12:44.481Z done balance-final-program [final-program] 980s
+2026-10-09T13:12:58.580Z done balance-final-wetware [final-wetware] 994s
+2026-10-09T13:13:42.656Z done balance-final-iron [final-iron] 1038s
+2026-10-09T13:13:42.658Z all 3 jobs finished
+2026-10-09T13:16:26.404Z start balance-binge-iron
+2026-10-09T13:16:26.410Z start balance-binge-program
+2026-10-09T13:16:26.413Z start balance-binge-wetware
+2026-10-09T13:18:53.628Z done balance-binge-program [binge-program] 147s
+2026-10-09T13:18:54.162Z done balance-binge-wetware [binge-wetware] 148s
+2026-10-09T13:19:03.361Z done balance-binge-iron [binge-iron] 157s
+2026-10-09T13:19:03.365Z all 3 jobs finished
+2026-10-09T13:32:48.754Z start balance-decided-iron
+2026-10-09T13:32:48.804Z start balance-decided-program
+2026-10-09T13:32:48.808Z start balance-decided-wetware
+2026-10-09T13:49:08.377Z done balance-decided-program [decided-program] 980s
+2026-10-09T13:49:33.509Z done balance-decided-wetware [decided-wetware] 1005s
+2026-10-09T13:50:01.668Z done balance-decided-iron [decided-iron] 1033s
+2026-10-09T13:50:01.669Z all 3 jobs finished

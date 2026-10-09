@@ -1,0 +1,6 @@
+{"sim":"2.0","gapHours":2,"checkInsADay":9,"fullLife":0.99,"faults":3.1,"deaths":{"end of life cycle":0.99,"integrity collapse":0.01}}
+{"sim":"2.0","gapHours":3,"checkInsADay":6,"fullLife":0.93,"faults":5.5,"deaths":{"end of life cycle":0.93,"integrity collapse":0.07}}
+{"sim":"2.0","gapHours":4,"checkInsADay":5,"fullLife":0.875,"faults":7.64,"deaths":{"end of life cycle":0.875,"integrity collapse":0.125}}
+{"sim":"2.0","gapHours":5,"checkInsADay":4,"fullLife":0.56,"faults":9.8,"deaths":{"end of life cycle":0.56,"integrity collapse":0.44}}
+{"sim":"2.0","gapHours":6,"checkInsADay":3,"fullLife":0.2,"faults":5.83,"deaths":{"integrity collapse":0.8,"end of life cycle":0.2}}
+{"sim":"2.0","gapHours":8,"checkInsADay":3,"fullLife":0.023,"faults":6.85,"deaths":{"integrity collapse":0.978,"end of life cycle":0.023}}

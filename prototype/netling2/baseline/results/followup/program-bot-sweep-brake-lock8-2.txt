@@ -1,0 +1,12 @@
+{"chargePerks":true,"bot":"greedy","archetype":"attentive","fullLife":0.99,"collapse":0.01,"inOverdrive":0.098,"drops":16.4,"playGain":1469,"feeds":108.1,"faults":0.42}
+{"chargePerks":true,"bot":"greedy","archetype":"sysadmin","fullLife":0.983,"collapse":0.017,"inOverdrive":0.095,"drops":18.4,"playGain":1678,"feeds":91.9,"faults":0.03}
+{"chargePerks":true,"bot":"watch","archetype":"attentive","fullLife":0.996,"collapse":0.004,"inOverdrive":0.079,"drops":16.1,"playGain":1455,"feeds":106.5,"faults":0.48}
+{"chargePerks":true,"bot":"watch","archetype":"sysadmin","fullLife":0.987,"collapse":0.013,"inOverdrive":0.085,"drops":18.4,"playGain":1679,"feeds":89.9,"faults":0.04}
+{"chargePerks":true,"bot":"avoid","archetype":"attentive","fullLife":1,"collapse":0,"inOverdrive":0,"drops":14.2,"playGain":1380,"feeds":75.2,"faults":0.95}
+{"chargePerks":true,"bot":"avoid","archetype":"sysadmin","fullLife":0.997,"collapse":0.003,"inOverdrive":0,"drops":17.2,"playGain":1656,"feeds":65.8,"faults":0.83}
+{"chargePerks":false,"bot":"greedy","archetype":"attentive","fullLife":0.993,"collapse":0.007,"inOverdrive":0.088,"drops":16.1,"playGain":1452,"feeds":108.9,"faults":0.44}
+{"chargePerks":false,"bot":"greedy","archetype":"sysadmin","fullLife":0.983,"collapse":0.017,"inOverdrive":0.086,"drops":18.2,"playGain":1664,"feeds":92.3,"faults":0.02}
+{"chargePerks":false,"bot":"watch","archetype":"attentive","fullLife":0.997,"collapse":0.003,"inOverdrive":0.07,"drops":15.8,"playGain":1437,"feeds":107.6,"faults":0.48}
+{"chargePerks":false,"bot":"watch","archetype":"sysadmin","fullLife":0.988,"collapse":0.012,"inOverdrive":0.074,"drops":18,"playGain":1659,"feeds":90.9,"faults":0.04}
+{"chargePerks":false,"bot":"avoid","archetype":"attentive","fullLife":1,"collapse":0,"inOverdrive":0,"drops":14.3,"playGain":1378,"feeds":75.7,"faults":1.01}
+{"chargePerks":false,"bot":"avoid","archetype":"sysadmin","fullLife":0.997,"collapse":0.003,"inOverdrive":0,"drops":17.2,"playGain":1654,"feeds":66.4,"faults":0.88}

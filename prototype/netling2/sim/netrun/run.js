@@ -3,7 +3,8 @@
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
 import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS } from '../sim.js';
-import { NR2, levelOf, tierShare, avoidMult } from './nr2.js';
+import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
+import { generateMap2 } from './map2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment as nextFragmentRaw, fragmentById, nextEggPage } from '../codex2.js';
@@ -164,7 +165,8 @@ export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
 export function startRun(pet, region, rng, codex = [], ownedAccessories = [], opts = {}) {
   const daily = Boolean(REGIONS[region].daily);
   const day = daily ? opts.day ?? DAILY.epoch : null;
-  const map = generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
+  const over = NR2.map.on && !daily ? NR2.map.region[region] : null; // 2.0 fork: wider maps for the regions listed (nr2.js map)
+  const map = over ? generateMap2(region, rng, over) : generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
   if (!daily) clinicKinds(map, rng);
   pet.run = {
     region,
@@ -253,9 +255,9 @@ export function clinicKinds(map, rng) {
 // The ways to pay for a fix, offered only while the netling has bugs.
 const fixOptions = (pet) => (pet.bugs > 0 ? [
   { id: 'fixscrip', label: `FIX A BUG ${BUG_CFG.clearScrip}$` },
-  { id: 'fix2corp', label: 'FIX A BUG 2 CORP' },
-  { id: 'fix1each', label: 'FIX A BUG 1+1 STANDING' },
-  { id: 'fix2street', label: 'FIX A BUG 2 STREET' },
+  { id: 'fix2corp', label: `FIX A BUG ${BUG_CFG.clearStanding} CORP` },
+  { id: 'fix1each', label: BUG_CFG.clearStanding === 2 ? 'FIX A BUG 1+1 STANDING' : `FIX A BUG ${Math.floor(BUG_CFG.clearStanding / 2)}+${BUG_CFG.clearStanding - Math.floor(BUG_CFG.clearStanding / 2)} STANDING` },
+  { id: 'fix2street', label: `FIX A BUG ${BUG_CFG.clearStanding} STREET` },
 ] : []);
 
 export const runOptions = (run) => nodeById(run.map, run.pos).edges.map((id) => nodeById(run.map, id));
@@ -640,11 +642,14 @@ export function refreshMarket(pet) {
     if (o.id === 'leave') continue;
     if (o.id.startsWith('fix')) {
       const { corp, street } = pet.standing;
+      const cost = BUG_CFG.clearStanding;
+      const half = Math.floor(cost / 2);
       const short = charge <= p.price + 5 ? `needs ${p.price + 5}+ charge`
         : o.id === 'fixscrip' ? (scrip < BUG_CFG.clearScrip ? `needs ${BUG_CFG.clearScrip} scrip, has ${scrip}` : null)
-        : o.id === 'fix2corp' ? (corp < 2 ? 'needs 2 corp standing' : null)
-        : o.id === 'fix2street' ? (street < 2 ? 'needs 2 street standing' : null)
-        : corp < 1 || street < 1 ? 'needs 1 of each standing' : null;
+        : BUG_CFG.standingOnlyIfShort && scrip >= BUG_CFG.clearScrip ? 'pay with scrip while you have it'
+        : o.id === 'fix2corp' ? (corp < cost ? `needs ${cost} corp standing` : null)
+        : o.id === 'fix2street' ? (street < cost ? `needs ${cost} street standing` : null)
+        : corp < half || street < cost - half ? 'needs standing of each' : null;
       o.disabled = Boolean(short);
       o.hint = short ?? `-${p.price} chg`;
       continue;
@@ -752,7 +757,7 @@ function chooseOption(pet, optionId, rng) {
   } else if (p.kind === 'market') {
     if (optionId.startsWith('fix')) {
       st.charge = clamp(st.charge - p.price);
-      const corp = optionId === 'fix2corp' ? 2 : optionId === 'fix1each' ? 1 : 0;
+      const corp = optionId === 'fix2corp' ? BUG_CFG.clearStanding : optionId === 'fix1each' ? Math.floor(BUG_CFG.clearStanding / 2) : 0;
       const how = optionId === 'fixscrip' ? { pay: 'scrip' } : { pay: 'standing', corp };
       if (!clearBugAt(pet, how)) return { ok: false, msg: 'could not pay.' };
       run.tally.fixed++;
@@ -1116,8 +1121,11 @@ function settleContract(pet, result) {
 // The seed that decides what is in a node without the route: the daily trace's, or a run's `fate` (nr2.js); undefined when contents are rolled on arrival.
 const fateSeed = (run) => (run.daily ? run.seed : run.fate);
 
+// How far along the run a node is: 0 at the entry, 1 at the exit.
+const layerFraction = (run, nodeId) => (run.map.layerCount > 1 ? nodeById(run.map, nodeId).layer / (run.map.layerCount - 1) : 0);
+
 function rollTier(run, nodeId, rng) {
-  const share = tierShare(run.region);
+  const share = tierShareAt(run.region, layerFraction(run, nodeId));
   if (!share) return 1;
   const r = fateSeed(run) !== undefined ? seededRoll(fateSeed(run), nodeId * 8 + 4, 0) : rng();
   return r < share ? 2 : 1;
@@ -1161,7 +1169,7 @@ export function foresightView(pet) {
     if (node.type === 'ice') {
       const view = {};
       if (fields.includes('game')) view.game = GAME_IDS[Math.floor(seededRoll(run.fate, id * 8 + LANE.game, 0) * GAME_IDS.length)];
-      if (fields.includes('tier')) view.tier = (() => { const sh = tierShare(run.region); return sh && seededRoll(run.fate, id * 8 + 4, 0) < sh ? 2 : 1; })();
+      if (fields.includes('tier')) view.tier = (() => { const sh = tierShareAt(run.region, layerFraction(run, id)); return sh && seededRoll(run.fate, id * 8 + 4, 0) < sh ? 2 : 1; })();
       if (Object.keys(view).length) out[id] = view;
     } else if (node.type === 'cache' && fields.includes('cache')) {
       out[id] = { filled: Boolean(node.filled) || cacheFate(run, id) < (REGIONS[run.region].cacheFind ?? RUN_CFG.cacheFindChance) };

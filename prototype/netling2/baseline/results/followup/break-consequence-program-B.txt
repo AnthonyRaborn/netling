@@ -1,0 +1,40 @@
+{"egg":"program","variant":"no break","bot":"default","archetype":"steer-tune-corp","fullLife":0.675,"breaks":0,"warns":0,"faults":0.36,"bugs":0.02,"viruses":2.63,"temper":5.96}
+{"egg":"program","variant":"no break","bot":"default","archetype":"ghosthunter","fullLife":0.805,"breaks":0,"warns":0,"faults":0,"bugs":0,"viruses":6.92,"temper":4.67}
+{"egg":"program","variant":"no break","bot":"default","archetype":"overclocker","fullLife":0.968,"breaks":0,"warns":0,"faults":1.7,"bugs":0.22,"viruses":8.71,"temper":-7.58}
+{"egg":"program","variant":"no break","bot":"default","archetype":"human-keen","fullLife":0.65,"breaks":0,"warns":0,"faults":3.74,"bugs":0.24,"viruses":5.4,"temper":0.01}
+{"egg":"program","variant":"no break","bot":"watch","archetype":"steer-tune-corp","fullLife":0.992,"breaks":0,"warns":0,"faults":0.44,"bugs":0.02,"viruses":2.78,"temper":5.91}
+{"egg":"program","variant":"no break","bot":"watch","archetype":"ghosthunter","fullLife":0.981,"breaks":0,"warns":0,"faults":0.02,"bugs":0,"viruses":7.2,"temper":4.46}
+{"egg":"program","variant":"no break","bot":"watch","archetype":"overclocker","fullLife":0.965,"breaks":0,"warns":0,"faults":1.85,"bugs":0.24,"viruses":8.65,"temper":-7.64}
+{"egg":"program","variant":"no break","bot":"watch","archetype":"human-keen","fullLife":0.658,"breaks":0,"warns":0,"faults":3.75,"bugs":0.24,"viruses":5.53,"temper":0}
+{"egg":"program","variant":"break","bot":"default","archetype":"steer-tune-corp","fullLife":0.993,"breaks":3.38,"warns":5.34,"faults":0.43,"bugs":0.02,"viruses":2.81,"temper":6.09}
+{"egg":"program","variant":"break","bot":"default","archetype":"ghosthunter","fullLife":0.989,"breaks":4.94,"warns":6.6,"faults":0.02,"bugs":0,"viruses":7.07,"temper":4.41}
+{"egg":"program","variant":"break","bot":"default","archetype":"overclocker","fullLife":0.968,"breaks":0,"warns":0,"faults":1.7,"bugs":0.22,"viruses":8.71,"temper":-7.58}
+{"egg":"program","variant":"break","bot":"default","archetype":"human-keen","fullLife":0.651,"breaks":0.01,"warns":0.06,"faults":3.76,"bugs":0.24,"viruses":5.4,"temper":0}
+{"egg":"program","variant":"break","bot":"watch","archetype":"steer-tune-corp","fullLife":0.994,"breaks":0.68,"warns":5.75,"faults":0.45,"bugs":0.02,"viruses":2.76,"temper":6.03}
+{"egg":"program","variant":"break","bot":"watch","archetype":"ghosthunter","fullLife":0.987,"breaks":0.74,"warns":7.13,"faults":0.02,"bugs":0,"viruses":7.23,"temper":4.45}
+{"egg":"program","variant":"break","bot":"watch","archetype":"overclocker","fullLife":0.965,"breaks":0,"warns":0,"faults":1.85,"bugs":0.24,"viruses":8.65,"temper":-7.64}
+{"egg":"program","variant":"break","bot":"watch","archetype":"human-keen","fullLife":0.659,"breaks":0,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.53,"temper":0}
+{"egg":"program","variant":"break + 1 fault","bot":"default","archetype":"steer-tune-corp","fullLife":0.995,"breaks":3.18,"warns":5.17,"faults":3.63,"bugs":0.14,"viruses":2.8,"temper":4.85}
+{"egg":"program","variant":"break + 1 fault","bot":"default","archetype":"ghosthunter","fullLife":0.981,"breaks":3.48,"warns":5.37,"faults":3.55,"bugs":0.39,"viruses":7.18,"temper":3.73}
+{"egg":"program","variant":"break + 1 fault","bot":"default","archetype":"overclocker","fullLife":0.968,"breaks":0,"warns":0,"faults":1.7,"bugs":0.22,"viruses":8.71,"temper":-7.58}
+{"egg":"program","variant":"break + 1 fault","bot":"default","archetype":"human-keen","fullLife":0.65,"breaks":0.01,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.41,"temper":0.01}
+{"egg":"program","variant":"break + 1 fault","bot":"watch","archetype":"steer-tune-corp","fullLife":0.994,"breaks":0.66,"warns":5.7,"faults":1.12,"bugs":0.05,"viruses":2.76,"temper":5.73}
+{"egg":"program","variant":"break + 1 fault","bot":"watch","archetype":"ghosthunter","fullLife":0.987,"breaks":0.7,"warns":6.89,"faults":0.73,"bugs":0.07,"viruses":7.23,"temper":4.27}
+{"egg":"program","variant":"break + 1 fault","bot":"watch","archetype":"overclocker","fullLife":0.965,"breaks":0,"warns":0,"faults":1.85,"bugs":0.24,"viruses":8.65,"temper":-7.64}
+{"egg":"program","variant":"break + 1 fault","bot":"watch","archetype":"human-keen","fullLife":0.658,"breaks":0,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.52,"temper":0}
+{"egg":"program","variant":"break + 10 integrity","bot":"default","archetype":"steer-tune-corp","fullLife":0.99,"breaks":3.43,"warns":5.23,"faults":0.4,"bugs":0.02,"viruses":2.81,"temper":5.96}
+{"egg":"program","variant":"break + 10 integrity","bot":"default","archetype":"ghosthunter","fullLife":0.972,"breaks":4.91,"warns":6.55,"faults":0.02,"bugs":0,"viruses":7.02,"temper":4.36}
+{"egg":"program","variant":"break + 10 integrity","bot":"default","archetype":"overclocker","fullLife":0.968,"breaks":0,"warns":0,"faults":1.7,"bugs":0.22,"viruses":8.71,"temper":-7.58}
+{"egg":"program","variant":"break + 10 integrity","bot":"default","archetype":"human-keen","fullLife":0.65,"breaks":0.01,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.4,"temper":0}
+{"egg":"program","variant":"break + 10 integrity","bot":"watch","archetype":"steer-tune-corp","fullLife":0.992,"breaks":0.68,"warns":5.72,"faults":0.45,"bugs":0.02,"viruses":2.76,"temper":5.94}
+{"egg":"program","variant":"break + 10 integrity","bot":"watch","archetype":"ghosthunter","fullLife":0.983,"breaks":0.75,"warns":7.12,"faults":0.02,"bugs":0,"viruses":7.21,"temper":4.42}
+{"egg":"program","variant":"break + 10 integrity","bot":"watch","archetype":"overclocker","fullLife":0.965,"breaks":0,"warns":0,"faults":1.85,"bugs":0.24,"viruses":8.65,"temper":-7.64}
+{"egg":"program","variant":"break + 10 integrity","bot":"watch","archetype":"human-keen","fullLife":0.658,"breaks":0,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.52,"temper":0}
+{"egg":"program","variant":"break + both","bot":"default","archetype":"steer-tune-corp","fullLife":0.986,"breaks":3.23,"warns":5.08,"faults":3.71,"bugs":0.16,"viruses":2.82,"temper":4.7}
+{"egg":"program","variant":"break + both","bot":"default","archetype":"ghosthunter","fullLife":0.968,"breaks":3.46,"warns":5.34,"faults":3.53,"bugs":0.38,"viruses":7.15,"temper":3.69}
+{"egg":"program","variant":"break + both","bot":"default","archetype":"overclocker","fullLife":0.968,"breaks":0,"warns":0,"faults":1.7,"bugs":0.22,"viruses":8.71,"temper":-7.58}
+{"egg":"program","variant":"break + both","bot":"default","archetype":"human-keen","fullLife":0.65,"breaks":0.01,"warns":0.07,"faults":3.75,"bugs":0.24,"viruses":5.41,"temper":0.01}
+{"egg":"program","variant":"break + both","bot":"watch","archetype":"steer-tune-corp","fullLife":0.988,"breaks":0.69,"warns":5.68,"faults":1.14,"bugs":0.05,"viruses":2.76,"temper":5.7}
+{"egg":"program","variant":"break + both","bot":"watch","archetype":"ghosthunter","fullLife":0.981,"breaks":0.69,"warns":6.88,"faults":0.74,"bugs":0.07,"viruses":7.19,"temper":4.26}
+{"egg":"program","variant":"break + both","bot":"watch","archetype":"overclocker","fullLife":0.965,"breaks":0,"warns":0,"faults":1.85,"bugs":0.24,"viruses":8.65,"temper":-7.64}
+{"egg":"program","variant":"break + both","bot":"watch","archetype":"human-keen","fullLife":0.658,"breaks":0,"warns":0.06,"faults":3.75,"bugs":0.24,"viruses":5.52,"temper":0}

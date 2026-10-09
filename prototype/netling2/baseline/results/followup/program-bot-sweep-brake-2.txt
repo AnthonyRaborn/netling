@@ -1,4 +1,0 @@
-{"chargePerks":true,"bot":"greedy","archetype":"attentive","fullLife":0.995,"collapse":0.005,"inOverdrive":0.052,"drops":15.2,"playGain":1407,"feeds":109.6,"faults":0.42}
-{"chargePerks":true,"bot":"greedy","archetype":"sysadmin","fullLife":0.988,"collapse":0.012,"inOverdrive":0.057,"drops":17.6,"playGain":1634,"feeds":92.3,"faults":0.02}
-{"chargePerks":true,"bot":"watch","archetype":"attentive","fullLife":0.996,"collapse":0.004,"inOverdrive":0.054,"drops":15.2,"playGain":1413,"feeds":108.1,"faults":0.48}
-{"chargePerks":true,"bot":"watch","archetype":"sysadmin","fullLife":0.992,"collapse":0.008,"inOverdrive":0.061,"drops":17.6,"playGain":1642,"feeds":91.3,"faults":0.04}

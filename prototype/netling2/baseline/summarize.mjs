@@ -50,6 +50,21 @@ const diffTable = (cfg) => {
   }
   return rows.join('\n');
 };
+// The break (BRAKE in sim.js) against the same egg without it, when those runs exist.
+import { existsSync } from 'node:fs';
+const brakeTable = (egg, tag = 'brake', label = 'the break') => {
+  const f = join(here, 'results', `balance-${tag}-${egg}.json`);
+  if (!existsSync(f)) return null;
+  const br = JSON.parse(readFileSync(f, 'utf8')).archetypes;
+  const rows = [`| archetype | full-${egg} full life % | with ${label} % | change (points) | faults change | viruses change | netruns change |`, '|---|---:|---:|---:|---:|---:|---:|'];
+  for (const n of names) {
+    const a = data[`full-${egg}`].archetypes[n];
+    const b = br[n];
+    const d = (b.fullLife - a.fullLife) * 100;
+    rows.push(`| ${n} | ${pct(a.fullLife)} | ${pct(b.fullLife)} | ${d >= 0 ? '+' : ''}${d.toFixed(1)} | ${(b.mistakes - a.mistakes).toFixed(1)} | ${((b.pressure?.viruses ?? 0) - (a.pressure?.viruses ?? 0)).toFixed(1)} | ${((b.netruns?.runs ?? 0) - (a.netruns?.runs ?? 0)).toFixed(1)} |`);
+  }
+  return rows.join('\n');
+};
 const out = [
   '# Balance baseline tables (generated)',
   '',
@@ -57,6 +72,7 @@ const out = [
   '',
   ...configs.flatMap((c) => [`## ${c}`, '', table(c), '']),
   ...configs.slice(1).flatMap((c) => [`## ${c} against core`, '', diffTable(c), '']),
+  ...[['brake', 'the final break (line 40, 12 hour lockout, 1 fault)'], ['brake40-lock24', 'the first break at line 40 (24 hour lockout, no consequence)'], ['brake55', 'the first break at line 55 (24 hour lockout, no consequence)']].flatMap(([tag, label]) => ['iron', 'program', 'wetware'].flatMap((e) => { const t = brakeTable(e, tag, label); return t ? [`## ${e} with ${label} against without`, '', t, ''] : []; })),
 ];
 writeFileSync(join(here, 'summary-balance.md'), out.join('\n'));
 console.log(`wrote summary-balance.md (${names.length} archetypes, ${configs.length} configurations)`);
