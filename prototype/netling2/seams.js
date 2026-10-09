@@ -1,4 +1,4 @@
-// Iron's wear seams (docs/NETLING_2_CARE_DRAFTS.md, Iron wear): a small static seam on one edge of the sprite once wear passes the line,
+// Wear and strain seams (docs/NETLING_2_CARE_DRAFTS.md, Iron wear; and Overuse and owner strain: the same mark on every egg): a small static seam on one edge of the sprite once wear passes the line,
 // a second at heavy wear, and they go one at a time as wear fades. DRAFT for review, not decided art. Not shipped.
 //
 // A seam is a split in the casing: the outline cell is cut out ('.') and the body cell diagonally inward goes dim ('x'). Rust (neglect.js)
@@ -11,7 +11,14 @@
 //
 // seams(rows, cells) -> rows with those cells applied; SEAMS[id] = [seam1, seam2], each { cut: [x, y], dim: [x, y] }.
 
-export const OVERRIDES = {};
+// Strain marks use the seam on every egg (maintainer, 2026-10-09: Iron's wear, Program's and Wetware's strain alike). Wired and its elder Plat have
+// no straight wall the rule accepts (a rounded head and torso, arms held apart), so they are pinned here: seam 1 on the right shoulder, seam 2
+// on the left of the head. The hidden forms the rule misses (Program's Shell, Wetware's Blank and Cipher) are left without seams (maintainer:
+// hidden forms may break the rules).
+export const OVERRIDES = {
+  wetwareAdultDodgeCorp: [{ cut: [13, 9], dim: [12, 10] }, { cut: [2, 3], dim: [3, 2] }],
+  wetwareElderDodgeCorp: [{ cut: [16, 9], dim: [15, 10] }, { cut: [2, 3], dim: [3, 2] }],
+};
 
 const plain = (rows, x, y) => rows[y]?.[x] === '#';
 

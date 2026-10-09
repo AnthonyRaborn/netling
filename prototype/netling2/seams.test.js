@@ -3,6 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import './ready.js'; // first: registers the forms before src/sim.js can load src/accessories.js (see ready.js)
 import { forms } from './models.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
 import { placeSeams, seams, seamCells } from './seams.js';
 import { METRONOME_ART, METRONOME_SIZE, metronomeFrame } from './metronome-art.js';
 import { metronome } from './metronome.js';
@@ -60,4 +62,19 @@ test('the Metronome art: three 5x8 frames, the case fixed, only the rod and weig
   }
   assert.ok(METRONOME_ART[-1][0].startsWith('o') && METRONOME_ART[1][0].endsWith('o'), 'left is left, right is right');
   for (const level of [-2, -1, 0, 1, 2]) for (const time of [0, 1234, 7000, 99999]) assert.ok(metronomeFrame(metronome({ level, time }).pos), `level ${level}`);
+});
+
+test('the strain mark is the seam on every egg: every Program and Wetware form gets two seams except the hidden forms the rule misses', () => {
+  const allowedMissing = new Set(['programTeenHidden', 'wetwareAdultHidden', 'wetwareElderHidden']);
+  for (const f of [...Object.values(programForms()), ...Object.values(wetwareForms())]) {
+    const [s1, s2] = placeSeams(f);
+    if (allowedMissing.has(f.id)) continue;
+    assert.ok(s1 && s2, `${f.id}: two seams`);
+    for (const s of [s1, s2]) {
+      assert.equal(f.a[s.cut[1]][s.cut[0]], '#', `${f.id}: the cut is a body cell`);
+      assert.equal(f.a[s.dim[1]][s.dim[0]], '#', `${f.id}: the dim cell is a body cell`);
+      assert.equal(f.a[s.cut[1]], f.b[s.cut[1]], `${f.id}: the cut row is the same in both frames`);
+      assert.equal(f.a[s.dim[1]], f.b[s.dim[1]], `${f.id}: the dim row is the same in both frames`);
+    }
+  }
 });
