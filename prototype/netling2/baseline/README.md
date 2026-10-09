@@ -161,6 +161,30 @@ Fork-only, off by default: `NR2.map` (`sim/netrun/map2.js`, a parameterized copy
 
 Not modelled or not checked: how a person reads a bigger map (the bots look ahead over what they can see), the fog, the phone screen (about 55 to 60 nodes against 27 to 35), and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps, which was not measured.
 
+## Follow-up: players who mind the break, on every egg (2026-10-09)
+
+`sim/state-bot-sweep.mjs <egg> 1000` (outputs `results/followup/state-bot-{iron,program,wetware}.jsonl`), on the decided settings (the `decided-<egg>` configuration: each egg's pressure, the break, stage care with the rest call, Standing gain 2, the fix rule and a Standing cost of 5). Bots: `default`; each egg's own watch (Iron `IRONBOT=watch`: keeps Heat a game under Overclock's line while Integrity is under 70; Program `PROGBOT=watch`; Wetware `SYNCBOT=watch`: plays only below Overlink's line minus a won game while Integrity is under 70); `watch-all` (`STATEBOT=watch`, all three rules together); and each egg's always-avoid player (Iron `chill`, Program and Wetware `avoid`), plus Wetware's `greedy`. The sim now counts breaks by state (`SIDE_METER.brakeCharge`, `brakeSync`, `brakeHeat`).
+
+Every egg holds Overdrive and Overlink (only the owner's are x3), and Overclock's break exists only on Iron. Breaks a life and full life (percent), selected rows:
+
+| egg, archetype | default | own watch | watch-all | avoid / chill |
+|---|---|---|---|---|
+| Iron, daredevil | 0.91 (Overclock 0.65), 99.1 | 0.19, 99.3 | 0.05, 99.6 | 0.07, 99.5 |
+| Iron, overclocker | 0.45 (all Overclock), 94.8 | 0.27, 95.6 | 0.26, 94.6 | 0, 96.0 |
+| Iron, steer-tune-corp | 0.39 (Overdrive 0.34), 99.6 | 0.39, 99.6 | 0.06, 99.5 | 0.26, 98.5 |
+| Iron, human-regular | 0.47 (all Overclock), 26.4 | 0.47, 26.4 | 0.47, 23.4 | 0.24, 18.7 |
+| Program, steer-tune-corp | 3.21, 99.3 | 0.63, 99.2 | 0.69, 99.3 | 0, 100.0 |
+| Program, hunter-exact | 3.52, 98.3 | 0.74, 97.8 | 0.71, 98.3 | 0, 100.0 |
+| Program, attentive | 1.12, 98.8 | 0.18, 99.8 | 0.22, 99.2 | 0, 99.9 |
+| Wetware, daredevil | 0.36 (Overlink 0.13), 99.4 | 0.32, 99.3 | 0.10, 99.4 | 0.26, 99.4 |
+| Wetware, steer-tune-corp | 0.36 (Overdrive 0.32), 99.5 | 0.40, 99.4 | 0.07, 99.7 | 0.41, 99.8 |
+
+- **Program:** watching cuts breaks by about 80% and faults by 0.9 to 2.8 a life, at almost no cost in benefit (Tune corp win drops 17.4 to 17.1, hunter-exact 26.2 to 27.5); avoiding removes every break and gives up about a quarter of the drops (Tune corp 17.4 to 13.0). As measured before.
+- **Iron:** its own watch matters only for players who run hot: daredevil Overclock breaks 0.65 to 0.02 and faults 2.56 to 1.73, overclocker 0.45 to 0.27 (it re-heats by design). Ordinary players' breaks on Iron are mostly Overdrive's, which only `watch-all` reaches (attentive 0.11 to 0.03, Tune corp 0.39 to 0.06).
+- **Wetware:** the break is rare (0.1 to 0.5 a life) and is mostly Overdrive's; Overlink's own break stays under 0.13 for every bot except greedy (0.26 for daredevil), because the burnout ends Overlink first. Its own watch changes little; `watch-all` cuts breaks by 70 to 80%. Greedy play doubles the win drops (attentive 15 to 30) for 1.3 burnouts a life and no extra breaks.
+- **Sparse players are not helped and can be hurt.** casual, human-keen and human-regular break Iron's Overclock 0.12 to 0.47 times a life whatever the bot does: the break fires between check-ins, where no rule applies. Watching by feeding or playing less when Integrity is low costs them: Iron casual 93.7 to 91.4 and human-regular 26.4 to 23.4 with `watch-all`, Wetware casual 95.4 to 92.4, from more Charge and Sync faults over the next gap. Iron's `chill` costs human-regular 7.7 points. So advice to stop feeding or playing is right for a player who will be back soon and wrong for one about to leave; the wording drafts say "ease off" for that reason (care drafts, The break).
+- Limits: the bots act only at check-ins and know Integrity exactly (a person sees the bar and the warning); the watch line is the warning line (70) for every bot; a single run of 1000 lives per row, so differences under about 1 point of full life or 0.05 breaks are noise.
+
 ## Follow-up: stage care (first build)
 
 Fork switches `STAGE` (the stage tables and the rest call; off by default). Findings, tables and the options for the baby are in [docs/NETLING_2_STAGE_CARE_DRAFTS.md](../../../docs/NETLING_2_STAGE_CARE_DRAFTS.md), section 7; outputs are `results/followup/stage-*` and `notification-count-real.txt`. In short (1000 lives, wider maps on, no egg pressure): the rest call alone changes nothing (mean full life 90.6% against 90.5%; long-gap survival unchanged); the stage tables cost the sparse players through the baby drain (x2.4: worker 82.4% to 63.7%, mean 90.5% to 89.5%), partly recovered when a baby's faults roll no bugs and almost fully at a drain of 1.6; Standing at the teen check falls and the teen tie rate rises from 53% to 58% on average. A bot artifact (bots never woke a call-rest) was found and fixed on the way. On top of each egg's pressure and the break (draft section 8; `results/balance-stage{A,B}-{iron,program,wetware}.json`, 1000 lives, 37 archetypes; A = decided tables with baby drain 2.4, B = drain 1.6 and no bugs from a baby's faults): mean full life break only / A / B is Iron 87.6 / 86.7 / 87.5, Program 87.4 / 86.4 / 87.1, Wetware 87.7 / 86.8 / 87.6. Under A the worker falls 20.3 (Iron), 16.6 (Program), 18.7 (Wetware) and hunter-casual 5 to 6; under B only Iron's worker stays down more than 3 (-3.8). Teen tie rate 53.7 to 59.7 (A) and 60.9 (B). About 9.9 rest calls a life, tired 13.3 to 13.6% of a life under A. Not measured: the elder, the hidden-teen binger.

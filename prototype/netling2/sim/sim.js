@@ -718,7 +718,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeWarns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeWarns: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -798,6 +798,7 @@ function stepBrake(s, rest, t) {
       s.brakeWarn[key] = false;
       s.brakes = (s.brakes ?? 0) + 1;
       SIDE_METER.brakes++;
+      SIDE_METER[{ charge: 'brakeCharge', sync: 'brakeSync', heat: 'brakeHeat' }[key]]++;
       log(s, t, `> !! ${{ charge: 'overdrive discharged', sync: 'overlink crashed', heat: 'overclock throttled' }[key]}. locked out for ${Math.round(BRAKE.lockMin / 60)}h.${BRAKE.faults > 0 ? ' care mistake.' : ''}`);
     } else if (st.integrity < BRAKE.warnInt && !s.brakeWarn[key]) {
       s.brakeWarn[key] = true;

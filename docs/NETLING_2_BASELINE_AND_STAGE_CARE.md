@@ -69,12 +69,18 @@ Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on 
 
 1. Map width: decided and built (above); still to check: the route guarantees and the phone map. The tier gradient was declined.
 2. The stage tables and the rest call are **built in the fork** (`STAGE`, `stage.test.js`) and measured alone and on each egg with the break: see the draft, sections 7 and 8. The open decision is the baby (drain, bug rule, a Standing multiplier; three options there). The stage-care draft document: **started and answered** (seven questions answered 2026-10-09), [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) (what care is today, the baby, elder, cache and rest call with starting numbers, the notification count, a test plan, four open questions). Measured alone and on top of each egg's pressure and the break (draft sections 7 and 8).
-3. A community sketch (document only).
-4. Alongside: a Program budgeting bot is in (`PROGBOT`), but Iron and Wetware have no equivalent for the break; the hunter binger; chatter, care wording and captions for the break (warning, discharge, throttle, crash).
+3. A community sketch (document only): moved to after the sprite review (maintainer, 2026-10-09).
+4. Alongside: done 2026-10-09: Iron and Wetware watch bots (`IRONBOT=watch`, `SYNCBOT=watch|avoid`) and a player who watches every bar (`STATEBOT=watch`), measured on all three eggs (`sim/state-bot-sweep.mjs`, tests in `statebot.test.js`; baseline README, "players who mind the break"); wording for the break drafted for choice (care drafts, "The break": log lines, alert lines, lockout readout words, a field manual line, a one-time caption, optional strained chatter). The hunter binger was done earlier (draft section 12).
+
+## Decisions of 2026-10-09, later (maintainer)
+
+- The phone map picture is accepted (the map widths stand as built).
+- The community sketch moves to after the sprite review.
+- Next: build the Iron and Wetware break bots and suggest wording (done, above), then work through the remaining open items one at a time.
 
 ## Working notes for the next session
 
 - The container restarts when idle and kills background jobs (it happened several times). Prefer `setsid nohup`, keep jobs resumable, and wait in the foreground with `timeout 590 tail --pid=<pid> -f /dev/null` (find the real pid with `pgrep -af`; a launching shell's pid exits at once). The run log is overwritten if two runners write it at the same time.
 - Keep earlier results under their own names when a rule changes (`balance-brake55-*`, `balance-brake40-lock24-*`, `results/superseded/`), so a table can always be traced to the rules that made it.
-- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break; 323 prototype tests pass), `bugcost.test.js`.
+- Tools added: `STAGE` in `sim/sim.js` and `stage.test.js`, `sim/notification-count.mjs`, `sim/map-metrics.mjs`, `sim/netrun/map2.js`, `sim/program-perk-sweep.mjs`, `sim/program-bot-sweep.mjs`, `sim/break-consequence-sweep.mjs`, `PROGBOT=avoid|watch` in `sim/balance.mjs`. Tests: `sides.test.js` (the break), `statebot.test.js` (the watch bots; 328 prototype tests pass), `bugcost.test.js`.
 - Test notes: two of the break's own tests were first written wrongly (one mixed up Overdrive's and Overlink's breaks, one ignored the one-minute lag after a sudden Integrity hit); both are fixed and the reasons are in the test comments.

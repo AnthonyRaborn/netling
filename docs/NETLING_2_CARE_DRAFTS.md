@@ -290,3 +290,49 @@ The preview is `docs/netling2-prototypes/clinic-node.png` (the real `drawNode` f
 **Corp exchange stock (decided, maintainer; measured).** With the healing items clinic-only the exchange offered the same two items at every visit (a Corp voucher and a Memory shard; the market shows two distinct items by weight). Proposed stock: Corp voucher 3, Signal booster 2, Bypass chip 1, Memory shard 1: the voucher stays the exchange's signature (it is sold nowhere else), the other three are neutral items the black market also sells, and the risky ones (Black ICE shard, Segfault) stay black-market only, which keeps the "safe, pricier" read. A visit then offers voucher 74%, booster 60%, memory 33%, bypass 33%, in 7 distinct pairs (was 2). Bots under the four stocks tried (attentive, casual, worker, sysadmin, 100 lives each) moved within noise; the bots buy the first wanted offer, so the value to a human is not measured (`sim/exchange-stock.mjs`).
 
 The clinic's share (25%) and fee (15 scrip or 2 Standing) were re-measured against the final pressure design and kept (see the prototypes README, The clinic). Open: the stock weights (unmeasured).
+
+## The break (drafts, first pass, for the maintainer to choose)
+
+Wording for the break (decided rule: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "The break"): while a state is held, Integrity under 70 warns once; under 40 the state ends, the bar drops well below its exit line, the netling takes one fault and the state is locked out for 12 hours. Every egg can hold Overdrive and Overlink (only the owner's are x3), so each egg needs both rows; Overclock's break exists only on Iron (in the simulator the other eggs' Overclock is 1.0's plain Heat rule with no break), so its row is Iron's alone. Nothing here is implemented, read in context or read on a device.
+
+Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 1.0's other bad news; no state name and no number in log lines or chatter (the label and readout word carry the name, as for the states themselves); the 12 hours is said as "half a day", as Overlink's burnout says "until tomorrow"; words already taken are avoided: "patch" (Program's cure), "reset" (Program's rest word), "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "fever" (Wetware's power surge); the fault word follows Failures (fault, fault, slip).
+
+**Log lines**
+
+| Moment | Program | Iron | Wetware |
+|---|---|---|---|
+| Warning, Overdrive | > integrity falling under load. ease off the charge. | > over spec too long. the frame is taking it. ease the power. | > too full, and it hurts now. ease off the food. |
+| Warning, Overlink | > link load is eating integrity. stop playing for now. | > the lock is straining the frame. let it ease. | > too close for too long. it hurts. give it some space. |
+| Warning, Overclock (Iron) | none | > past rating too long. it is wearing through. vent it. | none |
+| Break, Overdrive (discharge) | > !! buffers discharged. boost blocked for half a day. fault logged. | > !! breaker tripped. power dumped. held under spec for half a day. fault. | > !! it threw it all up. it cannot fill up like that for half a day. slip. |
+| Break, Overlink (crash) | > !! link crashed. session dropped. no relink for half a day. fault logged. | > !! lock slipped. gears out. no lock for half a day. fault. | > !! it pulled away all at once. half a day before it can get that close. slip. |
+| Break, Overclock (throttle, Iron) | none | > !! thermal cutout. throttled under rating for half a day. fault. | none |
+| Lockout over, Overdrive | > boost available again. | > breaker closed. it can run over spec again. | > it can fill up again. |
+| Lockout over, Overlink | > relink available. | > lock free again. | > it can get close again. |
+| Lockout over, Overclock (Iron) | none | > cutout cleared. it can run hot again. | none |
+
+Alternative for Wetware's discharge if "threw it all up" is too much: "> !! it ate too much and crashed. it cannot fill up like that for half a day. slip."
+
+**Alert lines** (the warning only; stat-alert style, sentence case). Proposal: the warning is a **Care** notification (not counted against the Events budget of 6 a day), once per state per entry, like the simulator's one-time warning; the break itself and the end of the lockout are log lines only, since by then there is nothing to answer.
+
+| Key | Program | Iron | Wetware |
+|---|---|---|---|
+| Overdrive strain | Running too full. Integrity is dropping. | Over spec too long. Integrity is dropping. | Too full. Its health is dropping. |
+| Overlink strain | Link overloaded. Integrity is dropping. | Lock straining. Integrity is dropping. | Too close for too long. Its health is dropping. |
+| Overclock strain (Iron) | none | Past rating too long. Vent it. | none |
+
+**State clues during the lockout** (extends the State clues table): the state's label goes back to the bar's own name and its marks fall away, as for Overlink's burnout, and the readout line carries a word until the lockout ends: Overdrive " · drained", Overlink " · spent" (the same word as the burnout, since the player's lesson is the same: not today), Overclock " · throttled". Screen-reader values match (", drained" and so on). No new sprite mark (keeps the flash budget and the three-region layout). During the warning: proposal, nothing beyond the log line and the alert; a thin strain mark was considered and left out because the marks are kept regular (Temper and the states, rule 1).
+
+**Field manual** (qualitative, appended to each state's entry): OD, OL and, on Iron, OC: "Let Integrity sink too far while it lasts and the state breaks: it takes a fault and cannot return for a while."
+
+**One-time caption** (proposal, same rules as the pre-state caption: once per netling, teen or later, nothing more urgent on screen), shown with the first warning:
+
+| Program | Iron | Wetware |
+|---|---|---|
+| it is paying for this in integrity. / ease off before it breaks. | it is paying for this in soundness. / ease off before something gives. | it is paying for this with its health. / ease off before it breaks. |
+
+**Chatter while strained (optional).** Two lines per state per egg was decided as enough; if a third, strained line is wanted (said only while the warning holds), drafts: Program "load exceeds rating. continuing anyway." (Overdrive) and "too much input. dropping frames." (Overlink); Iron "relays hot. something will trip." and "gears grinding. hold it steady."; Wetware "i ate too much. my insides hurt." and "too close. i cannot breathe right."; Iron Overclock "casing too hot to hold. it will cut out." Not checked by `checkShape` yet; they would be if adopted.
+
+Why "ease off" and not "stop": the watch bots (baseline README, "players who mind the break") show that feeding or playing less while Integrity is low saves a player who will be back soon but costs a sparse player 2 to 3 points of full life over the next gap, so the lines ask for less, not none.
+
+Open: whether the warning should notify at all (it is the only state line that asks for an action); "half a day" against "for a while" (the second hides the number entirely); Iron's trigger (Integrity in the simulator; its real cost is hidden wear and Heat 85 and over), which would change Iron's warning wording to wear words if it moves.

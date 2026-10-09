@@ -3,6 +3,8 @@
 // New settings: CLEAR=scrip|both|none how bots clear bugs unless an archetype sets its own `fix` policy (scrip at check-ins; 'both' falls back to
 // 2 Standing, 1 from each track);
 // PREF='{"on":false}' switches care preferences off; PREFBOT=follow makes the bots follow their netling's preference; PROGBOT=avoid|watch makes the bots mind Program's Overdrive (see chargeTarget below; needs SIDES on with owner 'charge');
+// IRONBOT=watch and SYNCBOT=avoid|watch are the same for Iron's Overclock and Wetware's Overlink, and STATEBOT=watch watches every bar
+// (see chargeTarget, coolAt and syncTarget below; state-bot-sweep.mjs);
 // BUGS='{"chance":0.5,"max":8}' overrides the bug rules; RATTLE='{"on":true}' switches on Program's rattle timer and IRON='{"on":true}' Iron's wear and WET='{"on":true}' Wetware's shock (sim.js); The archetypes keep their 1.0 names; the steer-* ones now aim at a
 // Standing lean or a temper level (the form names they were written for no longer exist). TRAIT is not supported (no 2.0 form
 // carries a trait). The remaining text below is 1.0's.
@@ -220,8 +222,12 @@ export function checkIn(s, p, now, rng, ctx) {
   // Overdrive's line a player feeds only below it minus 31. avoid does that always; watch feeds as usual until Integrity falls under
   // PROGBOT_INT (70), then does that until it recovers (so the held state lapses and is not re-entered). Neither changes how a player
   // tops up before a long absence (`topUp`), which stays at 94.
+  const watchAll = process.env.STATEBOT === 'watch';
+  const watchInt = Number(process.env.STATEBOT_INT ?? 70);
   const chargeTarget = () => {
     if (topUp) return 94;
+    // STATEBOT=watch: a player who watches every bar the netling holds a state on (Overdrive is held on every egg, only the owner's is x3).
+    if (watchAll && SIDES.on && SIDES.charge.hold > 0 && s.stats.integrity < watchInt) return Math.min(85, SIDES.charge.hi - 31);
     if (!process.env.PROGBOT || !SIDES.on || SIDES.owner !== 'charge') return 85;
     const under = Math.min(85, SIDES.charge.hi - 31);
     if (process.env.PROGBOT === 'avoid') return under;
@@ -316,6 +322,9 @@ export function checkIn(s, p, now, rng, ctx) {
   if (process.env.IRONBOT === 'avoid' && IRON.on && (s.wear ?? 0) >= IRON.line * 0.6) coolAt = Math.min(coolAt, IRON.heat - 5);
   // IRONBOT=chill: a player who keeps it cold (cools at 30 and over) whatever the wear.
   if (process.env.IRONBOT === 'chill' && IRON.on) coolAt = Math.min(coolAt, 30);
+  // IRONBOT=watch (the break, BRAKE in sim.js): Iron's counterpart of PROGBOT=watch. Cools as usual until Integrity falls under IRONBOT_INT (70,
+  // the break's warning line), then keeps Heat a game's worth (12) under Overclock's line until it recovers, so Overclock lapses and is not re-entered.
+  if ((process.env.IRONBOT === 'watch' || (watchAll && IRON.on && SIDES.owner === null)) && s.stats.integrity < Number(process.env.IRONBOT_INT ?? watchInt)) coolAt = Math.min(coolAt, CFG.overclockHeat - 13);
   if (s.stats.heat > coolAt && !lapse()) doAct('cool');
   if (mayFeed && s.stats.charge < 30) feed();
   // Attention rewards: whoever is around answers a request, greets a visitor and reads the chatter.
@@ -343,6 +352,11 @@ export function checkIn(s, p, now, rng, ctx) {
   if (process.env.SYNCBOT === 'greedy') syncTarget = 100;
   else if (process.env.SYNCBOT === 'sip' && SIDES.on) syncTarget = Math.min(syncTarget, SIDES.sync.penFree - 1);
   else if (process.env.SYNCBOT === 'budget' && SIDES.on && SIDES.sync.penLine > 0) syncTarget = Math.min(syncTarget, SIDES.sync.penLine);
+  // SYNCBOT=avoid|watch (Overlink, Wetware's state; it is held on the other eggs too, without the x3): Wetware's counterpart of PROGBOT. A won game
+  // adds 25 Sync, so to stay under Overlink's line a player plays only below it minus 26; avoid does that always, watch (and STATEBOT=watch) only
+  // while Integrity is under SYNCBOT_INT (70, the break's warning line). Under that target an Overlink already held lapses first (Sync falls under
+  // its exit line before the next play). topUp is unchanged.
+  else if ((process.env.SYNCBOT === 'avoid' || ((process.env.SYNCBOT === 'watch' || watchAll) && s.stats.integrity < Number(process.env.SYNCBOT_INT ?? watchInt))) && SIDES.on && SIDES.sync.hold > 0 && !topUp) syncTarget = Math.min(syncTarget, SIDES.sync.hi - CFG.playWinSync - 1);
   for (let i = 0; mayPlay && i < 4 && s.stats.sync < syncTarget && s.stats.charge >= 20 && !blockReason(s, 'play') && !(process.env.ACTBOT === 'budget' && ACTS.sync.on && s.stats.sync >= ACTS.sync.line); i++) {
     let game = GAME_IDS[ctx.games++ % GAME_IDS.length];
     if (p.focus && rng() < (p.focusShare ?? 1)) game = p.focus;
