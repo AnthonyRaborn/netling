@@ -335,7 +335,7 @@ Alternative for Wetware's discharge if "threw it all up" is too much: "> !! it a
 
 Why "ease off" and not "stop": the watch bots (baseline README, "players who mind the break") show that feeding or playing less while Integrity is low saves a player who will be back soon but costs a sparse player 2 to 3 points of full life over the next gap, so the lines ask for less, not none.
 
-**Second pass (2026-10-09, proposal; the first draft above is option A).** The rows above were written before the strain trigger, so a break now has two causes: Integrity under 40, or the owner's strain at 80. The lines above name no cause, so they fit both and need no change for it. What a second read found, and option B for the three break lines:
+**Second pass (2026-10-09): option B is decided (maintainer); the first draft above is option A, kept as the record.** The rows above were written before the strain trigger, so a break now has two causes: Integrity under 40, or the owner's strain at 80. The lines above name no cause, so they fit both and need no change for it. What a second read found, and option B for the three break lines:
 
 - Program's Overlink line says "link crashed". 1.0's overflow line is "buffers burst. crashed: ... rebooting...", so a Program player may expect a reboot after "crashed" and none comes. Option B says "dropped".
 - Option A runs long: the Wetware discharge is 74 characters with the prefix and so is Iron's, against 68 for 1.0's longest event line (the overflow crash, "> !! buffers burst. crashed: -15 integrity, cache full. rebooting..."). Option B keeps every break line at 61 or under.
@@ -347,7 +347,7 @@ Why "ease off" and not "stop": the watch bots (baseline README, "players who min
 | Overlink (crash) | > !! link dropped. no relink for half a day. fault. | > !! lock slipped its gears. no lock for half a day. fault. | > !! it pulled away hard. distant for half a day. slip. |
 | Overclock (throttle) | > !! thermal limit hit. throttled for half a day. fault. | > !! thermal cutout. held under rating for half a day. fault. | > !! it overheated. no running hot for half a day. slip. |
 
-My recommendation: option B on every egg (the "crashed" collision and the length); option A's Wetware discharge alternative ("it ate too much and crashed") has the same "crashed" problem. Lengths measured as strings only (51 to 61 characters); neither option is read in context or on a device.
+**Decided (maintainer, 2026-10-09): option B on every egg** for the three break lines. The warning, lockout-over and alert lines above are unchanged, and the Wetware discharge alternative under option A is dropped with it (it had the same "crashed" problem). Lengths measured as strings only (51 to 61 characters); not read in context or on a device.
 
 Open: whether the warning should notify at all (it is the only state line that asks for an action); "half a day" against "for a while" (the second hides the number entirely); Iron's trigger: since 2026-10-09 the owner's state also breaks on its strain (Iron's wear; EGG_PRESSURES, "The strain trigger"), so a strain break is preceded by the strain's own line ("tolerances are slipping.", "swap is filling up.", "it is jittery."), not by the Integrity warning; the maintainer reads them as warnings already, since they show only while the state is active (decided: on crossing the line in the state or on entering the state past it; EGG_PRESSURES, "Where the warning fires"). The wording stays.
 
@@ -396,7 +396,7 @@ The call, the answer and its end follow the stage-care draft (section 2.5): the 
 | Lapsed (sets tired) | > reset window missed. running degraded. | > calibration missed. it runs sluggish. | > it never got its rest. it is running tired. |
 | Tired clears (a rest of 20 minutes or a night) | > back to nominal. | > running smooth again. | > it has its energy back. |
 
-The late line is neutral on purpose (the rule is neutral; only a lapse costs). Iron's decided "> calibrating. back in 25m." becomes the two answered rows; if one line for both is wanted, it stands as decided. Not drafted: a reminder before the lapse (the stage-care draft lists unanswered-call reminders as unmeasured; proposal: none, one notification a call).
+The late line is neutral on purpose (the rule is neutral; only a lapse costs). Iron's decided "> calibrating. back in 25m." becomes the two answered rows; if one line for both is wanted, it stands as decided. **No reminder before the lapse (decided, maintainer, 2026-10-09):** one notification a call; the lapse line is the only follow-up.
 
 **A collision to fix in 1.0's nap text.** The nap button's refusal says "not tired yet. 3h until it can nap again." (`src/sim.js`, kept in the fork). With a tired state in 2.0 that line would read as a statement about tired. Proposal, per egg: Program "no nap needed yet. 3h until the next.", Iron "no idle needed yet. 3h until the next.", Wetware "it is not sleepy yet. 3h until it can doze."
 
@@ -447,6 +447,7 @@ PURGE with an empty cache returns 1.0's refusal "cache is clean." (no `> `, as t
 | Care | the break's warning (if it notifies; open in The break) | Netling needs you | Netling: check the gauges | Netling needs you | The break's alert line |
 | Care | evolution | Netling is evolving (1.0) | Netling: refit complete | Netling is growing | evolution body, below |
 | Cooldowns | netrun ready | Netling: netrun ready | Netling: netrun ready | Netling: netrun ready | cooldown body, below |
+| Cooldowns | contract posted (decided) | A contract came in (1.0) | Netling: work order in | A job came in | the contract text and its pay, as 1.0 ("get a bug stitched at a Public Net clinic. pays 40 scrip.") |
 
 Bodies not drafted before:
 
@@ -459,7 +460,7 @@ Bodies not drafted before:
 | Netrun ready | Cooldown complete. The net is open. | Cleared to go out again. | It is ready to go out again. |
 
 Notes:
-- The surge is not here: it needs no answer, and 1.0 does not notify it. Contracts are not in a class yet (1.0 posts them only while the app is open, so a background notification is rare); proposal: Cooldowns, since they are a convenience.
+- The surge is not here: it needs no answer, and 1.0 does not notify it. **Contracts are in the Cooldowns class (decided, maintainer, 2026-10-09)**: a convenience, off by default with the class. 1.0 posts them only while the app is open, so a background notification is rare. The contract text is the job line the clinic table already drafts per egg; the pay figure in the example is illustrative.
 - The NAME in the evolution body is the form's name in capitals, as 1.0 does. Evolution to an elder uses the same line.
 - The Iron "check the gauges" title is the one place Iron's title differs between stat alerts and events; it tells an Iron player that nothing timed is running. Program and Wetware keep 1.0's split (events by kind, stat alerts "needs you").
 

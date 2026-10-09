@@ -106,7 +106,7 @@ On an APK every event can be a notification, so volume is the constraint. Decide
 - **Visitors never notify.** They exist to encourage keeping the game open.
 - **Events** (timed events: trace, surge, attack, overflow, **and attention requests**) **notify and count against the budget of 6 a day.** Attention requests were placed here by the maintainer: they are games or COOL only, never food, and an unanswered one costs nothing ([ATTENTION.md](ATTENTION.md)).
 - **Care** events do **not** count against it. Care includes the rest call, stat alerts and **evolution notices** (decided).
-- **Cooldowns** are a third class (a netrun being ready is the example).
+- **Cooldowns** are a third class (a netrun being ready is the example; contracts posted are here too, decided 2026-10-09).
 - Each class has its own toggle. **Defaults: Events on, Care on** (decided); Cooldowns not decided (off is my suggestion for a convenience ping).
 - This changes 1.0's attention rule 4 ("a request or visitor arriving in the background notifies once"): in 2.0 visitors never notify, and requests notify as part of Events.
 
@@ -166,7 +166,7 @@ Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder c
 
 ## 6. Wording (drafted, for choice)
 
-Drafted 2026-10-09 in [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md), "Stage care and notifications": the rest call lines per egg (call, on time, late, rest over, woken early, lapsed, tired clears), the tired state's readout word, title and field manual line, the baby's hungry and messy lines, the elder's "nothing to purge" line, the notification titles and bodies for each class, and a review of the strain readout words. The break's warning, discharge, crash and throttle lines were already drafted (care drafts, "The break", option A); a second pass there adds a shorter option B. None of it is chosen, read in context or read on a device. Found on the way: 1.0's nap refusal "not tired yet." collides with the tired state (a per-egg replacement is drafted).
+Drafted 2026-10-09 in [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md), "Stage care and notifications": the rest call lines per egg (call, on time, late, rest over, woken early, lapsed, tired clears), the tired state's readout word, title and field manual line, the baby's hungry and messy lines, the elder's "nothing to purge" line, the notification titles and bodies for each class, and a review of the strain readout words. The break's warning, discharge, crash and throttle lines were already drafted (care drafts, "The break", option A); a second pass there adds a shorter option B, **decided** (maintainer, 2026-10-09). Also decided: contracts notify in the Cooldowns class, and no reminder is sent before a rest call lapses. The rest is not chosen, read in context or read on a device. Found on the way: 1.0's nap refusal "not tired yet." collides with the tired state (a per-egg replacement is drafted).
 
 ## 7. The first build and what the simulator says (2026-10-09)
 
