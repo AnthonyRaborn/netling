@@ -138,7 +138,7 @@ Log lines for the states in the pressures doc, in the register of each egg. Ever
 | | Program | Iron | Wetware |
 |---|---|---|---|
 | Charge state begins | > buffers full and steady. boost mode on. | > mains steady. running above spec. | > well fed and humming. |
-| Charge state ends | > boost mode off. | > back within spec. | > the hum settles. |
+| Charge state ends | > boost mode off. | > power back to rating. | > the hum settles. |
 | Sync state begins | > link saturated. latency near zero. | > locked tight. every move lands. | > it is buzzing. everything feels close. |
 | Sync state, first play at the top | > link at limit. more load will bite. | > lock at limit. more will strain it. | > it is wound too tight to play safely. |
 | Sync state, burnout | > link burned out. offline until tomorrow. | > lock burned out. it needs the day to settle. | > burned out. it needs the rest of the day. |
@@ -343,10 +343,10 @@ Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EG
 
 | Moment | Program | Iron | Wetware |
 |---|---|---|---|
-| Overfeed (a feed when full, every egg) | > buffer already full. the extra cost it. | > over capacity. the surge stung. | > it ate past full. its stomach hurts. |
-| Third overfeed (writes a cache file) | > overfed. corrupted cache file written. | > overfed. bit rot spreading. | > overfed. waste is piling up. |
-| Overplay (a game past the line, every egg) | > link at limit. that game cost it. | > lock at limit. that one strained it. | > too wound up to play safely. that hurt. |
-| Overheat (a game past the line, every egg) | > too hot to run clean. that cost it. | > past rating. that wore on it. | > too hot to play. that hurt. |
+| Overfeed (a feed when full, every egg) | > buffer already full. the extra cost it. | > over capacity. the excess stung. | > it ate past full. its stomach hurts. |
+| Third overfeed (writes a cache file; replaces the overfeed line) | > overfed. corrupted cache file written. | > overfed. bit rot spreading. | > overfed. waste is piling up. |
+| Overplay (a game past the line, every egg; inside Overlink the existing "first play at the top" cue replaces it, one line a game) | > link at limit. that game cost it. | > lock at limit. that one strained it. | > too wound up to play safely. that hurt. |
+| Overheat (a game past the line, every egg) | > too hot to run clean. that cost it. | > past rating. that wore on it. | > it played too hot. that hurt. |
 | Feed refused (after three overfeeds; Program's is 1.0's line) | > buffer full. refused. | > at capacity. refused. | > it is full. it turns away. |
 | Owner strain past the warning line | > swap is filling up. it is thrashing. | > tolerances are slipping. (wear, existing) | > it is jittery. too much, too close. |
 | Owner strain back under the line | > swap clearing. | > back within spec. (existing) | > it is calming down. |
@@ -357,6 +357,8 @@ Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EG
 
 **One-time caption** (owner's egg, the first time strain passes the line, teen or later, as Iron's wear caption): Program "feeding it past full wears it. / rest lets it recover." Wetware "playing past its limit wears it. / rest lets it recover." (Iron's: "running too hot or too cold wears it. / rest lets it recover.")
 
-**Field manual** (qualitative): on every egg, one line: "Feeding past full, playing past the top of the Sync bar or playing while hot each cost a little Integrity." Every egg also: "Fed past full, it still takes a few more, each one costing a little Integrity; the last of them spoils into the cache." On the owner's egg its strain line: Program "Feed it past full too often and it thrashes: infections come easier and its buffer overflows more, until it rests."; Wetware "Play past its limit too often and it frays: infections come easier and it burns through food, until it rests."
+**Field manual** (qualitative): on every egg, one line: "Feeding it past full, playing while Sync is nearly full or playing while hot each cost a little Integrity. Past full it takes only a few more, and the last spoils into the cache." On the owner's egg its strain line: Program "Feed it past full too often and it thrashes: infections come easier and its buffer overflows more, until it rests."; Wetware "Play past its limit too often and it frays: infections come easier and it burns through food, until it rests."
+
+**Reviewed with the maintainer (2026-10-09).** Fixed: Iron's overfeed no longer says "surge" (Iron's LINE SURGE event; the word was dropped as a state name for the same reason); one line a game inside Overlink and one line for the third overfeed; Wetware's overheat line says the game was played; the field manual is one accurate line; Iron's Overdrive end is "> power back to rating." so "> back within spec." means only that wear has recovered (Pressure cues). Left as drafted, not decided: Program's three basic lines all ending "cost it"; no sprite mark for Program's and Wetware's strains; Wetware's "its stomach hurts" (alternatives offered).
 
 Open: "cyberpsychosis" is the maintainer's theme for Wetware's strain; in-game Wetware text stays plain (The eggs), so the word itself does not appear; "frayed" and "jittery" carry it. Program's "out of swap" likewise shows as "thrashing".
