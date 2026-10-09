@@ -158,11 +158,12 @@ export const ELDERS = {
       '....###....###....',
     ],
   },
-  // Bamf's elder: its adult grown wider and one row taller, with a mark on the brow.
+  // Bamf's elder: its adult grown wider, with a mark on the brow. No dome over the head (redrawn: the dome read as Ping's mast and thinned
+  // the margin to its own adult to 0.042); the head starts low, as on the adult.
   bamfElder: {
     a: [
       '..................',
-      '......######......',
+      '..................',
       '.....########.....',
       '....##########....',
       '....####++####....',
@@ -179,7 +180,7 @@ export const ELDERS = {
     ],
     b: [
       '..................',
-      '......######......',
+      '..................',
       '.....########.....',
       '....##########....',
       '....####++####....',

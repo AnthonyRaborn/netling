@@ -52,16 +52,24 @@ const anchorsOf = (id) => ({ ...(PROGRAM_ADULT_ANCHORS[id] ?? PROGRAM_ELDER_ANCH
 const CURSOR = 'oo';
 const FLATLINES = ['oooooooo', 'oooooo', 'oooo']; // the longest that fits the chest
 // Stamp `pattern` (centred) onto the first row from `from` down where every mark lands on a `fill` cell.
-function stamp(rows, from, pattern, fill) {
+function stamp(rows, from, pattern, fill, ink = 'o') {
   const start = (rows[0].length - pattern.length) / 2;
   const paintable = (c) => c === fill || (fill === '#' && c === 'x'); // a taped patch ('x') takes a mark too
   const fits = (y) => [...pattern].every((c, i) => c !== 'o' || paintable(rows[y][start + i]));
   const y = rows.findIndex((_, i) => i >= from && fits(i));
   if (y < 0) throw new Error('no chest row fits the mark');
-  return rows.map((row, i) => (i === y ? [...row].map((c, x) => (pattern[x - start] === 'o' && paintable(c) ? 'o' : c)).join('') : row));
+  return rows.map((row, i) => (i === y ? [...row].map((c, x) => (pattern[x - start] === 'o' && paintable(c) ? ink : c)).join('') : row));
 }
 export function programMarks(rows, anchors, kind, fill) {
-  if (kind === 'sleep') return stamp(rows, anchors.mouthRow + 1, CURSOR, fill);
+  // Asleep: a dim cursor block from the row under the neck (review: accent under the mouth read as extra eyes, highlight as a second mouth);
+  // on the Shell, whose casing is already dim, it is drawn in the body colour.
+  if (kind === 'sleep') {
+    try {
+      return stamp(rows, anchors.neckRow + 1, CURSOR, fill, fill === '#' ? 'x' : '#');
+    } catch {
+      return stamp(rows, anchors.mouthRow + 1, CURSOR, fill, fill === '#' ? 'x' : '#');
+    }
+  }
   for (const line of FLATLINES) {
     try {
       return stamp(rows, anchors.neckRow, line, fill);

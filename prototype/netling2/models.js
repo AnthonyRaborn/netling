@@ -117,12 +117,13 @@ export function pose(a, eyeRow, kind, fill = '#') {
 
 // Iron's own marks on the generic poses (the sketch's death register: Iron is decommissioned, a last write that leaves a
 // read-only record; its rhythm is batch: work is queued and collected on return).
-//   asleep: a QUEUE, four accent dots in a row on the chest, work waiting for the next batch.
+//   asleep: a QUEUE, four dim dots in a row on the chest, work waiting for the next batch. Dim fill from the row under the neck (review:
+//           accent dots under the mouth read as stray pixels or extra eyes; highlight dots read as a second mouth or teeth).
 //   dead:   a READ-ONLY RECORD, a dark barcode stamped across the chest, the last write.
 // Marks only: they replace '#' body cells, never touch the eyes or the outline, and sit at the same columns on every form.
 const QUEUE = 'o.o..o.o';
 const RECORD = 'oo.o..o.oo'; // symmetric: read the same from either end
-function stamp(rows, from, pattern) {
+function stamp(rows, from, pattern, ink = 'o') {
   const w = rows[0].length;
   const start = (w - pattern.length) / 2;
   const hits = (y) => [...pattern].filter((c, i) => c === 'o' && rows[y][start + i] === '#').length;
@@ -130,9 +131,9 @@ function stamp(rows, from, pattern) {
   let best = -1;
   for (let y = from; y < rows.length; y++) if (hits(y) > (best < 0 ? 2 : hits(best))) best = y;
   if (best < 0) return rows;
-  return rows.map((row, y) => (y === best ? [...row].map((c, x) => (c === '#' && pattern[x - start] === 'o' ? 'o' : c)).join('') : row));
+  return rows.map((row, y) => (y === best ? [...row].map((c, x) => (c === '#' && pattern[x - start] === 'o' ? ink : c)).join('') : row));
 }
-export const ironMarks = (rows, anchors, kind) => (kind === 'sleep' ? stamp(rows, anchors.mouthRow + 1, QUEUE) : stamp(rows, anchors.neckRow, RECORD));
+export const ironMarks = (rows, anchors, kind) => (kind === 'sleep' ? stamp(rows, anchors.neckRow + 1, QUEUE, 'x') : stamp(rows, anchors.neckRow, RECORD));
 
 // Sleep and dead take the A frame's anchors (the eyes shut or crossed on the same row).
 function build(id, frames, anchors, stable = false) {

@@ -54,6 +54,9 @@ const SETTLE_MS = 400;
 const BLINK_MS = SLOT_MS;
 const BEAT_FADE_MS = 600;
 const STUTTER = { '-1': 0.1, '-2': 0.3 };
+// The deepest Wetware dip: 20% (was 25%). At 25% the neon palette's body fell to 2.95:1 against the screen, under the 3:1 asked of
+// graphics; at 20% every palette keeps 3.2:1 or more (proto.test.js checks it on all six).
+export const SHADE_DIP = 0.2;
 
 function frameOf(level, time, seed) {
   if (level >= 0) return Math.floor(time / FRAME_MS) % 2;
@@ -73,7 +76,7 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
     const into = time % interval;
     if (egg === 'iron' && into < SETTLE_MS) out.dy = 1;
     else if (egg === 'program' && into < BLINK_MS) out.blink = true;
-    else if (egg === 'wetware' && into < BEAT_FADE_MS) out.shade = 1 - 0.25 * Math.sin((into / BEAT_FADE_MS) * Math.PI);
+    else if (egg === 'wetware' && into < BEAT_FADE_MS) out.shade = 1 - SHADE_DIP * Math.sin((into / BEAT_FADE_MS) * Math.PI);
     return out;
   }
 
@@ -95,13 +98,19 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
     if (strong && hash(Math.floor(time / SLOT_MS) * 13 + seed) < 0.08) out.dy = -1;
   } else {
     // Wetware: the frame stays steady and the pulse carries the tell. The phase wanders; the fastest it moves is under 1 Hz and
-    // the swing is at most 0.25 of the brightness, so it is no flash.
+    // the swing is at most 0.2 of the brightness (SHADE_DIP), so it is no flash.
     out.frame = Math.floor(time / FRAME_MS) % 2;
     const wander = (strong ? 0.35 : 0.12) * Math.sin(time / 1100 + seed);
-    out.shade = 1 - (strong ? 0.25 : 0.15) * (0.5 + 0.5 * Math.sin((time / 1800 + wander) * 2 * Math.PI));
+    out.shade = 1 - (strong ? SHADE_DIP : 0.15) * (0.5 + 0.5 * Math.sin((time / 1800 + wander) * 2 * Math.PI));
   }
   return out;
 }
+
+// The drift never takes a netling past the edge of 1.0's idle wander (8 columns either way): at the edge it drifts inward instead, so the
+// tell stays visible and no wearable is pushed off the screen that the idle alone keeps on it (Splat and its elder lost the neural jack,
+// drone, earpiece and data aura before this; npm run proto:temper). The renderer passes the idle's column offset with the tell's dx.
+export const IDLE_MAX_X = 8;
+export const driftWithin = (dx, idleX, limit = IDLE_MAX_X) => (Math.abs(idleX + dx) > limit && Math.sign(dx) === Math.sign(idleX) ? -dx : dx);
 
 // Which registered pose to draw, and which to place wearables from, for a tell result and the pose the netling is in ('awake',
 // 'sleep' or 'dead'). Program's blink draws the sleep pose for 200 ms, but wearables stay placed on the frame the netling would
