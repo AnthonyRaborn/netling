@@ -108,7 +108,22 @@ Reading:
 - Bot sweep (Charge perks on), full life / win drops a life, no break, 55, 40: greedy Tune corp 68.4 / 20.8, 99.8 / 15.1, 99.2 / 17.2; watching Tune corp 99.2 / 18.0, 99.5 / 15.0, 99.5 / 17.4; greedy ghosthunter 82.3 / 28.9, 98.6 / 23.1, 98.1 / 24.7; watching ghosthunter 97.9 / 25.7, 98.4 / 23.5, 97.8 / 25.3.
 - Reading: the lower line costs 0.3 to 1.5 points of full life and returns about 83% to 96% of the unbraked benefit. A careful player and a careless one end up with almost the same benefit (17.4 against 17.2 for Tune corp), so the break protects the careless without rewarding the careful.
 - **Lockout length** (break line 40; Program only; `results/followup/program-bot-sweep-brake-lock{8,12}-*.txt`, `results/balance-brake-lock{8,12}-program.json`), no break / 24h / 12h / 8h: greedy Tune corp full life 68.4 / 99.2 / 99.6 / 99.6, win drops 20.8 / 17.2 / 18.1 / 18.1, time in Overdrive 33.6 / 15.3 / 19.9 / 19.9 percent; greedy ghosthunter win drops 28.9 / 24.7 / 25.7 / 25.7; watching players barely move (Tune corp 18.0 / 17.4 / 17.7 / 17.7). No archetype in the 37 moves by 1 point or more between 24h, 12h and 8h; mean netruns a life 13.43, 13.26, 13.25 (12.81 with no break). 8 and 12 hours are identical to the digit, probably because both end before the netling wakes (sleep is 22:00 to 07:00 and a hold needs 3 awake hours); not isolated. A shorter lockout gives greedy play about 5% more benefit and puts it level with, or just above, careful play (Tune corp 18.1 against 17.7), so it does not help the break reward care.
-- Untested: the warning line (70), lockouts on Iron and Wetware (the break rarely fires there), and an Iron-specific trigger.
+- Decided since: the maintainer chose a 12 hour lockout. Untested: the warning line (70), and an Iron-specific trigger.
+
+**Break consequences, all three eggs** (`sim/break-consequence-sweep.mjs`, `results/followup/break-consequence-*.txt`; line 40, 12 hour lockout, 1000 lives; Iron 6 archetypes, Program 7 with the default bot and with `PROGBOT=watch`, Wetware 6 with the default bot and `SYNCBOT=greedy`). Mean over archetypes, plain break against the break plus a consequence (the human-keen archetype, near 65% full life everywhere, is the minimum in every row and is not an effect of the break):
+
+| egg / bot | breaks a life | full life % plain / +1 fault / +10 integrity / both | faults a life plain / +1 fault |
+|---|---:|---|---|
+| Iron / default | 0.35 | 93.3 / 93.3 / 93.2 / 93.0 | 1.50 / 1.90 |
+| Program / default | 1.74 | 93.8 / 93.6 / 93.4 / 93.3 | 1.13 / 2.63 |
+| Program / watch | 0.30 | 94.1 / 94.0 / 93.9 / 93.8 | 1.17 / 1.48 |
+| Wetware / default | 0.17 | 93.7 / 93.7 / 93.7 / 93.6 | 1.28 / 1.46 |
+| Wetware / greedy | 0.19 | 93.2 / 93.2 / 93.2 / 93.2 | 1.26 / 1.45 |
+
+- A fault a break is cheap in survival (largest single loss 0.8 points, Program ghosthunter) and separates the two Program players: a greedy ghosthunter takes 0.02 faults a life with the plain break and 3.55 with a fault, a watching one 0.02 and 0.73; Tune corp 0.43 and 3.63 against 0.45 and 1.12. Bugs per life for the default Program bot rise from 0.08 to 0.19 and temper falls from 1.23 to 0.78.
+- Ten Integrity a break costs more survival than a fault (ghosthunter 1.7 points, no faults) and leaves no trace the player can read. Both together is the largest loss (2.1 points).
+- The greedy and heavy Program players break often (ghosthunter 4.9 and Tune corp 3.4 a life with the default bot, against 0.7 when watching), which a 12 hour lockout allows (a life is about 5 days).
+- Iron's hot players (overclocker) lose the most there (0.7 points with a fault); Wetware barely registers it, because the break fires 0.17 times a life even for the greedy bot.
 
 ## Against the figures in the docs
 
