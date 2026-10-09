@@ -157,6 +157,8 @@ Fork-only, off by default: `NR2.map` (`sim/netrun/map2.js`, a parameterized copy
 
 **Rogue gate and whole life** (link .75): attentive 9 to 8 lives, daredevil 9 to 9, casual 20 to 18; first elder life for casual 10 to 8. Whole-life results are unchanged: no archetype moves by 1.5 points, mean full life 90.5% either way, mean disconnects 0.35, mean scrip 50.9. Netruns in these regions are a small part of a life.
 
+**Chosen settings** (maintainer, 2026-10-09: Deep [3,4] at link .65, Source [3,5] at .75, no tier gradient). They are the defaults of `NR2.map` and `NR2=all` now switches them on, so the netrun-class outputs here (netrun, challenge, Foresight, egg anomalies, lineage) were rerun with them; the earlier outputs are in `results/superseded/narrow-maps/`. Rogue gate at the chosen settings, old maps to chosen: attentive 9 to 8 lives (p10 to p90 7 to 13, then 6 to 12), daredevil 9 to 9, casual 20 to 20; first elder life attentive 4 to 4, daredevil 5 to 4, casual 10 to 9. The other baseline outputs (whole-life balance and the life-level sweeps) were not rerun: whole life does not move with the maps (no archetype by 1.5 points at link .75).
+
 Not modelled or not checked: how a person reads a bigger map (the bots look ahead over what they can see), the fog, the phone screen (about 55 to 60 nodes against 27 to 35), and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps, which was not measured.
 
 ## Against the figures in the docs
