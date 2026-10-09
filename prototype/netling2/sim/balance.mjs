@@ -328,6 +328,16 @@ export function checkIn(s, p, now, rng, ctx) {
   if (s.request?.kind === 'game' && mayPlay && !blockReason(s, 'play') && (!p.balanceGames || s.games[s.request.game].won <= minWins(s) + 1) && (!p.focus || s.request.game === p.focus || rng() >= (p.focusShare ?? 1))) {
     if (doAct('play', { game: s.request.game, won: rng() < winChance(overclocked(s), skill()) }).requestMet) ctx.requestsMet = (ctx.requestsMet ?? 0) + 1;
   }
+  // BINGE=1 (hunters, balanceGames): a player after the hidden teen plays through the baby stage until every game has the wins the hidden teen needs,
+  // feeding and cooling as it goes; the ordinary hunter stops at its Sync target and so never gets there inside a 7 hour baby.
+  if (process.env.BINGE && p.balanceGames && s.stage === 'baby' && mayPlay) {
+    for (let i = 0; i < 24 && minWins(s) < CFG.shellMinWinsEach && !blockReason(s, 'play'); i++) {
+      if (s.stats.charge < 30) feed();
+      if (blockReason(s, 'play')) break;
+      doAct('play', { game: leastWon(s), won: rng() < winChance(overclocked(s), skill()) });
+      if (s.stats.heat > coolAt + 10) doAct('cool');
+    }
+  }
   let syncTarget = topUp ? 98 : p.gamer ? 90 : 80;
   // SYNCBOT=greedy plays until Sync is full; SYNCBOT=budget never plays at or over the Sync penalty line (SIDES.sync.penLine).
   if (process.env.SYNCBOT === 'greedy') syncTarget = 100;

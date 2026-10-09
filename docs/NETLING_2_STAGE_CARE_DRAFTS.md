@@ -279,3 +279,19 @@ Option 1 (baby drain 1.6, no baby bugs, rest call, stage tables), Standing gain 
 
 - **Gain 2 holds on all three eggs.** Teen ties for regular play: attentive 44 to 47, casual 53 to 56, human-keen 58, human-regular 63 to 64 (worker 74). Strict guided archetypes: 0 to 1%. No archetype moves its full life by 3 points against the break alone except Iron's worker (-4.4, the same sparse-player cost seen before).
 - **Hidden teen: the stage length, not the gain, removes it for the bots.** Hunter archetypes that reached the hidden teen in 86 to 87% of lives with no stage care reach it in 2 to 4% with the 7 hour baby, at every gain (Program: hunter-exact 86% break only, 3% at option 1 and gain 1, 2% at gain 2). The hidden adult is still reached in 76 to 82% of lives. The hunters never binge games, and three wins in every game before 7 hours is more than they play. Whether a person can do it is the open binger test; until it is built, the hidden teen's reachability under a 7 hour baby is unknown, and the 3 wins per game could need to move (for example counted across the whole teen window, or lowered).
+
+## 12. The binger test (2026-10-09)
+
+`BINGE=1` in `sim/balance.mjs` (hunter archetypes, those with `balanceGames`): in the baby stage, a check-in plays the least-won game until every game has 3 wins (up to 24 games a check-in), feeding when Charge is under 30 and cooling past `coolAt` + 10, then does the rest of the check-in as before. Final settings (section 11), 1000 lives, the hunter archetypes only; `results/balance-binge-{iron,program,wetware}.json` against `balance-final-*`. Hidden teen share of lives, without and with the binge (the three eggs agree to a point):
+
+| archetype | hidden teen | hidden adult | full life | faults a life (Program) |
+|---|---:|---:|---:|---:|
+| hunter-exact | 3 to 99 | 78 to 94 | 97 to 98 | 3.4 to 3.8 |
+| hunter-shown | 3 to 98 | 79 to 92 | 98 | 3.3 to 3.6 |
+| hunter-blocks (blocks 3) | 2 to 83 | 73 to 86 | 97 | 3.4 to 3.7 |
+| hunter-casual (6 check-ins a day) | 0 to 92 | 0 to 28 | 88 to 89 | 4.3 to 4.1 |
+
+- **The hidden teen is reachable inside a 7 hour baby, by a player who binges games in it.** Nothing blocks it: a binge plays about a dozen games in one or two check-ins. The simulator shows no cost in full life or faults beyond a few tenths. The bot ignores Sync (it ends the baby at full Sync) and Heat beyond cooling; no rule stops playing at max Sync, as the maintainer asked about earlier.
+- **A hunter that does not binge (the old policy, ghosthunter, hunter-shown-rotation) still gets about 1 to 3%**, so the hidden teen under a 7 hour baby is now a deliberate act, not something a balanced player drifts into. That may be the intent for a hidden form; it is a design question, not a finding.
+- The hidden adult rises for the bingers (78 to 94%) because the wins arrive earlier; the casual hunter reaches it far less often (28%) since six check-ins a day leave less time for the 29 game wins the adult needs.
+- Not tested: a person's real binge (is a dozen games in a baby stage fun or a chore), the Sync and Heat cost of the binge on a real run, the other two cutpoints (tracks within 1 at the teen check, which gain 2 makes tighter; hunters still passed it).

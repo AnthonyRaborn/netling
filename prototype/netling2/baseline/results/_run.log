@@ -187,3 +187,10 @@
 2026-10-09T13:12:58.580Z done balance-final-wetware [final-wetware] 994s
 2026-10-09T13:13:42.656Z done balance-final-iron [final-iron] 1038s
 2026-10-09T13:13:42.658Z all 3 jobs finished
+2026-10-09T13:16:26.404Z start balance-binge-iron
+2026-10-09T13:16:26.410Z start balance-binge-program
+2026-10-09T13:16:26.413Z start balance-binge-wetware
+2026-10-09T13:18:53.628Z done balance-binge-program [binge-program] 147s
+2026-10-09T13:18:54.162Z done balance-binge-wetware [binge-wetware] 148s
+2026-10-09T13:19:03.361Z done balance-binge-iron [binge-iron] 157s
+2026-10-09T13:19:03.365Z all 3 jobs finished
