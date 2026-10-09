@@ -230,6 +230,41 @@ Notes:
 - Tested: lowercase, no digits, no em dash, 62 characters or less, ids and groups new, and every line keeps its shape in the machine voicing at all four temper levels. The machine voicing of an unsteady Program line used to be able to swap the two halves, which `checkShape` rejects; it is now always a clipped clause, so the machine and hand-written rules agree.
 - Open: nothing further for this section.
 
+## Rogue: background and reveal (drafts, for choice)
+
+Direction (decided, maintainer): Rogue stays **indirect and background** until it is unlocked. Story: Rogue grew from NL-0's precursor code, copied out of the NL-0 corp by industrial espionage and finished by a second, unnamed corp; it escaped, and that corp chases it hard, to cover itself before the NL-0 corp finds out what it took. Once the gate is met (the ending and all 18 egg pages), Rogue is explained only weakly: a brief cutscene at the next death and rebirth, or a small animation of the Rogue egg infiltrating the list of eggs.
+
+Ground rules for these drafts: nothing names Rogue, the second corp or the theft; nothing is needed to play; no new pages, so the counts stay (39 story pages, 18 egg pages); every touch is either an optional rewording of an existing page or a line outside the codex.
+
+**Optional rewordings of three existing pages** (keep the current text if these say too much):
+
+| Page | Current | Alternative | What it plants |
+|---|---|---|---|
+| `corp-2` (Root) | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. (124) | KERNEL release schedule. v0.9: withdrawn after the access audit. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (140) | An earlier build left the corp under an audit: the precursor was taken. |
+| `bazaar-6` (late) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. (116) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. A buyer in a clean suit asked anyway. (121) | Someone corporate is searching the street for unlabeled things. It loses "they were here before the stall", which the dish thread uses (see Notes, A thread across regions), so take it only if that line moves elsewhere. |
+| `ruins-5` (late) | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. (125) | unchanged | Left alone: the forty-first rack is NL-0's and should stay unambiguous. |
+
+**Background lines outside the codex** (text only, no rule; they start once the ending has played, so they arrive while the player finishes the last egg pages and lead into the reveal):
+- **Visitors** (1.0's visit log, rare variants): "> a stray pinged in. it would not say whose it was, and left before the handshake." / "> a stray pinged in, looked over its shoulder, and pinged out."
+- **Netrun log** (the Deep and the Source, rare, on entering a node): "a sweep passed through here. it was not looking for you." / "trace residue on this node. not KERNEL's pattern."
+- **Job board** (a posting already withdrawn, cannot be taken): "WANTED: any unindexed process, running. no questions. buyer will not give a name. (withdrawn)"
+- **Chatter** (lineage group, after the ending): "something out there runs almost like me. it is running from someone."
+
+**The reveal, two options** (they can be combined):
+1. **Rebirth cutscene.** Once, at the first death and rebirth after the gate is met; the terminal style of the opening compile screen; skippable; about six lines at the opening's typing speed:
+   ```
+   > flatline logged. writing fragment...
+   > preparing next culture.
+   > egg directory: program/  iron/  wetware/
+   > warning: unindexed entry in egg directory.
+   > rogue/   owner: none   source: copied   status: running
+   > it was not invited. it is asking anyway.
+   ```
+   "copied", "owner: none" and "running" carry the whole backstory weakly: taken from somewhere, belongs to no one now, on the move.
+2. **Infiltration on the egg list.** On the egg choice screen, the first time it opens after the gate: the three eggs draw as usual; after about a second a fourth row opens below them and its label types in one character at a time ("r", "ro", ... "rogue", 400 ms a step, so nothing changes faster than three times a second); its egg sprite fills in over three steps with one pixel row in each hidden form's colour (Ghost, Guru, Blank: it is built on the three hidden lines); then one status line: "unindexed egg in the list. it was not invited." Reduced motion: the fourth row is simply there, with the status line. Later visits show the four rows plainly.
+
+**Recommendation:** option 2 as the reveal (it happens where the choice is made and needs no extra screen), with option 1's last two lines as a one-time log entry at that rebirth, so a player who skips past the egg screen still sees something. Not designed here: Rogue's own pages, which can say more about the second corp once the player has the egg.
+
 ## Trimmed alternatives for the longest pages (drafts, for choice)
 
 The three longest drafts, each with two shorter versions toward 1.0's median of 90 characters (1.0's longest is 166). Lengths counted by script. Nothing is replaced: pick one, keep the current, or mix. Each keeps the page's idea.
