@@ -198,3 +198,30 @@ Needed from the care-drafts register: the rest call line per egg (call, on time,
 3. Either of the above plus a **Standing multiplier on a baby's feeds** (for example x1.5 or x2) to restore the teen check, if the teen form should stay as steerable as today. Not built.
 
 **Not measured:** the hidden-teen binger test; the three eggs with their pressures and the break on top of the stage care (only the unpressured rules were run); the elder (no archetype reaches the elder stage in these runs); meal size by stage; and any real player.
+
+## 8. Stage care on top of each egg's pressure and the break (2026-10-09)
+
+Six whole-life runs, 1000 lives for each of 37 archetypes, with NR2=all, PERKS=1, the egg's final pressure design and the break on (the "brake" runs are the comparison). A is the decided tables (baby drain 2.4, a baby's faults roll bugs as today) plus the rest call. B is option 1 above (baby drain 1.6, `babyBugs` 0) plus the rest call. Files `prototype/netling2/baseline/results/balance-stage{A,B}-{iron,program,wetware}.json`; the configurations are in `baseline/run-all.mjs`.
+
+| egg | mean full life, break only | A | B | teen tie %, break only | A | B |
+|---|---:|---:|---:|---:|---:|---:|
+| Iron | 87.6 | 86.7 | 87.5 | 53.7 | 59.7 | 60.9 |
+| Program | 87.4 | 86.4 | 87.1 | 53.8 | 59.7 | 60.9 |
+| Wetware | 87.7 | 86.8 | 87.6 | 53.5 | 59.6 | 60.8 |
+
+Archetypes that move by 3 points or more (full life, points):
+
+| archetype | Iron A / B | Program A / B | Wetware A / B |
+|---|---:|---:|---:|
+| worker | -20.3 / -3.8 | -16.6 / -0.4 | -18.7 / -2.6 |
+| hunter-casual | -5.4 / -0.4 | -6.0 / -2.0 | -5.8 / -2.0 |
+| human-regular | within 3 | -4.8 / +0.6 | -4.2 / -1.7 |
+| human-keen | within 3 | within 3 | -4.5 / +0.7 |
+
+- The egg pressures and the break do not change the stage-care result: it matches the unpressured run in section 7. The baby drain is the cost; the cost lands on sparse players.
+- Option B removes nearly all of it. Only Iron's worker stays more than 3 points down (-3.8, close to noise at this sample size), and no archetype is down 3 or more under Program or Wetware.
+- Teen ties rise by about 6 points under A and 7 under B on every egg, so the teen form gets less steerable either way (a bot can only feed at check-ins; a person who feeds more would do better). This is the open Standing question; option 3 (a feed multiplier) is the lever and is not built.
+- Rest calls are the same on every egg: about 9.9 a life, 3.5 on time, 3.1 late, 2.7 lapsed; tired for 13.3 to 13.6% of a life under A. Mean of 37 archetypes; the response model (`CALLANSWER`, 0.7) is still an assumption.
+- Still not measured: the elder, the hidden-teen binger, meal size by stage, a person.
+
+**Recommendation (not a decision):** option 1. It needs the maintainer to approve the new bug rule, that a baby's faults roll no bugs. If the teen form should stay as steerable as today, add option 3 on top.

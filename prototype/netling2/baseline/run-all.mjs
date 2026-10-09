@@ -45,6 +45,14 @@ const CONFIG = {
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`brake-${egg}`] = { ...CONFIG[`full-${egg}`], ...CONFIG[`brake-${egg}`] };
 // Lockout lengths for the break (hours), Program only: the shorter the lockout, the more often a greedy player can re-enter the state.
 for (const h of [8, 12]) CONFIG[`brake-program-lock${h}`] = { ...CONFIG['full-program'], BRAKE: JSON.stringify({ on: true, lockMin: h * 60 }) };
+// Stage care (STAGE in sim.js) on top of each egg's pressure and the break: A as decided (tables with baby drain 2.4, the rest call), B the draft's option 1
+// (baby drain 1.6 and a baby's faults roll no bugs).
+const STAGE_A = JSON.stringify({ on: true, rest: { on: true } });
+const STAGE_B = JSON.stringify({ on: true, babyDrain: 1.6, babyBugs: 0, rest: { on: true } });
+for (const egg of ['iron', 'program', 'wetware']) {
+  CONFIG[`stageA-${egg}`] = { ...CONFIG[`brake-${egg}`], STAGE: STAGE_A };
+  CONFIG[`stageB-${egg}`] = { ...CONFIG[`brake-${egg}`], STAGE: STAGE_B };
+}
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
@@ -54,6 +62,8 @@ for (const c of ['core', 'full-iron', 'full-program', 'full-wetware']) add(`bala
 for (const egg of ['iron', 'program', 'wetware']) add(`balance-brake-${egg}`, 'balance.mjs', [LIVES], `brake-${egg}`, { JSON: '1' }, 900);
 
 for (const h of [8, 12]) add(`balance-brake-lock${h}-program`, 'balance.mjs', [LIVES], `brake-program-lock${h}`, { JSON: '1' }, 900);
+
+for (const egg of ['iron', 'program', 'wetware']) for (const v of ['A', 'B']) add(`balance-stage${v}-${egg}`, 'balance.mjs', [LIVES], `stage${v}-${egg}`, { JSON: '1' }, 900);
 
 // Lineage pacing and the Rogue gate (egg pages, ending).
 for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'rules', { JSON: '1' }, 600);
