@@ -25,6 +25,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
 | Read how the Mainframe stage and the Source were decided, built and measured | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
 | Look up the source vocabulary behind the Netling 2.0 names and failure models (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
+| Get a short overview of Netling 2.0 and how it differs from 1.0 | [NETLING_2_SUMMARY.md](NETLING_2_SUMMARY.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
 | Continue the Netling 2.0 sprites (all 66 forms, rules the tests enforce, commands, the next phase; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
 | Trace why a Netling 2.0 sprite decision was made (drafts, rejected options, measurements; archive) | [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) |
