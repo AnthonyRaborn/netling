@@ -61,6 +61,8 @@ for (const [tag, bugs] of [['rule2', { standingOnlyIfShort: true }], ['rule5', {
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`final-${egg}`] = { ...CONFIG[`gain2-${egg}`], BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }) };
 // The binger test: the hunter archetypes (filter "hunter") play through the baby stage for the hidden teen's wins (BINGE in sim/balance.mjs), on the final settings.
 for (const egg of ['iron', 'program', 'wetware']) CONFIG[`binge-${egg}`] = { ...CONFIG[`final-${egg}`], BINGE: '1' };
+// The decided settings (2026-10-09): stage care as in STAGE_A (baby drain 2.4, a baby's faults roll bugs, the rest call), Standing gain 2, the fix rule and a Standing cost of 5.
+for (const egg of ['iron', 'program', 'wetware']) CONFIG[`decided-${egg}`] = { ...CONFIG[`stageA-${egg}`], STANDINGGAIN: '2', BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }) };
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
@@ -80,6 +82,8 @@ for (const t of ['rule2', 'rule5', 'cost5']) add(`balance-bug-${t}-program`, 'ba
 for (const egg of ['iron', 'program', 'wetware']) add(`balance-final-${egg}`, 'balance.mjs', [LIVES], `final-${egg}`, { JSON: '1' }, 900);
 
 for (const egg of ['iron', 'program', 'wetware']) add(`balance-binge-${egg}`, 'balance.mjs', [LIVES, 'hunter'], `binge-${egg}`, { JSON: '1' }, 300);
+
+for (const egg of ['iron', 'program', 'wetware']) add(`balance-decided-${egg}`, 'balance.mjs', [LIVES], `decided-${egg}`, { JSON: '1' }, 900);
 
 // Lineage pacing and the Rogue gate (egg pages, ending).
 for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'rules', { JSON: '1' }, 600);

@@ -52,9 +52,13 @@ Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drai
 - The netrun-class baseline outputs (netrun, challenge, Foresight, egg anomalies, lineage) were rerun with the chosen maps; the earlier outputs are in `results/superseded/narrow-maps/`. Whole-life balance does not move with the maps (no archetype by 1.5 points), so the other baseline outputs were not rerun.
 - Not measured: the phone map (about 55 to 60 nodes), the fog, how a person scans a bigger map, and the cost of the route guarantees (`ensureOnEveryRoute`) on wider maps.
 
-## Standing gain and the bug fix cost (measured, not decided)
+## Decisions of 2026-10-09, after the stage-care measurements (draft section 13)
 
-Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on Program with the break and option 1, gain 2 gives about 44 to 59% teen ties for regular play and about 0% for strict guided play (the maintainer's target); sparse play stays tied. The bug fix rule (`standingOnlyIfShort`) and a cost of 5 change nothing measurable in the bots; recommended as asked. Open: confirm gain 2 on Iron and Wetware (config entries `gain<g>-<egg>` exist), the hidden-path band at a higher gain, and whether to pair gain with a baby feed multiplier.
+Decided: baby drain 2.4 with bugs (option A); Standing gain 2, the fix rule and a Standing cost of 5; Cooldowns class off by default; elder stage not simulated yet; meal size by stage unchanged; hidden teen unchanged (reachable by a deliberate binge, 83 to 99% of hunter bots that binge); community sketch comes after the phone map feedback. Measured as decided: worker -17 to -21 points, hunter-casual about -5, teen ties 44 to 65% for regular play. The sections below record how those numbers were reached.
+
+## Standing gain and the bug fix cost (measured, now decided)
+
+Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on Program with the break and option 1, gain 2 gives about 44 to 59% teen ties for regular play and about 0% for strict guided play (the maintainer's target); sparse play stays tied. The bug fix rule (`standingOnlyIfShort`) and a cost of 5 change nothing measurable in the bots; recommended as asked. Gain 2 is confirmed on all three eggs (draft section 11). The next step in the maintainer's order: feedback on the phone map picture, then the community sketch.
 
 ## Parked
 

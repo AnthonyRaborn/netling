@@ -295,3 +295,20 @@ Option 1 (baby drain 1.6, no baby bugs, rest call, stage tables), Standing gain 
 - **A hunter that does not binge (the old policy, ghosthunter, hunter-shown-rotation) still gets about 1 to 3%**, so the hidden teen under a 7 hour baby is now a deliberate act, not something a balanced player drifts into. That may be the intent for a hidden form; it is a design question, not a finding.
 - The hidden adult rises for the bingers (78 to 94%) because the wins arrive earlier; the casual hunter reaches it far less often (28%) since six check-ins a day leave less time for the 29 game wins the adult needs.
 - Not tested: a person's real binge (is a dozen games in a baby stage fun or a chore), the Sync and Heat cost of the binge on a real run, the other two cutpoints (tracks within 1 at the teen check, which gain 2 makes tighter; hunters still passed it).
+
+## 13. Decisions of 2026-10-09 and the measurement of what was decided
+
+Decided (maintainer): the **baby keeps the higher drain (2.4) and its faults roll bugs** (option A, not option 1); **Standing gain 2**, the **fix rule** (Standing only while short of scrip) and a **Standing cost of 5** are all adopted; the **Cooldowns notification class defaults to off** (the suggestion in section 6 and the handover; Events and Care stay on); the **elder stage is not simulated yet**; **meal size by stage stays 1** (no change needed with the Standing and baby changes); no baby feed multiplier; the hidden teen stays as it is (section 12). A phone picture of the maps was posted for feedback: `prototype/netling2/baseline/results/followup/map-phone-compare.png`.
+
+Measured as decided (`results/balance-decided-{iron,program,wetware}.json`, config `decided-<egg>`: STAGE tables, baby drain 2.4, babyBugs 1, rest call, gain 2, rule, cost 5, break, each egg's pressure; 1000 lives, 37 archetypes), against the break alone and against option 1:
+
+| egg | mean full life, break only | option 1 + gain 2 | decided | mean teen tie | bugs avg | bug ceiling % |
+|---|---:|---:|---:|---:|---:|---:|
+| Iron | 87.6 | 87.4 | 86.7 | 45.9 | 0.25 (0.16 break only) | 3.0 |
+| Program | 87.4 | 87.1 | 86.5 | 45.9 | 0.32 (0.23) | 2.5 |
+| Wetware | 87.7 | 87.6 | 86.9 | 45.8 | 0.23 (0.14) | 2.5 |
+
+- Teen ties at the target: attentive 43 to 46, casual 52, human-keen 56 to 57, human-regular 64 to 65, worker 74; strict guided 0 to 2.
+- **The cost is the same as in the first stage-care measurement, and Standing gain does not offset it.** Against the break alone, the worker archetype falls 21.2 (Iron), 16.6 (Program) and 18.0 (Wetware) points, hunter-casual about 5 to 6, human-regular 3.6 to 4.3 (Program, Wetware), human-keen 3.9 (Wetware). Option 1 had cost the worker 0.8 to 4.4. Other archetypes (attentive, casual, daredevil, the steer set) are within 3 points.
+- Mean full life falls 0.7 to 0.9 points. Bugs rise about 0.09 on average and the bug ceiling share is 2.5 to 3.0%.
+- This is the "sparse players pay for the baby" trade as understood when option A was named; it is now recorded as chosen, not as a surprise. If a work-day player who checks in five or more hours apart should keep surviving at about today's rate, the levers are the baby drain (1.6 recovers nearly all) or a baby-only bug exemption; neither is adopted.
