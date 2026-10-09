@@ -1,0 +1,71 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Strain marks preview</title>
+<style>body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+// Review render for the strain marks on Program and Wetware (docs/NETLING_2_CARE_DRAFTS.md, Overuse and owner strain). DRAFT, not decided art.
+// Option 1: Iron's seam (seams.js) on every egg: the outline cell cut out, the cell diagonally inward dim. Option 2: per-egg marks on the same
+// placement: Program a stuck pixel (the outline cell bright, the inward cell dim), Wetware a fray (the outline cell cut, one stray body cell
+// one column outside it and one row down). Columns: plain, neglect level 2 (for comparison), option 1 level 1 and 2, option 2 level 1 and 2.
+import './ready.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
+import { placeSeams, seams, seamCells } from './seams.js';
+import { neglected } from './neglect.js';
+import { drawSprite, paletteColors } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+
+const LCD = '#0b2226';
+const PICK = { program: ['programBaby', 'programTeenCorp', 'programAdultBreachCorp', 'programAdultTuneCorp', 'programElderBreachCorp'], wetware: ['wetwareBaby', 'wetwareTeenStreet', 'wetwareAdultBreachCorp', 'wetwareAdultFeastCorp', 'wetwareElderHidden'] };
+const SETS = { program: programForms(), wetware: wetwareForms() };
+const COLS = ['plain', 'neglect 2', 'level 1', 'level 2', 'level 1', 'level 2'];
+
+function option2(egg, rows, cells) {
+  const g = rows.map((r) => [...r]);
+  for (const { cut, dim } of cells) {
+    const [x, y] = cut;
+    if (egg === 'program') {
+      if (g[y]?.[x] === '#') g[y][x] = '+';
+      if (g[dim[1]]?.[dim[0]] === '#') g[dim[1]][dim[0]] = 'x';
+    } else {
+      if (g[y]?.[x] === '#') g[y][x] = '.';
+      const out = x + (dim[0] < x ? 1 : -1); // one column outside the edge, one row down
+      if (g[y + 1] && g[y + 1][out] === '.') g[y + 1][out] = '#';
+    }
+  }
+  return g.map((r) => r.join(''));
+}
+
+const S = 10, CW = 22, RH = 21, LEFT = 30, TOP = 16;
+const rows = [];
+for (const egg of ['program', 'wetware']) for (const id of PICK[egg]) rows.push({ egg, f: SETS[egg][id] });
+const c = document.getElementById('c');
+c.width = (LEFT + COLS.length * CW + 14) * S; c.height = (TOP + rows.length * RH + 4) * S;
+const ctx = c.getContext('2d'); ctx.scale(S, S); ctx.imageSmoothingEnabled = false;
+ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+ctx.fillStyle = '#c7f9ff'; ctx.font = '3px monospace';
+ctx.fillText('option 1: seam, every egg', LEFT + 2 * CW, 5); ctx.fillText('option 2: stuck pixel / fray', LEFT + 4 * CW, 5);
+COLS.forEach((t, i) => ctx.fillText(t, LEFT + i * CW, 11));
+rows.forEach(({ egg, f }, r) => {
+  const y0 = TOP + r * RH;
+  ctx.fillStyle = '#c7f9ff'; ctx.font = '3px monospace';
+  ctx.fillText(`${egg}`, 2, y0 + 8); ctx.fillText(f.name, 2, y0 + 12);
+  const placed = placeSeams(f);
+  const colors = paletteColors(PALETTES[0]);
+  const pics = [
+    f.a,
+    neglected(f.a, f.anchors.a, 2, 1),
+    seams(f.a, seamCells(placed, 1)),
+    seams(f.a, seamCells(placed, 2)),
+    option2(egg, f.a, seamCells(placed, 1)),
+    option2(egg, f.a, seamCells(placed, 2)),
+  ];
+  pics.forEach((p, i) => {
+    const x0 = LEFT + i * CW;
+    ctx.fillStyle = LCD; ctx.fillRect(x0 - 1, y0 - 1, CW - 2, RH - 2);
+    drawSprite(ctx, p, x0 + Math.floor((CW - 2 - p[0].length) / 2), y0 + Math.floor((RH - 2 - p.length) / 2), colors);
+  });
+});
+document.title = 'ready';
+</script>
