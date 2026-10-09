@@ -388,6 +388,11 @@ export const LEGACY_LIFE = { teenAt: 24 * 60, adultAt: 72 * 60, lifespan: 7 * 24
 // elder x0.25; the elder is the 'mainframe' stage in this fork) and a meal size by stage (proposal, all 1 = unchanged). STAGE='{"rest":{"on":true}}'
 // switches on the rest call and tired (starting values from the draft: a hidden sleep demand that rises while awake, a call at 60 answered with the nap
 // button for a 20 to 30 minute rest, a 60 minute window of which the first 30 are on time, and a tired state, x1.16 drain and no flow, if it lapses).
+// 2.0 Standing gain (maintainer idea, 2026-10-09): every source of Standing (feeds, games, events, netruns, trace) is multiplied by this.
+// STANDINGGAIN=2 doubles them. Costs (clearing a bug) and the tie weights stay in the same absolute points, so a larger number is the
+// same as every cutpoint being lower. Off (1) by default so every older table is unchanged.
+export const GAIN = { mult: Number(process.env.STANDINGGAIN ?? 1) };
+
 export const STAGE = {
   on: false,
   teenAtMin: 7 * 60,
@@ -530,8 +535,8 @@ function attachAxes(s) {
     get: () => s.standing.corp - s.standing.street,
     set(v) {
       const d = v - (s.standing.corp - s.standing.street);
-      if (d > 0) s.standing.corp += d;
-      else s.standing.street -= d;
+      if (d > 0) s.standing.corp += d * GAIN.mult;
+      else s.standing.street -= d * GAIN.mult;
     },
   });
   Object.defineProperty(axes, 'stability', { enumerable: true, get: () => s.temper, set: (v) => { s.temper = v; } });
@@ -1080,7 +1085,7 @@ function stepEvents(s, t, rng) {
     s.lastEventAnswered = false;
     if (type === 'trace') {
       st.integrity = clamp(st.integrity - CFG.traceIgnoredIntegrity);
-      s.standing.corp += CFG.traceIgnoredStanding;
+      s.standing.corp += GAIN.mult * CFG.traceIgnoredStanding;
       log(s, t, '> !! trace completed. corp harvested its data.');
     } else if (type === 'attack') {
       infect(s, CFG.attackLandedIntegrity);
@@ -1689,7 +1694,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
       st.sync = clamp(st.sync + mod(s, action === 'corp' ? 'corpSync' : 'scavSync', 0));
-      s.standing[action === 'corp' ? 'corp' : 'street'] += CFG.feedStanding;
+      s.standing[action === 'corp' ? 'corp' : 'street'] += GAIN.mult * CFG.feedStanding;
       s.sinceFed = 0;
       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
       {
@@ -1794,7 +1799,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.event = null;
       st.charge = clamp(st.charge - 10);
       st.heat = clamp(st.heat + 10);
-      s.standing.street += 1;
+      s.standing.street += GAIN.mult;
       res = ok(`rerouted through proxies. trace lost.${maybeDrop(s, 'hide', ITEM_CFG.hideDropChance, rng)}`, 'patch');
       break;
     }
@@ -1802,7 +1807,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       eventAnswered(s, now);
       s.event = null;
       st.sync = clamp(st.sync - CFG.complySync);
-      s.standing.corp += 1;
+      s.standing.corp += GAIN.mult;
       res = ok(`handshake accepted. corp scan complete.${maybeDrop(s, 'comply', ITEM_CFG.complyDropChance, rng)}`, 'feed');
       break;
     }
@@ -1939,7 +1944,7 @@ function useItem(s, id, rng) {
     }
     case 'voucher':
       st.charge = 100;
-      s.standing.corp += 1;
+      s.standing.corp += GAIN.mult;
       if (s.event?.type === 'trace') {
         s.event = null;
         return `${name} redeemed. charge full. trace waved off.`;
@@ -1949,7 +1954,7 @@ function useItem(s, id, rng) {
     case 'blackice': {
       st.sync = clamp(st.sync + 40);
       st.heat = clamp(st.heat + 20);
-      s.standing.street += 1;
+      s.standing.street += GAIN.mult;
       s.temper -= 1;
       if (!s.virus && !shielded(s) && rng() < ITEM_CFG.blackIceVirusChance) {
         s.virus = true;
@@ -1959,7 +1964,7 @@ function useItem(s, id, rng) {
       return `${name} jacked in. sync surging.`;
     }
     case 'decoy':
-      s.standing.street += 1;
+      s.standing.street += GAIN.mult;
       if (s.event?.type === 'attack') {
         s.event = null;
         return `${name} deployed. intrusion waved off.`;
@@ -1968,7 +1973,7 @@ function useItem(s, id, rng) {
       return `${name} deployed. next intrusion pre-cleared.`;
     case 'salvage': {
       st.charge = clamp(st.charge + 50);
-      s.standing.street += 1;
+      s.standing.street += GAIN.mult;
       if (!s.virus && !shielded(s) && rng() < 0.12) {
         s.virus = true;
         s.virusMin = 0;

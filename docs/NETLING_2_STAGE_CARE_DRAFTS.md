@@ -225,3 +225,28 @@ Archetypes that move by 3 points or more (full life, points):
 - Still not measured: the elder, the hidden-teen binger, meal size by stage, a person.
 
 **Recommendation (not a decision):** option 1. It needs the maintainer to approve the new bug rule, that a baby's faults roll no bugs. If the teen form should stay as steerable as today, add option 3 on top.
+
+## 9. Standing gain (maintainer idea, 2026-10-09): raise every source, flat
+
+Idea: Standing gain is too low to steer, so multiply all of it. Target set by the maintainer: about 50% teen ties for relatively unguided play, close to 0% for strict guided play. Built as `STANDINGGAIN` in the fork (`GAIN` in `sim/sim.js`; 1 by default, so every older table is unchanged): feeds, games, events, trace and netrun Standing are all multiplied; bug-clearing costs (2 Standing), the tie weights and the hidden-path band (1) stay in absolute points, so a gain of 2 is the same as every cutpoint being half as far. Tested on Program with the break and option 1 (baby drain 1.6, no baby bugs, rest call), 300 lives per archetype for the gains and the 1000 life option B run for gain 1; `results/balance-gain{1.5,2,3,4}-program.json`. Simulator only; no test file covers `GAIN` (the default path is covered by the existing 320 prototype tests).
+
+Teen tie rate (gap under 2) / adult lean certain (gap 5 or more):
+
+| archetype | gain 1 | 1.5 | 2 | 3 | 4 |
+|---|---:|---:|---:|---:|---:|
+| attentive | 80 / 14 | 68 / 33 | 44 / 50 | 33 / 64 | 18 / 71 |
+| casual | 86 / 12 | 73 / 28 | 55 / 42 | 41 / 58 | 24 / 71 |
+| human-keen | 89 / 7 | 79 / 19 | 59 / 34 | 48 / 53 | 33 / 68 |
+| human-regular | 94 / 4 | 81 / 13 | 65 / 27 | 53 / 47 | 37 / 62 |
+| worker | 98 / 3 | 92 / 12 | 77 / 26 | 66 / 43 | 40 / 57 |
+| daredevil | 71 / 38 | 57 / 53 | 38 / 66 | 27 / 73 | 17 / 81 |
+| corpo (strict guided) | 16 / 100 | 2 / 100 | 1 / 100 | 0 / 100 | 0 / 100 |
+| runner (strict guided) | 5 / 100 | 1 / 100 | 0 / 100 | 0 / 100 | 0 / 100 |
+| steer-tune-corp/street | 0 / 100 | 0 / 100 | 0 / 100 | 0 / 100 | 0 / 100 |
+
+- **Gain 2 meets the target** for the regular players (attentive 44, casual 55, human-keen 59) and takes the strict guided archetypes to about 0. Gain 1.5 is not enough (68 to 81 for regular play); gain 3 and 4 make the teen close to deterministic for anyone who plays at all.
+- Sparse players (worker, hunter-casual) stay mostly tied at gain 2 (77, 98): they feed too rarely for any flat gain to steer them. That is acceptable if the maintainer wants sparse play to stay a gamble; a stage curve or a bigger baby weight would be the lever.
+- The strict guided archetypes were already at or near 0 ties under option B; the problem was the regular players, and gain 2 fixes that.
+- Whole life does not move (mean full life 87% at every gain; the worker 81 to 78 at 300 lives, inside the noise of that sample).
+- Side effects to decide on: a bug cleared for Standing costs 2 points, so at gain 2 it is half the price in effect. The maintainer's lean: keep it cheap, but payable only when the netling lacks the scrip. That rule is not built (the bots pay scrip first by default, `CLEAR`). The hidden-path band stays at 1 absolute point, so a hidden-path player has half the room; the hunter archetypes' tie rate is unchanged at 98 to 100%, but the hidden-path rate was not measured here.
+- Not run: Iron and Wetware (config entries exist: `gain<g>-iron`, `gain<g>-wetware` in `baseline/run-all.mjs`), the clinic cost rule, any real player.

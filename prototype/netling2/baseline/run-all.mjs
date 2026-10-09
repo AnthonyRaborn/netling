@@ -53,6 +53,8 @@ for (const egg of ['iron', 'program', 'wetware']) {
   CONFIG[`stageA-${egg}`] = { ...CONFIG[`brake-${egg}`], STAGE: STAGE_A };
   CONFIG[`stageB-${egg}`] = { ...CONFIG[`brake-${egg}`], STAGE: STAGE_B };
 }
+// Standing gain (GAIN in sim.js) on top of option B: every source of Standing multiplied, tested at 300 lives (the teen tie rate is a share of lives).
+for (const egg of ['iron', 'program', 'wetware']) for (const g of [1.5, 2, 3, 4]) CONFIG[`gain${g}-${egg}`] = { ...CONFIG[`stageB-${egg}`], STANDINGGAIN: String(g) };
 const jobs = [];
 const add = (name, script, args, config, env = {}, est = 1) => jobs.push({ name, script, args: args.map(String), config, env, est });
 
@@ -64,6 +66,8 @@ for (const egg of ['iron', 'program', 'wetware']) add(`balance-brake-${egg}`, 'b
 for (const h of [8, 12]) add(`balance-brake-lock${h}-program`, 'balance.mjs', [LIVES], `brake-program-lock${h}`, { JSON: '1' }, 900);
 
 for (const egg of ['iron', 'program', 'wetware']) for (const v of ['A', 'B']) add(`balance-stage${v}-${egg}`, 'balance.mjs', [LIVES], `stage${v}-${egg}`, { JSON: '1' }, 900);
+
+for (const g of [1.5, 2, 3, 4]) add(`balance-gain${g}-program`, 'balance.mjs', [SMOKE ? 3 : 300], `gain${g}-program`, { JSON: '1' }, 400);
 
 // Lineage pacing and the Rogue gate (egg pages, ending).
 for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'rules', { JSON: '1' }, 600);

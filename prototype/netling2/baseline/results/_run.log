@@ -164,3 +164,12 @@
 2026-10-09T03:19:19.545Z done balance-stageA-wetware [stageA-wetware] 955s
 2026-10-09T03:19:21.776Z done balance-stageB-wetware [stageB-wetware] 954s
 2026-10-09T03:19:21.777Z all 6 jobs finished
+2026-10-09T12:23:33.709Z start balance-gain1.5-program
+2026-10-09T12:23:33.724Z start balance-gain2-program
+2026-10-09T12:23:33.728Z start balance-gain3-program
+2026-10-09T12:23:33.731Z start balance-gain4-program
+2026-10-09T12:28:33.002Z done balance-gain4-program [gain4-program] 299s
+2026-10-09T12:28:34.240Z done balance-gain1.5-program [gain1.5-program] 301s
+2026-10-09T12:28:35.177Z done balance-gain3-program [gain3-program] 301s
+2026-10-09T12:28:36.018Z done balance-gain2-program [gain2-program] 302s
+2026-10-09T12:28:36.019Z all 4 jobs finished
