@@ -174,3 +174,48 @@ test('Program and Wetware: the owner state breaks on its strain; another egg sta
     });
   }
 });
+
+// The strain warning (maintainer, 2026-10-09, option 3): only while the owner's state is active, on crossing the line or on entering the
+// state with strain already past it; once per stay in the state.
+const WARN = { heat: '> tolerances are slipping.', charge: '> swap is filling up. it is thrashing.', sync: '> it is jittery. too much, too close.' };
+const warnings = (s, key) => s.log.filter((e) => e.msg === WARN[key]).length;
+
+test('Iron: the wear warning shows in Overclock only, once a stay, and again on the next entry', () => {
+  withBreak(null, () => {
+    IRON.on = true; Object.assign(SIDES, { on: true, owner: null, ownerMult: 3, teenStates: true });
+    const s = make({ heat: 40 });
+    s.wear = 60;
+    oneMinute(s);
+    assert.equal(warnings(s, 'heat'), 0, 'not overclocked: no warning, though wear is past 50');
+    s.stats.heat = 90;
+    oneMinute(s); oneMinute(s);
+    assert.equal(warnings(s, 'heat'), 1, 'entering Overclock with wear past 50 warns, once');
+    s.stats.heat = 40;
+    oneMinute(s);
+    s.stats.heat = 90;
+    oneMinute(s);
+    assert.equal(warnings(s, 'heat'), 2, 'a new stay warns again');
+  });
+});
+
+test('Program and Wetware: the strain warning waits for the state, and precedes a strain break in the same minute', () => {
+  for (const owner of ['charge', 'sync']) {
+    withBreak(80, () => {
+      egg(owner);
+      const s = make({ [owner]: 96 });
+      s.ostrain = 60;
+      s.sideHeld = { charge: false, sync: false, heat: false };
+      s.sideHold = { charge: 0, sync: 0, heat: 0 };
+      oneMinute(s);
+      assert.equal(warnings(s, owner), 0, `${owner}: no state, no warning`);
+      const b = make({ [owner]: 96 });
+      b.ostrain = 85;
+      b.sideHeld = { charge: false, sync: false, heat: false, [owner]: true };
+      b.sideHold = { charge: 999, sync: 999, heat: 0 };
+      oneMinute(b);
+      const w = b.log.findIndex((e) => e.msg === WARN[owner]);
+      const k = b.log.findIndex((e) => e.msg.startsWith('> !!'));
+      assert.ok(w >= 0 && k > w, `${owner}: the warning comes before the break`);
+    });
+  }
+});

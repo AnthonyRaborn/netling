@@ -666,7 +666,7 @@ function stepWear(s, t, rest) {
   s.wearMax = Math.max(s.wearMax ?? 0, w);
   if (w >= IRON.line) s.wearHighMin = (s.wearHighMin ?? 0) + 1;
   if (w >= IRON.line && s.stage !== 'baby') s.wearAt ??= s.ageMin; // first minute wear passes the warning line (for the one-time Iron caption)
-  if (before < IRON.line && w >= IRON.line) log(s, t, '> tolerances are slipping.');
+  // its log line is the strain warning, shown by stepStrainWarn while Overclock is active
 }
 // 2.0 egg pressure as a band on one meter (maintainer: Iron manages Heat, Wetware Charge, Program Sync). Hidden strain builds while the stat is
 // above `hi` (rate per minute per point over) or under `lo` (loRate) while awake, decays (faster at rest) and replaces the flat base infection
@@ -736,7 +736,7 @@ function addStrain(s, t) {
   s.ostrain = Math.min(100, before + strainCfg('add'));
   s.ostrainMax = Math.max(s.ostrainMax ?? 0, s.ostrain);
   SIDE_METER.strainAdds++;
-  if (before < OVERUSE.strain.line && s.ostrain >= OVERUSE.strain.line && t !== undefined) log(s, t, SIDES.owner === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is jittery. too much, too close.');
+  // its log line is the strain warning, shown by stepStrainWarn while the owner's state is active
 }
 function stepStrain(s, rest) {
   if (!ownerStrain() || !s.ostrain) return;
@@ -754,7 +754,7 @@ const bandOn = () => (BANDS.charge.on ? 'charge' : BANDS.sync.on ? 'sync' : null
 //   charge lo: drains and heat drift slower (slow); cost: play needs more charge (gate, over the usual 10).
 //   sync hi:  visits likelier (visit), wins drop more (drop); cost: infection hazard up (virus), temper swings (swing, per minute).
 //   sync lo:  trouble comes less often (calm); cost: wins drop less (dull).
-export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeByStrain: 0, brakeWarns: 0, overfeeds: 0, overfeedCaches: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
+export const SIDE_METER = { drops: 0, plays: 0, playGain: 0, visits: 0, penHits: 0, burns: 0, brakes: 0, brakeCharge: 0, brakeSync: 0, brakeHeat: 0, brakeByStrain: 0, strainWarns: 0, brakeWarns: 0, overfeeds: 0, overfeedCaches: 0, overplays: 0, overheats: 0, strainAdds: 0, runsInState: 0, runEndsBelowExit: 0, endsSoonAfterRun: 0, endsOther: 0 }; // sums over lives, for sides-sweep.mjs
 export const SIDES = {
   on: false, owner: null, ownerMult: 2, lowOwnerOnly: false, flowShared: false, ironBenefit: 3, teenStates: true, // teenStates: a baby is too young and unstable to hold Overclock, Overdrive or Overlink (decided, maintainer)
  
@@ -820,6 +820,22 @@ function stepHeld(s, rest) {
       if (!s.sideHeld[key] && s.heldAt?.[key] == null && s.stage !== 'baby' && s.sideHold[key] >= (SIDES[key].hintMin ?? 120) && s.hintAt[key] === null) s.hintAt[key] = s.ageMin; // never as a baby
     }
   }
+}
+// The strain warning (maintainer, 2026-10-09, option 3): the owner's strain line (50) and its log line show only while the owner's state is
+// active: when strain crosses the line in the state, or when the state is entered with strain already past it. It shows again after the
+// state ends or strain falls under the line. With the strain break (BRAKE.strainBreak), every strain break is preceded by it, at worst in
+// the same minute. Before this, the line showed whenever strain crossed it (Program's and Wetware's heavy players mostly outside the state).
+function stepStrainWarn(s, rest, t) {
+  const key = IRON.on ? 'heat' : ownerStrain() ? SIDES.owner : null;
+  if (!key) return;
+  const strain = key === 'heat' ? s.wear ?? 0 : s.ostrain ?? 0;
+  const line = key === 'heat' ? IRON.line : OVERUSE.strain.line;
+  const active = !rest && (key === 'heat' ? overclocked(s) : Boolean(s.sideHeld?.[key]));
+  if (!active || strain < line) { s.strainWarned = false; return; }
+  if (s.strainWarned) return;
+  s.strainWarned = true;
+  SIDE_METER.strainWarns++;
+  log(s, t, key === 'heat' ? '> tolerances are slipping.' : key === 'charge' ? '> swap is filling up. it is thrashing.' : '> it is jittery. too much, too close.');
 }
 function stepBrake(s, rest, t) {
   if (!BRAKE.on || !SIDES.on) return;
@@ -1038,6 +1054,7 @@ function step(s, t, rng) {
   if (IRON.on) stepWear(s, t, rest);
   for (const k of Object.keys(BANDS)) if (BANDS[k].on) stepBand(s, k, rest);
   stepHeld(s, rest);
+  stepStrainWarn(s, rest, t);
   stepBrake(s, rest, t);
   stepRest(s, t, rest);
   if (WET.on) stepShock(s);
