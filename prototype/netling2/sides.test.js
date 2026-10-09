@@ -107,11 +107,12 @@ test('Iron: the break throttles Overclock for the lockout, and a baby never trig
   configure(false);
 });
 
-test('the break can cost faults and Integrity (both off by default): each break adds its faults and takes its Integrity', () => {
+test('the break costs one fault by default (maintainer) and can cost more faults and Integrity: each break adds its faults and takes its Integrity', () => {
   configure(true);
   SIDES.owner = 'charge';
-  assert.equal(BRAKE.faults, 0);
+  assert.equal(BRAKE.faults, 1, 'one fault a break by default');
   assert.equal(BRAKE.integrityHit, 0);
+  const keep = { faults: BRAKE.faults, integrityHit: BRAKE.integrityHit };
   BRAKE.on = true;
   BRAKE.faults = 2;
   BRAKE.integrityHit = 10;
@@ -135,7 +136,7 @@ test('the break can cost faults and Integrity (both off by default): each break 
     faults += last.careMistakes;
   }
   globalThis.__sample = undefined;
-  BRAKE.on = false; BRAKE.faults = 0; BRAKE.integrityHit = 0;
+  BRAKE.on = false; Object.assign(BRAKE, keep);
   configure(false);
   assert.ok(breaks > 0 && hitChecks > 0, 'breaks happen');
   assert.ok(faults >= breaks * 2, `faults ${faults} cover two a break (${breaks} breaks)`);

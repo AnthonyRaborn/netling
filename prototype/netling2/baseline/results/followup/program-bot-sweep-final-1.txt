@@ -1,0 +1,6 @@
+{"chargePerks":true,"bot":"greedy","archetype":"steer-tune-corp","fullLife":0.993,"collapse":0.007,"inOverdrive":0.195,"drops":18.2,"playGain":1543,"feeds":98.9,"faults":3.11,"bugs":0.12,"temper":28.33}
+{"chargePerks":true,"bot":"greedy","archetype":"ghosthunter","fullLife":0.982,"collapse":0.018,"inOverdrive":0.142,"drops":25.1,"playGain":2181,"feeds":91,"faults":2.09,"bugs":0.23,"temper":41.43}
+{"chargePerks":true,"bot":"watch","archetype":"steer-tune-corp","fullLife":0.994,"collapse":0.006,"inOverdrive":0.175,"drops":17.7,"playGain":1515,"feeds":93.9,"faults":1.03,"bugs":0.04,"temper":28.75}
+{"chargePerks":true,"bot":"watch","archetype":"ghosthunter","fullLife":0.978,"collapse":0.022,"inOverdrive":0.149,"drops":25.5,"playGain":2188,"feeds":85.7,"faults":0.36,"bugs":0.04,"temper":48.35}
+{"chargePerks":true,"bot":"avoid","archetype":"steer-tune-corp","fullLife":1,"collapse":0,"inOverdrive":0,"drops":13.7,"playGain":1305,"feeds":68.6,"faults":0.75,"bugs":0.03,"temper":14.31}
+{"chargePerks":true,"bot":"avoid","archetype":"ghosthunter","fullLife":0.999,"collapse":0.001,"inOverdrive":0,"drops":21.2,"playGain":1977,"feeds":62.3,"faults":0.47,"bugs":0.07,"temper":29.9}

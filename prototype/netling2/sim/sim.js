@@ -702,10 +702,11 @@ if (process.env.SIDES) for (const [k, v] of Object.entries(JSON.parse(process.en
 // 2.0 break (maintainer, off by default; BRAKE='{"on":true}' switches it on): a cost trigger for the three states (Iron's Overclock, Program's
 // Overdrive, Wetware's Overlink). While a state is active and Integrity is under warnInt (70) the netling warns once (visibility only); under breakInt (first 55, lowered to 40 by the maintainer)
 // the state is forced to end, the bar is pushed well below its exit line (drop: Charge, Sync or Heat is set to at most that), and the state cannot
-// be entered again for lockMin minutes (12 hours: lockouts of 8, 12 and 24 hours were tried, see baseline/README.md). Optional consequences (off):
-// `faults` ordinary faults (care mistakes, temper, a bug roll each) and `integrityHit` Integrity lost when the break fires. Iron's Overclock is a plain Heat band, so its lockout turns the
+// be entered again for lockMin minutes (12 hours: lockouts of 8, 12 and 24 hours were tried, see baseline/README.md). Consequences:
+// `faults` ordinary faults (care mistakes, temper, a bug roll each; maintainer: 1) and `integrityHit` Integrity lost when the break fires (0; 10 was tried and costs
+// more survival without a visible cue). Iron's Overclock is a plain Heat band, so its lockout turns the
 // Overclock rules (benefits and costs) off while it lasts. The trigger is Integrity for all three; the design doc may choose another for Iron.
-export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 0, integrityHit: 0 };
+export const BRAKE = { on: false, warnInt: 70, breakInt: 40, lockMin: 720, drop: { charge: 50, sync: 55, heat: 35 }, faults: 1, integrityHit: 0 };
 if (process.env.BRAKE) {
   const v = JSON.parse(process.env.BRAKE);
   Object.assign(BRAKE, v, { drop: { ...BRAKE.drop, ...(v.drop ?? {}) } });
