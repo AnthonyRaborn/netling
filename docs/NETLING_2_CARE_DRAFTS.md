@@ -304,14 +304,12 @@ Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 
 | Warning, Overdrive | > integrity falling under load. ease off the charge. | > over spec too long. the frame is taking it. ease the power. | > too full, and it hurts now. ease off the food. |
 | Warning, Overlink | > link load is eating integrity. stop playing for now. | > the lock is straining the frame. let it ease. | > too close for too long. it hurts. give it some space. |
 | Warning, Overclock | > running hot under load. integrity falling. flush the coolant. | > past rating too long. it is wearing through. vent it. | > too hot for too long. it hurts. cool it down. |
-| Break, Overdrive (discharge) | > !! buffers discharged. boost blocked for half a day. fault logged. | > !! breaker tripped. power dumped. held under spec for half a day. fault. | > !! it threw it all up. it cannot fill up like that for half a day. slip. |
+| Break, Overdrive (discharge) | > !! buffers discharged. boost blocked for half a day. fault logged. | > !! breaker tripped. power dumped. held under spec for half a day. fault. | > !! it ate too much and crashed. it cannot fill up like that for half a day. slip. |
 | Break, Overlink (crash) | > !! link crashed. session dropped. no relink for half a day. fault logged. | > !! lock slipped. gears out. no lock for half a day. fault. | > !! it pulled away all at once. half a day before it can get that close. slip. |
 | Break, Overclock (throttle) | > !! thermal limit hit. clock throttled for half a day. fault logged. | > !! thermal cutout. throttled under rating for half a day. fault. | > !! it overheated and shut down hard. it cannot run that hot for half a day. slip. |
 | Lockout over, Overdrive | > boost available again. | > breaker closed. it can run over spec again. | > it can fill up again. |
 | Lockout over, Overlink | > relink available. | > lock free again. | > it can get close again. |
 | Lockout over, Overclock | > clock limit lifted. | > cutout cleared. it can run hot again. | > it can run hot again. |
-
-Alternative for Wetware's discharge if "threw it all up" is too much: "> !! it ate too much and crashed. it cannot fill up like that for half a day. slip."
 
 **Alert lines** (the warning only; stat-alert style, sentence case). Proposal: the warning is a **Care** notification (not counted against the Events budget of 6 a day), once per state per entry, like the simulator's one-time warning; the break itself and the end of the lockout are log lines only, since by then there is nothing to answer.
 
@@ -319,7 +317,7 @@ Alternative for Wetware's discharge if "threw it all up" is too much: "> !! it a
 |---|---|---|---|
 | Overdrive strain | Running too full. Integrity is dropping. | Over spec too long. Integrity is dropping. | Too full. Its health is dropping. |
 | Overlink strain | Link overloaded. Integrity is dropping. | Lock straining. Integrity is dropping. | Too close for too long. Its health is dropping. |
-| Overclock strain | Running hot under load. Integrity is dropping. | Past rating too long. Vent it. | Too hot for too long. Its health is dropping. |
+| Overclock strain | Running hot under load. Integrity is dropping. | Past rating too long. Integrity is dropping. | Too hot for too long. Its health is dropping. |
 
 **State clues during the lockout** (extends the State clues table): the state's label goes back to the bar's own name and its marks fall away, as for Overlink's burnout, and the readout line carries a word until the lockout ends: Overdrive " · drained", Overlink " · spent" (the same word as the burnout, since the player's lesson is the same: not today), Overclock " · throttled". Screen-reader values match (", drained" and so on). No new sprite mark (keeps the flash budget and the three-region layout). During the warning: proposal, nothing beyond the log line and the alert; a thin strain mark was considered and left out because the marks are kept regular (Temper and the states, rule 1).
 
