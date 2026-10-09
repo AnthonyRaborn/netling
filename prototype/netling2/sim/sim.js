@@ -719,7 +719,7 @@ function stepActs(s) {
 // x restMult at rest); strain drives the base infection hazard as wear does (floor + slope * strain / 100; floor null is 1.0's base, so an unstrained netling is as in 1.0) plus one effect of its own: Program
 // buffer overflows more often (x 1 + overflow * strain / 100), Wetware burns Charge faster (x 1 + chargeDrain * strain / 100). Iron keeps its
 // wear (IRON). costsX1: the owner's x3 applies to the states' benefits only and their costs stay at x1, as for Iron's Overclock (symmetric).
-export const OVERUSE = { on: false, feedLine: 95, maxOverfeeds: 3, resetLine: 85, overfeedCache: true, playLine: 90, heatLine: 75, int: 2, costsX1: true, strain: { add: 10, decay: 1 / 1000, restMult: 4, floor: null, slope: 0.3, line: 50, overflow: 2, chargeDrain: 1, charge: { add: 8, slope: 0.1 }, sync: {} } };
+export const OVERUSE = { on: false, feedLine: 95, maxOverfeeds: 3, resetLine: 85, overfeedCache: true, playLine: 90, heatLine: 75, int: 2, costsX1: true, strain: { add: 10, decay: 1 / 1000, restMult: 4, floor: null, slope: 0.3, line: 50, overflow: 2, chargeDrain: 1, charge: { add: 8, slope: 0.1 }, sync: { add: 15 } } };
 if (process.env.OVERUSE) {
   const v = JSON.parse(process.env.OVERUSE);
   Object.assign(OVERUSE, v, { strain: { ...OVERUSE.strain, ...(v.strain ?? {}), charge: { ...OVERUSE.strain.charge, ...(v.strain?.charge ?? {}) }, sync: { ...OVERUSE.strain.sync, ...(v.strain?.sync ?? {}) } } });
