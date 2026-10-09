@@ -11,6 +11,9 @@ process.env.PERKS = process.env.PERKS ?? '1';
 const lives = Number(process.argv[2] ?? 200);
 const names = (process.argv[3] ?? 'attentive,casual,daredevil,sysadmin,human-regular').split(',');
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
+const { STAGE } = await import('./sim.js');
+// With STAGE='{"on":true,"rest":{"on":true}}' the real rest call in the fork is counted (calls opened, answered or not); otherwise the shadow model below.
+const REAL = STAGE.rest.on;
 const RATE = { baby: 20, teen: 12, adult: 6 };
 const stageOf = (age) => (age < 7 * 60 ? 'baby' : age < 46 * 60 ? 'teen' : 'adult');
 const sumWins = (s) => Object.values(s.wins ?? {}).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
@@ -34,12 +37,13 @@ for (const n of names) {
       if (cur.wins > prev.wins) D += (cur.wins - prev.wins) * (2 / 0.75);
       if (cur.nap && !prev.nap) D = Math.max(0, D - 40);
       if (prev.asleep && !cur.asleep) D = 0;
-      if (restLeft > 0) restLeft--;
+      if (REAL) { if (Boolean(s.call) && !prev.call) A[st].call++; cur.call = Boolean(s.call); }
+      else if (restLeft > 0) restLeft--;
       else if (awake) {
         D += RATE[st] / 60;
         if (D >= 60 && !cur.run && !cur.event) { A[st].call++; D = 10; restLeft = 25; }
       }
-      prev = cur;
+      prev = { ...cur, call: cur.call ?? false };
     };
     simulate({ ...ARCHETYPES[n] }, i);
   }

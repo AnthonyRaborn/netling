@@ -1,0 +1,16 @@
+archetype        | stage | awake h/life | events | visits | requests | rest calls | events + calls | + visits | + requests   (each per 15 awake hours)
+attentive        | baby  |          6.3 |    2.3 |    0.7 |      2.9 |        4.6 |            6.9 |      7.6 |         10.4
+attentive        | teen  |         21.0 |    1.8 |    0.8 |      2.9 |        3.3 |            5.0 |      5.9 |          8.8
+attentive        | adult |         44.9 |    1.7 |    0.8 |      3.0 |        1.3 |            2.9 |      3.8 |          6.8
+casual           | baby  |          6.3 |    2.0 |    0.8 |      2.2 |        4.3 |            6.3 |      7.2 |          9.4
+casual           | teen  |         20.9 |    1.9 |    0.8 |      2.4 |        3.2 |            5.0 |      5.9 |          8.3
+casual           | adult |         44.1 |    1.7 |    0.8 |      2.5 |        1.3 |            3.0 |      3.8 |          6.3
+daredevil        | baby  |          6.3 |    2.3 |    0.8 |      2.9 |        4.4 |            6.8 |      7.6 |         10.5
+daredevil        | teen  |         21.0 |    2.1 |    0.9 |      3.0 |        3.2 |            5.4 |      6.3 |          9.3
+daredevil        | adult |         44.9 |    2.0 |    0.9 |      3.0 |        1.3 |            3.2 |      4.1 |          7.1
+sysadmin         | baby  |          6.3 |    2.0 |    0.8 |      3.0 |        4.7 |            6.7 |      7.5 |         10.5
+sysadmin         | teen  |         21.0 |    1.8 |    0.8 |      2.9 |        3.4 |            5.3 |      6.0 |          9.0
+sysadmin         | adult |         44.7 |    1.7 |    0.8 |      3.0 |        1.3 |            3.0 |      3.8 |          6.8
+human-regular    | baby  |          6.3 |    2.1 |    0.9 |      1.8 |        4.3 |            6.4 |      7.3 |          9.0
+human-regular    | teen  |         17.4 |    2.0 |    0.8 |      1.8 |        3.2 |            5.2 |      6.0 |          7.8
+human-regular    | adult |         19.5 |    1.8 |    0.7 |      1.9 |        1.3 |            3.1 |      3.8 |          5.7
