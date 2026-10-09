@@ -9,10 +9,11 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 1. **Adult age: split the difference** between keeping 51 hours and moving to 41: **46 hours**. With a 7 hour baby the teen stage is 39 hours and the adult stage 74 hours of the 120 hour life.
 2. **Baby drain x2.4 works for now** (kept as a starting value, to be measured).
 3. **Elder cache: reduce it** (x0.25), do not remove it.
-4. **Rest call response window: try 60 minutes** (not 90). Names for Iron: options in section 2.5, not yet chosen.
+4. **Rest call response window: try 60 minutes** (not 90), and **the first 30 minutes still count as on time** (decided 2026-10-09). Iron's rest theme is **calibration** (decided as the right theme); the button label has to fit 9 characters, see section 2.5.
 5. **Tired: the size is a good start** (drain x1.16, flow blocked).
-6. **Notification budget: see what 6 a day looks like**, not counting care alerts, evolution notices or netrun calls (all three excluded from the count, at least for now). The first measurement is in section 2.6.
+6. **Notifications (decided 2026-10-09):** visitors never notify (they exist to encourage keeping the game open). Timed events (trace, surge, attack, overflow) do notify and are the class the budget of 6 a day counts. Care events, rest calls included, do not count against it. That gives three classes with their own toggles: **Events, Care, Cooldowns** (a netrun being ready is the cooldown example). Evolution notices were left out of the count and are not yet placed in a class. Counts per class are in section 2.6.
 7. **Clustered, predictable adult events: not yet.**
+8. **Elder cache is less often, not zero, so PURGE is unchanged** (decided 2026-10-09).
 
 ## 1. What care is today
 
@@ -51,7 +52,7 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 - Ways to tamp the benefit down (not chosen):
   1. **Reduce, do not remove** (chosen): elder cache chance x0.25. The pressure is weak but real, PURGE stays alive, nothing breaks. One number.
   2. **Swap in a matching burden**: an elder wear, an Integrity drain of the same size as the cache's (Integrity for Integrity; bugs already cost 0.5 an hour each as a precedent).
-  3. Give PURGE an elder job so the button stays alive without a new button.
+  3. Give PURGE an elder job so the button stays alive without a new button. Not needed: the cache is reduced, not removed, so PURGE works as it does now (decided).
 - Program's Overdrive overflow multiplier needs a look: overflow chance depends on cache, so an elder with no cache would pay no Overdrive overflow cost (the 8 an hour Integrity bleed remains).
 - Elders eat bigger meals (Proposal, start x1.5 Charge per feed), which lowers their feeds per hour.
 
@@ -72,10 +73,19 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
 - A hidden **sleep demand** from 0 to 100 builds while awake at a rate that depends on stage: start baby 20 an hour (a call about every 3 hours, two in the stage), teen 12, adult 6, elder 4. It rises by 10 for a netrun and 2 for a mini-game, falls by 1 for a feed, falls by 40 for a scheduled nap (in proportion to the nap's length), and resets to 0 after a night's sleep. Form may add a modifier later.
 - Past a threshold (start 60) it fires a **rest call**: a notification (the app is an APK, so notifications are expected). Calls do not fire during sleep hours, during a netrun (they wait until the jack-out and its 5 minute grace), or while an event is open.
 - Answering starts a **rest of 20 to 30 minutes** (random). During it: the nap drain rate (0.35), events paused, demand reset to 10. Rest ends a state in the pressure design, so the rule is: **a rest that answers a call pauses a held state and does not break it; a voluntary rest while not called still breaks it** (decided).
-- **Response window: 60 minutes** (decided to try; was proposed at 90). Answering within the first 30 minutes is on time (steady +1 temper, the same shape as a fast PATCH; the 30 is not confirmed against the shorter window); later in the window is neutral; letting it lapse sets **tired** and leans unsteady (-1 temper).
+- **How it is answered (Proposal; nothing here changes the fixed button count).** The call is answered with the **nap button**, which already changes its label (NAP to WAKE UP in 1.0). While a call is open the button shows the egg's rest verb, and pressing it starts the 20 to 30 minute call-rest, not a full nap. With no call open it is the ordinary nap (2 hour cap, 4 hour cooldown). A call-rest does not use the nap cooldown. Labels stay at 9 characters or fewer (the care drafts' rule); the longer words ("calibrating", "calibration due") belong to the call line, the log and the status text, not the button.
+
+  | | Ordinary nap button (care drafts) | During a call | While resting | Call line (not limited to 9) |
+  |---|---|---|---|---|
+  | Program | NAP | RESET | WAKE UP | "> reset due." |
+  | Iron | IDLE | CALIBRATE (exactly 9; CALIB if the layout needs 5) | WAKE UP | "> calibration due." / "> calibrating. back in 25m." |
+  | Wetware | DOZE | REST | WAKE UP | "> it needs rest." |
+
+  Shorter Iron labels, if CALIBRATE is too wide on a phone: CALIB (5), TRIM (4, trimming out drift), ZERO (4, zeroing a gauge); not TUNE (a role name). CALIBRATING (11) does not fit and would only ever be the status text.
+- **Response window: 60 minutes** (decided to try; was proposed at 90). Answering within the first 30 minutes is on time (steady +1 temper, the same shape as a fast PATCH); later in the window is neutral; letting it lapse sets **tired** and leans unsteady (-1 temper).
 - **Tired** (0 or 1, like a bug): Charge and Sync drain x1.16 (the size of one bug) and flow is blocked, until the next rest of 20 minutes or more or a night's sleep. It does not stack and it does not kill by itself. The size is a good start (decided).
 - Constraint: **a work-day gap stays fatal** (decided earlier). The rest call is a chore with a cost, not a safety net: an unanswered call must not make a long absence survivable, so there is no self-rest.
-- **Flavor** (wording not drafted): Program "reset" and Wetware "rest" are the working names; Iron is open. Iron's decided wording draws on machine sounds and timings, drift corrected by calibration, and batch rhythm ([SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md)). Options for the action and the call:
+- **Flavor** (wording not drafted): Program "reset" and Wetware "rest" are the working names; Iron's theme is calibration (decided). The options below were the shortlist. Iron's decided wording draws on machine sounds and timings, drift corrected by calibration, and batch rhythm ([SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md)). Options for the action and the call:
 
   | Option | Action / call | For | Against |
   |---|---|---|---|
@@ -86,34 +96,39 @@ First draft, started 2026-10-09. Care in 1.0 and in the 2.0 fork is the same at 
   | quiesce | "quiescing" / "quiesce due" | a precise machine term for settling to rest | hard word; the plain-words rule is only for Wetware, so it is allowed |
   | power cycle | "power cycling" / "cycle due" | familiar | too close to "reboot" (the post-crash recovery) and to hibernation |
 
-  Words not to use: "reboot" (the post-crash recovery), "defrag" (a proposed bug-clearing name) and "cool" or "cool-down" (COOL is a care button). My pick: **calibrate**, with **maintenance window** as the call's longer form; the maintainer chooses.
+  Words not to use: "reboot" (the post-crash recovery), "defrag" (a proposed bug-clearing name) and "cool" or "cool-down" (COOL is a care button). The theme is calibrate; the open part is only the button label (above).
 
-### 2.6 Notification budget (Direction: 6 a day, to be seen)
+### 2.6 Notifications: three classes and a budget of 6 a day for events (Decided, counts measured)
 
-On an APK every event can be a notification, so volume is the real constraint. Decided: look at a budget of **6 a day**, not counting care alerts, evolution notices or netrun calls (those three are excluded from the count and were not measured).
+On an APK every event can be a notification, so volume is the constraint. Decided (2026-10-09):
 
-**What reaches the player today and under the draft's rest call** (`sim/notification-count.mjs`, 200 lives each, results in `prototype/netling2/baseline/results/followup/notification-count.txt`). Counts are per 15 awake hours, stages by age as proposed (baby under 7 hours, teen to 46, adult after), the rest call is a shadow of section 2.5 that changes nothing and assumes every call is answered:
+- **Visitors never notify.** They exist to encourage keeping the game open.
+- **Events** (timed events: trace, surge, attack, overflow) **notify and count against the budget of 6 a day.**
+- **Care** events do **not** count against it. Care includes the rest call (and stat alerts; attention requests are placed here too, my assumption).
+- **Cooldowns** are a third class (a netrun being ready is the example).
+- Each class has its own toggle. Evolution notices are not yet placed in a class.
 
-| Player | Stage | Events | Visits | Requests | Rest calls | Events + calls | + visits | + requests |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| attentive | baby | 2.1 | 0.8 | 3.0 | 3.9 | 5.9 | 6.7 | 9.7 |
-| attentive | teen | 1.7 | 0.9 | 2.9 | 2.2 | 3.9 | 4.7 | 7.6 |
-| attentive | adult | 1.6 | 1.0 | 3.0 | 1.0 | 2.6 | 3.6 | 6.5 |
-| casual | baby | 1.9 | 0.8 | 3.2 | 3.6 | 5.5 | 6.3 | 9.4 |
-| casual | teen | 2.0 | 0.7 | 2.4 | 2.2 | 4.2 | 5.0 | 7.4 |
-| casual | adult | 1.8 | 0.8 | 2.5 | 1.0 | 2.8 | 3.6 | 6.0 |
-| daredevil | adult | 2.0 | 0.9 | 3.0 | 1.0 | 3.0 | 3.9 | 6.9 |
-| sysadmin | adult | 1.7 | 0.9 | 3.0 | 1.0 | 2.7 | 3.7 | 6.6 |
-| human-regular | adult | 1.9 | 0.7 | 1.9 | 1.0 | 2.9 | 3.5 | 5.4 |
+**What each class would send today and under the draft's rest call** (`sim/notification-count.mjs`, 200 lives each, `prototype/netling2/baseline/results/followup/notification-count.txt`). Per 15 awake hours, stages by age as proposed (baby under 7 hours, teen to 46, adult after); the rest call is a shadow of section 2.5 that changes nothing and assumes every call is answered:
 
-The other rows are in the results file. What it says:
-- **Events plus rest calls fit in 6 at every stage**: 2.6 to 3.0 for an adult, 3.9 to 4.2 for a teen, 5.5 to 6.1 for a baby (the baby stage is only about 7 awake hours, so that is about 2.6 items in the whole stage).
-- **Adding visits fits from the teen stage on** (3.5 to 5.0) and goes over in the baby stage (6.3 to 7.2).
-- **Adding attention requests breaks the budget** for the baby and the teen (7.0 to 10.3) and is borderline for an adult (5.4 to 6.9). Requests are opt-in rewards, so they would need to be off by default, a player setting, or capped to the headroom (about 1 a day for a teen, 2 to 3 for an adult).
-- The events are fewer than the 2.6 a day the rates suggest (1.6 to 2.2 per 15 hours), because an open event blocks new ones and rest suppresses them.
-- The baby's rest calls are the largest single item (3.6 to 3.9 per 15 hours), which fits a short, needy stage; the teen gets 2.2 and the adult 1.0. The elder was not simulated.
+| Player | Stage | Events (counted) | Rest calls (care) | Attention requests (care) | Visitors (no notification) |
+|---|---|---:|---:|---:|---:|
+| attentive | baby | 2.1 | 3.9 | 3.0 | 0.8 |
+| attentive | teen | 1.7 | 2.2 | 2.9 | 0.9 |
+| attentive | adult | 1.6 | 1.0 | 3.0 | 1.0 |
+| casual | baby | 1.9 | 3.6 | 3.2 | 0.8 |
+| casual | teen | 2.0 | 2.2 | 2.4 | 0.7 |
+| casual | adult | 1.8 | 1.0 | 2.5 | 0.8 |
+| daredevil | adult | 2.0 | 1.0 | 3.0 | 0.9 |
+| sysadmin | adult | 1.7 | 1.0 | 3.0 | 0.9 |
+| human-regular | adult | 1.9 | 1.0 | 1.9 | 0.7 |
 
-Not counted or not measured: stat alerts (those are care), evolution, netrun calls, unanswered-call reminders, the elder, and anything a person does that the bots do not.
+What it says:
+- **The Events class is far under 6 a day**: 1.6 to 2.2 per 15 awake hours at every stage, lower than the 2.6 the rates suggest, because an open event blocks new ones and rest suppresses them. A budget of 6 is not binding for events; it would only bind if new timed events are added later (it leaves room for three to four more a day).
+- **The Care class is where the volume is**: rest calls plus requests are about 6.9 per 15 hours in the baby stage, 4.6 to 5.1 in the teen stage and 2.9 to 4.0 for an adult, before stat alerts (not measured). Its own toggle is what keeps that manageable; requests are opt-in rewards and could be a separate sub-setting.
+- **Cooldowns** were not simulated. The most one can send is one per netrun cooldown (240 minutes for a baby, 210 teen, 180 adult), so up to about 4 to 5 per 15 awake hours for a player who runs every time; the bots make 3 to 5 runs a day. Default off is the natural choice for a convenience ping.
+- The elder was not simulated.
+
+Not counted or not measured: stat alerts, evolution, the cooldown class, unanswered-call reminders, the elder, and anything a person does that the bots do not.
 
 ## 3. How each part would be tested
 
@@ -126,18 +141,18 @@ Not counted or not measured: stat alerts (those are care), evolution, netrun cal
 | Elder wear | an Integrity drain at the elder stage | Integrity and full life against the no-cache elder | stage totals match today's elder |
 | Rest call | a demand model, a response-probability model in the bots, `gap-sweep` and `human-sweep` | calls a day by stage, tired share of time, full life, the longest survivable gap | gap survival unchanged (still fatal at 6 hours); the response probability is an assumption and is labelled one |
 | Rest and held states | `sides-sweep` with the pause rule | how often a call lands inside a held state and what the pause costs | no net loss of benefit for answering |
-| Notification budget | count calls, events and alerts a day per stage in the fork | items a day against the budget | at or under the budget |
+| Notifications | `sim/notification-count.mjs` (shadow rest call; add stat alerts, cooldown readiness and the elder) | items a day per class and stage | Events at or under 6 a day; Care and Cooldowns reported, not budgeted |
 
 All of it runs on the scripted bots; none of it can say whether a rest call is annoying, only how often it fires and what it costs.
 
 ## 4. Open questions for the maintainer
 
-Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25), response window (60 minutes), tired (good start), clustered adult events (not yet). Still open:
+Answered on 2026-10-09: adult age (46 hours), baby drain (x2.4 for now), elder cache (x0.25, PURGE unchanged), response window (60 minutes, 30 on time), tired (good start), clustered adult events (not yet), visitors (no notification), the three notification classes. Still open:
 
-1. Iron's name for the rest and the call (section 2.5 has six options; my pick is "calibrate").
-2. Whether the 30 minute "on time" part of the response window stays now that the window is 60.
-3. Which notification classes default on, and whether attention requests are capped, a setting, or both (section 2.6: they do not fit a 6 a day budget at the baby and teen stages).
-4. What PURGE does for an elder now that the cache is reduced and not removed (it still works; the question is only whether it needs any new use).
+1. Is the rest answered with the relabelled nap button (section 2.5), and is the Iron label CALIBRATE (9 characters), CALIB, TRIM or ZERO?
+2. Which classes default on: Events yes; Care and Cooldowns? (A missed rest call costs a tired state, so Care off means the player sees it only in the game.)
+3. Where do evolution notices go (their own class, or Events)?
+4. Are attention requests Care (my assumption) or their own sub-setting?
 
 ## 5. Constraints and risks
 
