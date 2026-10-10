@@ -7,12 +7,13 @@
 //   side a cell at a time, holds, and is dropped at once; it alternates sides by loop; it is drawn only where the figure is empty. It
 //   reaches one cell on the baby and teen, two on adults, three on elders. Calm: parked one cell out to the right.
 // Each older line has its own effect on top of it (decided, maintainer, 2026-10-10):
-//   Breach (Mole, Sleeper): the FADE, from the edges: the body dims from the outline inward, a ring a step, holds, and comes back.
+//   Breach (Mole, Sleeper): the FADE, from the edges: the body dims from the outline inward, a ring a step, holds, and comes back. Sleeper's
+//     goes all the way: it vanishes completely for three steps, leaving only its shadow.
 //   Dodge (Skip, Exile): CIPHER'S SHIMMER: a scan band sweeps from the hood to the feet and back; above it the body is solid, on it a dim
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
 //   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
 //   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
-//     copy's mouth height, a line in the eye colour curving up at both ends inside the shadow, an extra mouth in it (a grin).
+//     copy's mouth height, a half grin in the eye colour inside the shadow (a line with its outer end curled up), an extra mouth in it.
 //   Alias: a hint of the sweep: a dim band runs down the body below the neck and back, with no holes (its two camo bands are in its frames).
 //   Foundling: the plain decoy (its camo hint is in its frames).
 import { STEPS, STEP_MS, ECHO, stepOf, dub } from './echo-motion.js';
@@ -80,12 +81,28 @@ export function depth(rows) {
   }
   return d;
 }
-export const fadeMotion = (stage) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+// Sleeper's fade goes all the way (maintainer): it dims from the edges in to the core over four steps, VANISHES completely for three
+// (every cell of it empty, eyes and marks too; only its shadow is left, drawn whole while the figure is gone), then comes back dim and
+// fills in from the core out.
+// `VANISH[step]`: the share of its depth dimmed (1 = all of it), or 'gone'.
+export const VANISH = [0, 0.25, 0.5, 0.75, 1, 'gone', 'gone', 'gone', 1, 0.66, 0.33, 0];
+export const fadeMotion = (stage, { vanish = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, PAD);
   if (!reduced) {
-    const rings = FADE_RINGS[stepOf(time)];
     const d = depth(sprite);
-    sprite.forEach((r, y) => [...r].forEach((c, x) => { if (c === '#' && d[y][x] <= rings) g[y][x + PAD] = 'x'; }));
+    const step = stepOf(time);
+    if (vanish && VANISH[step] === 'gone') {
+      // Gone: nothing of it is left but its shadow, drawn whole (the figure no longer hides any of it).
+      sprite.forEach((r, y) => [...r].forEach((c, x) => { g[y][x + PAD] = '.'; }));
+      const n = offsetAt(step, REACH[stage]);
+      const side = sideAt(time);
+      sprite.forEach((r, y) => [...r].forEach((c, x) => { if (c !== '.') g[y][x + PAD + side * n] = ECHO.cell; }));
+      return out(g);
+    } else {
+      const deepest = Math.max(...d.flat().filter(Number.isFinite));
+      const rings = vanish ? Math.ceil(VANISH[step] * deepest) : FADE_RINGS[step];
+      sprite.forEach((r, y) => [...r].forEach((c, x) => { if (c === '#' && d[y][x] <= rings) g[y][x + PAD] = 'x'; }));
+    }
   }
   decoyInto(g, sprite, time, reduced, PAD, REACH[stage]);
   return out(g);
@@ -119,7 +136,8 @@ export const scanMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
 // ---- Feast: the bigger decoy, and Stash's maw (a draft) ------------------------------------------------------------------------------
 // The maw: at the copy's own mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the
 // body on the decoy's side), a mouth in the shadow. Two styles:
-//   grin (the current draft, maintainer's ask): a line in the eye colour ('o') curving up at both ends, for a menacing look: two cells on
+//   half (the current draft, maintainer's ask): a half grin, a smirk: three cells on the row with the outer end curled up a row.
+//   grin (the third draft): a line in the eye colour ('o') curving up at both ends, for a menacing look: two cells on
 //     the row and a corner one row up at each end ('o..o' over '.oo.'), set one cell in from the shadow's outer edge so the shadow frames
 //     it (from the outer edge when the strip is only four wide, as it mostly is on Stash). It takes the first row from the mouth row down
 //     where the run and the corners above it show; where none does, the straight line below.
@@ -136,6 +154,20 @@ function runFrom(drawnRow, side) {
 function maw(g, drawn, side, mouthRow, style) {
   const byRow = new Map();
   for (const [x, y] of drawn) byRow.set(y, [...(byRow.get(y) ?? []), x]);
+  if (style === 'half') {
+    // A half grin (a smirk): three cells on the row and the outer end curled up a row.
+    for (let y = mouthRow; y < g.length; y++) {
+      const run = runFrom(byRow.get(y) ?? [], side);
+      for (const at of [1, 0]) {
+        const [b, c, d, e] = run.slice(at, at + 4);
+        if (e === undefined || !(new Set(byRow.get(y - 1) ?? []).has(b) || g[y - 1]?.[b] === '.')) continue;
+        g[y - 1][b] = 'o';
+        g[y][c] = 'o'; g[y][d] = 'o'; g[y][e] = 'o';
+        return;
+      }
+    }
+    style = 'line';
+  }
   if (style === 'grin') {
     for (let y = mouthRow; y < g.length; y++) {
       const run = runFrom(byRow.get(y) ?? [], side);
@@ -168,11 +200,26 @@ function maw(g, drawn, side, mouthRow, style) {
     return;
   }
 }
-export const MAW_STYLES = ['grin', 'line', 'fangs'];
-export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'grin' } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+export const MAW_STYLES = ['half', 'grin', 'line', 'fangs'];
+// The shadow's eyes (an option to make the maw more menacing): where the copy's own eyes fall on cells the shadow shows, they are drawn
+// in the eye colour, so the shadow looks back.
+function shadowEyes(g, sprite, drawn, side, n, pad) {
+  const shown = new Set(drawn.map(([x, y]) => `${x},${y}`));
+  sprite.forEach((r, y) => [...r].forEach((c, x) => {
+    const tx = x + pad + side * n;
+    if (c === 'o' && shown.has(`${tx},${y}`)) g[y][tx] = 'o';
+  }));
+}
+// Options on the maw: `eyes` draws the shadow's eyes too; `late` shows the maw (and eyes) only for the last two steps of the hold, a reveal
+// just before the shadow is dropped.
+export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'half', eyes = false, late = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, BIG_PAD);
   const drawn = decoyInto(g, sprite, time, reduced, BIG_PAD, REACH[stage] + 1);
-  if (withMaw) maw(g, drawn, reduced ? 1 : sideAt(time), anchors.mouthRow, mawStyle);
+  const step = stepOf(time);
+  const showing = !late || (!reduced && step >= HOLD_UNTIL - 1 && step <= HOLD_UNTIL);
+  const side = reduced ? 1 : sideAt(time);
+  if (withMaw && showing) maw(g, drawn, side, anchors.mouthRow, mawStyle);
+  if (withMaw && eyes && showing) shadowEyes(g, sprite, drawn, side, reduced ? 1 : offsetAt(step, REACH[stage] + 1), BIG_PAD);
   return out(g);
 };
 
@@ -195,7 +242,7 @@ export const sweepHintMotion = (stage) => (sprite, anchors, { time = 0, reduced 
 export const MOTION_OF = {
   baby: decoyMotion('baby'),
   teen: sweepHintMotion('teen'),
-  mole: fadeMotion('adult'), moleElder: fadeMotion('elder'),
+  mole: fadeMotion('adult'), moleElder: fadeMotion('elder', { vanish: true }),
   skip: scanMotion('adult'), skipElder: scanMotion('elder'),
   spook: decoyMotion('adult'), spookElder: decoyMotion('elder'),
   drop: bigDecoyMotion('adult'), dropElder: bigDecoyMotion('elder', { withMaw: true }),

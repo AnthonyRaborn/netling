@@ -26,8 +26,8 @@ const W = 26, H = 17, GAP = 3, LABEL = 22, ROW = H * SC + 6, FRAME_MS = 500;
 const plain = (f) => ({ a: f.a, b: f.b });
 // [form, [[label, frames, motion]...]] per row; motion defaults to the form's own registered layer. Two forms a row, three cells each.
 // Now: the ten registered forms as decided (camo in the frames, each line's layer), and beside Stash its decoy without the maw, to judge
-// the maw (a draft: the eye-colour grin, beside the straight line and no maw; the fangs are selectable in code); beside Mole and Drop the
-// alternatives not chosen.
+// the maw (a draft: the half grin, then with the shadow's eyes, then the late reveal with the eyes; the full grin, straight line and fangs
+// are selectable in code); beside Mole and Drop the alternatives not chosen. Sleeper vanishes completely.
 const own = (f) => [['registered', plain(f)]];
 const rows = [
   [set.rogueBaby, own(set.rogueBaby)], [set.rogueTeen, own(set.rogueTeen)],
@@ -36,7 +36,7 @@ const rows = [
   [set.rogueAdultDodge, own(set.rogueAdultDodge)], [set.rogueElderDodge, own(set.rogueElderDodge)],
   [set.rogueAdultTune, own(set.rogueAdultTune)], [set.rogueElderTune, own(set.rogueElderTune)],
   [set.rogueAdultFeast, [...own(set.rogueAdultFeast), ['not chosen: bright', plain(set.rogueAdultFeast), bigDecoy('adult', true)]]],
-  [set.rogueElderFeast, [['maw: grin', plain(set.rogueElderFeast)], ['maw: straight line', plain(set.rogueElderFeast), bigDecoyMotion('elder', { withMaw: true, mawStyle: 'line' })], ['without', plain(set.rogueElderFeast), bigDecoy('elder')]]],
+  [set.rogueElderFeast, [['maw: half grin', plain(set.rogueElderFeast)], ['+ the shadow\'s eyes', plain(set.rogueElderFeast), bigDecoyMotion('elder', { withMaw: true, eyes: true })], ['late reveal + eyes', plain(set.rogueElderFeast), bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true })]]],
 ];
 const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;

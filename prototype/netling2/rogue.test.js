@@ -207,36 +207,46 @@ test('the shadow is registered on all ten forms, sized by stage (one cell on the
   }
 });
 
-test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a grin in the eye colour), Alias the sweep hint', async () => {
+test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a half grin in the eye colour), Sleeper vanishing, Alias the sweep hint', async () => {
   const M = await import('./rogue-motion.js');
   const same = (f, m) => [0, 2, 5, 9, 14].every((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join() === m(f.a, f.anchors.a, { time: s * STEP_MS }).join());
   assert.ok(same(set.rogueBaby, M.decoyMotion('baby')));
   assert.ok(same(set.rogueTeen, M.sweepHintMotion('teen')));
-  for (const id of ['rogueAdultBreach', 'rogueElderBreach']) assert.ok(same(set[id], M.fadeMotion(set[id].stage)), id);
+  assert.ok(same(set.rogueAdultBreach, M.fadeMotion('adult')));
+  assert.ok(same(set.rogueElderBreach, M.fadeMotion('elder', { vanish: true })), 'Sleeper vanishes');
   for (const id of ['rogueAdultDodge', 'rogueElderDodge']) assert.ok(same(set[id], M.scanMotion(set[id].stage)), id);
   for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
   assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
   assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true })));
-  // The maw (a draft): a grin in the eye colour in the shadow (two cells on a row, a corner one row up at each end), past the body, only while
-  // the decoy is fully out, at the copy's mouth height on either side; never on Drop.
+  // The maw (a draft): a half grin in the eye colour in the shadow (three cells on a row, the outer end curled up a row), past the body,
+  // only while the decoy is fully out, at the copy's mouth height on either side; never on the body, never on Drop.
   const extra = (f, s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join('').split('o').length - f.a.join('').split('o').length;
   const stash = set.rogueElderFeast;
-  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => extra(stash, s) === 4), 'a four-cell grin while the decoy is fully out, either side');
+  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => extra(stash, s) === 4), 'a four-cell half grin while the decoy is fully out, either side');
+  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => extra(stash, s) === 0), 'none while it steps out or is gone');
   for (const s of [5, 17]) {
     const g = stash.motion(stash.a, stash.anchors.a, { time: s * STEP_MS });
     const pad = (g[0].length - stash.a[0].length) / 2;
     const cells = g.flatMap((r, y) => [...r].map((c, x) => (c === 'o' && stash.a[y]?.[x - pad] !== 'o' ? [x, y] : null)).filter(Boolean));
     const rows = [...new Set(cells.map(([, y]) => y))].sort((p, q) => p - q);
     assert.equal(rows.length, 2, `step ${s}: two rows`);
-    const top = cells.filter(([, y]) => y === rows[0]).map(([x]) => x).sort((p, q) => p - q);
+    const [corner] = cells.filter(([, y]) => y === rows[0]).map(([x]) => x);
     const low = cells.filter(([, y]) => y === rows[1]).map(([x]) => x).sort((p, q) => p - q);
-    assert.deepEqual(low, [top[0] + 1, top[0] + 2], `step ${s}: the middle on the lower row`);
-    assert.equal(top[1], top[0] + 3, `step ${s}: a corner up at each end`);
+    assert.deepEqual(low, [low[0], low[0] + 1, low[0] + 2], `step ${s}: three in a row`);
+    const outer = s < STEPS ? low[2] + 1 : low[0] - 1; // the first loop puts the shadow on the right, the next on the left
+    assert.equal(corner, outer, `step ${s}: the outer end curled up`);
     assert.ok(rows[1] >= stash.anchors.a.mouthRow && rows[1] <= stash.anchors.a.mouthRow + 1, `step ${s}: at the mouth's height`);
     for (const [x, y] of cells) assert.equal(stash.a[y]?.[x - pad] ?? '.', '.', 'never on the body');
   }
-  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => extra(stash, s) === 0), 'none while it steps out or is gone');
   assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => stash.motion(stash.a, stash.anchors.a, { time: s * STEP_MS }).join('').includes('+')).every((x) => !x), 'no highlight cells (no fangs)');
+  // The options: the shadow's eyes, the late reveal, and the earlier styles (grin, straight line, fangs).
+  const opt = (o) => M.bigDecoyMotion('elder', { withMaw: true, ...o });
+  const count = (m, s) => m(stash.a, stash.anchors.a, { time: s * STEP_MS }).join('').split('o').length - stash.a.join('').split('o').length;
+  assert.ok(count(opt({ eyes: true }), 5) > 4, 'the shadow\'s eyes add eye cells');
+  assert.deepEqual([4, 5, 6, 7].map((s) => count(opt({ late: true }), s)), [0, 0, 4, 4], 'late: only the last two steps of the hold');
+  assert.equal(count(opt({ mawStyle: 'grin' }), 5), 4);
+  assert.equal(count(opt({ mawStyle: 'line' }), 5), 3);
+  assert.equal(opt({ mawStyle: 'fangs' })(stash.a, stash.anchors.a, { time: 5 * STEP_MS }).join('').split('+').length - 1, 2);
   assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => extra(set.rogueAdultFeast, s)).every((n) => n === 0), 'Drop has no maw');
   // The earlier drafts, the straight line and the fangs, stay available for the review page.
   const fangs = M.bigDecoyMotion('elder', { withMaw: true, mawStyle: 'fangs' });
@@ -450,4 +460,23 @@ test('options, third round: the fades, the bigger decoy and Alias\'s sweep chang
   for (let y = 0; y <= plainF.anchors.a.neckRow; y++) assert.equal(a[y], b[y]);
   const n = plainF.anchors.a.neckRow;
   assert.ok([n + 1, n + 2].every((y) => a[y] !== plainF.a[y]));
+});
+
+test('Sleeper vanishes completely for three steps (nothing of it but its whole shadow), then returns; Mole only dims', async () => {
+  const { VANISH } = await import('./rogue-motion.js');
+  const f = set.rogueElderBreach;
+  const pad = PAD;
+  const painted = f.a.join('').replace(/\./g, '').length;
+  for (let s = 0; s < STEPS; s++) {
+    const g = f.motion(f.a, f.anchors.a, { time: s * STEP_MS });
+    const inner = g.map((r) => r.slice(pad, pad + f.a[0].length)).join('');
+    if (VANISH[s] === 'gone') {
+      assert.ok(!/[#o+]/.test(g.join('')), `step ${s}: nothing of it left`);
+      assert.equal(g.join('').split('x').length - 1, painted, `step ${s}: its whole shadow`);
+    } else assert.ok(inner.includes('o'), `step ${s}: its eyes are there`);
+  }
+  assert.deepEqual(VANISH.filter((v) => v === 'gone').length, 3);
+  const mole = set.rogueAdultBreach;
+  for (let s = 0; s < STEPS; s++) assert.ok(mole.motion(mole.a, mole.anchors.a, { time: s * STEP_MS }).join('').includes('o'), 'Mole never vanishes');
+  assert.equal(new Set([0, 5, 9].map((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join())).size, 1, 'calm: still');
 });

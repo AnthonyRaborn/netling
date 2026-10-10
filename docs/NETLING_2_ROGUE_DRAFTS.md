@@ -214,6 +214,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 31. **The effects chosen (thirteenth round):** the Breach fade is **from the edges**; the Feast decoy is **dim**; **Alias's bigger hint** (two bands and the sweep hint) is right. The Feast elder (Stash) may need **something hinting at an additional mouth in its shadow** (a draft, 8.4f). All decided effects are now drawn into the registered forms.
 
+32. **Stash's maw and Sleeper (fourteenth round):** the eye-colour line is good; a curve up (a grin) then a **half grin** for a more menacing look, other menacing ideas welcome (8.4f). **Sleeper disappears completely** in its fade.
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -420,7 +422,14 @@ The registered forms now carry everything decided (6.1, items 22 to 31): the cam
 
 **Second try (maintainer's ask, 2026-10-10): the maw as a line in the eye colour, without the white fangs.** At the copy's mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the body), three cells in the eye colour, set one cell in from the shadow's outer edge so the shadow frames them. It shows for the same four steps of each loop, on either side. On the GIF (`rogue-registered.gif`, Stash's row: the line, the fangs, no maw) it reads as a mouth in the shadow, near the eyes' height. The line was liked (maintainer); the fangs stay selectable (`mawStyle: 'fangs'`) for comparison.
 
-**Third try (maintainer's ask): the line curving up at both ends, for a menacing look (a grin).** Two cells in the eye colour on the row and a corner one row up at each end (`o..o` over `.oo.`), at the copy's mouth height. It is set in from the shadow's outer edge when the strip is five wide and runs from the edge when it is four (as it mostly is on Stash); where Stash's lopsided body makes the shadow step, a corner may sit on the empty cell beside the step, never on the body, so the grin stays at mouth height on both sides (on the left it otherwise dropped to the satchel's shadow). It is now the registered draft; the straight line (`mawStyle: 'line'`) is shown beside it on the review page and the GIF.
+**Third try (maintainer's ask): the line curving up at both ends, for a menacing look (a grin).** Two cells in the eye colour on the row and a corner one row up at each end (`o..o` over `.oo.`), at the copy's mouth height. It is set in from the shadow's outer edge when the strip is five wide and runs from the edge when it is four (as it mostly is on Stash); where Stash's lopsided body makes the shadow step, a corner may sit on the empty cell beside the step, never on the body, so the grin stays at mouth height on both sides (on the left it otherwise dropped to the satchel's shadow). It was replaced by the half grin below; it stays selectable (`mawStyle: 'grin'`).
+
+**Fourth try (maintainer: a half grin may be better; other menacing ideas welcome).** The maw is now a **half grin**, a smirk: three cells in the eye colour on the row with the outer end curled up a row, at the copy's mouth height on either side (`mawStyle: 'half'`, the registered draft). Two further ideas are drawn as options beside it on the review page and the GIF (`rogue-registered.gif`, Stash's row):
+- **The shadow's eyes** (`eyes: true`): where the copy's own eyes fall on cells the shadow shows, they are drawn in the eye colour, so the shadow looks back with an eye of its own beside the smirk. The strongest of the options.
+- **A late reveal** (`late: true`): the smirk (and the eyes) show only for the last two steps of the hold, just before the shadow is dropped, so it is there for a moment and gone.
+Other ideas, not drawn: the smirk on the shadow only when the real netling glances away (it ties the maw to the temper tell); teeth as alternating eye-colour and dim cells along the line; the shadow lingering a step after the netling's decoy would have dropped.
+
+**Sleeper vanishes completely** (maintainer). Its fade goes all the way: it dims from the edges in to the core over four steps, is **gone** for three (no cell of it left, eyes and marks too; only its shadow, drawn whole while the figure is gone, a dim double shifted three cells to one side), then comes back dim and fills in from the core out. Mole keeps the shorter fade (three rings, eyes always lit). One renderer note: wearables are placed on the registered frames, so while Sleeper is gone they would float in the air unless the renderer hides them for those steps (or keeps them as a tell that something is there); not decided.
 
 ### 8.5 Ids and the Dex
 
@@ -429,7 +438,8 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- Stash's maw (8.4f): the eye-colour grin (now drawn), or the straight line.
+- Stash's maw (8.4f): the half grin (now drawn), with or without the shadow's eyes and the late reveal.
+- Whether wearables hide while Sleeper is gone (8.4f).
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
