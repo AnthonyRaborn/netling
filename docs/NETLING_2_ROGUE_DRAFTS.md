@@ -6,7 +6,8 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 1. **Done: Skip and Exile revisited** (2026-10-10). Skip stays as drawn; Exile is the cape (8.4g), and its layer takes turns by loop between Cipher's shimmer and the wipe back on by the column (8.4h). Registered in `rogue-art.js` (`skipElder`) and `rogue-motion.js` (`MOTION_OF.skipElder`); the other options stay in `rogue-options.js` for the record.
 2. **Done: Handler** (maintainer, after the Exile round: the least interesting elder). Its layer is now the headset signal with the split shadow (8.4i; `MOTION_OF.spookElder`). All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
 3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
-4. Then the simulator build (section 7) and the text (section 9).
+4. **Drafted: the kits** (section 9, for choice): each ability is the role's with a hunt twist, Rogue's own perks, the role traits, existing items as keepsakes.
+5. Then the simulator build (section 7) and the text (section 10).
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
 
@@ -279,7 +280,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 1. The sweep's window and answers (6.2), and the ambush shares within the ICE weight.
 2. Which fragment stands for each egg in the merge offer (the latest adult or elder, proposed).
 3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark).
-4. The forms' kits: each adult's role ability, perk, trait and keepsake (the names are decided, 6.1 item 23).
+4. The forms' kits: each adult's role ability, perk, trait and keepsake (the names are decided, 6.1 item 23). **Drafted for choice in section 9.**
 5. Difficulty, after the forms: the 4.4 targets are the starting point.
 6. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
 
@@ -287,7 +288,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 **Simulator fork (`prototype/netling2/sim/`), behind a `ROGUE` switch, off by default:**
 - Egg mode `rogue`: no Standing (its sources add trail), no owner bar (`SIDES.owner` `null` for life, the states at x1, no owner strain, no Iron wear), one teen, the adult by role with no lean, the elder through the ordinary gate.
-- The Rogue kit per role is not designed yet (6.3, 5). For a first run, a stand-in: the role's corp-lean ability plus the checkpoint part, the role's trait, no perk; flagged as a stand-in in every result.
+- The Rogue kit per role is drafted in section 9, not chosen yet. Until it is chosen, a stand-in: the role's corp-lean ability plus the checkpoint part, the role's trait, no perk; flagged as a stand-in in every result.
 - At home: the sweep in place of both the trace and the intrusion (12% an hour, 90 minutes, HIDE, DEFEND or a Decoy); marks with no fade; the `captured` death at three.
 - In `netrun/nr2.js`: the trail count; the trail hunter at each region's threshold, the Source included (12); ambush nodes as a share of each region's ICE nodes; the disconnect and mark on a lost hunter fight.
 - In `lineage-sweep.mjs`: Rogue lives after the gate; the good end armed by a Source exit, disarmed by a later mark, offered at once on a clean exit (a bot rule for accepting or refusing) and otherwise played at death; never after a capture; M3's ordinary next netling in the chosen egg (the offer in egg-completion order; a bot rule picks one). Since every egg is open at rebirth, also a bot rule for when a player returns to an NL-0 egg (for example after a capture) and for choosing Rogue again after a good end (the hunt applies again). M1 is not simulated; its balance is set aside by decision.
@@ -508,7 +509,77 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 - **Skip and Exile: done** (6.1, items 35 to 38; Exile is the cape with the wipe back on). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33; Exile's wipe and Handler's signal and split, items 37 and 40); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
 - Silhouette: the four adults pass the 0.82 audit (closest pair 0.67) and each elder is closest to its own adult (Exile 0.86 against Skip after the redraw).
 
-## 9. Not done
+## 9. The kits (drafts for choice, 2026-10-10)
+
+6.3, item 4. **Frame (maintainer, 2026-10-10):** each ability is its **role's ability with a hunt twist**; perks are **Rogue's own** and traits are **the role traits** for the first pass; keepsakes **reuse existing items**, and Rogue may share one with an NL-0 form. Nothing here is simulated; every number is a starting value taken from the fork's constants (`netrun/nr2.js`, `ab`; `sim.js`, the perks and `TRAIT_CFG`). Rogue has one form per role, so where the NL-0 role has a corp and a street ability, each brief says which one it starts from.
+
+### 9.1 What every kit stands on
+
+- **The checkpoint part** (6.1, item 6) on every adult and elder: checkpoints never notice it. A side effect to accept: a checkpoint is never met, so the checkpoint HIDE's trail +1 never happens either. The trail's sources in practice are moves (+1), lost fights (+2), anomaly choices (+1) and market purchases (+1).
+- **No ICE slip works on a hunter** (the trail hunter or an ambush; 4.2 and 6.2). The twists below are the only kit parts that touch hunter fights, and each says so.
+- **One part at the adult, a second at the elder** (netrun drafts, 3.1), except where the twist is the adult's own part; Rogue may break the structure (maintainer), and this is marked where it does.
+- **Parity:** the four Rogue forms are measured against each other on the netrun yardstick (banked value per run plus exit rate, netrun drafts, rule 3) with the hunters on, and against the NL-0 adults and elders of the same role for the 4.4 targets. The twists are what the four forms get back against the hunters, so they are not meant to bring Rogue level with the NL-0 forms.
+- **A name to watch:** 1.0's daily already has a `trail` (the run record in `src/netrun/daily.js`, `run.trail`). Rogue's trail count needs a different field name in code (`hunt`, for example); the player-facing word can stay "trail".
+
+### 9.2 The abilities
+
+Ability names are placeholders; the flavor text is section 10's.
+
+| Form | Starts from | Adult (level 1) | Elder (level 2) | Hooks |
+|---|---|---|---|---|
+| Mole / Sleeper (Breach) | Hardened (Breach street) | **Inside man:** ICE deals 0.7 of its damage, **hunters included, and the hunter's 1.5x does not apply to it** (it fights a hunter as plain tier-2 ICE) | **Deep cover:** 0.65 of the damage, and **once a run a lost hunter fight is an ordinary lost fight** (damage and trail +2; no disconnect, no mark) | damage; the hunter fight |
+| Skip / Exile (Dodge) | Unseen (Dodge street) | **On the lam:** ICE never notices it 30% of the time (the hidden adult's figure, not Unseen's 45%, since the twist is added), and **a move adds trail only every second move** | **Long gone:** 50%, and **an ambush can be slipped** at the elder's tier-2 avoidance rate (the trail hunter never) | avoidance; the trail; ambushes |
+| Spook / Handler (Tune) | Lookahead (Tune corp) | **Listening post:** sees node types two steps ahead on every branch, **and an ambush three steps ahead** (it hears them before it sees them) | **Runs agents:** three steps (ambushes four), and **once a run, at any node, it sends an agent out: trail -4** | sight (breadth); the trail; ambushes |
+| Drop / Stash (Feast) | Scavenge (Feast street) | **Dead drop:** better cache (0.55) and ICE-win (0.35) loot odds and a won ICE restores 11 Integrity; **at a relay it can leave one item behind: trail -3** | **Hoard:** 0.7 and 0.5, restores 22; **items left at a dead drop are kept**, banked at the run's end even after a disconnect | loot (small), sustain (small); the trail; relays |
+
+Notes and alternates:
+- **Mole.** Breach is the fighter, so its twist is the one form that can face the hunter head on. Hardened rather than Insurance, because a last stand that saves from one blow does little against a 1.5x hunter fight and nothing for the mark. Sleeper's part is Insurance's idea turned on the hunt (the corp Breach safety net, against the one fight that ends a run). **Alternate for Sleeper: Gone to ground**, once a run the first time the trail fills the hunter passes it by and the trail falls to half; it matches the vanishing on the sprite but is more Dodge than Breach. Rule-break: the adult has two parts (the damage share and the hunter's 1.5x cancelled); they are one idea, "it fights hunters as it fights anything".
+- **Skip.** Unseen rather than Phase, since Phase's sure first slip is spent on the region's first ICE and Rogue's danger comes later in the run. Halving the move trail is the twist and is strong: a Public Net run (6 middle layers) then adds about 3 from moves against a threshold of 10, and a Source run (13) about 7 against 12, leaving room for fights and choices before the hunter comes. The slip chance is trimmed to 30% to pay for it; the bots decide. Exile's ambush slip uses the existing tier-2 avoidance share (`tiers.avoid`, 0.75 at level 2), so it is 0.5 x 0.75 against an ambush. **Alternate for Exile: Away is home**, each relay visited sheds 3 trail.
+- **Spook.** Lookahead rather than Foresight: Rogue's danger is where the ambushes are, which is the question wide sight answers (netrun drafts, 3.3, Tune). Hearing ambushes one step further than it sees types is a small new hook (the ambush flag is node data, as the ICE game is for Foresight). Handler's agents are its split shadow and headset signal in play (8.4i). Under Blackout, Spook keeps Tune corp's limited sight (two steps of types) and loses the extra ambush step. **Alternate for Handler: Turned**, once a run one ambush it can see becomes ordinary ICE; stronger in the Deep and the Source, useless in the shallow regions (no ambushes there).
+- **Drop.** Scavenge rather than Concession: Concession leans on the exchange, and each purchase adds trail for Rogue, so it would pay for its own discount in noise. The dead drop turns loot into quiet, which is the Feast question for a hunted line ("is this worth the noise?", 4.2). Stash's kept items are its hoard and its maw (8.4f): what it leaves behind, it gets back. **Alternate for Stash: the forced filled cache** (Feast corp's elder part; never on a relay), which already exists in the fork and works in the Source. Daily trace: the dead drop takes and gives items, so it must work with the stake ledger or be off in the daily (netrun drafts, rule 4).
+- **Rolls.** None of the twists roll except Exile's ambush slip, which uses the lane rng as every avoidance does.
+
+### 9.3 The perks (Rogue's own)
+
+The NL-0 perks act on corp traces, intrusions, Standing-leaning packets and infections; Rogue has the sweep instead of the first two, no Standing, and fewer infections (no intrusion route; 6.2). So each Rogue perk acts on Rogue's home life, keeping the role's drive. The elder keeps its adult's perk, as on the other eggs.
+
+| Form | Drive | Perk | Close to |
+|---|---|---|---|
+| Mole | Risk | a sweep ignored or a DEFEND lost costs Integrity -10 instead of -20 (the mark stays) | Breach corp's cure bonus (toughness) |
+| Skip | Exposure | sweeps 30% less often | Dodge corp's trace perk |
+| Spook | Upkeep | Charge and Sync drain 10% slower (the two Tune perks, halved and joined, since there is no lean to pick one) | Tune corp, Tune street |
+| Drop | Reward | the clinic costs it 30% less scrip (Rogue pays scrip only, 6.1, item 5) | new |
+
+Alternates: Mole, a won DEFEND also gives Integrity +10; Spook, a sweep's window starts with a quiet early warning (a notification cost, so not recommended); Drop, play pays 20% more scrip. **Not chosen for any form: a perk that removes or prevents marks**, since marks do not fade (6.1, item 10) and are the difficulty lever; Mole's perk softens a sweep's damage but never its mark.
+
+### 9.4 The traits (the role traits, first pass)
+
+Mole Hardened, Skip Evasive, Spook Persistent, Drop Foraging, at the decided strengths and caps. A trait is inherited by role, so a Rogue Mole's Hardened streaks with an NL-0 Breach parent's and the other way round, which suits "shares some of NL-0's background". Notes:
+- **Evasive** must name the sweep among the timed events it lengthens (today: trace, intrusion, overflow). With it a sweep's 90 minutes become 112 at strength 1 and 118 at the cap (1.25).
+- **Hardened** is weaker on Rogue (fewer infections to cut). Accepted for the first pass; it is the strongest trait on the NL-0 eggs.
+- **Untraceable** (the hidden trait) cuts corp traces, which Rogue never meets. Proposal: it acts on the sweep for Rogue (as 4.1 first drafted), so an NL-0 hidden line's trait helps a Rogue child. To confirm.
+- **Open, for after the first pass:** a Rogue trait of its own (for example one that cuts the trail of every run by a little), which would only streak within Rogue lives.
+
+### 9.5 The keepsakes (existing items)
+
+| Form | Keepsake | Why | Shared with |
+|---|---|---|---|
+| Mole | Repair kit | Integrity, which sweeps and hunter fights cost | Breach corp |
+| Skip | Decoy | answers a sweep (6.2), and the decoy is the shadow every Rogue form casts | Dodge street |
+| Spook | Signal booster | the next win counts double, and wins choose Rogue's adult (6.1, item 4) | Tune street |
+| Drop | Salvage cell | Charge with no corp lean; Rogue's only Charge item that is not the corp's | Feast street |
+
+Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memory shard (the hidden forms' own). An item's Standing effect (the Decoy's and the Salvage cell's street +1) does nothing for Rogue, which has no Standing; 6.1, item 5's "adds trail instead" covers actions in a run, so at home these simply drop the Standing part. Elders leave their adult's keepsake.
+
+### 9.6 For the maintainer
+
+1. The four abilities, or an alternate per elder (Sleeper: Gone to ground; Exile: Away is home; Handler: Turned; Stash: the forced cache).
+2. The four perks, or an alternate.
+3. Untraceable acting on the sweep for Rogue.
+4. The keepsakes.
+5. Then the simulator build (section 7) can use these in place of its stand-in.
+
+## 10. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
 - The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance).
