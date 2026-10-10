@@ -13,7 +13,7 @@ Decided by the maintainer (sketch, Hidden egg; netrun drafts, section 8):
 - Its end of life is a **merge of two lineage fragments from different eggs into a hybrid next generation**, an NL-0 fragment joined with a Rogue one. The merge uses lineage fragments.
 - **Gate:** the ending has played and all 18 egg pages are found. Rogue does not appear before then, not even as a corrupted slot. So every Rogue player already holds Root, the whole codex and at least one elder in the Dex.
 
-Assumptions this document makes (to confirm):
+Assumptions this document makes (A1 and A2 confirmed 2026-10-10, section 6.1; A3 still to confirm):
 - **A1.** The egg is chosen again at each rebirth. The reveal drafts imply it (the egg directory is listed at a rebirth), but no decision says so.
 - **A2.** "Two fragments from different eggs" means the dying Rogue's own fragment plus one NL-0 fragment the player picks, not two NL-0 fragments.
 - **A3.** Root Access, the shared codex and the Dex carry into Rogue lives as they do between the other eggs.
@@ -28,6 +28,8 @@ The Puppet Master echo gives three ideas, and each part below uses one:
 Point 3 makes the merge both the ending and the escape. That gives the hunters and the merge one story: the hunters are the pressure and the merge is the way out.
 
 ## 3. The hidden-line base in play
+
+**Superseded in part (2026-10-10, section 6.1):** the hidden lines are inspiration, and Rogue has four adults (one per game) and four elders. The options below are kept as the record; option A's no-Standing rule and teen-state owner bar carry on as proposals in 6.2 and 6.3.
 
 What the three hidden forms share today: they master all four games, they take no side (Standing within 1 point), their netrun ability is full sight plus being noticed less (sight of every node, checkpoints never notice, ICE misses 30%, 55% as an elder), their perk is all drains 15% slower and their trait is Untraceable. What differs is only the egg: Ghost's owner bar is Charge, Guru's is Heat, Blank's is Sync.
 
@@ -83,7 +85,7 @@ Rogue sees the whole map (the hidden ability), so a hunter placed on the map wou
 - Trail rises: +1 a move, +2 for a lost ICE fight, +1 for a checkpoint HIDE, +1 for an anomaly choice, +1 for each market purchase. A won ICE fight adds nothing. Every number is a starting value.
 - When the trail reaches the region's threshold, the **hunter** arrives: a fight at the next node, whatever the node is. It is tier-2 ICE (netrun drafts, 2.1), with 1.5x the region's ICE damage, and the hidden ICE slip does not work on it (it is looking for this signature in particular).
 - Win: the trail falls to 0 and the run goes on; the hunter returns only if the trail fills again. Lose: the run ends as a disconnect, with a disconnect's usual costs (a failure, so no held-state window), and the netling gets a mark (4.3).
-- Thresholds (starting values): Public Net 10, Bazaar 10, Corp Grid 9, Ruins 9, the Deep 10. These are set against the move counts (6, 7, 7, 7 and 10 middle layers), so a quiet run in a shallow region finishes without meeting the hunter and a noisy one does not; the Deep almost always meets it once. Rogue cannot enter the Source (no elders), which matches A and needs nothing new.
+- Thresholds (starting values): Public Net 10, Bazaar 10, Corp Grid 9, Ruins 9, the Deep 10. These are set against the move counts (6, 7, 7, 7 and 10 middle layers), so a quiet run in a shallow region finishes without meeting the hunter and a noisy one does not; the Deep almost always meets it once. (Superseded, 6.1 and 6.2: Rogue has elders, the Source is on the way to its good end, and its threshold is proposed at 12.)
 - Relays are the escape: jacking out at a relay ends the run before the hunter, as usual. So the trail adds a real choice to every relay ("one more layer, or out?") and to every fight, checkpoint and market ("is this worth the noise?").
 - Why it fits the decided frame: it is a clock, not a triggered ability; no reflexes are needed beyond the existing games; it uses the existing tier-2 ICE and disconnect paths.
 
@@ -112,6 +114,8 @@ Rogue sees the whole map (the hidden ability), so a hunter placed on the map wou
 ## 5. The merge ending
 
 ### 5.1 When it happens
+
+**Superseded (2026-10-10, section 6.1):** the merge is the good end and needs a Rogue elder that has exited the Source; when it is offered is in 6.2. The original draft follows.
 
 The merge is offered when a **Rogue adult dies of old age** with fewer than three marks. Any other Rogue death (neglect, integrity collapse, capture) is an ordinary rebirth, so the merge is the reward for surviving the hunt to the end of a life. A Rogue that is not merged is reborn as Rogue (if the player picks it again, per A1) and the hunt goes on.
 
@@ -151,32 +155,65 @@ The first merge on an account plays a short terminal sequence in the style of th
 
 The egg named on the third line is the chosen fragment's. "owner: none" on both lines makes the point that neither was ever anyone's; "it was not invited" calls back to the reveal draft's line. Later merges log only the last two lines. No credits roll: the ending already has them, and this is a coda.
 
-## 6. Assumptions and open questions for the maintainer
+## 6. Decisions and open questions
 
-1. Confirm A1 to A3 (section 1).
-2. Base: A, B or C (section 3). Under A: are no elders acceptable for Rogue, and is a Standing-free egg acceptable (the clinic's Standing price is lost)?
-3. Hunters: H1, H2 or both; the sweep's numbers; capture at three marks, or the gentler lasting cost.
-4. How much harder (section 4.4): the proposed targets, or other ones.
-5. Merge: who can merge (old age only, as proposed, or any death with fewer than three marks); the offer (latest per egg or the full list); M1, M2 or M3.
-6. Can a hybrid's descendants merge again? Proposal: no; only a Rogue merges, so a player wanting another hybrid raises another Rogue to old age.
-7. Does Rogue get Dex entries before it is raised? The gate makes it visible only after the reveal; proposal: its 5 forms appear as `???` once the reveal has played.
+### 6.1 Decided (maintainer, 2026-10-10)
+
+1. **Every egg is available at every rebirth.** A player can pick Rogue again or go back to Program, Iron or Wetware. This confirms A1.
+2. **The hidden lines are inspiration, not the structure.** Rogue takes from Ghost, Guru and Blank what they have in common: it is secretive, hard to acquire and unlike the other lines, and drawing on them brings the background NL-0 and Rogue share into the egg. It is **not** three adults by hidden base. It has **four adults, one per game** (Breach, Dodge, Tune, Feast), like the other eggs' roles. This replaces section 3's option A tree (three adults by base, no elders).
+3. **The merge as drafted is agreed (M1, section 5.3):** the hybrid hatches in the chosen NL-0 fragment's egg with both parents' traits, a quirk key from each, both keepsakes and no hunt, and the first merge plays the epilogue (5.4). This confirms A2 (the Rogue's own fragment plus one NL-0 fragment).
+4. **The merge is the good end, and it needs an elder that has completed the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line that grew from a copy of it can find what it lacks. This replaces 5.1's trigger (any adult dying of old age) and section 4.2's note that Rogue cannot enter the Source.
+
+### 6.2 What follows (proposals, to confirm)
+
+- **Tree: 10 forms.** 1 baby, 1 teen, 4 adults, 4 elders. One teen, because with no lean there is nothing to split the teens on (if Standing stays off; next bullet).
+- **Routing.** The adult is the role of the game with the most wins this life, with the existing role tie breaks (sketch, Tie breaks) and no lean roll. The elder follows its adult, through the ordinary elder gate (96 hours old, the Deep feat, Root held). Every Rogue player already has an elder in the Dex, so the feat starts at tier 2 or better (sketch, Elder stage).
+- **No Standing (kept from option A).** With one adult per game there is no lean to decide, so Rogue still needs no Standing, and the trail (section 4) takes its place. Cost as before: the clinic's Standing price is lost, so Rogue fixes bugs with scrip only.
+- **How the hidden-line inspiration shows in play** (each a proposal):
+  - *Secretive:* every Rogue adult has the hidden line's checkpoint part (checkpoints never notice it) on top of its role ability. It does not have full sight; that stays the hidden forms' own.
+  - *Hard to acquire:* the gate (the ending and all 18 egg pages), the hunters, and the good end behind an elder and the Source.
+  - *Different:* no Standing, the trail, the sweep, marks and capture.
+  - *Shared background:* the sprites borrow outline cues from Ghost, Guru and Blank (one cue per Rogue adult, for example), and the reveal draft's egg fill already uses the three hidden colours.
+- **When the merge is offered (recommended):** at the Rogue elder's first Source exit, as a prompt. Accepting ends the life there as the good end and starts the merge (5.2, 5.3, 5.4). Declining lets the elder live on, and the merge is offered once more at its death unless it is captured. The alternative is to offer it only at the elder's death after a Source exit; that is simpler but separates the merge from the place the story puts it.
+- **Hunters in the Source:** a trail threshold of 12 for its 13 middle layers (starting value), so a Source run meets the hunter about once. With markets and checkpoints absent, the trail there comes from moves and lost fights only.
+- **Rogue in the Source, story:** a one-time log line at the first Source exit, for example "> found: NL-0, initial commit. it is not a copy." Rogue's own codex pages stay out of this pass, and the 18 egg pages and 39 story pages do not change.
+
+### 6.3 Still open
+
+1. **The owner bar**, now that it no longer picks the adult: (a) keep option A's rule, so the state held longest as a teen picks the owner bar for the adult and elder, separately from the role (recommended: it keeps the three-substrate echo of the hidden lines); (b) fix it by role; (c) no owner bar, all three at x1 for life (simplest, and harder because nothing is x3).
+2. Confirm Standing off for Rogue, and the scrip-only clinic.
+3. Each Rogue adult's kit: its role ability (the corp or the street lean's version, or a Rogue version), the checkpoint part above, the perk (the role's, or the hidden 15% drain), the role trait (so lineage streaks work), and four keepsakes (new, or reused from the role's forms).
+4. Hunters: H1, H2 or both; the sweep's numbers; capture at three marks, or the gentler lasting cost.
+5. How much harder (4.4): the proposed targets, or other ones. Note that the Deep feat and the Source are now on Rogue's path to its good end, so the hunters there decide how long the good end takes.
+6. When the merge is offered: at the Source exit (recommended) or only at the elder's death.
+7. The merge offer: the latest adult or elder fragment of each NL-0 egg (recommended), or the full list.
+8. Can a hybrid's descendants merge again? Proposal: no; only a Rogue elder merges.
+9. Dex: proposal, Rogue's 10 forms appear as `???` once the reveal has played, with the elder rows following the ordinary elder rule.
+10. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
 
 ## 7. What it would take
 
 **Simulator fork (`prototype/netling2/sim/`), behind a `ROGUE` switch, off by default:**
-- Egg mode `rogue`: no Standing (sources route to trail), owner bar `null` until adulthood, the teen state-time tally and the routing rule, the hidden kit at adulthood.
+- Egg mode `rogue`: no Standing (its sources add trail), one teen, the adult by role with no lean, the elder through the ordinary gate, and the owner bar by whichever rule 6.3 (1) settles (for (a): `null` until adulthood plus the teen state-time tally).
+- The Rogue kit per role (6.3, 3): the role ability plus the checkpoint part in `netrun/nr2.js`.
 - The sweep in place of the trace when `ROGUE` is on; marks; the `captured` death.
-- In `netrun/nr2.js`: the trail count, the hunter fight at the threshold, the disconnect and mark on a loss.
-- In `lineage-sweep.mjs`: the merge (pick the latest fragment per egg by a bot rule), the two-trait hybrid, and the hybrid's next life.
+- In `netrun/nr2.js`: the trail count, the hunter fight at the threshold in every region including the Source (12), and the disconnect and mark on a loss.
+- In `lineage-sweep.mjs`: Rogue lives after the gate, the merge at the first Source exit (or at death, per 6.3, 6), picking the latest fragment per egg by a bot rule, the two-trait hybrid and the hybrid's next life. Since every egg is open at rebirth, also a bot rule for when a player returns to an NL-0 egg (for example after a capture).
 - Bots: the existing archetypes plus a "quiet runner" that jacks out at the first relay past a trail of half the threshold, to see whether the relay choice is real.
-- Measures: full-life rate, capture rate, death causes, adult base shares by archetype (does play steer the base as intended, or does one bar dominate), run exit and disconnect rates by region against the hidden adults, notifications per 15 awake hours, and the hybrid's full-life rate against an ordinary child of the same fragment (how much two traits are worth).
+- Measures:
+  - Length of the good end: lives (and real days) from the first Rogue life to the first merge, by archetype. This is the new end-game length and has no target yet.
+  - Rogue elder rate and Source exit rate per life against the NL-0 eggs' (same feat tier), since the hunters now stand on the path to the good end.
+  - Full-life rate, capture rate and death causes; role shares (does the most-wins rule behave as on the other eggs); the owner bar shares under 6.3 (1)(a).
+  - Run exit and disconnect rates by region, the Source included, against the NL-0 adults and elders of the same role.
+  - Notifications per 15 awake hours (the sweep).
+  - The hybrid's full-life rate against an ordinary child of the same fragment (how much two traits are worth).
 
-**Sprites (option A):** 5 forms. Two ways: (a) five new authored forms; (b) a Rogue baby and teen authored new, and the three adults drawn as Ghost, Guru and Blank with a Rogue overlay (the "wears a stolen body" reading; 2 new sprites and 3 overlays, cheaper, and it shows the base on the sprite). Either way the forms need ids, frame and wearable checks, and the temper tell. Proposal: (b) for the first pass.
+**Sprites: 10 forms** (1 baby, 1 teen, 4 adults, 4 elders), all newly authored under the frame and wearable rules of [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md), with the temper tell, the neglect and bug channels, and outline cues from Ghost, Guru and Blank. The elders are wide bodies, so they share the wide-elder temper-tell risk the sprite handoff already lists. The earlier overlay idea (the three hidden adults redrawn with a Rogue layer) no longer fits four role adults and is dropped. Names are not drafted.
 
-**Save and ids (when it is built, not now):** new form ids (for example `rogueBaby`, `rogueTeen`, `rogueAdultGhost`, `rogueAdultGuru`, `rogueAdultBlank`; permanent once shipped), a `marks` field, the `captured` death cause, a second-parent field on the fragment and the lineage record, and a trail field in the run state. Each needs a sanitizer.
+**Save and ids (when it is built, not now):** form ids follow `prototype/netling2/form-ids.js` with no lean: `rogueBaby`, `rogueTeen`, `rogueAdultBreach`, `rogueAdultDodge`, `rogueAdultTune`, `rogueAdultFeast`, `rogueElderBreach`, `rogueElderDodge`, `rogueElderTune`, `rogueElderFeast` (permanent once shipped). Also a `marks` field, the `captured` death cause, a second-parent field on the fragment and the lineage record, a merged flag (the good end has played, for the one-time epilogue), and a trail field in the run state. Each needs a sanitizer.
 
 ## 8. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- Names for the five forms, egg flavor text for the hidden ability under Rogue, the sweep's and hunter's wording.
+- Names for the ten forms, the Rogue abilities' flavor text, the sweep's and hunter's wording.
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.
