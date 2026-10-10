@@ -118,7 +118,7 @@ Rogue sees the whole map (the hidden ability), so a hunter placed on the map wou
 
 ### 4.4 How much harder (proposed targets for the bots)
 
-**Accepted as the starting targets (2026-10-10, 6.1 item 10);** difficulty is revisited once the forms are worked out.
+**Accepted as the starting targets (2026-10-10, 6.1 item 10);** difficulty is revisited once the forms are worked out. **How to read them (maintainer, 2026-10-10): a first-pass aim on the high side.** The goal is for Rogue to come in under them (less harsh than these numbers) by some amount, not to hit them; a measured result above them is a miss, one somewhat below is the aim.
 
 "Much more aggressively" needs a yardstick. Proposed, against the NL-0 hidden adults (the closest kit) under the same archetypes:
 - Full-life rate: Rogue about 10 points lower for attentive play and about 15 lower for casual (capture and sweeps together), with capture itself under 5% of attentive lives.
@@ -197,7 +197,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 9. **In runs: the trail clock (H1)**, a run-long clock in the manner of FTL's pursuing fleet, **plus ambush nodes (H2) as extra pressure, mostly in the deeper regions.**
 10. **Marks: three and the Rogue is captured (dies).** Marks **do not fade** to start with, to keep the difficulty (this replaces 4.3's one-a-day fade). Difficulty is revisited once the forms are worked out; the targets in 4.4 are the starting targets.
 
-15. **No more hostile events than the NL-0 eggs** (2026-10-10, fourth round). The sweep's chance is the trace's and the intrusion's combined (12% an hour), never more. Ambush nodes likewise take their place out of the existing ICE weight of a region rather than adding nodes, so a Rogue run holds no more fights than another egg's; part of its ICE is simply hunters.
+15. **No more hostile events than the NL-0 eggs** (2026-10-10, fourth round). The sweep's chance is the trace's and the intrusion's combined (12% an hour), never more. Ambush nodes likewise take their place out of the existing ICE weight of a region rather than adding nodes, so a Rogue run holds no more fights than another egg's; part of its ICE is simply hunters. *(Revised 2026-10-10, maintainer: **no more hostile events at home** (the sweep stays at 12% an hour), **but a Rogue run may hold more fights** than another egg's, as the counterweight to danger sense; 9.7.)*
 
 **The forms (fifth round)**
 
@@ -603,16 +603,16 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 4. **Danger clustering.** Loot is guarded: for a share of caches and markets (starting value **one in two in every region**), every node in the layer before that links into it is danger, converted from ICE the region would place elsewhere (the count of danger nodes does not change). Quiet routes still exist but pass fewer caches and markets, so danger sense trades loot for safety instead of giving both. It pairs with Drop (loot is what it is for) and with Skip (it can slip ordinary ICE on the way to a guarded cache, never an ambush at the adult level).
 5. **Frequency (the tuning knob, last).** The danger and quiet weights per region are Rogue's own and are moved only to meet the balance goals once they are set. A starting proposal for one known gap: in the Corp Grid, half of the checkpoint weight (2 of 4) becomes ICE for Rogue (corp patrols that do notice it), so the region is not a free pass.
 
-**A decision this revises.** 6.1, item 15 says a Rogue run holds no more fights than another egg's (ambushes come out of the existing ICE weight). Levers 1 and 4 keep the count of danger nodes (a cordon converts nodes it would have rolled; clustering moves ICE), but lever 5, and lever 1 in a layer that rolled quiet, can add danger. Proposal: **item 15 holds at home** (the sweep stays at 12% an hour) **and is relaxed on the map**, where danger sense needs a counterweight. To confirm.
+**A decision this revises (decided, maintainer, 2026-10-10).** 6.1, item 15 said a Rogue run holds no more fights than another egg's. Levers 1 and 4 keep the count of danger nodes, but lever 5, and lever 1 in a layer that rolled quiet, can add danger. **Decided: no more hostile events at home** (the sweep stays at 12% an hour), **but possibly more fights in runs.**
 
 **Balance goals (not set; proposals to frame them).**
 - **Fights avoided:** a careful Rogue route (the bot routes by danger sense) meets about **60 to 75% of the fights** a route chosen without it meets, in each region. Under that range danger sense is not worth having; over it the hunters have no bite.
-- **Exit and value:** the 4.4 targets (careful disconnects about 1.5x the hidden adult's per region, the exit rate no more than 10 points lower in the Public Net and the Bazaar), measured with the kits and these map rules on.
-- **The relay question is real:** with a quiet-runner bot (section 7) jacking out at the relay before a cordon, its banked value per run should sit within about 20% of a bot that goes through, so neither choice is always right.
+- **Exit and value:** the 4.4 targets (careful disconnects about 1.5x the hidden adult's per region, the exit rate no more than 10 points lower in the Public Net and the Bazaar), measured with the kits and these map rules on. **Decided (maintainer): they are a high-side first aim; the build should come in under them by some amount** (4.4).
+- **The relay question (decided, maintainer, 2026-10-10): continuing pays about a third more, at a matching risk.** A bot that goes on past the relay before a cordon should bank on average **about 33% more per run** than the quiet runner (section 7) that jacks out there, not drastically more, and pay for it in risk: a higher disconnect rate and more marks (lost hunter fights and ambushes) from that point on. The two read-outs go side by side: banked value (target about 1.33x) and disconnects and marks after the relay. If continuing pays much more, the cordon or the guards are too soft; if it pays about the same or less, they are too hard or the deep half holds too little loot.
 
 **For the simulator (section 7, when built):** in `map2.js`, under the `ROGUE` switch: a cordon layer list per region, the relay-then-cordon placement, a relay weight factor, Rogue's own width and second-link per region, the guard rule with its share, and per-region weight overrides; a danger-sense routing rule for the bots; the measures above. One rng rule: the new steps must draw their random numbers after the ordinary map's, so a Rogue map with every lever off equals the ordinary map (the same test `map2` already has against `src/netrun/map.js`).
 
-**For the maintainer:** the order and the starting values above; item 15 relaxed on the map; the three balance-goal proposals.
+**For the maintainer:** the order and the starting values above (no comment yet; taken as starting values), and the fights-avoided range (60 to 75%), still a proposal. Decided: fights at home as before and possibly more in runs; the 4.4 targets as a high-side aim to come in under; continuing past the relay pays about 33% more at a matching risk.
 
 ## 10. Not done
 
