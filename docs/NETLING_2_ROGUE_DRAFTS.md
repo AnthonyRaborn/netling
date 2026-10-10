@@ -358,6 +358,23 @@ Still open:
 
 **Decided (maintainer, 2026-10-10): the 4 hour lockout**, with the 8 hour quiet; both are now the fork's Rogue defaults (`ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` gives stage 1 back). Still open: whether DEFEND should also be worth choosing (for example a won DEFEND removes a mark, which would reverse "nothing removes marks", or pays something HIDE does not), or stay the answer when there is no cover; and whether two-hourly players count as attentive (if so, the window is the lever for them, not the lockout).
 
+### 7.3 A won DEFEND into flow (2026-10-10, measured; for choice)
+
+**Proposal (maintainer, 2026-10-10):** a won DEFEND against a sweep also puts the netling straight into flow, on top of the quiet. Built as `ROGUE.defendFlow` (off by default): the 3 hour build-up is skipped, but flow's conditions still apply (awake, Charge and Sync 50+, Integrity 80+, Heat under 60, no open event), so it holds only in good shape. Why it suits DEFEND: any open event, a sweep included, resets the build-up, and HIDE adds Heat +10, so every HIDE costs at least 3 hours of flow while a won DEFEND keeps or gives the glow. Flow does nothing in runs; at home it means timed events x0.75, temper toward stable faster, visits x1.25 and the glow. Tested in `rogue-sim.test.js`; outputs `rogue-72-lock4-quiet8-*-flow.json`.
+
+At the decided 4 hour lockout and 8 hour quiet (attentive group, 300 lives of each archetype):
+
+| bot | DEFEND into flow | full life | captured, mean / worst | DEFENDs | marks | hours in flow a life | temper |
+|---|---|---|---|---|---|---|---|
+| HIDE first | off | 98.6 | 1.4 / 2.3 | 1.27 | 0.42 | 7.6 | 3.0 |
+| HIDE first | on | 98.6 | 1.3 / 2.3 | 1.28 | 0.42 | 8.5 | 3.1 |
+| reserve (DEFEND while unmarked) | off | 97.0 | 3.0 / 6.0 | 3.13 | 0.94 | 7.8 | 3.2 |
+| reserve | on | 97.1 | 2.9 / 6.3 | 3.14 | 0.94 | 10.2 | 3.5 |
+
+1. **Capture and full life do not move** (within noise), as expected: flow does not touch marks.
+2. **Flow is scarce, so the reward is large in relative terms.** An attentive Rogue spends only about 7.5 hours a life in flow; DEFEND into flow adds 0.9 hours for the HIDE-first player (its forced DEFENDs) and 2.4 hours (about a third more) for a player who DEFENDs by choice. Temper rises a little (3.0 to 3.5 for the reserve bot).
+3. **The trade is now a real one, but on different scales:** DEFEND by choice still costs about 0.5 more marks a life and about 1.6 points more capture (reserve against HIDE first), and pays about 2.4 more hours of flow and a steadier temper. Whether a player takes that depends on how much the glow is worth to them, which the bots cannot say. Ignoring the bots, the rule makes winning DEFEND visible and satisfying at no cost to the capture target.
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
