@@ -408,7 +408,7 @@ test('options, second round: the Cipher shimmer keeps the marks and the face row
   assert.equal(bandAt(STEPS / 2, 15), 14);
 });
 
-test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the face rows, holes only plain body cells, clears down then returns left to right, and takes turns with the shimmer', async () => {
+test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the face rows, holes only plain body cells, clears down then returns left to right, and takes turns with the shimmer (joined: no jump at the hand-overs)', async () => {
   const { EXILE_OPTIONS } = await import('./rogue-options.js');
   const { wipeMotion, scanWipeMotion, scanMotion, wipeAt } = await import('./rogue-motion.js');
   const f = { ...set.rogueElderDodge, a: EXILE_OPTIONS.cape.a };
@@ -442,6 +442,19 @@ test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the fac
   for (const s of [2, 6, 9]) {
     assert.deepEqual(both(f.a, f.anchors.a, { time: s * STEP_MS }), scanMotion('elder')(f.a, f.anchors.a, { time: s * STEP_MS }), 'first loop: the shimmer');
     assert.deepEqual(both(f.a, f.anchors.a, { time: loop + s * STEP_MS }), m(f.a, f.anchors.a, { time: loop + s * STEP_MS }), 'second loop: the wipe');
+  }
+  // Joined: the shimmer runs half a loop late, so it starts and ends plain as the wipe does and neither hand-over jumps.
+  const joined = scanWipeMotion('elder', { joined: true });
+  const cells = (t) => joined(f.a, f.anchors.a, { time: t }).map((r) => r.slice(PAD, PAD + w));
+  const changed = (t) => { const p = cells(t - STEP_MS); const q = cells(t); return f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && p[y][x] !== q[y][x]).length, 0); };
+  const inside = Math.max(...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((s) => changed(loop + s * STEP_MS)));
+  for (const t of [loop, 2 * loop]) assert.ok(changed(t) <= inside, `joined: the hand-over at ${t} ms changes ${changed(t)} cells, the wipe's own steps up to ${inside}`);
+  const unjoined = (t) => { const g = (u) => both(f.a, f.anchors.a, { time: u }).map((r) => r.slice(PAD, PAD + w)); const p = g(t - STEP_MS); const q = g(t); return f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && p[y][x] !== q[y][x]).length, 0); };
+  assert.ok(unjoined(loop) > inside, 'without joining, the hand-over jumps (why joined exists)');
+  for (let s = 0; s < STEPS; s++) {
+    const t = s * STEP_MS;
+    const off = (g) => g.map((r) => [...r].map((c, x) => (x < PAD || x >= PAD + w ? c : '.')).join(''));
+    assert.deepEqual(off(joined(f.a, f.anchors.a, { time: t })), off(both(f.a, f.anchors.a, { time: t })), `joined: the decoy keeps the real time, step ${s}`);
   }
 });
 

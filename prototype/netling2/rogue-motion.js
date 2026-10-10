@@ -166,11 +166,23 @@ export const wipeMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
   decoyInto(g, sprite, time, reduced, PAD, REACH[stage]);
   return out(g);
 };
-// The shimmer and the wipe taking turns by loop (the shimmer first), as the decoy takes turns by side.
-export const scanWipeMotion = (stage) => {
+// The shimmer and the wipe taking turns by loop (the shimmer first), as the decoy takes turns by side. `joined` starts the shimmer half a
+// loop late (its band at the feet, the body plain), so it rises into the camo and comes back down to plain: it then starts and ends where
+// the wipe does, and neither hand-over jumps (without it the shimmer ends in camo and the wipe starts plain).
+export const scanWipeMotion = (stage, { joined = false } = {}) => {
   const scan = scanMotion(stage);
   const wipe = wipeMotion(stage);
-  return (sprite, anchors, opts = {}) => (!opts.reduced && Math.floor(Math.max(0, opts.time ?? 0) / (STEPS * STEP_MS)) % 2 ? wipe : scan)(sprite, anchors, opts);
+  const late = joined ? (STEPS / 2) * STEP_MS : 0;
+  return (sprite, anchors, opts = {}) => {
+    const time = Math.max(0, opts.time ?? 0);
+    if (!opts.reduced && Math.floor(time / (STEPS * STEP_MS)) % 2) return wipe(sprite, anchors, opts);
+    if (!late || opts.reduced) return scan(sprite, anchors, opts);
+    // The shimmer's band runs late on the figure's cells; everywhere else the decoy keeps the real time, so it still changes sides by loop.
+    const banded = scan(sprite, anchors, { ...opts, time: time + late });
+    const timed = scan(sprite, anchors, opts);
+    const onFigure = (x, y) => (sprite[y][x - PAD] ?? '.') !== '.';
+    return banded.map((r, y) => [...r].map((c, x) => (onFigure(x, y) ? c : timed[y][x])).join(''));
+  };
 };
 
 // ---- Feast: the bigger decoy, and Stash's maw (a draft)------------------------------------------------------------------------------
