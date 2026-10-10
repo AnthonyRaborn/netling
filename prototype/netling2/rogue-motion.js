@@ -11,6 +11,8 @@
 //     goes all the way: it vanishes completely for three steps, leaving only its shadow.
 //   Dodge (Skip, Exile): CIPHER'S SHIMMER: a scan band sweeps from the hood to the feet and back; above it the body is solid, on it a dim
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
+//     Exile takes turns by loop with THE WIPE BACK ON (decided, 8.4h): from full camo a dim column sweeps left to right wiping it off,
+//     one plain step, then the column returns right to left wiping it back on, so it meets the shimmer in camo at both hand-overs.
 //   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
 //   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
 //     copy's mouth height and a row lower, a half grin in the eye colour inside the shadow (a line with its outer end curled up), with the
@@ -340,7 +342,7 @@ export const MOTION_OF = {
   baby: decoyMotion('baby'),
   teen: sweepHintMotion('teen'),
   mole: fadeMotion('adult'), moleElder: fadeMotion('elder', { vanish: true }),
-  skip: scanMotion('adult'), skipElder: scanMotion('elder'),
+  skip: scanMotion('adult'), skipElder: scanWipeBackMotion('elder', { back: 'col' }),
   spook: decoyMotion('adult'), spookElder: decoyMotion('elder'),
   drop: bigDecoyMotion('adult'), dropElder: bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true }),
 };

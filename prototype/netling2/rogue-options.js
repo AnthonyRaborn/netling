@@ -92,7 +92,8 @@ export const aliasHint = (f, tag) => {
 
 // Exile, the redraw (drafts 8.4g; maintainer: Skip stays, Exile is too close to Skip and needs its own idea). Three options, each 18 by 15
 // with Skip's head, lean and legs so it still reads as Skip's elder, the registered anchors and a three-cell tag (ROGUE_ELDER_ANCHORS and
-// ROGUE_TAGS skipElder, unchanged). Nothing here is registered until one is chosen.
+// ROGUE_TAGS skipElder, unchanged). Chosen (maintainer): the cape, now registered as Exile in rogue-art.js; pack and bindle kept for the
+// record.
 //   pack:   the brief's bundle, a pack high on its back with a strap, the swept hood laid over it.
 //   cape:   the hood tail grown into a long torn cape trailing behind, its tatters swapping with the frame.
 //   bindle: a stick over the shoulder with a bundle on the end, where the hood tail was: everything it owns, carried.
@@ -120,7 +121,7 @@ export const EXILE_OPTIONS = {
     '.......#..#.......',
     '.......#####......',
     '......#x##x###....',
-    '.....###xx######..',
+    '.....###xx#####...',
     '.....#oo##oo######',
     '.....#oo##oo##.###',
     '.....#########.###',

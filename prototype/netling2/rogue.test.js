@@ -207,14 +207,17 @@ test('the shadow is registered on all ten forms, sized by stage (one cell on the
   }
 });
 
-test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a half grin in the eye colour), Sleeper vanishing, Alias the sweep hint', async () => {
+test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher (Exile by turns with the wipe back on), Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a half grin in the eye colour), Sleeper vanishing, Alias the sweep hint', async () => {
   const M = await import('./rogue-motion.js');
   const same = (f, m) => [0, 2, 5, 9, 14].every((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join() === m(f.a, f.anchors.a, { time: s * STEP_MS }).join());
   assert.ok(same(set.rogueBaby, M.decoyMotion('baby')));
   assert.ok(same(set.rogueTeen, M.sweepHintMotion('teen')));
   assert.ok(same(set.rogueAdultBreach, M.fadeMotion('adult')));
   assert.ok(same(set.rogueElderBreach, M.fadeMotion('elder', { vanish: true })), 'Sleeper vanishes');
-  for (const id of ['rogueAdultDodge', 'rogueElderDodge']) assert.ok(same(set[id], M.scanMotion(set[id].stage)), id);
+  assert.ok(same(set.rogueAdultDodge, M.scanMotion('adult')), 'Skip: the shimmer');
+  assert.ok(same(set.rogueElderDodge, M.scanWipeBackMotion('elder', { back: 'col' })), 'Exile: the shimmer and the wipe back on by the column, by turns');
+  const { EXILE_OPTIONS } = await import('./rogue-options.js');
+  assert.deepEqual([set.rogueElderDodge.a, set.rogueElderDodge.b], [EXILE_OPTIONS.cape.a, EXILE_OPTIONS.cape.b], 'Exile is the cape (8.4g)');
   for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
   assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
   assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true })), 'Stash: the half grin, low, with the eye, late');

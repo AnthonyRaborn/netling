@@ -1,10 +1,10 @@
 # Netling 2.0: the Rogue egg (drafts)
 
-Status (handoff, 2026-10-10): the design is largely decided with the maintainer (section 6.1, items 1 to 34) and the ten forms are drawn in the sprite prototype (section 8). **The maintainer accepts the sprites and their effects except Skip and Exile (the Dodge line), which are to be revisited**; nothing is simulated yet, and every number is a starting value. Scope so far: the hidden-line base in play, the hunters, the merge ending (the good end) and the forms. The reveal, the background touches and Rogue's own codex pages are not done (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure.
+Status (handoff, 2026-10-10): the design is largely decided with the maintainer (section 6.1, items 1 to 38) and the ten forms are drawn in the sprite prototype (section 8). **All ten sprites and their effects are accepted by the maintainer** (Exile redrawn as the cape with a second camo pass, the wipe back on; 8.4g and 8.4h); nothing is simulated yet, and every number is a starting value. Scope so far: the hidden-line base in play, the hunters, the merge ending (the good end) and the forms. The reveal, the background touches and Rogue's own codex pages are not done (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure.
 
 **Where to pick up.**
-1. **Revisit Skip and Exile** (maintainer). **Now: Skip stays; three Exile options are drawn for choice (8.4g: pack, cape, bindle); register the chosen one in `rogue-art.js` (`skipElder`) and update the tests' notes. The maintainer is starting from the cape; a second camo pass for it (the wipe, 8.4h) is drawn for review.** Their sprites are in `prototype/netling2/rogue-art.js` (`skip`, `skipElder`); their effect is Cipher's shimmer (`scanMotion` in `rogue-motion.js`, decided as an effect; the redraw is about the sprites). Ask the maintainer what to change before redrawing; keep `npm run proto:test` green (the silhouette, elder-closest and fallback checks in `rogue.test.js`) and show the result on `rogue-options.html` and a GIF, as in 8.4c to 8.4f.
-2. The rest of the forms are accepted as drawn: Foundling, Alias, Mole, Spook, Drop, Sleeper, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
+1. **Done: Skip and Exile revisited** (2026-10-10). Skip stays as drawn; Exile is the cape (8.4g), and its layer takes turns by loop between Cipher's shimmer and the wipe back on by the column (8.4h). Registered in `rogue-art.js` (`skipElder`) and `rogue-motion.js` (`MOTION_OF.skipElder`); the other options stay in `rogue-options.js` for the record.
+2. All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
 3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
 4. Then the simulator build (section 7) and the text (section 9).
 
@@ -228,6 +228,14 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 34. **The forms reviewed (sixteenth round):** the sprites are good **except Skip and Exile, to be revisited**; the rest (and their effects) stand as drawn.
 
+35. **Skip stays; Exile is too close to Skip (seventeenth round)** and needs its own idea; options drawn side by side (8.4g). **Decided: the cape** (the hood tail grown into a long torn cape behind).
+
+36. **Exile gets a second camo pass (eighteenth to twenty-first rounds, 8.4h):** a wipe that takes turns with Cipher's shimmer by loop. Drafts along the way: the wipe alone, the two by turns, joined (no jump at the hand-overs), the first sweep reversed (up).
+
+37. **Decided: the wipe back on by the column (twenty-first round).** The wipe loop starts in full camo, a dim column sweeps left to right wiping it off, one plain step, then the column returns right to left wiping it back on, so it meets the shimmer (in its own timing) in camo at both hand-overs. Skip keeps the shimmer alone.
+
+38. **With that, all ten Rogue forms and their effects are accepted.**
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -445,18 +453,20 @@ Other ideas, not drawn: the smirk on the shadow only when the real netling glanc
 
 **Decided (maintainer):** Stash's maw is **the late reveal with the shadow's eye**, and **the whole half grin sits one row lower** (its corner on the copy's mouth row, its line a row below), so it shares no row with the shadow's eye and no cell of it touches the eye. On the review page and the GIF, Stash's row shows the registered version, the same not lowered, and the half grin alone. The other styles (full grin, straight line, fangs) stay selectable in code.
 
-### 8.4g Exile redrawn: three options (2026-10-10, for choice)
+### 8.4g Exile redrawn: three options (2026-10-10; decided: the cape)
 
 **Maintainer (seventeenth round):** Skip stays as drawn; what is wrong is that **Exile is too close to Skip** (it was Skip two columns wider), so it needs its own idea. Options to be drawn side by side.
 
-Three options, in `prototype/netling2/rogue-options.js` (`EXILE_OPTIONS`), none registered yet. Each keeps Skip's head, swept hood, lean and stride, the registered anchors and the three-cell tag, and widens the body by a column (to Skip's scaled width), so it reads as Skip grown older with one new thing added behind it:
+**Decided (6.1, item 35): the cape**, now registered as Exile. One change on registering: the hood's row 3 is a cell shorter on the right (as on the old Exile), because wearables centre on that row and the longer row moved the cyber eye half off the right eye (2 of 8 eye cells; 4 of 8 on every other Rogue form, now on Exile too). Scaled against Skip 0.86 after the trim; unscaled (the 1.0 audit) 0.70, down from the old Exile's 0.82.
+
+Three options, in `prototype/netling2/rogue-options.js` (`EXILE_OPTIONS`; pack and bindle kept for the record). Each keeps Skip's head, swept hood, lean and stride, the registered anchors and the three-cell tag, and widens the body by a column (to Skip's scaled width), so it reads as Skip grown older with one new thing added behind it:
 - **pack:** the brief's bundle, a pack high on its back under the swept hood, with a dim strap.
 - **cape:** the hood tail grown into a long torn cape trailing behind, its tatters swapping with the frame.
 - **bindle:** a stick over the shoulder with a bundle on the end, where the hood tail was (everything it owns, carried).
 
 Checks: with each option swapped in for Exile, all 25 Rogue tests pass. Elder against Skip, scaled: pack 0.85, cape 0.87, bindle 0.85 (the drawn Exile 0.77; bar 0.75), each well clear of the next adult (Drop or Spook, 0.57 to 0.61); closest other egg's elder 0.62 to 0.64 (bar 0.82). A first pass with a narrower body and legs at Skip's unscaled columns scored 0.65 to 0.72 and failed the bar, so the widening is what lets the added piece fit. The scores are silhouettes; how much each reads as its own form is for the look to decide. Shown on `rogue-options.html` (the row under Stash: Skip, the drawn Exile, then the three, all with the shimmer and the decoy), `docs/netling2-prototypes/shots/rogue-exile-options.png` (three moments: frame A, the decoy out, frame B) and `rogue-exile-options.gif` (9.6 s at 200 ms steps).
 
-### 8.4h Exile: a second camo pass (2026-10-10, for review)
+### 8.4h Exile: a second camo pass (2026-10-10; decided: the wipe back on by the column)
 
 **Maintainer (eighteenth round):** starting from the cape, a second animation for the thermocamo, for example a sweep down to clear, then a sweep left to right to come back in.
 
@@ -465,6 +475,8 @@ Drawn as `wipeMotion` in `rogue-motion.js` (an option, not registered): the same
 **Maintainer's read of the GIF (nineteenth round):** shimmer on, sweeping down to off and back up; then it turns off at random; then on again, sweeping down to off; then the wipe. Two causes: (1) the hand-overs jumped, because the shimmer rests in camo (its band at the top, holes below) and the wipe rests plain, so the shimmer-to-wipe change snapped 35 body cells at once and the wipe-to-shimmer one 41; (2) both effects open with a downward sweep that means the opposite (the shimmer's turns the camo off, the wipe's turns it on), so the wipe's first half reads as the shimmer again. Drawn for (1): **joined** (`scanWipeMotion(stage, { joined: true })`), the shimmer half a loop late on the figure (its band starts at the feet with the body plain, rises into the camo and comes back down), so it starts and ends plain as the wipe does; the hand-overs change 5 and 7 cells, no more than a step inside either effect (tested). The decoy keeps the real time. (2) is not changed yet: the wipe's clearing sweep could run up instead, or the column first, if the joined version still reads as a repeat.
 
 **Twentieth round (maintainer: "it's getting better; show me the first sweep reversed").** Drawn as **joined, wipe up** (`scanWipeMotion(stage, { joined: true, up: true })`; `wipeMotion(stage, { up: true })`): the wipe's first sweep runs from the feet to the hood with the camo going on below the row, then the same full-camo step and the same column left to right. The hand-overs stay as smooth as joined (tested). On the page and the GIF it is the fifth column.
+
+**Decided (twenty-first round, 6.1 item 37): the wipe back on by the column**, registered on Exile as `scanWipeBackMotion('elder', { back: 'col' })`. Skip keeps the shimmer alone. The other wipes (`wipeMotion`, `scanWipeMotion` with `joined` and `up`, the row back on) stay in `rogue-motion.js` for the record and are not registered. GIF of all ten registered forms redone: `rogue-registered.gif` (9.6 s, both of Exile's loops).
 
 **Twenty-first round (maintainer: can it wipe back on before it loops again).** Drawn as **the wipe back on** (`wipeBackMotion(stage, { back })`, taken in turns with the shimmer by `scanWipeBackMotion`): the wipe loop now starts in full camo, a dim column sweeps left to right wiping it off (steps 1 to 5), one plain step (6), then it is wiped back on (7 to 11) and ends in camo. Two ways back on: **row**, a dim row rising from the feet with the camo below it; **column**, the column returning right to left with the camo behind it. Since the shimmer in its own timing also starts and ends in camo, the turns meet with no half-loop offset (hand-overs 4 and 7 cells for row, 4 and 12 for column; tested). A fix on the way: the wipes' checker was the shimmer's in reverse (the shimmer counts padded columns, three of them, odd), so the two camos were opposite patterns; both wipes now use the shimmer's checker. The page row and the GIF now show: the shimmer alone, joined with the wipe up (the last pick), back on by row, back on by column; the still is the wipe loop's even steps (4.8 s to 8.8 s).
 
@@ -476,11 +488,11 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 
 ### 8.6 Not decided in the briefs
 
-- **Skip and Exile, to be revisited** (6.1, item 34). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
-- Silhouette: the four adults pass the 0.82 audit (closest pair 0.67); the redraw of Skip and Exile must keep that and each elder closest to its own adult.
+- **Skip and Exile: done** (6.1, items 35 to 38; Exile is the cape with the wipe back on). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
+- Silhouette: the four adults pass the 0.82 audit (closest pair 0.67) and each elder is closest to its own adult (Exile 0.86 against Skip after the redraw).
 
 ## 9. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- The redraw of Skip and Exile (6.1, item 34); the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers, the glance).
+- The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking, the glance).
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.
