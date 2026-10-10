@@ -289,10 +289,13 @@ test('Breach levers: lostTrail (decided at 1) sets the trail a lost fight adds; 
   }
 }));
 
-test('Dodge levers (off): headStart frees the first n moves and charges every later one; thresholdDelta moves the hunter; slipTrail marks a slip', () => withKits(() => {
+test('Dodge levers: thresholdDelta (decided at -4) moves the hunter; headStart (off) frees the first n moves and charges every later one; slipTrail (off) marks a slip', () => withKits(() => {
   const saved = JSON.parse(JSON.stringify(NR2.rogue.kit.dodge));
   try {
-    for (const l of [1, 2]) assert.deepEqual(['headStart', 'thresholdDelta', 'slipTrail'].filter((k) => k in NR2.rogue.kit.dodge[l]), [], 'all off by default');
+    for (const l of [1, 2]) {
+      assert.equal(NR2.rogue.kit.dodge[l].thresholdDelta, -4, 'decided (7.4)');
+      assert.deepEqual(['headStart', 'slipTrail'].filter((k) => k in NR2.rogue.kit.dodge[l]), [], 'the others off');
+    }
     NR2.rogue.kit.dodge[1].headStart = 2;
     const s = setup('rogueAdultDodge', ['checkpoint', 'checkpoint', 'checkpoint', 'checkpoint']);
     for (const [to, hunt] of [[1, 0], [2, 0], [3, 1], [4, 2]]) {

@@ -31,9 +31,12 @@ const JOBS = {
   // The draft's starting values, spelled out (the defaults are now the decided ones, 7.4); the other jobs vary these.
   start: DRAFT,
   // Decided (7.4): candidate A (thresholds x1.5, the hunter at tier 1, a lost ambush gives no mark) and only the cordons of the map rules.
-  // rogue-s2-decided.json was measured before Breach's lost fights went to trail +1 (7.4); decided-breach1 is the same with it.
+  // rogue-s2-decided.json was measured before Breach's lost fights went to trail +1 (7.4); decided-breach1 is the same with it (and the Dodge kit
+  // spelled out as it was then, before thresholdDelta -4).
   decided: { kit: { breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } } } },
-  'decided-breach1': {},
+  'decided-breach1': { kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2 }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true } } } },
+  // decided-dodge4: the same with the Dodge line's hunter threshold 4 lower (7.4), the fork's defaults.
+  'decided-dodge4': {},
   nomap: { ...DRAFT, map: { on: false } },
   th15: { ...DRAFT, ...th(1.5) },
   th20: { ...DRAFT, ...th(2) },

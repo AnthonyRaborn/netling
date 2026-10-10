@@ -2,6 +2,7 @@
 // at the decided stage 2 settings (rogue-stage2.mjs BASE), under the off-by-default levers in nr2.js kit.dodge: headStart (H), thresholdDelta (T)
 // and slipTrail (+S). The other lines' steerers at the decided settings are the "others" job. Writes results/followup/rogue-dodge-<name>.json;
 // skips files that exist (resumable). The per-region run figures came from sim/rogue-netrun.mjs (FORMS=rogue, 3000 runs) with the same ROGUE_RUN.
+// Measured before thresholdDelta -4 became the default (7.4), so every job spells out the Dodge kit of that time (every second move, no delta).
 // Usage: node prototype/netling2/baseline/rogue-dodge.mjs [lives=1000] [--jobs=3] [filter]
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -30,8 +31,8 @@ const BASE = {
 const D = (...parts) => ({ kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2, ...Object.assign({}, ...parts) }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true, ...Object.assign({}, ...parts) } } } });
 const S = { slipTrail: 1 };
 const JOBS = {
-  current: ['steer-dodge', {}],
-  others: [['steer-breach', 'steer-tune', 'steer-feast'], {}], // the other lines' steerers at the decided settings (one process each, merged)
+  current: ['steer-dodge', D()],
+  others: [['steer-breach', 'steer-tune', 'steer-feast'], D()], // the other lines' steerers at the decided settings (one process each, merged)
   H2: ['steer-dodge', D({ headStart: 2 })], H3: ['steer-dodge', D({ headStart: 3 })], H4: ['steer-dodge', D({ headStart: 4 })],
   'H3+S': ['steer-dodge', D({ headStart: 3 }, S)], 'H4+S': ['steer-dodge', D({ headStart: 4 }, S)],
   T3: ['steer-dodge', D({ thresholdDelta: -3 })], T4: ['steer-dodge', D({ thresholdDelta: -4 })], T5: ['steer-dodge', D({ thresholdDelta: -5 })],
