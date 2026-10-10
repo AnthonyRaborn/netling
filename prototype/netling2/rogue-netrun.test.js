@@ -88,7 +88,7 @@ test("a lost hunter fight: the hunter's damage, then a mark and a disconnect; Mo
   const r = resolveIce(e, false, stub(0.99));
   assert.notEqual(r.result, 'disconnected');
   assert.equal(e.marks ?? 0, 0);
-  assert.equal(e.run.hunt, huntThreshold({ region: 'deep' }) + 2, 'an ordinary lost fight: trail +2');
+  assert.equal(e.run.hunt, huntThreshold({ region: 'deep' }) + 1, 'an ordinary lost fight: trail +1 (Breach, 7.4)');
   assert.equal(e.run.pending?.kind, 'relay');
 }));
 
@@ -271,11 +271,10 @@ test('map rules in a run: a Rogue Deep run has its cordon (and, with narrow, the
   }
 }));
 
-test('Breach levers (off by default): lostTrail sets the trail a lost fight adds; ambushShrug makes a lost ambush an ordinary lost fight', () => withKits(() => {
+test('Breach levers: lostTrail (decided at 1) sets the trail a lost fight adds; ambushShrug (off) makes a lost ambush an ordinary lost fight', () => withKits(() => {
   const saved = JSON.parse(JSON.stringify(NR2.rogue.kit.breach));
   try {
-    assert.equal(NR2.rogue.kit.breach[1].lostTrail, undefined);
-    NR2.rogue.kit.breach[1].lostTrail = 1;
+    assert.equal(NR2.rogue.kit.breach[1].lostTrail, 1, 'decided (7.4)');
     const s = setup('rogueAdultBreach', ['ice']);
     moveTo(s, 1, stub(0.99));
     resolveIce(s, false, stub(0.99));

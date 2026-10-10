@@ -26,12 +26,14 @@ const BASE = {
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
 const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };
-const DRAFT = { ...th(1), hunterTier: 2, ambushMark: true, map: { on: true, relayFactor: 0.5, toIce: { corp: 0.5 }, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0.5, narrow: ['deep', 'source'] } };
+const DRAFT = { ...th(1), hunterTier: 2, ambushMark: true, kit: { breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } } }, map: { on: true, relayFactor: 0.5, toIce: { corp: 0.5 }, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0.5, narrow: ['deep', 'source'] } };
 const JOBS = {
   // The draft's starting values, spelled out (the defaults are now the decided ones, 7.4); the other jobs vary these.
   start: DRAFT,
   // Decided (7.4): candidate A (thresholds x1.5, the hunter at tier 1, a lost ambush gives no mark) and only the cordons of the map rules.
-  decided: {},
+  // rogue-s2-decided.json was measured before Breach's lost fights went to trail +1 (7.4); decided-breach1 is the same with it.
+  decided: { kit: { breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } } } },
+  'decided-breach1': {},
   nomap: { ...DRAFT, map: { on: false } },
   th15: { ...DRAFT, ...th(1.5) },
   th20: { ...DRAFT, ...th(2) },

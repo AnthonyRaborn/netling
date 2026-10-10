@@ -422,6 +422,9 @@ At the decided 4 hour lockout and 8 hour quiet (attentive group, 300 lives of ea
 
 The ambush shrug-off cuts disconnects but not captures (staying in the run longer meets slightly more hunters). A quieter lost fight brings the Breach line to about 4% captured, level with Tune (about 4%) and Feast (4 to 6%). The Dodge line is the opposite outlier: about 0.3% captured, since half-trail moves keep it under every threshold (hunters met 0.02 a life).
 
+**Decided (maintainer, 2026-10-10): a lost fight adds trail +1 for Mole and Sleeper** (+2 for the other lines), now the fork's default (`kit.breach.lostTrail`); the shrug-off and the save reset stay off. **The Dodge line stays open for discussion** (about 0.3% captured, almost never meets the hunter). The whole-group row above (`rogue-s2-decided.json`) predates this change; on the Breach archetypes it moves capture from 7.5% to 4.0%.
+
+
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg) and the relay-question read-out (continuing pays about a third more), which needs the chosen hunter settings first.
 
 ## 8. The ten forms (concept briefs, for choice)
