@@ -207,7 +207,7 @@ test('the shadow is registered on all ten forms, sized by stage (one cell on the
   }
 });
 
-test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher (Exile by turns with the wipe back on), Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a half grin in the eye colour), Sleeper vanishing, Alias the sweep hint', async () => {
+test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher (Exile by turns with the wipe back on), Spook and the baby the plain decoy, Handler the signal and the split, Feast the bigger one (Stash with its maw, a half grin in the eye colour), Sleeper vanishing, Alias the sweep hint', async () => {
   const M = await import('./rogue-motion.js');
   const same = (f, m) => [0, 2, 5, 9, 14].every((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join() === m(f.a, f.anchors.a, { time: s * STEP_MS }).join());
   assert.ok(same(set.rogueBaby, M.decoyMotion('baby')));
@@ -218,7 +218,8 @@ test('each line carries its decided effect: Breach fades, Dodge shimmers as Ciph
   assert.ok(same(set.rogueElderDodge, M.scanWipeBackMotion('elder', { back: 'col' })), 'Exile: the shimmer and the wipe back on by the column, by turns');
   const { EXILE_OPTIONS } = await import('./rogue-options.js');
   assert.deepEqual([set.rogueElderDodge.a, set.rogueElderDodge.b], [EXILE_OPTIONS.cape.a, EXILE_OPTIONS.cape.b], 'Exile is the cape (8.4g)');
-  for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
+  assert.ok(same(set.rogueAdultTune, M.decoyMotion('adult')), 'Spook: the plain decoy');
+  assert.ok(same(set.rogueElderTune, M.signalMotion('elder', { split: true })), 'Handler: the signal and the split');
   assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
   assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true })), 'Stash: the half grin, low, with the eye, late');
   // The maw (decided): a half grin in the eye colour in the shadow (three cells on a row, the outer end curled up a row), a row below the
@@ -504,7 +505,7 @@ test('options, Exile\'s wipe back on (8.4h): starts and ends in camo, plain at s
   }
 });
 
-test('options, Handler (8.4i): the split and the signal never touch the figure, the arcs leave both cups and travel out, two pulses a loop, calm still', async () => {
+test('Handler (8.4i, registered: both): the split and the signal never touch the figure, the arcs leave both cups and travel out, two pulses a loop, calm still', async () => {
   const { splitMotion, signalMotion, ringsAt, cupsOf, SIGNAL_REACH } = await import('./rogue-motion.js');
   const f = set.rogueElderTune;
   const w = f.a[0].length;

@@ -1,10 +1,10 @@
 # Netling 2.0: the Rogue egg (drafts)
 
-Status (handoff, 2026-10-10): the design is largely decided with the maintainer (section 6.1, items 1 to 38) and the ten forms are drawn in the sprite prototype (section 8). **All ten sprites and their effects are accepted by the maintainer** (Exile redrawn as the cape with a second camo pass, the wipe back on; 8.4g and 8.4h); nothing is simulated yet, and every number is a starting value. Scope so far: the hidden-line base in play, the hunters, the merge ending (the good end) and the forms. The reveal, the background touches and Rogue's own codex pages are not done (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure.
+Status (handoff, 2026-10-10): the design is largely decided with the maintainer (section 6.1, items 1 to 40) and the ten forms are drawn in the sprite prototype (section 8). **All ten sprites and their effects are accepted by the maintainer** (Exile redrawn as the cape with a second camo pass, the wipe back on, 8.4g and 8.4h; Handler given the headset signal and the split shadow, 8.4i); nothing is simulated yet, and every number is a starting value. Scope so far: the hidden-line base in play, the hunters, the merge ending (the good end) and the forms. The reveal, the background touches and Rogue's own codex pages are not done (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure.
 
 **Where to pick up.**
 1. **Done: Skip and Exile revisited** (2026-10-10). Skip stays as drawn; Exile is the cape (8.4g), and its layer takes turns by loop between Cipher's shimmer and the wipe back on by the column (8.4h). Registered in `rogue-art.js` (`skipElder`) and `rogue-motion.js` (`MOTION_OF.skipElder`); the other options stay in `rogue-options.js` for the record.
-2. **Handler (maintainer, after the Exile round): the least interesting elder now; options drawn for choice (8.4i: split, signal, both).** All ten forms are otherwise accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
+2. **Done: Handler** (maintainer, after the Exile round: the least interesting elder). Its layer is now the headset signal with the split shadow (8.4i; `MOTION_OF.spookElder`). All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
 3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
 4. Then the simulator build (section 7) and the text (section 9).
 
@@ -235,6 +235,10 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 37. **Decided: the wipe back on by the column (twenty-first round).** The wipe loop starts in full camo, a dim column sweeps left to right wiping it off, one plain step, then the column returns right to left wiping it back on, so it meets the shimmer (in its own timing) in camo at both hand-overs. Skip keeps the shimmer alone.
 
 38. **With that, all ten Rogue forms and their effects are accepted.**
+
+39. **Handler is the least interesting elder now (twenty-second round):** every other elder adds a behaviour over its adult and Handler had none (Spook's layer). Options drawn: the split shadow, the headset's signal, both (8.4i).
+
+40. **Decided: both (twenty-third round).** Handler's layer is the signal and the split: the shadow sent out to both sides at once (the agents it runs) and arcs in the body colour pulsing out from the headset cups, two pulses a loop. Spook keeps the plain decoy.
 
 **The good end**
 
@@ -482,11 +486,13 @@ Drawn as `wipeMotion` in `rogue-motion.js` (an option, not registered): the same
 
 Shown on `rogue-options.html` (the row under the Exile options: the cape with the shimmer, the wipe, the two taking turns, the same joined, and joined with the wipe going up), `docs/netling2-prototypes/shots/rogue-exile-wipe.png` (the wipe loop's first six steps, 5.2 s to 7.2 s, 0.4 s apart: the first sweep down in columns 2 to 4, up in column 5) and `rogue-exile-wipe.gif` (9.6 s, both loops, the time and loop printed on each frame).
 
-### 8.4i Handler: an elder move of its own (2026-10-10, for choice)
+### 8.4i Handler: an elder move of its own (2026-10-10; decided: both)
 
 **Maintainer (twenty-second round):** Handler is now the least interesting elder; ideas to help it like the others. The diagnosis: every other elder adds a behaviour over its adult (Sleeper vanishes, Exile wipes, Stash's shadow grins), while Handler's layer was Spook's (the still camo and the plain decoy). Four ideas were offered (the split shadow as agents it runs; the headset transmitting; the eyes following the shadow; the camo switching once a loop); **the maintainer asked to see the first two and both together.**
 
-Drawn in `rogue-motion.js` (options, not registered; 8.4i block):
+**Decided (6.1, item 40): both**, registered as `signalMotion('elder', { split: true })` (`MOTION_OF.spookElder`). The sprite is unchanged, so the audit (frames only) is identical; the arcs sit beside the head, where side-of-head wearables (headphones) may overlap the first arc in a renderer, which no check covers. `rogue-registered.gif` redone.
+
+Drawn in `rogue-motion.js` (the 8.4i block; split and signal alone kept as options):
 - **split:** the shadow sent out to both sides at once (`splitMotion`, the first round's alternate): two agents in the field. On Handler it is subtler than on a solid form, since its body is already half dim with the camo.
 - **signal:** the headset transmits (`signalMotion`): from each cup (the outermost dim cell on the eye row) an arc in the body colour travels outward a cell a step with a second one two cells behind, curving back toward the head at its ends ('(' and ')'). Two pulses a loop (steps 0 to 3 and 6 to 9). The body colour because the shadow is dim (it would hide dim arcs), the eye colour is Stash's reveal and the white mark is the dead tag. Drawn on empty cells and over the shadow, never on the figure. Calm: one arc parked a cell out.
 - **both:** `signalMotion(stage, { split: true })`.
@@ -499,11 +505,11 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 
 ### 8.6 Not decided in the briefs
 
-- **Skip and Exile: done** (6.1, items 35 to 38; Exile is the cape with the wipe back on). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
+- **Skip and Exile: done** (6.1, items 35 to 38; Exile is the cape with the wipe back on). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33; Exile's wipe and Handler's signal and split, items 37 and 40); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
 - Silhouette: the four adults pass the 0.82 audit (closest pair 0.67) and each elder is closest to its own adult (Exile 0.86 against Skip after the redraw).
 
 ## 9. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking, the glance).
+- The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance).
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.

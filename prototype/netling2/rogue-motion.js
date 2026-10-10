@@ -13,7 +13,9 @@
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
 //     Exile takes turns by loop with THE WIPE BACK ON (decided, 8.4h): from full camo a dim column sweeps left to right wiping it off,
 //     one plain step, then the column returns right to left wiping it back on, so it meets the shimmer in camo at both hand-overs.
-//   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
+//   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); Spook's layer is the plain decoy. Handler's
+//     (decided, 8.4i) is THE SIGNAL AND THE SPLIT: the shadow sent out to both sides at once (the agents it runs), and arcs in the body
+//     colour pulsing out from its headset cups, two pulses a loop.
 //   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
 //     copy's mouth height and a row lower, a half grin in the eye colour inside the shadow (a line with its outer end curled up), with the
 //     shadow's own eye showing beside it; both appear only for the last two steps of the hold, a reveal just before the shadow is dropped.
@@ -227,7 +229,7 @@ export const scanWipeMotion = (stage, { joined = false, up = false } = {}) => {
   };
 };
 
-// ---- Tune: Handler's options (drafts 8.4i; not registered) -----------------------------------------------------------------------------
+// ---- Tune: Handler's signal and split (drafts 8.4i; registered: both) -----------------------------------------------------------------------------
 // Handler runs others now. Two ideas, alone or together, over its still camo:
 //   split: the shadow sent out to both sides at once (the alternate kept from the first round, splitMotion): two agents in the field.
 //   signal: the headset transmits. From each cup (the outermost dim cell on the eye row) an arc in the body colour travels outward a
@@ -378,6 +380,6 @@ export const MOTION_OF = {
   teen: sweepHintMotion('teen'),
   mole: fadeMotion('adult'), moleElder: fadeMotion('elder', { vanish: true }),
   skip: scanMotion('adult'), skipElder: scanWipeBackMotion('elder', { back: 'col' }),
-  spook: decoyMotion('adult'), spookElder: decoyMotion('elder'),
+  spook: decoyMotion('adult'), spookElder: signalMotion('elder', { split: true }),
   drop: bigDecoyMotion('adult'), dropElder: bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true }),
 };

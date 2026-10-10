@@ -58,7 +58,7 @@ function draw(now) {
   const frame = Math.floor(time / FRAME_MS) % 2 ? 'b' : 'a';
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top';
-  ctx.fillText(`Registered (decided): Breach fade, Dodge sweep, Tune still camo, Feast big decoy, Stash's maw. t=${(time / 1000).toFixed(1)} s`, 4, 2);
+  ctx.fillText(`Registered: the ten forms with their decided effects (Exile's wipe, Handler's signal and split). t=${(time / 1000).toFixed(1)} s`, 4, 2);
   rows.forEach(([f, variants], i) => {
     const y = LABEL + Math.floor(i / 2) * ROW;
     const base = (i % 2) * 3;
