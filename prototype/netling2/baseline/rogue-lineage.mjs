@@ -44,8 +44,11 @@ const run = ([job, env, a]) => new Promise((resolve) => {
 });
 const queue = [...todo];
 await Promise.all(Array.from({ length: jobsAtOnce }, async () => { while (queue.length) await run(queue.shift()); }));
-for (const job of Object.keys(JOBS)) {
+// The combined file of each job asked for, once every archetype is done (the counts are read from the files, which may predate this call's).
+for (const job of Object.keys(JOBS).filter((j) => !filter || j.includes(filter))) {
   const files = ATT.map((a) => join(out, 'rogue-lineage', job, `${a}.json`));
   if (!files.every(existsSync)) continue;
-  writeFileSync(join(out, `rogue-lineage-${job}.json`), JSON.stringify({ job, lineages, rogueLives, archetypes: Object.fromEntries(ATT.map((a, i) => [a, JSON.parse(readFileSync(files[i], 'utf8'))])) }, null, 1));
+  const archetypes = Object.fromEntries(ATT.map((a, i) => [a, JSON.parse(readFileSync(files[i], 'utf8'))]));
+  const first = Object.values(archetypes)[0];
+  writeFileSync(join(out, `rogue-lineage-${job}.json`), JSON.stringify({ job, lineages: first.lineages, rogueLives: first.rogueLives, archetypes }, null, 1));
 }

@@ -22,13 +22,13 @@ for (const [label, job] of JOBS) {
   if (!first) {
     first = D;
     const none = Object.keys(D.archetypes).filter((a) => !(D.archetypes[a].perRogueLife.sourceRun > 0));
-    console.log(`Attentive group: ${A.length} archetypes that run (left out, they never jack in: ${none.join(', ')}), ${D.lineages} lines of ${D.rogueLives} Rogue lives each.\n`);
+    console.log(`Attentive group: ${A.length} archetypes that run (left out, they never jack in: ${none.join(', ')}), ${D.lineages} lines of ${D.rogueLives} Rogue lives each for the first job (each job's own count is in its row).\n`);
     console.log(`| bot rules ${HEAD}`);
     console.log(`|---${SEP}`);
   }
   const m = (get) => mean(A.map(get));
   const worst = Math.min(...A.map((o) => o.reached));
-  console.log(`| ${label} | ${pct(m((o) => o.reached))} (worst ${pct(worst)}) | ${pct(m((o) => o.reachedBy[1]))} / ${pct(m((o) => o.reachedBy[3]))} / ${pct(m((o) => o.reachedBy[5]))} | ${m((o) => o.firstGoodEnd.rogueLives.median).toFixed(1)} / ${m((o) => o.firstGoodEnd.lives.median).toFixed(1)} / ${m((o) => o.firstGoodEnd.days.median).toFixed(1)} | ${pct(m((o) => o.firstGoodEnd.atExit))} | ${pct(m((o) => o.perRogueLife.elder))} / ${pct(m((o) => o.perRogueLife.sourceExit))} / ${pct(m((o) => o.perRogueLife.cleanExit))} / ${pct(m((o) => o.perRogueLife.goodEnd))} | ${(m((o) => o.perRogueLife.captured) * 100).toFixed(1)} | ${pct(m((o) => o.afterExit.lostIt))} | ${m((o) => o.goodEndsPerLine).toFixed(2)} |`);
+  console.log(`| ${label} (${D.lineages} lines) | ${pct(m((o) => o.reached))} (worst ${pct(worst)}) | ${pct(m((o) => o.reachedBy[1]))} / ${pct(m((o) => o.reachedBy[3]))} / ${pct(m((o) => o.reachedBy[5]))} | ${m((o) => o.firstGoodEnd.rogueLives.median).toFixed(1)} / ${m((o) => o.firstGoodEnd.lives.median).toFixed(1)} / ${m((o) => o.firstGoodEnd.days.median).toFixed(1)} | ${pct(m((o) => o.firstGoodEnd.atExit))} | ${pct(m((o) => o.perRogueLife.elder))} / ${pct(m((o) => o.perRogueLife.sourceExit))} / ${pct(m((o) => o.perRogueLife.cleanExit))} / ${pct(m((o) => o.perRogueLife.goodEnd))} | ${(m((o) => o.perRogueLife.captured) * 100).toFixed(1)} | ${pct(m((o) => o.afterExit.lostIt))} | ${m((o) => o.goodEndsPerLine).toFixed(2)} |`);
 }
 if (first) {
   console.log('\nBy archetype (decided bot rules):\n');
