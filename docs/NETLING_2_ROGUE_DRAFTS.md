@@ -524,7 +524,7 @@ Reading it:
 2. **The cost is the Deep's value.** A whole Rogue Deep run banks about 19% less (adults 2.5 to 2.8 against 3.1 to 3.5), below the decided middle-relay Deep (2.7 to 3.2) and further below the hidden form (4.20). The Deep is where Rogue earns least against the NL-0 hidden form already.
 3. **0 overshoots** (going on pays the same as or less than jacking out), and the narrow Deep or a relay at 0.8 change little on top of an exit bonus of 1.
 
-**Decided (maintainer, 2026-10-10): Rogue's exit bonus in the Deep is 1** (`rogue.exitBonus: { deep: 1 }`, now the fork's default; other regions keep their own). The earlier sweep scripts spell out the region's 2 so their saved outputs still reproduce (`rogue-relay.json` with `ROGUE_RUN='{"map":{"relayAt":{}},"exitBonus":{"deep":2}}'`).
+**Decided (maintainer, 2026-10-10): Rogue's exit bonus in the Deep is 1** (`rogue.exitBonus: { deep: 1 }`, now the fork's default; other regions keep their own). The earlier sweep scripts spell out the region's 2 so their saved outputs still reproduce (`rogue-relay.json` with `ROGUE_RUN='{"map":{"relayAt":{}},"exitBonus":{"deep":2}}'`). Whole lives, attentive group (`rogue-s2-decided-exit1.json`, 300 lives each; against `decided-relay667`): full life 97.6 (97.3), captured 2.4% (2.7; worst archetype 5.7%, from 5.3), hunters met 0.70 (0.69), the Deep cleared in 75.9% (75.9), the elder gate met in 29.3% (30.0); captured by role steerers: Breach 5.2%, Dodge 1.7%, Tune 2.7%, Feast 3.0%. Nothing moves beyond sampling noise: the bonus is paid at the exit, so it changes what a Deep run banks, not who survives it.
 
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg).
 
