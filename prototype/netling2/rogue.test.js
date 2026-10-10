@@ -470,6 +470,37 @@ test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the fac
   }
 });
 
+test('options, Exile\'s wipe back on (8.4h): starts and ends in camo, plain at step 6, keeps the marks, and meets the shimmer in its own timing without a jump', async () => {
+  const { EXILE_OPTIONS } = await import('./rogue-options.js');
+  const { wipeBackMotion, scanWipeBackMotion, scanMotion } = await import('./rogue-motion.js');
+  const f = { ...set.rogueElderDodge, a: EXILE_OPTIONS.cape.a };
+  const w = f.a[0].length;
+  const { eyeRow } = f.anchors.a;
+  const loop = STEPS * STEP_MS;
+  const strip = (g) => g.map((r) => r.slice(PAD, PAD + w));
+  const holes = (g) => f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && g[y][x] === '.').length, 0);
+  const changed = (p, q) => f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && p[y][x] !== q[y][x]).length, 0);
+  for (const back of ['row', 'col']) {
+    const m = wipeBackMotion('elder', { back });
+    const at = (s) => strip(m(f.a, f.anchors.a, { time: s * STEP_MS }));
+    for (let s = 0; s < STEPS; s++) at(s).forEach((r, y) => [...r].forEach((c, x) => {
+      const was = f.a[y][x];
+      if (was === 'o' || was === 'x' || (y >= eyeRow - 2 && y <= eyeRow + 1)) assert.ok(c === was || (was === '.' && c === 'x'), `${back} step ${s}: mark or face cell ${x},${y}`);
+      else if (was === '#') assert.ok(c === '#' || c === 'x' || c === '.', `${back} step ${s}: ${x},${y}`);
+    }));
+    assert.equal(holes(at(6)), 0, `${back}: plain at step 6`);
+    assert.ok(holes(at(0)) > 20 && holes(at(11)) > 20, `${back}: camo at both ends`);
+    assert.ok(holes(at(3)) < holes(at(1)) && holes(at(9)) > holes(at(7)), `${back}: wiped off, then back on`);
+    const both = scanWipeBackMotion('elder', { back });
+    const g = (t) => strip(both(f.a, f.anchors.a, { time: t }));
+    const inside = Math.max(...Array.from({ length: 11 }, (_, i) => changed(g(i * STEP_MS), g((i + 1) * STEP_MS))));
+    for (const t of [loop, 2 * loop]) assert.ok(changed(g(t - STEP_MS), g(t)) <= inside, `${back}: the hand-over at ${t} ms`);
+    assert.deepEqual(both(f.a, f.anchors.a, { time: 3 * STEP_MS }), scanMotion('elder')(f.a, f.anchors.a, { time: 3 * STEP_MS }), `${back}: the shimmer in its own timing`);
+    const calm = new Set([0, 4, 9].map((s) => m(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n')));
+    assert.equal(calm.size, 1, `${back}: calm`);
+  }
+});
+
 test('options, second round: the still camo is the same in both frames, so even head and body keeps the head rows identical', async () => {
   const { STATIC_CAMO_OPTIONS } = await import('./rogue-options.js');
   for (const f of [set.rogueAdultTune, set.rogueElderTune]) {

@@ -15,7 +15,7 @@ import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { fadePulse, bigDecoy, EXILE_OPTIONS } from './rogue-options.js';
-import { bigDecoyMotion, scanMotion, wipeMotion, scanWipeMotion } from './rogue-motion.js';
+import { bigDecoyMotion, scanMotion, scanWipeMotion, scanWipeBackMotion } from './rogue-motion.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -72,12 +72,11 @@ function draw(now) {
   cell(col(0), ye, skip.motion(skip[frame], skip.anchors.a, { time }), 'Skip');
   cell(col(1), ye, exile.motion(exile[frame], exile.anchors.a, { time }), 'Exile now');
   Object.values(EXILE_OPTIONS).forEach((o, j) => cell(col(2 + j), ye, shimmer(o[frame], exile.anchors.a, { time }), `Exile: ${o.name}`));
-  // The cape with a second camo pass (drafts 8.4h): the shimmer alone, the wipe alone (down to camo, back in left to right), and the two
-  // taking turns by loop, and the same joined (the shimmer half a loop late, so neither hand-over jumps), and joined with the wipe's first sweep
-  // running up.
+  // The cape with a second camo pass (drafts 8.4h): the shimmer alone, the last pick (joined, the wipe going up), and the wipe back on
+  // (the wipe loop starts and ends in camo, so the shimmer keeps its own timing): back on by the row rising, or by the column returning.
   const yw = ye + ROW;
   const cape = EXILE_OPTIONS.cape;
-  [['shimmer', shimmer], ['wipe', wipeMotion('elder')], ['shimmer, then wipe', scanWipeMotion('elder')], ['joined', scanWipeMotion('elder', { joined: true })], ['joined, wipe up', scanWipeMotion('elder', { joined: true, up: true })]]
+  [['shimmer', shimmer], ['joined, wipe up', scanWipeMotion('elder', { joined: true, up: true })], ['back on: row', scanWipeBackMotion('elder', { back: 'row' })], ['back on: column', scanWipeBackMotion('elder', { back: 'col' })]]
     .forEach(([label, m], j) => cell(col(j), yw, m(cape[frame], exile.anchors.a, { time }), `cape: ${label}`));
   const y = yw + ROW;
   cell(col(0), y, frame === 'a' ? blank.a : blank.b, 'Blank (reference)');

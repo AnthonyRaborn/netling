@@ -164,13 +164,48 @@ export const wipeMotion = (stage, { up = false } = {}) => (sprite, anchors, { ti
         if (sprite[y][x] !== '#') continue;
         const at = x + PAD;
         if (y === row || x === col) g[y][at] = 'x';
-        else if ((full || (row !== undefined && (up ? y > row : y < row)) || (col !== undefined && x > col)) && (x + y) % 2) g[y][at] = '.';
+        else if ((full || (row !== undefined && (up ? y > row : y < row)) || (col !== undefined && x > col)) && (at + y) % 2) g[y][at] = '.'; // the shimmer's checker (padded columns), so the camo matches it
       }
     }
   }
   decoyInto(g, sprite, time, reduced, PAD, REACH[stage]);
   return out(g);
 };
+// The wipe back on (drafts 8.4h, twenty-first round): the wipe loop starts and ends in camo, as the shimmer in its own timing does, so the
+// two take turns with no offset. Step 0 full camo; 1 to 5 a dim column sweeps left to right and the body behind it comes back solid; 6
+// plain; 7 to 11 it is wiped back on: `back: 'row'` a dim row rising from the feet with the camo below it, `back: 'col'` the column
+// returning right to left with the camo behind it.
+export const wipeBackAt = (step, height, left, right, back = 'row') => {
+  if (step === 0) return { full: true };
+  if (step <= 5) return { col: Math.round(left + ((step - 1) / 4) * (right - left)), solidLeft: true };
+  if (step === 6) return {};
+  const k = (step - 7) / 4;
+  return back === 'col' ? { col: Math.round(right - k * (right - left)), camoRight: true } : { row: Math.round(height - 2 - k * (height - 2)), camoBelow: true };
+};
+export const wipeBackMotion = (stage, { back = 'row' } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+  const g = padded(sprite, PAD);
+  if (!reduced) {
+    const { row, col, full, solidLeft, camoRight, camoBelow } = wipeBackAt(stepOf(time), sprite.length, ...bodyCols(sprite), back);
+    for (let y = 0; y < sprite.length; y++) {
+      if (faceRow(anchors, y)) continue;
+      for (let x = 0; x < sprite[0].length; x++) {
+        if (sprite[y][x] !== '#') continue;
+        const at = x + PAD;
+        if (y === row || x === col) g[y][at] = 'x';
+        else if ((full || (solidLeft && x > col) || (camoRight && x > col) || (camoBelow && y > row)) && (at + y) % 2) g[y][at] = '.'; // the shimmer's checker (padded columns), so the camo matches it
+      }
+    }
+  }
+  decoyInto(g, sprite, time, reduced, PAD, REACH[stage]);
+  return out(g);
+};
+// The shimmer (its own timing) and the wipe back on, taking turns by loop.
+export const scanWipeBackMotion = (stage, { back = 'row' } = {}) => {
+  const scan = scanMotion(stage);
+  const wipe = wipeBackMotion(stage, { back });
+  return (sprite, anchors, opts = {}) => (!opts.reduced && Math.floor(Math.max(0, opts.time ?? 0) / (STEPS * STEP_MS)) % 2 ? wipe : scan)(sprite, anchors, opts);
+};
+
 // The shimmer and the wipe taking turns by loop (the shimmer first), as the decoy takes turns by side. `joined` starts the shimmer half a
 // loop late (its band at the feet, the body plain), so it rises into the camo and comes back down to plain: it then starts and ends where
 // the wipe does, and neither hand-over jumps (without it the shimmer ends in camo and the wipe starts plain).
