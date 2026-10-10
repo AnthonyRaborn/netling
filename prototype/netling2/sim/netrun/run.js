@@ -595,7 +595,8 @@ function encounterNode(pet, nodeId, rng) {
         note(run, 'exit node. trace complete.');
         return { ok: true, kind: 'exit', ...jackOut(pet) };
       }
-      const bonus = Array.from({ length: (region.exitBonus ?? 1) + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].exitItems ?? 0 : 0) }, () => weighted(region.loot, rng)); // Feast corp: a company-store item at the exit (when set)
+      const exitItems = hunted(pet, run) && NR2.rogue.exitBonus?.[run.region] !== undefined ? NR2.rogue.exitBonus[run.region] : region.exitBonus ?? 1; // Rogue: its own exit bonus where set (nr2.js rogue.exitBonus)
+      const bonus = Array.from({ length: exitItems + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].exitItems ?? 0 : 0) }, () => weighted(region.loot, rng)); // Feast corp: a company-store item at the exit (when set)
       run.loot.push(...bonus);
       run.scrip = (run.scrip ?? 0) + RUN_CFG.exitScrip + (ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].scrip : 0);
       const exitFragment = region.exitFragment ?? (run.contract?.kind === 'fragment' ? 1 : RUN_CFG.exitFragmentChance);

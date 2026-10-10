@@ -262,7 +262,7 @@ test('map rules: Corp Grid checkpoints become ICE at the share; guards make ever
   }
 });
 
-test('map rules in a run: a Rogue Deep run has its cordon (and, with narrow, the narrow map); an NL-0 run is untouched', () => withKits(() => {
+test('map rules in a run: a Rogue Deep run has its relay two thirds down and the cordon after it (and, with narrow, the narrow map); an NL-0 run is untouched', () => withKits(() => {
   const saved = [NR2.map.on, NR2.rogue.map.on];
   NR2.map.on = true;
   NR2.rogue.map.on = true;
@@ -274,7 +274,8 @@ test('map rules in a run: a Rogue Deep run has its cordon (and, with narrow, the
       startRun(s, 'deep', rng, []);
       const widths = Array.from({ length: REGIONS.deep.layers }, (_, i) => s.run.map.nodes.filter((n) => n.layer === i + 1).length);
       if (NR2.rogue.map.narrow.includes('deep')) assert.ok(Math.max(...widths) <= 3, 'narrow: 2 to 3 a layer');
-      assert.deepEqual(s.run.map.rogueRules.cordon, [6]);
+      assert.deepEqual(s.run.map.rogueRules.cordon, [8], 'decided (7.4): the relay at layer 7, the cordon at 8');
+      assert.ok(s.run.map.nodes.some((n) => n.layer === 7 && n.type === 'relay'));
       const rng2 = mulberry32(seed);
       const p = createScript({ now: 0, rng: rng2 });
       Object.assign(p, { egg: 'program', stage: 'adult', form: 'hidden' });
@@ -328,5 +329,24 @@ test('Dodge levers: thresholdDelta (decided at -4) moves the hunter; headStart (
     assert.equal(k.run.hunt, 2, 'the move (+1, past the head start) and the slip (+1)');
   } finally {
     NR2.rogue.kit.dodge = saved;
+  }
+}));
+
+test("the Rogue exit bonus (rogue.exitBonus, off): in place of the region's exit items, for a Rogue netling only", () => withKits(() => {
+  const saved = { ...NR2.rogue.exitBonus };
+  const exitLoot = (form, egg) => {
+    const s = setup(form, ['checkpoint'], { egg });
+    moveTo(s, 1, stub(0.99));
+    const before = s.run.loot.length;
+    moveTo(s, 2, stub(0.99));
+    return s.run.loot.length - before;
+  };
+  try {
+    assert.equal(exitLoot('rogueAdultBreach', 'rogue'), REGIONS.deep.exitBonus, "off: the region's");
+    NR2.rogue.exitBonus.deep = 1;
+    assert.equal(exitLoot('rogueAdultBreach', 'rogue'), 1);
+    assert.equal(exitLoot('hidden', 'program'), REGIONS.deep.exitBonus, 'an NL-0 netling keeps the region bonus');
+  } finally {
+    NR2.rogue.exitBonus = saved;
   }
 }));

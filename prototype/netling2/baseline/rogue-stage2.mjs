@@ -37,6 +37,9 @@ const JOBS = {
   'decided-breach1': { kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2 }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true } } } },
   // decided-dodge4: the same with the Dodge line's hunter threshold 4 lower (7.4), the fork's defaults.
   'decided-dodge4': {},
+  // decided-relay667: the same with the Deep's relay two thirds of the way down (7.4), the fork's defaults; every job above is measured with the
+  // relay in the middle layer, as it was then (PRE_RELAY below).
+  'decided-relay667': {},
   nomap: { ...DRAFT, map: { on: false } },
   th15: { ...DRAFT, ...th(1.5) },
   th20: { ...DRAFT, ...th(2) },
@@ -50,7 +53,8 @@ const JOBS = {
   'th20-tier1-nocordon-amb-half': { ...DRAFT, ...th(2), hunterTier: 1, map: { ...DRAFT.map, cordons: {} }, ambush: HALF },
 };
 
-const todo = Object.entries(JOBS).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));
+const PRE_RELAY = (name, over) => (name === 'decided-relay667' ? over : { ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
+const todo = Object.entries(JOBS).map(([n, o]) => [n, PRE_RELAY(n, o)]).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));
 console.log(`${todo.length} jobs to run, ${lives} lives an archetype, ${jobsAtOnce} at once`);
 const run = ([name, over]) => new Promise((resolve) => {
   const p = spawn(process.execPath, [balance, String(lives)], { env: { ...process.env, ...BASE, ROGUE_RUN: JSON.stringify(over) } });

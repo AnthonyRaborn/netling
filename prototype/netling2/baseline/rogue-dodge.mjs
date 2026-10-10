@@ -2,7 +2,8 @@
 // at the decided stage 2 settings (rogue-stage2.mjs BASE), under the off-by-default levers in nr2.js kit.dodge: headStart (H), thresholdDelta (T)
 // and slipTrail (+S). The other lines' steerers at the decided settings are the "others" job. Writes results/followup/rogue-dodge-<name>.json;
 // skips files that exist (resumable). The per-region run figures came from sim/rogue-netrun.mjs (FORMS=rogue, 3000 runs) with the same ROGUE_RUN.
-// Measured before thresholdDelta -4 became the default (7.4), so every job spells out the Dodge kit of that time (every second move, no delta).
+// Measured before thresholdDelta -4 and the Deep's moved relay became the defaults (7.4), so every job spells out the Dodge kit and the map of
+// that time (every second move, no delta; the relay in the middle layer).
 // Usage: node prototype/netling2/baseline/rogue-dodge.mjs [lives=1000] [--jobs=3] [filter]
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -28,7 +29,7 @@ const BASE = {
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
 };
 // ROGUE_RUN merges one level down, so the whole Dodge kit is spelled out with the lever added.
-const D = (...parts) => ({ kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2, ...Object.assign({}, ...parts) }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true, ...Object.assign({}, ...parts) } } } });
+const D = (...parts) => ({ map: { relayAt: {} }, kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2, ...Object.assign({}, ...parts) }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true, ...Object.assign({}, ...parts) } } } });
 const S = { slipTrail: 1 };
 const JOBS = {
   current: ['steer-dodge', D()],

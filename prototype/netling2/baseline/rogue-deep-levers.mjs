@@ -35,10 +35,20 @@ const FAR = {
   'relay at 0.667 + narrow': { map: { relayAt: { deep: 0.667 }, narrow: ['deep'] } },
   'relay at 0.8 + narrow': { map: { relayAt: { deep: 0.8 }, narrow: ['deep'] } },
 };
+// Fourth round, at the new default (the relay at 0.667, 7.4): the Rogue exit bonus in the Deep (rogue.exitBonus; the region's is 2).
+const EXIT = {
+  'relay 0.667 (decided)': {},
+  'relay 0.667 + exit 1': { exitBonus: { deep: 1 } },
+  'relay 0.667 + exit 0': { exitBonus: { deep: 0 } },
+  'relay 0.667 + narrow + exit 1': { exitBonus: { deep: 1 }, map: { narrow: ['deep'] } },
+  'relay 0.8 + exit 1': { exitBonus: { deep: 1 }, map: { relayAt: { deep: 0.8 } } },
+};
+// The first three rounds were measured with the relay in the middle layer (then the default), so they spell it out unless they move it.
+const PRE = (over) => ({ ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
 const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ...env }, maxBuffer: 1 << 26 }));
 const file = join(here, 'results', 'followup', 'rogue-deep-levers.json');
 const out = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
-for (const [name, over] of [...Object.entries(SETTINGS).map(([k, map]) => [k, { map }]), ...Object.entries(FAR)]) {
+for (const [name, over] of [...Object.entries(SETTINGS).map(([k, map]) => [k, PRE({ map })]), ...Object.entries(FAR).map(([k, o]) => [k, PRE(o)]), ...Object.entries(EXIT)]) {
   if (out[name]) continue;
   const ROGUE_RUN = JSON.stringify(over);
   out[name] = { relay: sim('rogue-relay.mjs', { ROGUE_RUN }), runs: sim('rogue-netrun.mjs', { ROGUE_RUN, FORMS: 'rogue,hidden' }) };

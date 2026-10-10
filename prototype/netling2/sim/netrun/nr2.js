@@ -117,10 +117,12 @@ export const NR2 = {
       tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
       feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },
     },
-    // Rogue's own map rules (9.7, netrun/rogue-map.js). Decided (7.4): only the cordons for now, one in the Deep and two in the Source. The draft's
-    // other rules, off: relayFactor 0.5 (extra relays halved), toIce { corp: 0.5 } (Corp Grid checkpoints as ICE), guardShare 0.5 (guarded caches
-    // and markets) and narrow ['deep', 'source'] (1.0's narrow maps there).
-    map: { on: true, relayFactor: 1, toIce: {}, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0, narrow: [] },
+    // Rogue's own map rules (9.7, netrun/rogue-map.js). Decided (7.4): the cordons, one in the Deep and two in the Source, and the Deep's relay
+    // two thirds of the way down (relayAt; its cordon follows it). The draft's other rules, off: relayFactor 0.5 (extra relays halved), toIce
+    // { corp: 0.5 } (Corp Grid checkpoints as ICE), guardShare 0.5 (guarded caches and markets) and narrow ['deep', 'source'] (1.0's narrow maps).
+    map: { on: true, relayFactor: 1, toIce: {}, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0, narrow: [], relayAt: { deep: 0.667 } },
+    // The exit's bonus items for a Rogue netling, by region, in place of the region's exitBonus (7.4, measured; off: the region's own).
+    exitBonus: {},
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----

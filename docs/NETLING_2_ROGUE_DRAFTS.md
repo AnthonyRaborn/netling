@@ -507,7 +507,24 @@ Reading it:
 2. **It levels off well above 1.33.** Even with the relay one layer before the exit (0.9), going on pays 1.4 to 1.9: the push crosses one cordon and collects the Deep's exit bonus (2 items and 3 scrip, `exitBonus` 2), which alone is most of a quiet run's value. The remainder is the exit bonus, so option (b) is what closes it.
 3. **Fewer runs meet the question** the later the relay sits (38 to 42% at the middle, 32 to 38% at two thirds); the narrow Deep gives that back (42 to 50%).
 
-**For the maintainer:** the relay at 0.667 (with or without the narrow Deep) as the starting point, and then either (b), a Rogue exit bonus of 1 in the Deep, measured on top, or (d), a Deep target of about 1.6 to 2.0. Not decided; `relayAt` stays off.
+**Decided (maintainer, 2026-10-10): the Rogue Deep's relay two thirds of the way down** (`relayAt: { deep: 0.667 }`, now the fork's default; the narrow Deep stays off). The earlier sweep scripts spell out the middle relay so their saved outputs still reproduce (`rogue-relay.json` with `ROGUE_RUN='{"map":{"relayAt":{}}}'`).
+
+**Option (b) measured on top: a Rogue exit bonus in the Deep.** A lever in the fork, `rogue.exitBonus` (`nr2.js`, off: the region's own, 2 in the Deep), in place of the region's exit items for a Rogue netling only. Same read-out, the relay at 0.667:
+
+| setting | push / quiet, adults | push / quiet, elders | push / quiet when hurt, adults | whole Deep run: banked value, adults (hidden 4.20) | elders (hidden elder 4.92) |
+|---|---|---|---|---|---|
+| exit bonus 2 (the region's, decided) | 1.6 to 2.0 | 1.9 to 2.4 | | 3.06 to 3.49 | 3.64 to 4.98 |
+| **exit bonus 1** | **1.18 to 1.53** (Feast 1.18, Tune 1.36, Breach 1.52, Dodge 1.53) | 1.58 to 1.78 | 0.91 to 1.18 | 2.49 to 2.83 | 2.88 to 4.25 |
+| exit bonus 0 | 0.8 to 1.1 | 1.1 to 1.3 | | | |
+| exit bonus 1, narrow Deep | 1.18 to 1.59 | 1.58 to 1.78 | 0.84 to 1.20 | | |
+| exit bonus 1, relay at 0.8 | 1.1 to 1.4 | 1.4 to 1.6 | | | |
+
+Reading it:
+1. **An exit bonus of 1 brings the adults to the target** (mean about 1.4, Tune at 1.36), the elders to about 1.6 to 1.8, and hurt at the relay going on about breaks even (0.9 to 1.2), so banking when hurt stays a fair call. Exit and disconnect rates do not move (the bonus is paid at the exit only).
+2. **The cost is the Deep's value.** A whole Rogue Deep run banks about 19% less (adults 2.5 to 2.8 against 3.1 to 3.5), below the decided middle-relay Deep (2.7 to 3.2) and further below the hidden form (4.20). The Deep is where Rogue earns least against the NL-0 hidden form already.
+3. **0 overshoots** (going on pays the same as or less than jacking out), and the narrow Deep or a relay at 0.8 change little on top of an exit bonus of 1.
+
+**For the maintainer:** a Rogue exit bonus of 1 in the Deep (the target met at a cost in Deep value), or keep 2 and take a Deep target of about 1.6 to 2.0. Not decided; `exitBonus` stays off.
 
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg).
 
