@@ -579,6 +579,9 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 
 ### 9.6 For the maintainer
 
+**Taken as starting points (maintainer, 2026-10-10):** the four abilities, the perks (Drop's widened to every market in a run), the role traits and the keepsakes, all to be measured; danger sense with the details proposed in 9.1 (marks on nodes, not lines; the trail hunter off the map; adult and elder the same; dark under Blackout). **Direction (maintainer):** Rogue gets **its own map build rules**, since its netrun rules differ anyway, as a balance lever against danger sense and the twists; not drafted yet. The items below stay open where not covered.
+
+
 1. The four abilities, or an alternate per elder (Sleeper: Gone to ground; Exile: Away is home; Handler: Turned; Stash: the forced cache).
 2. The four perks, or an alternate.
 3. Untraceable acting on the sweep for Rogue.
