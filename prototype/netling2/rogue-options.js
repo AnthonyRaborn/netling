@@ -32,3 +32,57 @@ export const CAMO_OPTIONS = {
   } },
 };
 const rowCells = (rows, y) => [...rows[y]].map((_, x) => [x, y]);
+
+// Static camo (the Tune line, second round): the same checker in both frames, so nothing shimmers and the head rows stay identical
+// between frames even when the hood is covered (no frame-rule exception needed).
+export const STATIC_CAMO_OPTIONS = {
+  body: { name: 'static, body only', make: (f, tag) => ({
+    a: camo(f.a, { from: f.anchors.a.neckRow + 1, to: f.a.length - 1, phase: 0, keep: tag }),
+    b: camo(f.b, { from: f.anchors.a.neckRow + 1, to: f.b.length - 1, phase: 0, keep: tag }),
+  }) },
+  whole: { name: 'static, head and body', make: (f, tag) => {
+    const e = f.anchors.a.eyeRow;
+    const keep = [...tag, ...rowCells(f.a, e - 2), ...rowCells(f.a, e - 1), ...rowCells(f.a, e), ...rowCells(f.a, e + 1)];
+    return { a: camo(f.a, { from: 2, to: f.a.length - 1, phase: 0, keep }), b: camo(f.b, { from: 2, to: f.b.length - 1, phase: 0, keep }) };
+  } },
+};
+
+// Cipher's shimmer for the Dodge line (second round): Cipher's camouflage activation (blank-motion.js) on Rogue's body. A scan band sweeps
+// from the hood's top to the feet and back in 12 steps of 400 ms; above it the body is solid, on it a dim row, below it plain body cells
+// are see-through checker holes (the outline changes, as on Cipher). Unlike Cipher's layer it never touches Rogue's marks (the arc, the
+// tag, the eyes: only '#' cells change) and keeps the face rows whole (the arc's rows to the row under the eyes). The decoy is drawn as
+// on every form, only where the original figure is empty, so it does not fill the holes. Reduced motion: no band (the body as drawn), the
+// decoy parked. A motion layer: it returns padded rows like rogue-motion.js.
+import { STEPS, STEP_MS, PAD, REACH, offsetAt, sideAt } from './rogue-motion.js';
+import { dub } from './echo-motion.js';
+export const bandAt = (step, height) => {
+  const t = step <= STEPS / 2 ? step / (STEPS / 2) : (STEPS - step) / (STEPS / 2);
+  return Math.round(1 + t * (height - 2));
+};
+export function cipherScan(stage) {
+  return (sprite, anchors, { time = 0, reduced = false } = {}) => {
+    const src = sprite.map((r) => [...('.'.repeat(PAD) + r + '.'.repeat(PAD))]);
+    const g = src.map((r) => r.slice());
+    const step = Math.floor(Math.max(0, time) / STEP_MS) % STEPS;
+    if (!reduced) {
+      const band = bandAt(step, sprite.length);
+      const face = (y) => y >= anchors.eyeRow - 2 && y <= anchors.eyeRow + 1;
+      for (let y = 0; y < g.length; y++) {
+        if (face(y)) continue;
+        for (let x = 0; x < g[0].length; x++) {
+          if (g[y][x] !== '#') continue;
+          if (y === band) g[y][x] = 'x';
+          else if (y > band && (x + y) % 2) g[y][x] = '.';
+        }
+      }
+    }
+    const n = reduced ? 1 : offsetAt(step, REACH[stage]);
+    const side = reduced ? 1 : sideAt(time);
+    if (n) {
+      const shadow = src.map((r) => r.map(() => '.'));
+      dub(shadow, src, side * n, 0);
+      for (let y = 0; y < g.length; y++) for (let x = 0; x < g[0].length; x++) if (src[y][x] === '.' && shadow[y][x] === 'x') g[y][x] = 'x';
+    }
+    return g.map((r) => r.join(''));
+  };
+}

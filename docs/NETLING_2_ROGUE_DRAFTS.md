@@ -208,6 +208,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 28. **The third eye is the arc** (tenth round): a dim downward curve, `x..x` over `.xx.`, now drawn on all ten forms. **The thermocamo is to be seen in motion before its coverage is chosen**, and **Spook** (so also Handler, its elder) is to be tried with it too, for a Ghost and Blank look (8.4c).
 
+29. **Thermocamo, second round (eleventh round):** Cipher's shimmer is closer to what was meant. Proposal under review: **the Dodge line (Skip, Exile) shimmers as Cipher does, and the Tune line (Spook, Handler) does not** (its camo stays still), so the two lines differ more and the Dodge line calls to Cipher (8.4d).
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -384,6 +386,13 @@ What it shows:
 - The shimmer swaps the whole body once a frame (two changes a second), as Blank's does; inside the flash budget.
 - The hints on Foundling and Alias stay faint in motion too.
 
+### 8.4d Thermocamo, second round: Dodge shimmers as Cipher, Tune wears it still (2026-10-10, for review)
+
+Drawn as options over the registered forms (`rogue-options.js`, `rogue-options.html`, GIF `docs/netling2-prototypes/shots/rogue-thermocamo-2.gif`; two tests in `rogue.test.js`).
+- **Skip and Exile, Cipher's shimmer** (`cipherScan`): Cipher's camouflage activation on Rogue's body, a motion layer. A scan band sweeps from the hood's top to the feet and back in 12 steps of 400 ms, scaled to the form's height; above it the body is solid, on it a dim row, below it plain body cells open into checker holes (the outline changes, as on Cipher, which hidden forms and Rogue may do). Differences from Cipher's own layer, so Rogue's marks survive: only plain body cells change (the arc, the tag and the eyes never do; Cipher's turns every dim cell solid above the band), and the face rows (the arc's rows to the row under the eyes) are kept whole, as Cipher keeps its face opening. The decoy is drawn as on every Rogue form, only where the original figure is empty, so it never fills the holes. Calm (reduced motion): no band, the decoy parked. The registered frames stay plain, so wearables and the frame rule are untouched.
+- **Spook and Handler, still camo** (`STATIC_CAMO_OPTIONS`): the checker in the same phase in both frames, so it does not shimmer. Body only, or head and body; head and body no longer needs Blank's exception to the frame rule, because the head is the same in both frames. The Ghost-and-Blank look of the ear points over a checkered head stays.
+- Foundling and Alias keep the one-band hint (it swaps phase with the frame, as Blank's does); whether the young forms should hint at the sweep instead is open.
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -391,7 +400,7 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The thermocamo's coverage (body only, or head and body), whether Spook and Handler take it, and how strong the baby's and teen's hints should be (8.4c; seen in motion on `rogue-options.html` and the GIF).
+- The thermocamo (8.4d): Cipher's shimmer on the Dodge line and still camo on the Tune line (body only, or head and body) as proposed, and the young forms' hint (the swapping band, or a hint of the sweep).
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).

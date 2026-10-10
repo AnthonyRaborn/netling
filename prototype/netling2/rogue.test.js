@@ -316,3 +316,40 @@ test('options: the thermocamo touches body cells only (never the eyes, the tag o
     }
   }
 });
+
+test('options, second round: the Cipher shimmer keeps the marks and the face rows, holes only plain body cells, loops on the echo steps and stands still calm', async () => {
+  const { cipherScan, bandAt } = await import('./rogue-options.js');
+  for (const f of [set.rogueAdultDodge, set.rogueElderDodge]) {
+    const m = cipherScan(f.stage);
+    const w = f.a[0].length;
+    const { eyeRow } = f.anchors.a;
+    for (let s = 0; s < STEPS; s++) {
+      const g = m(f.a, f.anchors.a, { time: s * STEP_MS }).map((r) => r.slice(PAD, PAD + w));
+      g.forEach((r, y) => [...r].forEach((c, x) => {
+        const was = f.a[y][x];
+        if (was === 'o' || was === 'x' || (y >= eyeRow - 2 && y <= eyeRow + 1)) assert.ok(c === was || (was === '.' && c === 'x'), `${f.id} step ${s}: mark or face cell ${x},${y}`);
+        else if (was === '#') assert.ok(c === '#' || c === 'x' || c === '.', `${f.id}: ${x},${y}`);
+      }));
+      const band = bandAt(s, f.a.length);
+      if (band < eyeRow - 2 || band > eyeRow + 1) assert.ok(g[band].includes('x'), `${f.id} step ${s}: the band`); // it passes behind the face
+    }
+    assert.deepEqual(m(f.a, f.anchors.a, { time: 0 }), m(f.a, f.anchors.a, { time: STEPS * STEP_MS * 2 }), 'it loops');
+    const calm = new Set([0, 4, 9].map((s) => m(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n')));
+    assert.equal(calm.size, 1, 'calm: no band, the decoy parked');
+  }
+  assert.equal(bandAt(0, 15), 1);
+  assert.equal(bandAt(STEPS / 2, 15), 14);
+});
+
+test('options, second round: the still camo is the same in both frames, so even head and body keeps the head rows identical', async () => {
+  const { STATIC_CAMO_OPTIONS } = await import('./rogue-options.js');
+  for (const f of [set.rogueAdultTune, set.rogueElderTune]) {
+    for (const [kind, o] of Object.entries(STATIC_CAMO_OPTIONS)) {
+      const { a, b } = o.make(f, rogueTag(f.id));
+      for (let y = 0; y <= f.anchors.a.neckRow; y++) assert.equal(a[y], b[y], `${f.id} ${kind}: row ${y}`);
+      for (const [rows, src] of [[a, f.a], [b, f.b]]) rows.forEach((r, y) => [...r].forEach((c, x) => c !== src[y][x] && assert.ok(src[y][x] === '#' && c === 'x')));
+      const e = f.anchors.a.eyeRow;
+      for (const y of [e - 2, e - 1, e, e + 1]) assert.equal(a[y], f.a[y], `${f.id} ${kind}: the face rows`);
+    }
+  }
+});
