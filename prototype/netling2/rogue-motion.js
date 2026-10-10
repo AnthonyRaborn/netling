@@ -134,7 +134,46 @@ export const scanMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
   return out(g);
 };
 
-// ---- Feast: the bigger decoy, and Stash's maw (a draft) ------------------------------------------------------------------------------
+// The wipe (an option for Exile, drafts 8.4h; not registered): a second pass of the same camo. A dim row sweeps down from the hood to the
+// feet and the body above it opens into the checker holes (the camo goes on behind it), holds in full camo for a step, then a dim column
+// sweeps left to right and the body behind it comes back solid. The same cells as the shimmer: plain body cells only, the face rows whole.
+// Steps: 0 plain; 1 to 5 the row down; 6 full camo; 7 to 11 the column across.
+// The column runs over the body's own columns (`left` to `right`, its first and last plain body cell), so no step is spent beside it.
+export const wipeAt = (step, height, left, right) => {
+  if (step >= 1 && step <= 5) return { row: Math.round(1 + ((step - 1) / 4) * (height - 2)) };
+  if (step === 6) return { full: true };
+  if (step >= 7) return { col: Math.round(left + ((step - 7) / 4) * (right - left)) };
+  return {};
+};
+const bodyCols = (sprite) => {
+  const xs = sprite.flatMap((r) => [...r].map((c, x) => (c === '#' ? x : -1)).filter((x) => x >= 0));
+  return [Math.min(...xs), Math.max(...xs)];
+};
+export const wipeMotion = (stage) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+  const g = padded(sprite, PAD);
+  if (!reduced) {
+    const { row, col, full } = wipeAt(stepOf(time), sprite.length, ...bodyCols(sprite));
+    for (let y = 0; y < sprite.length; y++) {
+      if (faceRow(anchors, y)) continue;
+      for (let x = 0; x < sprite[0].length; x++) {
+        if (sprite[y][x] !== '#') continue;
+        const at = x + PAD;
+        if (y === row || x === col) g[y][at] = 'x';
+        else if ((full || (row !== undefined && y < row) || (col !== undefined && x > col)) && (x + y) % 2) g[y][at] = '.';
+      }
+    }
+  }
+  decoyInto(g, sprite, time, reduced, PAD, REACH[stage]);
+  return out(g);
+};
+// The shimmer and the wipe taking turns by loop (the shimmer first), as the decoy takes turns by side.
+export const scanWipeMotion = (stage) => {
+  const scan = scanMotion(stage);
+  const wipe = wipeMotion(stage);
+  return (sprite, anchors, opts = {}) => (!opts.reduced && Math.floor(Math.max(0, opts.time ?? 0) / (STEPS * STEP_MS)) % 2 ? wipe : scan)(sprite, anchors, opts);
+};
+
+// ---- Feast: the bigger decoy, and Stash's maw (a draft)------------------------------------------------------------------------------
 // The maw: at the copy's own mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the
 // body on the decoy's side), a mouth in the shadow. Two styles:
 //   half (the current draft, maintainer's ask): a half grin, a smirk: three cells on the row with the outer end curled up a row.

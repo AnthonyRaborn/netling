@@ -15,7 +15,7 @@ import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { fadePulse, bigDecoy, EXILE_OPTIONS } from './rogue-options.js';
-import { bigDecoyMotion, scanMotion } from './rogue-motion.js';
+import { bigDecoyMotion, scanMotion, wipeMotion, scanWipeMotion } from './rogue-motion.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -42,7 +42,7 @@ const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;
 const c = document.getElementById('c');
 c.width = (6 * (W + GAP) + GAP) * SC;
-c.height = LABEL + Math.ceil(rows.length / 2) * ROW + 2 * ROW + 10; // set before drawing: resizing clears
+c.height = LABEL + Math.ceil(rows.length / 2) * ROW + 3 * ROW + 10; // set before drawing: resizing clears
 const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 function cell(x0, y0, sprite, label) {
@@ -72,7 +72,13 @@ function draw(now) {
   cell(col(0), ye, skip.motion(skip[frame], skip.anchors.a, { time }), 'Skip');
   cell(col(1), ye, exile.motion(exile[frame], exile.anchors.a, { time }), 'Exile now');
   Object.values(EXILE_OPTIONS).forEach((o, j) => cell(col(2 + j), ye, shimmer(o[frame], exile.anchors.a, { time }), `Exile: ${o.name}`));
-  const y = ye + ROW;
+  // The cape with a second camo pass (drafts 8.4h): the shimmer alone, the wipe alone (down to camo, back in left to right), and the two
+  // taking turns by loop.
+  const yw = ye + ROW;
+  const cape = EXILE_OPTIONS.cape;
+  [['shimmer', shimmer], ['wipe', wipeMotion('elder')], ['shimmer, then wipe', scanWipeMotion('elder')]]
+    .forEach(([label, m], j) => cell(col(j), yw, m(cape[frame], exile.anchors.a, { time }), `cape: ${label}`));
+  const y = yw + ROW;
   cell(col(0), y, frame === 'a' ? blank.a : blank.b, 'Blank (reference)');
   cell(col(1), y, cipher.motion(frame === 'a' ? cipher.a : cipher.b, cipher.anchors.a, { time }), 'Cipher (reference)');
   if (fixed === null) requestAnimationFrame(draw);

@@ -408,6 +408,43 @@ test('options, second round: the Cipher shimmer keeps the marks and the face row
   assert.equal(bandAt(STEPS / 2, 15), 14);
 });
 
+test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the face rows, holes only plain body cells, clears down then returns left to right, and takes turns with the shimmer', async () => {
+  const { EXILE_OPTIONS } = await import('./rogue-options.js');
+  const { wipeMotion, scanWipeMotion, scanMotion, wipeAt } = await import('./rogue-motion.js');
+  const f = { ...set.rogueElderDodge, a: EXILE_OPTIONS.cape.a };
+  const m = wipeMotion('elder');
+  const w = f.a[0].length;
+  const { eyeRow } = f.anchors.a;
+  const at = (s) => m(f.a, f.anchors.a, { time: s * STEP_MS }).map((r) => r.slice(PAD, PAD + w));
+  const holes = (g, y) => [...g[y]].filter((c, x) => f.a[y][x] === '#' && c === '.').length;
+  const body = (y) => [...f.a[y]].includes('#') && (y < eyeRow - 2 || y > eyeRow + 1);
+  for (let s = 0; s < STEPS; s++) {
+    const g = at(s);
+    g.forEach((r, y) => [...r].forEach((c, x) => {
+      const was = f.a[y][x];
+      if (was === 'o' || was === 'x' || (y >= eyeRow - 2 && y <= eyeRow + 1)) assert.ok(c === was || (was === '.' && c === 'x'), `step ${s}: mark or face cell ${x},${y}`);
+      else if (was === '#') assert.ok(c === '#' || c === 'x' || c === '.', `step ${s}: ${x},${y}`);
+    }));
+  }
+  for (let y = 0; y < f.a.length; y++) assert.equal(holes(at(0), y), 0, 'step 0: plain');
+  for (let y = 0; y < f.a.length; y++) if (body(y) && [...f.a[y]].filter((c) => c === '#').length > 1) assert.ok(holes(at(6), y) > 0, `step 6: full camo, row ${y}`);
+  const row = wipeAt(3, f.a.length, 0, 0).row;
+  assert.ok(holes(at(3), row - 1) > 0 && holes(at(3), row + 1) === 0, 'down: camo above the row, plain below');
+  const { col } = wipeAt(9, f.a.length, 5, 17);
+  const g9 = at(9);
+  assert.ok(g9.every((r, y) => ![...r].some((c, x) => x < col && f.a[y][x] === '#' && c === '.')), 'across: plain left of the column');
+  assert.ok(g9.some((r, y) => [...r].some((c, x) => x > col && f.a[y][x] === '#' && c === '.')), 'across: camo right of it');
+  assert.deepEqual(m(f.a, f.anchors.a, { time: 0 }), m(f.a, f.anchors.a, { time: STEPS * STEP_MS * 2 }), 'it loops');
+  const calm = new Set([0, 4, 9].map((s) => m(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n')));
+  assert.equal(calm.size, 1, 'calm: still');
+  const both = scanWipeMotion('elder');
+  const loop = STEPS * STEP_MS;
+  for (const s of [2, 6, 9]) {
+    assert.deepEqual(both(f.a, f.anchors.a, { time: s * STEP_MS }), scanMotion('elder')(f.a, f.anchors.a, { time: s * STEP_MS }), 'first loop: the shimmer');
+    assert.deepEqual(both(f.a, f.anchors.a, { time: loop + s * STEP_MS }), m(f.a, f.anchors.a, { time: loop + s * STEP_MS }), 'second loop: the wipe');
+  }
+});
+
 test('options, second round: the still camo is the same in both frames, so even head and body keeps the head rows identical', async () => {
   const { STATIC_CAMO_OPTIONS } = await import('./rogue-options.js');
   for (const f of [set.rogueAdultTune, set.rogueElderTune]) {
