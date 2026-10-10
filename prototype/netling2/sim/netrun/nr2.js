@@ -97,12 +97,12 @@ export const NR2 = {
   // gives stage 1's runs back. Every number is the draft's starting value. The count is `run.hunt` in code (1.0's daily already has `run.trail`).
   rogue: {
     on: true,
-    threshold: { public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }, // regions not listed (tutorial, daily) have no hunt
+    threshold: { public: 15, bazaar: 15, corp: 14, ruins: 14, deep: 15, source: 18 }, // decided (7.4, candidate A): the draft's 10, 10, 9, 9, 10, 12 at x1.5. Regions not listed (tutorial, daily) have no hunt
     trail: { move: 1, iceLost: 2, anomaly: 1, purchase: 1 }, // a won ICE adds nothing; the checkpoint HIDE never happens (checkpoints never notice Rogue)
-    hunterTier: 2, // the tier its fight is played at (2: the tier-2 speed, so a lower win chance)
+    hunterTier: 1, // the tier its fight is played at (decided, 7.4: 1, ordinary speed; the draft had 2, the tier-2 speed and a lower win chance)
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
     ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
-    ambushMark: true, // a lost ambush gives a mark (and a disconnect); false: the disconnect only (a lever for stage 2's tuning)
+    ambushMark: false, // decided (7.4): a lost ambush is a disconnect but no mark (the draft: a mark too); only the trail hunter marks in runs
     dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
     // The kits by role and level (9.2). Mole fights hunters as plain tier-2 ICE at its damage share; Sleeper turns one lost hunter fight a run into an
     // ordinary lost fight. Skip's slip is trimmed, its moves add trail every second move; Exile slips ambushes (tier-2 avoidance). Spook tells an
@@ -113,9 +113,10 @@ export const NR2 = {
       tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
       feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },
     },
-    // Rogue's own map rules (9.7, netrun/rogue-map.js), the draft's starting values: no extra relays half the time, half the Corp Grid's checkpoints
-    // are ICE, one cordon in the Deep and two in the Source, half of all caches and markets guarded, and 1.0's narrow maps in the Deep and the Source.
-    map: { on: true, relayFactor: 0.5, toIce: { corp: 0.5 }, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0.5, narrow: ['deep', 'source'] },
+    // Rogue's own map rules (9.7, netrun/rogue-map.js). Decided (7.4): only the cordons for now, one in the Deep and two in the Source. The draft's
+    // other rules, off: relayFactor 0.5 (extra relays halved), toIce { corp: 0.5 } (Corp Grid checkpoints as ICE), guardShare 0.5 (guarded caches
+    // and markets) and narrow ['deep', 'source'] (1.0's narrow maps there).
+    map: { on: true, relayFactor: 1, toIce: {}, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0, narrow: [] },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----

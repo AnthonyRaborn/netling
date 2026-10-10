@@ -26,19 +26,23 @@ const BASE = {
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
 const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };
+const DRAFT = { ...th(1), hunterTier: 2, ambushMark: true, map: { on: true, relayFactor: 0.5, toIce: { corp: 0.5 }, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0.5, narrow: ['deep', 'source'] } };
 const JOBS = {
-  start: {}, // the starting values: kits, danger sense, the map rules
-  nomap: { map: { on: false } },
-  th15: th(1.5),
-  th20: th(2),
-  'th15-nomap': { ...th(1.5), map: { on: false } },
-  'th15-tier1': { ...th(1.5), hunterTier: 1 },
-  'th20-tier1-nomap': { ...th(2), hunterTier: 1, map: { on: false } },
+  // The draft's starting values, spelled out (the defaults are now the decided ones, 7.4); the other jobs vary these.
+  start: DRAFT,
+  // Decided (7.4): candidate A (thresholds x1.5, the hunter at tier 1, a lost ambush gives no mark) and only the cordons of the map rules.
+  decided: {},
+  nomap: { ...DRAFT, map: { on: false } },
+  th15: { ...DRAFT, ...th(1.5) },
+  th20: { ...DRAFT, ...th(2) },
+  'th15-nomap': { ...DRAFT, ...th(1.5), map: { on: false } },
+  'th15-tier1': { ...DRAFT, ...th(1.5), hunterTier: 1 },
+  'th20-tier1-nomap': { ...DRAFT, ...th(2), hunterTier: 1, map: { on: false } },
   // Second round: the trail hunter nearly gone at 2x, so the ambushes are the lever.
-  'th20-tier1-nomap-amb-half': { ...th(2), hunterTier: 1, map: { on: false }, ambush: HALF },
-  'th20-tier1-nomap-amb-nomark': { ...th(2), hunterTier: 1, map: { on: false }, ambushMark: false },
-  'th15-tier1-nomap-amb-nomark': { ...th(1.5), hunterTier: 1, map: { on: false }, ambushMark: false },
-  'th20-tier1-nocordon-amb-half': { ...th(2), hunterTier: 1, map: { cordons: {} }, ambush: HALF },
+  'th20-tier1-nomap-amb-half': { ...DRAFT, ...th(2), hunterTier: 1, map: { on: false }, ambush: HALF },
+  'th20-tier1-nomap-amb-nomark': { ...DRAFT, ...th(2), hunterTier: 1, map: { on: false }, ambushMark: false },
+  'th15-tier1-nomap-amb-nomark': { ...DRAFT, ...th(1.5), hunterTier: 1, map: { on: false }, ambushMark: false },
+  'th20-tier1-nocordon-amb-half': { ...DRAFT, ...th(2), hunterTier: 1, map: { ...DRAFT.map, cordons: {} }, ambush: HALF },
 };
 
 const todo = Object.entries(JOBS).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));

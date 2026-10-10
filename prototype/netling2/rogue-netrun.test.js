@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
 const { createScript, mulberry32 } = await import('./sim/sim.js');
-const { startRun, moveTo, resolveIce, choose, jackOut, hunted, sendAgent, dangerView, ambushSeen } = await import('./sim/netrun/run.js');
+const { startRun, moveTo, resolveIce, choose, jackOut, hunted, huntThreshold, sendAgent, dangerView, ambushSeen } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
 const stub = (v) => () => v;
@@ -58,41 +58,41 @@ test('only a Rogue netling is hunted, and only with the rules on; the trail star
   assert.equal(hunted(setup('rogueAdultBreach', ['checkpoint'])), false);
 }));
 
-test('at the threshold the hunter waits at the next node: tier 2; won, the trail falls to 0 and the node follows', () => withKits(() => {
-  const s = setup('rogueAdultFeast', ['relay'], { hunt: 10 });
+test('at the threshold the hunter waits at the next node, at the hunter tier; won, the trail falls to 0 and the node follows', () => withKits(() => {
+  const s = setup('rogueAdultFeast', ['relay'], { hunt: huntThreshold({ region: 'deep' }) });
   const r = moveTo(s, 1, stub(0.99));
   assert.equal(r.hunter, 'trail');
-  assert.deepEqual([s.run.phase, s.run.pending.tier, s.run.pending.deferred], ['ice', 2, 1]);
-  assert.equal(s.run.hunt, 10, 'the move that meets the hunter adds no trail');
+  assert.deepEqual([s.run.phase, s.run.pending.tier, s.run.pending.deferred], ['ice', NR2.rogue.hunterTier, 1]);
+  assert.equal(s.run.hunt, huntThreshold({ region: 'deep' }), 'the move that meets the hunter adds no trail');
   resolveIce(s, true, stub(0.99));
   assert.equal(s.run.hunt, 0);
   assert.equal(s.run.pending?.kind, 'relay', "the relay's own choice follows the won fight");
 }));
 
 test("a lost hunter fight: the hunter's damage, then a mark and a disconnect; Mole takes its own share; Sleeper's save keeps it going once", () => withKits(() => {
-  const s = setup('rogueAdultFeast', ['relay'], { hunt: 10 });
+  const s = setup('rogueAdultFeast', ['relay'], { hunt: huntThreshold({ region: 'deep' }) });
   moveTo(s, 1, stub(0.99));
   assert.equal(resolveIce(s, false, stub(0.99)).result, 'disconnected');
   assert.equal(s.marks, 1);
   assert.equal(s.markSources['trail hunter'], 1);
   assert.equal(s.run.tally.huntersLost, 1);
   assert.ok(s.run.messages.some((m) => m.includes('-75 integrity')), 'the Deep at 50, x1.5');
-  const m = setup('rogueAdultBreach', ['relay'], { hunt: 10 });
+  const m = setup('rogueAdultBreach', ['relay'], { hunt: huntThreshold({ region: 'deep' }) });
   moveTo(m, 1, stub(0.99));
   resolveIce(m, false, stub(0.99));
   assert.ok(m.run.messages.some((x) => x.includes('-35 integrity')), 'Mole: 50 x 0.7, no 1.5x');
   assert.equal(m.marks, 1);
-  const e = setup('rogueAdultBreach', ['relay', 'checkpoint'], { stage: 'mainframe', hunt: 10 });
+  const e = setup('rogueAdultBreach', ['relay', 'checkpoint'], { stage: 'mainframe', hunt: huntThreshold({ region: 'deep' }) });
   e.form = 'rogueElderBreach';
   moveTo(e, 1, stub(0.99));
   const r = resolveIce(e, false, stub(0.99));
   assert.notEqual(r.result, 'disconnected');
   assert.equal(e.marks ?? 0, 0);
-  assert.equal(e.run.hunt, 12, 'an ordinary lost fight: trail +2');
+  assert.equal(e.run.hunt, huntThreshold({ region: 'deep' }) + 2, 'an ordinary lost fight: trail +2');
   assert.equal(e.run.pending?.kind, 'relay');
 }));
 
-test('an ambush: a lost fight of trail on entering, won or lost; lost is a mark and a disconnect; Exile can slip it', () => withKits(() => {
+test('an ambush: a lost fight of trail on entering, won or lost; lost is a disconnect (a mark only with ambushMark); Exile can slip it', () => withKits(() => {
   const s = setup('rogueAdultFeast', [{ type: 'ice', ambush: true }]);
   const r = moveTo(s, 1, stub(0.99));
   assert.equal(r.hunter, 'ambush');
@@ -102,7 +102,17 @@ test('an ambush: a lost fight of trail on entering, won or lost; lost is a mark 
   const l = setup('rogueAdultFeast', [{ type: 'ice', ambush: true }]);
   moveTo(l, 1, stub(0.99));
   assert.equal(resolveIce(l, false, stub(0.99)).result, 'disconnected');
-  assert.equal(l.markSources.ambush, 1);
+  assert.equal(l.marks ?? 0, 0, 'decided (7.4): a lost ambush disconnects but gives no mark');
+  const saved = NR2.rogue.ambushMark;
+  NR2.rogue.ambushMark = true;
+  try {
+    const lm = setup('rogueAdultFeast', [{ type: 'ice', ambush: true }]);
+    moveTo(lm, 1, stub(0.99));
+    resolveIce(lm, false, stub(0.99));
+    assert.equal(lm.markSources.ambush, 1, 'with ambushMark (the draft) it marks too');
+  } finally {
+    NR2.rogue.ambushMark = saved;
+  }
   const x = setup('rogueAdultDodge', [{ type: 'ice', ambush: true }], { stage: 'mainframe' });
   x.form = 'rogueElderDodge';
   assert.equal(moveTo(x, 1, stub(0)).phased, true);
@@ -237,7 +247,7 @@ test('map rules: Corp Grid checkpoints become ICE at the share; guards make ever
   }
 });
 
-test('map rules in a run: a Rogue Deep run has the narrow map and its cordon; an NL-0 run is untouched', () => withKits(() => {
+test('map rules in a run: a Rogue Deep run has its cordon (and, with narrow, the narrow map); an NL-0 run is untouched', () => withKits(() => {
   const saved = [NR2.map.on, NR2.rogue.map.on];
   NR2.map.on = true;
   NR2.rogue.map.on = true;
@@ -248,7 +258,7 @@ test('map rules in a run: a Rogue Deep run has the narrow map and its cordon; an
       Object.assign(s, { egg: 'rogue', stage: 'adult', form: 'rogueAdultBreach' });
       startRun(s, 'deep', rng, []);
       const widths = Array.from({ length: REGIONS.deep.layers }, (_, i) => s.run.map.nodes.filter((n) => n.layer === i + 1).length);
-      assert.ok(Math.max(...widths) <= 3, 'narrow: 2 to 3 a layer');
+      if (NR2.rogue.map.narrow.includes('deep')) assert.ok(Math.max(...widths) <= 3, 'narrow: 2 to 3 a layer');
       assert.deepEqual(s.run.map.rogueRules.cordon, [6]);
       const rng2 = mulberry32(seed);
       const p = createScript({ now: 0, rng: rng2 });
