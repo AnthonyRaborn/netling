@@ -5,7 +5,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 **Where to pick up.**
 1. **Done: Skip and Exile revisited** (2026-10-10). Skip stays as drawn; Exile is the cape (8.4g), and its layer takes turns by loop between Cipher's shimmer and the wipe back on by the column (8.4h). Registered in `rogue-art.js` (`skipElder`) and `rogue-motion.js` (`MOTION_OF.skipElder`); the other options stay in `rogue-options.js` for the record.
 2. **Done: Handler** (maintainer, after the Exile round: the least interesting elder). Its layer is now the headset signal with the split shadow (8.4i; `MOTION_OF.spookElder`). All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
-3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
+3. **The design is closed for the first build** (6.3, 2026-10-10): only M1 (later, if wanted) and difficulty (after the simulator) stay open.
 4. **Drafted: the kits** (section 9, for choice): each ability is the role's with a hunt twist, Rogue's own perks, the role traits, existing items as keepsakes.
 5. Then the simulator build (section 7) and the text (section 10).
 
@@ -22,7 +22,7 @@ Decided by the maintainer (sketch, Hidden egg; netrun drafts, section 8):
 - Its end of life is a **merge of two lineage fragments from different eggs into a hybrid next generation**, an NL-0 fragment joined with a Rogue one. The merge uses lineage fragments.
 - **Gate:** the ending has played and all 18 egg pages are found. Rogue does not appear before then, not even as a corrupted slot. So every Rogue player already holds Root, the whole codex and at least one elder in the Dex.
 
-Assumptions this document makes (A1 and A2 confirmed 2026-10-10, section 6.1; A3 still to confirm):
+Assumptions this document makes (A1 and A2 confirmed 2026-10-10, section 6.1; A3 confirmed later that day, 6.3):
 - **A1.** The egg is chosen again at each rebirth. The reveal drafts imply it (the egg directory is listed at a rebirth), but no decision says so.
 - **A2.** "Two fragments from different eggs" means the dying Rogue's own fragment plus one NL-0 fragment the player picks, not two NL-0 fragments.
 - **A3.** Root Access, the shared codex and the Dex carry into Rogue lives as they do between the other eggs.
@@ -277,12 +277,15 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 ### 6.3 Still open
 
-1. The sweep's window and answers (6.2), and the ambush shares within the ICE weight.
-2. Which fragment stands for each egg in the merge offer (the latest adult or elder, proposed).
-3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark).
-4. The forms' kits: each adult's role ability, perk, trait and keepsake (the names are decided, 6.1 item 23). **Drafted for choice in section 9.**
-5. Difficulty, after the forms: the 4.4 targets are the starting point.
-6. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
+Closed on 2026-10-10 (maintainer), kept for the record:
+1. ~~The sweep's window and answers, and the ambush shares.~~ **Decided: the sweep as drafted in 6.2** (12% an hour, a 90-minute window; HIDE, DEFEND or a Decoy; lost or ignored: Integrity -20 and a mark, no virus). **The ambush shares as drafted, measured first** (none in the Public Net and the Bazaar, 1 in 6 ICE nodes in the Corp Grid and the Ruins, 1 in 4 in the Deep and the Source; the danger nodes a cordon or a guard places roll as ambush at the same shares).
+2. ~~Which fragment stands for each egg.~~ **Decided: the latest adult or elder fragment of that egg** (6.2's offer, in egg-completion order).
+4. ~~The forms' kits.~~ **Taken as starting points** (section 9), with danger sense and Rogue's map rules (9.1, 9.7).
+6. ~~A3.~~ **Decided: Root Access, the codex and the Dex carry into Rogue lives** as between the other eggs (Rogue's elder and the Source need Root).
+
+Still open:
+3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark). Decided in direction (6.1, item 14): later, if wanted, with balance set aside; nothing to do before the simulator.
+5. Difficulty, after the simulator: the 4.4 targets are a high-side aim to come in under (4.4), and the relay goal is set (9.7).
 
 ## 7. What it would take
 
