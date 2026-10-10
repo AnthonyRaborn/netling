@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, tick, act, mulberry32, ROGUE, isRogue, hideLockLeft, sweepQuietLeft, FORMS, KEEPSAKES, PERKS, MAINFRAME_OF, SPECIES, marketScrip, addMark, CFG, MIN } = await import('./sim/sim.js');
+const { createScript, tick, act, mulberry32, ROGUE, isRogue, hideLockLeft, sweepQuietLeft, inFlow, FORMS, KEEPSAKES, PERKS, MAINFRAME_OF, SPECIES, marketScrip, addMark, CFG, MIN } = await import('./sim/sim.js');
 const { startRun, moveTo, runOptions, visibleNodeIds } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
@@ -111,15 +111,45 @@ test('answers: HIDE ends a sweep with no mark; COMPLY is refused; DEFEND won end
   assert.equal(Boolean(l.virus), false);
 });
 
-test('7.2, off by default: no HIDE lockout and no quiet after a won DEFEND', () => {
-  assert.deepEqual([ROGUE.hideLockMin, ROGUE.defendQuietMin], [0, 0]);
-  const s = fresh();
-  sweep(s);
-  act(s, 'hide', T0, stub(0.99));
-  sweep(s);
-  assert.ok(act(s, 'hide', T0, stub(0.99)).ok, 'a second HIDE straight after is allowed');
-  act(s, 'defend', T0, stub(0.99), { won: true });
-  assert.equal(sweepQuietLeft(s), 0);
+test('7.2, the decided numbers; at 0 (stage 1) no HIDE lockout and no quiet after a won DEFEND', () => {
+  assert.deepEqual([ROGUE.hideLockMin, ROGUE.defendQuietMin, ROGUE.defendFlow], [240, 480, false]);
+  const saved = [ROGUE.hideLockMin, ROGUE.defendQuietMin];
+  Object.assign(ROGUE, { hideLockMin: 0, defendQuietMin: 0 });
+  try {
+    const s = fresh();
+    sweep(s);
+    act(s, 'hide', T0, stub(0.99));
+    sweep(s);
+    assert.ok(act(s, 'hide', T0, stub(0.99)).ok, 'a second HIDE straight after is allowed');
+    sweep(s);
+    act(s, 'defend', T0, stub(0.99), { won: true });
+    assert.equal(sweepQuietLeft(s), 0);
+  } finally {
+    Object.assign(ROGUE, { hideLockMin: saved[0], defendQuietMin: saved[1] });
+  }
+});
+
+test('7.3, with defendFlow: a won DEFEND against a sweep puts it in flow at once; a lost one does not; flow still needs good shape', () => {
+  ROGUE.defendFlow = true;
+  try {
+    const w = fresh('rogueAdultBreach', { stats: { charge: 80, sync: 60, integrity: 90, heat: 20 } });
+    sweep(w);
+    act(w, 'defend', T0, stub(0.99), { won: true });
+    assert.equal(inFlow(w), true);
+    tick(w, T0 + MIN, stub(0.99));
+    assert.equal(inFlow(w), true, 'in good shape, it stays in flow');
+    const l = fresh('rogueAdultBreach', { stats: { charge: 80, sync: 60, integrity: 90, heat: 20 } });
+    sweep(l);
+    act(l, 'defend', T0, stub(0.99), { won: false });
+    assert.equal(inFlow(l), false);
+    const hurt = fresh('rogueAdultBreach', { stats: { charge: 80, sync: 60, integrity: 60, heat: 20 } });
+    sweep(hurt);
+    act(hurt, 'defend', T0, stub(0.99), { won: true });
+    tick(hurt, T0 + MIN, stub(0.99));
+    assert.equal(inFlow(hurt), false, 'Integrity under 80: flow drops at the next minute');
+  } finally {
+    ROGUE.defendFlow = false;
+  }
 });
 
 test('7.2: a HIDE burns the route for hideLockMin; a won DEFEND stops new sweeps for defendQuietMin, a lost one does not', () => {

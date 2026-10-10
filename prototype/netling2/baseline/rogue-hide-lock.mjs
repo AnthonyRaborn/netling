@@ -1,7 +1,7 @@
 // Rogue, section 7.2 (proposal under test): the HIDE lockout (a HIDE burns the route for ROGUE.hideLockMin) and the quiet a won DEFEND buys
 // (no sweep for ROGUE.defendQuietMin). Runs balance.mjs for all 37 archetypes under stage 1's settings (the "now" rules, SIDES owner "none",
 // every life starting with Root and the 22 Root pages) over a grid of lockouts and quiets, with the bot answering by SWEEPBOT=hide (HIDE when it
-// can, DEFEND when locked out) and, for some cells, SWEEPBOT=reserve (DEFEND while unmarked). Writes results/followup/rogue-72-*.json and skips
+// can, DEFEND when locked out) and, for some cells, SWEEPBOT=reserve (DEFEND while unmarked); two cells add ROGUE.defendFlow (7.3). Writes results/followup/rogue-72-*.json and skips
 // files that already exist (resumable). Usage: node prototype/netling2/baseline/rogue-hide-lock.mjs [lives=300] [--jobs=4]
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -30,13 +30,15 @@ for (const lock of [3, 4, 6]) for (const quiet of [6, 8, 12]) jobs.push({ lock, 
 for (const [lock, quiet] of [[3, 8], [4, 8], [6, 8], [4, 12]]) jobs.push({ lock, quiet, bot: 'reserve' });
 // The lockout alone (no quiet) and the quiet alone (no lockout), to see what each part does.
 jobs.push({ lock: 4, quiet: 0, bot: 'hide' }, { lock: 0, quiet: 8, bot: 'reserve' });
+// Section 7.3: a won DEFEND also puts it straight into flow (ROGUE.defendFlow), at the decided 4 hour lockout.
+for (const bot of ['hide', 'reserve']) jobs.push({ lock: 4, quiet: 8, bot, flow: true });
 
-const name = (j) => `rogue-72-lock${j.lock}-quiet${j.quiet}-${j.bot}.json`;
+const name = (j) => `rogue-72-lock${j.lock}-quiet${j.quiet}-${j.bot}${j.flow ? '-flow' : ''}.json`;
 const todo = jobs.filter((j) => !existsSync(join(out, name(j))));
 console.log(`${todo.length} of ${jobs.length} jobs to run, ${lives} lives an archetype, ${jobsAtOnce} at once`);
 
 const run = (j) => new Promise((resolve) => {
-  const env = { ...process.env, ...BASE, ROGUE: JSON.stringify({ hideLockMin: j.lock * 60, defendQuietMin: j.quiet * 60 }), SWEEPBOT: j.bot };
+  const env = { ...process.env, ...BASE, ROGUE: JSON.stringify({ hideLockMin: j.lock * 60, defendQuietMin: j.quiet * 60, defendFlow: Boolean(j.flow) }), SWEEPBOT: j.bot };
   const p = spawn(process.execPath, [balance, String(lives)], { env });
   let buf = '';
   let err = '';

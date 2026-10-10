@@ -356,7 +356,7 @@ Still open:
 4. **Two-hourly players** (corpo, runner, overclocker: 9 check-ins a day) lose the most: captured 26% in stage 1, 33% at the 4 hour lockout, 36% at 6 hours. Their gap is longer than the 90 minute window, so sweeps slip through whatever the lockout.
 5. Timed events fall slightly (10.4 to 9.7 a life at 6 hours) and sparse players are unchanged (about 63% captured), as expected.
 
-**For the maintainer:** which lockout (4 hours, room for stage 2; 6 hours, the home aim now); whether DEFEND should also be worth choosing (for example a won DEFEND removes a mark, which would reverse "nothing removes marks", or pays something HIDE does not), or stay the answer when there is no cover; and whether two-hourly players count as attentive (if so, the window is the lever for them, not the lockout).
+**Decided (maintainer, 2026-10-10): the 4 hour lockout**, with the 8 hour quiet; both are now the fork's Rogue defaults (`ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` gives stage 1 back). Still open: whether DEFEND should also be worth choosing (for example a won DEFEND removes a mark, which would reverse "nothing removes marks", or pays something HIDE does not), or stay the answer when there is no cover; and whether two-hourly players count as attentive (if so, the window is the lever for them, not the lockout).
 
 ## 8. The ten forms (concept briefs, for choice)
 

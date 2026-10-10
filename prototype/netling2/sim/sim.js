@@ -277,10 +277,13 @@ export const ROGUE = {
   sweepIntegrity: 20, // lost or ignored
   captureAt: 3,
   untraceableSweep: true, // section 9.4, proposal: the hidden trait Untraceable cuts sweeps for a Rogue (it has no traces to cut)
-  // Section 7.2 (proposal under test, 0 = off so stage 1 reproduces): a HIDE burns the route, so HIDE is unavailable for hideLockMin after it,
-  // and a won DEFEND sends the hunters away, so no sweep starts for defendQuietMin after it.
-  hideLockMin: 0,
-  defendQuietMin: 0,
+  // Section 7.2: a HIDE burns the route, so HIDE is unavailable for hideLockMin after it (4 hours, decided 2026-10-10), and a won DEFEND sends
+  // the hunters away, so no sweep starts for defendQuietMin after it. Stage 1 is these at 0 (ROGUE='{"hideLockMin":0,"defendQuietMin":0}').
+  hideLockMin: 240,
+  defendQuietMin: 480,
+  // Section 7.3 (proposal under test, off by default): a won DEFEND also puts it straight into flow (the 3 hour build-up skipped; flow's
+  // conditions still apply, so it holds only if the netling is in good shape).
+  defendFlow: false,
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
@@ -2054,6 +2057,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (opts.won) {
         s.temper += CFG.attackRepelledTemper;
         if (sweep && ROGUE.defendQuietMin) s.sweepQuietUntil = s.ageMin + ROGUE.defendQuietMin;
+        if (sweep && ROGUE.defendFlow) s.flowMin = Math.max(s.flowMin ?? 0, CFG.flowAfterMin);
         res = ok(`${sweep ? 'sweep' : 'intrusion'} repelled.${segfaultDrop(s, rng)}`, 'win');
       } else if (sweep) {
         st.integrity = clamp(st.integrity - sweepHit(s));
