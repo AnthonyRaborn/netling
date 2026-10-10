@@ -188,6 +188,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 9. **In runs: the trail clock (H1)**, a run-long clock in the manner of FTL's pursuing fleet, **plus ambush nodes (H2) as extra pressure, mostly in the deeper regions.**
 10. **Marks: three and the Rogue is captured (dies).** Marks **do not fade** to start with, to keep the difficulty (this replaces 4.3's one-a-day fade). Difficulty is revisited once the forms are worked out; the targets in 4.4 are the starting targets.
 
+15. **No more hostile events than the NL-0 eggs** (2026-10-10, fourth round). The sweep's chance is the trace's and the intrusion's combined (12% an hour), never more. Ambush nodes likewise take their place out of the existing ICE weight of a region rather than adding nodes, so a Rogue run holds no more fights than another egg's; part of its ICE is simply hunters.
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -196,14 +198,13 @@ Three rounds on one day; later items replace earlier text where they conflict, a
     - A **regular Source exit** (one or more fights lost) **unlocks** the merge without offering it. Refusing the clean exit's offer also leaves it unlocked.
     - Once unlocked, **the good end happens when that elder dies**, in place of an ordinary rebirth.
     - The lock is per netling: a Rogue that never exited the Source has an ordinary death.
-13. **Capture blocks the good end even when it is unlocked**, and **another Source exit can remove the hunter block.** See 6.2 for how this is read.
+13. **Capture blocks the good end even when it is unlocked**, and **another Source exit can remove the hunter block.** Confirmed reading: a Source exit arms the good end; a mark taken after the latest Source exit disarms it; another Source exit re-arms it (a clean one offers the merge at once again); at death the good end plays only if armed, never after a capture; marks do not fade, so re-arming does not remove a mark.
 14. **What the merge makes, in two steps.**
     - **First: the one-off ending (M3).** The good end plays the epilogue (5.4) and the next netling hatches in the chosen NL-0 fragment's egg as an ordinary netling. This is the easiest to plan and is the starting design. A2 stands: the Rogue's own fragment is merged with one NL-0 fragment the player picks (5.2).
     - **Later, if wanted: the two-parent hybrid (M1, 5.3)**, built on the chosen egg with some Rogue elements added and **balance deliberately ignored** (two traits at once is too hard to balance), with only a small sprite change as its visible sign. Under M1 the merge ends the hunt for that hybrid only: **choosing Rogue again later still meets the hunters.**
 
 ### 6.2 Proposals, to confirm
 
-- **Reading of item 13 (to confirm).** Capture is death, so a block that a later Source exit can lift has to come from a mark, not from the capture itself. Proposed rule: a Source exit **arms** the good end; a mark taken after the latest Source exit **disarms** it ("the hunters have its scent again"); another Source exit re-arms it (a clean one offers the merge at once again). At death, the good end plays only if it is armed, and never after a capture. Marks do not fade, so re-arming does not remove the mark itself; the third mark still kills.
 - **The sweep, now covering both events** (starting values):
 
 | | Corp trace and intrusion (NL-0 eggs) | Sweep (Rogue) |
@@ -215,23 +216,22 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 | DEFEND lost or ignored | intrusion: virus, Integrity -10; trace ignored: Integrity -15, corp Standing +1 | Integrity -20 and a mark, no virus |
 | Reduced by | Untraceable (traces), the Dodge corp perk (traces) and the Dodge street perk (intrusions); an Antivirus shield bounces intrusions | Untraceable, either Dodge perk if a Rogue form ever has one (perks come later), and Evasive's longer window. An Antivirus shield does not stop a sweep (it is not a virus) |
 
-  Side effect to measure: with no intrusion, Rogue loses its main home infection route, so it will have fewer infections than the NL-0 eggs. The 12% is a fixed sum, not 1.5x anything, so the sweep is harder than a trace mostly through its cost (a mark).
-- **Ambush nodes (H2), starting values:** none in the Public Net and the Bazaar; about 1 node in 12 in the Corp Grid and the Ruins; 1 in 8 in the Deep and the Source. An ambush is the hunter fight (tier-2 ICE, 1.5x damage, no slip), seen in advance only where the netling's sight reaches (a Rogue adult has its role's sight, not full sight). Entering one adds the trail of a lost fight whether won or lost, and a loss gives a mark as the trail hunter does.
+  Side effect to measure: with no intrusion, Rogue loses its main home infection route, so it will have fewer infections than the NL-0 eggs. The 12% is the two events' sum and stays so (item 15), so the sweep is harder than a trace only through its cost (a mark).
+- **Ambush nodes (H2), starting values:** a share of each region's ICE nodes becomes an ambush (item 15: no extra nodes): none in the Public Net and the Bazaar, about 1 ICE node in 6 in the Corp Grid and the Ruins, 1 in 4 in the Deep and the Source. An ambush is the hunter fight (tier-2 ICE, 1.5x damage, no slip), seen in advance only where the netling's sight reaches (a Rogue adult has its role's sight, not full sight). Entering one adds the trail of a lost fight whether won or lost, and a loss gives a mark as the trail hunter does.
 - **Tree: 10 forms.** 1 baby, 1 teen, 4 adults, 4 elders. One teen, since with no Standing and no main bar there is nothing to split the teens on.
 - **Hunters in the Source:** a trail threshold of 12 for its 13 middle layers (starting value), so a Source run meets the trail hunter about once. A lost hunter fight is a lost ICE fight, so it rules out a clean exit.
 - **Rogue in the Source, story:** a one-time log line at the first Source exit, for example "> found: NL-0, initial commit. it is not a copy." Rogue's own codex pages stay out of this pass, and the 18 egg pages and 39 story pages do not change.
-- **The merge offer:** the latest adult or elder fragment of each NL-0 egg (at most three choices).
+- **The merge offer (decided 2026-10-10):** one entry per NL-0 egg, **in the order the player completed that egg's pages, first to last**. Each entry is that egg's latest adult or elder fragment (proposal, to confirm).
 - **Repeat good ends under M3:** each good end plays the last two lines of the epilogue; the full sequence plays once.
 
 ### 6.3 Still open
 
-1. The reading of item 13 above (marks disarm, a Source exit re-arms).
-2. The sweep's numbers and answers (6.2), and the ambush shares.
-3. The merge offer (latest per egg, or the full list).
-4. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark).
-5. The forms' details: names, each adult's role ability, perk, trait and keepsake.
-6. Difficulty, after the forms: the 4.4 targets are the starting point.
-7. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
+1. The sweep's window and answers (6.2), and the ambush shares within the ICE weight.
+2. Which fragment stands for each egg in the merge offer (the latest adult or elder, proposed).
+3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark).
+4. The forms' details: names, each adult's role ability, perk, trait and keepsake.
+5. Difficulty, after the forms: the 4.4 targets are the starting point.
+6. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
 
 ## 7. What it would take
 
@@ -239,8 +239,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 - Egg mode `rogue`: no Standing (its sources add trail), no owner bar (`SIDES.owner` `null` for life, the states at x1, no owner strain, no Iron wear), one teen, the adult by role with no lean, the elder through the ordinary gate.
 - The Rogue kit per role is not designed yet (6.3, 5). For a first run, a stand-in: the role's corp-lean ability plus the checkpoint part, the role's trait, no perk; flagged as a stand-in in every result.
 - At home: the sweep in place of both the trace and the intrusion (12% an hour, 90 minutes, HIDE, DEFEND or a Decoy); marks with no fade; the `captured` death at three.
-- In `netrun/nr2.js`: the trail count; the trail hunter at each region's threshold, the Source included (12); ambush nodes by region; the disconnect and mark on a lost hunter fight.
-- In `lineage-sweep.mjs`: Rogue lives after the gate; the good end armed by a Source exit, disarmed by a later mark, offered at once on a clean exit (a bot rule for accepting or refusing) and otherwise played at death; never after a capture; M3's ordinary next netling in the chosen egg (picking the latest fragment per egg by a bot rule). Since every egg is open at rebirth, also a bot rule for when a player returns to an NL-0 egg (for example after a capture) and for choosing Rogue again after a good end (the hunt applies again). M1 is not simulated; its balance is set aside by decision.
+- In `netrun/nr2.js`: the trail count; the trail hunter at each region's threshold, the Source included (12); ambush nodes as a share of each region's ICE nodes; the disconnect and mark on a lost hunter fight.
+- In `lineage-sweep.mjs`: Rogue lives after the gate; the good end armed by a Source exit, disarmed by a later mark, offered at once on a clean exit (a bot rule for accepting or refusing) and otherwise played at death; never after a capture; M3's ordinary next netling in the chosen egg (the offer in egg-completion order; a bot rule picks one). Since every egg is open at rebirth, also a bot rule for when a player returns to an NL-0 egg (for example after a capture) and for choosing Rogue again after a good end (the hunt applies again). M1 is not simulated; its balance is set aside by decision.
 - Bots: the existing archetypes plus a "quiet runner" that jacks out at the first relay past a trail of half the threshold, to see whether the relay choice is real.
 - Measures:
   - Length of the good end: lives (and real days) from the first Rogue life to the first good end, by archetype. This is the new end-game length and has no target yet.
