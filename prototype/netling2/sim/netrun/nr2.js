@@ -108,7 +108,7 @@ export const NR2 = {
     // ordinary lost fight. Skip's slip is trimmed, its moves add trail every second move; Exile slips ambushes (tier-2 avoidance). Spook tells an
     // ambush from ICE one step beyond its sight; Handler's agent sheds trail once a run. Drop leaves one item at a relay for less trail; Stash keeps it.
     kit: {
-      breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } },
+      breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } }, // levers measured (7.4), off: lostTrail (trail a lost fight adds), ambushShrug (chance a lost ambush is an ordinary lost fight), saveResets (Sleeper's save also clears the trail)
       dodge: { 1: { unseen: 0.3, moveEvery: 2 }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true } },
       tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
       feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },

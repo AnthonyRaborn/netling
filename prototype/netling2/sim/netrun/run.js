@@ -658,7 +658,7 @@ function resolveIceFight(pet, won, rng) {
   const soft = (ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses) || Boolean(hd?.soft && (run.softLosses ?? 0) < hd.soft);
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
   markTrail(run, TRAIL.iceLost);
-  if (hunted(pet, run)) addTrail(run, NR2.rogue.trail.iceLost);
+  if (hunted(pet, run)) addTrail(run, rkit(pet)?.lostTrail ?? NR2.rogue.trail.iceLost);
   const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
   const dmg = Math.round(
     REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? (hd ? NR2.ab.softMult : RUN_CFG.airgapSoftMult) : 1) * (hd ? hd.dmg : 1) * (NR2.tiers && tier2 ? NR2.tier.damageMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
@@ -691,11 +691,20 @@ function resolveHunter(pet, run, kind, deferred, won, rng) {
   const dmg = Math.round(REGIONS[run.region].iceDamage * (breach ? k.dmg : NR2.rogue.hunterMult) * (run.hot ? CFG.overclockIceDamageMult : 1));
   st.integrity = clamp(st.integrity - dmg);
   st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
-  addTrail(run, NR2.rogue.trail.iceLost);
+  addTrail(run, k?.lostTrail ?? NR2.rogue.trail.iceLost);
   if (NR2.eggCost) lostFightCost(pet, run, rng);
   if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
+  // Breach levers under test (nr2.js kit.breach): ambushShrug, the chance a lost ambush is an ordinary lost fight (no disconnect).
+  const shrug = kind === 'ambush' && k?.ambushShrug && rng() < k.ambushShrug;
+  if (shrug) {
+    run.tally.ambushesShrugged = (run.tally.ambushesShrugged ?? 0) + 1;
+    note(run, `shrugged off the ambush. -${dmg} integrity.`);
+    if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by the ambush.');
+    return onward();
+  }
   if (k?.hunterSaves && run.hunterSaves < k.hunterSaves) {
     run.hunterSaves++;
+    if (k.saveResets && kind === 'trail') run.hunt = 0; // saveResets: the hunter loses the trail as well
     note(run, `deep cover: the ${what} lost it in the crowd. -${dmg} integrity.`);
     if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by the hunter.');
     return onward();

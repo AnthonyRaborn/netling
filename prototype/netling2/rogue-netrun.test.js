@@ -270,3 +270,22 @@ test('map rules in a run: a Rogue Deep run has its cordon (and, with narrow, the
     [NR2.map.on, NR2.rogue.map.on] = saved;
   }
 }));
+
+test('Breach levers (off by default): lostTrail sets the trail a lost fight adds; ambushShrug makes a lost ambush an ordinary lost fight', () => withKits(() => {
+  const saved = JSON.parse(JSON.stringify(NR2.rogue.kit.breach));
+  try {
+    assert.equal(NR2.rogue.kit.breach[1].lostTrail, undefined);
+    NR2.rogue.kit.breach[1].lostTrail = 1;
+    const s = setup('rogueAdultBreach', ['ice']);
+    moveTo(s, 1, stub(0.99));
+    resolveIce(s, false, stub(0.99));
+    assert.equal(s.run.hunt, 2, 'the move (+1) and the lost fight (+1, not +2)');
+    NR2.rogue.kit.breach[1].ambushShrug = 1;
+    const a = setup('rogueAdultBreach', [{ type: 'ice', ambush: true }, 'checkpoint']);
+    moveTo(a, 1, stub(0.5));
+    assert.notEqual(resolveIce(a, false, stub(0.5)).result, 'disconnected');
+    assert.equal(a.run.tally.ambushesShrugged, 1);
+  } finally {
+    NR2.rogue.kit.breach = saved;
+  }
+}));

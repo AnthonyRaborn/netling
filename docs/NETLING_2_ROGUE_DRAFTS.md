@@ -410,6 +410,18 @@ At the decided 4 hour lockout and 8 hour quiet (attentive group, 300 lives of ea
 
 **Open after the decision:** the Deep's disconnects are a little over 4.4's 1.5x (1.8x) because a cordon forces a fight that may be an ambush; if that should come down, the smallest change is to keep ambushes out of cordon layers. The Breach line is the most captured (Mole has no avoidance, so it meets the most hunters and ambushes).
 
+**The Breach line (2026-10-10, measured, for choice).** Under candidate A a lost ambush gives no mark, so the Breach line's extra captures come from the trail hunter: Mole and Sleeper have no avoidance, fight more, and each lost fight adds +2 trail, so they meet the hunter about 2.3 times a life (Tune and Feast 0.6 to 0.9, Dodge almost never). On the three Breach archetypes (300 lives each; levers in `nr2.js`, `kit.breach`, all off):
+
+| Breach kit | full life | captured, mean / worst | hunter marks a life | hunters met | ambushes lost | run disconnects | elder gate met |
+|---|---|---|---|---|---|---|---|
+| as decided | 92.5 | 7.5 / 8.0 | 0.50 | 2.29 | 0.87 | 2.58 | 37 |
+| a lost ambush shrugged off half the time | 92.3 | 7.7 / 9.0 | 0.54 | 2.46 | 0.49 | 2.27 | 36 |
+| Sleeper's save also clears the trail | 92.4 | 7.6 / 8.0 | 0.49 | 2.25 | 0.87 | 2.56 | 37 |
+| **a lost fight adds trail +1, not +2** | 96.0 | 4.0 / 5.0 | 0.27 | 1.39 | 0.89 | 2.42 | 42 |
+| both of the last two | 96.2 | 3.8 / 5.0 | 0.26 | 1.35 | 0.89 | 2.40 | 42 |
+
+The ambush shrug-off cuts disconnects but not captures (staying in the run longer meets slightly more hunters). A quieter lost fight brings the Breach line to about 4% captured, level with Tune (about 4%) and Feast (4 to 6%). The Dodge line is the opposite outlier: about 0.3% captured, since half-trail moves keep it under every threshold (hunters met 0.02 a life).
+
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg) and the relay-question read-out (continuing pays about a third more), which needs the chosen hunter settings first.
 
 ## 8. The ten forms (concept briefs, for choice)
