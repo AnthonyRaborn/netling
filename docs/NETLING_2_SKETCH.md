@@ -535,7 +535,7 @@ Item names per egg (suggestions): Coolant cell / Coolant loop / Cold pack; Antiv
 5. Care preferences: whether the steady lock-in for players who never netrun is acceptable; log line wording.
 6. Elders: whether the wide elder bodies carry the same temper tell (sprite risk); elder art is not final, so names are not either.
 7. Metronome: prop colours and the unsteady-hold alert rule are unspecified beyond the neglect rule; art is five by eight and unrendered.
-8. UI: the Dex structure for hints, Standing display, how bugs and neglect show, whether a revealed hidden entry shows a hint line.
+8. UI: the Dex structure for hints, Standing display, how bugs and neglect show, whether a revealed hidden entry shows a hint line. First pass in [NETLING_2_UI.md](NETLING_2_UI.md): Standing (floored integers) and bugs are placed; the Dex structure and the hint line are still open.
 9. Purge order details (recommended: leave accident or deliberate unsettled; NL-0 learns it was dead only when the player shows it).
 10. Retest in 2.0: egg page rates (0.20, 0.50), bug values, temper guard and edges, the neglect lines.
 
