@@ -39,7 +39,9 @@ const JOBS = {
   'decided-dodge4': {},
   // decided-relay667: the same with the Deep's relay two thirds of the way down (7.4), the fork's defaults; every job above is measured with the
   // relay in the middle layer, as it was then (PRE_RELAY below).
-  'decided-relay667': {},
+  'decided-relay667': { exitBonus: { deep: 2 } },
+  // decided-exit1: the same with Rogue's Deep exit bonus 1 (7.4), the fork's defaults.
+  'decided-exit1': {},
   nomap: { ...DRAFT, map: { on: false } },
   th15: { ...DRAFT, ...th(1.5) },
   th20: { ...DRAFT, ...th(2) },
@@ -53,7 +55,9 @@ const JOBS = {
   'th20-tier1-nocordon-amb-half': { ...DRAFT, ...th(2), hunterTier: 1, map: { ...DRAFT.map, cordons: {} }, ambush: HALF },
 };
 
-const PRE_RELAY = (name, over) => (name === 'decided-relay667' ? over : { ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
+// Jobs measured before a later default spell out the earlier value: the middle relay (all but the two below) and the region's exit bonus 2 (all
+// but decided-exit1, which runs on the fork's defaults).
+const PRE_RELAY = (name, over) => (name === 'decided-exit1' || name === 'decided-relay667' ? over : { exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
 const todo = Object.entries(JOBS).map(([n, o]) => [n, PRE_RELAY(n, o)]).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));
 console.log(`${todo.length} jobs to run, ${lives} lives an archetype, ${jobsAtOnce} at once`);
 const run = ([name, over]) => new Promise((resolve) => {

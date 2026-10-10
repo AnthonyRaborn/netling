@@ -332,7 +332,7 @@ test('Dodge levers: thresholdDelta (decided at -4) moves the hunter; headStart (
   }
 }));
 
-test("the Rogue exit bonus (rogue.exitBonus, off): in place of the region's exit items, for a Rogue netling only", () => withKits(() => {
+test("the Rogue exit bonus (rogue.exitBonus, decided 1 in the Deep): in place of the region's exit items, for a Rogue netling only", () => withKits(() => {
   const saved = { ...NR2.rogue.exitBonus };
   const exitLoot = (form, egg) => {
     const s = setup(form, ['checkpoint'], { egg });
@@ -342,10 +342,11 @@ test("the Rogue exit bonus (rogue.exitBonus, off): in place of the region's exit
     return s.run.loot.length - before;
   };
   try {
-    assert.equal(exitLoot('rogueAdultBreach', 'rogue'), REGIONS.deep.exitBonus, "off: the region's");
-    NR2.rogue.exitBonus.deep = 1;
+    assert.deepEqual(NR2.rogue.exitBonus, { deep: 1 }, 'decided (7.4)');
     assert.equal(exitLoot('rogueAdultBreach', 'rogue'), 1);
     assert.equal(exitLoot('hidden', 'program'), REGIONS.deep.exitBonus, 'an NL-0 netling keeps the region bonus');
+    delete NR2.rogue.exitBonus.deep;
+    assert.equal(exitLoot('rogueAdultBreach', 'rogue'), REGIONS.deep.exitBonus, "not listed: the region's");
   } finally {
     NR2.rogue.exitBonus = saved;
   }

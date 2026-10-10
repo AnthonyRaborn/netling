@@ -121,8 +121,9 @@ export const NR2 = {
     // two thirds of the way down (relayAt; its cordon follows it). The draft's other rules, off: relayFactor 0.5 (extra relays halved), toIce
     // { corp: 0.5 } (Corp Grid checkpoints as ICE), guardShare 0.5 (guarded caches and markets) and narrow ['deep', 'source'] (1.0's narrow maps).
     map: { on: true, relayFactor: 1, toIce: {}, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0, narrow: [], relayAt: { deep: 0.667 } },
-    // The exit's bonus items for a Rogue netling, by region, in place of the region's exitBonus (7.4, measured; off: the region's own).
-    exitBonus: {},
+    // The exit's bonus items for a Rogue netling, by region, in place of the region's exitBonus. Decided (7.4): 1 in the Deep (the region's is 2),
+    // so going on past the relay pays about a third more than jacking out there. Regions not listed keep their own.
+    exitBonus: { deep: 1 },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----

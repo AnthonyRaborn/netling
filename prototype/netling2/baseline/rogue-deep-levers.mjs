@@ -35,16 +35,17 @@ const FAR = {
   'relay at 0.667 + narrow': { map: { relayAt: { deep: 0.667 }, narrow: ['deep'] } },
   'relay at 0.8 + narrow': { map: { relayAt: { deep: 0.8 }, narrow: ['deep'] } },
 };
-// Fourth round, at the new default (the relay at 0.667, 7.4): the Rogue exit bonus in the Deep (rogue.exitBonus; the region's is 2).
+// Fourth round, at the relay at 0.667 (7.4): the Rogue exit bonus in the Deep (rogue.exitBonus; the region's is 2; 1 later decided).
 const EXIT = {
-  'relay 0.667 (decided)': {},
+  'relay 0.667 (decided)': { exitBonus: { deep: 2 } },
   'relay 0.667 + exit 1': { exitBonus: { deep: 1 } },
   'relay 0.667 + exit 0': { exitBonus: { deep: 0 } },
   'relay 0.667 + narrow + exit 1': { exitBonus: { deep: 1 }, map: { narrow: ['deep'] } },
   'relay 0.8 + exit 1': { exitBonus: { deep: 1 }, map: { relayAt: { deep: 0.8 } } },
 };
 // The first three rounds were measured with the relay in the middle layer (then the default), so they spell it out unless they move it.
-const PRE = (over) => ({ ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
+// All rounds were measured with the region's exit bonus 2 (then the default) unless they set it.
+const PRE = (over) => ({ exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
 const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ...env }, maxBuffer: 1 << 26 }));
 const file = join(here, 'results', 'followup', 'rogue-deep-levers.json');
 const out = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
