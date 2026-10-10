@@ -51,7 +51,7 @@ Every item below is marked **Decided** (the maintainer said so in the design con
 - **A named state replaces the bar's label** (OD for Overdrive, OC for Overclock), as in the care drafts' state clues. The mock **does not recolor the row** for a state, because a recolor is more of a hint than the label (maintainer: orange Heat was too much). The marks beside the sprite (wisps, sparks, dots) stay as the care drafts describe them.
 - **Per-egg words.** The labels follow the care drafts: Program CHG, SYN, INT, HEAT; Iron PWR, LOCK, INT, HEAT; Wetware FOOD, BOND, HLTH, TEMP.
 
-**Open: the Cache meter.** 1.0 and the care drafts have a fifth meter (CACHE, ROT or WASTE per egg), shown as pips. The mock shows four. Where Cache goes (a fifth row under the strip, or inside the CARE tray next to PURGE) is not decided.
+**Decided: Cache is not a meter.** In 1.0 it is a row of small icons drawn on the screen under the netling (`src/render.js`, one icon per point of cache), and 2.0 keeps that: the icons stay on the stage below the pet, not in the strip, and the strip stays at four vitals. The egg's word (CACHE, ROT or WASTE, from the care drafts) is the icons' accessible label, and the Fix button that clears them (PURGE, SCRUB, FLUSH) sits in the CARE tray.
 
 **Open: pips against the pre-state captions.** The captions in the care drafts ("Pre-state caption") hint that a state is near. Pips tied to the band edges already show the approach. Keep both, or let the pips replace the captions? The care drafts also decided not to print the Charge and Sync entry lines and to show the Iron free band's edge as a tick without a number. Visible band edges are consistent with that tick but go further, so this needs a decision before the build.
 
@@ -137,7 +137,7 @@ The wardrobe starts about the size of 1.0's and will grow, so it is built to tak
 
 ## Open questions
 
-1. Where the Cache meter goes, and whether the pips replace the pre-state captions (see Vitals).
+1. Whether the pips replace the pre-state captions (see Vitals).
 2. The Rogue skin, its Standing replacement and its dock names.
 3. How the Dex and Codex present hints (sketch open item 8), and whether Chatter folds into LIBRARY.
 4. Whether an egg's long event names fit the lane on a 360 to 400 px phone.
