@@ -314,7 +314,7 @@ Each adult keeps the full signature and differs by outline, so the four stay und
 |---|---|---|---|---|
 | Mole | Broader, settled, the claws resting; it has been in place a long time | **Sleeper**; Plant | A sleeper is a mole left in place for years, waiting. The same idea after long service, exactly | strong |
 | Skip | Wider stance, the cloak torn shorter, a bundle on its back: it has been running for years | **Exile**; Lam | Someone who has been away so long that away is home. Lam (on the lam) is the shorter, slangier option | medium |
-| Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler**; Station | A handler runs agents; the spook after long service. Caution: two syllables and a common word; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
+| Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler**; Station | A handler runs agents; the spook after long service. Caution: a common word with no Tune link of its own; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
 | Fence | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash**; Cutout | A stash is what a fence keeps hidden. Cutout (the go-between so neither side knows the other) fits the trade but not the art | medium |
 
 ### 8.5 Ids and the Dex
