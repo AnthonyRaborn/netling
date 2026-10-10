@@ -7,7 +7,8 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 2. **Done: Handler** (maintainer, after the Exile round: the least interesting elder). Its layer is now the headset signal with the split shadow (8.4i; `MOTION_OF.spookElder`). All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
 3. **The design is closed for the first build** (6.3, 2026-10-10): only M1 (later, if wanted) and difficulty (after the simulator) stay open.
 4. **Drafted: the kits** (section 9, for choice): each ability is the role's with a hunt twist, Rogue's own perks, the role traits, existing items as keepsakes.
-5. Then the simulator build (section 7) and the text (section 10).
+5. **Simulator stage 1 (home life) built and measured** (7.1): the mean lands on the 4.4 aim, but sparse players are captured by sweeps that expire (casual 33% full life); the sweep window and DEFEND need a decision before stage 2 (the netrun).
+6. Then stage 2 and 3 of the simulator build (section 7) and the text (section 10).
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
 
@@ -308,6 +309,28 @@ Still open:
 **Sprites: 10 forms** (1 baby, 1 teen, 4 adults, 4 elders), all newly authored under the frame and wearable rules of [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md), with the temper tell, the neglect and bug channels, and outline cues from Ghost, Guru and Blank. The elders are wide bodies, so they share the wide-elder temper-tell risk the sprite handoff already lists. The earlier overlay idea (the three hidden adults redrawn with a Rogue layer) no longer fits four role adults and is dropped. Under M1 later, a hybrid needs only a small mark on its egg's existing sprite (for example one row in Rogue's colour). Names are not drafted.
 
 **Save and ids (when it is built, not now):** form ids follow `prototype/netling2/form-ids.js` with no lean: `rogueBaby`, `rogueTeen`, `rogueAdultBreach`, `rogueAdultDodge`, `rogueAdultTune`, `rogueAdultFeast`, `rogueElderBreach`, `rogueElderDodge`, `rogueElderTune`, `rogueElderFeast` (permanent once shipped). Also a `marks` field, an armed flag for the good end, the `captured` death cause, the `sweep` event type, an ambush node type, a merge record on the lineage (which NL-0 fragment was chosen), an account flag that the epilogue has played, and a trail field in the run state; under M1 later, a second-parent field on the fragment. Each needs a sanitizer.
+
+### 7.1 Stage 1 built and measured: home life (2026-10-10)
+
+**What was built** (fork, behind `ROGUE`, off by default; with it off the balance output is byte-identical to the code before): Rogue as a per-life egg (`s.egg === 'rogue'`) with no Standing (reset every minute), one teen (`rogueTeen`), the adult by most wins with the usual tie weights and no lean, the elders through the ordinary gate (`rogueElder*`); the sweep in the trace's draw position and no intrusion (12% an hour, 90 minutes; HIDE, DEFEND or a Decoy; lost or ignored: Integrity -20 and a mark; no virus; an antivirus shield does not stop it); marks with no fade and the `captured` death at three, which Root Access does not reverse; section 9's perks (Mole -10 instead of -20, Skip sweeps x0.7, Spook drains x0.9, Drop 30% off scrip at every market in a run), the role traits (Evasive lengthens the sweep window, Untraceable cuts the sweep) and the keepsakes. **In runs, a stand-in:** each Rogue adult and elder runs on its role's base ability at the NL-0 numbers (Hardened, Unseen, Lookahead, Scavenge) plus the checkpoint part; no trail, hunters, ambushes, twists, danger sense or map rules yet (stage 2). Tests: `prototype/netling2/rogue-sim.test.js` (13). Run with `ROGUE=1` and `SIDES` owner `"none"` (every state at x1, no owner strain, no Iron wear); the bot answers a sweep by `SWEEPBOT=hide` (default), `defend` or `mix`.
+
+**How it was measured.** 300 lives for each of the 37 archetypes under the "now" rules (stage care, the rest call, Standing gain 2, the fix rule, the break, OVERUSE), every life starting with Root and the 22 Root pages as a Rogue player would (A3; `CODEX=deep`), against Iron, Program and Wetware under the same settings. Outputs and the full tables: `prototype/netling2/baseline/results/followup/rogue-stage1-*` (summary in `rogue-stage1-summary.md`, made by `baseline/rogue-stage1-summary.mjs`).
+
+**Findings.**
+1. **The mean lands on the 4.4 target, but the shape is wrong.** Full life, mean of the 37 archetypes: NL-0 89.7%, Rogue answering every sweep with HIDE 79.6% (-10.2 points). All of the cost falls on sparse players: every attentive archetype keeps 100% (4.4 aimed at about 10 points lower), while casual falls from 99.2% to 32.7%, worker from 82.3% to 14.0%, human-keen from 81.9% to 33.3% and hunter-casual from 97.1% to 32.7% (4.4 aimed at about 15 lower). That is far above the high-side aim, so a miss.
+2. **The cause is ignored sweeps and capture.** With HIDE, every mark comes from a sweep left to run out; an attentive player meets about 8 sweeps a life and lets 0.1 expire, a casual player (check-ins about 3 hours apart) lets 2.5 expire. Captured: casual 66%, worker 81%, the human archetypes 51 to 65%, attentive 0%. Capture under 5% of attentive lives is met.
+3. **The window is the lever** (sparse players only, HIDE). Full life / captured at a window of 90, 120, 180 and 240 minutes: casual 33/66, 62/36, 98/1, 99/0; worker 14/81, 24/67, 53/36, 74/15; human-keen 33/57, 48/40, 77/8, 79/3. The casual player's gap is about 3 hours, so 180 is roughly where a sweep stops slipping through for it; about 150 would put casual near the 4.4 aim (about 15 lower).
+4. **DEFEND is a trap as built.** Answering every sweep with DEFEND gives 51.3% full life and captures 44% of lives (attentive 36%), because a lost mini-game is a mark and HIDE's only cost is Charge -10 and Heat +10. Half and half: 70.1%, 25% captured. A person would learn to always HIDE, so DEFEND adds nothing as it stands.
+5. **No more hostile events at home** (decided): timed events a life 9.2 for Rogue against 9.3 for the NL-0 eggs.
+6. **Fewer infections**, as expected without the intrusion: 6.1 a life against 7.3.
+7. **Roles** with HIDE: Spook 18%, Mole 18%, Drop 16%, Skip 15% as adults, plus elders (Mole and Skip lines 8% each, Drop and Spook 5%); close to even.
+
+**Not measured in stage 1:** time in each state with no main bar (`sides-sweep.mjs` is written for the three NL-0 eggs), the notification count per 15 awake hours, and anything in runs beyond the stand-in.
+
+**For the maintainer (choices before stage 2; numbers are proposals):**
+- **The sweep's window for sparse play:** a longer window (about 150 minutes to land casual near the aim; 180 nearly removes the casual cost), or keep 90 and soften what an ignored sweep costs (the "softer ignore" option declined earlier: a mark only from a lost DEFEND), or let marks fade after all (one per 24 awake hours, 4.3's first draft). The window is the smallest change and keeps the mark rule.
+- **DEFEND's reason to exist:** for example a won DEFEND removes the last mark, or pays something HIDE does not (scrip, a drop), or HIDE costs more (a share of Charge rather than 10). Without one, DEFEND is never right.
+- Stage 2 (the netrun) adds marks from the trail hunter and ambushes, so the home cost should sit below the aim before it; the 4.4 targets are for the whole.
 
 ## 8. The ten forms (concept briefs, for choice)
 
