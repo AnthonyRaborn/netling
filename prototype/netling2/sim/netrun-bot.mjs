@@ -71,7 +71,7 @@ function decide(pet, style, rng) {
       // player jacks out when one more mark would be the third and the trail would bring the hunter before the exit. Going on, Drop and Stash
       // leave an item at the dead drop while there is trail to shed.
       const run = pet.run;
-      const th = huntThreshold(run);
+      const th = huntThreshold(run, pet);
       if ((style.quiet ?? process.env.RUNBOT === 'quiet') && run.hunt >= th / 2) return 'out';
       const movesLeft = run.map.layerCount - 1 - nodeById(run.map, run.pos).layer;
       if (style.plan && (pet.marks ?? 0) >= 2 && run.hunt + movesLeft >= th) return 'out';
@@ -202,7 +202,7 @@ export function playRun(pet, style, region, rng, codex = []) {
     }
     else {
       // Handler: the agent goes out when the hunter would be waiting at the next node.
-      if (hunted(pet) && run.hunt >= huntThreshold(run)) sendAgent(pet);
+      if (hunted(pet) && run.hunt >= huntThreshold(run, pet)) sendAgent(pet);
       const opts = runOptions(run);
       const hurt = pet.stats.integrity < style.avoidIceBelow;
       const seek = pet.bugs > 0 && style.seekClinic !== false && style.fix?.mode !== 'none'; // bugged, and willing to pay for a fix

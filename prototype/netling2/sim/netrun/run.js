@@ -134,7 +134,8 @@ const lvl = (pet) => levelOf(pet);
 // Every Rogue netling that jacks in is hunted and has danger sense; the kit twists (rkit) are the adult's and the elder's, with the abilities on.
 const ROLE_OF = { rogueAdultBreach: 'breach', rogueAdultDodge: 'dodge', rogueAdultTune: 'tune', rogueAdultFeast: 'feast' };
 export const hunted = (pet, run = pet.run) => Boolean(NR2.rogue?.on && isRogue(pet) && run && !run.daily && NR2.rogue.threshold[run.region] !== undefined);
-export const huntThreshold = (run) => NR2.rogue.threshold[run.region];
+// The region's threshold; with the netling, its kit's thresholdDelta too (the Dodge skip-tracer lever, off by default).
+export const huntThreshold = (run, pet) => NR2.rogue.threshold[run.region] + ((pet && rkit(pet)?.thresholdDelta) ?? 0);
 const rogueRole = (pet) => (NR2.abilities && NR2.rogue?.on && isRogue(pet) && (pet.stage === 'adult' || pet.stage === 'mainframe') ? ROLE_OF[lineOf(pet.form)] ?? null : null);
 const rkit = (pet) => (rogueRole(pet) ? NR2.rogue.kit[rogueRole(pet)][lvl(pet)] : null);
 function addTrail(run, n) {
@@ -372,9 +373,9 @@ function moveToNode(pet, nodeId, rng) {
   }
 
   // Rogue (stage 2): once the trail has reached the region's threshold, the hunter is waiting at the next node, whatever the node is; the node's own
-  // encounter follows a won fight. Otherwise the move adds its trail (Skip: every second move).
+  // encounter follows a won fight. Otherwise the move adds its trail (Skip: every second move; with the headStart lever, every move after the first n).
   if (hunted(pet, run)) {
-    if (run.hunt >= huntThreshold(run)) {
+    if (run.hunt >= huntThreshold(run, pet)) {
       const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
       run.tally.hunters++;
       run.phase = 'ice';
@@ -383,8 +384,11 @@ function moveToNode(pet, nodeId, rng) {
       return { ok: true, kind: 'ice', game, tier: NR2.rogue.hunterTier, hunter: 'trail' };
     }
     run.huntMoves++;
-    const every = rkit(pet)?.moveEvery ?? 1;
-    if (run.huntMoves % every === 0) addTrail(run, NR2.rogue.trail.move);
+    const k = rkit(pet);
+    if (k?.headStart !== undefined) {
+      if (run.huntMoves > k.headStart) addTrail(run, NR2.rogue.trail.move);
+    }
+    else if (run.huntMoves % (k?.moveEvery ?? 1) === 0) addTrail(run, NR2.rogue.trail.move);
   }
   return encounterNode(pet, nodeId, rng);
 }
@@ -447,6 +451,7 @@ function encounterNode(pet, nodeId, rng) {
           if (ph && run.freePhases < ph.free) run.freePhases++;
           run.tally.icePhased++;
           markTrail(run, TRAIL.icePhased);
+          if (hunted(pet, run) && rkit(pet)?.slipTrail) addTrail(run, rkit(pet).slipTrail); // the slipTrail lever (Dodge): a slip leaves tracks
           note(run, 'the ICE never noticed it.');
           return { ok: true, kind: 'ice', phased: true };
         }

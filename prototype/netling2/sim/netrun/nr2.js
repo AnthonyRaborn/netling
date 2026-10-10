@@ -111,6 +111,8 @@ export const NR2 = {
       // Decided (7.4): a lost fight adds trail +1 for Mole and Sleeper (lostTrail; +2 for the others). Measured and off: ambushShrug (chance a lost
       // ambush is an ordinary lost fight) and saveResets (Sleeper's save also clears the trail).
       breach: { 1: { dmg: 0.7, lostTrail: 1 }, 2: { dmg: 0.65, hunterSaves: 1, lostTrail: 1 } },
+      // Measured and off (7.4, the Dodge line): headStart (the first n moves of a run add no trail, every later move does; replaces moveEvery),
+      // thresholdDelta (the hunter's threshold moved by this much for the line: skip tracers) and slipTrail (a slipped ordinary ICE adds this trail).
       dodge: { 1: { unseen: 0.3, moveEvery: 2 }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true } },
       tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
       feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },

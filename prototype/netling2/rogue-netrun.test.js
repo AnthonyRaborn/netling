@@ -288,3 +288,27 @@ test('Breach levers: lostTrail (decided at 1) sets the trail a lost fight adds; 
     NR2.rogue.kit.breach = saved;
   }
 }));
+
+test('Dodge levers (off): headStart frees the first n moves and charges every later one; thresholdDelta moves the hunter; slipTrail marks a slip', () => withKits(() => {
+  const saved = JSON.parse(JSON.stringify(NR2.rogue.kit.dodge));
+  try {
+    for (const l of [1, 2]) assert.deepEqual(['headStart', 'thresholdDelta', 'slipTrail'].filter((k) => k in NR2.rogue.kit.dodge[l]), [], 'all off by default');
+    NR2.rogue.kit.dodge[1].headStart = 2;
+    const s = setup('rogueAdultDodge', ['checkpoint', 'checkpoint', 'checkpoint', 'checkpoint']);
+    for (const [to, hunt] of [[1, 0], [2, 0], [3, 1], [4, 2]]) {
+      moveTo(s, to, stub(0.99));
+      assert.equal(s.run.hunt, hunt, `move ${to}`);
+    }
+    NR2.rogue.kit.dodge[1].thresholdDelta = -4;
+    assert.equal(huntThreshold({ region: 'deep' }, s), huntThreshold({ region: 'deep' }) - 4);
+    assert.equal(huntThreshold({ region: 'deep' }, setup('rogueAdultTune', ['checkpoint'])), huntThreshold({ region: 'deep' }), 'the other lines keep theirs');
+    const h = setup('rogueAdultDodge', ['checkpoint', 'checkpoint'], { hunt: huntThreshold({ region: 'deep' }) - 4 });
+    assert.equal(moveTo(h, 1, stub(0.99)).hunter, 'trail', 'the hunter comes at the lower threshold');
+    NR2.rogue.kit.dodge[1].slipTrail = 1;
+    const k = setup('rogueAdultDodge', ['ice'], { huntMoves: 2 });
+    assert.equal(moveTo(k, 1, stub(0)).phased, true);
+    assert.equal(k.run.hunt, 2, 'the move (+1, past the head start) and the slip (+1)');
+  } finally {
+    NR2.rogue.kit.dodge = saved;
+  }
+}));
