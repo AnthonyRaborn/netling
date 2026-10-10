@@ -14,8 +14,8 @@ import { drawSprite, paletteColors } from '../../src/sprites.js';
 import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
-import { fadePulse, bigDecoy } from './rogue-options.js';
-import { bigDecoyMotion } from './rogue-motion.js';
+import { fadePulse, bigDecoy, EXILE_OPTIONS } from './rogue-options.js';
+import { bigDecoyMotion, scanMotion } from './rogue-motion.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -42,7 +42,7 @@ const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;
 const c = document.getElementById('c');
 c.width = (6 * (W + GAP) + GAP) * SC;
-c.height = LABEL + Math.ceil(rows.length / 2) * ROW + ROW + 10; // set before drawing: resizing clears
+c.height = LABEL + Math.ceil(rows.length / 2) * ROW + 2 * ROW + 10; // set before drawing: resizing clears
 const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 function cell(x0, y0, sprite, label) {
@@ -64,7 +64,15 @@ function draw(now) {
     const base = (i % 2) * 3;
     variants.forEach(([label, frames, motion], j) => cell(col(base + j), y, (motion ?? f.motion)(frames[frame], f.anchors.a, { time }), `${f.name} ${label}`));
   });
-  const y = LABEL + Math.ceil(rows.length / 2) * ROW;
+  // The Exile redraw (drafts 8.4g): Skip and the registered Exile, then the three options, all with the Dodge line's shimmer.
+  const ye = LABEL + Math.ceil(rows.length / 2) * ROW;
+  const skip = set.rogueAdultDodge;
+  const exile = set.rogueElderDodge;
+  const shimmer = scanMotion('elder');
+  cell(col(0), ye, skip.motion(skip[frame], skip.anchors.a, { time }), 'Skip');
+  cell(col(1), ye, exile.motion(exile[frame], exile.anchors.a, { time }), 'Exile now');
+  Object.values(EXILE_OPTIONS).forEach((o, j) => cell(col(2 + j), ye, shimmer(o[frame], exile.anchors.a, { time }), `Exile: ${o.name}`));
+  const y = ye + ROW;
   cell(col(0), y, frame === 'a' ? blank.a : blank.b, 'Blank (reference)');
   cell(col(1), y, cipher.motion(frame === 'a' ? cipher.a : cipher.b, cipher.anchors.a, { time }), 'Cipher (reference)');
   if (fixed === null) requestAnimationFrame(draw);

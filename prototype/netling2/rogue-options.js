@@ -89,3 +89,63 @@ export const aliasHint = (f, tag) => {
   const y = f.anchors.a.neckRow + 1;
   return { a: camo(f.a, { from: y, to: y + 1, phase: 0, keep: tag }), b: camo(f.b, { from: y, to: y + 1, phase: 1, keep: tag }) };
 };
+
+// Exile, the redraw (drafts 8.4g; maintainer: Skip stays, Exile is too close to Skip and needs its own idea). Three options, each 18 by 15
+// with Skip's head, lean and legs so it still reads as Skip's elder, the registered anchors and a three-cell tag (ROGUE_ELDER_ANCHORS and
+// ROGUE_TAGS skipElder, unchanged). Nothing here is registered until one is chosen.
+//   pack:   the brief's bundle, a pack high on its back with a strap, the swept hood laid over it.
+//   cape:   the hood tail grown into a long torn cape trailing behind, its tatters swapping with the frame.
+//   bindle: a stick over the shoulder with a bundle on the end, where the hood tail was: everything it owns, carried.
+const LEGS = {
+  a: ['.....#.##.##.##...', '......#......#....', '......#......#....', '.....##......##...'],
+  b: ['....#.##.##.##....', '.....#.......#....', '....#.........#...', '...##.........##..'],
+};
+const exile = (name, head, bodyA, bodyB = bodyA) => ({ name, a: [...head, ...bodyA, ...LEGS.a], b: [...head, ...bodyB, ...LEGS.b] });
+export const EXILE_OPTIONS = {
+  pack: exile('pack', [
+    '.......#..#.......',
+    '.......#####......',
+    '......#x##x##.....',
+    '.....###xx#####...',
+    '.....#oo##oo######',
+    '.....#oo##oo##x###',
+    '.....#########x###',
+    '......########x##.',
+  ], [
+    '.....#########.##.',
+    '.....#xxx#####....',
+    '.....#########....',
+  ]),
+  cape: exile('cape', [
+    '.......#..#.......',
+    '.......#####......',
+    '......#x##x###....',
+    '.....###xx######..',
+    '.....#oo##oo######',
+    '.....#oo##oo##.###',
+    '.....#########.###',
+    '......########.###',
+  ], [
+    '.....#########.##.',
+    '.....#xxx#####.#.#',
+    '.....#########..#.',
+  ], [
+    '.....#########.##.',
+    '.....#xxx#####..##',
+    '.....#########.#..',
+  ]),
+  bindle: exile('bindle', [
+    '.......#..#.......',
+    '.......#####......',
+    '......#x##x##.....',
+    '.....###xx####..x.',
+    '.....#oo##oo##.###',
+    '.....#oo##oo######',
+    '.....#########.###',
+    '......########.##.',
+  ], [
+    '.....#########....',
+    '.....#xxx#####....',
+    '.....#########....',
+  ]),
+};
