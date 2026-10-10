@@ -26,6 +26,8 @@ Every item below is marked **Decided** (the maintainer said so in the design con
 
 ```
 +-----------------------------+
+| nameplate: crest + label    |
++-----------------------------+
 | status strip (read only)    |
 +-----------------------------+
 |          PET STAGE          |
@@ -38,6 +40,7 @@ Every item below is marked **Decided** (the maintainer said so in the design con
 
 - **Decided: five dock items, in this order:** CARE, PLAY, NETRUN, STYLE, MENU. MENU is in the dock so the whole interface is thumb reachable.
 - CARE, PLAY, STYLE and MENU open over the lower part of the stage and leave the pet visible. NETRUN goes to its own full screen and is drawn differently from the others, because it is a mode change with risk.
+- **Proposal: the nameplate is the shell's spot for the crest and the device label.** It is 1.0's header brand (a 9 by 9 pixel crest beside the label, default NETLING) kept as a thin read-only row above the strip, since the rest of 1.0's header moved into MENU. The crest is hidden until one is equipped. It is the only place either shows. Both are edited in STYLE.
 - The strip, stage and lane never move. Layout shifts on a phone cause mis-taps at the worst moment.
 
 ## Vitals
@@ -97,14 +100,15 @@ Every item below is marked **Decided** (the maintainer said so in the design con
 
 The wardrobe starts about the size of 1.0's and will grow, so it is built to take more without a redesign.
 
-- **Decided: more than accessories change.** Categories follow 1.0's cosmetics (`src/cosmetics.js`) plus the wear slots: HEAD, FACE and BACK (accessories), SHELL, TINT, FX (screen effect), SOUND, CREST and MUSIC. Each tab shows its own count (3/8). Adding a category adds a tab; the tabs wrap to rows and never scroll sideways.
+- **Decided: more than accessories change.** Categories follow 1.0's cosmetics (`src/cosmetics.js`) plus the wear slots: HEAD, FACE and BACK (accessories), SHELL, TINT, FX (screen effect), SOUND, CREST, MUSIC and LABEL. Each tab shows its own count (3/8). Adding a category adds a tab; the tabs wrap to rows and never scroll sideways.
 - **Decided: a live preview of the netling is pinned at the top** and changes as you equip. Shell, tint and screen effect apply to the preview and to the device.
 - **Decided: an obvious scroll.** The list has a thick, high-contrast scrollbar and a "scroll for more" cue that disappears at the bottom.
 - **Decided: every item shows its hint, owned or locked,** and locked items stay listed (dashed and dimmed). This is a change from 1.0, where an owned item replaces its hint with "tap to equip" or "equipped". Tapping a locked item repeats its hint. The hint of a still-hidden or corrupted entry keeps 1.0's rule (`corruptedText`).
 - **Decided: shell recolors the UI surfaces** (strip, lane, dock, trays, rows), not only a bezel. Default shell and tint defer to the egg skin.
 - **Decided: music and sound can be previewed,** with a visible playing state and a STOP control. If the device is muted, the preview shows a short "Muted: sound is off on this device" note with a button to turn sound on.
 - **Decided: NEW markers per item.** A new unlock carries a NEW tag, its category tab shows one, and the STYLE dock button shows a dot until each new item has been equipped (one at a time, not on a visit).
-- **Open:** how SHELL and CREST map to a phone UI that has no device bezel, and what the corrupted entries look like in the new rows.
+- **Crest and renaming (proposal).** CREST is a list like the others, with 1.0's crests and hints; each owned crest shows its pixel shape in the row. LABEL is a text field, not a list: a locked state shows the hint ("lose one before you name the line"), an unlocked one shows the field with SET, using 1.0's rules (up to 10 characters from A to Z, 0 to 9, space, `.` and `-`, falling back to NETLING). The preview shows the nameplate, so a change to either appears at once.
+- **Open:** what the corrupted entries look like in the new rows, and whether SHELL (now an edge color for the UI surfaces) is enough of a shell without a bezel.
 
 ## Egg skins
 
