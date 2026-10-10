@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Rogue options (third eye, thermocamo)</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+// Options for the Rogue drafts' review (rogue-options.js; docs/NETLING_2_ROGUE_DRAFTS.md, 8.4b). Top: the shut third eye four ways on all
+// ten forms. Below: the thermocamo, hints on Foundling and Alias and in full on Skip and Exile (body only, then head and body), in both
+// frames and with the decoy, beside Blank for reference. Open with `npm run serve`:
+// http://localhost:5174/prototype/netling2/rogue-options.html (#scale=5&palette=0).
+import './ready.js';
+import { drawSprite, paletteColors } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+import { wetwareForms } from './wetware-models.js';
+import { rogueForms, rogueTag } from './rogue-models.js';
+import { STEP_MS } from './rogue-motion.js';
+import { THIRD_EYES, thirdEye, CAMO_OPTIONS } from './rogue-options.js';
+
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 5);
+const pal = paletteColors(PALETTES[Number(hash.get('palette') ?? 0)]);
+const set = rogueForms();
+const forms = Object.values(set);
+const W = 26, H = 17, GAP = 3, LABEL = 22, ROW = H * SC + 6;
+
+const c = document.getElementById('c');
+const camoRows = 4 + 1; // Foundling and Alias hints, Skip and Exile, Blank
+c.width = (2 * THIRD_EYES.length * (W + GAP) + GAP) * SC;
+c.height = 2 * (LABEL + 8) + (forms.length / 2) * ROW + camoRows * ROW + 20; // set before drawing: resizing clears
+const ctx = c.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+function cell(x0, y0, sprite, label) {
+  ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+  ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+  drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, pal);
+  ctx.fillStyle = '#c7f9ff88'; ctx.font = '2px monospace'; ctx.textBaseline = 'top'; ctx.fillText(label, 1, 0);
+  ctx.restore();
+}
+function heading(text, y) {
+  ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top'; ctx.fillText(text, 4, y + 2);
+  return y + LABEL;
+}
+const col = (i) => GAP + i * (W + GAP);
+
+let y = heading('THIRD EYE: pair (first draft), four dim cells, slit (accent, as a sleeping eye), arc (a dim closed-eye curve). Two forms a row.', 0);
+for (let i = 0; i < forms.length; i += 2) {
+  [forms[i], forms[i + 1]].forEach((f, half) => THIRD_EYES.forEach((kind, j) => cell(col(half * THIRD_EYES.length + j), y, thirdEye(f.a, f.anchors.a, kind), `${f.name} ${kind}`)));
+  y += ROW;
+}
+y = heading('THERMOCAMO: frames A and B (the shimmer swaps phase), then each with the decoy. Hints on the young forms; full on the Dodge line, body only then head and body.', y + 8);
+const rowsCamo = [
+  [set.rogueBaby, ['hint']], [set.rogueTeen, ['hint']],
+  [set.rogueAdultDodge, ['body', 'whole']], [set.rogueElderDodge, ['body', 'whole']],
+];
+for (const [f, kinds] of rowsCamo) {
+  let k = 0;
+  for (const kind of kinds) {
+    const { a, b } = CAMO_OPTIONS[kind].make(f, rogueTag(f.id));
+    cell(col(k++), y, a, `${f.name} ${kind} A`);
+    cell(col(k++), y, b, `${kind} B`);
+    cell(col(k++), y, f.motion(a, f.anchors.a, { time: 3 * STEP_MS }), `${kind} + decoy`);
+    cell(col(k++), y, f.motion(b, f.anchors.a, { time: 15 * STEP_MS }), `B + decoy`);
+  }
+  y += ROW;
+}
+const blank = wetwareForms().wetwareAdultHidden;
+const cipher = wetwareForms().wetwareElderHidden;
+cell(col(0), y, blank.a, 'Blank A (reference)');
+cell(col(1), y, blank.b, 'Blank B');
+cell(col(2), y, cipher.a, 'Cipher A');
+cell(col(3), y, cipher.b, 'Cipher B');
+</script>

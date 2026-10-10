@@ -294,3 +294,34 @@ test('unsteady: glances at random times to either side, more at -2; reduced moti
     for (const c of changes) assert.ok(changes.filter((d) => d >= c && d < c + 1000).length <= 6, `L${level}: over six changes a second`);
   }
 });
+
+// --- the review options (rogue-options.js; nothing registered) ---------------------------------------------------------------------
+test('options: each third eye changes only the two rows above the eyes, keeps the eyes and the outline, and fits on every form', async () => {
+  const { THIRD_EYES, thirdEye } = await import('./rogue-options.js');
+  for (const f of forms) {
+    for (const kind of THIRD_EYES) {
+      const g = thirdEye(f.a, f.anchors.a, kind);
+      assert.equal(poseDistance(f.a, g), 0, `${f.id} ${kind}: outline`);
+      g.forEach((r, y) => [...r].forEach((c, x) => c !== f.a[y][x] && assert.ok(y === f.anchors.a.eyeRow - 1 || y === f.anchors.a.eyeRow - 2, `${f.id} ${kind}: cell ${x},${y}`)));
+      const third = g.slice(f.anchors.a.eyeRow - 2, f.anchors.a.eyeRow).join('').replace(/[.#]/g, '').length;
+      assert.ok(third >= 2, `${f.id} ${kind}: a third eye is drawn`);
+      for (const y of [f.anchors.a.eyeRow, f.anchors.a.eyeRow + 1]) assert.equal(g[y], f.a[y]);
+    }
+  }
+});
+
+test('options: the thermocamo touches body cells only (never the eyes, the tag or the outline); body only keeps the head identical in both frames', async () => {
+  const { CAMO_OPTIONS } = await import('./rogue-options.js');
+  for (const f of [set.rogueBaby, set.rogueTeen, set.rogueAdultDodge, set.rogueElderDodge]) {
+    for (const [kind, o] of Object.entries(CAMO_OPTIONS)) {
+      const { a, b } = o.make(f, rogueTag(f.id));
+      for (const [rows, src] of [[a, f.a], [b, f.b]]) {
+        assert.equal(poseDistance(rows, src), 0, `${f.id} ${kind}: outline`);
+        rows.forEach((r, y) => [...r].forEach((c, x) => c !== src[y][x] && assert.ok(src[y][x] === '#' && c === 'x', `${f.id} ${kind}: ${x},${y}`)));
+      }
+      assert.ok(a.join('') !== f.a.join(''), `${f.id} ${kind}: some camo`);
+      const neck = f.anchors.a.neckRow;
+      if (kind !== 'whole') for (let y = 0; y <= neck; y++) assert.equal(a[y], b[y], `${f.id} ${kind}: head row ${y}`);
+    }
+  }
+});

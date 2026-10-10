@@ -204,6 +204,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 25. **The shut third eye and the glance tell must be seen before they are decided** (a drawn preview).
 26. **Elders aim to pass the elder-closest-to-adult rule**; Rogue's leave to break it is not used for this.
 
+27. **First look at the drafts (ninth round, 2026-10-10):** the shut third eye does not read (it comes across as a slit in the head; four cells where it fits, maybe); the shadow is a good hint at the other hidden lines and looks good in motion; the tag reads as holes in the body, which is fine (Rogue is missing a piece). **Thermocamo, first guess: hints of it on the baby and teen, and the Dodge line (Skip, Exile) in it entirely**, the coverage (body only, or head and body) to be chosen by look (8.4b).
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -351,6 +353,23 @@ Choices made while drawing (each easy to change):
 - **The shadow** reaches one cell on the baby and teen, two on adults, three on elders. Like the hidden elders' echoes it shows only where the figure is empty, so on the baby and teen it is a thin sliver at the edge; it reads on adults and elders.
 - Mole was redrawn once (a narrower body over wide claws) to separate it from Drop (0.80 at first), and the baby once (one hood point instead of two) because two points read like Program's Bitling's antennae (0.86 at first).
 
+### 8.4b Options after the first look (2026-10-10, for choice)
+
+Drawn over the registered forms, which stay as in 8.4a until a pick (`prototype/netling2/rogue-options.js`, page `rogue-options.html`, screenshot `docs/netling2-prototypes/shots/rogue-options.png`; two tests in `rogue.test.js` keep them inside the form rules).
+
+**The shut third eye, four ways on all ten forms:**
+- *pair* (the first draft): two dim cells. Reads as a slit.
+- *four*: four dim cells where the head has room (two where not). Wider, but still a line.
+- *slit*: a closed eye drawn as the game draws a sleeping one, a row of accent cells. Reads as a third eye, closed, at once; it is bright, so it competes with the two open eyes, and the asleep pose (which darkens accent cells above the eyes) would hide it.
+- *arc*: a dim downward curve, four wide and two tall (`x..x` over `.xx.`), the usual pixel shorthand for a shut eye. Reads as an eye rather than a cut on most forms; it needs two body rows above the eyes (it fits on all ten).
+My reading: arc first, slit second; the choice is the maintainer's.
+
+**The thermocamo** (Blank's checker, phase swapped between frames, on body cells only; the eyes, the tag, the third eye and the outline untouched):
+- Foundling and Alias, *hint*: one band across the cloak under the neck. At review size it is faint; a second band or a patch is the next step up if it should show more.
+- Skip and Exile, *body only*: the whole body below the neck. The frame rule holds as it is (the head is the same in both frames).
+- Skip and Exile, *head and body*: as Blank, the hood too (the eye rows and the third eye left clear). Closer to Blank's look, and needs Blank's exception to the frame rule (the head rows differ between frames, read as body colour by the test).
+Each is shown in both frames and with the decoy; with the camo the decoy still reads, as a dim copy beside a shimmering body.
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -358,7 +377,8 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The shut third eye: drawn (8.4a); the two-cell version reads weakly, so its size or colour is open.
+- The shut third eye: pair, four, slit or arc (8.4b).
+- The thermocamo's coverage on the Dodge line (body only, or head and body) and how strong the baby's and teen's hints should be (8.4b).
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
