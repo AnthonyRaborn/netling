@@ -465,7 +465,31 @@ Reading it:
 3. **Hurt at the relay, going on stops paying in the Source** (0.5 to 1.5; under 1 for every adult), so the careful bot's bank-when-hurt rule is the right play there; in the Deep it still pays.
 4. **Most runs never meet the question.** Only 38 to 42% of Deep runs and 30 to 35% of Source runs stand at the relay before the cordon; 40 to 50% cross the relay layer by another node (measured on Mole) (ICE, a cache, an anomaly) and meet the cordon without the offer, and the rest end before it. The relay rule in 9.7 (relay layer, then cordon) makes the question available, not asked.
 
-**Levers, not measured yet** (all exist in `rogue-map.js`, off): the guards (`guardShare`, loot behind danger, which thins the deep half's free caches), the narrow Deep (`narrow`), fewer extra relays (`relayFactor`), and, for point 4, a relay layer of only the relay (not in the fork). The Deep's ratio is the one far off; the Source's adults are in range.
+**The Deep's levers (2026-10-10, measured).** Every existing lever, alone and combined: 9.7's map rules (guards, the narrow Deep, fewer extra relays) and three on the far half (a second cordon, more ambushes, a lower hunter threshold). `baseline/rogue-deep-levers.mjs` runs the relay read-out and whole Deep runs (Rogue and the hidden form, 3000 runs a form) for each; output `results/followup/rogue-deep-levers.json`. The hidden form's Deep: exit 53%, disconnects 18.1% (elder 66%, 10.4%).
+
+| setting | reached the relay % | push / quiet, adults | push / quiet, elders | push: disconnect % after the relay | marks a run, push | whole Deep run, adults: exit / disconnect / value | elders: exit / disconnect | adult disconnects vs hidden |
+|---|---|---|---|---|---|---|---|---|
+| decided | 38 to 42 | 2.1 to 2.7 | 2.5 to 3.2 | 22 to 41 | 0.034 max | 38 / 34.3 / 3.04 | 47 / 29.4 | 1.90x |
+| guard 0.25 | 38 to 43 | 2.1 to 2.6 | 2.5 to 3.2 | 24 to 43 | 0.050 max | 38 / 34.1 / 3.06 | 47 / 29.0 | 1.89x |
+| guard 0.5 | 37 to 42 | 2.0 to 2.6 | 2.4 to 3.2 | 24 to 44 | 0.038 max | 36 / 35.4 / 2.91 | 45 / 30.3 | 1.96x |
+| narrow | 48 to 55 | 2.1 to 2.8 | 2.6 to 3.4 | 24 to 44 | 0.056 max | 35 / 35.1 / 2.69 | 44 / 29.8 | 1.95x |
+| relays 0.5 | 40 to 44 | 2.0 to 2.8 | 2.5 to 3.2 | 23 to 46 | 0.055 max | 41 / 36.6 / 3.33 | 49 / 31.1 | 2.03x |
+| guard 0.5 + narrow | 45 to 53 | 2.0 to 2.6 | 2.5 to 3.4 | 25 to 47 | 0.051 max | 33 / 35.7 / 2.63 | 43 / 30.8 | 1.97x |
+| guard 0.5 + relays 0.5 | 38 to 42 | 2.1 to 2.7 | 2.5 to 3.3 | 25 to 47 | 0.059 max | 39 / 37.7 / 3.07 | 48 / 32.6 | 2.09x |
+| narrow + relays 0.5 | 49 to 56 | 2.1 to 2.8 | 2.6 to 3.4 | 26 to 47 | 0.057 max | 38 / 37.3 / 2.96 | 47 / 31.6 | 2.06x |
+| all | 47 to 54 | 2.0 to 2.7 | 2.5 to 3.3 | 28 to 49 | 0.056 max | 35 / 38.8 / 2.80 | 44 / 33.5 | 2.14x |
+| second cordon 0.8 | 39 to 43 | 2.0 to 2.6 | 2.4 to 3.0 | 26 to 47 | 0.041 max | 35 / 39.1 / 2.77 | 44 / 33.6 | 2.16x |
+| second cordon 0.9 | 39 to 42 | 1.8 to 2.5 | 2.4 to 3.0 | 26 to 48 | 0.048 max | 36 / 37.7 / 2.81 | 45 / 32.5 | 2.09x |
+| ambush 0.4 | 36 to 42 | 2.0 to 2.5 | 2.4 to 3.0 | 26 to 45 | 0.060 max | 34 / 41.5 / 2.68 | 44 / 34.4 | 2.30x |
+| threshold 12 | 38 to 42 | 1.8 to 2.3 | 2.4 to 2.8 | 29 to 51 | 0.190 max | 32 / 41.5 / 2.59 | 43 / 34.3 | 2.30x |
+| second cordon 0.8 + ambush 0.4 | 37 to 43 | 1.8 to 2.3 | 2.3 to 2.9 | 32 to 51 | 0.062 max | 31 / 46.0 / 2.42 | 41 / 39.1 | 2.55x |
+
+Reading it:
+1. **No danger lever brings the ratio near 1.33.** The map rules leave it where it was (adults 2.0 to 2.8); the far-half levers lower it a little (the best, a second cordon at 0.8 with ambushes at 0.4: adults 1.8 to 2.3) while whole-run disconnects climb to 2.55x the hidden form's (4.4 aims at 1.5x; the decided Deep is already 1.9x). Danger raises the risk on both sides of the relay, so it costs the run more than it changes the choice.
+2. **The ratio is structural.** Jacking out at the middle relay banks the first half's loot only; going on adds the second half and the exit's bonus item and scrip. Even a run that is half lost on the way still out-banks the relay by about 2x.
+3. **The narrow Deep raises the share of runs that meet the question** (38 to 42% to 48 to 55%), the one thing it does well here.
+
+**What could move it (not in the fork, for choice):** (a) move the Rogue Deep's relay later (about two thirds of the way down, the cordon still right after it), so jacking out there banks more; (b) a smaller exit bonus for Rogue in the Deep; (c) a payout for jacking out at that relay; (d) accept a higher target in the Deep, where the exit is the clearing run, and keep 1.33 for the Source, whose adults are in range.
 
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg).
 

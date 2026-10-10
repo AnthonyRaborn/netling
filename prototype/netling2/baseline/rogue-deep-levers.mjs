@@ -1,0 +1,38 @@
+// Rogue, the Deep's map levers against the relay question (docs/NETLING_2_ROGUE_DRAFTS.md 7.4, 9.7): each setting runs sim/rogue-relay.mjs (the
+// relay read-out) and sim/rogue-netrun.mjs (whole Deep runs, Rogue forms and the hidden form) in the Deep only, at the decided settings plus the
+// lever. guardShare and relayFactor act in every region in the fork; only the Deep is measured here. Writes results/followup/rogue-deep-levers.json.
+// Usage: node prototype/netling2/baseline/rogue-deep-levers.mjs [runs=3000]
+import { execFileSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const n = process.argv[2] ?? '3000';
+const SETTINGS = {
+  decided: {},
+  'guard 0.25': { guardShare: 0.25 },
+  'guard 0.5': { guardShare: 0.5 },
+  narrow: { narrow: ['deep'] },
+  'relays 0.5': { relayFactor: 0.5 },
+  'guard 0.5 + narrow': { guardShare: 0.5, narrow: ['deep'] },
+  'guard 0.5 + relays 0.5': { guardShare: 0.5, relayFactor: 0.5 },
+  'narrow + relays 0.5': { narrow: ['deep'], relayFactor: 0.5 },
+  all: { guardShare: 0.5, narrow: ['deep'], relayFactor: 0.5 },
+};
+// Second round: levers on the far half (the first round's map rules did not move the ratio). Each is a whole ROGUE_RUN override.
+const FAR = {
+  'second cordon 0.8': { map: { cordons: { deep: [0, 0.8], source: [0, 0.667] } } },
+  'second cordon 0.9': { map: { cordons: { deep: [0, 0.9], source: [0, 0.667] } } },
+  'ambush 0.4': { ambush: { deep: 0.4 } },
+  'threshold 12': { threshold: { deep: 12 } },
+  'second cordon 0.8 + ambush 0.4': { map: { cordons: { deep: [0, 0.8], source: [0, 0.667] } }, ambush: { deep: 0.4 } },
+};
+const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ...env }, maxBuffer: 1 << 26 }));
+const out = {};
+for (const [name, over] of [...Object.entries(SETTINGS).map(([k, map]) => [k, { map }]), ...Object.entries(FAR)]) {
+  const ROGUE_RUN = JSON.stringify(over);
+  out[name] = { relay: sim('rogue-relay.mjs', { ROGUE_RUN }), runs: sim('rogue-netrun.mjs', { ROGUE_RUN, FORMS: 'rogue,hidden' }) };
+  console.log(name, 'done');
+}
+writeFileSync(join(here, 'results', 'followup', 'rogue-deep-levers.json'), JSON.stringify(out, null, 1));
