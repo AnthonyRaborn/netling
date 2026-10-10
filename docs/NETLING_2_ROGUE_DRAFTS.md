@@ -375,6 +375,37 @@ At the decided 4 hour lockout and 8 hour quiet (attentive group, 300 lives of ea
 2. **Flow is scarce, so the reward is large in relative terms.** An attentive Rogue spends only about 7.5 hours a life in flow; DEFEND into flow adds 0.9 hours for the HIDE-first player (its forced DEFENDs) and 2.4 hours (about a third more) for a player who DEFENDs by choice. Temper rises a little (3.0 to 3.5 for the reserve bot).
 3. **The trade is now a real one, but on different scales:** DEFEND by choice still costs about 0.5 more marks a life and about 1.6 points more capture (reserve against HIDE first), and pays about 2.4 more hours of flow and a steadier temper. Whether a player takes that depends on how much the glow is worth to them, which the bots cannot say. Ignoring the bots, the rule makes winning DEFEND visible and satisfying at no cost to the capture target.
 
+### 7.4 Stage 2 built and measured: the hunt in runs (2026-10-10; numbers for choice)
+
+**Decided first (maintainer, 2026-10-10):** DEFEND into flow is kept (now the default), and players who check in every 2 hours are not attentive enough for Rogue, so they are not a tuning target.
+
+**What was built** (fork; `NR2.rogue`, on for Rogue netlings only; `NR2='{"rogue":{"on":false}}'` gives stage 1's runs back): the trail (`run.hunt`: +1 a move, +2 a lost fight, +1 an anomaly choice, +1 a purchase); the trail hunter at the next node once the trail reaches the region's threshold (the node's own encounter follows a won fight; won, the trail falls to 0); ambush nodes as a share of each region's ICE; a lost hunter fight or ambush is the hunter's damage, a mark and a disconnect; danger sense (every node danger or quiet; dark under Blackout); the four kits' twists (9.2: Mole fights hunters as plain ICE at 0.7, Sleeper turns one lost hunter fight a run into an ordinary one; Skip's moves add trail every second move and its slip is 30%, Exile slips ambushes; Spook tells ambushes apart one step past its sight, Handler's agent sheds 4 once a run; Drop's dead drop at a relay, trail -3, Stash keeps the item); and Rogue's map rules (9.7, `netrun/rogue-map.js`: extra relays halved, half the Corp Grid's checkpoints as ICE, cordons, guards, narrow Deep and Source). The bot routes by danger sense, avoids ambushes it can tell apart, uses the agent and the dead drop, and jacks out at a relay when a third mark is in reach; `RUNBOT=quiet` is the quiet runner. Tests: `rogue-netrun.test.js`. Per-region sweep `sim/rogue-netrun.mjs`; life sweep `baseline/rogue-stage2.mjs` (summary `rogue-stage2-summary.mjs`, outputs `results/followup/rogue-s2-*`, table in `rogue-s2-summary.md`). `ROGUE_RUN` overrides any number.
+
+**At the starting values the hunt is far too harsh.** Attentive group (26 hourly archetypes), 300 lives each, the decided home rules:
+
+| setting | full life | captured, mean / worst | marks a life: home / hunter / ambush | hunters met | ambushes met | Deep cleared | elder gate met |
+|---|---|---|---|---|---|---|---|
+| no hunt in runs | 98.6 | 1.3 / 2.3 | 0.43 / 0 / 0 | 0 | 0 | 77 | 35 |
+| starting values | 35.5 | 64.5 / 95.7 | 0.27 / 1.36 / 0.59 | 3.46 | 1.53 | 29 | 3 |
+| no map rules | 40.6 | 59.4 / 90.3 | 0.29 / 1.38 / 0.48 | 3.50 | 1.24 | 38 | 6 |
+| thresholds x1.5 | 68.6 | 31.4 / 55.0 | 0.35 / 0.21 / 1.03 | 0.58 | 2.79 | 64 | 14 |
+| thresholds x2, tier-1 hunter, no map rules | 89.1 | 10.9 / 23.0 | 0.39 / 0 / 0.60 | 0.02 | 2.40 | 75 | 35 |
+| **x2, tier 1, no map rules, ambushes halved** | 95.8 | 4.2 / 10.3 | 0.41 / 0 / 0.27 | 0.01 | 1.10 | 76 | 38 |
+| **x1.5, tier 1, no map rules, a lost ambush gives no mark** | 97.0 | 3.0 / 9.0 | 0.40 / 0.19 / 0 | 0.79 | 2.50 | 76 | 33 |
+| x2, tier 1, no map rules, a lost ambush gives no mark | 98.8 | 1.2 / 2.3 | 0.41 / 0 / 0 | 0.02 | 2.52 | 77 | 37 |
+
+1. **The mark budget is the constraint.** Marks never fade and capture is at three, an attentive life takes about 17 to 19 runs, and home already gives about 0.4 marks. For capture under 5%, runs can add only about 0.4 marks a life, about 0.02 a run. At the starting values a Deep or Source run gave 0.3 to 0.4.
+2. **The trail hunter is mostly a threshold question.** At x1.5 it is met about 0.6 to 0.8 times a life; at x2 almost never (0.02), which leaves the trail meter with nothing to warn about.
+3. **Ambushes become the main source once the hunter is rare**, about 0.6 marks a life even with no map rules.
+4. **Danger sense avoids little as the bot uses it**: about 10% of fights (the draft aimed at 25 to 40%), since the bot weighs a fight lightly while healthy. So the map rules, built as a counterweight to danger sense, more than cancel it (Rogue meets more fights than the NL-0 hidden form in the Deep and the Source); they are off in both candidates.
+5. **Runs at the halved-ambush candidate** (per region, Rogue adults against the hidden adult, careful bot): disconnects 0.8 against 0.5% in the Public Net, 2.5 against 0.8 in the Corp Grid, 21.6 against 19.0 in the Deep, 37.5 against 36.4 in the Source; exit rates within 3 points everywhere. Under 4.4's 1.5x aim in the deep regions (as the aim reads, coming in under is right), over it in the shallow ones only because the hidden adult almost never disconnects there.
+
+**For the maintainer (choices; the numbers are proposals):**
+- **Candidate A (recommended): thresholds x1.5, the hunter at tier 1, no map rules, a lost ambush is a disconnect but no mark.** Captured 3.0% (worst archetype 9%), full life 3 points lower. The trail hunter stays a real event (about 0.8 a life) and is the only thing in runs that marks; ambushes stay a danger (a lost ambush still ends the run and loses the loot). This revises "a lost ambush gives a mark" (6.2).
+- **Candidate B: thresholds x2, tier 1, no map rules, ambushes halved (they still mark).** Captured 4.2% (worst 10%). It keeps the decided mark rules but the trail hunter nearly disappears, so the trail meter, the relay question and the agent and dead drop twists lose their point.
+- **Either way:** whether to keep any of the map rules (cordons in particular, which force a fight); whether the bot should weigh fights more for Rogue (a person with danger sense likely avoids more, which would ease things further); and whether 4.4's full life aim (about 10 points lower) still matters given capture is the limit (both candidates are 3 to 4 points lower).
+- **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg) and the relay-question read-out (continuing pays about a third more), which needs the chosen hunter settings first.
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
