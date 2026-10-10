@@ -21,7 +21,7 @@ const pad = (sprite) => sprite.map((r) => [...('.'.repeat(PAD) + r + '.'.repeat(
 const isBody = (c) => c !== '.' && c !== undefined;
 // Draw a dim copy of `src` (padded rows) shifted by (dx, dy) into `g`, on empty cells only. `mode`: 'solid' (every body cell), 'outline'
 // (only cells with an empty neighbour), 'checker' (every other cell).
-function dub(g, src, dx, dy, mode = 'solid') {
+export function dub(g, src, dx, dy, mode = 'solid') {
   for (let y = 0; y < src.length; y++) {
     for (let x = 0; x < src[0].length; x++) {
       if (!isBody(src[y][x])) continue;

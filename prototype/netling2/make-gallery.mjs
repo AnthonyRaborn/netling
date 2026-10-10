@@ -1,4 +1,4 @@
-// Writes prototype/netling2/gallery-iron.html, gallery-program.html and gallery-wetware.html: the unchanged gallery.html with its paths pointed
+// Writes prototype/netling2/gallery-iron.html, gallery-program.html, gallery-wetware.html and gallery-rogue.html: the unchanged gallery.html with its paths pointed
 // back at the repository root and an egg prelude added, so the real gallery (every wearable, state, palette, tint, scene and matrix)
 // runs on that egg's forms.
 // Each also gets a "layers" section (gallery-layers.js): the prototype's neglect, bugs and temper tell on every form of the egg.
@@ -13,6 +13,7 @@ const EGGS = [
   { file: 'gallery-iron.html', egg: 'iron', prelude: 'gallery-prelude.js', name: 'Iron', heading: 'SPRITE GALLERY, IRON (22 forms, prototype; plus 1.0 Chrome and Bitling as reference bodies)' },
   { file: 'gallery-program.html', egg: 'program', prelude: 'gallery-prelude-program.js', name: 'Program', heading: 'SPRITE GALLERY, PROGRAM (22 forms, prototype; plus 1.0 Chrome and Bitling as reference bodies)' },
   { file: 'gallery-wetware.html', egg: 'wetware', prelude: 'gallery-prelude-wetware.js', name: 'Wetware', heading: 'SPRITE GALLERY, WETWARE (22 forms, prototype; plus 1.0 Chrome and Bitling as reference bodies)' },
+  { file: 'gallery-rogue.html', egg: 'rogue', prelude: 'gallery-prelude-rogue.js', name: 'Rogue', heading: 'SPRITE GALLERY, ROGUE (10 forms, first drafts, prototype; plus 1.0 Chrome and Bitling as reference bodies)' },
 ];
 for (const egg of EGGS) {
   const html = source

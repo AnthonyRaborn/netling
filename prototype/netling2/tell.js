@@ -18,8 +18,11 @@
 //             so the drop is the only thing moving.  unsteady: it drifts off its grid a column at a time.
 //   program   steady: it BLINKS (the sleep pose for 200 ms).               unsteady: frames stutter and it hops a row.
 //   wetware   steady: a clean BEAT (one smooth dip in brightness).         unsteady: the pulse goes irregular.
+//   rogue     steady: it GLANCES, the eyes shifting a cell to the left for 500 ms on the beat (a look over its shoulder).
+//             unsteady: glances come at random times and to either side, more often at -2. (The hidden Rogue egg; not in EGGS, which the
+//             launch eggs' tests and tools iterate. Only its result carries `glance`; rogueGlance in rogue-models.js draws it.)
 // Reduced motion: unsteady levels get a still variant (Iron sits one column off its grid, Program holds its alternate frame,
-// Wetware holds a dimmer steady shade); the steady beat stays, because it is calm, tiny and predictable.
+// Wetware holds a dimmer steady shade, Rogue holds its eyes to one side); the steady beat stays, because it is calm, tiny and predictable.
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 
 export const SLOT_MS = FLASH_TOGGLE_MS;
@@ -54,6 +57,11 @@ const SETTLE_MS = 400;
 const BLINK_MS = SLOT_MS;
 const BEAT_FADE_MS = 600;
 const STUTTER = { '-1': 0.1, '-2': 0.3 };
+// Rogue's glance: one 1.0 frame (500 ms), aligned to the frame rhythm so a glance and a frame change land together (on 400 ms windows the
+// two could change 100 ms apart, under the flash floor), and the chance per window that an unsteady Rogue glances.
+export const GLANCE_MS = FRAME_MS;
+export const GLANCE_SIDE = -1; // the steady glance's side: always the same, so it can be counted
+const GLANCE_CHANCE = { '-1': 0.08, '-2': 0.22 };
 // The deepest Wetware dip: 20% (was 25%). At 25% the neon palette's body fell to 2.95:1 against the screen, under the 3:1 asked of
 // graphics; at 20% every palette keeps 3.2:1 or more (proto.test.js checks it on all six).
 export const SHADE_DIP = 0.2;
@@ -68,6 +76,7 @@ function frameOf(level, time, seed) {
 // -> { frame: 0 | 1 (A or B), blink (show the sleep pose), dx, dy (columns and rows off the idle position), shade (1 = full) }
 export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
   const out = { frame: Math.floor(time / FRAME_MS) % 2, blink: false, dx: 0, dy: 0, shade: 1 };
+  if (egg === 'rogue') out.glance = 0;
   if (level === 0) return out;
 
   if (level > 0) {
@@ -77,12 +86,14 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
     if (egg === 'iron' && into < SETTLE_MS) out.dy = 1;
     else if (egg === 'program' && into < BLINK_MS) out.blink = true;
     else if (egg === 'wetware' && into < BEAT_FADE_MS) out.shade = 1 - SHADE_DIP * Math.sin((into / BEAT_FADE_MS) * Math.PI);
+    else if (egg === 'rogue' && into < GLANCE_MS) out.glance = GLANCE_SIDE;
     return out;
   }
 
   if (reduced) {
     if (egg === 'iron') out.dx = hash(seed + 7) < 0.5 ? -1 : 1;
     else if (egg === 'program') out.frame = 1;
+    else if (egg === 'rogue') out.glance = hash(seed + 7) < 0.5 ? -1 : 1;
     else out.shade = 0.8;
     return out;
   }
@@ -96,6 +107,12 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
     out.dx = dir * Math.min(amp, Math.floor(((time % 4000) / 4000) * (amp + 1)));
   } else if (egg === 'program') {
     if (strong && hash(Math.floor(time / SLOT_MS) * 13 + seed) < 0.08) out.dy = -1;
+  } else if (egg === 'rogue') {
+    // The frames keep the 1.0 rhythm; the eyes carry the tell. A glance fills one whole frame (500 ms) and starts on a frame boundary, so
+    // the picture still changes at most every 500 ms.
+    out.frame = Math.floor(time / FRAME_MS) % 2;
+    const w = Math.floor(time / GLANCE_MS);
+    if (hash(w * 29 + seed) < GLANCE_CHANCE[level]) out.glance = hash(w * 41 + seed + 3) < 0.5 ? -1 : 1;
   } else {
     // Wetware: the frame stays steady and the pulse carries the tell. The phase wanders; the fastest it moves is under 1 Hz and
     // the swing is at most 0.2 of the brightness (SHADE_DIP), so it is no flash.

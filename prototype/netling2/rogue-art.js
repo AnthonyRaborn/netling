@@ -1,0 +1,400 @@
+// The hidden Rogue egg's ten forms (docs/NETLING_2_ROGUE_DRAFTS.md, section 8): first drafts for review, nothing decided about the art.
+// Marks as everywhere: '#' main, 'o' accent (the eyes), 'x' dim, '+' highlight (unused awake: Rogue has no mouth), '.' empty.
+//
+// What every form carries (section 8.1):
+//   the shut third eye: a dim pair ('xx') above and between the eyes. The hidden lines' third eye, copied and never opened (Rogue does
+//     not have their full sight).
+//   no mouth (Blank's blank face).
+//   a ragged hem (Ghost's), the bottom rows tattered.
+//   a scraped-off asset tag: a small dim block on the chest where a corp plate was removed ("owner: none"), one cell on the baby and
+//     growing with the stage.
+//   two notches in the top of the hood (Guru's crown points).
+// The shadow, the feature all ten share (decided), is not drawn here: it is a motion layer (rogue-motion.js).
+//
+// Every pair of eyes has a body cell on each side, so the glance (the temper tell, tell.js) can shift them a cell either way.
+// The old authoring keys (baby, teen, mole, ...) map to the permanent ids in rogue-models.js.
+
+export const ROGUE_BABY = {
+  // Foundling: a small hooded cone that turned up on its own (one hood point: the notches do not fit 12 columns).
+  a: [
+      '.....##.....',
+      '....####....',
+      '...######...',
+      '...##xx##...',
+      '..#oo##oo#..',
+      '..#oo##oo#..',
+      '.##########.',
+      '.###x######.',
+      '############',
+      '#.##.##.##.#',
+      '#..#..#..#..',
+    ],
+  b: [
+      '.....##.....',
+      '....####....',
+      '...######...',
+      '...##xx##...',
+      '..#oo##oo#..',
+      '..#oo##oo#..',
+      '.##########.',
+      '.###x######.',
+      '############',
+      '.##.##.##.##',
+      '..#..#..#..#',
+    ],
+};
+export const ROGUE_BABY_ANCHORS = { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 };
+
+export const ROGUE_TEENS = {
+  // Alias: the hood a full cowl over a short cloak, legs showing; the tag two cells.
+  teen: {
+    a: [
+      '.....#..#.....',
+      '.....####.....',
+      '....######....',
+      '...###xx###...',
+      '...#oo##oo#...',
+      '...#oo##oo#...',
+      '..##########..',
+      '..###xx#####..',
+      '..#.##.##.#...',
+      '....#....#....',
+      '...##....##...',
+    ],
+    b: [
+      '.....#..#.....',
+      '.....####.....',
+      '....######....',
+      '...###xx###...',
+      '...#oo##oo#...',
+      '...#oo##oo#...',
+      '..##########..',
+      '..###xx#####..',
+      '...#.##.##.#..',
+      '...#......#...',
+      '..##......##..',
+    ],
+  },
+};
+export const ROGUE_TEEN_ANCHORS = { teen: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 } };
+
+export const ROGUE_ADULTS = {
+  // Mole (Breach): a narrow body over two heavy forelimbs spread wide at the hem like digging claws.
+  mole: {
+    a: [
+      '......#..#......',
+      '......####......',
+      '.....######.....',
+      '....###xx###....',
+      '...##oo##oo##...',
+      '...##oo##oo##...',
+      '..############..',
+      '..############..',
+      '..#xxx########..',
+      '..#xxx########..',
+      '################',
+      '###.########.###',
+      '#.#..#.##.#..#.#',
+    ],
+    b: [
+      '......#..#......',
+      '......####......',
+      '.....######.....',
+      '....###xx###....',
+      '...##oo##oo##...',
+      '...##oo##oo##...',
+      '..############..',
+      '..############..',
+      '..#xxx########..',
+      '..#xxx########..',
+      '################',
+      '.###.######.###.',
+      '#.#.#..##..#.#.#',
+    ],
+  },
+  // Skip (Dodge): narrow and tall, leaning, the hood swept back as if moving, long legs under a short ragged hem.
+  skip: {
+    a: [
+      '......#..#......',
+      '......#####.....',
+      '.....#######....',
+      '....###xx#####..',
+      '....#oo##oo#####',
+      '....#oo##oo#.###',
+      '....#######...##',
+      '.....######....#',
+      '....########....',
+      '....#xx#####....',
+      '....########....',
+      '....#.##.##.#...',
+      '.....#.....#....',
+      '.....#.....#....',
+      '....##.....##...',
+    ],
+    b: [
+      '......#..#......',
+      '......#####.....',
+      '.....#######....',
+      '....###xx#####..',
+      '....#oo##oo#####',
+      '....#oo##oo#.###',
+      '....#######...##',
+      '.....######....#',
+      '....########....',
+      '....#xx#####....',
+      '....########....',
+      '...#.##.##.#....',
+      '....#.......#...',
+      '...#.........#..',
+      '..##.........##.',
+    ],
+  },
+  // Spook (Tune): tall, the hood's notches drawn up into ear-like points (listening), the shut third eye wider.
+  spook: {
+    a: [
+      '...#........#...',
+      '...##......##...',
+      '...###....###...',
+      '...##########...',
+      '...###xxxx###...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '...##########...',
+      '....########....',
+      '...##########...',
+      '..###xx#######..',
+      '..###xx#######..',
+      '..############..',
+      '..#.##.##.##.#..',
+      '..#..#..#..#..#.',
+    ],
+    b: [
+      '...#........#...',
+      '...##......##...',
+      '...###....###...',
+      '...##########...',
+      '...###xxxx###...',
+      '...#oo####oo#...',
+      '...#oo####oo#...',
+      '...##########...',
+      '....########....',
+      '...##########...',
+      '..###xx#######..',
+      '..###xx#######..',
+      '..############..',
+      '..##.##.##.#.#..',
+      '.#..#..#..#..#..',
+    ],
+  },
+  // Drop (Feast): round, on stubby feet, a satchel hanging low at its left and the strap across the body (stolen goods), the tag half
+  // under the strap.
+  drop: {
+    a: [
+      '........#..#....',
+      '........####....',
+      '.......######...',
+      '......###xx###..',
+      '.....##oo##oo##.',
+      '.....##oo##oo##.',
+      '.....#########x.',
+      '....#########x#.',
+      '....#xx#####x##.',
+      '...##xx####x###.',
+      '.xxx######x####.',
+      '.xxx###########.',
+      '.###.#.##.##.#..',
+      '.....#....#.....',
+    ],
+    b: [
+      '........#..#....',
+      '........####....',
+      '.......######...',
+      '......###xx###..',
+      '.....##oo##oo##.',
+      '.....##oo##oo##.',
+      '.....#########x.',
+      '....#########x#.',
+      '....#xx#####x##.',
+      '...##xx####x###.',
+      '.xxx######x####.',
+      '.xxx###########.',
+      '.###..#.##.##.#.',
+      '......#....#....',
+    ],
+  },
+};
+export const ROGUE_ADULT_ANCHORS = {
+  mole: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+  skip: { headTop: 3, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+  spook: { headTop: 3, eyeRow: 5, mouthRow: 7, neckRow: 8 },
+  drop: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+};
+
+export const ROGUE_ELDERS = {
+  // Sleeper (Mole's elder): broader and settled, the claws resting flat; the tag larger.
+  moleElder: {
+    a: [
+      '.......#..#.......',
+      '.......####.......',
+      '......######......',
+      '.....###xx###.....',
+      '....##oo##oo##....',
+      '...###oo##oo###...',
+      '...############...',
+      '..##############..',
+      '..#xxxx#########..',
+      '..#xxxx#########..',
+      '..##############..',
+      '##################',
+      '####.########.####',
+      '#.#.#.#.##.#.#.#.#',
+    ],
+    b: [
+      '.......#..#.......',
+      '.......####.......',
+      '......######......',
+      '.....###xx###.....',
+      '....##oo##oo##....',
+      '...###oo##oo###...',
+      '...############...',
+      '..##############..',
+      '..#xxxx#########..',
+      '..#xxxx#########..',
+      '..##############..',
+      '##################',
+      '###.##########.###',
+      '.#.#.#.#..#.#.#.#.',
+    ],
+  },
+  // Exile (Skip's elder): a wider stance, the hood swept further back, the hem torn shorter, the tag wider: it has been running for years.
+  skipElder: {
+    a: [
+      '.......#..#.......',
+      '.......#####......',
+      '......#######.....',
+      '.....###xx#####...',
+      '.....#oo##oo######',
+      '.....#oo##oo#.####',
+      '.....#######...###',
+      '......######....##',
+      '.....########.....',
+      '.....#xxx####.....',
+      '.....########.....',
+      '.....#.#.#.#......',
+      '.....#......#.....',
+      '....#........#....',
+      '...##........##...',
+    ],
+    b: [
+      '.......#..#.......',
+      '.......#####......',
+      '......#######.....',
+      '.....###xx#####...',
+      '.....#oo##oo######',
+      '.....#oo##oo#.####',
+      '.....#######...###',
+      '......######....##',
+      '.....########.....',
+      '.....#xxx####.....',
+      '.....########.....',
+      '......#.#.#.#.....',
+      '....#........#....',
+      '...#..........#...',
+      '..##..........##..',
+    ],
+  },
+  // Handler (Spook's elder): taller ear points and a headset, dim cups at the sides of the hood (it runs others now).
+  spookElder: {
+    a: [
+      '...#..........#...',
+      '...##........##...',
+      '...###......###...',
+      '...############...',
+      '...####xxxx####...',
+      '..x#oo######oo#x..',
+      '..x#oo######oo#x..',
+      '...############...',
+      '....##########....',
+      '...############...',
+      '..####xxxx######..',
+      '..####xxxx######..',
+      '.################.',
+      '.#.##.##.##.##.#..',
+      '.#..#..#..#..#..#.',
+    ],
+    b: [
+      '...#..........#...',
+      '...##........##...',
+      '...###......###...',
+      '...############...',
+      '...####xxxx####...',
+      '..x#oo######oo#x..',
+      '..x#oo######oo#x..',
+      '...############...',
+      '....##########....',
+      '...############...',
+      '..####xxxx######..',
+      '..####xxxx######..',
+      '.################.',
+      '..##.##.##.##.#.#.',
+      '..#..#..#..#..#..#',
+    ],
+  },
+  // Stash (Drop's elder): wider, the satchel grown into a pack; the tag larger.
+  dropElder: {
+    a: [
+      '.........#..#.....',
+      '.........####.....',
+      '........######....',
+      '.......###xx###...',
+      '......##oo##oo##..',
+      '......##oo##oo##..',
+      '.....##########x..',
+      '....##########x##.',
+      '...##xxx#####x###.',
+      '..###xxx####x####.',
+      'xxxx########x####.',
+      'xxxx#############.',
+      '####.##.##.##.##..',
+      '......#.....#.....',
+    ],
+    b: [
+      '.........#..#.....',
+      '.........####.....',
+      '........######....',
+      '.......###xx###...',
+      '......##oo##oo##..',
+      '......##oo##oo##..',
+      '.....##########x..',
+      '....##########x##.',
+      '...##xxx#####x###.',
+      '..###xxx####x####.',
+      'xxxx########x####.',
+      'xxxx#############.',
+      '####..##.##.##.##.',
+      '.......#.....#....',
+    ],
+  },
+};
+export const ROGUE_ELDER_ANCHORS = {
+  moleElder: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+  skipElder: { headTop: 3, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+  spookElder: { headTop: 3, eyeRow: 5, mouthRow: 7, neckRow: 8 },
+  dropElder: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 },
+};
+
+// The scraped-off asset tag on each form: [column, row] of every cell, all dim in the A frame. The dead pose lights it (rogue-models.js);
+// the tests check it is where these say. Rows are below the neck, so the frames carry it unchanged.
+const block = (x0, y0, w, h) => Array.from({ length: w * h }, (_, i) => [x0 + (i % w), y0 + Math.floor(i / w)]);
+export const ROGUE_TAGS = {
+  baby: block(4, 7, 1, 1),
+  teen: block(5, 7, 2, 1),
+  mole: block(3, 8, 3, 2),
+  skip: block(5, 9, 2, 1),
+  spook: block(5, 10, 2, 2),
+  drop: block(5, 8, 2, 2),
+  moleElder: block(3, 8, 4, 2),
+  skipElder: block(6, 9, 3, 1),
+  spookElder: block(6, 10, 4, 2),
+  dropElder: block(5, 8, 3, 2),
+};

@@ -1,0 +1,123 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Rogue review (third eye, glance, shadow)</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<canvas id="live"></canvas>
+<script type="module">
+// The review page for the hidden Rogue egg's ten first drafts (docs/NETLING_2_ROGUE_DRAFTS.md, section 8; the maintainer asked to see the
+// shut third eye, the glance and the shadow before deciding). Static sheet: every form awake, glancing left and right, asleep and dead;
+// then the shadow, the decoy (proposed) and the split (alternate), step by step with the calm (reduced motion) version, beside the hidden
+// elders' echoes it draws on. Live strip below: every form with the glance at the four tell levels and the decoy, animating.
+// Open with `npm run serve`: http://localhost:5174/prototype/netling2/rogue-preview.html (#scale=5&palette=0&live=0 to freeze the strip).
+import './ready.js';
+import { drawSprite, paletteColors } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+import { forms } from './models.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
+import { rogueForms, rogueGlance } from './rogue-models.js';
+import { decoyMotion, splitMotion, STEP_MS } from './rogue-motion.js';
+
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 5);
+const pal = paletteColors(PALETTES[Number(hash.get('palette') ?? 0)]);
+const set = Object.values(rogueForms());
+const W = 26, H = 17, GAP = 3, LABEL = 22;
+
+function cell(ctx, x0, y0, sprite, label) {
+  ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+  ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+  drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, pal);
+  ctx.fillStyle = '#c7f9ff88'; ctx.font = '2px monospace'; ctx.textBaseline = 'top'; ctx.fillText(label, 1, 0);
+  ctx.restore();
+}
+function heading(ctx, text, y) {
+  ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top'; ctx.fillText(text, 4, y + 2);
+  return y + LABEL;
+}
+
+// --- static sheet -----------------------------------------------------------------------------------------------------------------
+const POSES = [
+  ['awake A', (f) => f.a], ['frame B', (f) => f.b], ['glance <', (f) => rogueGlance(f.a, f.anchors.a, -1)], ['glance >', (f) => rogueGlance(f.a, f.anchors.a, 1)],
+  ['asleep', (f) => f.sleep], ['dead', (f) => f.dead],
+];
+const SHADOW_STEPS = [0, 1, 2, 3, 5, 8];
+const REF = [
+  ['Cipher (Wetware): ghost dub', wetwareForms().wetwareElderHidden, wetwareForms().wetwareElderHidden.motion],
+  ['Whisper (Program): fork lag', programForms().programElderHidden, programForms().programElderHidden.motion],
+  ['Init (Iron): ratchet trail', forms('B').ironElderHidden, forms('B').ironElderHidden.motion],
+];
+const cols = Math.max(POSES.length, SHADOW_STEPS.length + 2) * 2;
+const c = document.getElementById('c');
+c.width = (cols * (W + GAP) + GAP) * SC;
+c.height = 3 * (LABEL + 8) + (Math.ceil(set.length / 2) + set.length + REF.length) * (H * SC + 6) + 10; // set before drawing: resizing clears
+const ctx = c.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+let y = heading(ctx, 'ROGUE, first drafts: awake, the B frame, the glance either way (the temper tell), asleep, dead (the tag lit). The shut third eye is the dim pair above the eyes.', 0);
+for (let i = 0; i < set.length; i += 2) {
+  [set[i], set[i + 1]].filter(Boolean).forEach((f, half) => {
+    POSES.forEach(([name, get], j) => cell(ctx, GAP + (half * POSES.length + j) * (W + GAP), y, get(f), `${f.name} ${name}`));
+  });
+  y += H * SC + 6;
+}
+y = heading(ctx, 'THE SHADOW: the decoy (proposed: one side, alternating by loop, dropped at once) then the split (alternate: both sides). Steps of 400 ms; calm = reduced motion.', y + 8);
+for (const f of set) {
+  const decoy = decoyMotion(f.stage);
+  const split = splitMotion(f.stage);
+  SHADOW_STEPS.forEach((s, j) => cell(ctx, GAP + j * (W + GAP), y, decoy(f.a, f.anchors.a, { time: s * STEP_MS }), `${f.name} decoy ${s}`));
+  cell(ctx, GAP + SHADOW_STEPS.length * (W + GAP), y, decoy(f.a, f.anchors.a, { time: 0, reduced: true }), 'decoy calm');
+  cell(ctx, GAP + (SHADOW_STEPS.length + 1) * (W + GAP), y, decoy(f.a, f.anchors.a, { time: (12 + 3) * STEP_MS }), 'next loop');
+  SHADOW_STEPS.forEach((s, j) => cell(ctx, GAP + (SHADOW_STEPS.length + 2 + j) * (W + GAP), y, split(f.a, f.anchors.a, { time: s * STEP_MS }), `split ${s}`));
+  cell(ctx, GAP + (2 * SHADOW_STEPS.length + 2) * (W + GAP), y, split(f.a, f.anchors.a, { time: 0, reduced: true }), 'split calm');
+  y += H * SC + 6;
+}
+y = heading(ctx, 'FOR REFERENCE: the hidden elders\' echoes the shadow draws on (decided), same steps.', y + 8);
+for (const [label, f, fn] of REF) {
+  SHADOW_STEPS.forEach((s, j) => cell(ctx, GAP + j * (W + GAP), y, fn(f.a, f.anchors.a, { time: s * STEP_MS }), `${j ? '' : label + ' '}${s}`));
+  y += H * SC + 6;
+}
+</script>
+<script type="module">
+// The live strip: each form with the glance at the four tell levels (and the middle, none) and the decoy layer, animating.
+import './ready.js';
+import { drawSprite, paletteColors } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+import { rogueForms, rogueGlance } from './rogue-models.js';
+import { temperTell, tellPose } from './tell.js';
+
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 5);
+const pal = paletteColors(PALETTES[Number(hash.get('palette') ?? 0)]);
+const set = Object.values(rogueForms());
+const LEVELS = [[-2, 'strongly unsteady'], [-1, 'unsteady'], [0, 'middle'], [1, 'steady'], [2, 'strongly steady']];
+const W = 26, H = 17, GAP = 3, LABEL = 22;
+const c = document.getElementById('live');
+c.width = (LEVELS.length * (W + GAP) + GAP + 60) * SC;
+c.height = LABEL + set.length * (H * SC + 6) + 10;
+const ctx = c.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const frozen = hash.get('live') === '0';
+function draw(now) {
+  const time = frozen ? 0 : now;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top';
+  ctx.fillText('LIVE: the glance at each temper level, with the decoy (steady glances on an exact beat, every 6 s and 3 s, always to the left)', 4, 2);
+  set.forEach((f, i) => {
+    LEVELS.forEach(([level, name], j) => {
+      const tell = temperTell({ egg: 'rogue', level, time, seed: i + 1 });
+      const { draw: key } = tellPose(tell, 'awake');
+      const eyes = rogueGlance(f[key], f.anchors[key], tell.glance);
+      const sprite = f.motion(eyes, f.anchors[key], { time });
+      const x0 = 3 + j * (W + 3), y0 = 22 + i * (H * SC + 6);
+      ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+      ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+      drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, pal);
+      ctx.fillStyle = '#c7f9ff88'; ctx.font = '2px monospace'; ctx.fillText(`${f.name} ${name}`, 1, 0);
+      ctx.restore();
+    });
+  });
+  if (!frozen) requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>

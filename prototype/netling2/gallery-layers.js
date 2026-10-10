@@ -6,6 +6,7 @@ import './ready.js'; // first: the wearable code must see the authored anchors (
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
+import { rogueForms, rogueGlance } from './rogue-models.js';
 import { neglected } from './neglect.js';
 import { glitched, MAX_BUGS } from './glitch.js';
 import { temperTell, tellPose, idleClock } from './tell.js';
@@ -15,7 +16,7 @@ import { drawSprite, paletteColors } from '../../src/sprites.js';
 import { PALETTES } from '../../src/sim.js';
 import { drawWorn } from '../../src/accessories.js';
 
-const SETS = { iron: () => forms('B'), program: programForms, wetware: wetwareForms };
+const SETS = { iron: () => forms('B'), program: programForms, wetware: wetwareForms, rogue: rogueForms };
 const CROP = { x: 5, y: 0, w: 30, h: 24 }; // the part of the 40x28 screen that holds a pet
 const FULL_WIDTH = { x: 0, y: 0, w: 40, h: 24 }; // a visiting pet stands at the right edge, outside CROP
 const LEVELS = [[-2, 'strongly unsteady'], [-1, 'unsteady'], [0, 'middle'], [1, 'steady'], [2, 'strongly steady']];
@@ -32,7 +33,9 @@ function picture(env, f, state) {
   const base = f[key];
   const anchors = f.anchors[key];
   const rusty = neglect ? neglected(base, anchors, neglect, SEED) : base;
-  const look = bugs ? glitched(rusty, anchors, bugs, { time, reduced: reduced || still, seed: SEED }) : rusty;
+  const torn = bugs ? glitched(rusty, anchors, bugs, { time, reduced: reduced || still, seed: SEED }) : rusty;
+  // Rogue's glance moves the eyes only; wearables stay placed on the unglanced frame (f[wear], below).
+  const look = t.glance ? rogueGlance(torn, anchors, t.glance) : torn;
   const shown = f.motion && key !== 'sleep' ? f.motion(look, anchors, { time, reduced }) : look;
   const wander = idle !== 'none' ? idleOffset(idle, base.length, idleClock({ egg, level, time })) : { x: 0, y: 0 };
   const bounce = state.visit ? visitMotion({ w: base[0].length, h: base.length, time, calm: reduced }) : null;

@@ -13,14 +13,14 @@ import { MAX_BUGS } from './glitch.js';
 
 const dir = fileURLToPath(new URL('.', import.meta.url));
 
-test('the maker writes three galleries, each with the layers section wired in for its own egg', () => {
+test('the maker writes four galleries (the three eggs and Rogue), each with the layers section wired in for its own egg', () => {
   execFileSync('node', [`${dir}make-gallery.mjs`], { stdio: 'pipe' });
-  for (const egg of ['iron', 'program', 'wetware']) {
+  for (const egg of ['iron', 'program', 'wetware', 'rogue']) {
     const html = readFileSync(`${dir}gallery-${egg}.html`, 'utf8');
     assert.match(html, /import \{ layersSection \} from '\.\.\/\.\.\/prototype\/netling2\/gallery-layers\.js'/);
     assert.match(html, /'crests', 'colors', 'layers'\]/);
     assert.ok(html.includes(`}, "${egg}");`), `${egg}: wrong egg in the builder`);
-    assert.ok(html.includes('22 forms'), `${egg}: heading`);
+    assert.ok(html.includes(egg === 'rogue' ? '10 forms' : '22 forms'), `${egg}: heading`);
     assert.ok(html.includes("['1', '2', '3', '4', '5', '6', '8']") && !html.includes('Math.max(3, scale()'), `${egg}: the 1x and 2x scales`);
   }
 });

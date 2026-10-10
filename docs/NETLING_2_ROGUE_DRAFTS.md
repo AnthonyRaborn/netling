@@ -296,7 +296,7 @@ So the decoy layer proposed for the elders (8.4) becomes this feature, extended 
 
 Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) the shadow layer on all ten forms (8.1, 8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
 
-**Temper tell skin (proposal).** The other eggs settle (Iron), blink and hop (Program) or pulse (Wetware). Rogue **glances**: on the tell's beat the eyes shift one cell to the side and back, a look over its shoulder (the background line "looked over its shoulder"). Steady: the glance lands exactly on the beat, a watchful routine. Unsteady: glances come early, late or twice. Eye shifts are 400 ms steps, under the flash limit. Neglect and bug marks use the shared skin.
+**Temper tell skin (proposal).** The other eggs settle (Iron), blink and hop (Program) or pulse (Wetware). Rogue **glances**: on the tell's beat the eyes shift one cell to the side and back, a look over its shoulder (the background line "looked over its shoulder"). Steady: the glance lands exactly on the beat, a watchful routine. Unsteady: glances come early, late or twice. Eye shifts last one 500 ms frame, under the flash limit (drawn: 8.4a). Neglect and bug marks use the shared skin.
 
 ### 8.2 Baby and teen
 
@@ -337,6 +337,20 @@ Each adult keeps the full signature and differs by outline, so the four stay und
 | Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler** (decided) | A handler runs agents; the spook after long service. Caution: a common word with no Tune link of its own; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
 | Drop | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash** (decided) | A stash is what is kept hidden at a drop, grown into a hoard. Cutout (the go-between so neither side knows the other at a drop) fits the trade but not the art | medium |
 
+### 8.4a First drafts drawn (2026-10-10, for review; nothing decided about the art)
+
+All ten forms are drawn in the sprite prototype (`prototype/netling2/rogue-art.js`, `rogue-models.js`, `rogue-motion.js`, `rogue.test.js`; the sprite handoff, Status, has the file list). See them on `prototype/netling2/rogue-preview.html` (every form awake, in its B frame, glancing either way, asleep and dead; the decoy and the split step by step beside the hidden elders' echoes; a live strip of the glance at each temper level) or the screenshot `docs/netling2-prototypes/shots/rogue-review.png`, and in `gallery-rogue.html` (`npm run proto:gallery`) with every wearable.
+
+What the checks say (all pass, 18 tests): the frame, anchor and wearable rules every egg obeys (41 wearables, none moves between frames or leaves the screen); the four adults pairwise at most 0.67 and the elders at most 0.71 (1.0's bar is 0.82); each elder closest to its own adult after scaling (Sleeper 0.84, Exile 0.77, Handler 0.80, Stash 0.82; the bar is 0.75), so no elder uses the leave to break that rule (6.1, item 26); and **the fallback check (6.1, item 22)**: no Rogue form is within 0.82 of any of the other eggs' 66 forms of its stage (closest: Mole and Sleeper 0.75, Foundling 0.74 against Program's Bitling), so on the numbers the shadow does not need the thermocamo or the hood. That is a silhouette measure only; the maintainer's look decides.
+
+Choices made while drawing (each easy to change):
+- **The shut third eye** is a dim pair (four cells on Spook and Handler, whose ears frame a wider one). Seen on the screenshot, the four-cell one reads clearly and **the two-cell one nearly disappears** against the body at small sizes; options if it should read on every form: make it four cells everywhere it fits, or use the highlight colour for a closed-lid line (but highlight is what the dead pose uses for the tag).
+- **The hood notches** are on every form but the baby (12 columns leave room for one point only).
+- **The dead mark** is the tag lit (its dim cells turn highlight): the removed plate showing through at the end. Asleep has no mark (the third eye is shut already).
+- **The glance** lasts one frame (500 ms), not 400 ms as first drafted: on 400 ms windows a glance and a frame change could land 100 ms apart, under the flash floor; aligned to the 1.0 frame rhythm they land together. Steady glances to the left on the exact beat (every 6 s, 3 s strongly steady); unsteady glances come at random to either side (more at -2); under reduced motion an unsteady Rogue holds its eyes to one side. Wearables stay placed on the unglanced frame.
+- **The shadow** reaches one cell on the baby and teen, two on adults, three on elders. Like the hidden elders' echoes it shows only where the figure is empty, so on the baby and teen it is a thin sliver at the edge; it reads on adults and elders.
+- Mole was redrawn once (a narrower body over wide claws) to separate it from Drop (0.80 at first), and the baby once (one hood point instead of two) because two points read like Program's Bitling's antennae (0.86 at first).
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -344,13 +358,13 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The shut third eye: to be seen drawn (6.1, item 25), including whether it reads at 12 wide.
-- The decoy's exact motion per stage (step size, hold time), and the split beside it, to be seen drawn. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
-- The glance tell: to be seen drawn (6.1, item 25).
+- The shut third eye: drawn (8.4a); the two-cell version reads weakly, so its size or colour is open.
+- The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
+- The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
 
 ## 9. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- The choice among the form briefs and names (section 8), any sprite drawing, the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.
+- The maintainer's review of the first-draft sprites (8.4a), any redraws, the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.

@@ -4,6 +4,7 @@
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
+import { rogueForms } from './rogue-models.js';
 
 export const MODELS = ['A', 'B'];
 export const protoKey = (model, id) => `proto${model}_${id}`;
@@ -11,6 +12,8 @@ export const protoKey = (model, id) => `proto${model}_${id}`;
 export const programKey = (id) => protoKey('P', id);
 // Wetware's likewise, under W.
 export const wetwareKey = (id) => protoKey('W', id);
+// The hidden Rogue egg's, under R.
+export const rogueKey = (id) => protoKey('R', id);
 
 export function register(SPRITES, ANCHOR_ROWS) {
   for (const model of MODELS) {
@@ -33,6 +36,14 @@ export function register(SPRITES, ANCHOR_ROWS) {
   }
   for (const f of Object.values(wetwareForms())) {
     const key = wetwareKey(f.id);
+    SPRITES[`${key}A`] = f.a;
+    SPRITES[`${key}B`] = f.b;
+    SPRITES[`${key}Sleep`] = f.sleep;
+    SPRITES[`${key}Dead`] = f.dead;
+    ANCHOR_ROWS[key] = f.anchors;
+  }
+  for (const f of Object.values(rogueForms())) {
+    const key = rogueKey(f.id);
     SPRITES[`${key}A`] = f.a;
     SPRITES[`${key}B`] = f.b;
     SPRITES[`${key}Sleep`] = f.sleep;
