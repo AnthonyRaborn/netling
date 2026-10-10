@@ -196,6 +196,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 17. **Names from espionage and fugitive vocabulary** (tradecraft and the language of people on the run), distinct from all three eggs.
 18. **All three hidden lines' cues in every Rogue form** (one mixed identity), not one line per role.
 19. **Rogue's forms may break the form rules as the hidden forms may** (sizes, the elder-closest-to-adult check, motion layers that change the outline).
+20. **Names chosen so far: Foundling (baby) and Drop (Feast adult)** (sixth round). The rest of section 8's names stay candidates.
+21. **One main shared feature on every form, chosen from three:** the hood, the thermocamo, or the shadow (the echo every hidden line has behind it: Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub, each behaving differently). The three are drafted in 8.1 for the maintainer to pick one.
 
 **The good end**
 
@@ -268,25 +270,34 @@ Nothing here is drawn. Each brief gives the idea, the outline, the cues and name
 
 ### 8.1 The shared signature (every form)
 
-Decided: all three hidden lines show in every form (6.1, item 18). One fixed cue from each, small enough to fit a 12-wide baby, plus one cue of Rogue's own:
+**The main shared feature: one of three, to choose (6.1, item 21).** Whichever is picked appears on all ten forms.
+
+| Option | What it is on the hidden lines | Rogue's version | For | Against |
+|---|---|---|---|---|
+| **Shadow** (recommended) | The echo behind each hidden elder: Whisper's fork lag (a dim copy trails out and is reaped), Init's ratchet trail (copies stack out), Cipher's ghost dub (a dim copy slides either way). Each line's behaves differently | A dim copy that **steps off to one side and holds, then is dropped**: a decoy left for the hunters. On every form, not only the elders; small and short on the baby, wider and longer-held on the elders | The only cue all three hidden lines genuinely share, so it carries the shared background by itself; it has its own Rogue behaviour, as each line's does; it ties to the hunt; it needs no outline change, so the role outlines stay free | A motion layer on all ten forms (a rule-break, allowed): every form needs the edge, wearable and reduced-motion checks the hidden elders' layers already pass (parked under reduced motion, so a still frame shows nothing of it); more runtime art than a mark |
+| **Thermocamo** | Blank's camouflage: cells alternating bright and dim, the phase swapping between frames, so the shimmer is the animation | The same shimmer over part or all of each body | Strong and readable at any size; marks only, so no outline change and no new layer; works in a still frame | Blank's own look, so Rogue risks reading as a Wetware form; it is one line's cue, not all three's; it competes with the neglect and bug marks, which also use dim cells |
+| **Hood** | Blank's pointed hood around a dark face opening | A hood on every form, peak notched | Cheapest; a clear "hidden" read; works in a still frame | Also one line's cue; it puts the same outline on top of all four adults, which raises the silhouette scores between them (8.6) |
+
+**Recommendation: the shadow.** If it is chosen, the decoy layer proposed for the elders (8.4) becomes this feature, extended to all ten forms, and the hood in the briefs below becomes an ordinary outline choice per form rather than a must.
+
+**Secondary marks (proposals, kept whichever main feature is picked).** Small cues from each line plus one of Rogue's own, small enough to fit a 12-wide baby:
 
 | From | The hidden line's look | Rogue's version |
 |---|---|---|
-| Blank (Wetware) | A pointed hood, a dark face opening with lens eyes and **no mouth**, camouflage cells alternating bright and dim | **The hood and no mouth** on every form. The camouflage is reduced to a **patch** (a band or one shoulder), as if the cloak was only partly copied |
+| Blank (Wetware) | A pointed hood, a dark face opening with lens eyes and **no mouth**, camouflage cells alternating bright and dim | **No mouth** on every form. (The hood and the thermocamo are the main-feature options above; if neither is picked, a small camouflage patch can stand in, as if the cloak was only partly copied) |
 | Guru (Iron) | Crown points on the top row, a **third eye**, lit seams | **A third eye drawn shut**: a dim `x` cell or pair above the two eyes. The hidden forms see the whole map and Rogue does not (6.1, item 6); the eye is there, copied, and does not open. The crown points become two **notches in the hood's peak** |
 | Ghost (Program) | A dome over a sheet body with a **ragged hem** | **The ragged hem** on the bottom row (or the cloak's edge on forms with feet) |
 | Rogue's own | (none) | **A scraped-off asset tag**: a small dim rectangle on the chest where a corp plate was removed. It makes "owner: none" visible and echoes `ruins-5` (the forty-first rack with no plate) without being NL-0's. It grows with the stage, and on the elders it is the largest mark |
 
-Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) a motion layer on the elders (8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
+Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) the shadow layer if it is the main feature (on all ten forms; otherwise on the elders only, 8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
 
 **Temper tell skin (proposal).** The other eggs settle (Iron), blink and hop (Program) or pulse (Wetware). Rogue **glances**: on the tell's beat the eyes shift one cell to the side and back, a look over its shoulder (the background line "looked over its shoulder"). Steady: the glance lands exactly on the beat, a watchful routine. Unsteady: glances come early, late or twice. Eye shifts are 400 ms steps, under the flash limit. Neglect and bug marks use the shared skin.
 
 ### 8.2 Baby and teen
 
 **Baby (12 wide).** A small hooded lump: the hood with its notched peak, two lens eyes, the shut third eye, a ragged hem and the smallest tag (one dim cell). It reads as something that turned up on its own.
-- **Stray** (recommended, strong). A stray is an animal with no owner. It ties to the background lines already drafted ("a stray pinged in. it would not say whose it was"), so the reveal pays off a word the player has seen. Caution: 1.0 already says "a stray X pinged in" for visitors and has the STRAY SIGNAL anomaly; a Rogue visitor would log "a stray stray", so the visitor line needs a form-aware wording, or pick the alternate.
-- Foundling (strong): found, unclaimed, "owner: none". No collision.
-- Waif (medium).
+- **Foundling** (decided, maintainer): found, unclaimed, "owner: none". No collision.
+- Not chosen: Stray (it would log "a stray stray pinged in" as a visitor), Waif.
 
 **Teen (14 wide, 11 to 12 rows).** The hood now a full cowl over a narrower, upright body; the camouflage patch appears (one band across the cloak); the hem longer; the tag a small rectangle. One teen, so it need not sit close to a sibling; it must be clearly unlike the other eggs' teens.
 - **Alias** (recommended, strong). A false name; the teen tries on identities before it settles into a role, which is what the teen stage is. No collision.
@@ -302,20 +313,20 @@ Each adult keeps the full signature and differs by outline, so the four stay und
 | Breach | Low and broad, hood pulled forward, two heavy forelimbs at the hem like digging claws. The camouflage patch on its back | **Mole**; Plant | A mole is an agent placed inside an organization, who breaks it from within; also a digger. One syllable, fits the others' short adult names | strong |
 | Dodge | Narrow and tall, leaning, the hood swept back as if moving, long legs showing under a short ragged hem | **Skip**; Bolt; Lam | A skip is a fugitive who skipped bail (the hunted, in the skip tracer's word); also a quick hop aside, which is Dodge | strong |
 | Tune | Tall, the hood's two notches drawn up into ear-like points (listening), the shut third eye larger | **Spook**; Tap | Spy slang for an intelligence agent, and a ghost: the Ghost cue named. Listening is Tune | strong |
-| Feast | Round and low, a satchel or bundle at one side (stolen goods), the tag half-covered by the strap | **Fence**; Drop | A fence buys and sells stolen goods; Feast takes and trades. Caution: 1.0's `bazaar-3` is titled "a fence, off the record"; the page is about someone who buys fragments, which suits the word, but the two would sit side by side. Drop (a dead drop, where things are left to be picked up) is the clean alternate | medium |
+| Feast | Round and low, a satchel or bundle at one side (stolen goods), the tag half-covered by the strap | **Drop** (decided, maintainer) | A dead drop: where things are left to be picked up, and Feast picks them up. Caution for the text: "drop" is also the word for loot ("drops", drop tables), so log and Dex lines should avoid "a drop dropped" | strong |
 
 ### 8.4 Elders (18 wide, at most 15 rows)
 
 "The same idea after long service." Each is its adult grown wider and more worn: the hem more ragged, the camouflage patch larger, the tag fully exposed and larger. The shut third eye stays shut on every elder (Rogue never gets the full sight).
 
-**Shared motion layer (rule-break, proposal): the decoy.** As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
+**Shared motion layer (rule-break, proposal): the decoy.** If the shadow is chosen as the main feature (8.1), this is it, on every form; otherwise it stays an elder-only layer. As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
 
 | Adult | Elder idea | Name (recommended first) | Reason | Strength |
 |---|---|---|---|---|
 | Mole | Broader, settled, the claws resting; it has been in place a long time | **Sleeper**; Plant | A sleeper is a mole left in place for years, waiting. The same idea after long service, exactly | strong |
 | Skip | Wider stance, the cloak torn shorter, a bundle on its back: it has been running for years | **Exile**; Lam | Someone who has been away so long that away is home. Lam (on the lam) is the shorter, slangier option | medium |
 | Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler**; Station | A handler runs agents; the spook after long service. Caution: a common word with no Tune link of its own; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
-| Fence | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash**; Cutout | A stash is what a fence keeps hidden. Cutout (the go-between so neither side knows the other) fits the trade but not the art | medium |
+| Drop | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash**; Cutout | A stash is what is kept hidden at a drop, grown into a hoard. Cutout (the go-between so neither side knows the other at a drop) fits the trade but not the art | medium |
 
 ### 8.5 Ids and the Dex
 
@@ -323,11 +334,12 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 
 ### 8.6 Not decided in the briefs
 
-- The names (each has a recommendation and alternates).
+- The main shared feature: shadow (recommended), thermocamo or hood (8.1).
+- The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
 - Whether the shut third eye reads at 12 wide, or the baby drops it (a test render would tell).
 - The decoy layer, and whether any elder should break the elder-closest-to-adult rule.
 - The glance tell.
-- Silhouette risk: all four adults share the hood and hem, so the outlines must carry the difference (the 0.82 audit decides).
+- Silhouette risk: all four adults share the hem (and the hood, if it is the main feature), so the outlines must carry the difference (the 0.82 audit decides).
 
 ## 9. Not done
 
