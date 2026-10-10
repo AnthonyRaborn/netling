@@ -425,6 +425,33 @@ The ambush shrug-off cuts disconnects but not captures (staying in the run longe
 **Decided (maintainer, 2026-10-10): a lost fight adds trail +1 for Mole and Sleeper** (+2 for the other lines), now the fork's default (`kit.breach.lostTrail`); the shrug-off and the save reset stay off. **The Dodge line stays open for discussion** (about 0.3% captured, almost never meets the hunter). With it, the attentive group (`rogue-s2-decided-breach1.json`, 300 lives each): full life 97.5, captured 2.4% (worst archetype 5.7%, Feast corp), hunter marks 0.13 a life, the elder gate met in 27%; captured by role steerers: Breach 3.5%, Tune 3.9%, Feast 4.9%, Dodge 0.3%. The earlier whole-group row (`rogue-s2-decided.json`) predates this change.
 
 
+**The Dodge line (2026-10-10, measured, for choice).** Why it is the outlier: the decided thresholds are set against full move trail, and halving it frees room in proportion to run length, so the gap is widest in the Deep and the Source (room left for fights, choices and purchases: other lines about 5 there, Skip 10 to 12). Its slip also loses fewer fights (+2 each). Three levers in `nr2.js`, `kit.dodge`, all off: **headStart** n (the first n moves of a run add no trail, every later move +1; replaces every second move), **thresholdDelta** (the hunter's threshold for the line, the skip tracers; every second move kept) and **slipTrail** (+S: a slipped ordinary ICE adds +1, the slip leaves tracks). The two Dodge steerers, 1000 lives each (`baseline/rogue-dodge.mjs`, outputs `results/followup/rogue-dodge-*.json`), mean of the two, beside the other lines' steerers at the decided settings:
+
+| setting | captured | hunter marks a life | hunters met | Source cleared | elder gate met |
+|---|---|---|---|---|---|
+| Breach steerers (decided) | 3.8 | 0.29 | 1.42 | 36 | 43 |
+| Tune steerers (decided) | 3.2 | 0.19 | 0.62 | 16 | 23 |
+| Feast steerers (decided) | 4.0 | 0.26 | 0.85 | 25 | 32 |
+| Dodge, decided (every second move) | 0.6 | 0.01 | 0.02 | 41 | 46 |
+| headStart 2 | 1.1 | 0.12 | 0.38 | 39 | 45 |
+| headStart 3 | 0.7 | 0.05 | 0.18 | 40 | 46 |
+| headStart 4 | 0.5 | 0.03 | 0.08 | 41 | 46 |
+| headStart 3 +S | 2.2 | 0.18 | 0.57 | 38 | 45 |
+| headStart 4 +S | 1.3 | 0.10 | 0.33 | 39 | 46 |
+| thresholdDelta -3 | 0.9 | 0.08 | 0.25 | 40 | 45 |
+| **thresholdDelta -4** | 1.7 | 0.18 | 0.59 | 38 | 43 |
+| thresholdDelta -5 | 3.4 | 0.37 | 1.23 | 33 | 40 |
+| thresholdDelta -3 +S | 2.2 | 0.20 | 0.73 | 37 | 44 |
+| thresholdDelta -4 +S | 4.1 | 0.40 | 1.33 | 33 | 41 |
+
+Reading it:
+1. **The head start loses as a rival.** It frees a fixed number of moves, but Skip's slip already loses fewer fights, so even two free moves leave the hunter rarer than for any other line (0.12 marks a life against 0.19 to 0.29). It only reaches the range with the slip trail added.
+2. **The threshold is the stronger lever** and moves smoothly: -4 puts the hunter marks at Tune's level (0.18), -5 and -4 +S overshoot Breach (0.37 to 0.40).
+3. **Captured stays lower than the other lines' at matching hunter marks** because Skip's perk (sweeps 30% less often) cuts home marks (about 0.33 a life against 0.41 to 0.47). That is the perk working, not the run, so hunter marks a life are the fairer yardstick for the run levers, and capture parity would mean overshooting in runs.
+4. **No lever touches the line's lead in exit rates.** Per run (3000 runs a form, `sim/rogue-netrun.mjs`, `results/followup/rogue-dodge-runs.json`), the Deep exit rate is about 44 for Skip against 32 to 40 for the other adults, and 56 for Exile against 42 to 47 for the other elders, under every setting (41 to 44 and 49 to 56); banked value per run sits among the other lines' (above Breach and Tune, below Feast's elder in the Source). That lead is the slip avoiding fights, not the trail, and the elder gate and Source clearing follow it. If it should come down, the lever is the slip chance (0.3 and 0.5), a separate question.
+
+**For the maintainer:** thresholdDelta -4 (a single rule; "every second move" stays as the player sees it) or thresholdDelta -3 with the slip trail (the cost tied to the slip). headStart 3 with the slip trail lands in the same place but changes Skip's twist. Measured on the two steerers only; the whole attentive group is not rerun.
+
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg) and the relay-question read-out (continuing pays about a third more), which needs the chosen hunter settings first.
 
 ## 8. The ten forms (concept briefs, for choice)
