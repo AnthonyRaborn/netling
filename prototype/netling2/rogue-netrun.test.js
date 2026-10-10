@@ -193,3 +193,70 @@ test('ambushes are a share of a region ICE nodes (none in the Public Net), drawn
   const deep = count('deep');
   assert.ok(deep > 0.15 && deep < 0.35, `deep share ${deep}`);
 }));
+
+// Stage 2b: Rogue's own map rules (9.7, netrun/rogue-map.js).
+const { rogueMapRules } = await import('./sim/netrun/rogue-map.js');
+const { generateMap } = await import('../../src/netrun/map.js');
+const { REGIONS } = await import('../../src/netrun/regions.js');
+const OFF = { relayFactor: 1, toIce: {}, cordons: {}, guardShare: 0 };
+const types = (m) => m.nodes.map((n) => n.type).join(',');
+
+test('map rules: with every rule off the map is the ordinary one', () => {
+  for (const region of ['public', 'corp', 'deep', 'source']) {
+    for (let seed = 1; seed <= 20; seed++) {
+      const a = generateMap(region, mulberry32(seed));
+      const b = rogueMapRules(generateMap(region, mulberry32(seed)), mulberry32(99), OFF);
+      assert.equal(types(b), types(a));
+    }
+  }
+});
+
+test('map rules: cordons (the layer after the relay; the Source a second about two thirds down), and the relay layer keeps its relay', () => {
+  for (let seed = 1; seed <= 20; seed++) {
+    const d = rogueMapRules(generateMap('deep', mulberry32(seed)), mulberry32(seed), { ...OFF, relayFactor: 0, cordons: { deep: [0], source: [0, 0.667] } });
+    const relayLayer = Math.ceil(REGIONS.deep.layers / 2);
+    assert.deepEqual(d.rogueRules.cordon, [relayLayer + 1]);
+    assert.ok(d.nodes.filter((n) => n.layer === relayLayer + 1).every((n) => n.type === 'ice'));
+    assert.equal(d.nodes.filter((n) => n.type === 'relay').length, 1, 'extra relays thinned, the relay layer keeps one');
+    assert.equal(d.nodes.find((n) => n.type === 'relay').layer, relayLayer);
+    const s = rogueMapRules(generateMap('source', mulberry32(seed)), mulberry32(seed), { ...OFF, cordons: { source: [0, 0.667] } });
+    assert.deepEqual(s.rogueRules.cordon, [8, 10]);
+  }
+});
+
+test('map rules: Corp Grid checkpoints become ICE at the share; guards make every way into a guarded cache or market danger, moving ICE, not adding it', () => {
+  const c = rogueMapRules(generateMap('corp', mulberry32(3)), mulberry32(3), { ...OFF, toIce: { corp: 1 } });
+  assert.equal(c.nodes.filter((n) => n.type === 'checkpoint').length, 0);
+  for (let seed = 1; seed <= 30; seed++) {
+    const before = generateMap('ruins', mulberry32(seed));
+    const ice = before.nodes.filter((n) => n.type === 'ice').length;
+    const m = rogueMapRules(generateMap('ruins', mulberry32(seed)), mulberry32(seed), { ...OFF, guardShare: 1 });
+    const after = m.nodes.filter((n) => n.type === 'ice').length;
+    assert.ok(after >= ice && after - ice === m.rogueRules.guardIce - m.rogueRules.guardMoved, 'only the guards no spare ICE could pay for are added');
+    assert.ok(m.rogueRules.guardMoved <= m.rogueRules.guardIce);
+  }
+});
+
+test('map rules in a run: a Rogue Deep run has the narrow map and its cordon; an NL-0 run is untouched', () => withKits(() => {
+  const saved = [NR2.map.on, NR2.rogue.map.on];
+  NR2.map.on = true;
+  NR2.rogue.map.on = true;
+  try {
+    for (let seed = 1; seed <= 15; seed++) {
+      const rng = mulberry32(seed);
+      const s = createScript({ now: 0, rng });
+      Object.assign(s, { egg: 'rogue', stage: 'adult', form: 'rogueAdultBreach' });
+      startRun(s, 'deep', rng, []);
+      const widths = Array.from({ length: REGIONS.deep.layers }, (_, i) => s.run.map.nodes.filter((n) => n.layer === i + 1).length);
+      assert.ok(Math.max(...widths) <= 3, 'narrow: 2 to 3 a layer');
+      assert.deepEqual(s.run.map.rogueRules.cordon, [6]);
+      const rng2 = mulberry32(seed);
+      const p = createScript({ now: 0, rng: rng2 });
+      Object.assign(p, { egg: 'program', stage: 'adult', form: 'hidden' });
+      startRun(p, 'deep', rng2, []);
+      assert.equal(p.run.map.rogueRules, undefined);
+    }
+  } finally {
+    [NR2.map.on, NR2.rogue.map.on] = saved;
+  }
+}));

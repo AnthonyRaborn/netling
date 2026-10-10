@@ -5,6 +5,7 @@
 import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip, addMark } from '../sim.js';
 import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
 import { generateMap2 } from './map2.js';
+import { rogueMapRules } from './rogue-map.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER, regionLock, regionOpen } from '../../../../src/netrun/regions.js';
 import { nextFragment as nextFragmentRaw, fragmentById, nextEggPage } from '../codex2.js';
@@ -176,8 +177,14 @@ export const iceSpeed = (pet) => (pet.run?.hot ? CFG.overclockGameSpeed : 1);
 export function startRun(pet, region, rng, codex = [], ownedAccessories = [], opts = {}) {
   const daily = Boolean(REGIONS[region].daily);
   const day = daily ? opts.day ?? DAILY.epoch : null;
-  const over = NR2.map.on && !daily ? NR2.map.region[region] : null; // 2.0 fork: wider maps for the regions listed (nr2.js map)
+  // Rogue's own map rules (stage 2b, nr2.js rogue.map): its narrow Deep and Source, then the rules applied to the built map.
+  const rogueMap = NR2.rogue?.map?.on && hunted(pet, { region, daily });
+  const over = NR2.map.on && !daily && !(rogueMap && NR2.rogue.map.narrow.includes(region)) ? NR2.map.region[region] : null; // 2.0 fork: wider maps for the regions listed (nr2.js map)
   const map = over ? generateMap2(region, rng, over) : generateMap(region, daily ? mulberry32(dailySeed(day)) : rng);
+  if (rogueMap) {
+    rogueMapRules(map, rng, NR2.rogue.map);
+    marketKinds(map, rng);
+  }
   if (!daily) clinicKinds(map, rng);
   pet.run = {
     region,
@@ -371,9 +378,9 @@ function moveToNode(pet, nodeId, rng) {
       const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
       run.tally.hunters++;
       run.phase = 'ice';
-      run.pending = { game, tier: 2, hunter: 'trail', deferred: nodeId };
+      run.pending = { game, tier: NR2.rogue.hunterTier, hunter: 'trail', deferred: nodeId };
       note(run, `!! the hunter caught up: ${game}.`);
-      return { ok: true, kind: 'ice', game, tier: 2, hunter: 'trail' };
+      return { ok: true, kind: 'ice', game, tier: NR2.rogue.hunterTier, hunter: 'trail' };
     }
     run.huntMoves++;
     const every = rkit(pet)?.moveEvery ?? 1;
@@ -425,9 +432,9 @@ function encounterNode(pet, nodeId, rng) {
         }
         const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
         run.phase = 'ice';
-        run.pending = { game, tier: 2, hunter: 'ambush', deferred: null };
+        run.pending = { game, tier: NR2.rogue.hunterTier, hunter: 'ambush', deferred: null };
         note(run, `!! ambush: ${game}.`);
-        return { ok: true, kind: 'ice', game, tier: 2, hunter: 'ambush' };
+        return { ok: true, kind: 'ice', game, tier: NR2.rogue.hunterTier, hunter: 'ambush' };
       }
       const tier = rollTier(run, nodeId, rng);
       const am = avoidMult(tier, lvl(pet));

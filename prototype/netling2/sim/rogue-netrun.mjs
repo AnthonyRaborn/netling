@@ -2,6 +2,7 @@
 // of the same role base, on the fork's rules (NR2=all). docs/NETLING_2_ROGUE_DRAFTS.md 4.2, 4.4, 9 and 7.4.
 // Usage: node prototype/netling2/sim/rogue-netrun.mjs [runs=1000] [regions=public,bazaar,corp,ruins,deep,source] [styles=careful]
 //   FORMS=rogue,hidden,base   which groups (default all three). JSON=1 prints JSON. RUNBOT=quiet makes every Rogue run a quiet runner.
+//   ROGUE_RUN='{...}'          overrides NR2.rogue (nr2.js), for example '{"map":{"on":false},"dangerSense":false}'.
 //   MARKS=n                   the marks a Rogue netling carries into each run (default 0; the careful bot bails at a relay with 2).
 // Each run starts from the same spread of stats as netrun-sweep.mjs. Reported per form and region: exit rate (reached the exit), careful
 // disconnects, banked value (items worth, plus loose scrip, in items), fights met (ICE and ambushes reached, slipped or not), hunters met and lost,

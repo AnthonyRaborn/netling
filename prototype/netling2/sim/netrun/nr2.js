@@ -99,6 +99,7 @@ export const NR2 = {
     on: true,
     threshold: { public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }, // regions not listed (tutorial, daily) have no hunt
     trail: { move: 1, iceLost: 2, anomaly: 1, purchase: 1 }, // a won ICE adds nothing; the checkpoint HIDE never happens (checkpoints never notice Rogue)
+    hunterTier: 2, // the tier its fight is played at (2: the tier-2 speed, so a lower win chance)
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
     ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
     dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
@@ -111,6 +112,9 @@ export const NR2 = {
       tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
       feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },
     },
+    // Rogue's own map rules (9.7, netrun/rogue-map.js), the draft's starting values: no extra relays half the time, half the Corp Grid's checkpoints
+    // are ICE, one cordon in the Deep and two in the Source, half of all caches and markets guarded, and 1.0's narrow maps in the Deep and the Source.
+    map: { on: true, relayFactor: 0.5, toIce: { corp: 0.5 }, cordons: { deep: [0], source: [0, 0.667] }, guardShare: 0.5, narrow: ['deep', 'source'] },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
@@ -126,6 +130,14 @@ if (process.env.NR2) {
   for (const [k, val] of Object.entries(v)) {
     if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
     else NR2[k] = val;
+  }
+}
+
+// ROGUE_RUN='{"threshold":{"deep":15},"map":{"on":false}}' overrides NR2.rogue (objects merge one level down), for the stage 2 sweeps.
+if (process.env.ROGUE_RUN) {
+  for (const [k, v] of Object.entries(JSON.parse(process.env.ROGUE_RUN))) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && typeof NR2.rogue[k] === 'object') Object.assign(NR2.rogue[k], v);
+    else NR2.rogue[k] = v;
   }
 }
 
