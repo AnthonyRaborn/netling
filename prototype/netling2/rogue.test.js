@@ -64,7 +64,7 @@ test('the frames: the head to the neck identical in A and B, the body\'s bottom 
   }
 });
 
-test('the shared marks: two 2x2 eyes with a body cell on each side (room for the glance), the shut third eye above them, no mouth, a dim tag on the chest', () => {
+test('the shared marks: two 2x2 eyes with a body cell on each side (room for the glance), the shut third eye (an arc) above them, no mouth, a dim tag on the chest', () => {
   for (const f of forms) {
     const { eyeRow, neckRow } = f.anchors.a;
     for (const y of [eyeRow, eyeRow + 1]) {
@@ -72,9 +72,14 @@ test('the shared marks: two 2x2 eyes with a body cell on each side (room for the
       assert.deepEqual(runs, ['oo', 'oo'], `${f.id}: eyes on row ${y}`);
       for (const x of [...f.a[y]].map((c, i) => (c === 'o' ? i : -1)).filter((i) => i >= 0)) assert.ok(f.a[y][x - 1] !== '.' && f.a[y][x + 1] !== '.', `${f.id}: eye cell ${x},${y} on the outline`);
     }
+    // The shut third eye is the arc (decided): two dim cells between the inner eyes on the row above them, and one dim cell over each end
+    // on the row above that ('x..x' over '.xx.'), a closed eye's downward curve.
     const eyeCols = [...f.a[eyeRow]].map((c, x) => (c === 'o' ? x : -1)).filter((x) => x >= 0);
-    const shut = [...f.a[eyeRow - 1]].map((c, x) => (c === 'x' ? x : -1)).filter((x) => x >= 0);
-    assert.ok(shut.length >= 2 && shut.every((x) => x > eyeCols[1] && x < eyeCols[2]), `${f.id}: a shut third eye between and above the eyes`);
+    const dim = (y) => [...f.a[y]].map((c, x) => (c === 'x' ? x : -1)).filter((x) => x >= 0);
+    const low = dim(eyeRow - 1).filter((x) => x > eyeCols[1] && x < eyeCols[2]);
+    assert.equal(low.length, 2, `${f.id}: the arc's lower pair between the eyes`);
+    assert.deepEqual(dim(eyeRow - 2), [low[0] - 1, low[1] + 1], `${f.id}: the arc's ends above it`);
+    for (const y of [eyeRow - 2, eyeRow - 1]) assert.equal(f.b[y], f.a[y]);
     assert.ok(!f.a.join('').includes('+') && !f.b.join('').includes('+'), `${f.id}: no mouth (no highlight cell awake)`);
     const tag = rogueTag(f.id);
     assert.ok(tag.length >= 1 && tag.every(([x, y]) => y >= neckRow && f.a[y][x] === 'x' && f.b[y][x] === 'x'), `${f.id}: the tag`);
@@ -296,23 +301,9 @@ test('unsteady: glances at random times to either side, more at -2; reduced moti
 });
 
 // --- the review options (rogue-options.js; nothing registered) ---------------------------------------------------------------------
-test('options: each third eye changes only the two rows above the eyes, keeps the eyes and the outline, and fits on every form', async () => {
-  const { THIRD_EYES, thirdEye } = await import('./rogue-options.js');
-  for (const f of forms) {
-    for (const kind of THIRD_EYES) {
-      const g = thirdEye(f.a, f.anchors.a, kind);
-      assert.equal(poseDistance(f.a, g), 0, `${f.id} ${kind}: outline`);
-      g.forEach((r, y) => [...r].forEach((c, x) => c !== f.a[y][x] && assert.ok(y === f.anchors.a.eyeRow - 1 || y === f.anchors.a.eyeRow - 2, `${f.id} ${kind}: cell ${x},${y}`)));
-      const third = g.slice(f.anchors.a.eyeRow - 2, f.anchors.a.eyeRow).join('').replace(/[.#]/g, '').length;
-      assert.ok(third >= 2, `${f.id} ${kind}: a third eye is drawn`);
-      for (const y of [f.anchors.a.eyeRow, f.anchors.a.eyeRow + 1]) assert.equal(g[y], f.a[y]);
-    }
-  }
-});
-
 test('options: the thermocamo touches body cells only (never the eyes, the tag or the outline); body only keeps the head identical in both frames', async () => {
   const { CAMO_OPTIONS } = await import('./rogue-options.js');
-  for (const f of [set.rogueBaby, set.rogueTeen, set.rogueAdultDodge, set.rogueElderDodge]) {
+  for (const f of [set.rogueBaby, set.rogueTeen, set.rogueAdultDodge, set.rogueElderDodge, set.rogueAdultTune, set.rogueElderTune]) {
     for (const [kind, o] of Object.entries(CAMO_OPTIONS)) {
       const { a, b } = o.make(f, rogueTag(f.id));
       for (const [rows, src] of [[a, f.a], [b, f.b]]) {

@@ -206,6 +206,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 27. **First look at the drafts (ninth round, 2026-10-10):** the shut third eye does not read (it comes across as a slit in the head; four cells where it fits, maybe); the shadow is a good hint at the other hidden lines and looks good in motion; the tag reads as holes in the body, which is fine (Rogue is missing a piece). **Thermocamo, first guess: hints of it on the baby and teen, and the Dodge line (Skip, Exile) in it entirely**, the coverage (body only, or head and body) to be chosen by look (8.4b).
 
+28. **The third eye is the arc** (tenth round): a dim downward curve, `x..x` over `.xx.`, now drawn on all ten forms. **The thermocamo is to be seen in motion before its coverage is chosen**, and **Spook** (so also Handler, its elder) is to be tried with it too, for a Ghost and Blank look (8.4c).
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -370,6 +372,18 @@ My reading: arc first, slit second; the choice is the maintainer's.
 - Skip and Exile, *head and body*: as Blank, the hood too (the eye rows and the third eye left clear). Closer to Blank's look, and needs Blank's exception to the frame rule (the head rows differ between frames, read as body colour by the test).
 Each is shown in both frames and with the decoy; with the camo the decoy still reads, as a dim copy beside a shimmering body.
 
+### 8.4c The arc drawn, and the thermocamo in motion (2026-10-10)
+
+The arc (decided) replaces the first draft's pair on all ten forms in `rogue-art.js`; the review screenshot `rogue-review.png` is redrawn with it. The silhouettes do not change (marks only), so every check in 8.4a still holds.
+
+The thermocamo animates on `prototype/netling2/rogue-options.html` and in the GIF `docs/netling2-prototypes/shots/rogue-thermocamo.gif` (9.6 s, two of the decoy's loops): each form plain, with the camo on the body only, and on the head and body, at the 1.0 frame rhythm (A and B every 500 ms, the shimmer swapping phase with the frame) with the decoy on. Foundling and Alias show the one-band hint; Skip, Exile, Spook and Handler the full camo; Blank and Cipher animate beside them for reference.
+
+What it shows:
+- **Body only** keeps the hood plain, so the arc, the eyes and the hood's outline read as before and the camo reads as a cloak. No frame-rule exception is needed.
+- **Head and body** is the closer echo of Blank and Cipher; on Spook and Handler the ear points over a shimmering head give the Ghost-and-Blank look asked about. The cost: the arc's top cells sit inside the checker and are harder to pick out, and the head rows change between frames (Blank's exception would be needed).
+- The shimmer swaps the whole body once a frame (two changes a second), as Blank's does; inside the flash budget.
+- The hints on Foundling and Alias stay faint in motion too.
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -377,8 +391,7 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The shut third eye: pair, four, slit or arc (8.4b).
-- The thermocamo's coverage on the Dodge line (body only, or head and body) and how strong the baby's and teen's hints should be (8.4b).
+- The thermocamo's coverage (body only, or head and body), whether Spook and Handler take it, and how strong the baby's and teen's hints should be (8.4c; seen in motion on `rogue-options.html` and the GIF).
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
