@@ -332,6 +332,32 @@ Still open:
 - **DEFEND's reason to exist:** for example a won DEFEND removes the last mark, or pays something HIDE does not (scrip, a drop), or HIDE costs more (a share of Charge rather than 10). Without one, DEFEND is never right.
 - Stage 2 (the netrun) adds marks from the trail hunter and ambushes, so the home cost should sit below the aim before it; the 4.4 targets are for the whole.
 
+### 7.2 The HIDE lockout and DEFEND's quiet (2026-10-10, measured; numbers for choice)
+
+**Direction (maintainer, 2026-10-10):** Rogue is the hard egg and sparse players will rarely unlock it, so the casual sub-target of 4.4 is dropped and the 90 minute window stays; tuning aims at attentive players. Home alone aims at about 2 to 3% capture of attentive lives, leaving the rest of 4.4 (full life about 10 points lower, capture under 5%) to stage 2's hunters. DEFEND needs a reason: a won DEFEND pushes the next hunt out.
+
+**Why HIDE had to change too.** In stage 1, HIDE was certain and cheap, so attentive players never took a mark (99.9% full life). A quiet period after a won DEFEND only removes sweeps, so on its own it changes nothing for a player who HIDEs every sweep at no risk. HIDE has to be limited for DEFEND to matter.
+
+**What was built** (fork, behind `ROGUE`; both numbers 0 by default, so stage 1 reproduces exactly): `ROGUE.hideLockMin`, a HIDE burns the route and HIDE is refused for that long ("route burned. no cover for Nm."), so a sweep in that time takes DEFEND, a Decoy or the hit; `ROGUE.defendQuietMin`, a won DEFEND starts a quiet in which no sweep starts (a lost one does not). The quiet only removes sweeps, so the "no more hostile events" rule holds. Bots: every bot DEFENDs when HIDE is locked out; `SWEEPBOT=reserve` also DEFENDs on purpose while it has no mark. Tests in `rogue-sim.test.js`. Driver `baseline/rogue-hide-lock.mjs`, summary `baseline/rogue-hide-lock-summary.mjs`, outputs `results/followup/rogue-72-*` (table in `rogue-72-summary.md`). 300 lives of all 37 archetypes, stage 1's settings.
+
+**Findings** (attentive group: the 26 hourly archetypes stage 1 left at 99% or more):
+
+| setting | full life | captured, mean / worst archetype | sweeps | DEFENDs (forced) | marks |
+|---|---|---|---|---|---|
+| stage 1 (HIDE always) | 99.9 | 0.1 / 0.7 | 8.22 | 0 | 0.07 |
+| lockout 3h, quiet 8h | 99.0 | 1.0 / 2.0 | 7.79 | 1.04 | 0.36 |
+| lockout 4h, quiet 8h | 98.6 | 1.4 / 2.3 | 7.66 | 1.27 | 0.42 |
+| lockout 6h, quiet 8h | 97.5 | 2.4 / 5.0 | 7.53 | 1.60 | 0.52 |
+| lockout 4h, quiet 8h, reserve bot | 97.0 | 3.0 / 6.0 | 6.73 | 3.13 (0.58) | 0.94 |
+
+1. **The lockout is the lever; the quiet's length barely matters.** Quiets of 6, 8 and 12 hours differ by about 0.2 sweeps a life and within noise on capture; the lockout alone (4h, no quiet) gives 1.5% captured against 1.4% with an 8h quiet.
+2. **The 2 to 3% home aim is met by the 6 hour lockout** (2.4% mean, worst archetype 5.0%, full life 2.4 points lower). The 4 hour lockout gives 1.4% (worst 2.3%) and leaves more room for stage 2. Forced DEFENDs came out lower than estimated (1.6 a life at 6 hours, not 2), since sleep and the event lane cut into the time a second sweep can start.
+3. **DEFEND by choice still does not pay.** The reserve bot (DEFEND while unmarked) takes about twice the marks of the HIDE-first bot at every setting. A won DEFEND saves less than one later sweep, and a later sweep costs a mark only if it lands in a lockout, so the quiet is worth far less than DEFEND's 30% risk of a mark (at the attentive win rate of 0.7). DEFEND now has a reason (no cover), but not as a choice.
+4. **Two-hourly players** (corpo, runner, overclocker: 9 check-ins a day) lose the most: captured 26% in stage 1, 33% at the 4 hour lockout, 36% at 6 hours. Their gap is longer than the 90 minute window, so sweeps slip through whatever the lockout.
+5. Timed events fall slightly (10.4 to 9.7 a life at 6 hours) and sparse players are unchanged (about 63% captured), as expected.
+
+**For the maintainer:** which lockout (4 hours, room for stage 2; 6 hours, the home aim now); whether DEFEND should also be worth choosing (for example a won DEFEND removes a mark, which would reverse "nothing removes marks", or pays something HIDE does not), or stay the answer when there is no cover; and whether two-hourly players count as attentive (if so, the window is the lever for them, not the lockout).
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
