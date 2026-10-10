@@ -102,6 +102,7 @@ export const NR2 = {
     hunterTier: 2, // the tier its fight is played at (2: the tier-2 speed, so a lower win chance)
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
     ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
+    ambushMark: true, // a lost ambush gives a mark (and a disconnect); false: the disconnect only (a lever for stage 2's tuning)
     dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
     // The kits by role and level (9.2). Mole fights hunters as plain tier-2 ICE at its damage share; Sleeper turns one lost hunter fight a run into an
     // ordinary lost fight. Skip's slip is trimmed, its moves add trail every second move; Exile slips ambushes (tier-2 avoidance). Spook tells an

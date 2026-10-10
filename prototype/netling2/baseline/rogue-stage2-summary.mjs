@@ -13,7 +13,7 @@ const rows = [['no hunt in runs (stage 1 runs, decided home rules)', 'rogue-72-l
 const ATT = Object.keys(load(rows[0][1])).filter((n) => !OUT.has(n));
 const pct = (x) => (x * 100).toFixed(1);
 console.log(`Attentive group: ${ATT.length} archetypes.\n`);
-console.log('| setting | full life | captured (mean / worst) | marks: home / hunter / ambush | hunters met (lost) | ambushes met (lost) | runs (disconnects) | Deep cleared | elder.mainframe.met |');
+console.log('| setting | full life | captured (mean / worst) | marks: home / hunter / ambush | hunters met (lost) | ambushes met (lost) | runs (disconnects) | Deep cleared | elder gate met |');
 console.log('|---|---|---|---|---|---|---|---|---|');
 for (const [label, f] of rows) {
   const R = load(f);

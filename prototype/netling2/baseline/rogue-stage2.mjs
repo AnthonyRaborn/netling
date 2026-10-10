@@ -25,6 +25,7 @@ const BASE = {
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
+const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };
 const JOBS = {
   start: {}, // the starting values: kits, danger sense, the map rules
   nomap: { map: { on: false } },
@@ -33,6 +34,11 @@ const JOBS = {
   'th15-nomap': { ...th(1.5), map: { on: false } },
   'th15-tier1': { ...th(1.5), hunterTier: 1 },
   'th20-tier1-nomap': { ...th(2), hunterTier: 1, map: { on: false } },
+  // Second round: the trail hunter nearly gone at 2x, so the ambushes are the lever.
+  'th20-tier1-nomap-amb-half': { ...th(2), hunterTier: 1, map: { on: false }, ambush: HALF },
+  'th20-tier1-nomap-amb-nomark': { ...th(2), hunterTier: 1, map: { on: false }, ambushMark: false },
+  'th15-tier1-nomap-amb-nomark': { ...th(1.5), hunterTier: 1, map: { on: false }, ambushMark: false },
+  'th20-tier1-nocordon-amb-half': { ...th(2), hunterTier: 1, map: { cordons: {} }, ambush: HALF },
 };
 
 const todo = Object.entries(JOBS).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));

@@ -702,7 +702,7 @@ function resolveHunter(pet, run, kind, deferred, won, rng) {
   }
   run.tally[kind === 'trail' ? 'huntersLost' : 'ambushesLost']++;
   note(run, `the ${what} got it. -${dmg} integrity.`);
-  addMark(pet, pet.lastTick ?? 0, kind === 'trail' ? 'trail hunter' : 'ambush');
+  if (kind === 'trail' || NR2.rogue.ambushMark) addMark(pet, pet.lastTick ?? 0, kind === 'trail' ? 'trail hunter' : 'ambush');
   return disconnect(pet, kind === 'trail' ? 'the hunter caught it.' : 'walked into an ambush.');
 }
 
