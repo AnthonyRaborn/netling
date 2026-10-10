@@ -3,6 +3,7 @@ Attentive group: 26 archetypes.
 | setting | full life | captured (mean / worst) | marks: home / hunter / ambush | hunters met (lost) | ambushes met (lost) | runs (disconnects) | Deep cleared | elder gate met |
 |---|---|---|---|---|---|---|---|---|
 | no hunt in runs (stage 1 runs, decided home rules) | 98.6 | 1.3 / 2.3 | 0.43 / 0.00 / 0.00 | 0.00 (0.00) | 0.00 (0.00) | 19.5 (1.34) | 76.6 | 35.3 |
+| decided | 96.9 | 3.1 / 8.0 | 0.39 / 0.18 / 0.00 | 0.74 (0.18) | 2.62 (0.68) | 18.8 (2.02) | 75.5 | 26.7 |
 | nomap | 40.6 | 59.4 / 90.3 | 0.29 / 1.38 / 0.48 | 3.50 (1.38) | 1.24 (0.48) | 12.7 (2.27) | 37.5 | 6.2 |
 | start | 35.5 | 64.5 / 95.7 | 0.27 / 1.36 / 0.59 | 3.46 (1.36) | 1.53 (0.59) | 11.2 (2.44) | 28.7 | 3.0 |
 | th15-nomap | 78.2 | 21.8 / 38.7 | 0.37 / 0.20 / 0.76 | 0.61 (0.20) | 2.20 (0.76) | 17.8 (1.84) | 71.0 | 26.8 |
