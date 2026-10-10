@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip, addMark } from '../sim.js';
 import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
 import { generateMap2 } from './map2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
@@ -129,6 +129,16 @@ const upgraded = (pet) => pet.stage === 'mainframe';
 // 2.0 abilities (nr2.js): the ability key is the adult form's id (breachCorp ... feastStreet, hidden); level 1 adult, 2 elder.
 const ab2 = (pet) => (NR2.abilities ? ability(pet) : null);
 const lvl = (pet) => levelOf(pet);
+// Rogue, simulator stage 2 (nr2.js rogue). A run is hunted when the netling is Rogue and the region has a threshold (not the tutorial or the daily).
+// Every Rogue netling that jacks in is hunted and has danger sense; the kit twists (rkit) are the adult's and the elder's, with the abilities on.
+const ROLE_OF = { rogueAdultBreach: 'breach', rogueAdultDodge: 'dodge', rogueAdultTune: 'tune', rogueAdultFeast: 'feast' };
+export const hunted = (pet, run = pet.run) => Boolean(NR2.rogue?.on && isRogue(pet) && run && !run.daily && NR2.rogue.threshold[run.region] !== undefined);
+export const huntThreshold = (run) => NR2.rogue.threshold[run.region];
+const rogueRole = (pet) => (NR2.abilities && NR2.rogue?.on && isRogue(pet) && (pet.stage === 'adult' || pet.stage === 'mainframe') ? ROLE_OF[lineOf(pet.form)] ?? null : null);
+const rkit = (pet) => (rogueRole(pet) ? NR2.rogue.kit[rogueRole(pet)][lvl(pet)] : null);
+function addTrail(run, n) {
+  run.hunt = Math.max(0, (run.hunt ?? 0) + n);
+}
 // Which egg this netling is, for the light run costs: Iron (wear on), Program (Charge-owner), Wetware (Sync-owner).
 const eggOf = (pet) => (IRON.on ? 'iron' : SIDES.on && SIDES.owner === 'charge' ? 'program' : SIDES.on && SIDES.owner === 'sync' ? 'wetware' : null);
 
@@ -218,6 +228,14 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
   }
   // NL-0 will not go down to the Source. It says so, if it is watching.
   if (region === 'source' && pet.rootAccess) note(pet.run, pet.nl0Rests ? "NL-0 (asleep): zzz. i'll wait up here." : "NL-0: i'll wait up here.");
+  // Rogue (stage 2): the trail starts at 0 and a share of the region's ICE nodes are ambushes, drawn after everything above.
+  if (hunted(pet)) {
+    const run = pet.run;
+    Object.assign(run, { hunt: 0, huntMoves: 0, hunterSaves: 0, agentUsed: false, dropped: [], droppedAt: [] });
+    Object.assign(run.tally, { hunters: 0, huntersLost: 0, ambushes: 0, ambushesLost: 0, ambushesSlipped: 0, agents: 0, deadDrops: 0 });
+    const share = NR2.rogue.ambush[region] ?? 0;
+    if (share > 0) for (const n of map.nodes) if (n.type === 'ice' && rng() < share) n.ambush = true;
+  }
   return pet.run;
 }
 
@@ -346,6 +364,28 @@ function moveToNode(pet, nodeId, rng) {
     if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'burned out from the heat.');
   }
 
+  // Rogue (stage 2): once the trail has reached the region's threshold, the hunter is waiting at the next node, whatever the node is; the node's own
+  // encounter follows a won fight. Otherwise the move adds its trail (Skip: every second move).
+  if (hunted(pet, run)) {
+    if (run.hunt >= huntThreshold(run)) {
+      const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
+      run.tally.hunters++;
+      run.phase = 'ice';
+      run.pending = { game, tier: 2, hunter: 'trail', deferred: nodeId };
+      note(run, `!! the hunter caught up: ${game}.`);
+      return { ok: true, kind: 'ice', game, tier: 2, hunter: 'trail' };
+    }
+    run.huntMoves++;
+    const every = rkit(pet)?.moveEvery ?? 1;
+    if (run.huntMoves % every === 0) addTrail(run, NR2.rogue.trail.move);
+  }
+  return encounterNode(pet, nodeId, rng);
+}
+
+// A node's own encounter, on arrival (or after a won hunter fight there).
+function encounterNode(pet, nodeId, rng) {
+  const run = pet.run;
+  const st = pet.stats;
   const node = nodeById(run.map, nodeId);
   const region = REGIONS[run.region];
   forceCache(pet, run, node, rng);
@@ -371,13 +411,31 @@ function moveToNode(pet, nodeId, rng) {
     }
     case 'ice': {
       // 2.0: a harder tier of ICE, mixed in by region depth. The daily trace rolls it by node alone (lane 4, beside the four in daily.js).
+      // Rogue (stage 2): an ambush is the hunter fight (tier 2, the hunter's damage, no ICE slip). Entering one adds a lost fight's trail, won or
+      // lost; only Exile can slip it, at its tier-2 avoidance.
+      if (hunted(pet, run) && node.ambush) {
+        addTrail(run, NR2.rogue.trail.iceLost);
+        run.tally.ambushes++;
+        const k = rkit(pet);
+        if (k?.ambushSlip && rng() < k.unseen * avoidMult(2, lvl(pet))) {
+          run.tally.ambushesSlipped++;
+          run.tally.icePhased++;
+          note(run, 'an ambush. it was already gone.');
+          return { ok: true, kind: 'ice', phased: true, hunter: 'ambush' };
+        }
+        const game = GAME_IDS[Math.floor(rng() * GAME_IDS.length)];
+        run.phase = 'ice';
+        run.pending = { game, tier: 2, hunter: 'ambush', deferred: null };
+        note(run, `!! ambush: ${game}.`);
+        return { ok: true, kind: 'ice', game, tier: 2, hunter: 'ambush' };
+      }
       const tier = rollTier(run, nodeId, rng);
       const am = avoidMult(tier, lvl(pet));
       const key2 = ab2(pet);
       if (key2) {
         // Phase (Dodge corp): the first ICE (two at the elder level) for certain, then often; against tier 2 each works less often.
         const ph = key2 === 'dodgeCorp' ? NR2.ab.phase[lvl(pet)] : null;
-        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' ? NR2.ab.unseen[lvl(pet)] : key2 === 'hidden' ? NR2.ab.hiddenUnseen[lvl(pet)] : 0;
+        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' ? rkit(pet)?.unseen ?? NR2.ab.unseen[lvl(pet)] : key2 === 'hidden' ? NR2.ab.hiddenUnseen[lvl(pet)] : 0;
         if (chance > 0 && rng() < chance * am) {
           if (ph && run.freePhases < ph.free) run.freePhases++;
           run.tally.icePhased++;
@@ -440,6 +498,7 @@ function moveToNode(pet, nodeId, rng) {
       const patched = patch > 0;
       if (patched) st.integrity = clamp(st.integrity + patch);
       note(run, patched ? `relay found. recharged, vented, and patched: +${patch} integrity (corp credentials).` : 'relay found. recharged and vented.');
+      const drop = hunted(pet, run) && rkit(pet)?.deadDrop && run.loot.length; // Drop and Stash: leave one item here for less trail (once a relay)
       openChoice(run, {
         kind: 'relay',
         title: 'RELAY',
@@ -447,6 +506,7 @@ function moveToNode(pet, nodeId, rng) {
         options: [
           { id: 'continue', label: 'CONTINUE', hint: 'keep going' },
           { id: 'out', label: run.daily ? 'JACK OUT' : `JACK OUT (${run.loot.length})`, hint: run.daily ? 'end the trace here' : 'bank loot, end run' },
+          ...(drop ? [{ id: 'deaddrop', label: 'DEAD DROP', hint: `leave one item behind: trail -${rkit(pet).deadDrop}` }] : []),
         ],
       });
       return { ok: true, kind: 'relay' };
@@ -565,11 +625,14 @@ function resolveIceFight(pet, won, rng) {
   if (run.daily) rng = laneRng(run, run.pos, LANE.ice);
   if (PREF.on && PREF.ice && run.pending?.game) pushGame(pet, run.pending.game);
   run.lastTier = run.pending?.tier ?? 1;
+  const hunter = run.pending?.hunter ?? null;
+  const deferred = run.pending?.deferred ?? null;
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
   const tier2 = run.lastTier === 2;
   if (run.tally) run.tally[won ? 'iceWon' : 'iceLost']++;
+  if (hunter) return resolveHunter(pet, run, hunter, deferred, won, rng);
   if (won) {
     const wh = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].winHeal : ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].winHeal : 0;
     if (wh) st.integrity = clamp(st.integrity + wh); // Feast: a small sustain from feeding on a broken ICE (decided as fitting the theme)
@@ -583,10 +646,12 @@ function resolveIceFight(pet, won, rng) {
     }
     return { ok: true, won };
   }
-  const hd = ab2(pet) === 'breachStreet' ? NR2.ab.hardened[lvl(pet)] : null;
+  // Mole and Sleeper fight at their own damage share and have no soft first loss (Sleeper's second part is the hunter save instead).
+  const hd = rogueRole(pet) === 'breach' ? { dmg: rkit(pet).dmg, soft: 0 } : ab2(pet) === 'breachStreet' ? NR2.ab.hardened[lvl(pet)] : null;
   const soft = (ability(pet) === 'firewall' && upgraded(pet) && (run.softLosses ?? 0) < RUN_CFG.airgapSoftLosses) || Boolean(hd?.soft && (run.softLosses ?? 0) < hd.soft);
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
   markTrail(run, TRAIL.iceLost);
+  if (hunted(pet, run)) addTrail(run, NR2.rogue.trail.iceLost);
   const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
   const dmg = Math.round(
     REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? (hd ? NR2.ab.softMult : RUN_CFG.airgapSoftMult) : 1) * (hd ? hd.dmg : 1) * (NR2.tiers && tier2 ? NR2.tier.damageMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),
@@ -598,6 +663,75 @@ function resolveIceFight(pet, won, rng) {
   if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
   if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by ICE.');
   return { ok: true, won };
+}
+
+// Rogue (stage 2): the end of a hunter fight (the trail hunter or an ambush). Won: the trail hunter takes the trail to 0 (an ambush leaves it), and
+// the node's own encounter follows. Lost: the hunter's damage (Mole and Sleeper: their own share, without the hunter's 1.5x), a lost fight's trail,
+// then a mark and a disconnect, unless Sleeper still has a save this run (an ordinary lost fight).
+function resolveHunter(pet, run, kind, deferred, won, rng) {
+  const st = pet.stats;
+  const k = rkit(pet);
+  const what = kind === 'trail' ? 'hunter' : 'ambush';
+  const onward = () => (deferred !== null ? encounterNode(pet, deferred, rng) : { ok: true, won });
+  if (won) {
+    if (kind === 'trail') run.hunt = 0;
+    const wh = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].winHeal : 0;
+    if (wh) st.integrity = clamp(st.integrity + wh);
+    note(run, kind === 'trail' ? 'the hunter lost the trail. trail 0.' : 'ambush broken.');
+    return onward();
+  }
+  const breach = rogueRole(pet) === 'breach';
+  const dmg = Math.round(REGIONS[run.region].iceDamage * (breach ? k.dmg : NR2.rogue.hunterMult) * (run.hot ? CFG.overclockIceDamageMult : 1));
+  st.integrity = clamp(st.integrity - dmg);
+  st.heat = clamp(st.heat + RUN_CFG.iceLossHeat);
+  addTrail(run, NR2.rogue.trail.iceLost);
+  if (NR2.eggCost) lostFightCost(pet, run, rng);
+  if (challengeOn(run, 'glass')) voidChallenge(run, 'an ICE fight was lost.');
+  if (k?.hunterSaves && run.hunterSaves < k.hunterSaves) {
+    run.hunterSaves++;
+    note(run, `deep cover: the ${what} lost it in the crowd. -${dmg} integrity.`);
+    if (st.integrity <= 0 && !insured(pet)) return disconnect(pet, 'integrity breached by the hunter.');
+    return onward();
+  }
+  run.tally[kind === 'trail' ? 'huntersLost' : 'ambushesLost']++;
+  note(run, `the ${what} got it. -${dmg} integrity.`);
+  addMark(pet, pet.lastTick ?? 0, kind === 'trail' ? 'trail hunter' : 'ambush');
+  return disconnect(pet, kind === 'trail' ? 'the hunter caught it.' : 'walked into an ambush.');
+}
+
+// Handler (Rogue Tune elder): once a run, at any node, it sends an agent out to lay a false trail.
+export function sendAgent(pet) {
+  const run = pet.run;
+  const n = hunted(pet, run) ? rkit(pet)?.agent : 0;
+  if (!n || run.agentUsed || run.phase !== 'map') return { ok: false };
+  run.agentUsed = true;
+  run.tally.agents++;
+  addTrail(run, -n);
+  note(run, `agent sent out. trail -${n}.`);
+  return { ok: true };
+}
+
+// Danger sense (Rogue, stage 2): every node not yet visited, as 'danger' (ICE or an ambush) or 'quiet' (anything else). Empty when the run is not
+// hunted, with the sense off, or under Blackout (it darkens every sight).
+export function dangerView(pet) {
+  const run = pet.run;
+  if (!run || !hunted(pet, run) || !NR2.rogue.dangerSense || run.challenge === 'blackout') return {};
+  const out = {};
+  for (const n of run.map.nodes) if (!run.visited.includes(n.id) && n.type !== 'entry') out[n.id] = n.type === 'ice' ? 'danger' : 'quiet';
+  return out;
+}
+
+// The ambushes the player can tell apart from ordinary ICE: those within its sight (their type shows), and for the Tune forms one step further
+// (Spook three steps, Handler four; under Blackout only what it sees).
+export function ambushSeen(pet) {
+  const run = pet.run;
+  const out = new Set();
+  if (!run || !hunted(pet, run)) return out;
+  const ids = new Set(visibleNodeIds(pet));
+  const far = rkit(pet)?.ambushSight;
+  if (far && run.challenge !== 'blackout') nodesWithin(run, run.pos, far).forEach((id) => ids.add(id));
+  for (const id of ids) if (nodeById(run.map, id).ambush) out.add(id);
+  return out;
 }
 
 // Chrome's corp insurance: once a run (a Plat's twice), a blow that would disconnect it is paid off instead.
@@ -727,6 +861,18 @@ function chooseOption(pet, optionId, rng) {
   let boughtItem = false;
 
   if (p.kind === 'relay') {
+    if (optionId === 'deaddrop') {
+      // Drop and Stash: the cheapest item carried out of this run stays at the relay; the trail falls. Stash gets it back at the run's end.
+      const i = run.loot.reduce((b, id, j) => ((SCRIP.price[id] ?? 0) < (SCRIP.price[run.loot[b]] ?? 0) ? j : b), 0);
+      const [item] = run.loot.splice(i, 1);
+      run.dropped.push(item);
+      run.droppedAt.push(run.pos);
+      run.tally.deadDrops++;
+      addTrail(run, -rkit(pet).deadDrop);
+      note(run, `dead drop: left ${ITEMS[item].name}. trail -${rkit(pet).deadDrop}.`);
+      openChoice(run, { ...p, options: p.options.filter((o) => o.id !== 'deaddrop') });
+      return { ok: true };
+    }
     if (optionId === 'out') {
       rollEggPage(pet, rng);
       return jackOut(pet);
@@ -776,6 +922,7 @@ function chooseOption(pet, optionId, rng) {
       pet.scrip -= accScrip(p.accOffer);
       run.accessories.push(p.accOffer);
       run.tally.bought++;
+      if (hunted(pet, run)) addTrail(run, NR2.rogue.trail.purchase);
       msg = `bought ${accessoryById(p.accOffer).name} for your style.`;
     } else {
       const item = p.offers[Number(optionId.slice(3))];
@@ -783,6 +930,7 @@ function chooseOption(pet, optionId, rng) {
       pet.scrip -= marketScrip(pet, SCRIP.price[item]);
       run.loot.push(item);
       run.tally.bought++;
+      if (hunted(pet, run)) addTrail(run, NR2.rogue.trail.purchase);
       if (p.flavor !== 'clinic') lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);
       msg = `bought ${ITEMS[item].name}.`;
       boughtItem = true;
@@ -793,6 +941,7 @@ function chooseOption(pet, optionId, rng) {
       for (const id of nodesWithin(run, run.pos, depth)) if (!run.revealed.includes(id)) run.revealed.push(id);
     };
     const fragment = (chance) => (rng() < chance ? takeFragment(pet) : '');
+    if (hunted(pet, run)) addTrail(run, NR2.rogue.trail.anomaly);
     msg = ev.options.find((o) => o.id === optionId).apply({ pet, run, rng, loot, hurt, lean, reveal, fragment, codexDone: !fragmentsLeft(run, pet), infect: (d) => infect(pet, d) });
     st.charge = clamp(st.charge);
     st.heat = clamp(st.heat);
@@ -868,6 +1017,7 @@ export function jackOut(pet) {
     return { ok: true, result: 'jacked', kept: [], lost: [], fragments: [], contract: null };
   }
   settleContract(pet, 'jacked');
+  if (run.dropped?.length && rkit(pet)?.keepDropped) run.loot.push(...run.dropped.splice(0)); // Stash: what it left at a dead drop is banked
   const lostInt = (run.startStats?.integrity ?? pet.stats.integrity) - pet.stats.integrity;
   const restored = lostInt > 0 ? Math.round(lostInt * RUN_CFG.jackOutRestore) : 0;
   pet.stats.integrity = clamp(pet.stats.integrity + restored);
@@ -936,6 +1086,7 @@ export function disconnect(pet, why) {
     pet.faultRolls = (pet.faultRolls ?? 0) + 1; // 2.0: a bug roll, settled by sim.js on the next step
   }
   settleContract(pet, 'disconnected');
+  if (run.dropped?.length && rkit(pet)?.keepDropped) for (const item of run.dropped.splice(0)) grantItem(pet, item); // Stash: kept even after a disconnect
   note(run, run.daily ? `DISCONNECTED: ${why} trace over. nothing lost: what it cost is given back.` : `DISCONNECTED: ${why} loot lost. emergency reboot.${mistake ? ' care mistake logged.' : ''}`);
   run.loot = [];
   run.scrip = 0;

@@ -281,9 +281,9 @@ export const ROGUE = {
   // the hunters away, so no sweep starts for defendQuietMin after it. Stage 1 is these at 0 (ROGUE='{"hideLockMin":0,"defendQuietMin":0}').
   hideLockMin: 240,
   defendQuietMin: 480,
-  // Section 7.3 (proposal under test, off by default): a won DEFEND also puts it straight into flow (the 3 hour build-up skipped; flow's
+  // Section 7.3: a won DEFEND also puts it straight into flow (the 3 hour build-up skipped; flow's
   // conditions still apply, so it holds only if the netling is in good shape).
-  defendFlow: false,
+  defendFlow: true, // decided (maintainer, 2026-10-10)
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;

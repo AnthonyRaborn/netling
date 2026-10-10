@@ -112,7 +112,7 @@ test('answers: HIDE ends a sweep with no mark; COMPLY is refused; DEFEND won end
 });
 
 test('7.2, the decided numbers; at 0 (stage 1) no HIDE lockout and no quiet after a won DEFEND', () => {
-  assert.deepEqual([ROGUE.hideLockMin, ROGUE.defendQuietMin, ROGUE.defendFlow], [240, 480, false]);
+  assert.deepEqual([ROGUE.hideLockMin, ROGUE.defendQuietMin, ROGUE.defendFlow], [240, 480, true]);
   const saved = [ROGUE.hideLockMin, ROGUE.defendQuietMin];
   Object.assign(ROGUE, { hideLockMin: 0, defendQuietMin: 0 });
   try {
@@ -130,6 +130,7 @@ test('7.2, the decided numbers; at 0 (stage 1) no HIDE lockout and no quiet afte
 });
 
 test('7.3, with defendFlow: a won DEFEND against a sweep puts it in flow at once; a lost one does not; flow still needs good shape', () => {
+  const saved = ROGUE.defendFlow;
   ROGUE.defendFlow = true;
   try {
     const w = fresh('rogueAdultBreach', { stats: { charge: 80, sync: 60, integrity: 90, heat: 20 } });
@@ -148,7 +149,7 @@ test('7.3, with defendFlow: a won DEFEND against a sweep puts it in flow at once
     tick(hurt, T0 + MIN, stub(0.99));
     assert.equal(inFlow(hurt), false, 'Integrity under 80: flow drops at the next minute');
   } finally {
-    ROGUE.defendFlow = false;
+    ROGUE.defendFlow = saved;
   }
 });
 

@@ -295,6 +295,8 @@ export function checkIn(s, p, now, rng, ctx) {
       if (run.result === 'jacked' && run.messages.some((m) => m.startsWith('bought'))) ctx.runsWithBuy = (ctx.runsWithBuy ?? 0) + 1;
       ctx.scripPeak = Math.max(ctx.scripPeak ?? 0, s.scrip);
       if (run.result === 'disconnected') ctx.runDisconnects = (ctx.runDisconnects ?? 0) + 1;
+      // Rogue (stage 2): hunter fights and ambushes met and lost, a life.
+      for (const k of ['hunters', 'huntersLost', 'ambushes', 'ambushesLost', 'ambushesSlipped']) if (run.tally[k]) ctx[k] = (ctx[k] ?? 0) + run.tally[k];
       finishRun(s, now);
       // Deep runs up to and including the first that reaches its exit.
       if (region === 'deep' && ctx.deepClearAt === null) {
@@ -574,6 +576,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     sweeps: ctx.sweeps ?? 0,
     sweepDefends: ctx.sweepDefends ?? 0,
     sweepForced: ctx.sweepForced ?? 0,
+    hunt: Object.fromEntries(['hunters', 'huntersLost', 'ambushes', 'ambushesLost', 'ambushesSlipped'].map((k) => [k, ctx[k] ?? 0])),
     requestsMet: ctx.requestsMet ?? 0,
     greeted: ctx.greeted ?? 0,
     flowHours: (s.flowTotalMin ?? 0) / 60,
@@ -748,7 +751,10 @@ export function stats(results) {
       defends: round(avg(results.map((r) => r.sweepDefends)), 2), // DEFENDs against a sweep, a life
       forced: round(avg(results.map((r) => r.sweepForced)), 2), // of which with HIDE locked out
       marks: round(avg(results.map((r) => r.marks)), 2),
-      markSources: Object.fromEntries(['sweep ignored', 'defend lost'].map((k) => [k, round(avg(results.map((r) => r.markSources?.[k] ?? 0)), 2)])),
+      markSources: Object.fromEntries(['sweep ignored', 'defend lost', 'trail hunter', 'ambush'].map((k) => [k, round(avg(results.map((r) => r.markSources?.[k] ?? 0)), 2)])),
+      hunt: Object.fromEntries(['hunters', 'huntersLost', 'ambushes', 'ambushesLost', 'ambushesSlipped'].map((k) => [k, round(avg(results.map((r) => r.hunt?.[k] ?? 0)), 2)])),
+      runs: round(avg(results.map((r) => r.runs ?? 0)), 2),
+      runDisconnects: round(avg(results.map((r) => r.runDisconnects ?? 0)), 2),
       marked: rate((r) => r.marks > 0),
       captured: rate((r) => r.cause === 'captured'),
     } } : {}),
@@ -833,7 +839,7 @@ const list = (m) => Object.entries(m).map(([k, v]) => `${k} ${pct(v)}`).join(', 
 function printLife(st, detail) {
   console.log(`  reach teen ${pct(st.teen)} · adult ${pct(st.adult)} · full life ${pct(st.fullLife)} · median ${st.medianDays.toFixed(1)}d · mistakes ${st.mistakes.toFixed(1)}`);
   console.log(`  deaths: ${list(st.deaths)}`);
-  if (st.rogue) console.log(`  rogue: sweeps ${st.rogue.sweeps} (defended ${st.rogue.defends}, forced ${st.rogue.forced}) · marks ${st.rogue.marks} (ignored ${st.rogue.markSources['sweep ignored']}, defend lost ${st.rogue.markSources['defend lost']}) · marked ${pct(st.rogue.marked)} · captured ${pct(st.rogue.captured)}`);
+  if (st.rogue) console.log(`  rogue: sweeps ${st.rogue.sweeps} (defended ${st.rogue.defends}, forced ${st.rogue.forced}) · marks ${st.rogue.marks} (ignored ${st.rogue.markSources['sweep ignored']}, defend lost ${st.rogue.markSources['defend lost']}, hunter ${st.rogue.markSources['trail hunter']}, ambush ${st.rogue.markSources.ambush}) · hunters ${st.rogue.hunt.hunters} (lost ${st.rogue.hunt.huntersLost}) · ambushes ${st.rogue.hunt.ambushes} (lost ${st.rogue.hunt.ambushesLost}) · marked ${pct(st.rogue.marked)} · captured ${pct(st.rogue.captured)}`);
   console.log(`  teens:  ${list(st.teens)}`);
   console.log(`  adults: ${list(st.adults)}`);
   printGate(st.mainframe);

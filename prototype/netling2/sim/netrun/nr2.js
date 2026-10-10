@@ -92,6 +92,26 @@ export const NR2 = {
   // (Mole Hardened, Skip Unseen, Spook Lookahead, Drop Scavenge) at the NL-0 numbers, plus the checkpoint part (run.js). A stand-in: the hunt twists,
   // Skip's trimmed slip, danger sense, the trail and the hunters come with stage 2.
   rogueBase: { rogueAdultBreach: 'breachStreet', rogueAdultDodge: 'dodgeStreet', rogueAdultTune: 'tuneCorp', rogueAdultFeast: 'feastStreet' },
+  // Rogue, simulator stage 2 (docs/NETLING_2_ROGUE_DRAFTS.md 4.2, 6.2, 9.1, 9.2): the trail, the trail hunter, ambush nodes, danger sense and the
+  // hunt twists, for a Rogue netling (sim.js isRogue) only. On by default (Rogue itself is off unless ROGUE is set); NR2='{"rogue":{"on":false}}'
+  // gives stage 1's runs back. Every number is the draft's starting value. The count is `run.hunt` in code (1.0's daily already has `run.trail`).
+  rogue: {
+    on: true,
+    threshold: { public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }, // regions not listed (tutorial, daily) have no hunt
+    trail: { move: 1, iceLost: 2, anomaly: 1, purchase: 1 }, // a won ICE adds nothing; the checkpoint HIDE never happens (checkpoints never notice Rogue)
+    hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
+    ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
+    dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
+    // The kits by role and level (9.2). Mole fights hunters as plain tier-2 ICE at its damage share; Sleeper turns one lost hunter fight a run into an
+    // ordinary lost fight. Skip's slip is trimmed, its moves add trail every second move; Exile slips ambushes (tier-2 avoidance). Spook tells an
+    // ambush from ICE one step beyond its sight; Handler's agent sheds trail once a run. Drop leaves one item at a relay for less trail; Stash keeps it.
+    kit: {
+      breach: { 1: { dmg: 0.7 }, 2: { dmg: 0.65, hunterSaves: 1 } },
+      dodge: { 1: { unseen: 0.3, moveEvery: 2 }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true } },
+      tune: { 1: { sight: 2, ambushSight: 3 }, 2: { sight: 3, ambushSight: 4, agent: 4 } },
+      feast: { 1: { deadDrop: 3 }, 2: { deadDrop: 3, keepDropped: true } },
+    },
+  },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
   cost: {

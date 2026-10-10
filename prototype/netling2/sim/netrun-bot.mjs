@@ -1,5 +1,5 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
-import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem, foresightView } from './netrun/run.js';
+import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem, foresightView, hunted, huntThreshold, sendAgent, dangerView, ambushSeen } from './netrun/run.js';
 import { INVENTORY_SLOTS, SCRIP, leanSeen, slotsUsed } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
 import { tierPenalty } from './netrun/nr2.js';
@@ -63,7 +63,22 @@ function decide(pet, style, rng) {
   const p = pet.run.pending;
   const has = (id) => p.options.some((o) => o.id === id && !o.disabled);
   // Under a challenge it still holds, it pushes for the exit: a relay jack-out would not count.
-  if (p.kind === 'relay') return pet.run.challenge && !pet.run.challengeVoid ? 'continue' : pet.stats.integrity < style.bankAt ? 'out' : 'continue';
+  if (p.kind === 'relay') {
+    if (pet.run.challenge && !pet.run.challengeVoid) return 'continue';
+    if (pet.stats.integrity < style.bankAt) return 'out';
+    if (hunted(pet)) {
+      // Rogue (stage 2). The quiet runner (style.quiet, or RUNBOT=quiet) jacks out at the first relay once the trail is half the threshold. A planning
+      // player jacks out when one more mark would be the third and the trail would bring the hunter before the exit. Going on, Drop and Stash
+      // leave an item at the dead drop while there is trail to shed.
+      const run = pet.run;
+      const th = huntThreshold(run);
+      if ((style.quiet ?? process.env.RUNBOT === 'quiet') && run.hunt >= th / 2) return 'out';
+      const movesLeft = run.map.layerCount - 1 - nodeById(run.map, run.pos).layer;
+      if (style.plan && (pet.marks ?? 0) >= 2 && run.hunt + movesLeft >= th) return 'out';
+      if (has('deaddrop') && run.hunt > 0) return 'deaddrop';
+    }
+    return 'continue';
+  }
   if (p.kind === 'checkpoint') {
     if (has('voucher') && style.lean !== 'indie') return 'voucher';
     if (style.lean === 'corp') return 'comply';
@@ -112,9 +127,16 @@ function nodeValue(type, hurt, node, seek, detail = null, ctx = {}) {
   return { cache: 2, exit: 1, market: 0.5, anomaly: 0.5, checkpoint: -0.5 }[type] ?? 0;
 }
 
+// Rogue (stage 2): an ambush the player can tell apart is worse than ICE (a loss is a mark and a disconnect); a node it cannot see but feels through
+// danger sense counts as ICE (danger) or as a little better than nothing (quiet: caches, relays, markets and the rest, on average).
+const AMBUSH = { hurt: -10, fine: -3 };
+const QUIET = 0.4;
 function pathValue(map, id, visible, depth, hurt, seek, view = null, ctx = {}) {
   const node = nodeById(map, id);
-  const here = visible.has(id) ? nodeValue(node.type, hurt, node, seek, view?.[id], ctx) : 0;
+  const sense = ctx.danger?.[id];
+  const here = visible.has(id)
+    ? ctx.ambush?.has(id) ? AMBUSH[hurt ? 'hurt' : 'fine'] : nodeValue(node.type, hurt, node, seek, view?.[id], ctx)
+    : sense === 'danger' ? nodeValue('ice', hurt, node, seek, null, ctx) : sense === 'quiet' ? QUIET : 0;
   if (depth === 0 || !node.edges.length) return here;
   return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt, seek, view, ctx)));
 }
@@ -179,11 +201,13 @@ export function playRun(pet, style, region, rng, codex = []) {
       choose(pet, decide(pet, style, rng), rng);
     }
     else {
+      // Handler: the agent goes out when the hunter would be waiting at the next node.
+      if (hunted(pet) && run.hunt >= huntThreshold(run)) sendAgent(pet);
       const opts = runOptions(run);
       const hurt = pet.stats.integrity < style.avoidIceBelow;
       const seek = pet.bugs > 0 && style.seekClinic !== false && style.fix?.mode !== 'none'; // bugged, and willing to pay for a fix
       const pick = style.plan
-        ? planMove(run.map, opts, visibleNodeIds(pet), hurt, 3, seek, foresightView(pet), { style, hot: run.hot, cacheFind: REGIONS[run.region].cacheFind })
+        ? planMove(run.map, opts, visibleNodeIds(pet), hurt, 3, seek, foresightView(pet), { style, hot: run.hot, cacheFind: REGIONS[run.region].cacheFind, danger: dangerView(pet), ambush: ambushSeen(pet) })
         : ((seek ? opts.find((n) => n.type === 'market' && n.flavor === 'clinic') : undefined) ??
           opts.find((n) => hurt && n.type === 'relay') ??
           opts.find((n) => !(hurt && n.type === 'ice') && n.type === 'cache') ??
