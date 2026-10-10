@@ -54,7 +54,8 @@ function picture(env, f, state) {
   drawSprite(ctx, shown, xShown, y, paletteColors(pal));
   ctx.globalAlpha = 1;
   const worn = env.worn();
-  if (worn.length) drawWorn(ctx, worn.map((id) => ({ id })), f[wear], x, y, t.frame, false, time, pal);
+  // A form that vanishes (Rogue's Sleeper) hides what it wears while it is gone.
+  if (worn.length && !f.hideWorn?.({ time, reduced })) drawWorn(ctx, worn.map((id) => ({ id })), f[wear], x, y, t.frame, false, time, pal);
   return canvas;
 }
 

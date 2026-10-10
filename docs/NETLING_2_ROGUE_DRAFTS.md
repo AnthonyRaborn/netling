@@ -216,6 +216,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 32. **Stash's maw and Sleeper (fourteenth round):** the eye-colour line is good; a curve up (a grin) then a **half grin** for a more menacing look, other menacing ideas welcome (8.4f). **Sleeper disappears completely** in its fade.
 
+33. **Stash's maw decided (fifteenth round): the late reveal**, with the shadow's eye, and **the whole half grin one row lower** so it does not blend into the eye. **Wearables hide while Sleeper is gone.**
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -429,7 +431,9 @@ The registered forms now carry everything decided (6.1, items 22 to 31): the cam
 - **A late reveal** (`late: true`): the smirk (and the eyes) show only for the last two steps of the hold, just before the shadow is dropped, so it is there for a moment and gone.
 Other ideas, not drawn: the smirk on the shadow only when the real netling glances away (it ties the maw to the temper tell); teeth as alternating eye-colour and dim cells along the line; the shadow lingering a step after the netling's decoy would have dropped.
 
-**Sleeper vanishes completely** (maintainer). Its fade goes all the way: it dims from the edges in to the core over four steps, is **gone** for three (no cell of it left, eyes and marks too; only its shadow, drawn whole while the figure is gone, a dim double shifted three cells to one side), then comes back dim and fills in from the core out. Mole keeps the shorter fade (three rings, eyes always lit). One renderer note: wearables are placed on the registered frames, so while Sleeper is gone they would float in the air unless the renderer hides them for those steps (or keeps them as a tell that something is there); not decided.
+**Sleeper vanishes completely** (maintainer). Its fade goes all the way: it dims from the edges in to the core over four steps, is **gone** for three (no cell of it left, eyes and marks too; only its shadow, drawn whole while the figure is gone, a dim double shifted three cells to one side), then comes back dim and fills in from the core out. Mole keeps the shorter fade (three rings, eyes always lit). One renderer note: wearables are placed on the registered frames, so while Sleeper is gone they would float in the air unless the renderer hides them for those steps (or keeps them as a tell that something is there). **Decided: they hide.** The form carries `hideWorn` (true for the three vanished steps, false under reduced motion, where it does not vanish), and the gallery's layers section skips drawing wearables while it is true; the real renderer must do the same.
+
+**Decided (maintainer):** Stash's maw is **the late reveal with the shadow's eye**, and **the whole half grin sits one row lower** (its corner on the copy's mouth row, its line a row below), so it shares no row with the shadow's eye and no cell of it touches the eye. On the review page and the GIF, Stash's row shows the registered version, the same not lowered, and the half grin alone. The other styles (full grin, straight line, fangs) stay selectable in code.
 
 ### 8.5 Ids and the Dex
 
@@ -438,8 +442,6 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- Stash's maw (8.4f): the half grin (now drawn), with or without the shadow's eyes and the late reveal.
-- Whether wearables hide while Sleeper is gone (8.4f).
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).

@@ -217,33 +217,37 @@ test('each line carries its decided effect: Breach fades, Dodge shimmers as Ciph
   for (const id of ['rogueAdultDodge', 'rogueElderDodge']) assert.ok(same(set[id], M.scanMotion(set[id].stage)), id);
   for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
   assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
-  assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true })));
-  // The maw (a draft): a half grin in the eye colour in the shadow (three cells on a row, the outer end curled up a row), past the body,
-  // only while the decoy is fully out, at the copy's mouth height on either side; never on the body, never on Drop.
+  assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true })), 'Stash: the half grin, low, with the eye, late');
+  // The maw (decided): a half grin in the eye colour in the shadow (three cells on a row, the outer end curled up a row), a row below the
+  // copy's mouth row so it stays clear of the shadow's eye, with the shadow's own eye showing; both only for the last two steps of the hold
+  // (the late reveal), on either side; never on the body, never on Drop.
   const extra = (f, s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join('').split('o').length - f.a.join('').split('o').length;
   const stash = set.rogueElderFeast;
-  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => extra(stash, s) === 4), 'a four-cell half grin while the decoy is fully out, either side');
-  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => extra(stash, s) === 0), 'none while it steps out or is gone');
-  for (const s of [5, 17]) {
+  const { eyeRow, mouthRow } = stash.anchors.a;
+  assert.ok([6, 7, 18, 19].every((s) => extra(stash, s) > 4), 'the grin and the eye at the end of the hold, either side');
+  assert.ok([0, 1, 2, 3, 4, 5, 8, 9, 11, 12, 15, 16, 17].every((s) => extra(stash, s) === 0), 'nothing before the end of the hold or after');
+  for (const s of [6, 18]) {
     const g = stash.motion(stash.a, stash.anchors.a, { time: s * STEP_MS });
     const pad = (g[0].length - stash.a[0].length) / 2;
-    const cells = g.flatMap((r, y) => [...r].map((c, x) => (c === 'o' && stash.a[y]?.[x - pad] !== 'o' ? [x, y] : null)).filter(Boolean));
+    const added = g.flatMap((r, y) => [...r].map((c, x) => (c === 'o' && stash.a[y]?.[x - pad] !== 'o' ? [x, y] : null)).filter(Boolean));
+    const eye = added.filter(([, y]) => y === eyeRow || y === eyeRow + 1);
+    const cells = added.filter(([, y]) => y > eyeRow + 1);
+    assert.ok(eye.length >= 2, `step ${s}: the shadow's eye`);
     const rows = [...new Set(cells.map(([, y]) => y))].sort((p, q) => p - q);
-    assert.equal(rows.length, 2, `step ${s}: two rows`);
+    assert.deepEqual(rows, [mouthRow, mouthRow + 1], `step ${s}: the grin a row below the mouth row (its corner on the mouth row)`);
+    assert.ok(rows[0] > eyeRow + 1, `step ${s}: the grin shares no row with the shadow's eye`);
+    assert.ok(cells.every(([x, y]) => eye.every(([ex, ey]) => Math.max(Math.abs(x - ex), Math.abs(y - ey)) > 1)), `step ${s}: and no grin cell touches the eye, diagonals included`);
     const [corner] = cells.filter(([, y]) => y === rows[0]).map(([x]) => x);
     const low = cells.filter(([, y]) => y === rows[1]).map(([x]) => x).sort((p, q) => p - q);
     assert.deepEqual(low, [low[0], low[0] + 1, low[0] + 2], `step ${s}: three in a row`);
-    const outer = s < STEPS ? low[2] + 1 : low[0] - 1; // the first loop puts the shadow on the right, the next on the left
-    assert.equal(corner, outer, `step ${s}: the outer end curled up`);
-    assert.ok(rows[1] >= stash.anchors.a.mouthRow && rows[1] <= stash.anchors.a.mouthRow + 1, `step ${s}: at the mouth's height`);
-    for (const [x, y] of cells) assert.equal(stash.a[y]?.[x - pad] ?? '.', '.', 'never on the body');
+    assert.equal(corner, s < STEPS ? low[2] + 1 : low[0] - 1, `step ${s}: the outer end curled up`);
+    for (const [x, y] of added) assert.equal(stash.a[y]?.[x - pad] ?? '.', '.', 'never on the body');
   }
   assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => stash.motion(stash.a, stash.anchors.a, { time: s * STEP_MS }).join('').includes('+')).every((x) => !x), 'no highlight cells (no fangs)');
-  // The options: the shadow's eyes, the late reveal, and the earlier styles (grin, straight line, fangs).
+  // The other styles and options stay selectable for the review page.
   const opt = (o) => M.bigDecoyMotion('elder', { withMaw: true, ...o });
   const count = (m, s) => m(stash.a, stash.anchors.a, { time: s * STEP_MS }).join('').split('o').length - stash.a.join('').split('o').length;
-  assert.ok(count(opt({ eyes: true }), 5) > 4, 'the shadow\'s eyes add eye cells');
-  assert.deepEqual([4, 5, 6, 7].map((s) => count(opt({ late: true }), s)), [0, 0, 4, 4], 'late: only the last two steps of the hold');
+  assert.equal(count(opt({}), 5), 4, 'the half grin alone, all through the hold');
   assert.equal(count(opt({ mawStyle: 'grin' }), 5), 4);
   assert.equal(count(opt({ mawStyle: 'line' }), 5), 3);
   assert.equal(opt({ mawStyle: 'fangs' })(stash.a, stash.anchors.a, { time: 5 * STEP_MS }).join('').split('+').length - 1, 2);
@@ -479,4 +483,8 @@ test('Sleeper vanishes completely for three steps (nothing of it but its whole s
   const mole = set.rogueAdultBreach;
   for (let s = 0; s < STEPS; s++) assert.ok(mole.motion(mole.a, mole.anchors.a, { time: s * STEP_MS }).join('').includes('o'), 'Mole never vanishes');
   assert.equal(new Set([0, 5, 9].map((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join())).size, 1, 'calm: still');
+  // Its wearables hide while it is gone (decided), and only then; no other form hides them.
+  assert.deepEqual(Array.from({ length: STEPS }, (_, s) => f.hideWorn({ time: s * STEP_MS })), VANISH.map((v) => v === 'gone'));
+  assert.equal(f.hideWorn({ time: 6 * STEP_MS, reduced: true }), false, 'calm: it does not vanish, so nothing hides');
+  for (const g of forms) if (g !== f) assert.equal(g.hideWorn, undefined, g.id);
 });

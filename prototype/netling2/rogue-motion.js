@@ -13,7 +13,8 @@
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
 //   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
 //   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
-//     copy's mouth height, a half grin in the eye colour inside the shadow (a line with its outer end curled up), an extra mouth in it.
+//     copy's mouth height and a row lower, a half grin in the eye colour inside the shadow (a line with its outer end curled up), with the
+//     shadow's own eye showing beside it; both appear only for the last two steps of the hold, a reveal just before the shadow is dropped.
 //   Alias: a hint of the sweep: a dim band runs down the body below the neck and back, with no holes (its two camo bands are in its frames).
 //   Foundling: the plain decoy (its camo hint is in its frames).
 import { STEPS, STEP_MS, ECHO, stepOf, dub } from './echo-motion.js';
@@ -211,14 +212,15 @@ function shadowEyes(g, sprite, drawn, side, n, pad) {
   }));
 }
 // Options on the maw: `eyes` draws the shadow's eyes too; `late` shows the maw (and eyes) only for the last two steps of the hold, a reveal
-// just before the shadow is dropped.
-export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'half', eyes = false, late = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+// just before the shadow is dropped; `low` starts the maw one row lower, so a curled corner never sits beside the shadow's eye (decided for
+// Stash: the half grin, low, with the eyes and the late reveal).
+export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'half', eyes = false, late = false, low = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, BIG_PAD);
   const drawn = decoyInto(g, sprite, time, reduced, BIG_PAD, REACH[stage] + 1);
   const step = stepOf(time);
   const showing = !late || (!reduced && step >= HOLD_UNTIL - 1 && step <= HOLD_UNTIL);
   const side = reduced ? 1 : sideAt(time);
-  if (withMaw && showing) maw(g, drawn, side, anchors.mouthRow, mawStyle);
+  if (withMaw && showing) maw(g, drawn, side, anchors.mouthRow + (low ? 1 : 0), mawStyle);
   if (withMaw && eyes && showing) shadowEyes(g, sprite, drawn, side, reduced ? 1 : offsetAt(step, REACH[stage] + 1), BIG_PAD);
   return out(g);
 };
@@ -238,6 +240,10 @@ export const sweepHintMotion = (stage) => (sprite, anchors, { time = 0, reduced 
   return out(g);
 };
 
+// While Sleeper is gone, its wearables hide too (decided): the renderer asks the form's `hideWorn` before drawing what it wears.
+export const vanishedAt = ({ time = 0, reduced = false } = {}) => !reduced && VANISH[stepOf(time)] === 'gone';
+export const HIDE_WORN_OF = { moleElder: vanishedAt };
+
 // Which layer each form carries, by its old authoring key (rogue-models.js registers it as `motion`).
 export const MOTION_OF = {
   baby: decoyMotion('baby'),
@@ -245,5 +251,5 @@ export const MOTION_OF = {
   mole: fadeMotion('adult'), moleElder: fadeMotion('elder', { vanish: true }),
   skip: scanMotion('adult'), skipElder: scanMotion('elder'),
   spook: decoyMotion('adult'), spookElder: decoyMotion('elder'),
-  drop: bigDecoyMotion('adult'), dropElder: bigDecoyMotion('elder', { withMaw: true }),
+  drop: bigDecoyMotion('adult'), dropElder: bigDecoyMotion('elder', { withMaw: true, eyes: true, late: true, low: true }),
 };

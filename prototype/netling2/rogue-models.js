@@ -10,7 +10,7 @@
 // Alias carries a hint of the sweep. The camo itself (Foundling's band, Alias's two, the Tune line's still camo) is drawn in the frames.
 import { pose } from './models.js';
 import { idMaps, nameOf } from './form-ids.js';
-import { MOTION_OF } from './rogue-motion.js';
+import { MOTION_OF, HIDE_WORN_OF } from './rogue-motion.js';
 import { ROGUE_BABY, ROGUE_BABY_ANCHORS, ROGUE_TEENS, ROGUE_TEEN_ANCHORS, ROGUE_ADULTS, ROGUE_ADULT_ANCHORS, ROGUE_ELDERS, ROGUE_ELDER_ANCHORS, ROGUE_TAGS } from './rogue-art.js';
 
 const OLD_FORMS = {
@@ -56,6 +56,8 @@ function build(old) {
     dead: roguePose(frames.a, a, 'dead', old),
     anchors: { a, b: a, sleep: a },
     motion: MOTION_OF[old],
+    // Sleeper only: true while it has vanished, so the renderer hides what it wears (rogue-motion.js).
+    ...(HIDE_WORN_OF[old] ? { hideWorn: HIDE_WORN_OF[old] } : {}),
   };
 }
 let cache;
