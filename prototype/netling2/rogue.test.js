@@ -190,22 +190,54 @@ test('no wearable moves between the A and B frames on any Rogue form, and every 
 });
 
 // --- the shadow (rogue-motion.js) -----------------------------------------------------------------------------------------------------
-test('the shadow is registered on all ten forms, sized by stage: one cell out on the baby and teen, two on the adults, three on the elders', () => {
+test('the shadow is registered on all ten forms, sized by stage (one cell on the baby and teen, two on adults, three on elders), one further on the Feast line', () => {
   assert.deepEqual(REACH, { baby: 1, teen: 1, adult: 2, elder: 3 });
   for (const f of forms) {
     assert.equal(typeof f.motion, 'function', f.id);
     let widest = 0;
     for (let s = 0; s < STEPS; s++) {
       const m = f.motion(f.a, f.anchors.a, { time: s * STEP_MS });
+      const pad = (m[0].length - f.a[0].length) / 2;
       // How far the copy reaches past the figure's own painted edge (a narrow form does not fill its width).
       const cols = m.flatMap((r) => [...r].map((c, x) => (c !== '.' ? x : -1)).filter((x) => x >= 0));
-      const own = f.a.flatMap((r) => [...r].map((c, x) => (c !== '.' ? x + PAD : -1)).filter((x) => x >= 0));
-      const left = Math.min(...own) - Math.min(...cols);
-      const right = Math.max(...cols) - Math.max(...own);
-      widest = Math.max(widest, left, right);
+      const own = f.a.flatMap((r) => [...r].map((c, x) => (c !== '.' ? x + pad : -1)).filter((x) => x >= 0));
+      widest = Math.max(widest, Math.min(...own) - Math.min(...cols), Math.max(...cols) - Math.max(...own));
     }
-    assert.equal(widest, REACH[f.stage], `${f.id}: the copy reaches ${widest} cells out`);
+    assert.equal(widest, REACH[f.stage] + (f.role === 'feast' || f.from === 'rogueAdultFeast' ? 1 : 0), `${f.id}: the copy reaches ${widest} cells out`);
   }
+});
+
+test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw), Alias the sweep hint', async () => {
+  const M = await import('./rogue-motion.js');
+  const same = (f, m) => [0, 2, 5, 9, 14].every((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join() === m(f.a, f.anchors.a, { time: s * STEP_MS }).join());
+  assert.ok(same(set.rogueBaby, M.decoyMotion('baby')));
+  assert.ok(same(set.rogueTeen, M.sweepHintMotion('teen')));
+  for (const id of ['rogueAdultBreach', 'rogueElderBreach']) assert.ok(same(set[id], M.fadeMotion(set[id].stage)), id);
+  for (const id of ['rogueAdultDodge', 'rogueElderDodge']) assert.ok(same(set[id], M.scanMotion(set[id].stage)), id);
+  for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
+  assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
+  assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true })));
+  // The maw: bright teeth in the shadow, past the body, only while the decoy is out; never on Drop.
+  const teeth = (f, s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join('').split('+').length - 1 - f.a.join('').split('+').length + 1;
+  const stash = set.rogueElderFeast;
+  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => teeth(stash, s) === 2), 'two teeth while the decoy is fully out, either side');
+  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => teeth(stash, s) === 0), 'none while it steps out or is gone');
+  assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => teeth(set.rogueAdultFeast, s)).every((n) => n === 0), 'Drop has no maw');
+});
+
+test('the camo is drawn in the frames: a band on Foundling, two on Alias (swapping with the frame), still camo on Spook and Handler over head and body', () => {
+  const camoRow = (r) => /(#x){2}|(x#){2}/.test(r);
+  const n = (f) => f.anchors.a.neckRow;
+  assert.ok(camoRow(set.rogueBaby.a[n(set.rogueBaby) + 1]) && set.rogueBaby.a[n(set.rogueBaby) + 1] !== set.rogueBaby.b[n(set.rogueBaby) + 1]);
+  for (const y of [n(set.rogueTeen) + 1, n(set.rogueTeen) + 2]) assert.notEqual(set.rogueTeen.a[y], set.rogueTeen.b[y], `Alias row ${y} swaps`);
+  for (const id of ['rogueAdultTune', 'rogueElderTune']) {
+    const f = set[id];
+    const e = f.anchors.a.eyeRow;
+    assert.ok(f.a.slice(0, e - 2).join('').includes('x'), `${id}: camo on the head, above the arc`);
+    assert.ok(f.a.slice(n(f) + 1).filter(camoRow).length >= 3, `${id}: camo on the body`);
+    for (let y = 0; y < f.a.length; y++) if (y <= n(f)) assert.equal(f.a[y], f.b[y], `${id}: still, row ${y}`);
+  }
+  for (const id of ['rogueAdultBreach', 'rogueAdultDodge', 'rogueAdultFeast']) assert.ok(!set[id].a.slice(n(set[id]) + 1).some((r, i) => camoRow(r) && !rogueTag(id).some(([, y]) => y === i + n(set[id]) + 1)), `${id}: no camo`);
 });
 
 test('the shadow follows the echo rules: a pure function of time in 12 steps of 400 ms, the figure untouched, dim cells only where it is empty', () => {
@@ -303,7 +335,8 @@ test('unsteady: glances at random times to either side, more at -2; reduced moti
 // --- the review options (rogue-options.js; nothing registered) ---------------------------------------------------------------------
 test('options: the thermocamo touches body cells only (never the eyes, the tag or the outline); body only keeps the head identical in both frames', async () => {
   const { CAMO_OPTIONS } = await import('./rogue-options.js');
-  for (const f of [set.rogueBaby, set.rogueTeen, set.rogueAdultDodge, set.rogueElderDodge, set.rogueAdultTune, set.rogueElderTune]) {
+  // On the Dodge forms, which have no camo in their frames (the decided camo is drawn in Foundling's, Alias's and the Tune line's).
+  for (const f of [set.rogueAdultDodge, set.rogueElderDodge]) {
     for (const [kind, o] of Object.entries(CAMO_OPTIONS)) {
       const { a, b } = o.make(f, rogueTag(f.id));
       for (const [rows, src] of [[a, f.a], [b, f.b]]) {
@@ -391,9 +424,10 @@ test('options, third round: the fades, the bigger decoy and Alias\'s sweep chang
   };
   assert.equal(reach(set.rogueAdultFeast, bigDecoy('adult'), BIG_PAD), REACH.adult + 1);
   assert.equal(reach(set.rogueElderFeast, bigDecoy('elder'), BIG_PAD), REACH.elder + 1);
-  // Alias's bigger hint: two camo rows under the neck, the head identical in both frames.
-  const { a, b } = aliasHint(set.rogueTeen, rogueTag('rogueTeen'));
-  for (let y = 0; y <= set.rogueTeen.anchors.a.neckRow; y++) assert.equal(a[y], b[y]);
-  const n = set.rogueTeen.anchors.a.neckRow;
-  assert.ok([n + 1, n + 2].every((y) => a[y] !== set.rogueTeen.a[y]));
+  // Alias's bigger hint (drawn into its frames since; checked there): on a form without camo it adds two rows under the neck.
+  const plainF = set.rogueAdultBreach;
+  const { a, b } = aliasHint(plainF, rogueTag(plainF.id));
+  for (let y = 0; y <= plainF.anchors.a.neckRow; y++) assert.equal(a[y], b[y]);
+  const n = plainF.anchors.a.neckRow;
+  assert.ok([n + 1, n + 2].every((y) => a[y] !== plainF.a[y]));
 });

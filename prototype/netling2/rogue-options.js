@@ -1,5 +1,5 @@
-// Options for the Rogue drafts' review (docs/NETLING_2_ROGUE_DRAFTS.md, 8.4b and 8.4c), drawn over the registered forms, which stay unchanged
-// until the maintainer picks. Pure functions of the rows; nothing here is registered.
+// Options for the Rogue drafts' review (docs/NETLING_2_ROGUE_DRAFTS.md, 8.4b to 8.4f): the camo helpers that drew the decided camo into
+// rogue-art.js, and the alternatives not chosen, for the record and the options page. Pure functions of the rows; nothing here is registered.
 //
 // Third eye: decided, the arc (8.4b), now drawn in rogue-art.js; the other three options (pair, four, slit) are in the git history of this
 // file and on docs/netling2-prototypes/shots/rogue-options.png.
@@ -47,72 +47,18 @@ export const STATIC_CAMO_OPTIONS = {
   } },
 };
 
-// Cipher's shimmer for the Dodge line (second round): Cipher's camouflage activation (blank-motion.js) on Rogue's body. A scan band sweeps
-// from the hood's top to the feet and back in 12 steps of 400 ms; above it the body is solid, on it a dim row, below it plain body cells
-// are see-through checker holes (the outline changes, as on Cipher). Unlike Cipher's layer it never touches Rogue's marks (the arc, the
-// tag, the eyes: only '#' cells change) and keeps the face rows whole (the arc's rows to the row under the eyes). The decoy is drawn as
-// on every form, only where the original figure is empty, so it does not fill the holes. Reduced motion: no band (the body as drawn), the
-// decoy parked. A motion layer: it returns padded rows like rogue-motion.js.
-import { STEPS, STEP_MS, PAD, REACH, offsetAt, sideAt } from './rogue-motion.js';
-import { dub } from './echo-motion.js';
-export const bandAt = (step, height) => {
-  const t = step <= STEPS / 2 ? step / (STEPS / 2) : (STEPS - step) / (STEPS / 2);
-  return Math.round(1 + t * (height - 2));
-};
-export function cipherScan(stage) {
-  return (sprite, anchors, { time = 0, reduced = false } = {}) => {
-    const src = sprite.map((r) => [...('.'.repeat(PAD) + r + '.'.repeat(PAD))]);
-    const g = src.map((r) => r.slice());
-    const step = Math.floor(Math.max(0, time) / STEP_MS) % STEPS;
-    if (!reduced) {
-      const band = bandAt(step, sprite.length);
-      const face = (y) => y >= anchors.eyeRow - 2 && y <= anchors.eyeRow + 1;
-      for (let y = 0; y < g.length; y++) {
-        if (face(y)) continue;
-        for (let x = 0; x < g[0].length; x++) {
-          if (g[y][x] !== '#') continue;
-          if (y === band) g[y][x] = 'x';
-          else if (y > band && (x + y) % 2) g[y][x] = '.';
-        }
-      }
-    }
-    const n = reduced ? 1 : offsetAt(step, REACH[stage]);
-    const side = reduced ? 1 : sideAt(time);
-    if (n) {
-      const shadow = src.map((r) => r.map(() => '.'));
-      dub(shadow, src, side * n, 0);
-      for (let y = 0; y < g.length; y++) for (let x = 0; x < g[0].length; x++) if (src[y][x] === '.' && shadow[y][x] === 'x') g[y][x] = 'x';
-    }
-    return g.map((r) => r.join(''));
-  };
-}
-
-// ---- third round (maintainer, 2026-10-10): each older line its own effect --------------------------------------------------------------
-// Breach (Mole, Sleeper): a FADE, two looks to compare. Feast (Drop, Stash): a BIGGER, more obvious decoy. Alias: a bigger hint and a hint
-// of the Dodge line's sweep. All motion layers in the echo frame (12 steps of 400 ms, padded rows, calm = still); none touches the eyes,
-// the arc or the tag, only plain body cells.
-const FADE_RINGS = [0, 1, 2, 3, 3, 3, 3, 3, 2, 1, 0, 0]; // edge fade: rings dimmed at each step (in, hold, back)
-const PULSE = [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0]; // whole-body pulse: dim or not at each step
-// Distance of each painted cell from the outside (1 = an outline cell), by 4-neighbour steps.
-function depth(rows) {
-  const h = rows.length;
-  const w = rows[0].length;
-  const d = rows.map((r) => [...r].map((c) => (c === '.' ? 0 : Infinity)));
-  for (let pass = 0; pass < w + h; pass++) {
-    let changed = false;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      if (!d[y][x]) continue;
-      const n = Math.min(d[y - 1]?.[x] ?? 0, d[y + 1]?.[x] ?? 0, d[y][x - 1] ?? 0, d[y][x + 1] ?? 0) + 1;
-      if (n < d[y][x]) { d[y][x] = n; changed = true; }
-    }
-    if (!changed) break;
-  }
-  return d;
-}
+// The layers chosen from these options now live in rogue-motion.js and are registered on the forms (scanMotion, fadeMotion,
+// bigDecoyMotion, sweepHintMotion). The options page (rogue-options.html) still draws the alternatives that were not chosen, kept here for
+// the record: the whole-body fade pulse (Breach; edges was chosen) and the bright decoy (Feast; dim was chosen).
+import { STEPS, STEP_MS, PAD, BIG_PAD, REACH, offsetAt, sideAt, scanMotion, fadeMotion, bigDecoyMotion, sweepHintMotion, bandAt } from './rogue-motion.js';
+export { bandAt, BIG_PAD };
+export const cipherScan = scanMotion;
+export const fadeEdges = fadeMotion;
+export const aliasSweep = sweepHintMotion;
 const stepOfTime = (time) => Math.floor(Math.max(0, time) / STEP_MS) % STEPS;
-// The decoy as on every form, drawn only where the original figure is empty, into padded rows `g` (padding `pad`).
+const padded = (sprite, pad) => sprite.map((r) => [...('.'.repeat(pad) + r + '.'.repeat(pad))]);
 function decoyInto(g, sprite, stage, time, reduced, pad, { reach = REACH[stage], cell = 'x', checker = false } = {}) {
-  const src = sprite.map((r) => [...('.'.repeat(pad) + r + '.'.repeat(pad))]);
+  const src = padded(sprite, pad);
   const n = reduced ? 1 : offsetAt(stepOfTime(time), reach);
   const side = reduced ? 1 : sideAt(time);
   if (!n) return;
@@ -121,20 +67,7 @@ function decoyInto(g, sprite, stage, time, reduced, pad, { reach = REACH[stage],
     if (src[y][x] === '.' && from && from !== '.' && (!checker || (x + y) % 2 === 0)) g[y][x] = cell;
   }
 }
-const padded = (sprite, pad) => sprite.map((r) => [...('.'.repeat(pad) + r + '.'.repeat(pad))]);
-
-export function fadeEdges(stage) {
-  return (sprite, anchors, { time = 0, reduced = false } = {}) => {
-    const g = padded(sprite, PAD);
-    if (!reduced) {
-      const rings = FADE_RINGS[stepOfTime(time)];
-      const d = depth(sprite);
-      sprite.forEach((r, y) => [...r].forEach((c, x) => { if (c === '#' && d[y][x] <= rings) g[y][x + PAD] = 'x'; }));
-    }
-    decoyInto(g, sprite, stage, time, reduced, PAD);
-    return g.map((r) => r.join(''));
-  };
-}
+const PULSE = [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0]; // whole-body pulse: dim or not at each step
 export function fadePulse(stage) {
   return (sprite, anchors, { time = 0, reduced = false } = {}) => {
     const g = padded(sprite, PAD);
@@ -143,31 +76,16 @@ export function fadePulse(stage) {
     return g.map((r) => r.join(''));
   };
 }
-// The Feast line's bigger decoy: one cell further than the stage's reach (Drop 3, Stash 4), dim and solid, or bright and sparse.
-export const BIG_PAD = 4;
-export const bigDecoy = (stage, bright = false) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
-  const g = padded(sprite, BIG_PAD);
-  decoyInto(g, sprite, stage, time, reduced, BIG_PAD, { reach: REACH[stage] + 1, cell: bright ? '#' : 'x', checker: bright });
-  return g.map((r) => r.join(''));
-};
-// Alias, a bigger hint: two camo bands on the cloak (swapping phase with the frame, as the first hint), and a hint of the sweep: a dim band
-// that runs down the body below the neck and back, with no holes. The frames are camoed by `aliasHint`; the sweep is a motion layer.
+// The Feast decoy, dim (chosen: rogue-motion.js) or bright (the body colour on a checker; not chosen).
+export const bigDecoy = (stage, bright = false) => (bright
+  ? (sprite, anchors, { time = 0, reduced = false } = {}) => {
+    const g = padded(sprite, BIG_PAD);
+    decoyInto(g, sprite, stage, time, reduced, BIG_PAD, { reach: REACH[stage] + 1, cell: '#', checker: true });
+    return g.map((r) => r.join(''));
+  }
+  : bigDecoyMotion(stage));
+// Alias, the bigger hint (chosen, drawn into its frames): two camo bands on the cloak, swapping phase with the frame.
 export const aliasHint = (f, tag) => {
   const y = f.anchors.a.neckRow + 1;
   return { a: camo(f.a, { from: y, to: y + 1, phase: 0, keep: tag }), b: camo(f.b, { from: y, to: y + 1, phase: 1, keep: tag }) };
 };
-export function aliasSweep(stage) {
-  return (sprite, anchors, { time = 0, reduced = false } = {}) => {
-    const g = padded(sprite, PAD);
-    if (!reduced) {
-      const top = anchors.neckRow + 1;
-      const span = sprite.length - top;
-      const s = stepOfTime(time);
-      const t = s <= STEPS / 2 ? s / (STEPS / 2) : (STEPS - s) / (STEPS / 2);
-      const band = top + Math.round(t * (span - 1));
-      [...sprite[band]].forEach((c, x) => { if (c === '#') g[band][x + PAD] = 'x'; });
-    }
-    decoyInto(g, sprite, stage, time, reduced, PAD);
-    return g.map((r) => r.join(''));
-  };
-}

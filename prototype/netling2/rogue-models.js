@@ -5,11 +5,12 @@
 // Rogue's marks (a proposal, easy to change):
 //   asleep: no mark, only 1.0's slit eyes. The shut third eye is shut already.
 //   dead:   the scraped-off asset tag lights up (its dim cells turn highlight): the plate that was removed shows through at the end.
-// Every form carries the shadow, a motion layer (rogue-motion.js): the decoy, registered as `motion`; the split is kept beside it for the
-// review page.
+// Every form carries the shadow, a motion layer (rogue-motion.js), registered as `motion`, and each older line its own effect with it: the
+// Breach line fades from the edges, the Dodge line shimmers as Cipher, the Feast line casts a bigger decoy (Stash's with a maw, a draft),
+// Alias carries a hint of the sweep. The camo itself (Foundling's band, Alias's two, the Tune line's still camo) is drawn in the frames.
 import { pose } from './models.js';
 import { idMaps, nameOf } from './form-ids.js';
-import { decoyMotion } from './rogue-motion.js';
+import { MOTION_OF } from './rogue-motion.js';
 import { ROGUE_BABY, ROGUE_BABY_ANCHORS, ROGUE_TEENS, ROGUE_TEEN_ANCHORS, ROGUE_ADULTS, ROGUE_ADULT_ANCHORS, ROGUE_ELDERS, ROGUE_ELDER_ANCHORS, ROGUE_TAGS } from './rogue-art.js';
 
 const OLD_FORMS = {
@@ -54,7 +55,7 @@ function build(old) {
     sleep: roguePose(frames.a, a, 'sleep', old),
     dead: roguePose(frames.a, a, 'dead', old),
     anchors: { a, b: a, sleep: a },
-    motion: decoyMotion(OLD_FORMS[old].stage),
+    motion: MOTION_OF[old],
   };
 }
 let cache;

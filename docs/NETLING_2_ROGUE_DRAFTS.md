@@ -212,6 +212,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 30. **Each line its own effect (twelfth round):** the Dodge line shimmers as Cipher (kept) and the Tune line wears the camo **still, on head and body** (decided). Foundling's hint stays; **Alias shows more, plus a hint of the sweep**. **The Breach line (Mole, Sleeper) fades** and **the Feast line (Drop, Stash) casts a bigger, more obvious decoy**, so every older form has its own distinction; the two fade looks and two decoy looks are drawn to compare (8.4e).
 
+31. **The effects chosen (thirteenth round):** the Breach fade is **from the edges**; the Feast decoy is **dim**; **Alias's bigger hint** (two bands and the sweep hint) is right. The Feast elder (Stash) may need **something hinting at an additional mouth in its shadow** (a draft, 8.4f). All decided effects are now drawn into the registered forms.
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -410,6 +412,12 @@ Drawn as options over the registered forms (`rogue-options.js`, `rogue-options.h
 
 What the GIF shows: both fades nearly empty the body for a moment (the eyes stay lit), the pulse more abruptly; the bright decoy is the most visible effect on the page, the dim one reads as a longer shadow. A fade and the bright decoy are the strongest motion on any form, so both stay inside the flash budget by the same 400 ms steps as the echoes (the pulse changes twice a loop, the edge fade once a step).
 
+### 8.4f The decided effects drawn into the forms, and Stash's maw (2026-10-10)
+
+The registered forms now carry everything decided (6.1, items 22 to 31): the camo in the frames (Foundling's one band and Alias's two, swapping with the frame; Spook's and Handler's still camo on head and body, the arc, eyes and tag left clear), and each form's layer in `rogue-motion.js` (`MOTION_OF`): the plain decoy on Foundling, Spook and Handler; the sweep hint on Alias; the edge fade on Mole and Sleeper; Cipher's shimmer on Skip and Exile; the bigger dim decoy on Drop and Stash. The layers moved from `rogue-options.js` into `rogue-motion.js`; the options file keeps the camo helpers that drew the frames and the alternatives not chosen (the fade pulse, the bright decoy) for the record. Every check in 8.4a still holds (24 tests); the gallery and the review page draw the registered layers. GIF of the registered forms: `docs/netling2-prototypes/shots/rogue-registered.gif`; review sheet `rogue-review.png` redrawn with the camo.
+
+**Stash's maw (a draft for review).** The shadow shows only where the figure is empty, so a mouth where the copy's own face would be stays hidden behind the body; the maw sits in the visible strip instead. At the copy's mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the body, with the row under them showing too), the outermost four become a mouth: a dark opening two cells wide and two rows tall with a bright fang at each top corner (`+..+` over `x..x`), there only while the decoy is fully out (four steps of each loop, on either side). Seen on the GIF it reads as two fangs over a notch at the shadow's leading edge; whether that reads as a mouth is the maintainer's call. A first try on the shadow's widest row (lower down) read as two stray dots and was replaced. Options if it should read more: an accent (the eyes' colour) mouth line instead of the fangs, a wider opening, or the maw on Drop too.
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -417,7 +425,7 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The Breach fade (edges or pulse) and the Feast decoy (dim or bright), and Alias's bigger hint (8.4e). Then the decided effects are drawn into the registered forms.
+- Stash's maw (8.4f): as drawn, or one of the stronger options.
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
