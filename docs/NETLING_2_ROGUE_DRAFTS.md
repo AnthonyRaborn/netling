@@ -579,7 +579,7 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 
 ### 9.6 For the maintainer
 
-**Taken as starting points (maintainer, 2026-10-10):** the four abilities, the perks (Drop's widened to every market in a run), the role traits and the keepsakes, all to be measured; danger sense with the details proposed in 9.1 (marks on nodes, not lines; the trail hunter off the map; adult and elder the same; dark under Blackout). **Direction (maintainer):** Rogue gets **its own map build rules**, since its netrun rules differ anyway, as a balance lever against danger sense and the twists; not drafted yet. The items below stay open where not covered.
+**Taken as starting points (maintainer, 2026-10-10):** the four abilities, the perks (Drop's widened to every market in a run), the role traits and the keepsakes, all to be measured; danger sense with the details proposed in 9.1 (marks on nodes, not lines; the trail hunter off the map; adult and elder the same; dark under Blackout). **Direction (maintainer):** Rogue gets **its own map build rules**, since its netrun rules differ anyway, as a balance lever against danger sense and the twists; drafted in 9.7. The items below stay open where not covered.
 
 
 1. The four abilities, or an alternate per elder (Sleeper: Gone to ground; Exile: Away is home; Handler: Turned; Stash: the forced cache).
@@ -588,6 +588,31 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 3a. Danger sense's details (9.1): marks on nodes but not lines, the trail hunter off the map, adult and elder the same.
 4. The keepsakes.
 5. Then the simulator build (section 7) can use these in place of its stand-in.
+
+### 9.7 Rogue's map rules (draft for choice, 2026-10-10)
+
+**Direction (maintainer):** Rogue has its own netrun rules, so it gets its own map build rules as a balance lever, mainly against danger sense (9.1). Levers chosen: **cordon layers, chokepoints, relay rules, danger clustering, and the danger and quiet node frequencies as needed** to meet balance goals that are not set yet. Nothing is simulated; every number is a starting value. The rules act at map build (`netrun/map2.js` in the fork, which already takes a region's width and second-link chance), so they stay pure and change nothing for the NL-0 eggs.
+
+**What danger sense does to today's maps.** Danger share by node weight: Public Net 6 of 14 (43%), Corp Grid 7 of 18 (39%), Bazaar 5 of 14 (36%), Ruins 6 of 17 (35%), the Deep 9 of 16 (56%), the Source 11 of 17 (65%). The 2.0 maps widened the Deep (3 to 4 nodes a layer, second link 0.65) and the Source (3 to 5, 0.75), which gives the most ways around danger exactly where Rogue's hunters and its good end are. In the shallow regions a quiet way through a layer is usually there. So without new rules danger sense saves the most fights where it should save the fewest. Also: checkpoints never notice Rogue (9.1), so a checkpoint is a free quiet node, and the Corp Grid (checkpoint weight 4) becomes Rogue's easiest region.
+
+**The five levers, in the order recommended:**
+
+1. **Cordon layers (the main feature).** A cordon is a layer where every node is danger (ICE or an ambush): the hunters' net across the route. Danger sense shows it from the start of the run, so the player plans for it rather than meeting it by surprise. It forces one fight and leaves a choice of which: Spook tells an ambush from ICE there (9.2) and Mole is built to take it. Starting values: none in the Public Net and the Bazaar, none in the Corp Grid and the Ruins at first (one each if those regions measure too easy), **one in the Deep and two in the Source**. Never layer 1, never the relay layer.
+2. **Relay rules (paired with the cordon).** The guaranteed relay stays at the middle layer, and **the first cordon sits in the layer right after it**, so the relay asks the real question: out now with what is held, or through the net. In the Source the second cordon goes about two thirds of the way down. Relays beyond the guaranteed one (weight 1 in every region) are **halved for Rogue** (weight 0.5) so the escape is a place, not a habit. Cost to note: relays are where Drop's dead drop acts (9.2), so fewer relays weaken Drop; if it falls behind, its dead drop can also work at a market.
+3. **Chokepoints.** Rogue keeps **1.0's narrow maps in the Deep and the Source** (2 to 3 nodes a layer, second link 0.5) instead of the widened 2.0 ones, so there are fewer ways around danger where it matters. The shallow regions are unchanged. If that is not enough, the next step is a lower second-link chance (0.35) in the deep half of the map only. The widening was decided for the NL-0 eggs' exit rates; Rogue's own measure decides its own width.
+4. **Danger clustering.** Loot is guarded: for a share of caches and markets (starting value **one in two in every region**), every node in the layer before that links into it is danger, converted from ICE the region would place elsewhere (the count of danger nodes does not change). Quiet routes still exist but pass fewer caches and markets, so danger sense trades loot for safety instead of giving both. It pairs with Drop (loot is what it is for) and with Skip (it can slip ordinary ICE on the way to a guarded cache, never an ambush at the adult level).
+5. **Frequency (the tuning knob, last).** The danger and quiet weights per region are Rogue's own and are moved only to meet the balance goals once they are set. A starting proposal for one known gap: in the Corp Grid, half of the checkpoint weight (2 of 4) becomes ICE for Rogue (corp patrols that do notice it), so the region is not a free pass.
+
+**A decision this revises.** 6.1, item 15 says a Rogue run holds no more fights than another egg's (ambushes come out of the existing ICE weight). Levers 1 and 4 keep the count of danger nodes (a cordon converts nodes it would have rolled; clustering moves ICE), but lever 5, and lever 1 in a layer that rolled quiet, can add danger. Proposal: **item 15 holds at home** (the sweep stays at 12% an hour) **and is relaxed on the map**, where danger sense needs a counterweight. To confirm.
+
+**Balance goals (not set; proposals to frame them).**
+- **Fights avoided:** a careful Rogue route (the bot routes by danger sense) meets about **60 to 75% of the fights** a route chosen without it meets, in each region. Under that range danger sense is not worth having; over it the hunters have no bite.
+- **Exit and value:** the 4.4 targets (careful disconnects about 1.5x the hidden adult's per region, the exit rate no more than 10 points lower in the Public Net and the Bazaar), measured with the kits and these map rules on.
+- **The relay question is real:** with a quiet-runner bot (section 7) jacking out at the relay before a cordon, its banked value per run should sit within about 20% of a bot that goes through, so neither choice is always right.
+
+**For the simulator (section 7, when built):** in `map2.js`, under the `ROGUE` switch: a cordon layer list per region, the relay-then-cordon placement, a relay weight factor, Rogue's own width and second-link per region, the guard rule with its share, and per-region weight overrides; a danger-sense routing rule for the bots; the measures above. One rng rule: the new steps must draw their random numbers after the ordinary map's, so a Rogue map with every lever off equals the ordinary map (the same test `map2` already has against `src/netrun/map.js`).
+
+**For the maintainer:** the order and the starting values above; item 15 relaxed on the map; the three balance-goal proposals.
 
 ## 10. Not done
 
