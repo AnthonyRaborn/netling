@@ -227,6 +227,41 @@ export const scanWipeMotion = (stage, { joined = false, up = false } = {}) => {
   };
 };
 
+// ---- Tune: Handler's options (drafts 8.4i; not registered) -----------------------------------------------------------------------------
+// Handler runs others now. Two ideas, alone or together, over its still camo:
+//   split: the shadow sent out to both sides at once (the alternate kept from the first round, splitMotion): two agents in the field.
+//   signal: the headset transmits. From each cup (the outermost dim cell on the eye row) an arc in the body colour travels outward a
+//     cell a step, a second one two cells behind it, the arc curving back toward the head at its ends: '(' on the left, ')' on the right.
+//     Two pulses a loop (steps 0 to 3 and 6 to 9; 4, 5, 10 and 11 quiet). Drawn on empty cells and over the shadow, never on the figure.
+//     Calm: one arc parked a cell out.
+export const SIGNAL_REACH = 4;
+export const ringsAt = (step) => {
+  const k = step % 6;
+  return k < SIGNAL_REACH ? [k + 1, k - 1].filter((d) => d >= 1) : [];
+};
+export const cupsOf = (sprite, anchors) => {
+  const row = sprite[anchors.eyeRow];
+  return [row.indexOf('x'), row.lastIndexOf('x')];
+};
+export const signalMotion = (stage, { split = false } = {}) => {
+  const base = split ? splitMotion(stage) : decoyMotion(stage);
+  return (sprite, anchors, { time = 0, reduced = false } = {}) => {
+    const g = base(sprite, anchors, { time, reduced }).map((r) => [...r]);
+    const [left, right] = cupsOf(sprite, anchors);
+    const e = anchors.eyeRow;
+    const onFigure = (x, y) => (sprite[y]?.[x - PAD] ?? '.') !== '.';
+    const put = (x, y) => { if (g[y]?.[x] !== undefined && !onFigure(x, y)) g[y][x] = '#'; };
+    for (const d of reduced ? [1] : ringsAt(stepOf(time))) {
+      for (const [cup, dir] of [[left, -1], [right, 1]]) {
+        const x = cup + PAD + dir * d;
+        put(x, e); put(x, e + 1);
+        if (d >= 2) { put(x - dir, e - 1); put(x - dir, e + 2); }
+      }
+    }
+    return g.map((r) => r.join(''));
+  };
+};
+
 // ---- Feast: the bigger decoy, and Stash's maw (a draft)------------------------------------------------------------------------------
 // The maw: at the copy's own mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the
 // body on the decoy's side), a mouth in the shadow. Two styles:

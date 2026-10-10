@@ -4,7 +4,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 
 **Where to pick up.**
 1. **Done: Skip and Exile revisited** (2026-10-10). Skip stays as drawn; Exile is the cape (8.4g), and its layer takes turns by loop between Cipher's shimmer and the wipe back on by the column (8.4h). Registered in `rogue-art.js` (`skipElder`) and `rogue-motion.js` (`MOTION_OF.skipElder`); the other options stay in `rogue-options.js` for the record.
-2. All ten forms are accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
+2. **Handler (maintainer, after the Exile round): the least interesting elder now; options drawn for choice (8.4i: split, signal, both).** All ten forms are otherwise accepted: Foundling, Alias, Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
 3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
 4. Then the simulator build (section 7) and the text (section 9).
 
@@ -481,6 +481,17 @@ Drawn as `wipeMotion` in `rogue-motion.js` (an option, not registered): the same
 **Twenty-first round (maintainer: can it wipe back on before it loops again).** Drawn as **the wipe back on** (`wipeBackMotion(stage, { back })`, taken in turns with the shimmer by `scanWipeBackMotion`): the wipe loop now starts in full camo, a dim column sweeps left to right wiping it off (steps 1 to 5), one plain step (6), then it is wiped back on (7 to 11) and ends in camo. Two ways back on: **row**, a dim row rising from the feet with the camo below it; **column**, the column returning right to left with the camo behind it. Since the shimmer in its own timing also starts and ends in camo, the turns meet with no half-loop offset (hand-overs 4 and 7 cells for row, 4 and 12 for column; tested). A fix on the way: the wipes' checker was the shimmer's in reverse (the shimmer counts padded columns, three of them, odd), so the two camos were opposite patterns; both wipes now use the shimmer's checker. The page row and the GIF now show: the shimmer alone, joined with the wipe up (the last pick), back on by row, back on by column; the still is the wipe loop's even steps (4.8 s to 8.8 s).
 
 Shown on `rogue-options.html` (the row under the Exile options: the cape with the shimmer, the wipe, the two taking turns, the same joined, and joined with the wipe going up), `docs/netling2-prototypes/shots/rogue-exile-wipe.png` (the wipe loop's first six steps, 5.2 s to 7.2 s, 0.4 s apart: the first sweep down in columns 2 to 4, up in column 5) and `rogue-exile-wipe.gif` (9.6 s, both loops, the time and loop printed on each frame).
+
+### 8.4i Handler: an elder move of its own (2026-10-10, for choice)
+
+**Maintainer (twenty-second round):** Handler is now the least interesting elder; ideas to help it like the others. The diagnosis: every other elder adds a behaviour over its adult (Sleeper vanishes, Exile wipes, Stash's shadow grins), while Handler's layer was Spook's (the still camo and the plain decoy). Four ideas were offered (the split shadow as agents it runs; the headset transmitting; the eyes following the shadow; the camo switching once a loop); **the maintainer asked to see the first two and both together.**
+
+Drawn in `rogue-motion.js` (options, not registered; 8.4i block):
+- **split:** the shadow sent out to both sides at once (`splitMotion`, the first round's alternate): two agents in the field. On Handler it is subtler than on a solid form, since its body is already half dim with the camo.
+- **signal:** the headset transmits (`signalMotion`): from each cup (the outermost dim cell on the eye row) an arc in the body colour travels outward a cell a step with a second one two cells behind, curving back toward the head at its ends ('(' and ')'). Two pulses a loop (steps 0 to 3 and 6 to 9). The body colour because the shadow is dim (it would hide dim arcs), the eye colour is Stash's reveal and the white mark is the dead tag. Drawn on empty cells and over the shadow, never on the figure. Calm: one arc parked a cell out.
+- **both:** `signalMotion(stage, { split: true })`.
+
+Checks (`rogue.test.js`): no option changes a cell of the figure; the arcs leave both cups and travel out, two pulses a loop; quiet steps; loops; calm still; a cell changes at most once a step (the flash rule). Shown on `rogue-options.html` (the row under the Exile wipes: Spook, Handler now, then the three), `docs/netling2-prototypes/shots/rogue-handler-options.png` (the first 2 s, 0.4 s apart) and `rogue-handler-options.gif` (9.6 s, both loops).
 
 ### 8.5 Ids and the Dex
 

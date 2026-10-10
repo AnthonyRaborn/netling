@@ -504,6 +504,33 @@ test('options, Exile\'s wipe back on (8.4h): starts and ends in camo, plain at s
   }
 });
 
+test('options, Handler (8.4i): the split and the signal never touch the figure, the arcs leave both cups and travel out, two pulses a loop, calm still', async () => {
+  const { splitMotion, signalMotion, ringsAt, cupsOf, SIGNAL_REACH } = await import('./rogue-motion.js');
+  const f = set.rogueElderTune;
+  const w = f.a[0].length;
+  const e = f.anchors.a.eyeRow;
+  assert.deepEqual(cupsOf(f.a, f.anchors.a), [2, 15], 'the headset cups');
+  for (const m of [splitMotion('elder'), signalMotion('elder'), signalMotion('elder', { split: true })]) {
+    for (let s = 0; s < STEPS; s++) {
+      const g = m(f.a, f.anchors.a, { time: s * STEP_MS });
+      f.a.forEach((r, y) => [...r].forEach((c, x) => { if (c !== '.') assert.equal(g[y][x + PAD], c, `step ${s}: figure cell ${x},${y}`); }));
+    }
+    assert.deepEqual(m(f.a, f.anchors.a, { time: 0 }), m(f.a, f.anchors.a, { time: STEPS * STEP_MS * 2 }), 'it loops');
+    const calm = new Set([0, 4, 9].map((s) => m(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n')));
+    assert.equal(calm.size, 1, 'calm: still');
+  }
+  const m = signalMotion('elder');
+  const lit = (s, x) => m(f.a, f.anchors.a, { time: s * STEP_MS })[e][x + PAD] === '#';
+  for (let d = 1; d <= SIGNAL_REACH; d++) {
+    const s = d - 1;
+    assert.ok(lit(s, 2 - d) && lit(s, 15 + d), `step ${s}: the leading arc ${d} out on both sides`);
+    assert.ok(lit(s + 6, 2 - d) && lit(s + 6, 15 + d), `step ${s + 6}: the second pulse`);
+  }
+  for (const s of [4, 5, 10, 11]) assert.deepEqual(ringsAt(s), [], `step ${s}: quiet`);
+  // The flash rule: an arc cell changes at most once a step (400 ms), so no cell flips faster than FLASH_TOGGLE_MS allows.
+  assert.ok(STEP_MS >= 2 * FLASH_TOGGLE_MS);
+});
+
 test('options, second round: the still camo is the same in both frames, so even head and body keeps the head rows identical', async () => {
   const { STATIC_CAMO_OPTIONS } = await import('./rogue-options.js');
   for (const f of [set.rogueAdultTune, set.rogueElderTune]) {

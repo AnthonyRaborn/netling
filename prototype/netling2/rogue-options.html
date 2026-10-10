@@ -15,7 +15,7 @@ import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { fadePulse, bigDecoy, EXILE_OPTIONS } from './rogue-options.js';
-import { bigDecoyMotion, scanMotion, scanWipeMotion, scanWipeBackMotion } from './rogue-motion.js';
+import { bigDecoyMotion, scanMotion, scanWipeMotion, scanWipeBackMotion, splitMotion, signalMotion } from './rogue-motion.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -42,7 +42,7 @@ const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;
 const c = document.getElementById('c');
 c.width = (6 * (W + GAP) + GAP) * SC;
-c.height = LABEL + Math.ceil(rows.length / 2) * ROW + 3 * ROW + 10; // set before drawing: resizing clears
+c.height = LABEL + Math.ceil(rows.length / 2) * ROW + 4 * ROW + 10; // set before drawing: resizing clears
 const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 function cell(x0, y0, sprite, label) {
@@ -78,7 +78,15 @@ function draw(now) {
   const cape = EXILE_OPTIONS.cape;
   [['shimmer', shimmer], ['joined, wipe up', scanWipeMotion('elder', { joined: true, up: true })], ['back on: row', scanWipeBackMotion('elder', { back: 'row' })], ['back on: column', scanWipeBackMotion('elder', { back: 'col' })]]
     .forEach(([label, m], j) => cell(col(j), yw, m(cape[frame], exile.anchors.a, { time }), `cape: ${label}`));
-  const y = yw + ROW;
+  // Handler's options (drafts 8.4i): Spook and the registered Handler, then the split shadow, the headset's signal, and both.
+  const yh = yw + ROW;
+  const spook = set.rogueAdultTune;
+  const handler = set.rogueElderTune;
+  cell(col(0), yh, spook.motion(spook[frame], spook.anchors.a, { time }), 'Spook');
+  cell(col(1), yh, handler.motion(handler[frame], handler.anchors.a, { time }), 'Handler now');
+  [['split', splitMotion('elder')], ['signal', signalMotion('elder')], ['both', signalMotion('elder', { split: true })]]
+    .forEach(([label, m], j) => cell(col(2 + j), yh, m(handler[frame], handler.anchors.a, { time }), `Handler: ${label}`));
+  const y = yh + ROW;
   cell(col(0), y, frame === 'a' ? blank.a : blank.b, 'Blank (reference)');
   cell(col(1), y, cipher.motion(frame === 'a' ? cipher.a : cipher.b, cipher.anchors.a, { time }), 'Cipher (reference)');
   if (fixed === null) requestAnimationFrame(draw);
