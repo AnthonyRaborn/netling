@@ -12,7 +12,7 @@
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
 //   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
 //   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
-//     copy's mouth height, a short line in the eye colour inside the shadow, an extra mouth in it.
+//     copy's mouth height, a line in the eye colour curving up at both ends inside the shadow, an extra mouth in it (a grin).
 //   Alias: a hint of the sweep: a dim band runs down the body below the neck and back, with no holes (its two camo bands are in its frames).
 //   Foundling: the plain decoy (its camo hint is in its frames).
 import { STEPS, STEP_MS, ECHO, stepOf, dub } from './echo-motion.js';
@@ -119,8 +119,11 @@ export const scanMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
 // ---- Feast: the bigger decoy, and Stash's maw (a draft) ------------------------------------------------------------------------------
 // The maw: at the copy's own mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the
 // body on the decoy's side), a mouth in the shadow. Two styles:
-//   line (the current draft, maintainer's ask): a line of three cells in the eye colour ('o'), set one cell in from the shadow's outer
-//     edge so the shadow frames it.
+//   grin (the current draft, maintainer's ask): a line in the eye colour ('o') curving up at both ends, for a menacing look: two cells on
+//     the row and a corner one row up at each end ('o..o' over '.oo.'), set one cell in from the shadow's outer edge so the shadow frames
+//     it (from the outer edge when the strip is only four wide, as it mostly is on Stash). It takes the first row from the mouth row down
+//     where the run and the corners above it show; where none does, the straight line below.
+//   line (the second draft): three cells in the eye colour on one row, set one cell in from the outer edge.
 //   fangs (the first draft, kept for comparison): the outermost four become a dark opening two cells wide and two rows tall with a bright
 //     fang at each top corner ('+..+' over 'x..x'); it needs the row under it to show the same four cells.
 // There only while the decoy is out.
@@ -133,6 +136,23 @@ function runFrom(drawnRow, side) {
 function maw(g, drawn, side, mouthRow, style) {
   const byRow = new Map();
   for (const [x, y] of drawn) byRow.set(y, [...(byRow.get(y) ?? []), x]);
+  if (style === 'grin') {
+    for (let y = mouthRow; y < g.length; y++) {
+      const run = runFrom(byRow.get(y) ?? [], side);
+      const above = new Set(byRow.get(y - 1) ?? []);
+      // Set in by one when the strip is wide enough (five cells), else from the outer edge (four).
+      for (const at of [1, 0]) {
+        const [b, c, d, e] = run.slice(at, at + 4);
+        // A corner sits on a shadow cell or, where the shadow steps (a lopsided body), on the empty cell beside it; never on the body.
+        const ok = (x) => above.has(x) || g[y - 1]?.[x] === '.';
+        if (e === undefined || !ok(b) || !ok(e)) continue;
+        g[y - 1][b] = 'o'; g[y - 1][e] = 'o';
+        g[y][c] = 'o'; g[y][d] = 'o';
+        return;
+      }
+    }
+    style = 'line';
+  }
   for (let y = mouthRow; y < g.length - 1; y++) {
     const run = runFrom(byRow.get(y) ?? [], side);
     if (run.length < 4) continue;
@@ -148,8 +168,8 @@ function maw(g, drawn, side, mouthRow, style) {
     return;
   }
 }
-export const MAW_STYLES = ['line', 'fangs'];
-export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'line' } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+export const MAW_STYLES = ['grin', 'line', 'fangs'];
+export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'grin' } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, BIG_PAD);
   const drawn = decoyInto(g, sprite, time, reduced, BIG_PAD, REACH[stage] + 1);
   if (withMaw) maw(g, drawn, reduced ? 1 : sideAt(time), anchors.mouthRow, mawStyle);
