@@ -199,6 +199,10 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 20. **Names chosen so far: Foundling (baby) and Drop (Feast adult)** (sixth round). The rest of section 8's names stay candidates.
 21. **One main shared feature on every form, chosen from three:** the hood, the thermocamo, or the shadow (the echo every hidden line has behind it: Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub, each behaving differently). The three are drafted in 8.1.
 22. **The shadow is the main shared feature** (seventh round), on all ten forms. **Fallbacks:** the thermocamo and the hood stay as options if the shadow breaks the sprite tests or if, with it, Rogue becomes hard to tell from the other eggs' forms.
+23. **All names chosen** (eighth round): Foundling (baby), Alias (teen), Mole, Skip, Spook, Drop (adults), Sleeper, Exile, Handler, Stash (elders).
+24. **The shadow draws on the hidden forms' existing echo rules** (8.4).
+25. **The shut third eye and the glance tell must be seen before they are decided** (a drawn preview).
+26. **Elders aim to pass the elder-closest-to-adult rule**; Rogue's leave to break it is not used for this.
 
 **The good end**
 
@@ -267,7 +271,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 ## 8. The ten forms (concept briefs, for choice)
 
-Nothing here is drawn. Each brief gives the idea, the outline, the cues and name candidates (first is the recommendation). The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
+Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
 
 ### 8.1 The shared signature (every form)
 
@@ -301,7 +305,7 @@ Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame r
 - Not chosen: Stray (it would log "a stray stray pinged in" as a visitor), Waif.
 
 **Teen (14 wide, 11 to 12 rows).** The hood now a full cowl over a narrower, upright body; the camouflage patch appears (one band across the cloak); the hem longer; the tag a small rectangle. One teen, so it need not sit close to a sibling; it must be clearly unlike the other eggs' teens.
-- **Alias** (recommended, strong). A false name; the teen tries on identities before it settles into a role, which is what the teen stage is. No collision.
+- **Alias** (decided, maintainer; strong). A false name; the teen tries on identities before it settles into a role, which is what the teen stage is. No collision.
 - Legend (medium): a spy's built cover story. It also means a myth, which may confuse.
 - Runaway (medium): plain, a bit long.
 
@@ -311,23 +315,27 @@ Each adult keeps the full signature and differs by outline, so the four stay und
 
 | Role | Outline idea | Name (recommended first) | Reason | Strength |
 |---|---|---|---|---|
-| Breach | Low and broad, hood pulled forward, two heavy forelimbs at the hem like digging claws. The camouflage patch on its back | **Mole**; Plant | A mole is an agent placed inside an organization, who breaks it from within; also a digger. One syllable, fits the others' short adult names | strong |
-| Dodge | Narrow and tall, leaning, the hood swept back as if moving, long legs showing under a short ragged hem | **Skip**; Bolt; Lam | A skip is a fugitive who skipped bail (the hunted, in the skip tracer's word); also a quick hop aside, which is Dodge | strong |
-| Tune | Tall, the hood's two notches drawn up into ear-like points (listening), the shut third eye larger | **Spook**; Tap | Spy slang for an intelligence agent, and a ghost: the Ghost cue named. Listening is Tune | strong |
+| Breach | Low and broad, hood pulled forward, two heavy forelimbs at the hem like digging claws. The camouflage patch on its back | **Mole** (decided) | A mole is an agent placed inside an organization, who breaks it from within; also a digger. One syllable, fits the others' short adult names | strong |
+| Dodge | Narrow and tall, leaning, the hood swept back as if moving, long legs showing under a short ragged hem | **Skip** (decided) | A skip is a fugitive who skipped bail (the hunted, in the skip tracer's word); also a quick hop aside, which is Dodge | strong |
+| Tune | Tall, the hood's two notches drawn up into ear-like points (listening), the shut third eye larger | **Spook** (decided) | Spy slang for an intelligence agent, and a ghost: the Ghost cue named. Listening is Tune | strong |
 | Feast | Round and low, a satchel or bundle at one side (stolen goods), the tag half-covered by the strap | **Drop** (decided, maintainer) | A dead drop: where things are left to be picked up, and Feast picks them up. Caution for the text: "drop" is also the word for loot ("drops", drop tables), so log and Dex lines should avoid "a drop dropped" | strong |
 
 ### 8.4 Elders (18 wide, at most 15 rows)
 
 "The same idea after long service." Each is its adult grown wider and more worn: the hem more ragged, the camouflage patch larger, the tag fully exposed and larger. The shut third eye stays shut on every elder (Rogue never gets the full sight).
 
-**Shared motion layer (rule-break): the decoy.** This is the shadow (8.1, decided), on every form; the elders' version is the widest and longest-held. As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
+**Shared motion layer (rule-break): the decoy.** This is the shadow (8.1, decided), on every form; the elders' version is the widest and longest-held.
+
+**Rules it takes from the hidden forms' echoes (decided in direction, 6.1, item 24; `echo-motion.js`, `blank-motion.js`, checked by `echo.test.js`):** a pure function of (sprite, anchors, time) returning padded rows; a layer over the sprite, not a different sprite, so the registered A and B frames still obey the frame rules and wearables sit on them; 12 steps of 400 ms (`STEP_MS = FLASH_TOGGLE_MS * 2`, a 4.8 s loop); echo cells drawn only where the figure is empty, in the shared dim `x` (the `ECHO` knob for brightness and the checker pattern applies); a pad sized to the widest copy; a still, parked version under reduced motion; registered as `motion` on each form in its models file.
+
+**How Rogue's behaves (proposal, to see drawn).** The three hidden echoes already cover one copy sliding both ways (Cipher's dub), one copy trailing out to one side and being reaped (Whisper's fork lag) and copies stacking out (Init's ratchet). "Steps aside and holds, then is dropped", as first drafted, is too close to the fork lag. Proposed instead, **the split**: two dim copies step out to **both sides at once**, hold for a few steps, and drop together, so for a moment there are three of it and the hunters cannot tell which is real. One cell out on the baby and teen, two on the adults, three on the elders (pad 3). Parked under reduced motion: both copies one cell out. Alternates if it reads badly: one copy that appears on the side away from the glance (misdirection; it couples the shadow to the tell, which the other echoes do not do), or the first draft's single decoy. As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
 
 | Adult | Elder idea | Name (recommended first) | Reason | Strength |
 |---|---|---|---|---|
-| Mole | Broader, settled, the claws resting; it has been in place a long time | **Sleeper**; Plant | A sleeper is a mole left in place for years, waiting. The same idea after long service, exactly | strong |
-| Skip | Wider stance, the cloak torn shorter, a bundle on its back: it has been running for years | **Exile**; Lam | Someone who has been away so long that away is home. Lam (on the lam) is the shorter, slangier option | medium |
-| Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler**; Station | A handler runs agents; the spook after long service. Caution: a common word with no Tune link of its own; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
-| Drop | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash**; Cutout | A stash is what is kept hidden at a drop, grown into a hoard. Cutout (the go-between so neither side knows the other at a drop) fits the trade but not the art | medium |
+| Mole | Broader, settled, the claws resting; it has been in place a long time | **Sleeper** (decided) | A sleeper is a mole left in place for years, waiting. The same idea after long service, exactly | strong |
+| Skip | Wider stance, the cloak torn shorter, a bundle on its back: it has been running for years | **Exile** (decided) | Someone who has been away so long that away is home. Lam (on the lam) is the shorter, slangier option | medium |
+| Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler** (decided) | A handler runs agents; the spook after long service. Caution: a common word with no Tune link of its own; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
+| Drop | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash** (decided) | A stash is what is kept hidden at a drop, grown into a hoard. Cutout (the go-between so neither side knows the other at a drop) fits the trade but not the art | medium |
 
 ### 8.5 Ids and the Dex
 
@@ -336,9 +344,9 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- Whether the shut third eye reads at 12 wide, or the baby drops it (a test render would tell).
-- The decoy's exact motion per stage (step size, hold time), and whether any elder should break the elder-closest-to-adult rule.
-- The glance tell.
+- The shut third eye: to be seen drawn (6.1, item 25), including whether it reads at 12 wide.
+- The split's exact motion per stage (step size, hold time), to be seen drawn. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
+- The glance tell: to be seen drawn (6.1, item 25).
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
 
 ## 9. Not done
