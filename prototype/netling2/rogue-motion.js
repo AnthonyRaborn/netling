@@ -11,8 +11,8 @@
 //   Dodge (Skip, Exile): CIPHER'S SHIMMER: a scan band sweeps from the hood to the feet and back; above it the body is solid, on it a dim
 //     row, below it plain body cells open into checker holes (the outline changes, as on Cipher). The face rows stay whole.
 //   Tune (Spook, Handler): still camo on head and body, drawn in the frames (rogue-art.js); the layer is the plain decoy.
-//   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): where the
-//     shadow shows past the body on its widest row, an opening with a bright tooth at each end, an extra mouth in the shadow.
+//   Feast (Drop, Stash): a BIGGER DECOY, one cell further than the stage's (3 and 4). Stash's carries a maw (a draft for review): at the
+//     copy's mouth height, a short line in the eye colour inside the shadow, an extra mouth in it.
 //   Alias: a hint of the sweep: a dim band runs down the body below the neck and back, with no holes (its two camo bands are in its frames).
 //   Foundling: the plain decoy (its camo hint is in its frames).
 import { STEPS, STEP_MS, ECHO, stepOf, dub } from './echo-motion.js';
@@ -118,31 +118,41 @@ export const scanMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
 
 // ---- Feast: the bigger decoy, and Stash's maw (a draft) ------------------------------------------------------------------------------
 // The maw: at the copy's own mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the
-// body on the decoy's side, and the row under it shows them too), the outermost four cells of that run become a mouth: a dark opening two
-// cells wide and two rows tall, with a bright fang at each top corner ('+..+' over 'x..x'). There only while the decoy is out.
+// body on the decoy's side), a mouth in the shadow. Two styles:
+//   line (the current draft, maintainer's ask): a line of three cells in the eye colour ('o'), set one cell in from the shadow's outer
+//     edge so the shadow frames it.
+//   fangs (the first draft, kept for comparison): the outermost four become a dark opening two cells wide and two rows tall with a bright
+//     fang at each top corner ('+..+' over 'x..x'); it needs the row under it to show the same four cells.
+// There only while the decoy is out.
 function runFrom(drawnRow, side) {
   const sorted = [...drawnRow].sort((p, q) => (side < 0 ? p - q : q - p)); // outermost first
   const run = sorted.length ? [sorted[0]] : [];
   for (let i = 1; i < sorted.length && Math.abs(sorted[i] - run.at(-1)) === 1; i++) run.push(sorted[i]);
   return run;
 }
-function maw(g, drawn, side, mouthRow) {
+function maw(g, drawn, side, mouthRow, style) {
   const byRow = new Map();
   for (const [x, y] of drawn) byRow.set(y, [...(byRow.get(y) ?? []), x]);
   for (let y = mouthRow; y < g.length - 1; y++) {
     const run = runFrom(byRow.get(y) ?? [], side);
-    const below = new Set(byRow.get(y + 1) ?? []);
-    if (run.length < 4 || !run.slice(0, 4).every((x) => below.has(x))) continue;
+    if (run.length < 4) continue;
     const [a, b, c, d] = run.slice(0, 4);
+    if (style === 'line') {
+      for (const x of [b, c, d]) g[y][x] = 'o';
+      return;
+    }
+    const below = new Set(byRow.get(y + 1) ?? []);
+    if (![a, b, c, d].every((x) => below.has(x))) continue;
     g[y][a] = '+'; g[y][b] = '.'; g[y][c] = '.'; g[y][d] = '+';
     g[y + 1][b] = '.'; g[y + 1][c] = '.';
     return;
   }
 }
-export const bigDecoyMotion = (stage, { withMaw = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+export const MAW_STYLES = ['line', 'fangs'];
+export const bigDecoyMotion = (stage, { withMaw = false, mawStyle = 'line' } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, BIG_PAD);
   const drawn = decoyInto(g, sprite, time, reduced, BIG_PAD, REACH[stage] + 1);
-  if (withMaw) maw(g, drawn, reduced ? 1 : sideAt(time), anchors.mouthRow);
+  if (withMaw) maw(g, drawn, reduced ? 1 : sideAt(time), anchors.mouthRow, mawStyle);
   return out(g);
 };
 

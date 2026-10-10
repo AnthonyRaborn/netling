@@ -207,7 +207,7 @@ test('the shadow is registered on all ten forms, sized by stage (one cell on the
   }
 });
 
-test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw), Alias the sweep hint', async () => {
+test('each line carries its decided effect: Breach fades, Dodge shimmers as Cipher, Tune and the baby the plain decoy, Feast the bigger one (Stash with its maw, a line in the eye colour), Alias the sweep hint', async () => {
   const M = await import('./rogue-motion.js');
   const same = (f, m) => [0, 2, 5, 9, 14].every((s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join() === m(f.a, f.anchors.a, { time: s * STEP_MS }).join());
   assert.ok(same(set.rogueBaby, M.decoyMotion('baby')));
@@ -217,12 +217,16 @@ test('each line carries its decided effect: Breach fades, Dodge shimmers as Ciph
   for (const id of ['rogueAdultTune', 'rogueElderTune']) assert.ok(same(set[id], M.decoyMotion(set[id].stage)), id);
   assert.ok(same(set.rogueAdultFeast, M.bigDecoyMotion('adult')));
   assert.ok(same(set.rogueElderFeast, M.bigDecoyMotion('elder', { withMaw: true })));
-  // The maw: bright teeth in the shadow, past the body, only while the decoy is out; never on Drop.
-  const teeth = (f, s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join('').split('+').length - 1 - f.a.join('').split('+').length + 1;
+  // The maw (a draft): a line of three cells in the eye colour in the shadow, past the body, only while the decoy is fully out; never on Drop.
+  const extra = (f, s) => f.motion(f.a, f.anchors.a, { time: s * STEP_MS }).join('').split('o').length - f.a.join('').split('o').length;
   const stash = set.rogueElderFeast;
-  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => teeth(stash, s) === 2), 'two teeth while the decoy is fully out, either side');
-  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => teeth(stash, s) === 0), 'none while it steps out or is gone');
-  assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => teeth(set.rogueAdultFeast, s)).every((n) => n === 0), 'Drop has no maw');
+  assert.ok([4, 5, 6, 7, 16, 17, 18, 19].every((s) => extra(stash, s) === 3), 'a three-cell line while the decoy is fully out, either side');
+  assert.ok([0, 1, 2, 3, 8, 9, 11, 12, 15].every((s) => extra(stash, s) === 0), 'none while it steps out or is gone');
+  assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => stash.motion(stash.a, stash.anchors.a, { time: s * STEP_MS }).join('').includes('+')).every((x) => !x), 'no highlight cells (no fangs)');
+  assert.ok(Array.from({ length: 2 * STEPS }, (_, s) => extra(set.rogueAdultFeast, s)).every((n) => n === 0), 'Drop has no maw');
+  // The first draft, fangs, stays available for the review page.
+  const fangs = M.bigDecoyMotion('elder', { withMaw: true, mawStyle: 'fangs' });
+  assert.equal(fangs(stash.a, stash.anchors.a, { time: 5 * STEP_MS }).join('').split('+').length - 1, 2);
 });
 
 test('the camo is drawn in the frames: a band on Foundling, two on Alias (swapping with the frame), still camo on Spook and Handler over head and body', () => {

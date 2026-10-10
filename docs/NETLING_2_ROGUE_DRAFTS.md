@@ -418,6 +418,8 @@ The registered forms now carry everything decided (6.1, items 22 to 31): the cam
 
 **Stash's maw (a draft for review).** The shadow shows only where the figure is empty, so a mouth where the copy's own face would be stays hidden behind the body; the maw sits in the visible strip instead. At the copy's mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the body, with the row under them showing too), the outermost four become a mouth: a dark opening two cells wide and two rows tall with a bright fang at each top corner (`+..+` over `x..x`), there only while the decoy is fully out (four steps of each loop, on either side). Seen on the GIF it reads as two fangs over a notch at the shadow's leading edge; whether that reads as a mouth is the maintainer's call. A first try on the shadow's widest row (lower down) read as two stray dots and was replaced. Options if it should read more: an accent (the eyes' colour) mouth line instead of the fangs, a wider opening, or the maw on Drop too.
 
+**Second try (maintainer's ask, 2026-10-10): the maw as a line in the eye colour, without the white fangs.** At the copy's mouth height (the first row from the mouth row down where at least four shadow cells in a row show past the body), three cells in the eye colour, set one cell in from the shadow's outer edge so the shadow frames them. It shows for the same four steps of each loop, on either side. On the GIF (`rogue-registered.gif`, Stash's row: the line, the fangs, no maw) it reads as a mouth in the shadow, near the eyes' height. It is now the registered draft; the fangs stay selectable (`mawStyle: 'fangs'`) for comparison.
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -425,7 +427,7 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- Stash's maw (8.4f): as drawn, or one of the stronger options.
+- Stash's maw (8.4f): the eye-colour line (now drawn), or the fangs.
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).

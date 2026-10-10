@@ -15,6 +15,7 @@ import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { fadePulse, bigDecoy } from './rogue-options.js';
+import { bigDecoyMotion } from './rogue-motion.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -25,7 +26,7 @@ const W = 26, H = 17, GAP = 3, LABEL = 22, ROW = H * SC + 6, FRAME_MS = 500;
 const plain = (f) => ({ a: f.a, b: f.b });
 // [form, [[label, frames, motion]...]] per row; motion defaults to the form's own registered layer. Two forms a row, three cells each.
 // Now: the ten registered forms as decided (camo in the frames, each line's layer), and beside Stash its decoy without the maw, to judge
-// the maw (a draft); beside Mole and Drop the alternatives not chosen.
+// the maw (a draft: the eye-colour line, beside the first draft's fangs and no maw); beside Mole and Drop the alternatives not chosen.
 const own = (f) => [['registered', plain(f)]];
 const rows = [
   [set.rogueBaby, own(set.rogueBaby)], [set.rogueTeen, own(set.rogueTeen)],
@@ -34,7 +35,7 @@ const rows = [
   [set.rogueAdultDodge, own(set.rogueAdultDodge)], [set.rogueElderDodge, own(set.rogueElderDodge)],
   [set.rogueAdultTune, own(set.rogueAdultTune)], [set.rogueElderTune, own(set.rogueElderTune)],
   [set.rogueAdultFeast, [...own(set.rogueAdultFeast), ['not chosen: bright', plain(set.rogueAdultFeast), bigDecoy('adult', true)]]],
-  [set.rogueElderFeast, [['with the maw', plain(set.rogueElderFeast)], ['without', plain(set.rogueElderFeast), bigDecoy('elder')]]],
+  [set.rogueElderFeast, [['maw: eye-colour line', plain(set.rogueElderFeast)], ['maw: fangs (first draft)', plain(set.rogueElderFeast), bigDecoyMotion('elder', { withMaw: true, mawStyle: 'fangs' })], ['without', plain(set.rogueElderFeast), bigDecoy('elder')]]],
 ];
 const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;
