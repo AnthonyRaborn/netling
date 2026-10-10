@@ -548,9 +548,9 @@ The NL-0 perks act on corp traces, intrusions, Standing-leaning packets and infe
 | Mole | Risk | a sweep ignored or a DEFEND lost costs Integrity -10 instead of -20 (the mark stays) | Breach corp's cure bonus (toughness) |
 | Skip | Exposure | sweeps 30% less often | Dodge corp's trace perk |
 | Spook | Upkeep | Charge and Sync drain 10% slower (the two Tune perks, halved and joined, since there is no lean to pick one) | Tune corp, Tune street |
-| Drop | Reward | the clinic costs it 30% less scrip (Rogue pays scrip only, 6.1, item 5) | new |
+| Drop | Reward | **30% less scrip at every market in a run: the clinic, the corp exchange and the black market** (widened from the clinic alone, maintainer, 2026-10-10). The Charge cost per purchase and the sale price stay | Feast corp's exchange discount, widened |
 
-Alternates: Mole, a won DEFEND also gives Integrity +10; Spook, a sweep's window starts with a quiet early warning (a notification cost, so not recommended); Drop, play pays 20% more scrip. **Not chosen for any form: a perk that removes or prevents marks**, since marks do not fade (6.1, item 10) and are the difficulty lever; Mole's perk softens a sweep's damage but never its mark.
+Alternates: Mole, a won DEFEND also gives Integrity +10; Spook, a sweep's window starts with a quiet early warning (a notification cost, so not recommended); Drop, play pays 20% more scrip. Drop's perk acts in a run, not at home, which stretches the perk frame (perks are care effects); Rogue's clinic is where it pays for bugs, so the frame was already stretched there. Each purchase still adds trail +1, so the discount makes buying cheaper, not quieter; it pairs with the dead drop (buy, then leave what is spare at a relay for quiet). **Not chosen for any form: a perk that removes or prevents marks**, since marks do not fade (6.1, item 10) and are the difficulty lever; Mole's perk softens a sweep's damage but never its mark.
 
 ### 9.4 The traits (the role traits, first pass)
 
