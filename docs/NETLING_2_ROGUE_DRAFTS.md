@@ -197,7 +197,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 18. **All three hidden lines' cues in every Rogue form** (one mixed identity), not one line per role.
 19. **Rogue's forms may break the form rules as the hidden forms may** (sizes, the elder-closest-to-adult check, motion layers that change the outline).
 20. **Names chosen so far: Foundling (baby) and Drop (Feast adult)** (sixth round). The rest of section 8's names stay candidates.
-21. **One main shared feature on every form, chosen from three:** the hood, the thermocamo, or the shadow (the echo every hidden line has behind it: Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub, each behaving differently). The three are drafted in 8.1 for the maintainer to pick one.
+21. **One main shared feature on every form, chosen from three:** the hood, the thermocamo, or the shadow (the echo every hidden line has behind it: Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub, each behaving differently). The three are drafted in 8.1.
+22. **The shadow is the main shared feature** (seventh round), on all ten forms. **Fallbacks:** the thermocamo and the hood stay as options if the shadow breaks the sprite tests or if, with it, Rogue becomes hard to tell from the other eggs' forms.
 
 **The good end**
 
@@ -270,7 +271,7 @@ Nothing here is drawn. Each brief gives the idea, the outline, the cues and name
 
 ### 8.1 The shared signature (every form)
 
-**The main shared feature: one of three, to choose (6.1, item 21).** Whichever is picked appears on all ten forms.
+**The main shared feature: the shadow (decided, 6.1, item 22),** on all ten forms. The thermocamo and the hood are kept as fallbacks, used if the shadow fails the sprite tests or Rogue becomes hard to tell from the other eggs' forms with it. The comparison as drafted:
 
 | Option | What it is on the hidden lines | Rogue's version | For | Against |
 |---|---|---|---|---|
@@ -278,7 +279,7 @@ Nothing here is drawn. Each brief gives the idea, the outline, the cues and name
 | **Thermocamo** | Blank's camouflage: cells alternating bright and dim, the phase swapping between frames, so the shimmer is the animation | The same shimmer over part or all of each body | Strong and readable at any size; marks only, so no outline change and no new layer; works in a still frame | Blank's own look, so Rogue risks reading as a Wetware form; it is one line's cue, not all three's; it competes with the neglect and bug marks, which also use dim cells |
 | **Hood** | Blank's pointed hood around a dark face opening | A hood on every form, peak notched | Cheapest; a clear "hidden" read; works in a still frame | Also one line's cue; it puts the same outline on top of all four adults, which raises the silhouette scores between them (8.6) |
 
-**Recommendation: the shadow.** If it is chosen, the decoy layer proposed for the elders (8.4) becomes this feature, extended to all ten forms, and the hood in the briefs below becomes an ordinary outline choice per form rather than a must.
+So the decoy layer proposed for the elders (8.4) becomes this feature, extended to all ten forms, and the hood in the briefs below is an ordinary outline choice per form rather than a must. **When to fall back:** the shadow layer fails the motion-layer checks (edges, wearables, the flash budget, reduced motion) on a form and cannot be fixed within the form; or, at the review, a still frame of a Rogue form (where the shadow is parked) reads as another egg's form. The check for the second is the existing silhouette audit run against all three eggs' forms of the same stage, plus the maintainer's look at the gallery.
 
 **Secondary marks (proposals, kept whichever main feature is picked).** Small cues from each line plus one of Rogue's own, small enough to fit a 12-wide baby:
 
@@ -289,7 +290,7 @@ Nothing here is drawn. Each brief gives the idea, the outline, the cues and name
 | Ghost (Program) | A dome over a sheet body with a **ragged hem** | **The ragged hem** on the bottom row (or the cloak's edge on forms with feet) |
 | Rogue's own | (none) | **A scraped-off asset tag**: a small dim rectangle on the chest where a corp plate was removed. It makes "owner: none" visible and echoes `ruins-5` (the forty-first rack with no plate) without being NL-0's. It grows with the stage, and on the elders it is the largest mark |
 
-Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) the shadow layer if it is the main feature (on all ten forms; otherwise on the elders only, 8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
+Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) the shadow layer on all ten forms (8.1, 8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
 
 **Temper tell skin (proposal).** The other eggs settle (Iron), blink and hop (Program) or pulse (Wetware). Rogue **glances**: on the tell's beat the eyes shift one cell to the side and back, a look over its shoulder (the background line "looked over its shoulder"). Steady: the glance lands exactly on the beat, a watchful routine. Unsteady: glances come early, late or twice. Eye shifts are 400 ms steps, under the flash limit. Neglect and bug marks use the shared skin.
 
@@ -319,7 +320,7 @@ Each adult keeps the full signature and differs by outline, so the four stay und
 
 "The same idea after long service." Each is its adult grown wider and more worn: the hem more ragged, the camouflage patch larger, the tag fully exposed and larger. The shut third eye stays shut on every elder (Rogue never gets the full sight).
 
-**Shared motion layer (rule-break, proposal): the decoy.** If the shadow is chosen as the main feature (8.1), this is it, on every form; otherwise it stays an elder-only layer. As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
+**Shared motion layer (rule-break): the decoy.** This is the shadow (8.1, decided), on every form; the elders' version is the widest and longest-held. As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
 
 | Adult | Elder idea | Name (recommended first) | Reason | Strength |
 |---|---|---|---|---|
@@ -334,12 +335,11 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 
 ### 8.6 Not decided in the briefs
 
-- The main shared feature: shadow (recommended), thermocamo or hood (8.1).
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
 - Whether the shut third eye reads at 12 wide, or the baby drops it (a test render would tell).
-- The decoy layer, and whether any elder should break the elder-closest-to-adult rule.
+- The decoy's exact motion per stage (step size, hold time), and whether any elder should break the elder-closest-to-adult rule.
 - The glance tell.
-- Silhouette risk: all four adults share the hem (and the hood, if it is the main feature), so the outlines must carry the difference (the 0.82 audit decides).
+- Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
 
 ## 9. Not done
 
