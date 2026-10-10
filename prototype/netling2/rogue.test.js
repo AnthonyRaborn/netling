@@ -353,3 +353,47 @@ test('options, second round: the still camo is the same in both frames, so even 
     }
   }
 });
+
+test('options, third round: the fades, the bigger decoy and Alias\'s sweep change only plain body cells inside the figure, loop, and stand still calm', async () => {
+  const { fadeEdges, fadePulse, bigDecoy, BIG_PAD, aliasSweep, aliasHint } = await import('./rogue-options.js');
+  const cases = [
+    [set.rogueAdultBreach, fadeEdges('adult'), PAD], [set.rogueElderBreach, fadeEdges('elder'), PAD],
+    [set.rogueAdultBreach, fadePulse('adult'), PAD], [set.rogueElderBreach, fadePulse('elder'), PAD],
+    [set.rogueAdultFeast, bigDecoy('adult'), BIG_PAD], [set.rogueElderFeast, bigDecoy('elder', true), BIG_PAD],
+    [set.rogueTeen, aliasSweep('teen'), PAD],
+  ];
+  for (const [f, m, pad] of cases) {
+    const w = f.a[0].length;
+    let dimmed = 0;
+    for (let s = 0; s < STEPS; s++) {
+      const g = m(f.a, f.anchors.a, { time: s * STEP_MS });
+      assert.ok(g.every((r) => r.length === w + 2 * pad));
+      g.forEach((r, y) => [...r].forEach((c, x) => {
+        const was = f.a[y][x - pad] ?? '.';
+        if (was === '#') { assert.ok(c === '#' || c === 'x', `${f.id}: ${x},${y}`); if (c === 'x') dimmed++; }
+        else if (was === '.') assert.ok(c === '.' || c === 'x' || c === '#', `${f.id}: outside ${x},${y}`);
+        else assert.equal(c, was, `${f.id} step ${s}: a mark at ${x - pad},${y}`);
+      }));
+    }
+    assert.deepEqual(m(f.a, f.anchors.a, { time: 0 }), m(f.a, f.anchors.a, { time: STEPS * STEP_MS * 2 }), `${f.id}: loops`);
+    assert.equal(new Set([0, 4, 9].map((s) => m(f.a, f.anchors.a, { time: s * STEP_MS, reduced: true }).join('\n'))).size, 1, `${f.id}: calm`);
+    if (m !== cases[4][1] && m !== cases[5][1]) assert.ok(dimmed > 0, `${f.id}: the effect shows`);
+  }
+  // The bigger decoy reaches one cell further than the stage's own.
+  const reach = (f, m, pad) => {
+    const own = f.a.flatMap((r) => [...r].map((c, x) => (c !== '.' ? x + pad : -1)).filter((x) => x >= 0));
+    let far = 0;
+    for (let s = 0; s < 2 * STEPS; s++) {
+      const cols = m(f.a, f.anchors.a, { time: s * STEP_MS }).flatMap((r) => [...r].map((c, x) => (c !== '.' ? x : -1)).filter((x) => x >= 0));
+      far = Math.max(far, Math.min(...own) - Math.min(...cols), Math.max(...cols) - Math.max(...own));
+    }
+    return far;
+  };
+  assert.equal(reach(set.rogueAdultFeast, bigDecoy('adult'), BIG_PAD), REACH.adult + 1);
+  assert.equal(reach(set.rogueElderFeast, bigDecoy('elder'), BIG_PAD), REACH.elder + 1);
+  // Alias's bigger hint: two camo rows under the neck, the head identical in both frames.
+  const { a, b } = aliasHint(set.rogueTeen, rogueTag('rogueTeen'));
+  for (let y = 0; y <= set.rogueTeen.anchors.a.neckRow; y++) assert.equal(a[y], b[y]);
+  const n = set.rogueTeen.anchors.a.neckRow;
+  assert.ok([n + 1, n + 2].every((y) => a[y] !== set.rogueTeen.a[y]));
+});

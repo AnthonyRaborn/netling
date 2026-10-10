@@ -210,6 +210,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 29. **Thermocamo, second round (eleventh round):** Cipher's shimmer is closer to what was meant. Proposal under review: **the Dodge line (Skip, Exile) shimmers as Cipher does, and the Tune line (Spook, Handler) does not** (its camo stays still), so the two lines differ more and the Dodge line calls to Cipher (8.4d).
 
+30. **Each line its own effect (twelfth round):** the Dodge line shimmers as Cipher (kept) and the Tune line wears the camo **still, on head and body** (decided). Foundling's hint stays; **Alias shows more, plus a hint of the sweep**. **The Breach line (Mole, Sleeper) fades** and **the Feast line (Drop, Stash) casts a bigger, more obvious decoy**, so every older form has its own distinction; the two fade looks and two decoy looks are drawn to compare (8.4e).
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -393,6 +395,21 @@ Drawn as options over the registered forms (`rogue-options.js`, `rogue-options.h
 - **Spook and Handler, still camo** (`STATIC_CAMO_OPTIONS`): the checker in the same phase in both frames, so it does not shimmer. Body only, or head and body; head and body no longer needs Blank's exception to the frame rule, because the head is the same in both frames. The Ghost-and-Blank look of the ear points over a checkered head stays.
 - Foundling and Alias keep the one-band hint (it swaps phase with the frame, as Blank's does); whether the young forms should hint at the sweep instead is open.
 
+### 8.4e Each line its own effect (2026-10-10, for review)
+
+Drawn as options over the registered forms (`rogue-options.js`, `rogue-options.html`, GIF `docs/netling2-prototypes/shots/rogue-lines.gif`, 9.6 s; a test in `rogue.test.js` keeps every layer to plain body cells, looping, and still when calm). Every layer keeps the decoy, and none touches the eyes, the arc or the tag.
+
+| Line | Effect | Status |
+|---|---|---|
+| Breach (Mole, Sleeper) | **Fade**, two looks: *edges* (the body dims from the outline inward, a ring a step, holds, comes back) and *pulse* (the whole body dims at once for five steps, then returns) | to choose |
+| Dodge (Skip, Exile) | Cipher's shimmer (8.4d) | decided |
+| Tune (Spook, Handler) | Still camo on head and body (8.4d) | decided |
+| Feast (Drop, Stash) | **Bigger decoy**, one cell further than the stage's (Drop 3, Stash 4), two looks: *dim* (solid, the ordinary dim cell) and *bright* (the body colour on a checker, the brighter-but-sparser setting the echo layers already have) | to choose |
+| Foundling | the one-band hint | kept |
+| Alias | **two camo bands** under the neck (swapping phase with the frame) and **a hint of the sweep**: a dim band runs down the body below the neck and back, with no holes | for review |
+
+What the GIF shows: both fades nearly empty the body for a moment (the eyes stay lit), the pulse more abruptly; the bright decoy is the most visible effect on the page, the dim one reads as a longer shadow. A fade and the bright decoy are the strongest motion on any form, so both stay inside the flash budget by the same 400 ms steps as the echoes (the pulse changes twice a loop, the edge fade once a step).
+
 ### 8.5 Ids and the Dex
 
 Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
@@ -400,7 +417,7 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 ### 8.6 Not decided in the briefs
 
 - The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The thermocamo (8.4d): Cipher's shimmer on the Dodge line and still camo on the Tune line (body only, or head and body) as proposed, and the young forms' hint (the swapping band, or a hint of the sweep).
+- The Breach fade (edges or pulse) and the Feast decoy (dim or bright), and Alias's bigger hint (8.4e). Then the decided effects are drawn into the registered forms.
 - The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
 - The glance tell: drawn (8.4a), for the maintainer's look.
 - Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).

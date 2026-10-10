@@ -4,17 +4,17 @@
 <style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
 <canvas id="c"></canvas>
 <script type="module">
-// The thermocamo in motion (rogue-options.js; docs/NETLING_2_ROGUE_DRAFTS.md, 8.4c and 8.4d), animating as the game would (the 1.0
-// frame rhythm, A and B every 500 ms) with the decoy on. Second round: the Dodge line (Skip, Exile) shimmers as Cipher does (a scan band
-// sweeping hood to feet and back, holes below it); the Tune line (Spook, Handler) wears the camo still, body only or head and body, so
-// the two lines differ. Hints on Foundling and Alias as before. Blank and Cipher animate beside them for reference. Open with `npm run serve`:
+// Each Rogue line's effect in motion (rogue-options.js; docs/NETLING_2_ROGUE_DRAFTS.md, 8.4c to 8.4e), animating as the game would (the
+// 1.0 frame rhythm, A and B every 500 ms) with the decoy on: Breach fades (two looks), Dodge shimmers as Cipher, Tune wears the camo still
+// on head and body, Feast casts a bigger decoy (dim or bright); Foundling's hint, and Alias's first hint beside the bigger one with a
+// hint of the sweep. Blank and Cipher animate below for reference. Open with `npm run serve`:
 // http://localhost:5174/prototype/netling2/rogue-options.html (#scale=5&palette=0; #t=1234 freezes the picture at that time in ms).
 import './ready.js';
 import { drawSprite, paletteColors } from '../../src/sprites.js';
 import { PALETTES } from '../../src/sim.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms, rogueTag } from './rogue-models.js';
-import { CAMO_OPTIONS, STATIC_CAMO_OPTIONS, cipherScan } from './rogue-options.js';
+import { CAMO_OPTIONS, STATIC_CAMO_OPTIONS, cipherScan, fadeEdges, fadePulse, bigDecoy, aliasHint, aliasSweep } from './rogue-options.js';
 
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 5);
@@ -23,13 +23,16 @@ let fixed = hash.has('t') ? Number(hash.get('t')) : null;
 const set = rogueForms();
 const W = 26, H = 17, GAP = 3, LABEL = 22, ROW = H * SC + 6, FRAME_MS = 500;
 const plain = (f) => ({ a: f.a, b: f.b });
-// [form, [[label, frames, motion]...]] per row; motion defaults to the form's own (the decoy).
+// [form, [[label, frames, motion]...]] per row; motion defaults to the form's own (the decoy). Two forms a row, three cells each.
 const scan = (id) => ({ a: set[id].a, b: set[id].b });
+const tune = (id) => [set[id], [['plain', plain(set[id])], ['still, head+body', STATIC_CAMO_OPTIONS.whole.make(set[id], rogueTag(id))]]];
 const rows = [
   [set.rogueBaby, [['plain', plain(set.rogueBaby)], ['hint', CAMO_OPTIONS.hint.make(set.rogueBaby, rogueTag('rogueBaby'))]]],
-  [set.rogueTeen, [['plain', plain(set.rogueTeen)], ['hint', CAMO_OPTIONS.hint.make(set.rogueTeen, rogueTag('rogueTeen'))]]],
+  [set.rogueTeen, [['first hint', CAMO_OPTIONS.hint.make(set.rogueTeen, rogueTag('rogueTeen'))], ['bigger + sweep', aliasHint(set.rogueTeen, rogueTag('rogueTeen')), aliasSweep('teen')]]],
+  ...['rogueAdultBreach', 'rogueElderBreach'].map((id) => [set[id], [['plain', plain(set[id])], ['fade: edges', scan(id), fadeEdges(set[id].stage)], ['fade: pulse', scan(id), fadePulse(set[id].stage)]]]),
   ...['rogueAdultDodge', 'rogueElderDodge'].map((id) => [set[id], [['plain', plain(set[id])], ['Cipher shimmer', scan(id), cipherScan(set[id].stage)]]]),
-  ...['rogueAdultTune', 'rogueElderTune'].map((id) => [set[id], [['plain', plain(set[id])], ['still, body', STATIC_CAMO_OPTIONS.body.make(set[id], rogueTag(id))], ['still, head+body', STATIC_CAMO_OPTIONS.whole.make(set[id], rogueTag(id))]]]),
+  tune('rogueAdultTune'), tune('rogueElderTune'),
+  ...['rogueAdultFeast', 'rogueElderFeast'].map((id) => [set[id], [['plain', plain(set[id])], ['big decoy, dim', scan(id), bigDecoy(set[id].stage)], ['big, bright', scan(id), bigDecoy(set[id].stage, true)]]]),
 ];
 const blank = wetwareForms().wetwareAdultHidden;
 const cipher = wetwareForms().wetwareElderHidden;
@@ -51,7 +54,7 @@ function draw(now) {
   const frame = Math.floor(time / FRAME_MS) % 2 ? 'b' : 'a';
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top';
-  ctx.fillText(`THERMOCAMO, second round: Dodge shimmers as Cipher, Tune wears it still. With the decoy. t=${(time / 1000).toFixed(1)} s`, 4, 2);
+  ctx.fillText(`Each line its own effect: Breach fade, Dodge sweep, Tune still camo, Feast big decoy. t=${(time / 1000).toFixed(1)} s`, 4, 2);
   rows.forEach(([f, variants], i) => {
     const y = LABEL + Math.floor(i / 2) * ROW;
     const base = (i % 2) * 3;
