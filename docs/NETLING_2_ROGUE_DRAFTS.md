@@ -190,6 +190,13 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 15. **No more hostile events than the NL-0 eggs** (2026-10-10, fourth round). The sweep's chance is the trace's and the intrusion's combined (12% an hour), never more. Ambush nodes likewise take their place out of the existing ICE weight of a region rather than adding nodes, so a Rogue run holds no more fights than another egg's; part of its ICE is simply hunters.
 
+**The forms (fifth round)**
+
+16. **This pass on the forms is concept briefs** (section 8): idea, outline, cues and name candidates per form; no sprite code until the maintainer picks.
+17. **Names from espionage and fugitive vocabulary** (tradecraft and the language of people on the run), distinct from all three eggs.
+18. **All three hidden lines' cues in every Rogue form** (one mixed identity), not one line per role.
+19. **Rogue's forms may break the form rules as the hidden forms may** (sizes, the elder-closest-to-adult check, motion layers that change the outline).
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -255,8 +262,75 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 **Save and ids (when it is built, not now):** form ids follow `prototype/netling2/form-ids.js` with no lean: `rogueBaby`, `rogueTeen`, `rogueAdultBreach`, `rogueAdultDodge`, `rogueAdultTune`, `rogueAdultFeast`, `rogueElderBreach`, `rogueElderDodge`, `rogueElderTune`, `rogueElderFeast` (permanent once shipped). Also a `marks` field, an armed flag for the good end, the `captured` death cause, the `sweep` event type, an ambush node type, a merge record on the lineage (which NL-0 fragment was chosen), an account flag that the epilogue has played, and a trail field in the run state; under M1 later, a second-parent field on the fragment. Each needs a sanitizer.
 
-## 8. Not done
+## 8. The ten forms (concept briefs, for choice)
+
+Nothing here is drawn. Each brief gives the idea, the outline, the cues and name candidates (first is the recommendation). The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
+
+### 8.1 The shared signature (every form)
+
+Decided: all three hidden lines show in every form (6.1, item 18). One fixed cue from each, small enough to fit a 12-wide baby, plus one cue of Rogue's own:
+
+| From | The hidden line's look | Rogue's version |
+|---|---|---|
+| Blank (Wetware) | A pointed hood, a dark face opening with lens eyes and **no mouth**, camouflage cells alternating bright and dim | **The hood and no mouth** on every form. The camouflage is reduced to a **patch** (a band or one shoulder), as if the cloak was only partly copied |
+| Guru (Iron) | Crown points on the top row, a **third eye**, lit seams | **A third eye drawn shut**: a dim `x` cell or pair above the two eyes. The hidden forms see the whole map and Rogue does not (6.1, item 6); the eye is there, copied, and does not open. The crown points become two **notches in the hood's peak** |
+| Ghost (Program) | A dome over a sheet body with a **ragged hem** | **The ragged hem** on the bottom row (or the cloak's edge on forms with feet) |
+| Rogue's own | (none) | **A scraped-off asset tag**: a small dim rectangle on the chest where a corp plate was removed. It makes "owner: none" visible and echoes `ruins-5` (the forty-first rack with no plate) without being NL-0's. It grows with the stage, and on the elders it is the largest mark |
+
+Rule-breaking (allowed, 6.1, item 19), proposed sparingly: sizes and the frame rules stay as for the other eggs, so wearables, poses and the audits keep working; the breaks are (1) a motion layer on the elders (8.4) and (2) leave to fail the elder-closest-to-adult check if an elder needs to look more worn than grown.
+
+**Temper tell skin (proposal).** The other eggs settle (Iron), blink and hop (Program) or pulse (Wetware). Rogue **glances**: on the tell's beat the eyes shift one cell to the side and back, a look over its shoulder (the background line "looked over its shoulder"). Steady: the glance lands exactly on the beat, a watchful routine. Unsteady: glances come early, late or twice. Eye shifts are 400 ms steps, under the flash limit. Neglect and bug marks use the shared skin.
+
+### 8.2 Baby and teen
+
+**Baby (12 wide).** A small hooded lump: the hood with its notched peak, two lens eyes, the shut third eye, a ragged hem and the smallest tag (one dim cell). It reads as something that turned up on its own.
+- **Stray** (recommended, strong). A stray is an animal with no owner. It ties to the background lines already drafted ("a stray pinged in. it would not say whose it was"), so the reveal pays off a word the player has seen. Caution: 1.0 already says "a stray X pinged in" for visitors and has the STRAY SIGNAL anomaly; a Rogue visitor would log "a stray stray", so the visitor line needs a form-aware wording, or pick the alternate.
+- Foundling (strong): found, unclaimed, "owner: none". No collision.
+- Waif (medium).
+
+**Teen (14 wide, 11 to 12 rows).** The hood now a full cowl over a narrower, upright body; the camouflage patch appears (one band across the cloak); the hem longer; the tag a small rectangle. One teen, so it need not sit close to a sibling; it must be clearly unlike the other eggs' teens.
+- **Alias** (recommended, strong). A false name; the teen tries on identities before it settles into a role, which is what the teen stage is. No collision.
+- Legend (medium): a spy's built cover story. It also means a myth, which may confuse.
+- Runaway (medium): plain, a bit long.
+
+### 8.3 Adults (16 wide, 13 to 15 rows)
+
+Each adult keeps the full signature and differs by outline, so the four stay under the 0.82 pair score. Role ideas follow the games: Breach (cracking from the inside), Dodge (getting away), Tune (listening to signals), Feast (taking and trading).
+
+| Role | Outline idea | Name (recommended first) | Reason | Strength |
+|---|---|---|---|---|
+| Breach | Low and broad, hood pulled forward, two heavy forelimbs at the hem like digging claws. The camouflage patch on its back | **Mole**; Plant | A mole is an agent placed inside an organization, who breaks it from within; also a digger. One syllable, fits the others' short adult names | strong |
+| Dodge | Narrow and tall, leaning, the hood swept back as if moving, long legs showing under a short ragged hem | **Skip**; Bolt; Lam | A skip is a fugitive who skipped bail (the hunted, in the skip tracer's word); also a quick hop aside, which is Dodge | strong |
+| Tune | Tall, the hood's two notches drawn up into ear-like points (listening), the shut third eye larger | **Spook**; Tap | Spy slang for an intelligence agent, and a ghost: the Ghost cue named. Listening is Tune | strong |
+| Feast | Round and low, a satchel or bundle at one side (stolen goods), the tag half-covered by the strap | **Fence**; Drop | A fence buys and sells stolen goods; Feast takes and trades. Caution: 1.0's `bazaar-3` is titled "a fence, off the record"; the page is about someone who buys fragments, which suits the word, but the two would sit side by side. Drop (a dead drop, where things are left to be picked up) is the clean alternate | medium |
+
+### 8.4 Elders (18 wide, at most 15 rows)
+
+"The same idea after long service." Each is its adult grown wider and more worn: the hem more ragged, the camouflage patch larger, the tag fully exposed and larger. The shut third eye stays shut on every elder (Rogue never gets the full sight).
+
+**Shared motion layer (rule-break, proposal): the decoy.** As the hidden elders have an echo (Whisper's fork lag, Init's ratchet trail, Cipher's ghost dub), every Rogue elder has a **decoy**: a dim copy steps one to three cells off to one side and holds there while the real body stays, then is dropped. It reads as a decoy left for the hunters. 400 ms steps; parked under reduced motion; it must not reach the screen edge or the wearables, as the existing layers are checked. One layer for all four keeps the art cost to one.
+
+| Adult | Elder idea | Name (recommended first) | Reason | Strength |
+|---|---|---|---|---|
+| Mole | Broader, settled, the claws resting; it has been in place a long time | **Sleeper**; Plant | A sleeper is a mole left in place for years, waiting. The same idea after long service, exactly | strong |
+| Skip | Wider stance, the cloak torn shorter, a bundle on its back: it has been running for years | **Exile**; Lam | Someone who has been away so long that away is home. Lam (on the lam) is the shorter, slangier option | medium |
+| Spook | Taller ear points, a headset-like band across the hood (it now runs others) | **Handler**; Station | A handler runs agents; the spook after long service. Caution: two syllables and a common word; Station (a spy station; also a numbers station, which broadcasts tones, fitting Tune) is the alternate | medium |
+| Fence | Wider, more bundles, the satchel now a pack, the tag finally uncovered | **Stash**; Cutout | A stash is what a fence keeps hidden. Cutout (the go-between so neither side knows the other) fits the trade but not the art | medium |
+
+### 8.5 Ids and the Dex
+
+Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
+
+### 8.6 Not decided in the briefs
+
+- The names (each has a recommendation and alternates).
+- Whether the shut third eye reads at 12 wide, or the baby drops it (a test render would tell).
+- The decoy layer, and whether any elder should break the elder-closest-to-adult rule.
+- The glance tell.
+- Silhouette risk: all four adults share the hood and hem, so the outlines must carry the difference (the 0.82 audit decides).
+
+## 9. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- Names for the ten forms, the Rogue abilities' flavor text, the sweep's and hunter's wording.
+- The choice among the form briefs and names (section 8), any sprite drawing, the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.
