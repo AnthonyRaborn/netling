@@ -416,6 +416,7 @@ test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the fac
   const w = f.a[0].length;
   const { eyeRow } = f.anchors.a;
   const at = (s) => m(f.a, f.anchors.a, { time: s * STEP_MS }).map((r) => r.slice(PAD, PAD + w));
+  const at6full = () => m(f.a, f.anchors.a, { time: 6 * STEP_MS });
   const holes = (g, y) => [...g[y]].filter((c, x) => f.a[y][x] === '#' && c === '.').length;
   const body = (y) => [...f.a[y]].includes('#') && (y < eyeRow - 2 || y > eyeRow + 1);
   for (let s = 0; s < STEPS; s++) {
@@ -451,6 +452,17 @@ test('options, Exile\'s second pass (8.4h): the wipe keeps the marks and the fac
   for (const t of [loop, 2 * loop]) assert.ok(changed(t) <= inside, `joined: the hand-over at ${t} ms changes ${changed(t)} cells, the wipe's own steps up to ${inside}`);
   const unjoined = (t) => { const g = (u) => both(f.a, f.anchors.a, { time: u }).map((r) => r.slice(PAD, PAD + w)); const p = g(t - STEP_MS); const q = g(t); return f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && p[y][x] !== q[y][x]).length, 0); };
   assert.ok(unjoined(loop) > inside, 'without joining, the hand-over jumps (why joined exists)');
+  // Up: the first sweep runs from the feet to the hood, the camo below the row; the hand-overs stay as smooth joined.
+  const up = wipeMotion('elder', { up: true });
+  const rowUp = wipeAt(3, f.a.length, 0, 0, { up: true }).row;
+  const g3 = up(f.a, f.anchors.a, { time: 3 * STEP_MS }).map((r) => r.slice(PAD, PAD + w));
+  assert.ok(rowUp < row && holes(g3, rowUp + 1) > 0 && holes(g3, rowUp - 1) === 0, 'up: camo below the row, plain above');
+  assert.ok(wipeAt(1, f.a.length, 0, 0, { up: true }).row > wipeAt(5, f.a.length, 0, 0, { up: true }).row, 'up: it rises');
+  assert.deepEqual(up(f.a, f.anchors.a, { time: 6 * STEP_MS }), at6full(), 'up: the same full camo at step 6');
+  const joinedUp = scanWipeMotion('elder', { joined: true, up: true });
+  const cellsUp = (t) => joinedUp(f.a, f.anchors.a, { time: t }).map((r) => r.slice(PAD, PAD + w));
+  const changedUp = (t) => { const p = cellsUp(t - STEP_MS); const q = cellsUp(t); return f.a.reduce((n, r, y) => n + [...r].filter((c, x) => c === '#' && p[y][x] !== q[y][x]).length, 0); };
+  for (const t of [loop, 2 * loop]) assert.ok(changedUp(t) <= inside, `joined, up: the hand-over at ${t} ms changes ${changedUp(t)} cells`);
   for (let s = 0; s < STEPS; s++) {
     const t = s * STEP_MS;
     const off = (g) => g.map((r) => [...r].map((c, x) => (x < PAD || x >= PAD + w ? c : '.')).join(''));

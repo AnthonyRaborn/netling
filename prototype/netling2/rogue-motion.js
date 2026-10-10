@@ -139,8 +139,13 @@ export const scanMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
 // sweeps left to right and the body behind it comes back solid. The same cells as the shimmer: plain body cells only, the face rows whole.
 // Steps: 0 plain; 1 to 5 the row down; 6 full camo; 7 to 11 the column across.
 // The column runs over the body's own columns (`left` to `right`, its first and last plain body cell), so no step is spent beside it.
-export const wipeAt = (step, height, left, right) => {
-  if (step >= 1 && step <= 5) return { row: Math.round(1 + ((step - 1) / 4) * (height - 2)) };
+// `up` (drafts 8.4h, twentieth round): the row runs from the feet to the hood instead, the camo going on below it, so the wipe's first
+// sweep no longer moves the way the shimmer's band does when it turns the camo off.
+export const wipeAt = (step, height, left, right, { up = false } = {}) => {
+  if (step >= 1 && step <= 5) {
+    const down = Math.round(1 + ((step - 1) / 4) * (height - 2));
+    return { row: up ? height - 1 - down : down };
+  }
   if (step === 6) return { full: true };
   if (step >= 7) return { col: Math.round(left + ((step - 7) / 4) * (right - left)) };
   return {};
@@ -149,17 +154,17 @@ const bodyCols = (sprite) => {
   const xs = sprite.flatMap((r) => [...r].map((c, x) => (c === '#' ? x : -1)).filter((x) => x >= 0));
   return [Math.min(...xs), Math.max(...xs)];
 };
-export const wipeMotion = (stage) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
+export const wipeMotion = (stage, { up = false } = {}) => (sprite, anchors, { time = 0, reduced = false } = {}) => {
   const g = padded(sprite, PAD);
   if (!reduced) {
-    const { row, col, full } = wipeAt(stepOf(time), sprite.length, ...bodyCols(sprite));
+    const { row, col, full } = wipeAt(stepOf(time), sprite.length, ...bodyCols(sprite), { up });
     for (let y = 0; y < sprite.length; y++) {
       if (faceRow(anchors, y)) continue;
       for (let x = 0; x < sprite[0].length; x++) {
         if (sprite[y][x] !== '#') continue;
         const at = x + PAD;
         if (y === row || x === col) g[y][at] = 'x';
-        else if ((full || (row !== undefined && y < row) || (col !== undefined && x > col)) && (x + y) % 2) g[y][at] = '.';
+        else if ((full || (row !== undefined && (up ? y > row : y < row)) || (col !== undefined && x > col)) && (x + y) % 2) g[y][at] = '.';
       }
     }
   }
@@ -169,9 +174,9 @@ export const wipeMotion = (stage) => (sprite, anchors, { time = 0, reduced = fal
 // The shimmer and the wipe taking turns by loop (the shimmer first), as the decoy takes turns by side. `joined` starts the shimmer half a
 // loop late (its band at the feet, the body plain), so it rises into the camo and comes back down to plain: it then starts and ends where
 // the wipe does, and neither hand-over jumps (without it the shimmer ends in camo and the wipe starts plain).
-export const scanWipeMotion = (stage, { joined = false } = {}) => {
+export const scanWipeMotion = (stage, { joined = false, up = false } = {}) => {
   const scan = scanMotion(stage);
-  const wipe = wipeMotion(stage);
+  const wipe = wipeMotion(stage, { up });
   const late = joined ? (STEPS / 2) * STEP_MS : 0;
   return (sprite, anchors, opts = {}) => {
     const time = Math.max(0, opts.time ?? 0);
