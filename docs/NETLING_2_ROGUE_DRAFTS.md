@@ -452,7 +452,22 @@ Reading it:
 
 **Decided (maintainer, 2026-10-10): the hunter's threshold is 4 lower for the Dodge line** (Skip and Exile, `kit.dodge.thresholdDelta: -4`, now the fork's default; every second move stays); the head start and the slip trail stay off. Measured on the two Dodge steerers only (the table's row); the whole attentive group at the new default (`rogue-s2-decided-dodge4.json`, 300 lives each; against `decided-breach1`): full life 97.4 (97.5), captured 2.6% (2.4; worst archetype 5.7%, unchanged), hunter marks 0.17 a life (0.13), hunters met 0.64 (0.54), the elder gate met in 26.7% (27.2); captured by role steerers: Breach 3.5%, Dodge 1.1% (0.3), Tune 3.9%, Feast 4.9%. The Dodge steerers' 1.1% at 300 lives and 1.7% at 1000 differ by a few lives, within sampling noise. The slip's lead in exit rates (point 4) stays open.
 
-- **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg) and the relay-question read-out (continuing pays about a third more), which needs the chosen hunter settings first.
+**The relay question (2026-10-10, measured, for choice).** 9.7's target: going on past the relay before a cordon banks about 1.33x what jacking out there banks, at a matching risk. Measured at the decided settings (the Dodge threshold included) by `sim/rogue-relay.mjs` (3000 runs a form; `results/followup/rogue-relay.md` and `.json`): the careful bot plays a Rogue run until it stands at the relay of the relay layer, the run is copied, and one copy jacks out (quiet) while the other goes on (push: the dead drop first for Drop and Stash, always on even when hurt, later relays by the bot's own rule). The same run up to the relay, so the ratio reads the choice alone. Runs that never stand at that relay are counted, not split; every run starts with no marks. Banked value is items plus loose scrip in items, as `rogue-netrun.mjs`; a disconnect banks nothing (Stash keeps its dead drop).
+
+| region | reached the relay | push / quiet, adults | push / quiet, elders | push: exit / disconnect, after the relay | marks a run, push | push / quiet when hurt (Integrity under 55) |
+|---|---|---|---|---|---|---|
+| the Deep | 38 to 42% | 2.1 to 2.7 | 2.5 to 3.2 | 41 to 66% / 22 to 41% | 0.00 to 0.03 | 1.1 to 2.2 |
+| the Source | 30 to 35% | 1.15 to 1.63 | 1.57 to 2.21 | 22 to 47% / 40 to 63% | 0.00 to 0.06 | 0.5 to 1.5 |
+
+Reading it:
+1. **The Deep pays far more than the target for going on** (2 to 3x, not 1.33x), even with every hurt run pushed on. Its relay holds little (1.3 to 1.7 items jacking out there; Stash 2.4), and the far half holds the exit's bonus item and scrip. By 9.7's rule (pays much more: the cordon or the guards are too soft), the Deep's deep half is the soft part. The Source's adults sit near the target (Tune 1.15, Breach 1.41, Feast 1.44, Dodge 1.63) and its elders above it (1.57 to 2.21), Exile the most.
+2. **The risk is disconnects, not marks.** Going on disconnects 22 to 63% of the time after the relay, but marks stay rare (a few in a hundred runs), since only the trail hunter marks in runs (candidate A) and the cordon fight is ordinary ICE or a non-marking ambush. A disconnect's other costs (a care mistake and a bug roll, Sync, stability) are not in the value, so the ratio overstates going on somewhat.
+3. **Hurt at the relay, going on stops paying in the Source** (0.5 to 1.5; under 1 for every adult), so the careful bot's bank-when-hurt rule is the right play there; in the Deep it still pays.
+4. **Most runs never meet the question.** Only 38 to 42% of Deep runs and 30 to 35% of Source runs stand at the relay before the cordon; 40 to 50% cross the relay layer by another node (measured on Mole) (ICE, a cache, an anomaly) and meet the cordon without the offer, and the rest end before it. The relay rule in 9.7 (relay layer, then cordon) makes the question available, not asked.
+
+**Levers, not measured yet** (all exist in `rogue-map.js`, off): the guards (`guardShare`, loot behind danger, which thins the deep half's free caches), the narrow Deep (`narrow`), fewer extra relays (`relayFactor`), and, for point 4, a relay layer of only the relay (not in the fork). The Deep's ratio is the one far off; the Source's adults are in range.
+
+- **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg).
 
 ## 8. The ten forms (concept briefs, for choice)
 

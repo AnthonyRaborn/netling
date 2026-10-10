@@ -186,8 +186,15 @@ export function sellAtMarket(pet, keep = null) {
 export function playRun(pet, style, region, rng, codex = []) {
   pet.keepList = style.keep ?? null; // what this player has a use for, for the end-of-run choice (2.0 inventory)
   startRun(pet, region, rng, codex, [], { challenge: style.challenge ?? null, day: style.day });
+  return continueRun(pet, style, rng);
+}
+
+// Plays a started run on until it is done, or until style.stopAt(pet) is true at the top of a step (the run is then returned unfinished, to be
+// copied or played on with another call; the Rogue relay read-out, rogue-relay.mjs).
+export function continueRun(pet, style, rng) {
   let steps = 0;
   while (pet.run.phase !== 'done' && steps++ < 60) {
+    if (style.stopAt?.(pet)) return pet.run;
     const run = pet.run;
     if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, gameRate(style, run.pending.game) - tierPenalty(run.pending)), rng);
     else if (run.phase === 'choice') {
