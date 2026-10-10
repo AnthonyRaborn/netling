@@ -33,7 +33,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Read or edit the Netling 2.0 care wording (meters, buttons, events, items, alerts, clinic and bug statements) | [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) |
 | Read or edit the Netling 2.0 perks, lineage traits, keepsakes and the two new items (Decoy, Salvage cell) | [NETLING_2_PERKS_TRAITS_DRAFTS.md](NETLING_2_PERKS_TRAITS_DRAFTS.md) |
 | Read or edit the Netling 2.0 netrun drafts (adult abilities, elder upgrades, how the eggs differ in a run, anomalies) | [NETLING_2_NETRUN_DRAFTS.md](NETLING_2_NETRUN_DRAFTS.md) |
-| Read or edit the Netling 2.0 Rogue egg drafts (the hidden-line base, the hunters, the merge ending; options for choice) | [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md) |
+| Continue the Netling 2.0 Rogue egg (its design and decisions, the ten forms and their effects; where to pick up: the status block at its top) | [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md) |
 | Read the Netling 2.0 simulator baseline (every sweep re-run at 1000 lives, the Program/perks finding, the break's numbers) and how to re-run it | [../prototype/netling2/baseline/README.md](../prototype/netling2/baseline/README.md) |
 | Read or edit the Netling 2.0 stage-care drafts (a shorter, harder baby, elder mess, the rest call, the notification budget, with starting numbers and a test plan) | [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) |
 | Pick up the last session's work: the break, stage care and the rest call, map width, what is parked and what to do next | [NETLING_2_BASELINE_AND_STAGE_CARE.md](NETLING_2_BASELINE_AND_STAGE_CARE.md) |

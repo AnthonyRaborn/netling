@@ -1,6 +1,14 @@
 # Netling 2.0: the Rogue egg (drafts)
 
-Status: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from. Scope agreed for this pass: **the hidden-line base in play, the hunters, and the merge ending.** The reveal, the background touches and Rogue's own codex pages are out of this pass (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure (22 forms, four roles with two leans, one owner bar). Nothing here is decided, simulated or drawn; every number is a starting value for the 2.0 simulator fork to replace. Spoilers throughout.
+Status (handoff, 2026-10-10): the design is largely decided with the maintainer (section 6.1, items 1 to 34) and the ten forms are drawn in the sprite prototype (section 8). **The maintainer accepts the sprites and their effects except Skip and Exile (the Dodge line), which are to be revisited**; nothing is simulated yet, and every number is a starting value. Scope so far: the hidden-line base in play, the hunters, the merge ending (the good end) and the forms. The reveal, the background touches and Rogue's own codex pages are not done (their drafts stay in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md), Rogue: background and reveal). The maintainer allowed Rogue to break the other eggs' structure.
+
+**Where to pick up.**
+1. **Revisit Skip and Exile** (maintainer). Their sprites are in `prototype/netling2/rogue-art.js` (`skip`, `skipElder`); their effect is Cipher's shimmer (`scanMotion` in `rogue-motion.js`, decided as an effect; the redraw is about the sprites). Ask the maintainer what to change before redrawing; keep `npm run proto:test` green (the silhouette, elder-closest and fallback checks in `rogue.test.js`) and show the result on `rogue-options.html` and a GIF, as in 8.4c to 8.4f.
+2. The rest of the forms are accepted as drawn: Foundling, Alias, Mole, Spook, Drop, Sleeper, Handler, Stash, with the arc third eye, the decoy shadow, each line's effect and the glance tell.
+3. Still open in the design: section 6.3 (the sweep's window and answers, the ambush shares, the merge offer's fragment, M1 after M3, the forms' kits, difficulty, A3).
+4. Then the simulator build (section 7) and the text (section 9).
+
+The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
 
 Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (Hidden egg, Evolution, Elder stage), [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md) (the three bars and states), [NETLING_2_NETRUN_DRAFTS.md](NETLING_2_NETRUN_DRAFTS.md) (section 3.4, the hidden ability; section 8, Rogue's direction), [NETLING_2_PERKS_TRAITS_DRAFTS.md](NETLING_2_PERKS_TRAITS_DRAFTS.md) (traits, keepsakes, Decoy), [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) (section 2.6, the notification budget).
 
@@ -218,6 +226,8 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 33. **Stash's maw decided (fifteenth round): the late reveal**, with the shadow's eye, and **the whole half grin one row lower** so it does not blend into the eye. **Wearables hide while Sleeper is gone.**
 
+34. **The forms reviewed (sixteenth round):** the sprites are good **except Skip and Exile, to be revisited**; the rest (and their effects) stand as drawn.
+
 **The good end**
 
 11. **The merge is the good end, and it needs an elder and the Source.** The Rogue must reach its elder form and exit the Source. Thematically, NL-0's source code is in the Source, so that is where a line grown from a copy of it finds what it lacks. This replaces 5.1's trigger (any adult dying of old age).
@@ -257,7 +267,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 1. The sweep's window and answers (6.2), and the ambush shares within the ICE weight.
 2. Which fragment stands for each egg in the merge offer (the latest adult or elder, proposed).
 3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark).
-4. The forms' details: names, each adult's role ability, perk, trait and keepsake.
+4. The forms' kits: each adult's role ability, perk, trait and keepsake (the names are decided, 6.1 item 23).
 5. Difficulty, after the forms: the 4.4 targets are the starting point.
 6. A3: Root Access, the codex and the Dex carry into Rogue lives as between the other eggs (assumed; Rogue's elder needs Root).
 
@@ -441,13 +451,11 @@ Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display na
 
 ### 8.6 Not decided in the briefs
 
-- The remaining names: Alias (teen), Mole, Skip, Spook (adults), Sleeper, Exile, Handler, Stash (elders). Foundling and Drop are decided.
-- The decoy against the split, and their reach and hold per stage: drawn (8.4a), for the maintainer's choice. Elders aim to pass the elder-closest-to-adult rule (6.1, item 26).
-- The glance tell: drawn (8.4a), for the maintainer's look.
-- Silhouette risk: all four adults share the hem, so the outlines must carry the difference (the 0.82 audit decides).
+- **Skip and Exile, to be revisited** (6.1, item 34). Everything else in the briefs is decided or accepted: all ten names (item 23); the decoy as the shadow (the split stays on the review page as the alternate not used); the arc third eye; each line's effect (items 29 to 33); the glance tell (drawn in 8.4a; not commented on separately, accepted with the rest of the forms in item 34).
+- Silhouette: the four adults pass the 0.82 audit (closest pair 0.67); the redraw of Skip and Exile must keep that and each elder closest to its own adult.
 
 ## 9. Not done
 
 - The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
-- The maintainer's review of the first-draft sprites (8.4a), any redraws, the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.
+- The redraw of Skip and Exile (6.1, item 34); the Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers, the glance).
 - Any simulation. Every number above is a starting value, and the targets in 4.4 are proposals.
