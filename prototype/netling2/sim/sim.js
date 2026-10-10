@@ -349,6 +349,38 @@ export function addMark(s, t, source) {
   s.markSources[source] = (s.markSources[source] ?? 0) + 1;
   if (s.marks >= ROGUE.captureAt) s.captured = true;
   log(s, t, `> !! marked (${s.marks}/${ROGUE.captureAt}). ${source}.`);
+  if (s.merge?.armed) { // a mark after the latest Source exit disarms the good end (and withdraws an offer not yet answered)
+    s.merge.armed = false;
+    s.merge.disarmed++;
+    s.mergeOffer = false;
+  }
+}
+
+// The good end (docs/NETLING_2_ROGUE_DRAFTS.md, 6.1 items 11 to 13; simulator stage 3). Only a Rogue elder reaches the Source. A Source exit arms the
+// good end; a clean one (no ICE fight lost on that run, hunter fights included: the elder feat's "clean") also offers the merge at once
+// (s.mergeOffer, answered by takeMerge or declineMerge). A mark taken after the latest Source exit disarms it (addMark), another Source exit
+// re-arms it, and marks never fade, so re-arming removes none. Once armed, the elder's death is the good end in place of an ordinary rebirth,
+// never after a capture (the third mark has disarmed it). s.goodEnd: null, 'exit' (the offer taken) or 'death'.
+export function sourceExit(s, t, clean) {
+  if (!isRogue(s)) return;
+  s.merge ??= { armed: false, exits: 0, clean: 0, disarmed: 0, declined: 0 };
+  s.merge.exits++;
+  if (clean) s.merge.clean++;
+  s.merge.armed = true;
+  s.mergeOffer = Boolean(clean);
+  log(s, t, clean ? '> source exit, clean. two fragments can open. merge?' : '> source exit. the merge waits for the end.');
+}
+export function takeMerge(s, t, rng = null) {
+  if (!s.mergeOffer || !s.merge?.armed || s.stage === 'dead') return false;
+  s.mergeOffer = false;
+  flatline(s, t, 'merged', rng);
+  return true;
+}
+export function declineMerge(s) {
+  if (!s.mergeOffer) return false;
+  s.mergeOffer = false;
+  s.merge.declined++;
+  return true;
 }
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
@@ -1697,7 +1729,7 @@ export function fragmentOf(s, form) {
 
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.
 function rootRescue(s, t, cause) {
-  if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle' || cause === 'captured') return false; // the hunt is the one thing Root does not reach
+  if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle' || cause === 'captured' || cause === 'merged') return false; // the hunt is the one thing Root does not reach; the merge is chosen
   s.rootUsed = true;
   const st = s.stats;
   st.integrity = Math.max(st.integrity, 25);
@@ -1715,6 +1747,8 @@ function flatline(s, t, cause, rng = null) {
   s.stage = 'dead';
   s.deathCause = cause;
   s.diedAt = t;
+  s.goodEnd = cause === 'merged' ? 'exit' : s.merge?.armed && cause !== 'captured' ? 'death' : null; // Rogue's good end (sourceExit)
+  s.mergeOffer = false;
   // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;

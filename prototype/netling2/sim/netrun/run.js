@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip, addMark } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip, addMark, sourceExit } from '../sim.js';
 import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
 import { generateMap2 } from './map2.js';
 import { rogueMapRules } from './rogue-map.js';
@@ -610,6 +610,8 @@ function encounterNode(pet, nodeId, rng) {
         const id = nextEggPage(pet.egg ?? 'program', 'source', [...(pet.eggPages ?? []), ...(run.eggPages ?? [])]);
         if (id) run.eggPages.push(id);
       }
+      // Rogue: a Source exit arms the good end, and a clean one offers the merge at once (sim.js sourceExit).
+      if (run.region === 'source') sourceExit(pet, pet.lastTick ?? 0, (run.tally?.iceLost ?? 0) === 0);
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
         const d = pet.deepExits ?? { all: 0, clean: 0 };

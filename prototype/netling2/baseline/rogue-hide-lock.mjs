@@ -23,6 +23,7 @@ const BASE = {
   NR2: 'all', PERKS: '1', STAGE: JSON.stringify({ on: true, rest: { on: true } }), STANDINGGAIN: '2',
   BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}', CODEX: 'deep', JSON: '1',
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }),
+  MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
 };
 
 const jobs = [];

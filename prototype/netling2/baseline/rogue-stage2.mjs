@@ -23,6 +23,7 @@ const BASE = {
   NR2: 'all', PERKS: '1', STAGE: JSON.stringify({ on: true, rest: { on: true } }), STANDINGGAIN: '2',
   BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}', CODEX: 'deep', JSON: '1',
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
+  MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
 const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };

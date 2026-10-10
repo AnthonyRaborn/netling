@@ -16,7 +16,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed, ROGUE, marketScrip, hideLockLeft } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed, ROGUE, marketScrip, hideLockLeft, takeMerge, declineMerge } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -298,6 +298,12 @@ export function checkIn(s, p, now, rng, ctx) {
       // Rogue (stage 2): hunter fights and ambushes met and lost, a life.
       for (const k of ['hunters', 'huntersLost', 'ambushes', 'ambushesLost', 'ambushesSlipped']) if (run.tally[k]) ctx[k] = (ctx[k] ?? 0) + run.tally[k];
       finishRun(s, now);
+      // Rogue's good end: a clean Source exit offers the merge at once. MERGEBOT=accept (default) takes it, refuse declines every offer (the good
+      // end then waits for the elder's death, and a later mark can disarm it). An archetype may set `merge`.
+      if (s.mergeOffer) {
+        if ((p.merge ?? process.env.MERGEBOT ?? 'accept') === 'refuse') declineMerge(s);
+        else { takeMerge(s, now, rng); return; }
+      }
       // Deep runs up to and including the first that reaches its exit.
       if (region === 'deep' && ctx.deepClearAt === null) {
         ctx.deepRuns++;
@@ -573,6 +579,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     tracesIgnored,
     marks: s.marks ?? 0,
     markSources: { ...(s.markSources ?? {}) },
+    goodEnd: s.goodEnd ?? null, // Rogue: 'exit' (the merge taken at a clean Source exit), 'death' (armed when the elder died) or null
+    merge: s.merge ? { ...s.merge } : null, // Rogue: Source exits, clean ones, disarms by a later mark, offers declined, armed at the end
     sweeps: ctx.sweeps ?? 0,
     sweepDefends: ctx.sweepDefends ?? 0,
     sweepForced: ctx.sweepForced ?? 0,
@@ -757,6 +765,15 @@ export function stats(results) {
       runDisconnects: round(avg(results.map((r) => r.runDisconnects ?? 0)), 2),
       marked: rate((r) => r.marks > 0),
       captured: rate((r) => r.cause === 'captured'),
+      // The good end (stage 3): lives with a Source exit and a clean one, lives disarmed by a later mark, and the good end at the exit or at death.
+      good: {
+        sourceExit: rate((r) => (r.merge?.exits ?? 0) > 0),
+        cleanExit: rate((r) => (r.merge?.clean ?? 0) > 0),
+        disarmed: rate((r) => (r.merge?.disarmed ?? 0) > 0),
+        atExit: rate((r) => r.goodEnd === 'exit'),
+        atDeath: rate((r) => r.goodEnd === 'death'),
+        any: rate((r) => r.goodEnd !== null),
+      },
     } } : {}),
     // Attention rewards, a life: requests answered, visitors greeted, hours in flow, chatter lines seen.
     attention: {
