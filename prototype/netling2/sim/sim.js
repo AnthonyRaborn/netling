@@ -181,6 +181,7 @@ export const EVENTS = {
   trace: { label: 'CORP TRACE', window: 'traceWindowMin' },
   attack: { label: 'INTRUSION', window: 'attackWindowMin' },
   overflow: { label: 'MEMORY OVERFLOW', window: 'overflowWindowMin' },
+  sweep: { label: 'SWEEP', window: 'sweepWindowMin' }, // Rogue only (ROGUE below): replaces the trace and the intrusion
 };
 
 export const GAME_IDS = ['breach', 'dodge', 'tune', 'feast'];
@@ -263,10 +264,29 @@ const ADULTS = ROLES.flatMap((r) => LEANS.map((l) => roleForm(r, l)));
 // stays reproducible. Perks are by role and lean, traits by role (hidden has its own), keepsakes one per form.
 export const PERKS = { on: process.env.PERKS === '1' };
 const TRAIT_OF = { breach: 'hardened', dodge: 'evasive', tune: 'persistent', feast: 'foraging' };
-const traitFor = (f) => (f === 'hidden' ? 'untraceable' : TRAIT_OF[ROLES.find((r) => f.startsWith(r))]);
-const KEEP = { breachStreet: 'antivirus', breachCorp: 'repair', dodgeCorp: 'overclock', dodgeStreet: 'decoy', tuneCorp: 'coolant', tuneStreet: 'booster', feastCorp: 'voucher', feastStreet: 'salvage', hidden: 'memory' };
+// 2.0 Rogue egg (docs/NETLING_2_ROGUE_DRAFTS.md, sections 6 to 9; section 7's simulator build, stage 1: home life). A per-life egg: a netling is
+// Rogue when s.egg === 'rogue' (balance.mjs sets it for every life when ROGUE is set; ROGUE='{"...":...}' also overrides the numbers). Rogue has
+// no Standing (reset every minute), no main bar (run it with SIDES.owner 'none': every state at x1, no owner strain, no Iron wear), one teen,
+// four adults by most wins (no lean) and their elders through the ordinary gate. At home the sweep takes the slot of both the corp trace and
+// the intrusion (12% an hour, 90 minutes; HIDE, DEFEND or a Decoy; lost or ignored: Integrity -20 and a mark); three marks and it is captured
+// (a death Root Access does not reverse). Marks do not fade. Its perks, traits and keepsakes are section 9's. Off unless ROGUE is set.
+export const ROGUE = {
+  on: Boolean(process.env.ROGUE),
+  sweepChance: 0.12, // an hour: the trace's 8% and the intrusion's 4% (decided: never more than the two together)
+  sweepWindowMin: 90,
+  sweepIntegrity: 20, // lost or ignored
+  captureAt: 3,
+  untraceableSweep: true, // section 9.4, proposal: the hidden trait Untraceable cuts sweeps for a Rogue (it has no traces to cut)
+  ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
+};
+CFG.sweepWindowMin = ROGUE.sweepWindowMin;
+export const isRogue = (s) => s?.egg === 'rogue';
+export const ROGUE_ADULTS = ROLES.map((r) => `rogueAdult${cap1(r)}`);
+const rogueRole = (f) => ROLES.find((r) => f === `rogueAdult${cap1(r)}`);
+const traitFor = (f) => (f === 'hidden' ? 'untraceable' : TRAIT_OF[rogueRole(f) ?? ROLES.find((r) => f.startsWith(r))]);
+const KEEP = { breachStreet: 'antivirus', breachCorp: 'repair', dodgeCorp: 'overclock', dodgeStreet: 'decoy', tuneCorp: 'coolant', tuneStreet: 'booster', feastCorp: 'voucher', feastStreet: 'salvage', hidden: 'memory', rogueAdultBreach: 'repair', rogueAdultDodge: 'decoy', rogueAdultTune: 'booster', rogueAdultFeast: 'salvage' };
 export const KEEPSAKES = new Proxy({}, { get: (_, f) => (PERKS.on ? KEEP[f] : undefined) });
-export const FORMS = Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), get trait() { return PERKS.on ? traitFor(f) : null; } }]));
+export const FORMS = Object.fromEntries([...ADULTS, 'hidden', ...ROGUE_ADULTS].map((f) => [f, { name: cap1(f), get trait() { return PERKS.on ? traitFor(f) : null; } }]));
 
 // Every body a netling can have. Adult forms also appear in FORMS.
 export const SPECIES = {
@@ -277,6 +297,10 @@ export const SPECIES = {
   ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), stage: 'adult' }])),
   // Elders (the Mainframe stage of 1.0): one per adult, same gate as 1.0.
   ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [`${f}Elder`, { name: `${cap1(f)}Elder`, stage: 'mainframe', line: f }])),
+  // Rogue (ids as in docs/NETLING_2_ROGUE_DRAFTS.md, section 7): the baby is the shared one, one teen, four adults and their elders.
+  rogueTeen: { name: 'Alias', stage: 'teen' },
+  ...Object.fromEntries(ROLES.map((r) => [`rogueAdult${cap1(r)}`, { name: { breach: 'Mole', dodge: 'Skip', tune: 'Spook', feast: 'Drop' }[r], stage: 'adult' }])),
+  ...Object.fromEntries(ROLES.map((r) => [`rogueElder${cap1(r)}`, { name: { breach: 'Sleeper', dodge: 'Exile', tune: 'Handler', feast: 'Stash' }[r], stage: 'mainframe', line: `rogueAdult${cap1(r)}` }])),
 };
 
 // The adult form a body belongs to: itself for an adult, its line for an elder (and itself for anything else).
@@ -297,9 +321,25 @@ export const PERK_MODS = {
   feastCorp: { corpSync: 5, scavSync: -5 }, // Chrome's: loves corp packets, sulks at scavenged data
   feastStreet: { scavVirusMult: 0.5 }, // the infection roll on scavenged data halved
   hidden: { chargeDrainMult: 0.85, syncDrainMult: 0.85 },
+  // Rogue's own (docs/NETLING_2_ROGUE_DRAFTS.md, 9.3); the elder keeps its adult's.
+  rogueAdultBreach: { sweepIntegrity: 10 }, // Mole: a sweep ignored or a DEFEND lost costs Integrity -10, not -20 (the mark stays)
+  rogueAdultDodge: { sweepMult: 0.7 }, // Skip: sweeps 30% less often
+  rogueAdultTune: { chargeDrainMult: 0.9, syncDrainMult: 0.9 }, // Spook: Charge and Sync drain 10% slower
+  rogueAdultFeast: { marketScripMult: 0.7 }, // Drop: 30% less scrip at every market in a run (the clinic, the exchange, the black market)
 };
 
 const mod = (s, key, fallback = 1) => (PERKS.on ? PERK_MODS[lineOf(s.form)]?.[key] : undefined) ?? FORM_MODS[lineOf(s.form)]?.[key] ?? fallback;
+// The scrip a market in a run asks of this netling (Drop's perk; everyone else pays the list price).
+export const marketScrip = (s, price) => Math.round(price * mod(s, 'marketScripMult'));
+const sweepHit = (s) => mod(s, 'sweepIntegrity', ROGUE.sweepIntegrity);
+// A mark (Rogue): from an ignored sweep or a lost DEFEND (and, from the netrun stage on, a lost hunter fight). The capture itself is taken in step().
+export function addMark(s, t, source) {
+  s.marks = (s.marks ?? 0) + 1;
+  s.markSources ??= {};
+  s.markSources[source] = (s.markSources[source] ?? 0) + 1;
+  if (s.marks >= ROGUE.captureAt) s.captured = true;
+  log(s, t, `> !! marked (${s.marks}/${ROGUE.captureAt}). ${source}.`);
+}
 
 export const isAlive = (s) => s.stage !== 'script' && s.stage !== 'dead';
 // Asleep for the night, or napping: either way it rests and can't eat, play or run.
@@ -566,8 +606,9 @@ export function clearBug(s, { pay = 'scrip', corp = 1, where = 'home' } = {}) {
   if (!(s.bugs > 0)) return false;
   if (where === 'home' && !BUG_CFG.homeClear) return false;
   if (pay === 'scrip') {
-    if ((s.scrip ?? 0) < BUG_CFG.clearScrip) return false;
-    s.scrip -= BUG_CFG.clearScrip;
+    const price = where === 'clinic' ? marketScrip(s, BUG_CFG.clearScrip) : BUG_CFG.clearScrip;
+    if ((s.scrip ?? 0) < price) return false;
+    s.scrip -= price;
   } else {
     if (BUG_CFG.standingOnlyIfShort && (s.scrip ?? 0) >= BUG_CFG.clearScrip) return false;
     const street = BUG_CFG.clearStanding - corp;
@@ -1003,6 +1044,7 @@ function step(s, t, rng) {
     return;
   }
 
+  if (isRogue(s)) s.standing = { corp: 0, street: 0 }; // Rogue has no Standing (decided): whatever an action added is gone
   if (s.stage === 'baby' && s.ageMin >= s.life.teenAt) {
     evolve(s, t, 'teen', teenForm(s, rng));
   } else if (s.stage === 'teen' && s.ageMin >= s.life.adultAt) {
@@ -1133,7 +1175,8 @@ function step(s, t, rng) {
 
   s.integrityZeroMin = st.integrity <= 0 ? s.integrityZeroMin + 1 : 0;
 
-  if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse', rng);
+  if (s.captured) flatline(s, t, 'captured', rng);
+  else if (s.integrityZeroMin >= CFG.flatlineIntegrityMin) flatline(s, t, 'integrity collapse', rng);
   else if (s.careMistakes >= CFG.maxMistakes) flatline(s, t, 'neglect', rng);
   else if (s.ageMin >= lifeEnd(s)) flatline(s, t, 'end of life cycle', rng);
 }
@@ -1160,6 +1203,10 @@ function stepEvents(s, t, rng) {
     } else if (type === 'attack') {
       infect(s, CFG.attackLandedIntegrity);
       log(s, t, `> !! intrusion landed. virus installed. -${CFG.attackLandedIntegrity} integrity.`);
+    } else if (type === 'sweep') {
+      st.integrity = clamp(st.integrity - sweepHit(s));
+      log(s, t, `> !! sweep completed. it was seen. -${sweepHit(s)} integrity.`);
+      addMark(s, t, 'sweep ignored');
     } else if (type === 'overflow') {
       crash(s);
       log(s, t, `> !! buffers burst. crashed: -${CFG.overflowCrashIntegrity} integrity, cache full. rebooting...`);
@@ -1171,7 +1218,18 @@ function stepEvents(s, t, rng) {
   let hot = overclocked(s) ? CFG.overclockEventMult : inFlow(s) ? CFG.flowEventMult : 1;
   if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * lowM('sync');
   const overflowMult = (sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * costM('charge') : 1) * (ownerStrain() && SIDES.owner === 'charge' ? 1 + (OVERUSE.strain.overflow * (s.ostrain ?? 0)) / 100 : 1);
-  if (rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable')) * mod(s, 'traceMult')) / 60) {
+  const rogue = isRogue(s);
+  if (rogue && rng() < (hot * ROGUE.sweepChance * (ROGUE.untraceableSweep ? 1 - traitEffect(s, 'untraceable') : 1) * mod(s, 'sweepMult')) / 60) {
+    // Rogue: the sweep in the trace's place (the same draw position), and no intrusion below. A Decoy waves it off; an antivirus shield does not.
+    if (s.buffs?.attackSkip) {
+      s.buffs.attackSkip = false;
+      log(s, t, '> sweep followed the decoy instead.');
+      return;
+    }
+    s.event = { type: 'sweep', startedAge: s.ageMin, window: eventWindow(s, 'sweep') };
+    if (rattled(s)) rattleNote(s, t);
+    log(s, t, `> !! sweep incoming. HIDE or DEFEND within ${s.event.window}m.`);
+  } else if (!rogue && rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable')) * mod(s, 'traceMult')) / 60) {
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
       log(s, t, '> corp trace waved off by voucher.');
@@ -1180,7 +1238,7 @@ function stepEvents(s, t, rng) {
     s.event = { type: 'trace', startedAge: s.ageMin, window: eventWindow(s, 'trace') };
     if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! corp trace incoming. ${s.event.window}m to respond.`);
-  } else if (!s.virus && rng() < (hot * CFG.attackChancePerHour * mod(s, 'attackMult')) / 60) {
+  } else if (!rogue && !s.virus && rng() < (hot * CFG.attackChancePerHour * mod(s, 'attackMult')) / 60) {
     if (shielded(s)) {
       log(s, t, '> intrusion attempt bounced off the antivirus shield.');
       return;
@@ -1528,6 +1586,7 @@ export function teenCandidates(s) {
   return withFresh(s, { teenCorp: lean.corp, teenStreet: lean.street });
 }
 export function teenForm(s, rng = null) {
+  if (isRogue(s)) return 'rogueTeen';
   if (hiddenTeenMet(s)) return 'teenHidden';
   const pool = teenCandidates(s);
   if (rng) return weighted(pool, rng);
@@ -1544,6 +1603,12 @@ export function adultCandidates(s) {
 }
 export function adultForm(s, rng = null) {
   if (process.env.FORCE_ADULT && FORMS[process.env.FORCE_ADULT]) return process.env.FORCE_ADULT; // measurement aid: every netling grows into this form
+  if (isRogue(s)) {
+    // Rogue: the role of the game with the most wins, with the usual tie weights and no lean (decided).
+    const pool = withFresh(s, Object.fromEntries(Object.entries(gapWeights(Object.fromEntries(ROLES.map((r) => [r, s.games?.[r]?.won ?? 0])))).filter(([, w]) => w > 0).map(([r, w]) => [`rogueAdult${cap1(r)}`, w])));
+    if (rng) return weighted(pool, rng);
+    return Object.keys(pool).reduce((best, f) => (pool[f] > pool[best] ? f : best));
+  }
   if (hiddenAdultMet(s)) return 'hidden';
   const pool = adultCandidates(s);
   if (rng) return weighted(pool, rng);
@@ -1622,7 +1687,7 @@ export function fragmentOf(s, form) {
 
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.
 function rootRescue(s, t, cause) {
-  if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle') return false;
+  if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle' || cause === 'captured') return false; // the hunt is the one thing Root does not reach
   s.rootUsed = true;
   const st = s.stats;
   st.integrity = Math.max(st.integrity, 25);
@@ -1683,8 +1748,9 @@ export function blockReason(s, action) {
   if (rebootMinutesLeft(s) > 0 && action !== 'lights') return `rebooting. ${rebootMinutesLeft(s)}m left.`;
   if (resting(s) && ['corp', 'scav', 'play', 'cool'].includes(action)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10 + (SIDES.on && s.stats.charge <= SIDES[ 'charge' ].lo ? SIDES.charge.gate * sideM('charge') : 0)) return 'not enough charge to play.';
-  if ((action === 'hide' || action === 'comply') && s.event?.type !== 'trace') return 'no active trace.';
-  if (action === 'defend' && s.event?.type !== 'attack') return 'no intrusion to defend against.';
+  if (action === 'hide' && s.event?.type !== 'trace' && s.event?.type !== 'sweep') return 'no active trace.';
+  if (action === 'comply' && s.event?.type !== 'trace') return s.event?.type === 'sweep' ? 'no owner to comply with.' : 'no active trace.';
+  if (action === 'defend' && s.event?.type !== 'attack' && s.event?.type !== 'sweep') return 'no intrusion to defend against.';
   if (action === 'greet' && !s.visit) return 'nobody is here.';
   if (action === 'greet' && s.visit.greeted) return 'already said hello.';
   return null;
@@ -1891,10 +1957,14 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       st.charge = clamp(st.charge - 10);
       st.heat = clamp(st.heat + 10);
       s.standing.street += GAIN.mult;
-      res = ok(`rerouted through proxies. trace lost.${maybeDrop(s, 'hide', ITEM_CFG.hideDropChance, rng)}`, 'patch');
+      res = ok(`rerouted through proxies. ${isRogue(s) ? 'sweep' : 'trace'} lost.${maybeDrop(s, 'hide', ITEM_CFG.hideDropChance, rng)}`, 'patch');
       break;
     }
     case 'comply': {
+      if (s.event?.type === 'sweep') {
+        res = fail('no owner to comply with.');
+        break;
+      }
       eventAnswered(s, now);
       s.event = null;
       st.sync = clamp(st.sync - CFG.complySync);
@@ -1969,11 +2039,16 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
     }
     case 'defend': {
       // The DEFEND mini-game's result, like 'play' but for an intrusion.
+      const sweep = s.event?.type === 'sweep';
       if (opts.won) eventAnswered(s, now);
       s.event = null;
       if (opts.won) {
         s.temper += CFG.attackRepelledTemper;
-        res = ok(`intrusion repelled.${segfaultDrop(s, rng)}`, 'win');
+        res = ok(`${sweep ? 'sweep' : 'intrusion'} repelled.${segfaultDrop(s, rng)}`, 'win');
+      } else if (sweep) {
+        st.integrity = clamp(st.integrity - sweepHit(s));
+        addMark(s, now, 'defend lost');
+        res = ok(`seen. -${sweepHit(s)} integrity.${segfaultDrop(s, rng)}`, 'lose');
       } else {
         infect(s, CFG.attackLandedIntegrity);
         res = ok(`defense breached. virus installed. -${CFG.attackLandedIntegrity} integrity.${segfaultDrop(s, rng)}`, 'lose');
@@ -2056,9 +2131,10 @@ function useItem(s, id, rng) {
     }
     case 'decoy':
       s.standing.street += GAIN.mult;
-      if (s.event?.type === 'attack') {
+      if (s.event?.type === 'attack' || s.event?.type === 'sweep') {
+        const what = s.event.type === 'sweep' ? 'sweep' : 'intrusion';
         s.event = null;
-        return `${name} deployed. intrusion waved off.`;
+        return `${name} deployed. ${what} waved off.`;
       }
       s.buffs.attackSkip = true;
       return `${name} deployed. next intrusion pre-cleared.`;

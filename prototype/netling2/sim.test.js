@@ -23,10 +23,11 @@ const fresh = ({ now = T0, stage = 'adult', form = 'breachCorp' } = {}) => {
 };
 const advance = (s, minutes, rng = calm) => tick(s, s.lastTick + minutes * MIN, rng);
 
-test('the fork has the 22 forms of one egg and an elder for every adult', () => {
-  const by = (stage) => Object.values(SPECIES).filter((x) => x.stage === stage).length;
+test('the fork has the 22 forms of one egg, 9 more for Rogue (it shares the baby), and an elder for every adult', () => {
+  const by = (stage, rogue = false) => Object.entries(SPECIES).filter(([k, x]) => x.stage === stage && k.startsWith('rogue') === rogue).length;
   assert.deepEqual([by('baby'), by('teen'), by('adult'), by('mainframe')], [1, 3, 9, 9]);
-  assert.equal(Object.keys(FORMS).length, 9);
+  assert.deepEqual([by('baby', true), by('teen', true), by('adult', true), by('mainframe', true)], [0, 1, 4, 4]);
+  assert.equal(Object.keys(FORMS).length, 13);
   for (const f of Object.keys(FORMS)) assert.equal(SPECIES[MAINFRAME_OF[f]].line, f);
   assert.equal(CFG.maxMistakes, Infinity);
 });

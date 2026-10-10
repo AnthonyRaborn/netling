@@ -16,7 +16,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed, ROGUE, marketScrip } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -202,7 +202,7 @@ export function checkIn(s, p, now, rng, ctx) {
   if (p.runs && runCooldownLeft(s) > 0) useItem('overclock');
   // Items first: they can resolve things more cheaply than actions.
   if (s.event?.type === 'trace' && p.trace !== 'hide') useItem('voucher');
-  if (s.event?.type === 'attack') useItem('decoy');
+  if (s.event?.type === 'attack' || s.event?.type === 'sweep') useItem('decoy');
   if (s.stats.charge < 25) useItem('salvage');
   if (s.stats.heat > 70) useItem('coolant');
   if (ctx.gapToNext >= 240 && !(s.buffs?.shieldUntilAge > s.ageMin)) useItem('antivirus');
@@ -282,7 +282,7 @@ export function checkIn(s, p, now, rng, ctx) {
       const run = playRun(s, { ...RUN_STYLES[runStyle], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
       // Bugs fixed at a clinic this run, and what they cost.
       ctx.bugsFixed = (ctx.bugsFixed ?? 0) + (run.tally.fixed ?? 0);
-      ctx.scripSpent = (ctx.scripSpent ?? 0) + (run.tally.fixScrip ?? 0) * BUG_CFG.clearScrip;
+      ctx.scripSpent = (ctx.scripSpent ?? 0) + (run.tally.fixScrip ?? 0) * marketScrip(s, BUG_CFG.clearScrip);
       ctx.standingSpent = (ctx.standingSpent ?? 0) + (run.tally.fixStanding ?? 0) * BUG_CFG.clearStanding;
       ctx.clinicVisits = (ctx.clinicVisits ?? 0) + (run.tally.clinics ?? 0);
       ctx.runs = (ctx.runs ?? 0) + 1;
@@ -318,6 +318,13 @@ export function checkIn(s, p, now, rng, ctx) {
     if (!lapse()) doAct(choice);
   }
   if (s.event?.type === 'attack' && !lapse()) doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
+  // The sweep (Rogue): SWEEPBOT=hide (default: HIDE is sure, at Charge -10 and Heat +10), defend (always the mini-game, a loss is a mark) or
+  // mix (half and half). An archetype may set `sweep`. A lapse leaves it to run out (Integrity and a mark).
+  if (s.event?.type === 'sweep' && !lapse()) {
+    const how = p.sweep ?? process.env.SWEEPBOT ?? 'hide';
+    if (how === 'defend' || (how === 'mix' && rng() < 0.5)) doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
+    else doAct('hide');
+  }
   if (s.event?.type === 'overflow' && !lapse()) doAct('purge');
   if (s.virus && !lapse()) doAct('patch');
   if (s.cache > 0 && !(p.sloppy && s.cache < 3) && !lapse()) doAct('purge');
@@ -404,7 +411,7 @@ const snap = (s) => ({
   total: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
 });
 
-export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [], egg = 'program', eggPages = [] } = {}) {
+export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [], egg = ROGUE.on ? 'rogue' : 'program', eggPages = [] } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
@@ -458,6 +465,7 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     if (s.event && !prevEvent) {
       events++;
       if (s.event.type === 'trace') traces++;
+      if (s.event.type === 'sweep') ctx.sweeps = (ctx.sweeps ?? 0) + 1;
     }
     // A trace left to run out costs Integrity at once.
     if (prevEvent?.type === 'trace' && !s.event && s.stats.integrity < integrityBefore - 10) tracesIgnored++;
@@ -556,6 +564,9 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     events,
     traces,
     tracesIgnored,
+    marks: s.marks ?? 0,
+    markSources: { ...(s.markSources ?? {}) },
+    sweeps: ctx.sweeps ?? 0,
     requestsMet: ctx.requestsMet ?? 0,
     greeted: ctx.greeted ?? 0,
     flowHours: (s.flowTotalMin ?? 0) / 60,
@@ -724,6 +735,14 @@ export function stats(results) {
     events: round(avg(results.map((r) => r.events)), 2),
     traces: round(avg(results.map((r) => r.traces)), 2),
     tracesIgnored: round(avg(results.map((r) => r.tracesIgnored)), 2),
+    // Rogue (ROGUE): sweeps met, marks and where they came from, a life (only when the switch is on, so other reports are unchanged).
+    ...(ROGUE.on ? { rogue: {
+      sweeps: round(avg(results.map((r) => r.sweeps)), 2),
+      marks: round(avg(results.map((r) => r.marks)), 2),
+      markSources: Object.fromEntries(['sweep ignored', 'defend lost'].map((k) => [k, round(avg(results.map((r) => r.markSources?.[k] ?? 0)), 2)])),
+      marked: rate((r) => r.marks > 0),
+      captured: rate((r) => r.cause === 'captured'),
+    } } : {}),
     // Attention rewards, a life: requests answered, visitors greeted, hours in flow, chatter lines seen.
     attention: {
       requestsMet: round(avg(results.map((r) => r.requestsMet)), 2),
@@ -805,6 +824,7 @@ const list = (m) => Object.entries(m).map(([k, v]) => `${k} ${pct(v)}`).join(', 
 function printLife(st, detail) {
   console.log(`  reach teen ${pct(st.teen)} · adult ${pct(st.adult)} · full life ${pct(st.fullLife)} · median ${st.medianDays.toFixed(1)}d · mistakes ${st.mistakes.toFixed(1)}`);
   console.log(`  deaths: ${list(st.deaths)}`);
+  if (st.rogue) console.log(`  rogue: sweeps ${st.rogue.sweeps} · marks ${st.rogue.marks} (ignored ${st.rogue.markSources['sweep ignored']}, defend lost ${st.rogue.markSources['defend lost']}) · marked ${pct(st.rogue.marked)} · captured ${pct(st.rogue.captured)}`);
   console.log(`  teens:  ${list(st.teens)}`);
   console.log(`  adults: ${list(st.adults)}`);
   printGate(st.mainframe);

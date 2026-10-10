@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip } from '../sim.js';
 import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
 import { generateMap2 } from './map2.js';
 import { generateMap, nodeById, ensureOnEveryRoute, marketKinds } from '../../../../src/netrun/map.js';
@@ -123,7 +123,8 @@ export const MAINFRAME_ABILITIES = {
   panic: 'Slips through the first two ICE of each run for certain.',
   whisper: 'ICE misses it more often still.',
 };
-const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? lineOf(pet.form) : null);
+// A Rogue form runs on its role's base ability (NR2.rogueBase) until its own kit is built (docs/NETLING_2_ROGUE_DRAFTS.md, 9.2; simulator stage 2).
+const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? NR2.rogueBase[lineOf(pet.form)] ?? lineOf(pet.form) : null);
 const upgraded = (pet) => pet.stage === 'mainframe';
 // 2.0 abilities (nr2.js): the ability key is the adult form's id (breachCorp ... feastStreet, hidden); level 1 adult, 2 elder.
 const ab2 = (pet) => (NR2.abilities ? ability(pet) : null);
@@ -452,7 +453,7 @@ function moveToNode(pet, nodeId, rng) {
     }
     case 'checkpoint': {
       const form = ability(pet);
-      if (form === 'chrome' || form === 'ghost' || (ab2(pet) && NR2.ab.checkpoint[form]?.[lvl(pet)])) {
+      if (form === 'chrome' || form === 'ghost' || (ab2(pet) && NR2.ab.checkpoint[form]?.[lvl(pet)]) || (ab2(pet) && isRogue(pet))) { // every Rogue adult and elder: checkpoints never notice it (decided)
         note(run, form === 'chrome' ? 'checkpoint: credentials accepted.' : 'checkpoint: it never saw you.');
         return { ok: true, kind: 'checkpoint', auto: true };
       }
@@ -493,7 +494,7 @@ function moveToNode(pet, nodeId, rng) {
         accOffer,
         options: [
           ...(clinic ? fixOptions(pet) : []),
-          ...offers.map((id, i) => ({ id: `buy${i}`, label: `${ITEMS[id].name.toUpperCase()} ${SCRIP.price[id]}$` })),
+          ...offers.map((id, i) => ({ id: `buy${i}`, label: `${ITEMS[id].name.toUpperCase()} ${marketScrip(pet, SCRIP.price[id])}$` })),
           ...(accOffer ? [{ id: 'buyacc', label: `${accessoryById(accOffer).name.toUpperCase()} ${accScrip(accOffer)}$` }] : []),
           { id: 'leave', label: 'LEAVE', hint: 'buy nothing. sell from the inventory first.' },
         ],
@@ -645,8 +646,8 @@ export function refreshMarket(pet) {
       const cost = BUG_CFG.clearStanding;
       const half = Math.floor(cost / 2);
       const short = charge <= p.price + 5 ? `needs ${p.price + 5}+ charge`
-        : o.id === 'fixscrip' ? (scrip < BUG_CFG.clearScrip ? `needs ${BUG_CFG.clearScrip} scrip, has ${scrip}` : null)
-        : BUG_CFG.standingOnlyIfShort && scrip >= BUG_CFG.clearScrip ? 'pay with scrip while you have it'
+        : o.id === 'fixscrip' ? (scrip < marketScrip(pet, BUG_CFG.clearScrip) ? `needs ${marketScrip(pet, BUG_CFG.clearScrip)} scrip, has ${scrip}` : null)
+        : BUG_CFG.standingOnlyIfShort && scrip >= marketScrip(pet, BUG_CFG.clearScrip) ? 'pay with scrip while you have it'
         : o.id === 'fix2corp' ? (corp < cost ? `needs ${cost} corp standing` : null)
         : o.id === 'fix2street' ? (street < cost ? `needs ${cost} street standing` : null)
         : corp < half || street < cost - half ? 'needs standing of each' : null;
@@ -655,7 +656,7 @@ export function refreshMarket(pet) {
       continue;
     }
     const acc = o.id === 'buyacc';
-    const cost = acc ? accScrip(p.accOffer) : SCRIP.price[p.offers[Number(o.id.slice(3))]];
+    const cost = acc ? accScrip(p.accOffer) : marketScrip(pet, SCRIP.price[p.offers[Number(o.id.slice(3))]]);
     const chg = acc ? RUN_CFG.accPrice : p.price;
     const short = scrip < cost ? `needs ${cost} scrip, has ${scrip}` : charge <= chg + 5 ? `needs ${chg + 5}+ charge` : null;
     o.disabled = Boolean(short);
@@ -779,7 +780,7 @@ function chooseOption(pet, optionId, rng) {
     } else {
       const item = p.offers[Number(optionId.slice(3))];
       st.charge = clamp(st.charge - p.price);
-      pet.scrip -= SCRIP.price[item];
+      pet.scrip -= marketScrip(pet, SCRIP.price[item]);
       run.loot.push(item);
       run.tally.bought++;
       if (p.flavor !== 'clinic') lean(p.flavor === 'corp' ? RUN_CFG.exchangeLean : RUN_CFG.blackLean, 0);

@@ -88,6 +88,10 @@ export const NR2 = {
     scavenge: { 1: { cache: 0.55, iceWin: 0.35, winHeal: 11 }, 2: { cache: 0.7, iceWin: 0.5, winHeal: 22 } }, // feastStreet: tuned to the parity yardstick; winHeal is a small sustain (Integrity restored by a won ICE), decided as fitting the theme
     forcedCacheForms: ['feastCorp'], // level 2 only
   },
+  // Rogue (sim.js ROGUE), simulator stage 1: each Rogue adult and elder runs on its role's base ability from docs/NETLING_2_ROGUE_DRAFTS.md, 9.2
+  // (Mole Hardened, Skip Unseen, Spook Lookahead, Drop Scavenge) at the NL-0 numbers, plus the checkpoint part (run.js). A stand-in: the hunt twists,
+  // Skip's trimmed slip, danger sense, the trail and the hunters come with stage 2.
+  rogueBase: { rogueAdultBreach: 'breachStreet', rogueAdultDodge: 'dodgeStreet', rogueAdultTune: 'tuneCorp', rogueAdultFeast: 'feastStreet' },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
   cost: {
