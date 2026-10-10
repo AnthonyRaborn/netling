@@ -13,7 +13,8 @@ process.env.ROGUE = process.env.ROGUE ?? '1';
 const { createScript, mulberry32, SCRIP } = await import('./sim.js');
 const { playRun, continueRun, RUN_STYLES } = await import('./netrun-bot.mjs');
 const { choose, hunted } = await import('./netrun/run.js');
-const { REGIONS } = await import('../../../src/netrun/regions.js');
+const { rogueRelayLayer } = await import('./netrun/rogue-map.js');
+const { NR2 } = await import('./netrun/nr2.js');
 const { nodeById } = await import('../../../src/netrun/map.js');
 
 const n = Number(process.argv[2] ?? 3000);
@@ -38,7 +39,7 @@ function play(c, seed, region) {
   pet.rootAccess = true;
   Object.assign(pet.stats, { charge: 60 + rng() * 40, integrity: 60 + rng() * 40, heat: 20 + rng() * 30 });
   const scrip0 = pet.scrip ?? 0;
-  const relayLayer = Math.ceil(REGIONS[region].layers / 2);
+  const relayLayer = rogueRelayLayer(region, NR2.rogue.map); // the middle layer, or where relayAt moves it
   const style = { ...RUN_STYLES.careful, winRate: 0.7, lean: 'mix' };
   const atRelay = (p) => p.run.phase === 'choice' && p.run.pending?.kind === 'relay' && nodeById(p.run.map, p.run.pos)?.layer === relayLayer;
   const run = playRun(pet, { ...style, stopAt: atRelay }, region, rng);

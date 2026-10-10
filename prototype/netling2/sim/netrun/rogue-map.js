@@ -6,17 +6,36 @@
 //                the way down (at least two layers after the one before). Never layer 1, the relay layer or the exit.
 //   guardShare   the chance a cache or market is guarded: every node of the layer before that links into it becomes ICE, and as many ICE nodes
 //                elsewhere become quiet nodes (so the count of danger nodes does not change).
+//   relayAt      { region: f }: the guaranteed relay moves to the layer that share of the way down (first, so the cordon after it follows); the
+//                middle layer's guaranteed relay becomes a quiet node. Off when not listed (the middle layer, as the ordinary map).
 import { REGIONS } from '../../../../src/netrun/regions.js';
 import { weighted } from '../../../../src/random.js';
+
+// The layer of the guaranteed relay under these rules: the middle (the ordinary map's), or relayAt's share of the way down, kept off layer 1 and
+// the last layer.
+export function rogueRelayLayer(regionId, rules = {}) {
+  const layers = REGIONS[regionId].layers;
+  const f = rules.relayAt?.[regionId];
+  return f === undefined ? Math.ceil(layers / 2) : Math.min(layers - 1, Math.max(2, Math.round(f * layers)));
+}
 
 export function rogueMapRules(map, rng, rules) {
   const region = REGIONS[map.region];
   const layers = region.layers;
-  const relayLayer = Math.ceil(layers / 2);
+  const relayLayer = rogueRelayLayer(map.region, rules);
   const byLayer = (L) => map.nodes.filter((n) => n.layer === L);
   const quiet = Object.fromEntries(Object.entries(region.nodes).filter(([t]) => t !== 'ice' && t !== 'relay'));
   const reroll = () => weighted(quiet, rng);
-  const tally = { relaysThinned: 0, toIce: 0, cordon: [], guarded: 0, guardIce: 0, guardMoved: 0 };
+  const tally = { relaysThinned: 0, toIce: 0, cordon: [], guarded: 0, guardIce: 0, guardMoved: 0, relayMoved: false };
+
+  const middle = Math.ceil(layers / 2);
+  if (relayLayer !== middle) {
+    const old = byLayer(middle).find((n) => n.type === 'relay');
+    if (old) old.type = reroll();
+    const row = byLayer(relayLayer);
+    if (!row.some((n) => n.type === 'relay')) row[Math.floor(rng() * row.length)].type = 'relay';
+    tally.relayMoved = true;
+  }
 
   if (rules.relayFactor < 1) {
     for (const n of map.nodes) {

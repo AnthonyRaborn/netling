@@ -491,6 +491,24 @@ Reading it:
 
 **What could move it (not in the fork, for choice):** (a) move the Rogue Deep's relay later (about two thirds of the way down, the cordon still right after it), so jacking out there banks more; (b) a smaller exit bonus for Rogue in the Deep; (c) a payout for jacking out at that relay; (d) accept a higher target in the Deep, where the exit is the clearing run, and keep 1.33 for the Source, whose adults are in range.
 
+**Option (a) measured (2026-10-10): the relay moved down.** A map rule in the fork, `relayAt` (`rogue-map.js`, `nr2.js` `rogue.map`, off): the guaranteed relay moves to that share of the way down, the middle layer's becomes a quiet node, and the cordon stays right after it. Same read-out (`rogue-deep-levers.mjs`, same file; 3000 runs a form):
+
+| relay at | reached the relay | push / quiet, adults | push / quiet, elders | push: disconnect % after the relay | adults: banked jacking out there | whole Deep run, adults: exit / disconnect | adult disconnects vs hidden |
+|---|---|---|---|---|---|---|---|
+| the middle (layer 5, decided) | 38 to 42% | 2.1 to 2.7 | 2.5 to 3.2 | 22 to 41 | 1.4 to 1.7 | 38 / 34.3 | 1.90x |
+| 0.6 (layer 6) | 35 to 40% | 1.7 to 2.2 | 2.1 to 2.6 | 19 to 38 | | 41 / 33.6 | 1.86x |
+| **0.667 (layer 7)** | 32 to 38% | 1.6 to 2.0 | 1.9 to 2.4 | 18 to 35 | 2.2 to 2.7 | 40 / 33.2 | 1.84x |
+| 0.8 (layer 8) | 29 to 35% | 1.5 to 1.9 | 1.7 to 2.1 | 16 to 32 | 2.6 to 3.1 | 39 / 34.8 | 1.92x |
+| 0.9 (layer 9, the cordon in the last layer) | 27 to 33% | 1.4 to 1.9 | 1.6 to 2.1 | 12 to 25 | 2.9 to 3.6 | 40 / 34.2 | 1.90x |
+| 0.667 with the narrow Deep | 42 to 50% | 1.6 to 2.1 | 1.9 to 2.4 | 19 to 38 | | 36 / 34.8 | 1.93x |
+
+Reading it:
+1. **It works where danger did not**, and costs the run nothing: the relay at two thirds brings the adults from 2.1 to 2.7 down to 1.6 to 2.0 (Feast 1.59, Tune 1.76, Breach and Dodge 1.99), the elders to 1.9 to 2.4, with whole-run disconnects unchanged or a little lower (1.84x the hidden form's against 1.90x).
+2. **It levels off well above 1.33.** Even with the relay one layer before the exit (0.9), going on pays 1.4 to 1.9: the push crosses one cordon and collects the Deep's exit bonus (2 items and 3 scrip, `exitBonus` 2), which alone is most of a quiet run's value. The remainder is the exit bonus, so option (b) is what closes it.
+3. **Fewer runs meet the question** the later the relay sits (38 to 42% at the middle, 32 to 38% at two thirds); the narrow Deep gives that back (42 to 50%).
+
+**For the maintainer:** the relay at 0.667 (with or without the narrow Deep) as the starting point, and then either (b), a Rogue exit bonus of 1 in the Deep, measured on top, or (d), a Deep target of about 1.6 to 2.0. Not decided; `relayAt` stays off.
+
 - **Not done in stage 2:** the lineage side (the good end armed by a Source exit and disarmed by a later mark, the merge offer, returns to an NL-0 egg).
 
 ## 8. The ten forms (concept briefs, for choice)

@@ -205,7 +205,7 @@ test('ambushes are a share of a region ICE nodes (none in the Public Net), drawn
 }));
 
 // Stage 2b: Rogue's own map rules (9.7, netrun/rogue-map.js).
-const { rogueMapRules } = await import('./sim/netrun/rogue-map.js');
+const { rogueMapRules, rogueRelayLayer } = await import('./sim/netrun/rogue-map.js');
 const { generateMap } = await import('../../src/netrun/map.js');
 const { REGIONS } = await import('../../src/netrun/regions.js');
 const OFF = { relayFactor: 1, toIce: {}, cordons: {}, guardShare: 0 };
@@ -231,6 +231,21 @@ test('map rules: cordons (the layer after the relay; the Source a second about t
     assert.equal(d.nodes.find((n) => n.type === 'relay').layer, relayLayer);
     const s = rogueMapRules(generateMap('source', mulberry32(seed)), mulberry32(seed), { ...OFF, cordons: { source: [0, 0.667] } });
     assert.deepEqual(s.rogueRules.cordon, [8, 10]);
+  }
+});
+
+test('map rules: relayAt moves the guaranteed relay down (the middle one becomes quiet) and the cordon follows it; off, the middle layer', () => {
+  assert.equal(rogueRelayLayer('deep', OFF), Math.ceil(REGIONS.deep.layers / 2));
+  assert.equal(rogueRelayLayer('deep', { relayAt: { deep: 0.667 } }), 7);
+  assert.equal(rogueRelayLayer('deep', { relayAt: { deep: 1 } }), REGIONS.deep.layers - 1, 'never the last layer');
+  const middle = Math.ceil(REGIONS.deep.layers / 2);
+  for (let seed = 1; seed <= 20; seed++) {
+    const d = rogueMapRules(generateMap('deep', mulberry32(seed)), mulberry32(seed), { ...OFF, relayFactor: 0, relayAt: { deep: 0.667 }, cordons: { deep: [0] } });
+    assert.equal(d.nodes.filter((n) => n.type === 'relay').length, 1, 'one relay: the moved one');
+    assert.equal(d.nodes.find((n) => n.type === 'relay').layer, 7);
+    assert.ok(d.nodes.filter((n) => n.layer === middle).every((n) => n.type !== 'relay'), 'the middle layer has none');
+    assert.deepEqual(d.rogueRules.cordon, [8]);
+    assert.equal(d.rogueRules.relayMoved, true);
   }
 });
 
