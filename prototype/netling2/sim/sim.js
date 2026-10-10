@@ -277,10 +277,17 @@ export const ROGUE = {
   sweepIntegrity: 20, // lost or ignored
   captureAt: 3,
   untraceableSweep: true, // section 9.4, proposal: the hidden trait Untraceable cuts sweeps for a Rogue (it has no traces to cut)
+  // Section 7.2 (proposal under test, 0 = off so stage 1 reproduces): a HIDE burns the route, so HIDE is unavailable for hideLockMin after it,
+  // and a won DEFEND sends the hunters away, so no sweep starts for defendQuietMin after it.
+  hideLockMin: 0,
+  defendQuietMin: 0,
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
 export const isRogue = (s) => s?.egg === 'rogue';
+// Minutes left on the HIDE lockout and on the quiet a won DEFEND bought (Rogue, section 7.2; both 0 while the numbers are off).
+export const hideLockLeft = (s) => Math.max(0, (s.hideLockUntil ?? 0) - s.ageMin);
+export const sweepQuietLeft = (s) => Math.max(0, (s.sweepQuietUntil ?? 0) - s.ageMin);
 export const ROGUE_ADULTS = ROLES.map((r) => `rogueAdult${cap1(r)}`);
 const rogueRole = (f) => ROLES.find((r) => f === `rogueAdult${cap1(r)}`);
 const traitFor = (f) => (f === 'hidden' ? 'untraceable' : TRAIT_OF[rogueRole(f) ?? ROLES.find((r) => f.startsWith(r))]);
@@ -1219,7 +1226,7 @@ function stepEvents(s, t, rng) {
   if (sideOf(s, 'sync') === 'lo') hot /= 1 + SIDES.sync.calm * lowM('sync');
   const overflowMult = (sideOf(s, 'charge') === 'hi' ? 1 + SIDES.charge.overflow * costM('charge') : 1) * (ownerStrain() && SIDES.owner === 'charge' ? 1 + (OVERUSE.strain.overflow * (s.ostrain ?? 0)) / 100 : 1);
   const rogue = isRogue(s);
-  if (rogue && rng() < (hot * ROGUE.sweepChance * (ROGUE.untraceableSweep ? 1 - traitEffect(s, 'untraceable') : 1) * mod(s, 'sweepMult')) / 60) {
+  if (rogue && !sweepQuietLeft(s) && rng() < (hot * ROGUE.sweepChance * (ROGUE.untraceableSweep ? 1 - traitEffect(s, 'untraceable') : 1) * mod(s, 'sweepMult')) / 60) {
     // Rogue: the sweep in the trace's place (the same draw position), and no intrusion below. A Decoy waves it off; an antivirus shield does not.
     if (s.buffs?.attackSkip) {
       s.buffs.attackSkip = false;
@@ -1749,6 +1756,7 @@ export function blockReason(s, action) {
   if (resting(s) && ['corp', 'scav', 'play', 'cool'].includes(action)) return s.nap ? 'napping. wake it first.' : 'in low-power mode.';
   if (action === 'play' && s.stats.charge < 10 + (SIDES.on && s.stats.charge <= SIDES[ 'charge' ].lo ? SIDES.charge.gate * sideM('charge') : 0)) return 'not enough charge to play.';
   if (action === 'hide' && s.event?.type !== 'trace' && s.event?.type !== 'sweep') return 'no active trace.';
+  if (action === 'hide' && s.event?.type === 'sweep' && hideLockLeft(s)) return `route burned. no cover for ${Math.ceil(hideLockLeft(s))}m.`;
   if (action === 'comply' && s.event?.type !== 'trace') return s.event?.type === 'sweep' ? 'no owner to comply with.' : 'no active trace.';
   if (action === 'defend' && s.event?.type !== 'attack' && s.event?.type !== 'sweep') return 'no intrusion to defend against.';
   if (action === 'greet' && !s.visit) return 'nobody is here.';
@@ -1952,6 +1960,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       break;
     }
     case 'hide': {
+      if (s.event?.type === 'sweep' && ROGUE.hideLockMin) s.hideLockUntil = s.ageMin + ROGUE.hideLockMin;
       eventAnswered(s, now);
       s.event = null;
       st.charge = clamp(st.charge - 10);
@@ -2044,6 +2053,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       s.event = null;
       if (opts.won) {
         s.temper += CFG.attackRepelledTemper;
+        if (sweep && ROGUE.defendQuietMin) s.sweepQuietUntil = s.ageMin + ROGUE.defendQuietMin;
         res = ok(`${sweep ? 'sweep' : 'intrusion'} repelled.${segfaultDrop(s, rng)}`, 'win');
       } else if (sweep) {
         st.integrity = clamp(st.integrity - sweepHit(s));

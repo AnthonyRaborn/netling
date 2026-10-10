@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, tick, act, mulberry32, ROGUE, isRogue, FORMS, KEEPSAKES, PERKS, MAINFRAME_OF, SPECIES, marketScrip, addMark, CFG, MIN } = await import('./sim/sim.js');
+const { createScript, tick, act, mulberry32, ROGUE, isRogue, hideLockLeft, sweepQuietLeft, FORMS, KEEPSAKES, PERKS, MAINFRAME_OF, SPECIES, marketScrip, addMark, CFG, MIN } = await import('./sim/sim.js');
 const { startRun, moveTo, runOptions, visibleNodeIds } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
@@ -109,6 +109,55 @@ test('answers: HIDE ends a sweep with no mark; COMPLY is refused; DEFEND won end
   assert.equal(l.markSources['defend lost'], 1);
   assert.equal(l.stats.integrity, 60);
   assert.equal(Boolean(l.virus), false);
+});
+
+test('7.2, off by default: no HIDE lockout and no quiet after a won DEFEND', () => {
+  assert.deepEqual([ROGUE.hideLockMin, ROGUE.defendQuietMin], [0, 0]);
+  const s = fresh();
+  sweep(s);
+  act(s, 'hide', T0, stub(0.99));
+  sweep(s);
+  assert.ok(act(s, 'hide', T0, stub(0.99)).ok, 'a second HIDE straight after is allowed');
+  act(s, 'defend', T0, stub(0.99), { won: true });
+  assert.equal(sweepQuietLeft(s), 0);
+});
+
+test('7.2: a HIDE burns the route for hideLockMin; a won DEFEND stops new sweeps for defendQuietMin, a lost one does not', () => {
+  const saved = [ROGUE.hideLockMin, ROGUE.defendQuietMin];
+  Object.assign(ROGUE, { hideLockMin: 240, defendQuietMin: 480 });
+  try {
+    const h = fresh();
+    sweep(h);
+    assert.ok(act(h, 'hide', T0, stub(0.99)).ok);
+    assert.equal(hideLockLeft(h), 240);
+    sweep(h);
+    const r = act(h, 'hide', T0, stub(0.99));
+    assert.equal(r.ok, false, 'no cover while the route is burned');
+    assert.equal(h.event.type, 'sweep', 'the sweep stays open for DEFEND or a Decoy');
+    h.ageMin += 240;
+    assert.equal(hideLockLeft(h), 0);
+    assert.ok(act(h, 'hide', T0, stub(0.99)).ok, 'cover is back once the lockout has passed');
+
+    const w = fresh();
+    sweep(w);
+    act(w, 'defend', T0, stub(0.99), { won: true });
+    assert.equal(sweepQuietLeft(w), 480);
+    assert.equal(hideLockLeft(w), 0, 'DEFEND does not burn the route');
+    tick(w, T0 + MIN, stub(0));
+    assert.notEqual(w.event?.type, 'sweep', 'no sweep starts in the quiet');
+    w.sweepQuietUntil = w.ageMin;
+    w.event = null;
+    tick(w, T0 + 2 * MIN, stub(0));
+    assert.equal(w.event?.type, 'sweep', 'sweeps start again once the quiet is over');
+
+    const l = fresh();
+    sweep(l);
+    act(l, 'defend', T0, stub(0.99), { won: false });
+    assert.equal(sweepQuietLeft(l), 0);
+    assert.equal(l.marks, 1);
+  } finally {
+    Object.assign(ROGUE, { hideLockMin: saved[0], defendQuietMin: saved[1] });
+  }
 });
 
 test('a Decoy waves off the open sweep, or the next one', () => {

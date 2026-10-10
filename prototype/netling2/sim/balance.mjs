@@ -16,7 +16,7 @@
 // way down is open to The Deep, and Root Access as the game would grant it) or CODEX=ruins (through ruins-4,
 // the earliest a lineage can reach The Deep) starts every single life knowing that much.
 process.env.TZ = 'UTC';
-const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed, ROGUE, marketScrip } = await import('./sim.js');
+const { createScript, tick, act, blockReason, bedtimeHour, mulberry32, inFlow, overclocked, lifeEnd, mainframeAt, mainframeDue, mainframeFeat, CFG, FORMS, KEEPSAKES, MIN, GAME_IDS, INVENTORY_SLOTS, BUG_CFG, PREF, IRON, WET, ACTS, SIDES, STAGE, temperLevel, clearBug, leanSeen, slotsUsed, ROGUE, marketScrip, hideLockLeft } = await import('./sim.js');
 const { RUN_CFG, runCooldownLeft, updateContract } = await import('./netrun/run.js');
 const { runBlockReason } = await import('./netrun/run.js');
 const { REGION_ORDER, regionLock } = await import('../../../src/netrun/regions.js');
@@ -318,12 +318,17 @@ export function checkIn(s, p, now, rng, ctx) {
     if (!lapse()) doAct(choice);
   }
   if (s.event?.type === 'attack' && !lapse()) doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
-  // The sweep (Rogue): SWEEPBOT=hide (default: HIDE is sure, at Charge -10 and Heat +10), defend (always the mini-game, a loss is a mark) or
-  // mix (half and half). An archetype may set `sweep`. A lapse leaves it to run out (Integrity and a mark).
+  // The sweep (Rogue): SWEEPBOT=hide (default: HIDE is sure, at Charge -10 and Heat +10), defend (always the mini-game, a loss is a mark),
+  // mix (half and half) or reserve (DEFEND while it has no mark, keeping HIDE for later; HIDE once marked). Whenever HIDE is locked out (the
+  // route burned, ROGUE.hideLockMin) every bot DEFENDs. An archetype may set `sweep`. A lapse leaves it to run out (Integrity and a mark).
   if (s.event?.type === 'sweep' && !lapse()) {
     const how = p.sweep ?? process.env.SWEEPBOT ?? 'hide';
-    if (how === 'defend' || (how === 'mix' && rng() < 0.5)) doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
-    else doAct('hide');
+    const defend = how === 'defend' || (how === 'mix' && rng() < 0.5) || (how === 'reserve' && !s.marks) || hideLockLeft(s) > 0;
+    if (defend) {
+      ctx.sweepDefends = (ctx.sweepDefends ?? 0) + 1;
+      if (hideLockLeft(s) > 0) ctx.sweepForced = (ctx.sweepForced ?? 0) + 1;
+      doAct('defend', { won: rng() < winChance(overclocked(s), skill()) });
+    } else doAct('hide');
   }
   if (s.event?.type === 'overflow' && !lapse()) doAct('purge');
   if (s.virus && !lapse()) doAct('patch');
@@ -567,6 +572,8 @@ export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), frag
     marks: s.marks ?? 0,
     markSources: { ...(s.markSources ?? {}) },
     sweeps: ctx.sweeps ?? 0,
+    sweepDefends: ctx.sweepDefends ?? 0,
+    sweepForced: ctx.sweepForced ?? 0,
     requestsMet: ctx.requestsMet ?? 0,
     greeted: ctx.greeted ?? 0,
     flowHours: (s.flowTotalMin ?? 0) / 60,
@@ -738,6 +745,8 @@ export function stats(results) {
     // Rogue (ROGUE): sweeps met, marks and where they came from, a life (only when the switch is on, so other reports are unchanged).
     ...(ROGUE.on ? { rogue: {
       sweeps: round(avg(results.map((r) => r.sweeps)), 2),
+      defends: round(avg(results.map((r) => r.sweepDefends)), 2), // DEFENDs against a sweep, a life
+      forced: round(avg(results.map((r) => r.sweepForced)), 2), // of which with HIDE locked out
       marks: round(avg(results.map((r) => r.marks)), 2),
       markSources: Object.fromEntries(['sweep ignored', 'defend lost'].map((k) => [k, round(avg(results.map((r) => r.markSources?.[k] ?? 0)), 2)])),
       marked: rate((r) => r.marks > 0),
@@ -824,7 +833,7 @@ const list = (m) => Object.entries(m).map(([k, v]) => `${k} ${pct(v)}`).join(', 
 function printLife(st, detail) {
   console.log(`  reach teen ${pct(st.teen)} · adult ${pct(st.adult)} · full life ${pct(st.fullLife)} · median ${st.medianDays.toFixed(1)}d · mistakes ${st.mistakes.toFixed(1)}`);
   console.log(`  deaths: ${list(st.deaths)}`);
-  if (st.rogue) console.log(`  rogue: sweeps ${st.rogue.sweeps} · marks ${st.rogue.marks} (ignored ${st.rogue.markSources['sweep ignored']}, defend lost ${st.rogue.markSources['defend lost']}) · marked ${pct(st.rogue.marked)} · captured ${pct(st.rogue.captured)}`);
+  if (st.rogue) console.log(`  rogue: sweeps ${st.rogue.sweeps} (defended ${st.rogue.defends}, forced ${st.rogue.forced}) · marks ${st.rogue.marks} (ignored ${st.rogue.markSources['sweep ignored']}, defend lost ${st.rogue.markSources['defend lost']}) · marked ${pct(st.rogue.marked)} · captured ${pct(st.rogue.captured)}`);
   console.log(`  teens:  ${list(st.teens)}`);
   console.log(`  adults: ${list(st.adults)}`);
   printGate(st.mainframe);
