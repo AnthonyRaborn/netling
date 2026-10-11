@@ -25,6 +25,7 @@ const BASE = {
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }),
   MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
   ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
+  ROGUE_SOURCE: '0', // measured before the Source levers became the defaults (2026-10-11, Rogue drafts 7.11): pinned off
 };
 
 const jobs = [];

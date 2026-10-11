@@ -25,6 +25,7 @@ const BASE = {
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
   MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
   ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
+  ROGUE_SOURCE: '0', // measured before the Source levers became the defaults (2026-10-11, Rogue drafts 7.11): pinned off
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
 const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };

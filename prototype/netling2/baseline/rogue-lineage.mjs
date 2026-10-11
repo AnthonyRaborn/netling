@@ -61,7 +61,8 @@ const JOBS = {
     // The lines at about 35% (7.11; kept for tuning after a playtest): Breach's chance and Dodge's slip searched here; Feast clean at 100 and Tune's
     // nullify 1 come from fclean100 and null1.
     'bchance20': { breachFree: 1, breachChance: 0.2 }, 'bchance25': { breachFree: 1, breachChance: 0.25 },
-    'dodge25': { dodgeSlip: 0.25 }, 'dodge10': { dodgeSlip: 0.1 },
+    'dodge25': { dodgeSlip: 0.25 }, 'dodge10': { dodgeSlip: 0.1 }, 'dodge0': { dodgeSlip: 0 },
+    thirtyfive: { breachFree: 1, breachChance: 0.2, dodgeSlip: 0, feastClean: 100, tuneNullify: { 1: 1, 2: 1 } },
   }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
   // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
   'trait-spread': { SPREAD: '0.2' },
@@ -69,6 +70,9 @@ const JOBS = {
 };
 // jobFilter: a comma list of job names (exact), or one substring as before.
 const wanted = (job) => !filter || (filter.includes(',') ? filter.split(',').includes(job) : job.includes(filter));
+// Every job above was measured with the Source levers off (nr2.js rogue.source neutral), so each runs with ROGUE_SOURCE=0 and its own levers
+// on top; the decided defaults since 2026-10-11 (7.11, the fifty set) are the 'fifty' job's levers, and 'decided-fifty' runs them as the defaults.
+JOBS['decided-fifty'] = { ROGUE_SOURCE: '' };
 const todo = [];
 for (const [job, env] of Object.entries(JOBS)) {
   if (!wanted(job)) continue;
@@ -77,7 +81,7 @@ for (const [job, env] of Object.entries(JOBS)) {
 }
 console.log(`${todo.length} runs to do, ${lineages} lines of ${rogueLives} Rogue lives, ${jobsAtOnce} at once`);
 const run = ([job, env, a]) => new Promise((resolve) => {
-  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ...env, JSON: '1' } });
+  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ROGUE_SOURCE: '0', ...env, JSON: '1' } });
   let buf = '';
   let err = '';
   p.stdout.on('data', (d) => (buf += d));

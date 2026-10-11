@@ -6,7 +6,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const dir = join(dirname(fileURLToPath(import.meta.url)), 'results', 'followup', 'rogue-lineage');
-const JOBS = ['trait', 'breach1', 'tune', 'feast2', 'feast3', 'dodge75', 'dodge50', 'help', 'help-dodge75', 'help3-dodge50', 'trait-spread', 'tune-spread', 'fclean80', 'fclean90', 'fclean100', 'fclean80-h2', 'fclean90-h2', 'fclean100-h2', 'reroll1', 'reroll2', 'null1', 'null2', 'even', 'softer', 'bchance50', 'bchance60', 'fifty', 'bchance20', 'bchance25', 'dodge25', 'dodge10', 'thirtyfive'];
+const JOBS = ['trait', 'breach1', 'tune', 'feast2', 'feast3', 'dodge75', 'dodge50', 'help', 'help-dodge75', 'help3-dodge50', 'trait-spread', 'tune-spread', 'fclean80', 'fclean90', 'fclean100', 'fclean80-h2', 'fclean90-h2', 'fclean100-h2', 'reroll1', 'reroll2', 'null1', 'null2', 'even', 'softer', 'bchance50', 'bchance60', 'fifty', 'bchance20', 'bchance25', 'dodge25', 'dodge10', 'dodge0', 'thirtyfive'];
 const LINES = ['breach', 'dodge', 'tune', 'feast'];
 const OUT = new Set(['corpo', 'runner', 'overclocker', 'casual', 'worker', 'hunter-casual', 'human-casual', 'human-regular', 'human-keen', 'human-bursty', 'neglectful']);
 const { ARCHETYPES } = await import('../sim/balance.mjs');

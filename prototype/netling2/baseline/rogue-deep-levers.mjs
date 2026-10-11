@@ -46,7 +46,7 @@ const EXIT = {
 // The first three rounds were measured with the relay in the middle layer (then the default), so they spell it out unless they move it.
 // All rounds were measured with the region's exit bonus 2 (then the default) unless they set it.
 const PRE = (over) => ({ exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
-const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ROGUE_TRAIT: '0', ...env }, maxBuffer: 1 << 26 }));
+const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ROGUE_TRAIT: '0', ROGUE_SOURCE: '0', ...env }, maxBuffer: 1 << 26 }));
 const file = join(here, 'results', 'followup', 'rogue-deep-levers.json');
 const out = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
 for (const [name, over] of [...Object.entries(SETTINGS).map(([k, map]) => [k, PRE({ map })]), ...Object.entries(FAR).map(([k, o]) => [k, PRE(o)]), ...Object.entries(EXIT)]) {
