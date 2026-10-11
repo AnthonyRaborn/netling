@@ -27,7 +27,7 @@ const BASE = {
 };
 for (const [k, v] of Object.entries(BASE)) process.env[k] ??= v;
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
-const { CFG, SIDES, IRON, lineOf, ROGUE, INHERIT } = await import('./sim.js');
+const { CFG, SIDES, IRON, lineOf, ROGUE, INHERIT, ROGUE_TRAIT } = await import('./sim.js');
 const { FRAGMENTS } = await import('./codex2.js');
 const { OWNER, nextLife, crossFragment } = await import('./rogue-line.js');
 
@@ -51,11 +51,11 @@ function life(egg, seed, fragment, generation, owned, mixed = false) {
     tier = egg === 'rogue' && process.env.FEAT ? Number(process.env.FEAT) : mine.has(lineOf(s.form)) ? 4 : mine.size ? 3 : 2;
     return LADDER[tier];
   };
-  const r = simulate({ ...ARCHETYPES[name] }, seed, { fragment, generation, codex: CODEX, rootAccess: true, egg });
+  const r = simulate({ ...ARCHETYPES[name] }, seed, { fragment, generation, codex: CODEX, rootAccess: true, egg, mixed });
   CFG.featFor = null;
   const elder = (r.stageDays?.mainframe ?? 0) > 0;
   if (elder) (owned[egg] ??= new Set()).add(lineOf(r.form));
-  return { egg, mixed, inherited: Boolean(fragment?.trait), cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
+  return { egg, mixed, inherited: Boolean(fragment?.trait), traces: r.traces, greeted: r.greeted, hunters: r.hunt?.hunters ?? 0, huntersLost: r.hunt?.huntersLost ?? 0, cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
 }
 
 function lineage(i) {
@@ -139,6 +139,14 @@ const out = {
   nl0Lives: L.flat().length - R.length,
   mixedLives: L.flat().filter((r) => r.mixed).length, // NL-0 lives hatched from a good end (the mixed egg)
   rogueInherited: share(R, (r) => r.inherited), // Rogue lives that hatched with a trait line
+  rogueTrait: ROGUE_TRAIT.on,
+  // The Rogue trait's two halves: the trail hunter on Rogue lives, and traces and visitors greeted on the mixed egg against other NL-0 lives.
+  hunters: round(R.reduce((a, r) => a + r.hunters, 0) / R.length, 2),
+  huntersLost: round(R.reduce((a, r) => a + r.huntersLost, 0) / R.length, 2),
+  nl0: Object.fromEntries([['mixed', true], ['other', false]].map(([k, m]) => {
+    const xs = L.flat().filter((r) => r.egg !== 'rogue' && r.mixed === m);
+    return [k, { lives: xs.length, traces: xs.length ? round(xs.reduce((a, r) => a + r.traces, 0) / xs.length, 2) : null, greeted: xs.length ? round(xs.reduce((a, r) => a + r.greeted, 0) / xs.length, 2) : null }];
+  })),
 };
 if (process.env.JSON) console.log(JSON.stringify(out));
 else {
@@ -148,4 +156,5 @@ else {
   console.log(`  first good end: Rogue life ${f.rogueLives.median} (p90 ${f.rogueLives.p90}), life ${f.lives.median} (p90 ${f.lives.p90}), day ${f.days.median} (p90 ${f.days.p90}); at the exit ${(f.atExit * 100).toFixed(0)}%`);
   console.log(`  per Rogue life: elder ${(p.elder * 100).toFixed(0)}%, Source run ${(p.sourceRun * 100).toFixed(0)}%, Source exit ${(p.sourceExit * 100).toFixed(0)}% (clean ${(p.cleanExit * 100).toFixed(0)}%), good end ${(p.goodEnd * 100).toFixed(0)}% (exit ${(p.atExit * 100).toFixed(0)}, death ${(p.atDeath * 100).toFixed(0)}), captured ${(p.captured * 100).toFixed(1)}%, marks ${p.marks}, ${p.days} days`);
   console.log(`  after a Source exit (${a.lives} lives): disarmed once ${(a.disarmedOnce * 100).toFixed(0)}%, no good end ${(a.lostIt * 100).toFixed(0)}% (captured ${(a.capturedAfter * 100).toFixed(0)}%), declined ${(a.declined * 100).toFixed(0)}%, ${a.exitsPerLife} exits a life · deaths ${JSON.stringify(out.deaths)} · NL-0 lives ${out.nl0Lives} (mixed ${out.mixedLives})`);
+  console.log(`  Rogue trait ${out.rogueTrait ? 'on' : 'off'}: hunters ${out.hunters} a Rogue life (lost ${out.huntersLost}) · mixed lives: traces ${out.nl0.mixed.traces}, visitors greeted ${out.nl0.mixed.greeted} · other NL-0 lives: traces ${out.nl0.other.traces}, greeted ${out.nl0.other.greeted}`);
 }

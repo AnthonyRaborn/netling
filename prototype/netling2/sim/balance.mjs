@@ -424,12 +424,13 @@ const snap = (s) => ({
   total: GAME_IDS.reduce((n, id) => n + s.games[id].won, 0),
 });
 
-export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [], egg = ROGUE.on ? 'rogue' : 'program', eggPages = [] } = {}) {
+export function simulate(p, seed, { rootAccess = Boolean(process.env.ROOT), fragment = null, generation = 1, codex = [], egg = ROGUE.on ? 'rogue' : 'program', eggPages = [], mixed = false } = {}) {
   const rng = mulberry32(seed);
   const t0 = Date.UTC(2026, 0, 5, 8, 0);
   const s = createScript({ now: t0, rng, rootAccess, fragment, generation });
   s.egg = egg; // which egg's pages drop (NR2.eggPages); the eggs share every other rule in this fork
   s.eggPages = [...eggPages];
+  if (mixed) s.mixed = true; // the mixed egg (hatched after a Rogue good end): it carries the Rogue trait for this life (sim.js ROGUE_TRAIT)
   const ctx = { bugMin: 0, ceilMin: 0, games: 0, lastOfDay: false, codex: [...codex], regionRuns: {}, chatterSeen: new Set(), deepClearAt: null, deepRuns: 0, deepDisconnects: 0, deepExits: [], firstFlowAt: null };
   const codexAtStart = ctx.codex.length;
   let minute = 0;

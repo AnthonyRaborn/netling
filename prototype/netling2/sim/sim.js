@@ -294,6 +294,13 @@ export const ROGUE = {
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
 export const isRogue = (s) => s?.egg === 'rogue';
+// The Rogue trait (docs/NETLING_2_ROGUE_DRAFTS.md 9.4a, C1 and E1; decided, maintainer, 2026-10-11; placeholder name Unsigned): whatever hunts it
+// finds it less. Innate, not inherited: every Rogue netling has it beside its role trait, and the mixed egg (an NL-0 netling hatched after a good
+// end, s.mixed) has it for its one life; its child does not. Always at full strength (no streak, no history). On a Rogue: every region's hunter
+// threshold is `threshold` higher (netrun/run.js huntThreshold). On the mixed egg: a share `traceToVisit` of its corp traces become visitors
+// instead (the trace's rate reassigned to the one positive random event). Off: ROGUE_TRAIT=0 (the older Rogue runners pin it off).
+export const ROGUE_TRAIT = { on: process.env.ROGUE_TRAIT !== '0', threshold: 2, traceToVisit: 0.25, ...(process.env.ROGUE_TRAIT && process.env.ROGUE_TRAIT.startsWith('{') ? JSON.parse(process.env.ROGUE_TRAIT) : {}) };
+export const hasRogueTrait = (s) => ROGUE_TRAIT.on && (isRogue(s) || Boolean(s?.mixed));
 // Minutes left on the HIDE lockout and on the quiet a won DEFEND bought (Rogue, section 7.2; both 0 while the numbers are off).
 export const hideLockLeft = (s) => Math.max(0, (s.hideLockUntil ?? 0) - s.ageMin);
 export const sweepQuietLeft = (s) => Math.max(0, (s.sweepQuietUntil ?? 0) - s.ageMin);
@@ -1279,6 +1286,14 @@ function stepEvents(s, t, rng) {
     if (rattled(s)) rattleNote(s, t);
     log(s, t, `> !! sweep incoming. HIDE or DEFEND within ${s.event.window}m.`);
   } else if (!rogue && rng() < (hot * CFG.traceChancePerHour * (1 - traitEffect(s, 'untraceable')) * mod(s, 'traceMult')) / 60) {
+    // The Rogue trait on the mixed egg: this share of its traces arrive as a visitor instead (none if a visit cannot start now).
+    if (hasRogueTrait(s) && rng() < ROGUE_TRAIT.traceToVisit) {
+      if (!s.visit && !s.run && rebootMinutesLeft(s) === 0) {
+        SIDE_METER.visits++;
+        startVisit(s, t, rng);
+      }
+      return;
+    }
     if (s.buffs?.traceSkip) {
       s.buffs.traceSkip = false;
       log(s, t, '> corp trace waved off by voucher.');

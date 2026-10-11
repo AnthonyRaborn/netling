@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, mulberry32 } = await import('./sim/sim.js');
+const { createScript, mulberry32, ROGUE_TRAIT } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce, choose, jackOut, hunted, huntThreshold, sendAgent, dangerView, ambushSeen } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
@@ -31,14 +31,16 @@ function setup(form, types, { region = 'deep', egg = 'rogue', stage = 'adult', .
   return s;
 }
 // Every test runs with the kits on (NR2.abilities) and the Rogue rules on, as NR2=all would.
+// The hunt's own rules at the region thresholds: the Rogue trait (its +2, tested in rogue-goodend.test.js) is off here.
 function withKits(fn) {
-  const saved = [NR2.abilities, NR2.rogue.on];
+  const saved = [NR2.abilities, NR2.rogue.on, ROGUE_TRAIT.on];
   NR2.abilities = true;
   NR2.rogue.on = true;
+  ROGUE_TRAIT.on = false;
   try {
     return fn();
   } finally {
-    [NR2.abilities, NR2.rogue.on] = saved;
+    [NR2.abilities, NR2.rogue.on, ROGUE_TRAIT.on] = saved;
   }
 }
 

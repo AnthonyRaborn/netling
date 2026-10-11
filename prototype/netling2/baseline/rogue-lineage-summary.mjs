@@ -7,9 +7,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const dir = join(dirname(fileURLToPath(import.meta.url)), 'results', 'followup');
 const JOBS = [['stage 3 (any exit arms; accept the offer, Rogue again)', 'decided'], ['stage 3: refuse every offer', 'refuse'], ['stage 3: one NL-0 life after a capture', 'back'], ["stage 3 lever: every Rogue elder at 1.0's feat", 'tier1'],
-  ['decided 2026-10-11 (a clean exit arms; accept, the mixed egg)', 'clean'], ['decided 2026-10-11: refuse every offer', 'clean-refuse'], ['decided 2026-10-11: Rogue again after every good end', 'clean-rogue']];
+  ['decided 2026-10-11 (a clean exit arms; accept, the mixed egg)', 'clean'], ['decided 2026-10-11: refuse every offer', 'clean-refuse'], ['decided 2026-10-11: Rogue again after every good end', 'clean-rogue'],
+  ['with the Rogue trait (C1, E1)', 'trait']];
 // The per-archetype table shows the current decided job when it exists, else stage 3's.
-const BY = existsSync(join(dir, 'rogue-lineage-clean.json')) ? 'clean' : 'decided';
+const BY = ['trait', 'clean', 'decided'].find((j) => existsSync(join(dir, `rogue-lineage-${j}.json`)));
 const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
 const pct = (x) => (x * 100).toFixed(0);
 const row = (o) => [pct(o.reached), pct(o.reachedBy[1]), pct(o.reachedBy[3]), pct(o.reachedBy[5]), o.firstGoodEnd.rogueLives.median, o.firstGoodEnd.lives.median, o.firstGoodEnd.days.median, pct(o.firstGoodEnd.atExit),

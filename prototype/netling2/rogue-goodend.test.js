@@ -5,8 +5,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, fragmentOf, lifeEnd, CFG, MIN, ROGUE, PERKS, INHERIT } = await import('./sim/sim.js');
-const { startRun, moveTo, resolveIce } = await import('./sim/netrun/run.js');
+const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, fragmentOf, lifeEnd, CFG, MIN, ROGUE, PERKS, INHERIT, ROGUE_TRAIT, hasRogueTrait } = await import('./sim/sim.js');
+const { startRun, moveTo, resolveIce, huntThreshold } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
 const stub = (v) => () => v;
@@ -284,4 +284,39 @@ test('only a full life passes the trait line on (any egg): old age and the taken
     PERKS.on = saved;
     INHERIT.fullLife = true;
   }
+});
+
+test('the Rogue trait (9.4a, C1 and E1): every Rogue and the mixed egg have it, never inherited; a Rogue\'s hunter threshold +2', () => {
+  const rogue = elder();
+  const plain = elder('program', 'breachStreet');
+  const mixed = elder('program', 'breachStreet');
+  mixed.mixed = true;
+  assert.deepEqual([hasRogueTrait(rogue), hasRogueTrait(plain), hasRogueTrait(mixed)], [true, false, true]);
+  const run = { region: 'deep' };
+  assert.equal(huntThreshold(run, rogue), NR2.rogue.threshold.deep + ROGUE_TRAIT.threshold);
+  oldAge(mixed);
+  const child = createScript({ now: T0, rng: mulberry32(4), fragment: mixed.fragment });
+  assert.equal(hasRogueTrait(child), false, 'the mixed egg\'s child does not carry it');
+  ROGUE_TRAIT.on = false;
+  try {
+    assert.equal(huntThreshold(run, rogue), NR2.rogue.threshold.deep);
+  } finally {
+    ROGUE_TRAIT.on = true;
+  }
+});
+
+test('the Rogue trait on the mixed egg: a share of its corp traces arrive as visitors instead (none for an NL-0 netling without it)', () => {
+  // Every roll 0 until the trace fires (rolls run trace, then the trace-to-visitor share): with the trait the trace becomes a visit.
+  const home = (mixedEgg) => {
+    const s = createScript({ now: T0, rng: mulberry32(3) });
+    Object.assign(s, { egg: 'program', stage: 'adult', form: 'breachStreet', lastTick: T0, lightsOn: true, mixed: mixedEgg });
+    Object.assign(s.stats, { charge: 90, integrity: 90, heat: 30, sync: 60 });
+    tick(s, T0 + MIN, stub(0));
+    return s;
+  };
+  const m = home(true);
+  assert.equal(m.event, null, 'no trace');
+  assert.ok(m.visit, 'a visitor instead');
+  const p = home(false);
+  assert.equal(p.event?.type, 'trace');
 });

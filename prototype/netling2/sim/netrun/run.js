@@ -2,7 +2,7 @@
 // care-preference history, and a disconnect fault owes a bug roll (settled by sim.js on the next step). Standing arrives through the
 // `axes` adapter in sim.js. Not modeled: the debug station anomaly and any bug-clearing node.
 // Netrun rules. The run lives on the pet (pet.run) so it survives reloads, and it spends the pet's real stats.
-import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, marketScrip, addMark, sourceExit } from '../sim.js';
+import { addScrip, grantItem, isAlive, lineOf, log, mulberry32, overclocked, rebootMinutesLeft, resting, runCooldownAtFloor, runCooldownLeft, sellValue, GAME_IDS, INVENTORY_SLOTS, ITEMS, CFG, SCRIP, PREF, pushGame, BUG_CFG, clearBugAt, IRON, SIDES, SIDE_METER, ITEM_METER, infect, hasRoom, PERKS, isRogue, hasRogueTrait, ROGUE_TRAIT, marketScrip, addMark, sourceExit } from '../sim.js';
 import { NR2, levelOf, tierShare, tierShareAt, avoidMult } from './nr2.js';
 import { generateMap2 } from './map2.js';
 import { rogueMapRules } from './rogue-map.js';
@@ -135,7 +135,8 @@ const lvl = (pet) => levelOf(pet);
 const ROLE_OF = { rogueAdultBreach: 'breach', rogueAdultDodge: 'dodge', rogueAdultTune: 'tune', rogueAdultFeast: 'feast' };
 export const hunted = (pet, run = pet.run) => Boolean(NR2.rogue?.on && isRogue(pet) && run && !run.daily && NR2.rogue.threshold[run.region] !== undefined);
 // The region's threshold; with the netling, its kit's thresholdDelta too (the Dodge skip-tracer lever, off by default).
-export const huntThreshold = (run, pet) => NR2.rogue.threshold[run.region] + ((pet && rkit(pet)?.thresholdDelta) ?? 0);
+// The Rogue trait (sim.js ROGUE_TRAIT) raises it for every Rogue.
+export const huntThreshold = (run, pet) => NR2.rogue.threshold[run.region] + ((pet && rkit(pet)?.thresholdDelta) ?? 0) + (pet && hasRogueTrait(pet) ? ROGUE_TRAIT.threshold : 0);
 const rogueRole = (pet) => (NR2.abilities && NR2.rogue?.on && isRogue(pet) && (pet.stage === 'adult' || pet.stage === 'mainframe') ? ROLE_OF[lineOf(pet.form)] ?? null : null);
 const rkit = (pet) => (rogueRole(pet) ? NR2.rogue.kit[rogueRole(pet)][lvl(pet)] : null);
 function addTrail(run, n) {

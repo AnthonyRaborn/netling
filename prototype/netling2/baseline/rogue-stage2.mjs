@@ -24,6 +24,7 @@ const BASE = {
   BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}', CODEX: 'deep', JSON: '1',
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
   MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
+  ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
 };
 const th = (m) => ({ threshold: Object.fromEntries(Object.entries({ public: 10, bazaar: 10, corp: 9, ruins: 9, deep: 10, source: 12 }).map(([k, v]) => [k, Math.round(v * m)])) });
 const HALF = { corp: 1 / 12, ruins: 1 / 12, deep: 0.125, source: 0.125 };
@@ -54,15 +55,19 @@ const JOBS = {
   'th20-tier1-nomap-amb-nomark': { ...DRAFT, ...th(2), hunterTier: 1, map: { on: false }, ambushMark: false },
   'th15-tier1-nomap-amb-nomark': { ...DRAFT, ...th(1.5), hunterTier: 1, map: { on: false }, ambushMark: false },
   'th20-tier1-nocordon-amb-half': { ...DRAFT, ...th(2), hunterTier: 1, map: { ...DRAFT.map, cordons: {} }, ambush: HALF },
+  // The Rogue trait (decided 2026-10-11; sim.js ROGUE_TRAIT, the hunter's threshold +2 in every region), on the fork's defaults. The only job that
+  // runs with the trait on (TRAIT_ON below).
+  'decided-trait': {},
 };
+const TRAIT_ON = new Set(['decided-trait']);
 
 // Jobs measured before a later default spell out the earlier value: the middle relay (all but the two below) and the region's exit bonus 2 (all
 // but decided-exit1, which runs on the fork's defaults).
-const PRE_RELAY = (name, over) => (name === 'decided-exit1' || name === 'decided-relay667' ? over : { exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
+const PRE_RELAY = (name, over) => (name === 'decided-exit1' || name === 'decided-relay667' || TRAIT_ON.has(name) ? over : { exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
 const todo = Object.entries(JOBS).map(([n, o]) => [n, PRE_RELAY(n, o)]).filter(([n]) => (!filter || n.includes(filter)) && !existsSync(join(out, `rogue-s2-${n}.json`)));
 console.log(`${todo.length} jobs to run, ${lives} lives an archetype, ${jobsAtOnce} at once`);
 const run = ([name, over]) => new Promise((resolve) => {
-  const p = spawn(process.execPath, [balance, String(lives)], { env: { ...process.env, ...BASE, ROGUE_RUN: JSON.stringify(over) } });
+  const p = spawn(process.execPath, [balance, String(lives)], { env: { ...process.env, ...BASE, ...(TRAIT_ON.has(name) && { ROGUE_TRAIT: '1' }), ROGUE_RUN: JSON.stringify(over) } });
   let buf = '';
   let err = '';
   p.stdout.on('data', (d) => (buf += d));

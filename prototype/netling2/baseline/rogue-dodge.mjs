@@ -28,6 +28,7 @@ const BASE = {
   BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}', CODEX: 'deep', JSON: '1',
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }), ROGUE: '1',
   MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
+  ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
 };
 // ROGUE_RUN merges one level down, so the whole Dodge kit is spelled out with the lever added.
 const D = (...parts) => ({ map: { relayAt: {} }, exitBonus: { deep: 2 }, kit: { dodge: { 1: { unseen: 0.3, moveEvery: 2, ...Object.assign({}, ...parts) }, 2: { unseen: 0.5, moveEvery: 2, ambushSlip: true, ...Object.assign({}, ...parts) } } } });

@@ -24,6 +24,7 @@ const BASE = {
   BUGS: JSON.stringify({ standingOnlyIfShort: true, clearStanding: 5 }), BRAKE: '{"on":true}', OVERUSE: '{"on":true}', CODEX: 'deep', JSON: '1',
   SIDES: JSON.stringify({ on: true, owner: 'none', ownerMult: 3, teenStates: true, ...FINAL_SIDES }),
   MERGEBOT: 'refuse', // measured before the good end (stage 3): a declined offer leaves every life as it was then
+  ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
 };
 
 const jobs = [];
