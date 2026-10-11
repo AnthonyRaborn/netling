@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Netling 2.0 UI Mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+<style>
+/* Layout: one phone-portrait device, top strip (read), stage (look), attention lane (events), dock (act).
+   Palette is netling 1.0's own: dark shell, magenta/cyan/yellow, LCD green-teal. Single dark look by choice. */
+:root {
+  --bg: #07070c;
+  --shell: #14121f;
+  --shell-edge: #2a2240;
+  --magenta: #ff2a6d;
+  --cyan: #05d9e8;
+  --yellow: #f9f002;
+  --orange: #ff9f1c;
+  --text: #c7f9ff;
+  --dim: #809fa6;
+  --lcd: #0b2226;
+  --font: 'VT323', ui-monospace, 'Courier New', monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 20px; line-height: 1.2; padding-inline: 16px; padding-block: 12px 24px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.wrap { max-width: 420px; margin-inline: auto; display: flex; flex-direction: column; gap: 12px; }
+.demo { display: flex; flex-direction: column; gap: 6px; }
+.demo h1 { font-size: 22px; font-weight: 400; color: var(--cyan); letter-spacing: 0.08em; margin: 0; }
+.demo p { margin: 0; color: var(--dim); font-size: 18px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--shell); border: 1px solid var(--shell-edge); padding: 4px 10px; font-size: 18px; letter-spacing: 0.05em; }
+.chip[aria-pressed="true"] { border-color: var(--cyan); color: var(--cyan); }
+
+/* device */
+/* nameplate: the shell's spot for the crest and the device label (1.0's header brand), read only */
+.plate { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px; border-bottom: 1px solid var(--shell-edge); background: #0b0a12; flex: none; }
+.plate canvas, canvas.sw { width: 18px; height: 18px; image-rendering: pixelated; flex: none; }
+.plate span { font-size: 19px; letter-spacing: 0.3em; color: var(--cyan); }
+.row input { flex: 1; min-width: 0; font: inherit; font-size: 20px; background: #000; color: var(--cyan); border: 1px solid var(--shell-edge); padding: 6px 8px; text-transform: uppercase; letter-spacing: 0.1em; }
+.device { position: relative; height: 730px; background: var(--shell); border: 2px solid var(--shell-edge); display: flex; flex-direction: column; overflow: hidden; }
+
+/* top strip: read only, no controls */
+.strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; padding: 10px 12px; border-bottom: 1px solid var(--shell-edge); background: #100e19; }
+.vital { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.vital .row1 { display: flex; justify-content: space-between; font-size: 17px; color: var(--dim); letter-spacing: 0.08em; }
+.vital .st { color: var(--orange); }
+.pips { display: flex; gap: 2px; }
+.pip { flex: 1; height: 12px; border: 1px solid var(--cyan); background: transparent; }
+.pip.gap { margin-left: 3px; }
+.pip.on { background: var(--cyan); }
+/* Heat takes each pip's color from its band: cool cyan, warm yellow, hot red. The other vitals have a red
+   danger zone at their low end (.d). A named state recolors nothing; its word is the only mark. */
+.heat .pip.c2 { border-color: var(--yellow); } .heat .pip.c2.on { background: var(--yellow); }
+.heat .pip.c3 { border-color: var(--magenta); } .heat .pip.c3.on { background: var(--magenta); }
+.pip.d { border-color: var(--magenta); } .pip.d.on { background: var(--magenta); }
+.od .pip.on:last-child { background: #fff; box-shadow: 0 0 0 1px #fff; }
+.pips.empty .pip.d { animation: slow 2.4s ease-in-out infinite; }
+.pips.hot .pip.on:last-child { animation: slow 2.4s ease-in-out infinite; }
+@keyframes slow { 50% { opacity: 0.35; } }
+
+/* stage */
+.stage { flex: 1; min-height: 0; margin: 10px 12px 0; background: var(--lcd); border: 2px solid #000; position: relative; display: grid; place-items: center; }
+.stage canvas { width: 176px; height: 176px; image-rendering: pixelated; animation: bob 3s steps(2) infinite; }
+@keyframes bob { 50% { transform: translateY(4px); } }
+.bubble { position: absolute; top: 10px; right: 12px; max-width: 70%; background: #000; border: 1px solid var(--cyan); color: var(--cyan); padding: 3px 8px; font-size: 18px; }
+/* 1.0's cache icon (src/sprites.js SPRITES.cache): 4x5, drawn bottom left, one per point, 1 px apart. */
+.cacheicons { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 4px; }
+.cacheicons canvas { width: 16px; height: 20px; image-rendering: pixelated; }
+.agebar { position: absolute; right: 8px; bottom: 6px; color: var(--dim); font-size: 16px; letter-spacing: 0.08em; }
+
+/* attention lane: always reserved, fixed height */
+.lane { height: 72px; margin: 8px 12px 0; display: flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid var(--shell-edge); background: #100e19; }
+.lane .msg { flex: 1; min-width: 0; font-size: 19px; color: var(--dim); }
+.lane.event { border-color: var(--magenta); background: #1d0f1a; }
+.lane.event .msg { color: var(--text); }
+.lane.wish { border-color: var(--yellow); }
+.lane.wish .msg { color: var(--yellow); }
+.lane .time { color: var(--magenta); font-size: 24px; font-variant-numeric: tabular-nums; }
+.lane button { min-height: 44px; min-width: 64px; padding: 0 8px; background: var(--shell); border: 1px solid var(--cyan); color: var(--cyan); letter-spacing: 0.06em; }
+.lane.event button { border-color: var(--magenta); color: var(--magenta); }
+.lane.wish button { border-color: var(--yellow); color: var(--yellow); }
+
+/* dock */
+.dock { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px 12px 10px; }
+.dock button { position: relative; min-height: 52px; background: var(--shell); border: 1px solid var(--shell-edge); letter-spacing: 0.04em; font-size: 19px; }
+.dock button[aria-expanded="true"] { border-color: var(--cyan); color: var(--cyan); }
+.dock .netrun { border-color: var(--magenta); color: var(--magenta); }
+.dot { position: absolute; top: 5px; right: 6px; width: 9px; height: 9px; background: var(--yellow); border-radius: 50%; }
+.dot[hidden] { display: none; }
+
+/* trays and panels */
+.tray { position: absolute; left: 8px; right: 8px; bottom: 74px; background: #0d0b16; border: 1px solid var(--cyan); padding: 10px; display: flex; flex-direction: column; gap: 10px; z-index: 5; }
+.tray h2, .panel h2, .sheet h2 { margin: 0; font-size: 18px; font-weight: 400; color: var(--dim); letter-spacing: 0.1em; }
+.groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.group { display: flex; flex-direction: column; gap: 6px; }
+.group h3 { margin: 0; font-size: 16px; font-weight: 400; color: var(--cyan); letter-spacing: 0.1em; }
+.act { min-height: 44px; background: var(--shell); border: 1px solid var(--shell-edge); padding: 0 6px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cell { position: relative; min-height: 54px; background: var(--shell); border: 1px solid var(--shell-edge); display: grid; place-items: center; font-size: 17px; }
+.cell.empty { border-style: dashed; color: var(--shell-edge); }
+.cell.dim { opacity: 0.45; }
+.cell[aria-pressed="true"] { border-color: var(--yellow); }
+.badge { position: absolute; right: 4px; bottom: 2px; font-size: 15px; color: var(--yellow); }
+.keep { position: absolute; left: 4px; top: 2px; font-size: 14px; color: var(--cyan); }
+.desc { min-height: 44px; display: flex; align-items: center; gap: 8px; font-size: 18px; color: var(--dim); }
+.desc .grow { flex: 1; }
+.desc button { min-height: 40px; padding: 0 12px; border: 1px solid var(--cyan); background: var(--shell); color: var(--cyan); }
+.desc button.scrap { border-color: var(--shell-edge); color: var(--dim); }
+.games { display: flex; flex-direction: column; gap: 6px; }
+.game { min-height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; background: var(--shell); border: 1px solid var(--shell-edge); }
+.game .wins { color: var(--yellow); font-variant-numeric: tabular-nums; }
+
+.panel { position: absolute; inset: 0 0 74px 0; background: #0d0b16; z-index: 6; display: flex; flex-direction: column; }
+.panel header { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--shell-edge); }
+.panel header button, .back { min-height: 40px; padding: 0 14px; background: var(--shell); border: 1px solid var(--shell-edge); }
+.panel .body { padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.sheet { position: absolute; left: 8px; right: 8px; bottom: 74px; background: #0d0b16; border: 1px solid var(--cyan); padding: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+.sheet button { min-height: 48px; display: flex; justify-content: space-between; align-items: center; padding: 0 12px; background: var(--shell); border: 1px solid var(--shell-edge); }
+.sheet button span { color: var(--dim); font-size: 17px; }
+.stand { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stand div { background: var(--shell); border: 1px solid var(--shell-edge); padding: 8px; display: flex; flex-direction: column; align-items: center; }
+.stand b { font-size: 44px; font-weight: 400; line-height: 1; font-variant-numeric: tabular-nums; }
+.stand .c b { color: var(--yellow); } .stand .s b { color: var(--magenta); }
+.stand small { color: var(--dim); font-size: 17px; letter-spacing: 0.1em; }
+.kv { display: flex; justify-content: space-between; border-bottom: 1px solid var(--shell-edge); padding: 4px 0; }
+.kv .v { color: var(--yellow); font-variant-numeric: tabular-nums; }
+.log { margin: 0; padding: 0; list-style: none; color: var(--dim); font-size: 17px; display: flex; flex-direction: column; gap: 2px; }
+.tabs { display: flex; gap: 6px; }
+.tabs button { flex: 1; min-height: 44px; background: var(--shell); border: 1px solid var(--shell-edge); }
+.tabs button[aria-selected="true"] { border-color: var(--cyan); color: var(--cyan); }
+.toggle[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); }
+.toast { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); background: #000; border: 1px solid var(--yellow); color: var(--yellow); padding: 4px 10px; z-index: 9; font-size: 18px; text-align: center; }
+.toast[hidden] { display: none; }
+
+.pv { position: relative; margin: 10px 12px 0; height: 128px; background: var(--lcd); border: 2px solid #000; display: flex; align-items: center; gap: 12px; padding: 0 12px; }
+.pv canvas { width: 104px; height: 104px; image-rendering: pixelated; flex: none; }
+.pvinfo { font-size: 20px; color: var(--cyan); min-width: 0; }
+.pvinfo small { display: block; color: var(--dim); font-size: 16px; letter-spacing: 0.08em; }
+.cats { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 12px 0; }
+.cats button { min-height: 36px; padding: 0 8px; background: var(--shell); border: 1px solid var(--shell-edge); font-size: 17px; }
+.cats button[aria-selected="true"] { border-color: var(--cyan); color: var(--cyan); }
+.cats small { color: var(--dim); font-size: 14px; margin-left: 4px; }
+.listwrap { position: relative; flex: 1; min-height: 0; margin: 10px 12px 12px; border: 1px solid var(--shell-edge); }
+.list { height: 100%; overflow-y: scroll; padding: 6px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: auto; scrollbar-color: var(--cyan) var(--shell); }
+.list::-webkit-scrollbar, .log.scroll::-webkit-scrollbar { width: 12px; }
+.list::-webkit-scrollbar-track, .log.scroll::-webkit-scrollbar-track { background: var(--shell); }
+.list::-webkit-scrollbar-thumb, .log.scroll::-webkit-scrollbar-thumb { background: var(--cyan); }
+.more { position: absolute; left: 0; right: 14px; bottom: 0; padding: 20px 0 4px; text-align: center; font-size: 17px; color: var(--cyan); background: linear-gradient(transparent, #0d0b16 70%); pointer-events: none; }
+.more[hidden] { display: none; }
+.row { display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 6px 10px; background: var(--shell); border: 1px solid var(--shell-edge); text-align: left; flex: none; }
+.row[aria-pressed="true"] { border-color: var(--yellow); }
+.row .col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row .nm { font-size: 20px; }
+.row .hn { font-size: 16px; color: var(--dim); }
+.row .stt { font-size: 16px; color: var(--cyan); letter-spacing: 0.06em; flex: none; }
+.row.locked { opacity: 0.65; border-style: dashed; }
+.row.locked .stt { color: var(--dim); }
+.sw { width: 18px; height: 18px; border: 1px solid var(--dim); flex: none; }
+.fx-scan::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px); }
+.log.scroll { max-height: 190px; overflow-y: scroll; border: 1px solid var(--shell-edge); padding: 6px; scrollbar-width: auto; scrollbar-color: var(--cyan) var(--shell); }
+.expand { min-height: 40px; background: var(--shell); border: 1px solid var(--shell-edge); color: var(--cyan); }
+.cats em, .row .new { color: var(--yellow); font-style: normal; font-size: 14px; margin-left: 4px; letter-spacing: 0.06em; }
+.row .stt { display: flex; flex-direction: column; align-items: flex-end; }
+.pvbtn { min-height: 36px; padding: 0 12px; margin-top: 4px; background: var(--shell); border: 1px solid var(--cyan); color: var(--cyan); font-size: 17px; }
+.bars { display: inline-flex; gap: 3px; align-items: flex-end; height: 16px; margin-right: 8px; vertical-align: middle; }
+.bars i { width: 6px; height: 16px; background: var(--cyan); animation: eq 2s steps(3) infinite; }
+.bars i:nth-child(2) { animation-delay: -0.5s; } .bars i:nth-child(3) { animation-delay: -1s; } .bars i:nth-child(4) { animation-delay: -1.5s; }
+@keyframes eq { 0% { height: 6px; } 33% { height: 16px; } 66% { height: 10px; } }
+.muted { color: var(--yellow) !important; }
+@media (prefers-reduced-motion: reduce) { .bars i { animation: none; } }
+.lane .msg b { display: block; font-weight: 400; font-size: 19px; line-height: 1; color: var(--magenta); letter-spacing: 0.06em; }
+.lane .msg small { display: block; font-size: 15px; color: var(--dim); }
+/* egg skins: same layout, different palette and names */
+.device[data-egg="iron"] { --cyan: #9fc3e6; --lcd: #151b20; --shell: #1b2127; --shell-edge: #3d4a57; }
+.device[data-egg="wetware"] { --cyan: #8cffb4; --lcd: #0e2418; --shell: #101a14; --shell-edge: #24402f; }
+/* full screens and modals */
+.screen { position: absolute; inset: 0; z-index: 20; background: #07070c; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 20px 16px; overflow-y: auto; }
+.screen.modal { background: rgba(7, 7, 12, 0.85); }
+.card { background: #0d0b16; border: 1px solid var(--cyan); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.scr-t { margin: 0; font-size: 34px; font-weight: 400; color: var(--cyan); letter-spacing: 0.1em; }
+.scr-t.danger { color: var(--magenta); }
+.scr-p { margin: 0; color: var(--dim); font-size: 20px; }
+.eggs { display: flex; flex-direction: column; gap: 8px; }
+.egg { display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 8px 12px; background: var(--el); border: 1px solid var(--ec); text-align: left; }
+.egg[aria-pressed="true"] { outline: 2px solid var(--yellow); outline-offset: 2px; }
+.egg canvas { width: 48px; height: 54px; image-rendering: pixelated; flex: none; }
+.egg .col { display: flex; flex-direction: column; min-width: 0; }
+.egg .nm { font-size: 22px; color: var(--ec); letter-spacing: 0.08em; }
+.egg .hn { font-size: 16px; color: var(--dim); }
+.big { min-height: 52px; background: var(--shell); border: 1px solid var(--cyan); color: var(--cyan); letter-spacing: 0.1em; font-size: 22px; }
+.cl { opacity: 0; animation: show 0.01s forwards; margin: 0; font-size: 21px; }
+@keyframes show { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cl { opacity: 1; animation: none; } }
+.chiplbl { color: var(--dim); font-size: 16px; align-self: center; letter-spacing: 0.08em; }
+.notes { color: var(--dim); font-size: 18px; display: flex; flex-direction: column; gap: 6px; }
+.notes h2 { margin: 0; font-size: 20px; font-weight: 400; color: var(--cyan); letter-spacing: 0.08em; }
+.notes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+@media (prefers-reduced-motion: reduce) { .stage canvas, .pips.empty .pip.d, .pips.hot .pip.on:last-child { animation: none; } }
+</style>
+
+<div class="wrap">
+  <section class="demo">
+    <h1>NETLING 2.0 UI MOCK</h1>
+    <p>Static mock with fake state. Pick a scenario, then tap the dock. Pip bands and numbers are placeholders.</p>
+    <div class="chips" id="chips"></div>
+    <div class="chips" id="chips-egg"></div>
+    <div class="chips" id="chips-scr"></div>
+  </section>
+
+  <div class="device" id="device" data-egg="program">
+    <div class="toast" id="toast" hidden></div>
+    <section class="screen" id="screen" hidden></section>
+    <div class="plate" id="plate"><canvas width="9" height="9" aria-hidden="true" hidden></canvas><span>NETLING</span></div>
+    <header class="strip" id="strip" aria-label="Vitals"></header>
+    <main class="stage">
+      <div class="bubble" id="bubble"></div>
+      <canvas id="pet" width="16" height="16" aria-label="Your netling"></canvas>
+      <div class="cacheicons" id="cache" role="img"></div>
+      <div class="agebar">TEEN  2d 4h</div>
+    </main>
+    <div class="lane" id="lane" aria-live="polite"></div>
+    <nav class="dock" id="dock" aria-label="Actions">
+      <button data-d="care" aria-expanded="false">CARE</button>
+      <button data-d="play" aria-expanded="false">PLAY</button>
+      <button data-d="netrun" class="netrun">NETRUN</button>
+      <button data-d="style" aria-expanded="false">STYLE<i class="dot" id="style-dot"></i></button>
+      <button data-d="menu" aria-expanded="false">MENU<i class="dot" id="menu-dot" hidden></i></button>
+    </nav>
+
+    <section class="tray" id="tray-care" hidden>
+      <h2>CARE</h2>
+      <div class="groups">
+        <div class="group"><h3>FEED</h3><span id="feedbtns" style="display:contents"></span></div>
+        <div class="group"><h3>FIX</h3><span id="fixbtns" style="display:contents"></span></div>
+        <div class="group"><h3>REST</h3><span id="restbtns" style="display:contents"></span></div>
+      </div>
+      <h2>ITEMS 5 OF 6 SLOTS</h2>
+      <div class="grid" id="items"></div>
+      <div class="desc" id="item-desc"><span class="grow">Tap an item.</span></div>
+    </section>
+
+    <section class="tray" id="tray-play" hidden>
+      <h2>PLAY</h2>
+      <div class="games" id="games"></div>
+    </section>
+
+    <section class="panel" id="panel-style" hidden>
+      <header><h2>STYLE</h2><button data-close>DONE</button></header>
+      <div class="plate" id="plate2"><canvas width="9" height="9" aria-hidden="true" hidden></canvas><span>NETLING</span></div>
+      <div class="pv" id="pv"><canvas id="pet2" width="16" height="16" aria-label="Preview of your netling"></canvas><div class="pvinfo" id="pvinfo"></div></div>
+      <div class="cats" id="slots" role="tablist"></div>
+      <div class="listwrap"><div class="list" id="style-items"></div><div class="more" id="more" hidden>SCROLL FOR MORE &#9660;</div></div>
+    </section>
+
+    <section class="sheet" id="sheet-menu" hidden>
+      <h2>MENU</h2>
+      <button data-p="status">STATUS <span>this life</span></button>
+      <button data-p="library">LIBRARY <span>records</span></button>
+      <button data-p="system">SYSTEM <span id="alerts-hint">alerts on</span></button>
+    </section>
+
+    <section class="panel" id="panel-info" hidden>
+      <header><h2 id="info-title"></h2><button data-close>BACK</button></header>
+      <div class="body" id="info-body"></div>
+    </section>
+  </div>
+
+  <section class="notes">
+    <h2>WHAT THIS SHOWS</h2>
+    <ul>
+      <li>Top strip is read only. Everything you tap is in the bottom third.</li>
+      <li>Pips: ten per vital, one pip per 10 points. A wider gap marks where a state band starts. Zero or one pip is the danger band, with no label. Named states (Overclock, Overdrive) recolor the row.</li>
+      <li>The lane between pet and dock is always reserved. Events and wishes share it. An event closes any open tray.</li>
+      <li>MENU shows a dot when alerts are off. Wins reset each life, so they live in PLAY and STATUS only.</li>
+      <li>STYLE keeps a live preview pinned on top, shows every item with its hint (owned or locked), and has a visible scrollbar plus a "scroll for more" cue. Shell, tint and screen effect apply to the preview and the device. Sound and music only show a note here.</li>
+      <li>Shell recolors every border on the device. Heat pips take their color from their band (cool, warm, hot). Newly unlocked items carry a NEW tag, and the STYLE button shows a dot until each is seen.</li>
+      <li>Red marks each danger zone: Heat's hot end and the low end of Charge, Sync and Integrity. Overclock and Overdrive no longer recolor anything; the state word is the only mark.</li>
+      <li>The EGG chips switch the skin (palette and Fix names). The SCREENS chips show egg choice, flatline, compile, hibernating, a transmission and the other-tab notice. The ending is not mocked.</li>
+      <li>The nameplate at the top of the device holds the crest and the device label (1.0's header brand). STYLE has a CREST list (1.0's real crests and hints) and a LABEL field; the preview shows the plate. The LABEL LOCKED chip shows the locked state.</li>
+      <li>Music loops in the preview until stopped. With sound off (try the SOUND OFF chip) it shows a muted note and a button to turn sound on.</li>
+      <li>STATUS log shows 3 lines, with SHOW ALL opening a scrolling list.</li>
+      <li>Open: Heat reads as heat (full is bad). Decided to keep it.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const state = { scen: 'calm', alerts: true, tray: null, panel: null, timer: null, left: 252,
+    slot: 'HEAD', sel: null, note: 'Tap an item to preview it.', sound: true, playing: null, loopT: null, label: 'NETLING', labelOwned: true,
+    fresh: new Set(['HEAD:halo', 'FX:scan', 'MUSIC:drift']),
+    worn: { HEAD: 'none', FACE: 'none', BACK: 'none', SHELL: 'standard', TINT: 'green', FX: 'none', SOUND: 'chirp', CREST: 'none', MUSIC: 'idle' } };
+
+  // Vitals: pips = number of bands; "on" = band reached. Band edges would come from CFG in the real build.
+  const SCEN = {
+    calm: { label: 'CALM', v: { CHARGE: [8], SYNC: [8], INTEGRITY: [9], HEAT: [2] }, mood: 'content', lane: { t: 'idle', msg: '> idling. systems nominal.' } },
+    low: { label: 'LOW CHARGE', v: { CHARGE: [0], SYNC: [5], INTEGRITY: [6], HEAT: [2] }, mood: 'sluggish', lane: { t: 'idle', msg: '> running on fumes.' } },
+    trace: { label: 'TRACE', v: { CHARGE: [8], SYNC: [7], INTEGRITY: [9], HEAT: [5] }, mood: 'tense', lane: { t: 'event', title: 'TRACE', sub: 'Corp is tracing it.', btns: ['HIDE', 'COMPLY'], secs: 252 } },
+    attack: { label: 'ATTACK', v: { CHARGE: [7], SYNC: [6], INTEGRITY: [5], HEAT: [4] }, mood: 'bracing', lane: { t: 'event', title: 'ATTACK', sub: 'ICE is hitting it.', btns: ['DEFEND'], secs: 90 } },
+    overflow: { label: 'OVERFLOW', v: { CHARGE: [8], SYNC: [7], INTEGRITY: [8], HEAT: [6] }, mood: 'strained', lane: { t: 'event', title: 'OVERFLOW', sub: 'Buffers filling.', btns: ['PURGE'], secs: 150 } },
+    wish: { label: 'WISH', v: { CHARGE: [8], SYNC: [6], INTEGRITY: [9], HEAT: [3] }, mood: 'restless', lane: { t: 'wish', msg: 'Wants to play.', btn: 'PLAY' } },
+    oc: { label: 'OVERCLOCK', v: { CHARGE: [10, 'od'], SYNC: [7], INTEGRITY: [5], HEAT: [9, 'oc'] }, mood: 'wired', lane: { t: 'idle', msg: '> running hot. losses cost more.' } },
+  };
+  // One pip is 10 points. A wider gap marks where a state band starts (pip index counted from 0).
+  const EDGES = { CHARGE: [2, 9], SYNC: [2, 9], INTEGRITY: [3], HEAT: [6, 8] };
+  const DANGER = { CHARGE: 2, SYNC: 2, INTEGRITY: 3 }; // pips in the red zone at the low end
+  // Egg skins share one layout. Palette, meter labels and button names differ. Names are the care drafts' (NETLING_2_CARE_DRAFTS.md);
+  // the palettes and the egg blurbs are invented placeholders.
+  const EGGS = {
+    program: { label: 'PROGRAM', c: '#05d9e8', lcd: '#0b2226', blurb: 'Clean code. Loud text.',
+      m: { CHARGE: 'CHG', SYNC: 'SYN', INTEGRITY: 'INT', HEAT: 'HEAT' }, feed: ['CORP PKT', 'SCAV DATA'], fix: ['PATCH', 'COOL', 'PURGE'], rest: ['NAP', 'LIGHTS OFF'],
+      ev: { trace: ['CORP TRACE', 'HIDE', 'COMPLY'], attack: ['INTRUSION', 'DEFEND'], overflow: ['OVERFLOW', 'PURGE'] } },
+    iron: { label: 'IRON', c: '#9fc3e6', lcd: '#151b20', blurb: 'Hard shell. Hard wear.',
+      m: { CHARGE: 'PWR', SYNC: 'LOCK', INTEGRITY: 'INT', HEAT: 'HEAT' }, feed: ['MAINS', 'SALVAGE'], fix: ['ALIGN', 'VENT', 'SCRUB'], rest: ['IDLE', 'LIGHTS OFF'],
+      ev: { trace: ['FIELD AUDIT', 'SHUTTER', 'SIGN OFF'], attack: ['TAMPER', 'LOCK DOWN'], overflow: ['BUFFER FULL', 'SCRUB'] } },
+    wetware: { label: 'WETWARE', c: '#8cffb4', lcd: '#0e2418', blurb: 'Soft. Warm. Needs care.',
+      m: { CHARGE: 'FOOD', SYNC: 'BOND', INTEGRITY: 'HLTH', HEAT: 'TEMP' }, feed: ['VAT MIX', 'SCRAPS'], fix: ['TREAT', 'CHILL', 'FLUSH'], rest: ['DOZE', 'LIGHTS OFF'],
+      ev: { trace: ['CORP SCAN', 'DUCK', 'SUBMIT'], attack: ['INVADER', 'FIGHT'], overflow: ['BACKLOG', 'FLUSH'] } },
+  };
+  const STATE_WORD = { od: 'OVERDRIVE', oc: 'OVERCLOCK' };
+  const ITEMS = [
+    { n: 'PATCH KIT', x: 2, d: 'Repairs a little Integrity.' },
+    { n: 'COOLANT', x: 1, d: 'Drops Heat.' },
+    { n: 'BYPASS', x: 3, d: 'Cuts the netrun cooldown.' },
+    { n: 'LUCKY BIT', x: 1, d: 'Keepsake. Not consumed.', keep: true },
+    { n: 'CLEAN PKT', x: 2, d: 'A safe meal.' },
+    null,
+  ];
+  const GAMES = [['BREACH', 7], ['DODGE', 4], ['TUNE', 2], ['FEAST', 5]];
+  // [id, name, owned, hint, apply]. Hints show whether owned or not. Names and hints are invented for the mock.
+  const CATS = {
+    HEAD: [['none', 'NONE', 1, 'Default.'], ['antenna', 'ANTENNA', 1, 'Found in a scav stash.'], ['halo', 'HALO', 1, 'Reach teen with no faults.'],
+      ['crown', 'CROWN', 0, 'Win 10 BREACH in one life.'], ['horns', 'HORNS', 0, 'Finish a netrun with 3 anomalies.'], ['cap', 'CAP', 0, 'Greet 5 visitors.'],
+      ['dish', 'DISH', 0, 'Build Standing on one side.'], ['bolt', 'BOLT', 0, 'Survive 3 traces in a day.']],
+    FACE: [['none', 'NONE', 1, 'Default.'], ['visor', 'VISOR', 1, 'Bought at a netrun market.'], ['mono', 'MONOCLE', 1, 'Answer 5 requests.'],
+      ['mask', 'MASK', 0, 'Clear a bug at the clinic.'], ['scar', 'SCAR', 0, 'Survive an attack at low Integrity.']],
+    BACK: [['none', 'NONE', 1, 'Default.'], ['cable', 'CABLE', 1, 'Netrun three times.'], ['wings', 'WINGS', 1, 'Keep it in flow for an hour.'],
+      ['pack', 'PACK', 0, 'Hold a full inventory for a day.'], ['tail', 'TAIL', 0, 'Reach elder.']],
+    SHELL: [['standard', 'STANDARD', 1, 'Default.', { c: '#2a2240' }], ['matte', 'MATTE', 1, 'Default.', { c: '#3a3a44' }], ['chrome', 'CHROME', 1, 'Play 10 games.', { c: '#aab4c0' }],
+      ['brick', 'BRICK', 0, 'Win BREACH 3 times in a row.', { c: '#8a3b2e' }], ['gold', 'GOLD', 0, 'Build Standing on both sides.', { c: '#c9a227' }]],
+    TINT: [['green', 'GREEN', 1, 'Default.', { c: '#0b2226' }], ['amber', 'AMBER', 1, 'Keep it in flow for an hour.', { c: '#2a1c06' }],
+      ['violet', 'VIOLET', 0, 'Netrun after midnight.', { c: '#1a0f2a' }], ['red', 'RED', 0, 'Flatline once.', { c: '#2a0b10' }]],
+    FX: [['none', 'NONE', 1, 'Default.'], ['scan', 'SCANLINES', 1, 'Run 5 netruns.', { fx: 1 }], ['drift', 'DRIFT', 0, 'Overclock for ten minutes.']],
+    SOUND: [['chirp', 'CHIRP', 1, 'Default.'], ['bell', 'BELL', 1, 'Win a game.'], ['hum', 'HUM', 0, 'Reach teen.']],
+    // Crests and hints are 1.0's (src/cosmetics.js). Helix and Triad are shown as owned for the demo.
+    CREST: [['none', 'NO CREST', 1, 'Default.'],
+      ['helix', 'HELIX', 1, 'inherit every trait there is, once.', { px: ['.#.....#.', '..#.#.#..', '...#.#...', '....#....', '...#.#...', '..#.#.#..', '.#.....#.', '..#.#.#..', '...#.#...'] }],
+      ['triad', 'TRIAD', 1, 'the same shape, three times running.', { px: ['....#....', '...#.#...', '..#...#..', '....#....', '...#.#...', '..#...#..', '....#....', '...#.#...', '..#...#..'] }],
+      ['loop', 'CLOSED LOOP', 0, 'five whole lives in a row, nobody pulled back.', { px: ['...###...', '..#...#..', '.#.....#.', '#.......#', '#...#...#', '#.......#', '.#.....#.', '..#...#..', '...###...'] }],
+      ['star', 'FULL HOUSE', 0, 'raise every grown shape in one line.', { px: ['....#....', '....#....', '...###...', '#########', '.#######.', '..#####..', '..##.##..', '.##...##.', '.#.....#.'] }],
+      ['speech', 'SPEECH MARK', 0, 'hear everything one kind of netling has to say.', { px: ['.........', '.#######.', '#.......#', '#.#.#.#.#', '#.......#', '.#######.', '..#......', '.#.......', '.........'] }],
+      ['seal', 'SEAL', 0, 'take ten jobs and see them through.', { px: ['..#####..', '.#.....#.', '#.....#.#', '#....#..#', '#.#.#...#', '.#.#...#.', '..#####..', '..#...#..', '.#.....#.'] }]],
+    LABEL: [], // a text field, not a list: see labelEditor
+    MUSIC: [['idle', 'IDLE LOOP', 1, 'Default.'], ['drift', 'DRIFT', 1, 'Keep the lights off overnight.'], ['march', 'MARCH', 0, 'Complete a daily trace.']],
+  };
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 1800); }
+
+  // --- pet (16x16 placeholder, with wearables drawn live) ---
+  const ROWS = [
+    '................', '................', '....########....', '..############..', '.##############.',
+    '.##############.', '.##############.', '.##############.', '.##############.', '.##############.',
+    '..############..', '..############..', '...##########...', '....##....##....', '....##....##....', '................',
+  ];
+  function drawPet() { ['pet', 'pet2'].forEach(drawOn); }
+  function drawOn(id) {
+    const c = $(id).getContext('2d'); c.clearRect(0, 0, 16, 16);
+    c.fillStyle = EGGS[state.egg].c;
+    ROWS.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') c.fillRect(x, y, 1, 1); }));
+    c.fillStyle = '#0b2226'; c.fillRect(4, 6, 2, 2); c.fillRect(10, 6, 2, 2);
+    c.fillStyle = '#fff'; c.fillRect(4, 6, 1, 1); c.fillRect(10, 6, 1, 1);
+    const w = state.worn;
+    if (w.HEAD === 'antenna') { c.fillStyle = '#ff2a6d'; c.fillRect(8, 0, 1, 2); c.fillRect(7, 0, 3, 1); }
+    if (w.HEAD === 'halo') { c.fillStyle = '#f9f002'; c.fillRect(4, 0, 8, 1); }
+    if (w.FACE === 'visor') { c.fillStyle = '#ff2a6d'; c.fillRect(3, 6, 10, 2); }
+    if (w.FACE === 'mono') { c.fillStyle = '#f9f002'; c.fillRect(9, 5, 4, 4); c.fillStyle = '#0b2226'; c.fillRect(10, 6, 2, 2); }
+    if (w.BACK === 'cable') { c.fillStyle = '#ff9f1c'; c.fillRect(14, 8, 1, 6); c.fillRect(13, 14, 2, 1); }
+    if (w.BACK === 'wings') { c.fillStyle = '#f9f002'; c.fillRect(0, 5, 1, 4); c.fillRect(15, 5, 1, 4); c.fillRect(0, 4, 1, 1); c.fillRect(15, 4, 1, 1); }
+  }
+
+  // --- strip ---
+  function renderStrip() {
+    const s = SCEN[state.scen], strip = $('strip'); strip.replaceChildren();
+    for (const [name, [on, mod]] of Object.entries(s.v)) {
+      const v = el('div', 'vital' + (name === 'HEAT' ? ' heat' : '') + (mod ? ' ' + mod : ''));
+      // A named state replaces the bar's label (OD, OC), as in the care drafts.
+      const r1 = el('div', 'row1'); r1.append(el('span', mod ? 'st' : '', mod ? mod.toUpperCase() : EGGS[state.egg].m[name]));
+      const low = name !== 'HEAT' && on < 2, hot = name === 'HEAT' && on >= 9;
+      const pips = el('div', 'pips' + (low ? ' empty' : '') + (hot ? ' hot' : ''));
+      pips.setAttribute('role', 'img');
+      pips.setAttribute('aria-label', name + (low ? ' low' : hot ? ' too hot' : '') + ', ' + on + ' of 10');
+      for (let i = 0; i < 10; i++) pips.append(el('i', 'pip' + (i < on ? ' on' : '') + (EDGES[name].includes(i) ? ' gap' : '') + (name === 'HEAT' ? (i < 6 ? ' c1' : i < 8 ? ' c2' : ' c3') : i < DANGER[name] ? ' d' : '')));
+      v.append(r1, pips); strip.append(v);
+    }
+  }
+
+  // --- lane ---
+  function fmt(sec) { return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }
+  // Cache is not a meter: small icons under the netling, labeled with the egg's word (care drafts).
+  const CACHE = { calm: 1, low: 2, trace: 2, attack: 0, overflow: 4, wish: 1, oc: 3 };
+  const CACHE_WORD = { program: 'CACHE', iron: 'ROT', wetware: 'WASTE' };
+  function renderCache() {
+    const n = CACHE[state.scen] || 0, c = $('cache'); c.replaceChildren();
+    const ICON = ['###.', '#..#', '#oo#', '#..#', '####']; // '#' main color, 'o' accent, as in 1.0
+    for (let i = 0; i < n; i++) {
+      const cv = el('canvas'); cv.width = 4; cv.height = 5; const g = cv.getContext('2d');
+      ICON.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { g.fillStyle = ch === '#' ? EGGS[state.egg].c : '#ff2a6d'; g.fillRect(x, y, 1, 1); } }));
+      c.append(cv);
+    }
+    c.setAttribute('aria-label', CACHE_WORD[state.egg] + ', ' + n);
+  }
+  function renderLane() {
+    renderCache();
+    const s = SCEN[state.scen], lane = $('lane'); lane.replaceChildren(); lane.className = 'lane';
+    clearInterval(state.timer);
+    const L = s.lane;
+    if (L.t === 'event') {
+      lane.classList.add('event');
+      const ev = EGGS[state.egg].ev[state.scen];
+      const m = el('span', 'msg'); m.append(el('b', '', ev[0]), el('small', '', L.sub)); const tm = el('span', 'time', fmt(state.left));
+      const btns = ev.slice(1).map((n) => { const b = el('button', '', n); b.onclick = () => toast(n + ' (mock)'); return b; });
+      lane.append(m, tm, ...btns);
+      state.timer = setInterval(() => { state.left = Math.max(0, state.left - 1); tm.textContent = fmt(state.left); }, 1000);
+    } else if (L.t === 'wish') {
+      lane.classList.add('wish');
+      const b = el('button', '', L.btn); b.onclick = () => { closeAll(); openTray('play'); };
+      lane.append(el('span', 'msg', L.msg), b);
+    } else lane.append(el('span', 'msg', L.msg));
+    $('bubble').textContent = s.mood;
+  }
+
+  // --- trays / panels ---
+  const TRAYS = { care: 'tray-care', play: 'tray-play', style: 'panel-style', menu: 'sheet-menu' };
+  function closeAll() {
+    stopAudio();
+    for (const id of Object.values(TRAYS)) $(id).hidden = true;
+    $('panel-info').hidden = true; state.tray = null;
+    document.querySelectorAll('.dock [aria-expanded]').forEach((b) => b.setAttribute('aria-expanded', 'false'));
+  }
+  function openTray(name) {
+    closeAll(); state.tray = name; $(TRAYS[name]).hidden = false;
+    document.querySelector('.dock [data-d="' + name + '"]').setAttribute('aria-expanded', 'true');
+  }
+  $('dock').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return; const d = b.dataset.d;
+    if (d === 'netrun') { closeAll(); return toast('Netrun opens full screen (not in this mock)'); }
+    if (state.tray === d) return closeAll();
+    openTray(d);
+  });
+  document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => { if (!$('panel-info').hidden) { $('panel-info').hidden = true; openTray('menu'); } else closeAll(); }));
+
+  // items
+  function renderItems() {
+    const g = $('items'); g.replaceChildren();
+    ITEMS.forEach((it, i) => {
+      if (!it) { g.append(el('div', 'cell empty', 'empty')); return; }
+      const c = el('button', 'cell' + (state.scen === 'nope' ? ' dim' : ''), it.n);
+      c.setAttribute('aria-pressed', state.sel === i);
+      if (it.x > 1) c.append(el('span', 'badge', 'x' + it.x));
+      if (it.keep) c.append(el('span', 'keep', 'KEEP'));
+      c.onclick = () => { state.sel = i; renderItems(); renderDesc(); };
+      g.append(c);
+    });
+  }
+  function renderDesc() {
+    const d = $('item-desc'); d.replaceChildren(); const it = ITEMS[state.sel];
+    if (!it) return d.append(el('span', 'grow', 'Tap an item.'));
+    d.append(el('span', 'grow', it.d));
+    const use = el('button', '', it.keep ? 'EQUIP' : 'USE'); use.onclick = () => toast(it.n + ' (mock)');
+    d.append(use);
+    if (!it.keep) { const sc = el('button', 'scrap', 'SCRAP'); sc.onclick = () => toast('Scrapped (mock)'); d.append(sc); }
+  }
+
+  // games
+  function renderGames() {
+    const g = $('games'); g.replaceChildren();
+    GAMES.forEach(([n, w]) => { const b = el('button', 'game'); b.append(el('span', '', n), el('span', 'wins', w + ' WINS')); b.onclick = () => toast(n + ' opens full screen'); g.append(b); });
+  }
+
+  // style
+  function renderStyle() {
+    const tabs = $('slots'); tabs.replaceChildren();
+    const list = $('style-items'), keep = list.scrollTop;
+    Object.keys(CATS).forEach((k) => {
+      const got = CATS[k].filter((i) => i[2]).length;
+      const b = el('button', '', k); b.append(el('small', '', k === 'LABEL' ? (state.labelOwned ? '1/1' : '0/1') : got + '/' + CATS[k].length));
+      if (CATS[k].some((i) => state.fresh.has(k + ':' + i[0]))) b.append(el('em', '', 'NEW'));
+      b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', k === state.slot);
+      b.onclick = () => { stopAudio(); state.slot = k; renderStyle(); list.scrollTop = 0; updateMore(); };
+      tabs.append(b);
+    });
+    list.replaceChildren();
+    const cat = state.slot;
+    CATS[cat].forEach(([id, name, own, hint, ap]) => {
+      const worn = state.worn[cat] === id;
+      const r = el('button', 'row' + (own ? '' : ' locked')); r.setAttribute('aria-pressed', worn);
+      const sw = ap && ap.px && own ? crestCanvas(ap.px, '#05d9e8') : el('i', 'sw'); if (ap && ap.c) sw.style.background = ap.c;
+      const col = el('span', 'col'); col.append(el('span', 'nm', name), el('span', 'hn', hint));
+      const stt = el('span', 'stt', own ? (worn ? 'EQUIPPED' : 'EQUIP') : 'LOCKED');
+      if (state.fresh.has(cat + ':' + id)) stt.append(el('span', 'new', 'NEW'));
+      r.append(sw, col, stt);
+      r.onclick = () => {
+        if (!own) return toast(hint);
+        state.worn[cat] = id; state.note = cat + ': ' + name; state.fresh.delete(cat + ':' + id);
+        applyLook(); drawPet(); preview(cat, id); renderStyle();
+      };
+      list.append(r);
+    });
+    if (cat === 'LABEL') labelEditor(list);
+    list.scrollTop = keep;
+    const pv = $('pvinfo'); pv.replaceChildren(el('span', '', state.note), el('small', '', 'PREVIEW'));
+    if (state.playing) {
+      const bars = el('span', 'bars'); for (let i = 0; i < 4; i++) bars.append(el('i'));
+      const stop = el('button', 'pvbtn', 'STOP'); stop.onclick = () => { stopAudio(); renderStyle(); };
+      pv.append(bars, stop);
+    }
+    if ((cat === 'MUSIC' || cat === 'SOUND') && !state.sound) {
+      const m = el('small', 'muted', 'Muted: sound is off on this device.');
+      const on = el('button', 'pvbtn', 'TURN SOUND ON'); on.onclick = () => setSound(true);
+      pv.append(m, on);
+    }
+    $('style-dot').hidden = state.fresh.size === 0;
+    updateMore();
+  }
+  // Nameplate: the crest and device label (1.0 rules: 10 characters, A-Z 0-9 space . -, earned by losing the first netling).
+  function crestCanvas(px, color) {
+    const cv = el('canvas', 'sw'); cv.width = 9; cv.height = 9; const g = cv.getContext('2d'); g.fillStyle = color;
+    px.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') g.fillRect(x, y, 1, 1); }));
+    return cv;
+  }
+  function cleanLabel(raw) { return String(raw || '').toUpperCase().replace(/[^A-Z0-9 .\-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 10) || 'NETLING'; }
+  function renderPlate() {
+    const crest = CATS.CREST.find((i) => i[0] === state.worn.CREST), px = crest && crest[4] && crest[4].px;
+    for (const p of [$('plate'), $('plate2')]) {
+      const cv = p.querySelector('canvas'), lb = p.querySelector('span');
+      lb.textContent = state.labelOwned ? state.label : 'NETLING';
+      cv.hidden = !px;
+      if (px) {
+        const g = cv.getContext('2d'); g.clearRect(0, 0, 9, 9); g.fillStyle = getComputedStyle(lb).color;
+        px.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') g.fillRect(x, y, 1, 1); }));
+      }
+    }
+  }
+  function labelEditor(list) {
+    const hint = 'lose one before you name the line.';
+    if (!state.labelOwned) {
+      const r = el('div', 'row locked'); const col = el('span', 'col'); col.append(el('span', 'nm', 'DEVICE LABEL'), el('span', 'hn', '??? ' + hint));
+      r.append(col, el('span', 'stt', 'LOCKED')); r.onclick = () => toast(hint); list.append(r); return;
+    }
+    const r = el('div', 'row'); const input = el('input'); input.id = 'label-input'; input.maxLength = 10; input.value = state.label;
+    input.setAttribute('aria-label', 'Device label'); input.spellcheck = false;
+    const set = el('button', 'pvbtn', 'SET');
+    const commit = () => { state.label = cleanLabel(input.value); state.note = 'LABEL: ' + state.label; renderPlate(); renderStyle(); };
+    set.onclick = commit; input.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+    r.append(input, set); list.append(r);
+    list.append(el('span', 'hn', 'Shown on the nameplate at the top of the device. Up to 10 letters, numbers, spaces, . and -.'));
+  }
+  function updateMore() { const l = $('style-items'); $('more').hidden = l.scrollHeight - l.scrollTop - l.clientHeight < 6; }
+  function applyLook() {
+    const get = (cat) => CATS[cat].find((i) => i[0] === state.worn[cat])[4];
+    // Default shell and tint defer to the egg skin; anything else overrides it.
+    const sh = state.worn.SHELL === 'standard' ? null : get('SHELL'), ti = state.worn.TINT === 'green' ? null : get('TINT'), fx = get('FX');
+    // The shell color is the edge color of every surface on the device (strip, lane, dock, trays, rows).
+    if (sh) $('device').style.setProperty('--shell-edge', sh.c); else $('device').style.removeProperty('--shell-edge');
+    renderPlate();
+    for (const node of [document.querySelector('.stage'), $('pv')]) { node.style.background = ti ? ti.c : ''; node.classList.toggle('fx-scan', !!(fx && fx.fx)); }
+  }
+
+  // menu + info panels
+  const INFO = {
+    status() {
+      const b = $('info-body'); b.replaceChildren();
+      const st = el('div', 'stand'); st.innerHTML = '<div class="c"><b>14</b><small>CORP</small></div><div class="s"><b>9</b><small>STREET</small></div>'; b.append(st);
+      b.append(el('h2', '', 'GAME WINS THIS LIFE'));
+      GAMES.forEach(([n, w]) => { const k = el('div', 'kv'); k.append(el('span', '', n), el('span', 'v', w)); b.append(k); });
+      const t = el('div', 'kv'); t.append(el('span', '', 'TOTAL'), el('span', 'v', GAMES.reduce((a, g) => a + g[1], 0))); b.append(t);
+      b.append(el('h2', '', 'BUGS')); b.append(el('span', '', 'None. Visit the clinic if one appears.'));
+      b.append(el('h2', '', 'RECENT'));
+      const all = ['14:02 > corp packet eaten.', '13:40 > won BREACH.', '13:12 > visitor left.', '12:15 > nap finished.', '11:50 > cooled down.', '11:20 > trace hidden.',
+        '10:58 > trace incoming.', '10:30 > patched.', '09:45 > won DODGE.', '09:10 > lights on.', '07:02 > woke up.', '23:40 > lights off.', '22:15 > scav data eaten.',
+        '21:30 > won TUNE.', '20:05 > greeted a visitor.', '19:20 > netrun finished.'];
+      const ul = el('ul', 'log'), tg = el('button', 'expand', ''); let open = false;
+      const paint = () => { ul.replaceChildren(...(open ? all : all.slice(0, 3)).map((l) => el('li', '', l))); ul.classList.toggle('scroll', open); tg.textContent = open ? 'COLLAPSE' : 'SHOW ALL (' + all.length + ')'; tg.setAttribute('aria-expanded', open); };
+      tg.onclick = () => { open = !open; paint(); }; paint(); b.append(ul, tg);
+    },
+    library() {
+      const b = $('info-body'); b.replaceChildren();
+      [['LINEAGE', '3 lives'], ['DEX', '9 of 22'], ['CODEX', '12 pages'], ['CHATTER', '6 heard']].forEach(([n, c]) => { const k = el('div', 'kv'); k.append(el('span', '', n), el('span', 'v', c)); b.append(k); });
+      b.append(el('span', '', 'Read only. Wins and Standing are not here; they reset each life.'));
+    },
+    system() {
+      const b = $('info-body'); b.replaceChildren();
+      const sd = el('button', 'back toggle', 'SOUND: ' + (state.sound ? 'ON' : 'OFF')); sd.setAttribute('aria-pressed', state.sound);
+      sd.onclick = () => { setSound(!state.sound); INFO.system(); }; b.append(sd);
+      const a = el('button', 'back toggle', 'ALERTS: ' + (state.alerts ? 'ON' : 'OFF')); a.setAttribute('aria-pressed', state.alerts);
+      a.onclick = () => { state.alerts = !state.alerts; syncAlerts(); INFO.system(); }; b.append(a);
+      ['FIELD MANUAL', 'SOUND', 'SCREEN', 'TRANSFER', 'VISITOR CARD', 'HIBERNATE', 'RESTART'].forEach((n) => { const x = el('button', 'back', n); x.onclick = () => toast(n + ' (mock)'); b.append(x); });
+    },
+  };
+  $('sheet-menu').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return; const p = b.dataset.p;
+    $('sheet-menu').hidden = true; $('info-title').textContent = p.toUpperCase(); INFO[p](); $('panel-info').hidden = false;
+  });
+  function syncAlerts() { $('menu-dot').hidden = state.alerts; $('alerts-hint').textContent = state.alerts ? 'alerts on' : 'alerts OFF'; }
+
+  // sound preview: a few WebAudio tones. Music loops until stopped, sound packs play once. Silent when the device is muted.
+  const NOTES = { chirp: [880, 1175], bell: [1320, 990], hum: [110, 110], idle: [262, 330, 392, 330], drift: [220, 277, 330, 277], march: [196, 196, 247, 196] };
+  let actx;
+  function playNotes(id) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      (NOTES[id] || []).forEach((f, i) => {
+        const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * 0.2;
+        o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.03, t); g.gain.linearRampToValueAtTime(0, t + 0.18);
+        o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 0.2);
+      });
+    } catch (e) { /* audio unavailable in this viewer: the visual state still shows */ }
+  }
+  function stopAudio() { clearInterval(state.loopT); state.loopT = null; state.playing = null; }
+  function preview(cat, id) {
+    stopAudio();
+    if (cat !== 'MUSIC' && cat !== 'SOUND') return;
+    if (cat === 'MUSIC') state.playing = id;
+    if (!state.sound) return;
+    playNotes(id);
+    if (cat === 'MUSIC') state.loopT = setInterval(() => playNotes(id), 1000);
+  }
+  function setSound(v) {
+    state.sound = v; if (!v) stopAudio();
+    const c = $('chip-snd'); if (c) c.setAttribute('aria-pressed', !v);
+    renderStyle();
+  }
+
+  // egg skin
+  function applyEgg(k) {
+    state.egg = k; $('device').dataset.egg = k;
+    for (const g of ['feed', 'fix', 'rest']) $(g + 'btns').replaceChildren(...EGGS[k][g].map((n) => el('button', 'act', n)));
+    applyLook(); drawPet(); renderStrip(); renderLane();
+    document.querySelectorAll('#chips-egg .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.e === k));
+  }
+
+  // full screens (first run, death, compile, hibernation) and modals
+  const EGG_ROWS = ['..####..', '.######.', '########', '########', '########', '########', '########', '.######.', '..####..'];
+  function eggCanvas(color) {
+    const cv = el('canvas'); cv.width = 8; cv.height = 9; const c = cv.getContext('2d');
+    EGG_ROWS.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') { c.fillStyle = (x + y) % 5 === 0 ? '#ffffff55' : color; c.fillRect(x, y, 1, 1); } }));
+    return cv;
+  }
+  function closeScreen() { $('screen').hidden = true; }
+  function kv(host, rows) { rows.forEach(([a, b]) => { const k = el('div', 'kv'); k.append(el('span', '', a), el('span', 'v', b)); host.append(k); }); }
+  const SCREENS = {
+    egg: { label: 'EGG CHOICE', build(h) {
+      h.append(el('h2', 'scr-t', '> netling.sh'), el('p', 'scr-p', 'Which egg?'));
+      let pick = state.egg; const cards = el('div', 'eggs');
+      Object.entries(EGGS).forEach(([id, e]) => {
+        const c = el('button', 'egg'); c.style.setProperty('--ec', e.c); c.style.setProperty('--el', e.lcd); c.dataset.id = id;
+        c.setAttribute('aria-pressed', id === pick);
+        const col = el('span', 'col'); col.append(el('span', 'nm', e.label), el('span', 'hn', e.blurb));
+        c.append(eggCanvas(e.c), col);
+        c.onclick = () => { pick = id; cards.querySelectorAll('.egg').forEach((x) => x.setAttribute('aria-pressed', x.dataset.id === id)); };
+        cards.append(c);
+      });
+      const go = el('button', 'big', 'HATCH'); go.onclick = () => { applyEgg(pick); closeScreen(); toast('Next: a short tutorial (not in this mock)'); };
+      h.append(cards, go, el('p', 'scr-p', 'Egg text is placeholder.'));
+    } },
+    flatline: { label: 'FLATLINE', build(h) {
+      h.append(el('h2', 'scr-t danger', 'FLATLINED'), el('p', 'scr-p', '> the signal dropped.'));
+      kv(h, [['FORM', 'DAEMON'], ['LIVED', '3d 4h'], ['CAUSE', 'overheated'], ['GAME WINS', '18'], ['STANDING', 'corp 14 / street 9']]);
+      const go = el('button', 'big', 'COMPILE'); go.onclick = () => showScreen('compile'); h.append(go);
+    } },
+    compile: { label: 'COMPILE', build(h) {
+      h.append(el('h2', 'scr-t', '> compiling'));
+      ['> linking lineage...', '> inheriting trait...', '> allocating memory...', '> ready.'].forEach((t, i) => { const p = el('p', 'cl', t); p.style.animationDelay = (0.5 + i * 0.8) + 's'; h.append(p); });
+      const go = el('button', 'big cl', 'CONTINUE'); go.style.animationDelay = '3.8s'; go.onclick = () => showScreen('egg'); h.append(go);
+    } },
+    hibernate: { label: 'HIBERNATING', build(h) {
+      h.append(el('h2', 'scr-t', 'HIBERNATING'), el('p', 'scr-p', 'Low-power mode. Wake it when you are ready.'));
+      const go = el('button', 'big', 'WAKE'); go.onclick = closeScreen; h.append(go);
+    } },
+    transmission: { label: 'TRANSMISSION', modal: 1, build(h) {
+      h.append(el('h2', 'scr-t', 'INCOMING: NL-0'), el('p', 'scr-p', '[transmission text goes here]'), el('p', 'scr-p', '[placeholder, no lore in this mock]'));
+      const go = el('button', 'big', 'END TRANSMISSION'); go.onclick = closeScreen; h.append(go);
+    } },
+    tab: { label: 'ANOTHER TAB', modal: 1, build(h) {
+      h.append(el('h2', 'scr-t', 'ANOTHER TAB'), el('p', 'scr-p', 'Your netling moved to another tab.'));
+      const go = el('button', 'big', 'USE IT HERE'); go.onclick = closeScreen; h.append(go);
+    } },
+  };
+  function showScreen(k) {
+    closeAll(); const s = $('screen'), sc = SCREENS[k]; s.replaceChildren(); s.className = 'screen' + (sc.modal ? ' modal' : ''); s.hidden = false;
+    const host = sc.modal ? s.appendChild(el('div', 'card')) : s; sc.build(host);
+  }
+  function buildExtraChips() {
+    const ce = $('chips-egg'); ce.append(el('span', 'chiplbl', 'EGG'));
+    Object.entries(EGGS).forEach(([id, e]) => { const c = el('button', 'chip', e.label); c.dataset.e = id; c.onclick = () => applyEgg(id); ce.append(c); });
+    const cs = $('chips-scr'); cs.append(el('span', 'chiplbl', 'SCREENS'));
+    Object.entries(SCREENS).forEach(([id, s]) => { const c = el('button', 'chip', s.label); c.onclick = () => showScreen(id); cs.append(c); });
+    ce.querySelector('.chip[data-e="' + state.egg + '"]').setAttribute('aria-pressed', true);
+    const lk = el('button', 'chip', 'LABEL LOCKED'); lk.setAttribute('aria-pressed', false);
+    lk.onclick = () => { state.labelOwned = !state.labelOwned; lk.setAttribute('aria-pressed', !state.labelOwned); renderPlate(); renderStyle(); };
+    ce.append(lk);
+  }
+
+  // scenarios
+  function setScen(k) {
+    state.scen = k; state.left = SCEN[k].lane.secs || 252;
+    if (SCEN[k].lane.t === 'event') closeAll();
+    renderStrip(); renderLane(); renderItems();
+    document.querySelectorAll('.chip[data-s]').forEach((c) => c.setAttribute('aria-pressed', c.dataset.s === k));
+  }
+  const chips = $('chips');
+  Object.entries(SCEN).forEach(([k, s]) => { const c = el('button', 'chip', s.label); c.dataset.s = k; c.onclick = () => setScen(k); chips.append(c); });
+  const al = el('button', 'chip', 'ALERTS OFF'); al.setAttribute('aria-pressed', false);
+  al.onclick = () => { state.alerts = !state.alerts; al.setAttribute('aria-pressed', !state.alerts); syncAlerts(); }; chips.append(al);
+  const sn = el('button', 'chip', 'SOUND OFF'); sn.id = 'chip-snd'; sn.setAttribute('aria-pressed', false);
+  sn.onclick = () => setSound(!state.sound); chips.append(sn);
+
+  $('style-items').addEventListener('scroll', updateMore);
+  state.egg = 'program';
+  renderGames(); renderStyle(); renderDesc(); applyEgg('program'); buildExtraChips(); setScen('calm'); syncAlerts();
+})();
+</script>
+
+</html>
