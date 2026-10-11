@@ -17,6 +17,8 @@ const jobsAtOnce = Number(process.argv.find((a) => a.startsWith('--jobs='))?.spl
 const OUT = new Set(['corpo', 'runner', 'overclocker', 'casual', 'worker', 'hunter-casual', 'human-casual', 'human-regular', 'human-keen', 'human-bursty', 'neglectful']);
 const { ARCHETYPES } = await import('../sim/balance.mjs');
 const ATT = Object.keys(ARCHETYPES).filter((n) => !OUT.has(n));
+// ARCH=a,b runs only those archetypes now (the combined file still waits for the whole group).
+const RUN_NOW = process.env.ARCH ? new Set(process.env.ARCH.split(',')) : null;
 // Stage 3's first jobs (2026-10-10) pin its rules so their saved outputs reproduce: any Source exit arms the good end, and the hatchling after it
 // takes the chosen egg's latest fragment as its parent.
 const STAGE3 = { ROGUE: '{"armClean":false,"goodEndFullLife":false}', PARENT: 'fragment', CROSS: 'open', INHERIT: '{"fullLife":false}', ROGUE_TRAIT: '0' };
@@ -54,11 +56,11 @@ const todo = [];
 for (const [job, env] of Object.entries(JOBS)) {
   if (!wanted(job)) continue;
   mkdirSync(join(out, 'rogue-lineage', job), { recursive: true });
-  for (const a of ATT) if (!existsSync(join(out, 'rogue-lineage', job, `${a}.json`))) todo.push([job, env, a]);
+  for (const a of ATT) if ((!RUN_NOW || RUN_NOW.has(a)) && !existsSync(join(out, 'rogue-lineage', job, `${a}.json`))) todo.push([job, env, a]);
 }
 console.log(`${todo.length} runs to do, ${lineages} lines of ${rogueLives} Rogue lives, ${jobsAtOnce} at once`);
 const run = ([job, env, a]) => new Promise((resolve) => {
-  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ...env, JSON: '1' } });
+  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ...env, JSON: '1' } });
   let buf = '';
   let err = '';
   p.stdout.on('data', (d) => (buf += d));
