@@ -274,6 +274,10 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 
 48. **C1 with E1** (9.4a): the trait is innate to the egg, on every Rogue beside its role trait and on the mixed egg for its one life, never inherited. On a Rogue: every region's hunter threshold +2. On the mixed egg: **a share of its corp traces is reassigned to visitors**, the one positive random event, instead of simply removed (starting share a quarter, 9.4a's figure). Placeholder name Unsigned. Then: see what the trait does to the good end's balance between the lines (7.6) before anything else; the Deep's disconnects after that (item 45).
 
+**The line gap (maintainer, 2026-10-11)**
+
+49. **The lines at about 50% to start, 35% kept for tuning** (7.8 to 7.11). In the Source only: Mole's and Sleeper's lost ordinary fight is forgiven at a 50% roll, at most one a run; Skip's and Exile's slip works half as often; a Source exit by Drop or Stash also counts as clean at Integrity 80 or more; Spook and Handler replay one lost ordinary fight a run (reroll). Each line reaches the good end in about 47 to 51% of Rogue lives. The thirtyfive set (the roll at 20%, no Dodge slip in the Source, clean at Integrity 100, one nullify a run in place of the reroll) is the tuning option after a playtest, at today's overall pace. Then: the Deep's disconnects (item 45).
+
 ### 6.2 Proposals, to confirm
 
 - **The sweep, now covering both events** (starting values):
@@ -738,6 +742,29 @@ Reading it:
 3. **Breach's chance is a fine knob**: about 4 points of good end per 0.1 of chance between 0.5 and 0.6, which matches the read-out (an exit with exactly one loss is about 40% of Breach's lives).
 
 **For the maintainer.** fifty as it stands, or every line toward about 35% to keep today's pace (smaller knobs of the same levers: Breach's chance about 0.25, Dodge's slip lower than x0.5, Feast's threshold above 90, Tune's reroll on fewer fights; not measured). The Deep's disconnects come after this (6.1, item 45).
+
+### 7.11 The lines at about 35%, and the fifty set decided (2026-10-11)
+
+**Decided (maintainer, 2026-10-11):** the fifty set (7.10) is the starting rule for the Source; the thirtyfive set below, which keeps today's overall pace, is kept for tuning after a playtest. In the fork, `nr2.js` `SOURCE_SETS` holds `off`, `fifty` and `thirtyfive`; `fifty` is now the default for `NR2.rogue.source`, and `ROGUE_SOURCE=off|fifty|thirtyfive` (`0` for off) picks a set before `ROGUE_RUN` applies. Every runner measured before this (`baseline/rogue-lineage.mjs`, `rogue-stage2.mjs`, `rogue-dodge.mjs`, `rogue-hide-lock.mjs`, `rogue-deep-levers.mjs`) now pins `ROGUE_SOURCE=0` so its saved outputs reproduce; the lineage runner's `decided-fifty` job runs the new defaults. Run directly, `sim/rogue-netrun.mjs` and `sim/rogue-relay.mjs` now use the fifty set in the Source; `ROGUE_SOURCE=0` gives their earlier tables.
+
+**The search for 35%** (as 7.8, each line's two steerers, good end a Rogue life / Source exit / first Rogue life): Breach's free loss at chance 0.2 gives 35 / 89 to 91 / 28%, at 0.25 37 to 38 / 89 to 91 / 31%; Dodge's Source slip at x0.25 gives 43 / 77 to 79 / 24 to 27%, at x0.1 39 / 73 to 75 / 25 to 26%, at x0 (no slip in the Source) 35 to 36 / 70 to 72 / 27%; Feast clean at Integrity 100 (7.9) 35 / 82 / 23 to 28%; Tune's nullify 1 for the adult and the elder (7.9) 33 to 34 / 81 to 83 / 16 to 18%.
+
+| set | Breach | Dodge | Tune | Feast |
+|---|---|---|---|---|
+| none (7.7) | 26 | 65 | 24 to 26 | 26 to 29 |
+| **fifty** (decided): free loss at 0.5, slip x0.5, clean at 80, reroll 1 | 47 to 49 | 49 to 50 | 47 to 50 | 50 to 51 |
+| **thirtyfive** (kept): free loss at 0.2, slip x0 in the Source, clean at 100, nullify 1 | 35 | 35 to 36 | 33 to 34 | 35 |
+
+| attentive group | good end within 10 Rogue lives | by Rogue life 1 / 3 / 5 | first good end: Rogue lives / days | per Rogue life: elder / Source exit / clean exit / good end | captured | good ends in 10 Rogue lives |
+|---|---|---|---|---|---|---|
+| none (7.7) | 98% (worst 94) | 25 / 64 / 84% | 2.8 / 14.3 | 90 / 80 / 35 / 35% | 1.7% | 3.5 |
+| fifty | 100% (99) | 33 / 77 / 93% | 2.1 / 10.8 | 90 / 80 / 47 / 47% | 1.6% | 4.7 |
+| thirtyfive | 98% (95) | 25 / 63 / 84% | 2.6 / 13.9 | 90 / 76 / 34 / 34% | 1.7% | 3.4 |
+
+Reading it:
+1. **thirtyfive keeps today's pace** (34% a Rogue life against 35%, first good end 13.9 days against 14.3) with the four lines within 3 points (33 to 36%), where today they span 24 to 65%.
+2. **Dodge needs its slip gone in the Source to come down to 35%**: the slip's effect flattens near zero (x0.25 43%, x0.1 39%, x0 35 to 36%), since Dodge also keeps its lighter trail and the hunter's lower threshold. In the fiction that is the Source seeing through Skip and Exile; it is the most visible change in either set.
+3. **thirtyfive swaps Tune's reroll for nullify** (the version that plays least like Dodge's slip) and needs no extra heal for Feast; Breach's roll is the same lever at a lower chance.
 
 ## 8. The ten forms (concept briefs, for choice)
 

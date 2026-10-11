@@ -4,6 +4,15 @@
 //
 // What is DECIDED (maintainer) and what is MINE (starting values to measure) is marked on each block. Nothing here is tuned.
 
+// The Source levers for the gap between the Rogue lines (NR2.rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8 to 7.11). off: none (every measure
+// before 7.11). fifty: decided, the default. thirtyfive: kept for tuning after a playtest.
+export const SOURCE_SETS = {
+  off: { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
+  fifty: { breachFree: 1, breachChance: 0.5, tuneTypes: false, feastHeal: 1, dodgeSlip: 0.5, feastClean: 80, tuneReroll: { 1: 1, 2: 1 }, tuneNullify: { 1: 0, 2: 0 } },
+  thirtyfive: { breachFree: 1, breachChance: 0.2, tuneTypes: false, feastHeal: 1, dodgeSlip: 0, feastClean: 100, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 1, 2: 1 } },
+};
+export const sourceSet = (name) => JSON.parse(JSON.stringify(SOURCE_SETS[name]));
+
 export const NR2 = {
   // One ability per role and lean at two levels: the adult is level 1, the elder level 2 (a mainframe-stage body in this fork).
   abilities: false,
@@ -133,7 +142,9 @@ export const NR2 = {
     // level (1 adult, 2 elder), lost ordinary ICE fights Spook or Handler replays in a Source run (the loss is not counted). tuneNullify, by
     // level, ordinary ICE fights it may pass without fighting in a Source run, chosen once the fight shows (nullifyIce). Hunter fights excluded.
     // Third round (7.10): breachChance, the chance each of those losses is forgiven, rolled when the fight is lost (1: every one, as 7.8 measured).
-    source: { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
+    // Decided (2026-10-11, 7.11): the fifty set is the default (each line at about 50% good ends a Rogue life); the thirtyfive set (about 35% each,
+    // today's overall pace) is kept for tuning after a playtest. ROGUE_SOURCE=off|fifty|thirtyfive (0 is off) picks a set before ROGUE_RUN applies.
+    source: { ...SOURCE_SETS.fifty, tuneReroll: { ...SOURCE_SETS.fifty.tuneReroll }, tuneNullify: { ...SOURCE_SETS.fifty.tuneNullify } },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
@@ -150,6 +161,12 @@ if (process.env.NR2) {
     if (typeof val === 'object' && val && !Array.isArray(val) && typeof NR2[k] === 'object') Object.assign(NR2[k], val);
     else NR2[k] = val;
   }
+}
+
+if (process.env.ROGUE_SOURCE) {
+  const name = process.env.ROGUE_SOURCE === '0' ? 'off' : process.env.ROGUE_SOURCE;
+  if (!SOURCE_SETS[name]) throw new Error(`ROGUE_SOURCE: unknown set ${process.env.ROGUE_SOURCE}`);
+  NR2.rogue.source = sourceSet(name);
 }
 
 // ROGUE_RUN='{"threshold":{"deep":15},"map":{"on":false}}' overrides NR2.rogue (objects merge one level down), for the stage 2 sweeps.

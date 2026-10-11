@@ -357,9 +357,11 @@ test("the Rogue exit bonus (rogue.exitBonus, decided 1 in the Deep): in place of
 // The Source-only levers for the gap between the lines (nr2.js rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8). All off by default.
 const { foresightView, nullifyIce, nullifiesLeft } = await import('./sim/netrun/run.js');
 const { planMove, RUN_STYLES } = await import('./sim/netrun-bot.mjs');
+const { sourceSet } = await import('./sim/netrun/nr2.js');
+// Each lever test starts from the off set, its own levers on top.
 function withSource(levers, fn) {
-  const saved = { ...NR2.rogue.source };
-  Object.assign(NR2.rogue.source, levers);
+  const saved = NR2.rogue.source;
+  NR2.rogue.source = Object.assign(sourceSet('off'), levers);
   try {
     return withKits(fn);
   } finally {
@@ -376,8 +378,10 @@ function runLosing(form, types, region) {
   return s;
 }
 
-test('Source levers: all off by default', () => {
-  assert.deepEqual(NR2.rogue.source, { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } });
+test('Source levers: the fifty set is the default (decided, 7.11); off is all neutral; thirtyfive kept for tuning', () => {
+  assert.deepEqual(NR2.rogue.source, { breachFree: 1, breachChance: 0.5, tuneTypes: false, feastHeal: 1, dodgeSlip: 0.5, feastClean: 80, tuneReroll: { 1: 1, 2: 1 }, tuneNullify: { 1: 0, 2: 0 } });
+  assert.deepEqual(sourceSet('off'), { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } });
+  assert.deepEqual(sourceSet('thirtyfive'), { breachFree: 1, breachChance: 0.2, tuneTypes: false, feastHeal: 1, dodgeSlip: 0, feastClean: 100, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 1, 2: 1 } });
 });
 
 test('Source lever breachFree: a Sleeper with one lost ordinary fight in the Source still exits clean; two, or another line, or a lost hunter fight, do not', () => withSource({ breachFree: 1 }, () => {
