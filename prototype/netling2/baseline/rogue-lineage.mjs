@@ -51,6 +51,9 @@ const JOBS = {
     'fclean80-h2': { feastClean: 80, feastHeal: 2 }, 'fclean90-h2': { feastClean: 90, feastHeal: 2 }, 'fclean100-h2': { feastClean: 100, feastHeal: 2 },
     'reroll1': { tuneReroll: { 1: 1, 2: 1 } }, 'reroll2': { tuneReroll: { 1: 1, 2: 2 } },
     'null1': { tuneNullify: { 1: 1, 2: 1 } }, 'null2': { tuneNullify: { 1: 1, 2: 2 } },
+    // The packages (7.9): each line at about Dodge's 65% ('even'), and a softer one with nullify in place of the reroll.
+    even: { breachFree: 1, feastClean: 80, feastHeal: 2, tuneReroll: { 1: 1, 2: 2 } },
+    softer: { breachFree: 1, feastClean: 90, feastHeal: 2, tuneNullify: { 1: 1, 2: 2 } },
   }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
   // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
   'trait-spread': { SPREAD: '0.2' },
