@@ -1,0 +1,1885 @@
+{
+ "job": "clean-refuse",
+ "lineages": 200,
+ "rogueLives": 10,
+ "archetypes": {
+  "attentive": {
+   "archetype": "attentive",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.99,
+   "reachedBy": {
+    "1": 0.2,
+    "2": 0.37,
+    "3": 0.54,
+    "5": 0.765,
+    "10": 0.99
+   },
+   "goodEndsPerLine": 2.94,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 18,
+     "p90": 41
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.852,
+    "sourceRun": 0.852,
+    "sourceExit": 0.736,
+    "cleanExit": 0.333,
+    "goodEnd": 0.294,
+    "atExit": 0,
+    "atDeath": 0.294,
+    "captured": 0.036,
+    "marks": 0.66,
+    "days": 5.8,
+    "tier": {
+     "1": 0,
+     "2": 0.117,
+     "3": 0.292,
+     "4": 0.59
+    }
+   },
+   "afterExit": {
+    "lives": 1471,
+    "disarmedOnce": 0.054,
+    "lostIt": 0.6,
+    "capturedAfter": 0.013,
+    "declined": 0.452,
+    "exitsPerLife": 1.3
+   },
+   "deaths": {
+    "captured": 0.036,
+    "end of life cycle": 0.964
+   },
+   "nl0Lives": 521,
+   "mixedLives": 521,
+   "rogueInherited": 0.868
+  },
+  "sysadmin": {
+   "archetype": "sysadmin",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.007,
+    "marks": 0.36,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.007,
+    "end of life cycle": 0.992,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894
+  },
+  "ghosthunter": {
+   "archetype": "ghosthunter",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.006,
+    "marks": 0.3,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.006,
+    "end of life cycle": 0.994
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894
+  },
+  "daredevil": {
+   "archetype": "daredevil",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.975,
+   "reachedBy": {
+    "1": 0.235,
+    "2": 0.38,
+    "3": 0.5,
+    "5": 0.695,
+    "10": 0.975
+   },
+   "goodEndsPerLine": 2.84,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 8
+    },
+    "lives": {
+     "median": 3,
+     "p90": 8
+    },
+    "days": {
+     "median": 18,
+     "p90": 46
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.821,
+    "sourceRun": 0.821,
+    "sourceExit": 0.594,
+    "cleanExit": 0.316,
+    "goodEnd": 0.284,
+    "atExit": 0,
+    "atDeath": 0.284,
+    "captured": 0.038,
+    "marks": 0.64,
+    "days": 5.77,
+    "tier": {
+     "1": 0,
+     "2": 0.121,
+     "3": 0.294,
+     "4": 0.585
+    }
+   },
+   "afterExit": {
+    "lives": 1187,
+    "disarmedOnce": 0.057,
+    "lostIt": 0.521,
+    "capturedAfter": 0.013,
+    "declined": 0.532,
+    "exitsPerLife": 1.18
+   },
+   "deaths": {
+    "captured": 0.038,
+    "end of life cycle": 0.962
+   },
+   "nl0Lives": 498,
+   "mixedLives": 498,
+   "rogueInherited": 0.866
+  },
+  "steer-chrome": {
+   "archetype": "steer-chrome",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.94,
+   "reachedBy": {
+    "1": 0.265,
+    "2": 0.455,
+    "3": 0.58,
+    "5": 0.745,
+    "10": 0.94
+   },
+   "goodEndsPerLine": 2.81,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 16,
+     "p90": 40
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.877,
+    "sourceRun": 0.877,
+    "sourceExit": 0.78,
+    "cleanExit": 0.327,
+    "goodEnd": 0.281,
+    "atExit": 0,
+    "atDeath": 0.281,
+    "captured": 0.051,
+    "marks": 0.78,
+    "days": 5.81,
+    "tier": {
+     "1": 0,
+     "2": 0.114,
+     "3": 0.294,
+     "4": 0.592
+    }
+   },
+   "afterExit": {
+    "lives": 1561,
+    "disarmedOnce": 0.061,
+    "lostIt": 0.639,
+    "capturedAfter": 0.02,
+    "declined": 0.418,
+    "exitsPerLife": 1.33
+   },
+   "deaths": {
+    "captured": 0.051,
+    "end of life cycle": 0.95
+   },
+   "nl0Lives": 493,
+   "mixedLives": 493,
+   "rogueInherited": 0.852
+  },
+  "steer-firewall": {
+   "archetype": "steer-firewall",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.96,
+   "reachedBy": {
+    "1": 0.205,
+    "2": 0.375,
+    "3": 0.515,
+    "5": 0.785,
+    "10": 0.96
+   },
+   "goodEndsPerLine": 2.77,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 18,
+     "p90": 41
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.856,
+    "sourceRun": 0.854,
+    "sourceExit": 0.752,
+    "cleanExit": 0.315,
+    "goodEnd": 0.277,
+    "atExit": 0,
+    "atDeath": 0.277,
+    "captured": 0.034,
+    "marks": 0.7,
+    "days": 5.81,
+    "tier": {
+     "1": 0,
+     "2": 0.117,
+     "3": 0.295,
+     "4": 0.589
+    }
+   },
+   "afterExit": {
+    "lives": 1505,
+    "disarmedOnce": 0.053,
+    "lostIt": 0.633,
+    "capturedAfter": 0.016,
+    "declined": 0.418,
+    "exitsPerLife": 1.32
+   },
+   "deaths": {
+    "captured": 0.034,
+    "end of life cycle": 0.965,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 486,
+   "mixedLives": 486,
+   "rogueInherited": 0.869
+  },
+  "steer-daemon": {
+   "archetype": "steer-daemon",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.94,
+   "reachedBy": {
+    "1": 0.23,
+    "2": 0.435,
+    "3": 0.565,
+    "5": 0.775,
+    "10": 0.94
+   },
+   "goodEndsPerLine": 2.67,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 17,
+     "p90": 40
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.874,
+    "sourceRun": 0.872,
+    "sourceExit": 0.768,
+    "cleanExit": 0.311,
+    "goodEnd": 0.267,
+    "atExit": 0,
+    "atDeath": 0.267,
+    "captured": 0.048,
+    "marks": 0.74,
+    "days": 5.82,
+    "tier": {
+     "1": 0,
+     "2": 0.114,
+     "3": 0.289,
+     "4": 0.596
+    }
+   },
+   "afterExit": {
+    "lives": 1537,
+    "disarmedOnce": 0.06,
+    "lostIt": 0.653,
+    "capturedAfter": 0.022,
+    "declined": 0.405,
+    "exitsPerLife": 1.32
+   },
+   "deaths": {
+    "captured": 0.048,
+    "end of life cycle": 0.952
+   },
+   "nl0Lives": 484,
+   "mixedLives": 484,
+   "rogueInherited": 0.858
+  },
+  "steer-glitch": {
+   "archetype": "steer-glitch",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.965,
+   "reachedBy": {
+    "1": 0.215,
+    "2": 0.375,
+    "3": 0.545,
+    "5": 0.775,
+    "10": 0.965
+   },
+   "goodEndsPerLine": 3.1,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 18,
+     "p90": 40
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.845,
+    "sourceRun": 0.844,
+    "sourceExit": 0.642,
+    "cleanExit": 0.347,
+    "goodEnd": 0.31,
+    "atExit": 0,
+    "atDeath": 0.31,
+    "captured": 0.035,
+    "marks": 0.65,
+    "days": 5.8,
+    "tier": {
+     "1": 0,
+     "2": 0.118,
+     "3": 0.298,
+     "4": 0.584
+    }
+   },
+   "afterExit": {
+    "lives": 1285,
+    "disarmedOnce": 0.059,
+    "lostIt": 0.517,
+    "capturedAfter": 0.015,
+    "declined": 0.54,
+    "exitsPerLife": 1.21
+   },
+   "deaths": {
+    "captured": 0.035,
+    "end of life cycle": 0.965
+   },
+   "nl0Lives": 556,
+   "mixedLives": 556,
+   "rogueInherited": 0.868
+  },
+  "steer-breach-corp": {
+   "archetype": "steer-breach-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.855,
+   "reachedBy": {
+    "1": 0.13,
+    "2": 0.32,
+    "3": 0.465,
+    "5": 0.63,
+    "10": 0.855
+   },
+   "goodEndsPerLine": 1.89,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 8
+    },
+    "lives": {
+     "median": 3,
+     "p90": 8
+    },
+    "days": {
+     "median": 18,
+     "p90": 48
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.949,
+    "sourceRun": 0.949,
+    "sourceExit": 0.868,
+    "cleanExit": 0.224,
+    "goodEnd": 0.189,
+    "atExit": 0,
+    "atDeath": 0.189,
+    "captured": 0.054,
+    "marks": 0.85,
+    "days": 5.87,
+    "tier": {
+     "1": 0,
+     "2": 0.105,
+     "3": 0.001,
+     "4": 0.894
+    }
+   },
+   "afterExit": {
+    "lives": 1736,
+    "disarmedOnce": 0.042,
+    "lostIt": 0.783,
+    "capturedAfter": 0.021,
+    "declined": 0.258,
+    "exitsPerLife": 1.33
+   },
+   "deaths": {
+    "captured": 0.054,
+    "end of life cycle": 0.946
+   },
+   "nl0Lives": 328,
+   "mixedLives": 328,
+   "rogueInherited": 0.85
+  },
+  "steer-breach-street": {
+   "archetype": "steer-breach-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.875,
+   "reachedBy": {
+    "1": 0.12,
+    "2": 0.285,
+    "3": 0.4,
+    "5": 0.62,
+    "10": 0.875
+   },
+   "goodEndsPerLine": 1.95,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 4,
+     "p90": 9
+    },
+    "lives": {
+     "median": 4,
+     "p90": 9
+    },
+    "days": {
+     "median": 22.4,
+     "p90": 52.4
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.945,
+    "sourceRun": 0.945,
+    "sourceExit": 0.864,
+    "cleanExit": 0.23,
+    "goodEnd": 0.195,
+    "atExit": 0,
+    "atDeath": 0.195,
+    "captured": 0.05,
+    "marks": 0.8,
+    "days": 5.88,
+    "tier": {
+     "1": 0,
+     "2": 0.106,
+     "3": 0,
+     "4": 0.894
+    }
+   },
+   "afterExit": {
+    "lives": 1728,
+    "disarmedOnce": 0.042,
+    "lostIt": 0.775,
+    "capturedAfter": 0.024,
+    "declined": 0.266,
+    "exitsPerLife": 1.34
+   },
+   "deaths": {
+    "captured": 0.05,
+    "end of life cycle": 0.95
+   },
+   "nl0Lives": 338,
+   "mixedLives": 338,
+   "rogueInherited": 0.855
+  },
+  "steer-dodge-corp": {
+   "archetype": "steer-dodge-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.395,
+    "2": 0.745,
+    "3": 0.9,
+    "5": 0.985,
+    "10": 1
+   },
+   "goodEndsPerLine": 5.69,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 11,
+     "p90": 22
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.95,
+    "sourceRun": 0.95,
+    "sourceExit": 0.9,
+    "cleanExit": 0.639,
+    "goodEnd": 0.569,
+    "atExit": 0,
+    "atDeath": 0.569,
+    "captured": 0.016,
+    "marks": 0.56,
+    "days": 5.93,
+    "tier": {
+     "1": 0,
+     "2": 0.105,
+     "3": 0,
+     "4": 0.895
+    }
+   },
+   "afterExit": {
+    "lives": 1800,
+    "disarmedOnce": 0.089,
+    "lostIt": 0.368,
+    "capturedAfter": 0.009,
+    "declined": 0.711,
+    "exitsPerLife": 1.49
+   },
+   "deaths": {
+    "captured": 0.016,
+    "end of life cycle": 0.984
+   },
+   "nl0Lives": 1016,
+   "mixedLives": 1016,
+   "rogueInherited": 0.885
+  },
+  "steer-dodge-street": {
+   "archetype": "steer-dodge-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.41,
+    "2": 0.7,
+    "3": 0.835,
+    "5": 0.975,
+    "10": 1
+   },
+   "goodEndsPerLine": 5.69,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 11,
+     "p90": 24
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.943,
+    "sourceRun": 0.943,
+    "sourceExit": 0.889,
+    "cleanExit": 0.645,
+    "goodEnd": 0.569,
+    "atExit": 0,
+    "atDeath": 0.569,
+    "captured": 0.019,
+    "marks": 0.51,
+    "days": 5.91,
+    "tier": {
+     "1": 0,
+     "2": 0.106,
+     "3": 0,
+     "4": 0.894
+    }
+   },
+   "afterExit": {
+    "lives": 1778,
+    "disarmedOnce": 0.095,
+    "lostIt": 0.36,
+    "capturedAfter": 0.009,
+    "declined": 0.726,
+    "exitsPerLife": 1.46
+   },
+   "deaths": {
+    "captured": 0.019,
+    "end of life cycle": 0.981,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 1017,
+   "mixedLives": 1017,
+   "rogueInherited": 0.882
+  },
+  "steer-tune-corp": {
+   "archetype": "steer-tune-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.89,
+   "reachedBy": {
+    "1": 0.085,
+    "2": 0.22,
+    "3": 0.385,
+    "5": 0.645,
+    "10": 0.89
+   },
+   "goodEndsPerLine": 2.04,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 4,
+     "p90": 7
+    },
+    "lives": {
+     "median": 4,
+     "p90": 7
+    },
+    "days": {
+     "median": 23,
+     "p90": 42
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.854,
+    "sourceRun": 0.854,
+    "sourceExit": 0.699,
+    "cleanExit": 0.234,
+    "goodEnd": 0.204,
+    "atExit": 0,
+    "atDeath": 0.204,
+    "captured": 0.041,
+    "marks": 0.71,
+    "days": 5.79,
+    "tier": {
+     "1": 0,
+     "2": 0.117,
+     "3": 0,
+     "4": 0.883
+    }
+   },
+   "afterExit": {
+    "lives": 1398,
+    "disarmedOnce": 0.043,
+    "lostIt": 0.707,
+    "capturedAfter": 0.018,
+    "declined": 0.334,
+    "exitsPerLife": 1.26
+   },
+   "deaths": {
+    "captured": 0.041,
+    "end of life cycle": 0.96
+   },
+   "nl0Lives": 359,
+   "mixedLives": 359,
+   "rogueInherited": 0.865
+  },
+  "steer-tune-street": {
+   "archetype": "steer-tune-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.93,
+   "reachedBy": {
+    "1": 0.15,
+    "2": 0.325,
+    "3": 0.495,
+    "5": 0.7,
+    "10": 0.93
+   },
+   "goodEndsPerLine": 2.25,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 8
+    },
+    "lives": {
+     "median": 3,
+     "p90": 8
+    },
+    "days": {
+     "median": 18,
+     "p90": 47
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.879,
+    "sourceRun": 0.878,
+    "sourceExit": 0.71,
+    "cleanExit": 0.255,
+    "goodEnd": 0.226,
+    "atExit": 0,
+    "atDeath": 0.226,
+    "captured": 0.036,
+    "marks": 0.69,
+    "days": 5.82,
+    "tier": {
+     "1": 0,
+     "2": 0.114,
+     "3": 0,
+     "4": 0.886
+    }
+   },
+   "afterExit": {
+    "lives": 1419,
+    "disarmedOnce": 0.043,
+    "lostIt": 0.682,
+    "capturedAfter": 0.008,
+    "declined": 0.359,
+    "exitsPerLife": 1.24
+   },
+   "deaths": {
+    "captured": 0.036,
+    "end of life cycle": 0.962,
+    "integrity collapse": 0.002
+   },
+   "nl0Lives": 412,
+   "mixedLives": 412,
+   "rogueInherited": 0.866
+  },
+  "steer-feast-corp": {
+   "archetype": "steer-feast-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.88,
+   "reachedBy": {
+    "1": 0.105,
+    "2": 0.285,
+    "3": 0.425,
+    "5": 0.615,
+    "10": 0.88
+   },
+   "goodEndsPerLine": 2,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 4,
+     "p90": 8
+    },
+    "lives": {
+     "median": 4,
+     "p90": 8
+    },
+    "days": {
+     "median": 22,
+     "p90": 45
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.907,
+    "sourceRun": 0.907,
+    "sourceExit": 0.786,
+    "cleanExit": 0.248,
+    "goodEnd": 0.2,
+    "atExit": 0,
+    "atDeath": 0.2,
+    "captured": 0.059,
+    "marks": 0.87,
+    "days": 5.83,
+    "tier": {
+     "1": 0,
+     "2": 0.11,
+     "3": 0,
+     "4": 0.89
+    }
+   },
+   "afterExit": {
+    "lives": 1573,
+    "disarmedOnce": 0.062,
+    "lostIt": 0.746,
+    "capturedAfter": 0.026,
+    "declined": 0.316,
+    "exitsPerLife": 1.26
+   },
+   "deaths": {
+    "captured": 0.059,
+    "end of life cycle": 0.941
+   },
+   "nl0Lives": 365,
+   "mixedLives": 365,
+   "rogueInherited": 0.845
+  },
+  "steer-feast-street": {
+   "archetype": "steer-feast-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.9,
+   "reachedBy": {
+    "1": 0.165,
+    "2": 0.335,
+    "3": 0.455,
+    "5": 0.665,
+    "10": 0.9
+   },
+   "goodEndsPerLine": 2.23,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 8
+    },
+    "lives": {
+     "median": 3,
+     "p90": 8
+    },
+    "days": {
+     "median": 18,
+     "p90": 47.2
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.916,
+    "sourceRun": 0.915,
+    "sourceExit": 0.78,
+    "cleanExit": 0.273,
+    "goodEnd": 0.223,
+    "atExit": 0,
+    "atDeath": 0.223,
+    "captured": 0.06,
+    "marks": 0.84,
+    "days": 5.84,
+    "tier": {
+     "1": 0,
+     "2": 0.109,
+     "3": 0,
+     "4": 0.891
+    }
+   },
+   "afterExit": {
+    "lives": 1560,
+    "disarmedOnce": 0.068,
+    "lostIt": 0.715,
+    "capturedAfter": 0.025,
+    "declined": 0.349,
+    "exitsPerLife": 1.29
+   },
+   "deaths": {
+    "captured": 0.06,
+    "end of life cycle": 0.94
+   },
+   "nl0Lives": 393,
+   "mixedLives": 393,
+   "rogueInherited": 0.848
+  },
+  "seek-steady": {
+   "archetype": "seek-steady",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.305,
+    "2": 0.49,
+    "3": 0.67,
+    "5": 0.88,
+    "10": 1
+   },
+   "goodEndsPerLine": 3.51,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 6
+    },
+    "lives": {
+     "median": 3,
+     "p90": 6
+    },
+    "days": {
+     "median": 16.3,
+     "p90": 36
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.916,
+    "sourceRun": 0.916,
+    "sourceExit": 0.865,
+    "cleanExit": 0.399,
+    "goodEnd": 0.351,
+    "atExit": 0,
+    "atDeath": 0.351,
+    "captured": 0.026,
+    "marks": 0.62,
+    "days": 5.88,
+    "tier": {
+     "1": 0,
+     "2": 0.109,
+     "3": 0.286,
+     "4": 0.605
+    }
+   },
+   "afterExit": {
+    "lives": 1729,
+    "disarmedOnce": 0.06,
+    "lostIt": 0.594,
+    "capturedAfter": 0.012,
+    "declined": 0.462,
+    "exitsPerLife": 1.44
+   },
+   "deaths": {
+    "captured": 0.026,
+    "end of life cycle": 0.974
+   },
+   "nl0Lives": 634,
+   "mixedLives": 634,
+   "rogueInherited": 0.878
+  },
+  "seek-unsteady": {
+   "archetype": "seek-unsteady",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.965,
+   "reachedBy": {
+    "1": 0.165,
+    "2": 0.375,
+    "3": 0.55,
+    "5": 0.765,
+    "10": 0.965
+   },
+   "goodEndsPerLine": 2.88,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 6
+    },
+    "lives": {
+     "median": 3,
+     "p90": 6
+    },
+    "days": {
+     "median": 17,
+     "p90": 36
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.825,
+    "sourceRun": 0.824,
+    "sourceExit": 0.62,
+    "cleanExit": 0.325,
+    "goodEnd": 0.288,
+    "atExit": 0,
+    "atDeath": 0.288,
+    "captured": 0.032,
+    "marks": 0.64,
+    "days": 5.78,
+    "tier": {
+     "1": 0,
+     "2": 0.121,
+     "3": 0.306,
+     "4": 0.572
+    }
+   },
+   "afterExit": {
+    "lives": 1240,
+    "disarmedOnce": 0.064,
+    "lostIt": 0.535,
+    "capturedAfter": 0.015,
+    "declined": 0.523,
+    "exitsPerLife": 1.17
+   },
+   "deaths": {
+    "captured": 0.032,
+    "end of life cycle": 0.968,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 503,
+   "mixedLives": 503,
+   "rogueInherited": 0.871
+  },
+  "seek-unsteady-segfault": {
+   "archetype": "seek-unsteady-segfault",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.97,
+   "reachedBy": {
+    "1": 0.215,
+    "2": 0.425,
+    "3": 0.595,
+    "5": 0.815,
+    "10": 0.97
+   },
+   "goodEndsPerLine": 3.03,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 17,
+     "p90": 39
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.855,
+    "sourceRun": 0.855,
+    "sourceExit": 0.621,
+    "cleanExit": 0.338,
+    "goodEnd": 0.303,
+    "atExit": 0,
+    "atDeath": 0.303,
+    "captured": 0.025,
+    "marks": 0.61,
+    "days": 5.82,
+    "tier": {
+     "1": 0,
+     "2": 0.117,
+     "3": 0.292,
+     "4": 0.591
+    }
+   },
+   "afterExit": {
+    "lives": 1241,
+    "disarmedOnce": 0.06,
+    "lostIt": 0.512,
+    "capturedAfter": 0.01,
+    "declined": 0.545,
+    "exitsPerLife": 1.19
+   },
+   "deaths": {
+    "captured": 0.025,
+    "end of life cycle": 0.976
+   },
+   "nl0Lives": 545,
+   "mixedLives": 545,
+   "rogueInherited": 0.879
+  },
+  "hunter-exact": {
+   "archetype": "hunter-exact",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.007,
+    "marks": 0.32,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.007,
+    "end of life cycle": 0.993
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894
+  },
+  "hunter-blocks": {
+   "archetype": "hunter-blocks",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.005,
+    "marks": 0.28,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.005,
+    "end of life cycle": 0.995
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.895
+  },
+  "hunter-shown": {
+   "archetype": "hunter-shown",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.008,
+    "marks": 0.29,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.008,
+    "end of life cycle": 0.992,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.891
+  },
+  "hunter-shown-rotation": {
+   "archetype": "hunter-shown-rotation",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.003,
+    "marks": 0.31,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.003,
+    "end of life cycle": 0.997
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.897
+  },
+  "nudge-breach": {
+   "archetype": "nudge-breach",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.895,
+   "reachedBy": {
+    "1": 0.13,
+    "2": 0.295,
+    "3": 0.43,
+    "5": 0.655,
+    "10": 0.895
+   },
+   "goodEndsPerLine": 1.95,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 4,
+     "p90": 8
+    },
+    "lives": {
+     "median": 4,
+     "p90": 8
+    },
+    "days": {
+     "median": 22,
+     "p90": 46
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.938,
+    "sourceRun": 0.938,
+    "sourceExit": 0.83,
+    "cleanExit": 0.222,
+    "goodEnd": 0.195,
+    "atExit": 0,
+    "atDeath": 0.195,
+    "captured": 0.043,
+    "marks": 0.79,
+    "days": 5.88,
+    "tier": {
+     "1": 0,
+     "2": 0.107,
+     "3": 0.009,
+     "4": 0.885
+    }
+   },
+   "afterExit": {
+    "lives": 1660,
+    "disarmedOnce": 0.035,
+    "lostIt": 0.765,
+    "capturedAfter": 0.018,
+    "declined": 0.267,
+    "exitsPerLife": 1.3
+   },
+   "deaths": {
+    "captured": 0.043,
+    "end of life cycle": 0.958
+   },
+   "nl0Lives": 355,
+   "mixedLives": 355,
+   "rogueInherited": 0.862
+  },
+  "steer-stub": {
+   "archetype": "steer-stub",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.97,
+   "reachedBy": {
+    "1": 0.22,
+    "2": 0.355,
+    "3": 0.51,
+    "5": 0.78,
+    "10": 0.97
+   },
+   "goodEndsPerLine": 3.03,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 18,
+     "p90": 42
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.865,
+    "sourceRun": 0.865,
+    "sourceExit": 0.75,
+    "cleanExit": 0.338,
+    "goodEnd": 0.303,
+    "atExit": 0,
+    "atDeath": 0.303,
+    "captured": 0.04,
+    "marks": 0.72,
+    "days": 5.81,
+    "tier": {
+     "1": 0,
+     "2": 0.116,
+     "3": 0.296,
+     "4": 0.589
+    }
+   },
+   "afterExit": {
+    "lives": 1500,
+    "disarmedOnce": 0.053,
+    "lostIt": 0.596,
+    "capturedAfter": 0.018,
+    "declined": 0.451,
+    "exitsPerLife": 1.3
+   },
+   "deaths": {
+    "captured": 0.04,
+    "end of life cycle": 0.96
+   },
+   "nl0Lives": 535,
+   "mixedLives": 535,
+   "rogueInherited": 0.864
+  },
+  "steer-mainframe": {
+   "archetype": "steer-mainframe",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "refuse",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "reached": 0.965,
+   "reachedBy": {
+    "1": 0.22,
+    "2": 0.44,
+    "3": 0.625,
+    "5": 0.815,
+    "10": 0.965
+   },
+   "goodEndsPerLine": 3.17,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 7
+    },
+    "lives": {
+     "median": 3,
+     "p90": 7
+    },
+    "days": {
+     "median": 16,
+     "p90": 38.5
+    },
+    "atExit": 0
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.884,
+    "sourceRun": 0.884,
+    "sourceExit": 0.781,
+    "cleanExit": 0.365,
+    "goodEnd": 0.317,
+    "atExit": 0,
+    "atDeath": 0.317,
+    "captured": 0.043,
+    "marks": 0.72,
+    "days": 5.82,
+    "tier": {
+     "1": 0,
+     "2": 0.113,
+     "3": 0.289,
+     "4": 0.598
+    }
+   },
+   "afterExit": {
+    "lives": 1562,
+    "disarmedOnce": 0.065,
+    "lostIt": 0.595,
+    "capturedAfter": 0.019,
+    "declined": 0.468,
+    "exitsPerLife": 1.31
+   },
+   "deaths": {
+    "captured": 0.043,
+    "end of life cycle": 0.958
+   },
+   "nl0Lives": 554,
+   "mixedLives": 554,
+   "rogueInherited": 0.863
+  }
+ }
+}

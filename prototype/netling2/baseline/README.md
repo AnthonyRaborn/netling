@@ -203,6 +203,10 @@ The baseline above is "the before" (2026-10-08 rules). The `now-*` jobs in `run-
 - **Egg pressures (sides, iron, iron-cold, grace, hint, heat-hint sweeps):** all rows moved past the threshold, mostly through temper and Flow (attentive with no pressure: Flow share 27 to 13%, temper 5.4 to 4.3, probably the rest call's tired state, which blocks Flow, and the stage tables; not isolated); read the outputs before quoting any older egg-pressure table.
 - Not re-run here: the follow-up sweeps in `results/followup/` (each states its own settings).
 
+## Follow-up: inheritance needs a full life (2026-10-11)
+
+Decided (maintainer): only a death at the end of the life cycle, or Rogue's taken good end, passes the trait line on (`sim.js` `INHERIT`, now on by default). So that every earlier job still reproduces, `run-all.mjs` sets `INHERIT='{"fullLife":false}'` for every job that does not set it itself. The lineage sweep is the only job here that carries fragments from life to life; it was re-run under the rule as `inherit-lineage-attentive`, `-daredevil` and `-casual` (filter `inherit-`; 270, 365 and 660 seconds). Against `now-lineage-*`: the Rogue gate is unchanged (medians 8, 8 and 18 lives; p90 10, 11 and 30), and so are Root, the first elder and the ending. The Rogue lineage measure under the rule is in `docs/NETLING_2_ROGUE_DRAFTS.md`, 7.6.
+
 ## Against the figures in the docs
 
 | Doc figure | Now | Note |

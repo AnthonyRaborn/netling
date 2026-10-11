@@ -278,3 +278,10 @@
 2026-10-09T21:40:28.886Z done now-foresight-sweep [now-rules] 217s
 2026-10-09T21:50:07.560Z done now-clinic-final [now-rules] 2293s
 2026-10-09T21:50:07.560Z all 12 jobs finished
+2026-10-11T04:56:59.247Z start inherit-lineage-attentive
+2026-10-11T04:56:59.255Z start inherit-lineage-daredevil
+2026-10-11T04:56:59.259Z start inherit-lineage-casual
+2026-10-11T05:01:28.975Z done inherit-lineage-attentive [now-rules] 270s
+2026-10-11T05:03:04.286Z done inherit-lineage-daredevil [now-rules] 365s
+2026-10-11T05:07:59.260Z done inherit-lineage-casual [now-rules] 660s
+2026-10-11T05:07:59.261Z all 3 jobs finished
