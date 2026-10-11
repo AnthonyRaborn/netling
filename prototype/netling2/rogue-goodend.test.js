@@ -232,11 +232,11 @@ test('the mixed egg continues the Rogue\'s trait as any rebirth does: a Rogue Mo
   }
 });
 
-test('crossings between Rogue and the NL-0 eggs (6.1, item 47): Rogue to Rogue always, Rogue to NL-0 only through the good end, NL-0 to Rogue only after a first good end', async () => {
+test('crossings between Rogue and the NL-0 eggs (6.1, item 47): Rogue to Rogue always; Rogue to NL-0 the trait line only through the good end; nothing NL-0 to Rogue before a first good end, everything after', async () => {
   const { crossFragment } = await import('./sim/rogue-line.js');
   const f = { form: 'breachStreet', trait: 'hardened', level: 2, history: 'evasive', quirk: { a: 1 }, keepsake: 'repairKit', scrip: 4 };
   const none = { ...f, trait: null, level: 1, history: null };
-  assert.deepEqual(crossFragment('program', 'rogue', f, { goodEnds: 0 }), none, 'the first Rogue egg: no trait line, the rest kept');
+  assert.equal(crossFragment('program', 'rogue', f, { goodEnds: 0 }), null, 'before the first good end nothing crosses into Rogue');
   assert.deepEqual(crossFragment('program', 'rogue', f, { goodEnds: 1 }), f);
   assert.deepEqual(crossFragment('rogue', 'rogue', f), f);
   assert.deepEqual(crossFragment('rogue', 'iron', f, { goodEnd: null, goodEnds: 3 }), none);

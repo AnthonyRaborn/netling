@@ -7,10 +7,10 @@
 //   assumption back (the parent is the chosen egg's latest adult or elder fragment). The rest are bot rules too: `line` says what follows a Rogue
 //   life that did not reach the good end (stay: Rogue again; back: after a capture, one life of the first egg completed, then Rogue again), and
 //   after any NL-0 life the player picks Rogue again.
-//   Crossing between Rogue and the NL-0 eggs (6.1, item 47; decided 2026-10-11): Rogue to Rogue inherits as any rebirth does; Rogue to an NL-0 egg
-//   only through that life's good end (the mixed egg); an NL-0 egg to Rogue only once the account has had a good end, so the first Rogue egg has
-//   no trait line. A crossing that is not open passes the fragment without its trait line (sim.js withoutTraitLine), as a death short of a full
-//   life does. `cross: 'open'` gives stage 3 back (every crossing inherits). `goodEnds`: the account's good ends so far.
+//   Crossing between Rogue and the NL-0 eggs (6.1, item 47; decided 2026-10-11): Rogue to Rogue inherits as any rebirth does. Rogue to an NL-0 egg
+//   passes the trait line only through that life's good end (the mixed egg); without it the quirk key, keepsake and scrip still cross (sim.js
+//   withoutTraitLine). An NL-0 egg to Rogue passes nothing until the account's first good end (the first Rogue egg has no parent), and everything
+//   after it. `cross: 'open'` gives stage 3 back (every crossing inherits). `goodEnds`: the account's good ends so far.
 
 import { withoutTraitLine } from './sim.js';
 
@@ -32,7 +32,7 @@ export function crossFragment(from, to, fragment, { goodEnd = null, goodEnds = 0
   if (cross !== 'gated' && cross !== 'open') throw new Error(`CROSS must be gated or open, not ${cross}`);
   if (cross === 'open' || (from === 'rogue') === (to === 'rogue')) return fragment; // Rogue to Rogue, or between NL-0 eggs
   if (from === 'rogue') return goodEnd ? fragment : withoutTraitLine(fragment);
-  return goodEnds > 0 ? fragment : withoutTraitLine(fragment);
+  return goodEnds > 0 ? fragment : null;
 }
 
 // The egg and the parent fragment of the next life. life: { egg, cause, goodEnd, fragment } as simulate() returns it (fragment: this life's).
