@@ -111,6 +111,9 @@ export const NR2 = {
     hunterTier: 1, // the tier its fight is played at (decided, 7.4: 1, ordinary speed; the draft had 2, the tier-2 speed and a lower win chance)
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
     ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
+    // Lever for the Deep's disconnects (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 item 45, 7.12), off: { region: f } multiplies the ambush share in that
+    // region's cordon layers (0: a cordon fight is never an ambush). Regions not listed keep the share.
+    cordonAmbush: {},
     ambushMark: false, // decided (7.4): a lost ambush is a disconnect but no mark (the draft: a mark too); only the trail hunter marks in runs
     dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
     // The kits by role and level (9.2). Mole fights hunters as plain tier-2 ICE at its damage share; Sleeper turns one lost hunter fight a run into an

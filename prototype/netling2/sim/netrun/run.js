@@ -245,7 +245,10 @@ export function startRun(pet, region, rng, codex = [], ownedAccessories = [], op
     Object.assign(run, { hunt: 0, huntMoves: 0, hunterSaves: 0, agentUsed: false, dropped: [], droppedAt: [] });
     Object.assign(run.tally, { hunters: 0, huntersLost: 0, ambushes: 0, ambushesLost: 0, ambushesSlipped: 0, agents: 0, deadDrops: 0 });
     const share = NR2.rogue.ambush[region] ?? 0;
-    if (share > 0) for (const n of map.nodes) if (n.type === 'ice' && rng() < share) n.ambush = true;
+    // cordonAmbush (nr2.js): the share in the cordon layers is multiplied by it (one draw a node either way, so 1 is the decided map).
+    const cordon = map.rogueRules?.cordon ?? [];
+    const inCordon = NR2.rogue.cordonAmbush?.[region] ?? 1;
+    if (share > 0) for (const n of map.nodes) if (n.type === 'ice' && rng() < share * (cordon.includes(n.layer) ? inCordon : 1)) n.ambush = true;
   }
   return pet.run;
 }

@@ -43,16 +43,34 @@ const EXIT = {
   'relay 0.667 + narrow + exit 1': { exitBonus: { deep: 1 }, map: { narrow: ['deep'] } },
   'relay 0.8 + exit 1': { exitBonus: { deep: 1 }, map: { relayAt: { deep: 0.8 } } },
 };
+// Fifth round (6.1 item 45, 7.12): the Deep's disconnects at today's defaults (the Rogue trait on, the fifty set; neither pinned off) and the
+// ambush levers: cordonAmbush (the share in the cordon layer), the Deep's ambush share, and the cordon itself for comparison.
+const DISC = {
+  'today (trait on)': {},
+  'cordon ambush 0.5': { cordonAmbush: { deep: 0.5 } },
+  'cordon ambush 0': { cordonAmbush: { deep: 0 } },
+  'ambush 0.2': { ambush: { deep: 0.2 } },
+  'ambush 0.15': { ambush: { deep: 0.15 } },
+  'ambush 0.1': { ambush: { deep: 0.1 } },
+  'ambush 0': { ambush: { deep: 0 } },
+  'cordon ambush 0 + ambush 0.2': { cordonAmbush: { deep: 0 }, ambush: { deep: 0.2 } },
+  'cordon ambush 0 + ambush 0.15': { cordonAmbush: { deep: 0 }, ambush: { deep: 0.15 } },
+  'no cordon': { map: { cordons: { deep: [], source: [0, 0.667] } } },
+  'no cordon + ambush 0': { map: { cordons: { deep: [], source: [0, 0.667] } }, ambush: { deep: 0 } },
+};
 // The first three rounds were measured with the relay in the middle layer (then the default), so they spell it out unless they move it.
 // All rounds were measured with the region's exit bonus 2 (then the default) unless they set it.
 const PRE = (over) => ({ exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
-const sim = (file, env) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ROGUE_TRAIT: '0', ROGUE_SOURCE: '0', ...env }, maxBuffer: 1 << 26 }));
+// The first four rounds pin the Rogue trait and the Source set off (measured before them); the fifth runs today's defaults.
+const PIN = { ROGUE_TRAIT: '0', ROGUE_SOURCE: '0' };
+const sim = (file, env, pin = PIN) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ...pin, ...env }, maxBuffer: 1 << 26 }));
 const file = join(here, 'results', 'followup', 'rogue-deep-levers.json');
 const out = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
-for (const [name, over] of [...Object.entries(SETTINGS).map(([k, map]) => [k, PRE({ map })]), ...Object.entries(FAR).map(([k, o]) => [k, PRE(o)]), ...Object.entries(EXIT)]) {
+const rounds = [...Object.entries(SETTINGS).map(([k, map]) => [k, PRE({ map })]), ...Object.entries(FAR).map(([k, o]) => [k, PRE(o)]), ...Object.entries(EXIT)];
+for (const [name, over, pin] of [...rounds, ...Object.entries(DISC).map(([k, o]) => [k, o, {}])]) {
   if (out[name]) continue;
   const ROGUE_RUN = JSON.stringify(over);
-  out[name] = { relay: sim('rogue-relay.mjs', { ROGUE_RUN }), runs: sim('rogue-netrun.mjs', { ROGUE_RUN, FORMS: 'rogue,hidden' }) };
+  out[name] = { relay: sim('rogue-relay.mjs', { ROGUE_RUN }, pin), runs: sim('rogue-netrun.mjs', { ROGUE_RUN, FORMS: 'rogue,hidden' }, pin) };
   console.log(name, 'done');
 }
 writeFileSync(file, JSON.stringify(out, null, 1));

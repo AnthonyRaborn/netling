@@ -206,6 +206,39 @@ test('ambushes are a share of a region ICE nodes (none in the Public Net), drawn
   assert.ok(deep > 0.15 && deep < 0.35, `deep share ${deep}`);
 }));
 
+test('cordonAmbush (off): 0 keeps ambushes out of the cordon layers only, on the same random draws', () => withKits(() => {
+  const maps = (setting) => {
+    const saved = NR2.rogue.cordonAmbush;
+    NR2.rogue.cordonAmbush = setting;
+    try {
+      return Array.from({ length: 60 }, (_, i) => {
+        const rng = mulberry32(i + 1);
+        const s = createScript({ now: 0, rng });
+        Object.assign(s, { egg: 'rogue', stage: 'adult', form: 'rogueAdultBreach' });
+        startRun(s, 'deep', rng, []);
+        return s.run.map;
+      });
+    } finally {
+      NR2.rogue.cordonAmbush = saved;
+    }
+  };
+  const on = maps({});
+  const off = maps({ deep: 0 });
+  let inCordon = 0;
+  on.forEach((m, i) => {
+    const cordon = m.rogueRules.cordon;
+    assert.equal(cordon.length, 1, 'the Deep has one cordon');
+    m.nodes.forEach((n, j) => {
+      const o = off[i].nodes[j];
+      if (cordon.includes(n.layer)) {
+        if (n.ambush) inCordon++;
+        assert.ok(!o.ambush, 'no ambush in a cordon layer');
+      } else assert.equal(!!o.ambush, !!n.ambush, 'every other node as before');
+    });
+  });
+  assert.ok(inCordon > 0, 'the decided map has cordon ambushes to take out');
+}));
+
 // Stage 2b: Rogue's own map rules (9.7, netrun/rogue-map.js).
 const { rogueMapRules, rogueRelayLayer } = await import('./sim/netrun/rogue-map.js');
 const { generateMap } = await import('../../src/netrun/map.js');
