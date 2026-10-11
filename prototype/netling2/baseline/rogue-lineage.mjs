@@ -1,7 +1,7 @@
 // Rogue, simulator stage 3 (the lineage side): sim/rogue-lineage.mjs for each archetype of the attentive group (the 26 hourly archetypes) under
 // the decided settings and a few bot rules. One file an archetype and job in results/followup/rogue-lineage/<job>/ (resumable: a file that exists
 // is skipped), then results/followup/rogue-lineage-<job>.json with every archetype. Summary: rogue-lineage-summary.mjs.
-// Usage: node prototype/netling2/baseline/rogue-lineage.mjs [lineages=200] [rogueLives=10] [--jobs=4] [jobFilter]
+// Usage: node prototype/netling2/baseline/rogue-lineage.mjs [lineages=200] [rogueLives=10] [--jobs=4] [jobFilter: a substring, or a comma list of jobs]
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -34,10 +34,25 @@ const JOBS = {
   'clean-rogue': { ...NO_TRAIT, PICK: 'rogue' }, // Rogue again after every good end: no mixed egg, every life a Rogue life
   // The Rogue trait (decided 2026-10-11, 9.4a C1 and E1; sim.js ROGUE_TRAIT), on the fork's defaults: every rule decided so far.
   trait: {},
+  // Levers for the gap between the lines (docs/NETLING_2_ROGUE_DRAFTS.md 7.8; nr2.js rogue.source, all off by default), on top of the trait job.
+  ...Object.fromEntries(Object.entries({
+    breach1: { breachFree: 1 }, // Mole and Sleeper: one lost ordinary fight in the Source still exits clean
+    tune: { tuneTypes: true }, // Spook and Handler: every Source ICE's game and tier from the start
+    feast2: { feastHeal: 2 }, feast3: { feastHeal: 3 }, // Drop and Stash: the won-fight heal in the Source x2, x3
+    dodge75: { dodgeSlip: 0.75 }, dodge50: { dodgeSlip: 0.5 }, // Skip and Exile: the slip in the Source cut by a quarter, by half
+    help: { breachFree: 1, tuneTypes: true, feastHeal: 2 }, // the three helps together
+    'help-dodge75': { breachFree: 1, tuneTypes: true, feastHeal: 2, dodgeSlip: 0.75 },
+    'help3-dodge50': { breachFree: 1, tuneTypes: true, feastHeal: 3, dodgeSlip: 0.5 },
+  }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
+  // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
+  'trait-spread': { SPREAD: '0.2' },
+  'tune-spread': { SPREAD: '0.2', ROGUE_RUN: JSON.stringify({ source: { tuneTypes: true } }) },
 };
+// jobFilter: a comma list of job names (exact), or one substring as before.
+const wanted = (job) => !filter || (filter.includes(',') ? filter.split(',').includes(job) : job.includes(filter));
 const todo = [];
 for (const [job, env] of Object.entries(JOBS)) {
-  if (filter && !job.includes(filter)) continue;
+  if (!wanted(job)) continue;
   mkdirSync(join(out, 'rogue-lineage', job), { recursive: true });
   for (const a of ATT) if (!existsSync(join(out, 'rogue-lineage', job, `${a}.json`))) todo.push([job, env, a]);
 }
@@ -57,7 +72,7 @@ const run = ([job, env, a]) => new Promise((resolve) => {
 const queue = [...todo];
 await Promise.all(Array.from({ length: jobsAtOnce }, async () => { while (queue.length) await run(queue.shift()); }));
 // The combined file of each job asked for, once every archetype is done (the counts are read from the files, which may predate this call's).
-for (const job of Object.keys(JOBS).filter((j) => !filter || j.includes(filter))) {
+for (const job of Object.keys(JOBS).filter(wanted)) {
   const files = ATT.map((a) => join(out, 'rogue-lineage', job, `${a}.json`));
   if (!files.every(existsSync)) continue;
   const archetypes = Object.fromEntries(ATT.map((a, i) => [a, JSON.parse(readFileSync(files[i], 'utf8'))]));

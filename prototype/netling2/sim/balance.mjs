@@ -279,7 +279,7 @@ export function checkIn(s, p, now, rng, ctx) {
     if (region && !runBlockReason(s, region, ctx.codex)) {
       const lean = { hide: 'indie', comply: 'corp', balance: 'balance' }[p.trace] ?? 'mix';
       const flowAtJackIn = inFlow(s);
-      const run = playRun(s, { ...RUN_STYLES[runStyle], winRate: p.winRate, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
+      const run = playRun(s, { ...RUN_STYLES[runStyle], winRate: p.winRate, spread: p.spread, lean, anomaly: p.anomaly, shop: p.shop, keep, shown: p.shown, fix: p.fix, seekClinic: p.seekClinic }, region, rng, ctx.codex);
       // Bugs fixed at a clinic this run, and what they cost.
       ctx.bugsFixed = (ctx.bugsFixed ?? 0) + (run.tally.fixed ?? 0);
       ctx.scripSpent = (ctx.scripSpent ?? 0) + (run.tally.fixScrip ?? 0) * marketScrip(s, BUG_CFG.clearScrip);

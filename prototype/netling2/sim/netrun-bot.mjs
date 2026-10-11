@@ -136,7 +136,7 @@ function pathValue(map, id, visible, depth, hurt, seek, view = null, ctx = {}) {
   const sense = ctx.danger?.[id];
   const here = visible.has(id)
     ? ctx.ambush?.has(id) ? AMBUSH[hurt ? 'hurt' : 'fine'] : nodeValue(node.type, hurt, node, seek, view?.[id], ctx)
-    : sense === 'danger' ? nodeValue('ice', hurt, node, seek, null, ctx) : sense === 'quiet' ? QUIET : 0;
+    : sense === 'danger' ? nodeValue('ice', hurt, node, seek, view?.[id] ?? null, ctx) : sense === 'quiet' ? QUIET : 0;
   if (depth === 0 || !node.edges.length) return here;
   return here + 0.8 * Math.max(...node.edges.map((next) => pathValue(map, next, visible, depth - 1, hurt, seek, view, ctx)));
 }

@@ -353,3 +353,96 @@ test("the Rogue exit bonus (rogue.exitBonus, decided 1 in the Deep): in place of
     NR2.rogue.exitBonus = saved;
   }
 }));
+
+// The Source-only levers for the gap between the lines (nr2.js rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8). All off by default.
+const { foresightView } = await import('./sim/netrun/run.js');
+const { planMove, RUN_STYLES } = await import('./sim/netrun-bot.mjs');
+function withSource(levers, fn) {
+  const saved = { ...NR2.rogue.source };
+  Object.assign(NR2.rogue.source, levers);
+  try {
+    return withKits(fn);
+  } finally {
+    NR2.rogue.source = saved;
+  }
+}
+// Plays a straight map to its exit, losing every ICE fight; returns the netling.
+function runLosing(form, types, region) {
+  const s = setup(form, types, { region, stage: 'mainframe' });
+  for (let to = 1; to <= types.length + 1; to++) {
+    moveTo(s, to, stub(0.99));
+    if (s.run.phase === 'ice') resolveIce(s, false, stub(0.99));
+  }
+  return s;
+}
+
+test('Source levers: all off by default', () => {
+  assert.deepEqual(NR2.rogue.source, { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1 });
+});
+
+test('Source lever breachFree: a Sleeper with one lost ordinary fight in the Source still exits clean; two, or another line, or a lost hunter fight, do not', () => withSource({ breachFree: 1 }, () => {
+  assert.equal(runLosing('rogueElderBreach', ['ice', 'checkpoint'], 'source').merge.clean, 1);
+  assert.equal(runLosing('rogueElderBreach', ['ice', 'ice'], 'source').merge.clean, 0);
+  assert.equal(runLosing('rogueElderFeast', ['ice', 'checkpoint'], 'source').merge.clean, 0);
+  // Sleeper's save turns its first lost hunter fight into an ordinary one, but that loss still spoils "clean".
+  const h = setup('rogueElderBreach', ['relay', 'checkpoint'], { region: 'source', stage: 'mainframe', hunt: huntThreshold({ region: 'source' }) });
+  moveTo(h, 1, stub(0.99));
+  resolveIce(h, false, stub(0.99));
+  assert.equal(h.run.tally.hunterFightsLost, 1);
+  choose(h, 'continue', stub(0.99));
+  h.run.hunt = 0; // the save leaves the trail; clear it so the hunter does not wait again
+  moveTo(h, 2, stub(0.99));
+  moveTo(h, 3, stub(0.99));
+  assert.equal(h.merge.clean, 0);
+  NR2.rogue.source.breachFree = 0;
+  assert.equal(runLosing('rogueElderBreach', ['ice', 'checkpoint'], 'source').merge.clean, 0, 'off: as before');
+}));
+
+test('Source lever feastHeal: Stash heals that many times its won-fight heal in the Source only', () => withSource({ feastHeal: 2 }, () => {
+  const heal = (region) => {
+    const s = setup('rogueElderFeast', ['ice', 'checkpoint'], { region, stage: 'mainframe' });
+    s.stats.integrity = 40;
+    moveTo(s, 1, stub(0.99));
+    resolveIce(s, true, stub(0.99));
+    return s.stats.integrity - 40;
+  };
+  assert.equal(heal('source'), 2 * NR2.ab.scavenge[2].winHeal);
+  assert.equal(heal('deep'), NR2.ab.scavenge[2].winHeal);
+}));
+
+test("Source lever dodgeSlip: Exile's slip chance in the Source is multiplied by it, elsewhere unchanged", () => withSource({ dodgeSlip: 0.5 }, () => {
+  const slips = (region, roll) => {
+    const s = setup('rogueElderDodge', ['ice'], { region, stage: 'mainframe' });
+    return moveTo(s, 1, stub(roll)).phased === true;
+  };
+  const u = NR2.rogue.kit.dodge[2].unseen; // 0.5
+  assert.equal(slips('deep', u * 0.75), true);
+  assert.equal(slips('source', u * 0.75), false, 'above the halved chance');
+  assert.equal(slips('source', u * 0.25), true);
+  const a = setup('rogueElderDodge', [{ type: 'ice', ambush: true }], { region: 'source', stage: 'mainframe' });
+  assert.notEqual(moveTo(a, 1, stub(u * 0.75)).phased, true, "Exile's ambush slip is trimmed too");
+}));
+
+test('Source lever tuneTypes: Handler reads every Source ICE game and tier (an ambush a decoy), matching what the fight rolls; the planner uses it on danger-sensed nodes', () => withSource({ tuneTypes: true }, () => {
+  const s = setup('rogueElderTune', ['checkpoint', 'ice', { type: 'ice', ambush: true }, 'ice'], { region: 'source', stage: 'mainframe', fate: 12345 });
+  const view = foresightView(s);
+  assert.deepEqual(Object.keys(view).map(Number), [2, 3, 4]);
+  for (const v of Object.values(view)) assert.ok(['breach', 'dodge', 'tune', 'feast'].includes(v.game) && [1, 2].includes(v.tier));
+  moveTo(s, 1, stub(0.99));
+  const r = moveTo(s, 2, stub(0.99));
+  assert.equal(r.game, view[2].game, 'the fight is the game it read');
+  assert.equal(foresightView(setup('rogueElderTune', ['ice'], { region: 'deep', stage: 'mainframe', fate: 1 }))[1], undefined, 'Source only');
+  assert.deepEqual(foresightView(setup('rogueElderFeast', ['ice'], { region: 'source', stage: 'mainframe', fate: 1 })), {}, 'Handler and Spook only');
+  // Two unseen danger nodes: the planner avoids the one it reads as tier 2.
+  const map = { nodes: [{ id: 0, layer: 0, type: 'entry', edges: [1, 2] }, { id: 1, layer: 1, type: 'ice', edges: [3] }, { id: 2, layer: 1, type: 'ice', edges: [3] }, { id: 3, layer: 2, type: 'exit', edges: [] }] };
+  const ctx = { style: RUN_STYLES.skilled, hot: false, danger: { 1: 'danger', 2: 'danger', 3: 'quiet' }, ambush: new Set() };
+  const pick = (v) => planMove(map, [map.nodes[1], map.nodes[2]], new Set(), false, 3, false, v, ctx).id;
+  const tiers = NR2.tiers;
+  NR2.tiers = true;
+  try {
+    assert.equal(pick({ 1: { game: 'tune', tier: 2 }, 2: { game: 'tune', tier: 1 } }), 2);
+    assert.equal(pick({ 1: { game: 'tune', tier: 1 }, 2: { game: 'tune', tier: 2 } }), 1);
+  } finally {
+    NR2.tiers = tiers;
+  }
+}));

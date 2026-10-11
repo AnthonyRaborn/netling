@@ -139,6 +139,8 @@ export const hunted = (pet, run = pet.run) => Boolean(NR2.rogue?.on && isRogue(p
 export const huntThreshold = (run, pet) => NR2.rogue.threshold[run.region] + ((pet && rkit(pet)?.thresholdDelta) ?? 0) + (pet && hasRogueTrait(pet) ? ROGUE_TRAIT.threshold : 0);
 const rogueRole = (pet) => (NR2.abilities && NR2.rogue?.on && isRogue(pet) && (pet.stage === 'adult' || pet.stage === 'mainframe') ? ROLE_OF[lineOf(pet.form)] ?? null : null);
 const rkit = (pet) => (rogueRole(pet) ? NR2.rogue.kit[rogueRole(pet)][lvl(pet)] : null);
+// The Source-only lever of this netling's line (nr2.js rogue.source), or the neutral value: in the Source, for a Rogue adult or elder of that line.
+const srcLever = (pet, run, role, key, neutral) => (run?.region === 'source' && rogueRole(pet) === role ? NR2.rogue.source?.[key] ?? neutral : neutral);
 function addTrail(run, n) {
   run.hunt = Math.max(0, (run.hunt ?? 0) + n);
 }
@@ -429,7 +431,7 @@ function encounterNode(pet, nodeId, rng) {
         addTrail(run, NR2.rogue.trail.iceLost);
         run.tally.ambushes++;
         const k = rkit(pet);
-        if (k?.ambushSlip && rng() < k.unseen * avoidMult(2, lvl(pet))) {
+        if (k?.ambushSlip && rng() < k.unseen * srcLever(pet, run, 'dodge', 'dodgeSlip', 1) * avoidMult(2, lvl(pet))) {
           run.tally.ambushesSlipped++;
           run.tally.icePhased++;
           note(run, 'an ambush. it was already gone.');
@@ -447,7 +449,7 @@ function encounterNode(pet, nodeId, rng) {
       if (key2) {
         // Phase (Dodge corp): the first ICE (two at the elder level) for certain, then often; against tier 2 each works less often.
         const ph = key2 === 'dodgeCorp' ? NR2.ab.phase[lvl(pet)] : null;
-        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' ? rkit(pet)?.unseen ?? NR2.ab.unseen[lvl(pet)] : key2 === 'hidden' ? NR2.ab.hiddenUnseen[lvl(pet)] : 0;
+        const chance = ph ? (run.freePhases < ph.free ? 1 : ph.later) : key2 === 'dodgeStreet' ? (rkit(pet)?.unseen ?? NR2.ab.unseen[lvl(pet)]) * srcLever(pet, run, 'dodge', 'dodgeSlip', 1) : key2 === 'hidden' ? NR2.ab.hiddenUnseen[lvl(pet)] : 0;
         if (chance > 0 && rng() < chance * am) {
           if (ph && run.freePhases < ph.free) run.freePhases++;
           run.tally.icePhased++;
@@ -612,7 +614,12 @@ function encounterNode(pet, nodeId, rng) {
         if (id) run.eggPages.push(id);
       }
       // Rogue: a Source exit arms the good end, and a clean one offers the merge at once (sim.js sourceExit).
-      if (run.region === 'source') sourceExit(pet, pet.lastTick ?? 0, (run.tally?.iceLost ?? 0) === 0);
+      // The breachFree lever (nr2.js rogue.source): a Mole or Sleeper may lose that many ordinary fights here and still count as clean.
+      if (run.region === 'source') {
+        const lost = run.tally?.iceLost ?? 0;
+        const hunters = run.tally?.hunterFightsLost ?? 0;
+        sourceExit(pet, pet.lastTick ?? 0, lost === 0 || (hunters === 0 && lost <= srcLever(pet, run, 'breach', 'breachFree', 0)));
+      }
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
         const d = pet.deepExits ?? { all: 0, clean: 0 };
@@ -651,7 +658,7 @@ function resolveIceFight(pet, won, rng) {
   if (hunter) return resolveHunter(pet, run, hunter, deferred, won, rng);
   if (won) {
     const wh = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].winHeal : ab2(pet) === 'feastCorp' ? NR2.ab.concession[lvl(pet)].winHeal : 0;
-    if (wh) st.integrity = clamp(st.integrity + wh); // Feast: a small sustain from feeding on a broken ICE (decided as fitting the theme)
+    if (wh) st.integrity = clamp(st.integrity + wh * srcLever(pet, run, 'feast', 'feastHeal', 1)); // Feast: a small sustain from feeding on a broken ICE (decided as fitting the theme)
     const acc = rng() < RUN_CFG.iceWinAccChance ? takeAccessory(run, rng) : '';
     if (rng() < (ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].iceWin : RUN_CFG.iceWinLootChance)) {
       const item = weighted(REGIONS[run.region].loot, rng);
@@ -692,10 +699,11 @@ function resolveHunter(pet, run, kind, deferred, won, rng) {
   if (won) {
     if (kind === 'trail') run.hunt = 0;
     const wh = ab2(pet) === 'feastStreet' ? NR2.ab.scavenge[lvl(pet)].winHeal : 0;
-    if (wh) st.integrity = clamp(st.integrity + wh);
+    if (wh) st.integrity = clamp(st.integrity + wh * srcLever(pet, run, 'feast', 'feastHeal', 1));
     note(run, kind === 'trail' ? 'the hunter lost the trail. trail 0.' : 'ambush broken.');
     return onward();
   }
+  run.tally.hunterFightsLost = (run.tally.hunterFightsLost ?? 0) + 1; // every lost hunter fight, saved or shrugged too (huntersLost and ambushesLost count the disconnects)
   const breach = rogueRole(pet) === 'breach';
   const dmg = Math.round(REGIONS[run.region].iceDamage * (breach ? k.dmg : NR2.rogue.hunterMult) * (run.hot ? CFG.overclockIceDamageMult : 1));
   st.integrity = clamp(st.integrity - dmg);
@@ -1334,6 +1342,7 @@ const cacheFate = (run, nodeId) => seededRoll(run.fate, nodeId * 8 + 5, 0);
 // netling, with the switch off, or without `fate`. Nodes already visited and the entry show nothing (they are spent).
 export function foresightView(pet) {
   const run = pet.run;
+  if (run && run.fate !== undefined && run.phase !== 'done' && srcLever(pet, run, 'tune', 'tuneTypes', false)) return sourceTypes(run);
   if (!NR2.foresight.on || !NR2.abilities || ab2(pet) !== 'tuneStreet' || !run || run.fate === undefined || run.phase === 'done') return {};
   const level = lvl(pet);
   // Blackout is "you only see one step ahead", with no form sight: Foresight is dark under it unless nr2.js `blackout.tuneStreet` allows a limited depth (default 0).
@@ -1351,6 +1360,18 @@ export function foresightView(pet) {
     } else if (node.type === 'cache' && fields.includes('cache')) {
       out[id] = { filled: Boolean(node.filled) || cacheFate(run, id) < (REGIONS[run.region].cacheFind ?? RUN_CFG.cacheFindChance) };
     }
+  }
+  return out;
+}
+
+// The tuneTypes lever (nr2.js rogue.source): every unvisited ICE node's game and tier, read from the run's fate as the fight will roll them. An
+// ambush gets the same reading, a decoy (its fight rolls its own game), so the view does not tell it apart.
+function sourceTypes(run) {
+  const out = {};
+  for (const node of run.map.nodes) {
+    if (node.type !== 'ice' || run.visited.includes(node.id)) continue;
+    const sh = tierShareAt(run.region, layerFraction(run, node.id));
+    out[node.id] = { game: GAME_IDS[Math.floor(seededRoll(run.fate, node.id * 8 + LANE.game, 0) * GAME_IDS.length)], tier: sh && seededRoll(run.fate, node.id * 8 + 4, 0) < sh ? 2 : 1 };
   }
   return out;
 }

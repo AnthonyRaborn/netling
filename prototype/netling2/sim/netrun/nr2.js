@@ -124,6 +124,12 @@ export const NR2 = {
     // The exit's bonus items for a Rogue netling, by region, in place of the region's exitBonus. Decided (7.4): 1 in the Deep (the region's is 2),
     // so going on past the relay pays about a third more than jacking out there. Regions not listed keep their own.
     exitBonus: { deep: 1 },
+    // Levers for the gap between the Rogue lines (docs/NETLING_2_ROGUE_DRAFTS.md 7.7 and 7.8), the Source only, all off (measured, not decided).
+    // breachFree: lost ordinary ICE fights a Mole or Sleeper may have in a Source run and still exit clean (hunter fights still spoil it).
+    // tuneTypes: Spook and Handler read every Source ICE's game and tier from the start (Foresight's fields, the whole map; an ambush shows a
+    // decoy game and tier, so it is not told apart). feastHeal: Drop's and Stash's won-fight heal in the Source is multiplied by this.
+    // dodgeSlip: Skip's and Exile's slip chance in the Source (ordinary ICE and Exile's ambush slip) is multiplied by this.
+    source: { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1 },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----

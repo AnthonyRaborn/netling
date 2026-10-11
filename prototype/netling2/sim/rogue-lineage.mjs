@@ -13,7 +13,8 @@
 //   LINEBOT=stay|back, JSON=1. PARENT=fragment gives stage 3's first assumption back (the mixed egg's parent is the chosen egg's latest fragment),
 //   ROGUE='{"armClean":false,"goodEndFullLife":false}' its arming and its good end at death, CROSS=open its crossings between Rogue and the
 //   NL-0 eggs, and INHERIT='{"fullLife":false}' its inheritance (every death passes the trait line). A lever, not a bot rule: FEAT=1 holds every Rogue elder to the first tier (1.0's
-//   feat: three Deep exits or two clean), whatever the account holds. The decided settings below are the defaults (the stage 2 measure's,
+//   feat: three Deep exits or two clean), whatever the account holds. SPREAD=0.2 gives every run uneven per-game skill (netrun-bot.mjs style.spread;
+//   an assumption, for the tuneTypes lever, whose game half is worth nothing to a bot equally good at every game). The decided settings below are the defaults (the stage 2 measure's,
 //   rogue-stage2.mjs BASE); any of them can be set in the environment.
 process.env.TZ = 'UTC';
 const FINAL_SIDES = {
@@ -29,6 +30,7 @@ for (const [k, v] of Object.entries(BASE)) process.env[k] ??= v;
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
 const { CFG, SIDES, IRON, lineOf, ROGUE, INHERIT, ROGUE_TRAIT } = await import('./sim.js');
 const { FRAGMENTS } = await import('./codex2.js');
+const { NR2 } = await import('./netrun/nr2.js');
 const { OWNER, nextLife, crossFragment } = await import('./rogue-line.js');
 
 const [name, n, rogueLives] = [process.argv[2], Number(process.argv[3] ?? 200), Number(process.argv[4] ?? 10)];
@@ -51,7 +53,7 @@ function life(egg, seed, fragment, generation, owned, mixed = false) {
     tier = egg === 'rogue' && process.env.FEAT ? Number(process.env.FEAT) : mine.has(lineOf(s.form)) ? 4 : mine.size ? 3 : 2;
     return LADDER[tier];
   };
-  const r = simulate({ ...ARCHETYPES[name] }, seed, { fragment, generation, codex: CODEX, rootAccess: true, egg, mixed });
+  const r = simulate({ ...ARCHETYPES[name], ...(process.env.SPREAD ? { spread: Number(process.env.SPREAD) } : {}) }, seed, { fragment, generation, codex: CODEX, rootAccess: true, egg, mixed });
   CFG.featFor = null;
   const elder = (r.stageDays?.mainframe ?? 0) > 0;
   if (elder) (owned[egg] ??= new Set()).add(lineOf(r.form));
@@ -99,7 +101,7 @@ const elders = R.filter((r) => r.elder);
 const exited = R.filter((r) => (r.merge?.exits ?? 0) > 0);
 const goods = R.filter((r) => r.goodEnd);
 const out = {
-  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, parent: PARENT, armClean: ROGUE.armClean, goodEndFullLife: ROGUE.goodEndFullLife, cross: CROSS, fullLife: INHERIT.fullLife, feat: process.env.FEAT ? Number(process.env.FEAT) : null,
+  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, parent: PARENT, armClean: ROGUE.armClean, goodEndFullLife: ROGUE.goodEndFullLife, cross: CROSS, fullLife: INHERIT.fullLife, feat: process.env.FEAT ? Number(process.env.FEAT) : null, spread: process.env.SPREAD ? Number(process.env.SPREAD) : null, source: NR2.rogue.source,
   // How often: lines with a good end within rogueLives Rogue lives, and good ends a line.
   reached: round(first.length / n),
   reachedBy: Object.fromEntries([1, 2, 3, 5, rogueLives].map((k) => [k, round(first.filter((f) => f.rogue <= k).length / n)])),
