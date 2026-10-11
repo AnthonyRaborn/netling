@@ -1,0 +1,2737 @@
+{
+ "job": "fifty",
+ "lineages": 200,
+ "rogueLives": 10,
+ "archetypes": {
+  "attentive": {
+   "archetype": "attentive",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.335,
+    "2": 0.54,
+    "3": 0.73,
+    "5": 0.925,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.86,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 11.1,
+     "p90": 27.3
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.887,
+    "sourceRun": 0.89,
+    "sourceExit": 0.801,
+    "cleanExit": 0.486,
+    "goodEnd": 0.486,
+    "atExit": 0.486,
+    "atDeath": 0,
+    "captured": 0.02,
+    "marks": 0.45,
+    "days": 5.15,
+    "tier": {
+     "1": 0,
+     "2": 0.113,
+     "3": 0.292,
+     "4": 0.595
+    }
+   },
+   "afterExit": {
+    "lives": 1603,
+    "disarmedOnce": 0,
+    "lostIt": 0.394,
+    "capturedAfter": 0.006,
+    "declined": 0,
+    "exitsPerLife": 1.14
+   },
+   "deaths": {
+    "captured": 0.02,
+    "end of life cycle": 0.494,
+    "merged": 0.486
+   },
+   "nl0Lives": 872,
+   "mixedLives": 872,
+   "rogueInherited": 0.881,
+   "rogueTrait": true,
+   "hunters": 0.32,
+   "huntersLost": 0.07,
+   "nl0": {
+    "mixed": {
+     "lives": 872,
+     "traces": 4.72,
+     "greeted": 1.51
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "sysadmin": {
+   "archetype": "sysadmin",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.007,
+    "marks": 0.36,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.007,
+    "end of life cycle": 0.992,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "ghosthunter": {
+   "archetype": "ghosthunter",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.006,
+    "marks": 0.3,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.006,
+    "end of life cycle": 0.994
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "daredevil": {
+   "archetype": "daredevil",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.255,
+    "2": 0.49,
+    "3": 0.655,
+    "5": 0.87,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.17,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 6
+    },
+    "lives": {
+     "median": 3,
+     "p90": 6
+    },
+    "days": {
+     "median": 14,
+     "p90": 32.3
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.845,
+    "sourceRun": 0.847,
+    "sourceExit": 0.644,
+    "cleanExit": 0.416,
+    "goodEnd": 0.416,
+    "atExit": 0.416,
+    "atDeath": 0,
+    "captured": 0.015,
+    "marks": 0.47,
+    "days": 5.25,
+    "tier": {
+     "1": 0,
+     "2": 0.118,
+     "3": 0.301,
+     "4": 0.58
+    }
+   },
+   "afterExit": {
+    "lives": 1288,
+    "disarmedOnce": 0,
+    "lostIt": 0.353,
+    "capturedAfter": 0.002,
+    "declined": 0,
+    "exitsPerLife": 1.07
+   },
+   "deaths": {
+    "captured": 0.015,
+    "end of life cycle": 0.569,
+    "merged": 0.416
+   },
+   "nl0Lives": 739,
+   "mixedLives": 739,
+   "rogueInherited": 0.886,
+   "rogueTrait": true,
+   "hunters": 0.2,
+   "huntersLost": 0.06,
+   "nl0": {
+    "mixed": {
+     "lives": 739,
+     "traces": 5.19,
+     "greeted": 1.52
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-chrome": {
+   "archetype": "steer-chrome",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.99,
+   "reachedBy": {
+    "1": 0.35,
+    "2": 0.605,
+    "3": 0.775,
+    "5": 0.93,
+    "10": 0.99
+   },
+   "goodEndsPerLine": 4.38,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.2,
+     "p90": 27.1
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.898,
+    "sourceRun": 0.9,
+    "sourceExit": 0.815,
+    "cleanExit": 0.438,
+    "goodEnd": 0.438,
+    "atExit": 0.438,
+    "atDeath": 0,
+    "captured": 0.017,
+    "marks": 0.49,
+    "days": 5.24,
+    "tier": {
+     "1": 0,
+     "2": 0.111,
+     "3": 0.297,
+     "4": 0.592
+    }
+   },
+   "afterExit": {
+    "lives": 1629,
+    "disarmedOnce": 0,
+    "lostIt": 0.462,
+    "capturedAfter": 0.003,
+    "declined": 0,
+    "exitsPerLife": 1.17
+   },
+   "deaths": {
+    "captured": 0.017,
+    "end of life cycle": 0.545,
+    "merged": 0.438
+   },
+   "nl0Lives": 791,
+   "mixedLives": 791,
+   "rogueInherited": 0.884,
+   "rogueTrait": true,
+   "hunters": 0.31,
+   "huntersLost": 0.07,
+   "nl0": {
+    "mixed": {
+     "lives": 791,
+     "traces": 4.51,
+     "greeted": 1.5
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-firewall": {
+   "archetype": "steer-firewall",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.355,
+    "2": 0.59,
+    "3": 0.755,
+    "5": 0.925,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.53,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.3,
+     "p90": 27.4
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.881,
+    "sourceRun": 0.883,
+    "sourceExit": 0.804,
+    "cleanExit": 0.453,
+    "goodEnd": 0.453,
+    "atExit": 0.453,
+    "atDeath": 0,
+    "captured": 0.011,
+    "marks": 0.43,
+    "days": 5.2,
+    "tier": {
+     "1": 0,
+     "2": 0.113,
+     "3": 0.287,
+     "4": 0.6
+    }
+   },
+   "afterExit": {
+    "lives": 1608,
+    "disarmedOnce": 0,
+    "lostIt": 0.437,
+    "capturedAfter": 0.004,
+    "declined": 0,
+    "exitsPerLife": 1.15
+   },
+   "deaths": {
+    "captured": 0.011,
+    "end of life cycle": 0.535,
+    "integrity collapse": 0.001,
+    "merged": 0.453
+   },
+   "nl0Lives": 806,
+   "mixedLives": 806,
+   "rogueInherited": 0.889,
+   "rogueTrait": true,
+   "hunters": 0.3,
+   "huntersLost": 0.06,
+   "nl0": {
+    "mixed": {
+     "lives": 806,
+     "traces": 4.78,
+     "greeted": 1.58
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-daemon": {
+   "archetype": "steer-daemon",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.28,
+    "2": 0.505,
+    "3": 0.695,
+    "5": 0.915,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.56,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 11.5,
+     "p90": 28.1
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.879,
+    "sourceRun": 0.88,
+    "sourceExit": 0.798,
+    "cleanExit": 0.456,
+    "goodEnd": 0.456,
+    "atExit": 0.456,
+    "atDeath": 0,
+    "captured": 0.017,
+    "marks": 0.47,
+    "days": 5.2,
+    "tier": {
+     "1": 0,
+     "2": 0.114,
+     "3": 0.292,
+     "4": 0.594
+    }
+   },
+   "afterExit": {
+    "lives": 1596,
+    "disarmedOnce": 0,
+    "lostIt": 0.429,
+    "capturedAfter": 0.007,
+    "declined": 0,
+    "exitsPerLife": 1.16
+   },
+   "deaths": {
+    "captured": 0.017,
+    "end of life cycle": 0.527,
+    "merged": 0.456
+   },
+   "nl0Lives": 799,
+   "mixedLives": 799,
+   "rogueInherited": 0.884,
+   "rogueTrait": true,
+   "hunters": 0.31,
+   "huntersLost": 0.07,
+   "nl0": {
+    "mixed": {
+     "lives": 799,
+     "traces": 4.6,
+     "greeted": 1.49
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-glitch": {
+   "archetype": "steer-glitch",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.335,
+    "2": 0.555,
+    "3": 0.745,
+    "5": 0.895,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.58,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 6
+    },
+    "lives": {
+     "median": 2,
+     "p90": 6
+    },
+    "days": {
+     "median": 11,
+     "p90": 30.2
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.873,
+    "sourceRun": 0.873,
+    "sourceExit": 0.704,
+    "cleanExit": 0.458,
+    "goodEnd": 0.458,
+    "atExit": 0.458,
+    "atDeath": 0,
+    "captured": 0.013,
+    "marks": 0.46,
+    "days": 5.22,
+    "tier": {
+     "1": 0,
+     "2": 0.115,
+     "3": 0.284,
+     "4": 0.602
+    }
+   },
+   "afterExit": {
+    "lives": 1408,
+    "disarmedOnce": 0,
+    "lostIt": 0.349,
+    "capturedAfter": 0.002,
+    "declined": 0,
+    "exitsPerLife": 1.08
+   },
+   "deaths": {
+    "captured": 0.013,
+    "end of life cycle": 0.529,
+    "merged": 0.458
+   },
+   "nl0Lives": 810,
+   "mixedLives": 810,
+   "rogueInherited": 0.888,
+   "rogueTrait": true,
+   "hunters": 0.19,
+   "huntersLost": 0.05,
+   "nl0": {
+    "mixed": {
+     "lives": 810,
+     "traces": 4.9,
+     "greeted": 1.54
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-breach-corp": {
+   "archetype": "steer-breach-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.39,
+    "2": 0.655,
+    "3": 0.845,
+    "5": 0.97,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.69,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 10.1,
+     "p90": 23
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.961,
+    "sourceRun": 0.963,
+    "sourceExit": 0.914,
+    "cleanExit": 0.469,
+    "goodEnd": 0.469,
+    "atExit": 0.469,
+    "atDeath": 0,
+    "captured": 0.022,
+    "marks": 0.57,
+    "days": 5.23,
+    "tier": {
+     "1": 0,
+     "2": 0.104,
+     "3": 0,
+     "4": 0.896
+    }
+   },
+   "afterExit": {
+    "lives": 1829,
+    "disarmedOnce": 0,
+    "lostIt": 0.487,
+    "capturedAfter": 0.007,
+    "declined": 0,
+    "exitsPerLife": 1.22
+   },
+   "deaths": {
+    "captured": 0.022,
+    "end of life cycle": 0.509,
+    "merged": 0.469
+   },
+   "nl0Lives": 838,
+   "mixedLives": 838,
+   "rogueInherited": 0.881,
+   "rogueTrait": true,
+   "hunters": 0.65,
+   "huntersLost": 0.1,
+   "nl0": {
+    "mixed": {
+     "lives": 838,
+     "traces": 4.76,
+     "greeted": 1.61
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-breach-street": {
+   "archetype": "steer-breach-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.38,
+    "2": 0.635,
+    "3": 0.8,
+    "5": 0.95,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.87,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10,
+     "p90": 26
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.952,
+    "sourceRun": 0.953,
+    "sourceExit": 0.882,
+    "cleanExit": 0.487,
+    "goodEnd": 0.487,
+    "atExit": 0.487,
+    "atDeath": 0,
+    "captured": 0.017,
+    "marks": 0.52,
+    "days": 5.2,
+    "tier": {
+     "1": 0,
+     "2": 0.105,
+     "3": 0,
+     "4": 0.895
+    }
+   },
+   "afterExit": {
+    "lives": 1764,
+    "disarmedOnce": 0,
+    "lostIt": 0.448,
+    "capturedAfter": 0.006,
+    "declined": 0,
+    "exitsPerLife": 1.18
+   },
+   "deaths": {
+    "captured": 0.017,
+    "end of life cycle": 0.496,
+    "merged": 0.487
+   },
+   "nl0Lives": 874,
+   "mixedLives": 874,
+   "rogueInherited": 0.883,
+   "rogueTrait": true,
+   "hunters": 0.56,
+   "huntersLost": 0.07,
+   "nl0": {
+    "mixed": {
+     "lives": 874,
+     "traces": 4.81,
+     "greeted": 1.63
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-dodge-corp": {
+   "archetype": "steer-dodge-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.325,
+    "2": 0.645,
+    "3": 0.83,
+    "5": 0.955,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.95,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 10.2,
+     "p90": 22.2
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.947,
+    "sourceRun": 0.95,
+    "sourceExit": 0.848,
+    "cleanExit": 0.495,
+    "goodEnd": 0.495,
+    "atExit": 0.495,
+    "atDeath": 0,
+    "captured": 0.005,
+    "marks": 0.3,
+    "days": 5.2,
+    "tier": {
+     "1": 0,
+     "2": 0.106,
+     "3": 0,
+     "4": 0.894
+    }
+   },
+   "afterExit": {
+    "lives": 1695,
+    "disarmedOnce": 0,
+    "lostIt": 0.416,
+    "capturedAfter": 0.001,
+    "declined": 0,
+    "exitsPerLife": 1.12
+   },
+   "deaths": {
+    "captured": 0.005,
+    "end of life cycle": 0.5,
+    "merged": 0.495
+   },
+   "nl0Lives": 886,
+   "mixedLives": 886,
+   "rogueInherited": 0.895,
+   "rogueTrait": true,
+   "hunters": 0.11,
+   "huntersLost": 0.04,
+   "nl0": {
+    "mixed": {
+     "lives": 886,
+     "traces": 3.71,
+     "greeted": 1.53
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-dodge-street": {
+   "archetype": "steer-dodge-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.38,
+    "2": 0.635,
+    "3": 0.82,
+    "5": 0.965,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.95,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 10.2,
+     "p90": 23
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.948,
+    "sourceRun": 0.949,
+    "sourceExit": 0.819,
+    "cleanExit": 0.494,
+    "goodEnd": 0.494,
+    "atExit": 0.494,
+    "atDeath": 0,
+    "captured": 0.005,
+    "marks": 0.28,
+    "days": 5.23,
+    "tier": {
+     "1": 0,
+     "2": 0.106,
+     "3": 0,
+     "4": 0.894
+    }
+   },
+   "afterExit": {
+    "lives": 1638,
+    "disarmedOnce": 0,
+    "lostIt": 0.396,
+    "capturedAfter": 0,
+    "declined": 0,
+    "exitsPerLife": 1.12
+   },
+   "deaths": {
+    "captured": 0.005,
+    "end of life cycle": 0.5,
+    "merged": 0.494
+   },
+   "nl0Lives": 897,
+   "mixedLives": 897,
+   "rogueInherited": 0.895,
+   "rogueTrait": true,
+   "hunters": 0.12,
+   "huntersLost": 0.04,
+   "nl0": {
+    "mixed": {
+     "lives": 897,
+     "traces": 4.92,
+     "greeted": 1.62
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-tune-corp": {
+   "archetype": "steer-tune-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.99,
+   "reachedBy": {
+    "1": 0.265,
+    "2": 0.56,
+    "3": 0.73,
+    "5": 0.895,
+    "10": 0.99
+   },
+   "goodEndsPerLine": 4.75,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.3,
+     "p90": 28.2
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.877,
+    "sourceRun": 0.878,
+    "sourceExit": 0.83,
+    "cleanExit": 0.474,
+    "goodEnd": 0.474,
+    "atExit": 0.474,
+    "atDeath": 0,
+    "captured": 0.022,
+    "marks": 0.52,
+    "days": 5.15,
+    "tier": {
+     "1": 0,
+     "2": 0.114,
+     "3": 0,
+     "4": 0.886
+    }
+   },
+   "afterExit": {
+    "lives": 1659,
+    "disarmedOnce": 0,
+    "lostIt": 0.428,
+    "capturedAfter": 0.005,
+    "declined": 0,
+    "exitsPerLife": 1.21
+   },
+   "deaths": {
+    "captured": 0.022,
+    "end of life cycle": 0.503,
+    "merged": 0.474
+   },
+   "nl0Lives": 843,
+   "mixedLives": 843,
+   "rogueInherited": 0.88,
+   "rogueTrait": true,
+   "hunters": 0.11,
+   "huntersLost": 0.04,
+   "nl0": {
+    "mixed": {
+     "lives": 843,
+     "traces": 4.69,
+     "greeted": 1.52
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-tune-street": {
+   "archetype": "steer-tune-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.29,
+    "2": 0.545,
+    "3": 0.78,
+    "5": 0.95,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 5.03,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 10.4,
+     "p90": 22.5
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.894,
+    "sourceRun": 0.895,
+    "sourceExit": 0.845,
+    "cleanExit": 0.502,
+    "goodEnd": 0.502,
+    "atExit": 0.502,
+    "atDeath": 0,
+    "captured": 0.019,
+    "marks": 0.46,
+    "days": 5.11,
+    "tier": {
+     "1": 0,
+     "2": 0.111,
+     "3": 0,
+     "4": 0.889
+    }
+   },
+   "afterExit": {
+    "lives": 1689,
+    "disarmedOnce": 0,
+    "lostIt": 0.405,
+    "capturedAfter": 0.006,
+    "declined": 0,
+    "exitsPerLife": 1.2
+   },
+   "deaths": {
+    "captured": 0.019,
+    "end of life cycle": 0.478,
+    "integrity collapse": 0.001,
+    "merged": 0.502
+   },
+   "nl0Lives": 898,
+   "mixedLives": 898,
+   "rogueInherited": 0.882,
+   "rogueTrait": true,
+   "hunters": 0.1,
+   "huntersLost": 0.03,
+   "nl0": {
+    "mixed": {
+     "lives": 898,
+     "traces": 4.8,
+     "greeted": 1.71
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-feast-corp": {
+   "archetype": "steer-feast-corp",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.305,
+    "2": 0.625,
+    "3": 0.78,
+    "5": 0.945,
+    "10": 1
+   },
+   "goodEndsPerLine": 5.08,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.1,
+     "p90": 26.1
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.926,
+    "sourceRun": 0.928,
+    "sourceExit": 0.82,
+    "cleanExit": 0.508,
+    "goodEnd": 0.508,
+    "atExit": 0.508,
+    "atDeath": 0,
+    "captured": 0.029,
+    "marks": 0.59,
+    "days": 5.16,
+    "tier": {
+     "1": 0,
+     "2": 0.108,
+     "3": 0,
+     "4": 0.892
+    }
+   },
+   "afterExit": {
+    "lives": 1639,
+    "disarmedOnce": 0,
+    "lostIt": 0.379,
+    "capturedAfter": 0.008,
+    "declined": 0,
+    "exitsPerLife": 1.12
+   },
+   "deaths": {
+    "captured": 0.029,
+    "end of life cycle": 0.462,
+    "merged": 0.508
+   },
+   "nl0Lives": 909,
+   "mixedLives": 909,
+   "rogueInherited": 0.874,
+   "rogueTrait": true,
+   "hunters": 0.45,
+   "huntersLost": 0.13,
+   "nl0": {
+    "mixed": {
+     "lives": 909,
+     "traces": 4.67,
+     "greeted": 1.59
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-feast-street": {
+   "archetype": "steer-feast-street",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.37,
+    "2": 0.605,
+    "3": 0.795,
+    "5": 0.93,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.97,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.1,
+     "p90": 28
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.927,
+    "sourceRun": 0.927,
+    "sourceExit": 0.817,
+    "cleanExit": 0.497,
+    "goodEnd": 0.497,
+    "atExit": 0.497,
+    "atDeath": 0,
+    "captured": 0.021,
+    "marks": 0.57,
+    "days": 5.18,
+    "tier": {
+     "1": 0,
+     "2": 0.108,
+     "3": 0,
+     "4": 0.892
+    }
+   },
+   "afterExit": {
+    "lives": 1634,
+    "disarmedOnce": 0,
+    "lostIt": 0.392,
+    "capturedAfter": 0.004,
+    "declined": 0,
+    "exitsPerLife": 1.12
+   },
+   "deaths": {
+    "captured": 0.021,
+    "end of life cycle": 0.481,
+    "integrity collapse": 0.001,
+    "merged": 0.497
+   },
+   "nl0Lives": 885,
+   "mixedLives": 885,
+   "rogueInherited": 0.878,
+   "rogueTrait": true,
+   "hunters": 0.41,
+   "huntersLost": 0.13,
+   "nl0": {
+    "mixed": {
+     "lives": 885,
+     "traces": 4.76,
+     "greeted": 1.49
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "seek-steady": {
+   "archetype": "seek-steady",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.435,
+    "2": 0.75,
+    "3": 0.87,
+    "5": 0.975,
+    "10": 1
+   },
+   "goodEndsPerLine": 5.71,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 4
+    },
+    "lives": {
+     "median": 2,
+     "p90": 4
+    },
+    "days": {
+     "median": 9.5,
+     "p90": 21.3
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.918,
+    "sourceRun": 0.92,
+    "sourceExit": 0.879,
+    "cleanExit": 0.571,
+    "goodEnd": 0.571,
+    "atExit": 0.571,
+    "atDeath": 0,
+    "captured": 0.007,
+    "marks": 0.36,
+    "days": 5.04,
+    "tier": {
+     "1": 0,
+     "2": 0.109,
+     "3": 0.283,
+     "4": 0.609
+    }
+   },
+   "afterExit": {
+    "lives": 1759,
+    "disarmedOnce": 0,
+    "lostIt": 0.351,
+    "capturedAfter": 0.002,
+    "declined": 0,
+    "exitsPerLife": 1.18
+   },
+   "deaths": {
+    "captured": 0.007,
+    "end of life cycle": 0.422,
+    "merged": 0.571
+   },
+   "nl0Lives": 1013,
+   "mixedLives": 1013,
+   "rogueInherited": 0.892,
+   "rogueTrait": true,
+   "hunters": 0.31,
+   "huntersLost": 0.05,
+   "nl0": {
+    "mixed": {
+     "lives": 1013,
+     "traces": 4.66,
+     "greeted": 1.51
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "seek-unsteady": {
+   "archetype": "seek-unsteady",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.25,
+    "2": 0.47,
+    "3": 0.655,
+    "5": 0.86,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.17,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 3,
+     "p90": 6
+    },
+    "lives": {
+     "median": 3,
+     "p90": 6
+    },
+    "days": {
+     "median": 15,
+     "p90": 33.1
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.83,
+    "sourceRun": 0.833,
+    "sourceExit": 0.637,
+    "cleanExit": 0.417,
+    "goodEnd": 0.417,
+    "atExit": 0.417,
+    "atDeath": 0,
+    "captured": 0.011,
+    "marks": 0.44,
+    "days": 5.24,
+    "tier": {
+     "1": 0,
+     "2": 0.12,
+     "3": 0.301,
+     "4": 0.579
+    }
+   },
+   "afterExit": {
+    "lives": 1275,
+    "disarmedOnce": 0,
+    "lostIt": 0.345,
+    "capturedAfter": 0.002,
+    "declined": 0,
+    "exitsPerLife": 1.08
+   },
+   "deaths": {
+    "captured": 0.011,
+    "end of life cycle": 0.572,
+    "merged": 0.417
+   },
+   "nl0Lives": 738,
+   "mixedLives": 738,
+   "rogueInherited": 0.889,
+   "rogueTrait": true,
+   "hunters": 0.18,
+   "huntersLost": 0.04,
+   "nl0": {
+    "mixed": {
+     "lives": 738,
+     "traces": 5.15,
+     "greeted": 1.66
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "seek-unsteady-segfault": {
+   "archetype": "seek-unsteady-segfault",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.31,
+    "2": 0.54,
+    "3": 0.73,
+    "5": 0.88,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.25,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 6
+    },
+    "lives": {
+     "median": 2,
+     "p90": 6
+    },
+    "days": {
+     "median": 11.2,
+     "p90": 30.1
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.852,
+    "sourceRun": 0.854,
+    "sourceExit": 0.636,
+    "cleanExit": 0.424,
+    "goodEnd": 0.424,
+    "atExit": 0.424,
+    "atDeath": 0,
+    "captured": 0.011,
+    "marks": 0.43,
+    "days": 5.26,
+    "tier": {
+     "1": 0,
+     "2": 0.117,
+     "3": 0.291,
+     "4": 0.592
+    }
+   },
+   "afterExit": {
+    "lives": 1273,
+    "disarmedOnce": 0,
+    "lostIt": 0.333,
+    "capturedAfter": 0.002,
+    "declined": 0,
+    "exitsPerLife": 1.07
+   },
+   "deaths": {
+    "captured": 0.011,
+    "end of life cycle": 0.564,
+    "integrity collapse": 0.001,
+    "merged": 0.424
+   },
+   "nl0Lives": 756,
+   "mixedLives": 756,
+   "rogueInherited": 0.889,
+   "rogueTrait": true,
+   "hunters": 0.18,
+   "huntersLost": 0.04,
+   "nl0": {
+    "mixed": {
+     "lives": 756,
+     "traces": 5.21,
+     "greeted": 1.49
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "hunter-exact": {
+   "archetype": "hunter-exact",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.007,
+    "marks": 0.32,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.007,
+    "end of life cycle": 0.993
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.894,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "hunter-blocks": {
+   "archetype": "hunter-blocks",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.005,
+    "marks": 0.28,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.005,
+    "end of life cycle": 0.995
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.895,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "hunter-shown": {
+   "archetype": "hunter-shown",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.008,
+    "marks": 0.29,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.008,
+    "end of life cycle": 0.992,
+    "integrity collapse": 0.001
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.891,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "hunter-shown-rotation": {
+   "archetype": "hunter-shown-rotation",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0,
+   "reachedBy": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "5": 0,
+    "10": 0
+   },
+   "goodEndsPerLine": 0,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": null,
+     "p90": null
+    },
+    "lives": {
+     "median": null,
+     "p90": null
+    },
+    "days": {
+     "median": 0,
+     "p90": 0
+    },
+    "atExit": null
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0,
+    "sourceRun": 0,
+    "sourceExit": 0,
+    "cleanExit": 0,
+    "goodEnd": 0,
+    "atExit": 0,
+    "atDeath": 0,
+    "captured": 0.003,
+    "marks": 0.31,
+    "days": 4.99,
+    "tier": {
+     "1": null,
+     "2": null,
+     "3": null,
+     "4": null
+    }
+   },
+   "afterExit": {
+    "lives": 0,
+    "disarmedOnce": null,
+    "lostIt": null,
+    "capturedAfter": null,
+    "declined": null,
+    "exitsPerLife": 0
+   },
+   "deaths": {
+    "captured": 0.003,
+    "end of life cycle": 0.997
+   },
+   "nl0Lives": 0,
+   "mixedLives": 0,
+   "rogueInherited": 0.897,
+   "rogueTrait": true,
+   "hunters": 0,
+   "huntersLost": 0,
+   "nl0": {
+    "mixed": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "nudge-breach": {
+   "archetype": "nudge-breach",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.37,
+    "2": 0.625,
+    "3": 0.82,
+    "5": 0.95,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.78,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.1,
+     "p90": 25
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.955,
+    "sourceRun": 0.956,
+    "sourceExit": 0.875,
+    "cleanExit": 0.477,
+    "goodEnd": 0.477,
+    "atExit": 0.477,
+    "atDeath": 0,
+    "captured": 0.023,
+    "marks": 0.55,
+    "days": 5.23,
+    "tier": {
+     "1": 0,
+     "2": 0.105,
+     "3": 0.007,
+     "4": 0.888
+    }
+   },
+   "afterExit": {
+    "lives": 1751,
+    "disarmedOnce": 0,
+    "lostIt": 0.455,
+    "capturedAfter": 0.006,
+    "declined": 0,
+    "exitsPerLife": 1.17
+   },
+   "deaths": {
+    "captured": 0.023,
+    "end of life cycle": 0.499,
+    "merged": 0.477
+   },
+   "nl0Lives": 846,
+   "mixedLives": 846,
+   "rogueInherited": 0.879,
+   "rogueTrait": true,
+   "hunters": 0.55,
+   "huntersLost": 0.08,
+   "nl0": {
+    "mixed": {
+     "lives": 846,
+     "traces": 4.94,
+     "greeted": 1.47
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-stub": {
+   "archetype": "steer-stub",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 0.995,
+   "reachedBy": {
+    "1": 0.33,
+    "2": 0.59,
+    "3": 0.78,
+    "5": 0.95,
+    "10": 0.995
+   },
+   "goodEndsPerLine": 4.79,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.2,
+     "p90": 24.2
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.895,
+    "sourceRun": 0.897,
+    "sourceExit": 0.799,
+    "cleanExit": 0.479,
+    "goodEnd": 0.479,
+    "atExit": 0.479,
+    "atDeath": 0,
+    "captured": 0.016,
+    "marks": 0.47,
+    "days": 5.18,
+    "tier": {
+     "1": 0,
+     "2": 0.112,
+     "3": 0.284,
+     "4": 0.604
+    }
+   },
+   "afterExit": {
+    "lives": 1598,
+    "disarmedOnce": 0,
+    "lostIt": 0.401,
+    "capturedAfter": 0.006,
+    "declined": 0,
+    "exitsPerLife": 1.14
+   },
+   "deaths": {
+    "captured": 0.016,
+    "end of life cycle": 0.505,
+    "merged": 0.479
+   },
+   "nl0Lives": 847,
+   "mixedLives": 847,
+   "rogueInherited": 0.885,
+   "rogueTrait": true,
+   "hunters": 0.28,
+   "huntersLost": 0.06,
+   "nl0": {
+    "mixed": {
+     "lives": 847,
+     "traces": 4.64,
+     "greeted": 1.48
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  },
+  "steer-mainframe": {
+   "archetype": "steer-mainframe",
+   "lineages": 200,
+   "rogueLives": 10,
+   "merge": "accept",
+   "pick": "first",
+   "line": "stay",
+   "parent": "rogue",
+   "armClean": true,
+   "goodEndFullLife": true,
+   "cross": "gated",
+   "fullLife": true,
+   "feat": null,
+   "spread": null,
+   "source": {
+    "breachFree": 1,
+    "breachChance": 0.5,
+    "tuneTypes": false,
+    "feastHeal": 1,
+    "dodgeSlip": 0.5,
+    "feastClean": 80,
+    "tuneReroll": {
+     "1": 1,
+     "2": 1
+    },
+    "tuneNullify": {
+     "1": 0,
+     "2": 0
+    }
+   },
+   "reached": 1,
+   "reachedBy": {
+    "1": 0.34,
+    "2": 0.62,
+    "3": 0.765,
+    "5": 0.915,
+    "10": 1
+   },
+   "goodEndsPerLine": 4.85,
+   "firstGoodEnd": {
+    "rogueLives": {
+     "median": 2,
+     "p90": 5
+    },
+    "lives": {
+     "median": 2,
+     "p90": 5
+    },
+    "days": {
+     "median": 10.2,
+     "p90": 27.5
+    },
+    "atExit": 1
+   },
+   "perRogueLife": {
+    "lives": 2000,
+    "elder": 0.895,
+    "sourceRun": 0.895,
+    "sourceExit": 0.823,
+    "cleanExit": 0.485,
+    "goodEnd": 0.485,
+    "atExit": 0.485,
+    "atDeath": 0,
+    "captured": 0.015,
+    "marks": 0.45,
+    "days": 5.18,
+    "tier": {
+     "1": 0,
+     "2": 0.112,
+     "3": 0.296,
+     "4": 0.592
+    }
+   },
+   "afterExit": {
+    "lives": 1646,
+    "disarmedOnce": 0,
+    "lostIt": 0.411,
+    "capturedAfter": 0.005,
+    "declined": 0,
+    "exitsPerLife": 1.15
+   },
+   "deaths": {
+    "captured": 0.015,
+    "end of life cycle": 0.499,
+    "merged": 0.485
+   },
+   "nl0Lives": 874,
+   "mixedLives": 874,
+   "rogueInherited": 0.886,
+   "rogueTrait": true,
+   "hunters": 0.3,
+   "huntersLost": 0.07,
+   "nl0": {
+    "mixed": {
+     "lives": 874,
+     "traces": 4.6,
+     "greeted": 1.47
+    },
+    "other": {
+     "lives": 0,
+     "traces": null,
+     "greeted": null
+    }
+   }
+  }
+ }
+}

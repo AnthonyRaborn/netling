@@ -710,6 +710,35 @@ Reading it:
 
 **For the maintainer.** Choose a target level for the lines (about 65%, Dodge as it is, or about 50%, Dodge trimmed), then the Tune lever (reroll for the level, nullify for the feel) and Feast's threshold and heal. The Deep's disconnects come after this (6.1, item 45).
 
+### 7.10 The line gap, third round: the lines at about 50% (2026-10-11; for choice, nothing decided)
+
+The maintainer chose to aim the lines at about 50% (7.9's second route), with Breach's free loss as a chance instead of a certainty.
+
+**What was built** (fork, off by default): `breachChance` in `nr2.js` `rogue.source` (default 1). With `breachFree` set, each lost ordinary Source fight of a Mole or Sleeper rolls this chance when it is lost; a success forgives it (at most `breachFree` a run), and the exit is clean if every loss was forgiven and no hunter fight was lost. At 1 no roll is made, so 7.8's `breach1` outputs reproduce exactly (checked). Test in `rogue-netrun.test.js`.
+
+**Measured** (as 7.8). Breach's steerers, per Rogue life, good end / Source exit / first Rogue life: chance 0.5 gives 47 to 49 / 88 to 91 / 38 to 39%; chance 0.6 gives 51 / 89 to 92 / 36 to 43% (none: 26%; certain: 66%). The package **fifty**: Breach's free loss at 0.5, Dodge's Source slip x0.5, Feast clean at Integrity 80 with the ordinary heal (7.9: 50 to 51%, closer to 50 than 90 with the heal x2 at 55%), Tune's reroll 1 for the adult and the elder.
+
+| package | Breach | Dodge | Tune | Feast |
+|---|---|---|---|---|
+| none (7.7) | 26 | 65 | 24 to 26 | 26 to 29 |
+| even (7.9) | 66 | 65 | 64 to 67 | 65 to 66 |
+| **fifty** | 47 to 49 | 49 to 50 | 47 to 50 | 50 to 51 |
+
+Good end in the first Rogue life, fifty: Breach 38 to 39%, Dodge 33 to 38%, Tune 27 to 29%, Feast 31 to 37%. Captured 1 to 3% on every line.
+
+| attentive group | good end within 10 Rogue lives | by Rogue life 1 / 3 / 5 | first good end: Rogue lives / days | per Rogue life: elder / Source exit / clean exit / good end | captured | good ends in 10 Rogue lives |
+|---|---|---|---|---|---|---|
+| none (7.7) | 98% (worst 94) | 25 / 64 / 84% | 2.8 / 14.3 | 90 / 80 / 35 / 35% | 1.7% | 3.5 |
+| even (7.9) | 100% (100) | 44 / 87 / 97% | 1.8 / 8.5 | 90 / 84 / 63 / 63% | 1.5% | 6.3 |
+| **fifty** | 100% (99) | 33 / 77 / 93% | 2.1 / 10.8 | 90 / 80 / 47 / 47% | 1.6% | 4.7 |
+
+Reading it:
+1. **The four lines sit within 4 points of each other (47 to 51%)**, from a spread of 24 to 65%. Tune's first Rogue life stays the lowest (27 to 29%), since its Source exits start lower.
+2. **The good end is still easier overall than now** (35% to 47% a Rogue life, first good end 14 to about 11 days), because three lines rise by about 22 points and only Dodge falls, by 15. 7.9 said the 50% route would keep the current pace; that was wrong: the current group mean of 35% is close to the lines' plain average (about 36%), so holding it would put every line at about 35%.
+3. **Breach's chance is a fine knob**: about 4 points of good end per 0.1 of chance between 0.5 and 0.6, which matches the read-out (an exit with exactly one loss is about 40% of Breach's lives).
+
+**For the maintainer.** fifty as it stands, or every line toward about 35% to keep today's pace (smaller knobs of the same levers: Breach's chance about 0.25, Dodge's slip lower than x0.5, Feast's threshold above 90, Tune's reroll on fewer fights; not measured). The Deep's disconnects come after this (6.1, item 45).
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
