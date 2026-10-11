@@ -58,6 +58,10 @@ const JOBS = {
     // (heal x1), Tune's reroll 1 for the adult and the elder, Breach at the chance chosen from the steerer jobs).
     'bchance50': { breachFree: 1, breachChance: 0.5 }, 'bchance60': { breachFree: 1, breachChance: 0.6 },
     fifty: { breachFree: 1, breachChance: 0.5, dodgeSlip: 0.5, feastClean: 80, tuneReroll: { 1: 1, 2: 1 } },
+    // The lines at about 35% (7.11; kept for tuning after a playtest): Breach's chance and Dodge's slip searched here; Feast clean at 100 and Tune's
+    // nullify 1 come from fclean100 and null1.
+    'bchance20': { breachFree: 1, breachChance: 0.2 }, 'bchance25': { breachFree: 1, breachChance: 0.25 },
+    'dodge25': { dodgeSlip: 0.25 }, 'dodge10': { dodgeSlip: 0.1 },
   }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
   // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
   'trait-spread': { SPREAD: '0.2' },
