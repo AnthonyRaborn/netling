@@ -614,12 +614,12 @@ function encounterNode(pet, nodeId, rng) {
         if (id) run.eggPages.push(id);
       }
       // Rogue: a Source exit arms the good end, and a clean one offers the merge at once (sim.js sourceExit).
-      // The breachFree lever (nr2.js rogue.source): a Mole or Sleeper may lose that many ordinary fights here and still count as clean.
+      // The breachFree lever (nr2.js rogue.source): the ordinary losses a Mole or Sleeper had forgiven here (rolled at each loss) do not spoil clean.
       if (run.region === 'source') {
         const lost = run.tally?.iceLost ?? 0;
         const hunters = run.tally?.hunterFightsLost ?? 0;
         const fed = srcLever(pet, run, 'feast', 'feastClean', 0); // the feastClean lever: well fed counts as clean
-        sourceExit(pet, pet.lastTick ?? 0, lost === 0 || (hunters === 0 && lost <= srcLever(pet, run, 'breach', 'breachFree', 0)) || (fed > 0 && pet.stats.integrity >= fed));
+        sourceExit(pet, pet.lastTick ?? 0, lost === 0 || (hunters === 0 && lost <= (run.forgiven ?? 0)) || (fed > 0 && pet.stats.integrity >= fed));
       }
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
@@ -683,6 +683,14 @@ function resolveIceFight(pet, won, rng) {
   if (soft) run.softLosses = (run.softLosses ?? 0) + 1;
   markTrail(run, TRAIL.iceLost);
   if (hunted(pet, run)) addTrail(run, rkit(pet)?.lostTrail ?? NR2.rogue.trail.iceLost);
+  // The breachFree lever: while forgiveness lasts, each lost ordinary Source fight is forgiven at breachChance (no roll at 1, so 7.8's draws stand).
+  if ((run.forgiven ?? 0) < srcLever(pet, run, 'breach', 'breachFree', 0)) {
+    const ch = NR2.rogue.source.breachChance ?? 1;
+    if (ch >= 1 || rng() < ch) {
+      run.forgiven = (run.forgiven ?? 0) + 1;
+      run.tally.forgiven = (run.tally.forgiven ?? 0) + 1;
+    }
+  }
   const hot = Boolean(run.hot); // lost ICE bites harder for a netling that jacked in overclocked
   const dmg = Math.round(
     REGIONS[run.region].iceDamage * (ability(pet) === 'firewall' ? RUN_CFG.firewallIceMult : 1) * (soft ? (hd ? NR2.ab.softMult : RUN_CFG.airgapSoftMult) : 1) * (hd ? hd.dmg : 1) * (NR2.tiers && tier2 ? NR2.tier.damageMult : 1) * (hot ? CFG.overclockIceDamageMult : 1),

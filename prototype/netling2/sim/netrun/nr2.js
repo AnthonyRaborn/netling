@@ -132,7 +132,8 @@ export const NR2 = {
     // Second round (7.9): feastClean, a Source exit by Drop or Stash also counts as clean at this much Integrity or more (0 off). tuneReroll, by
     // level (1 adult, 2 elder), lost ordinary ICE fights Spook or Handler replays in a Source run (the loss is not counted). tuneNullify, by
     // level, ordinary ICE fights it may pass without fighting in a Source run, chosen once the fight shows (nullifyIce). Hunter fights excluded.
-    source: { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
+    // Third round (7.10): breachChance, the chance each of those losses is forgiven, rolled when the fight is lost (1: every one, as 7.8 measured).
+    source: { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----

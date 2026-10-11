@@ -377,7 +377,7 @@ function runLosing(form, types, region) {
 }
 
 test('Source levers: all off by default', () => {
-  assert.deepEqual(NR2.rogue.source, { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } });
+  assert.deepEqual(NR2.rogue.source, { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } });
 });
 
 test('Source lever breachFree: a Sleeper with one lost ordinary fight in the Source still exits clean; two, or another line, or a lost hunter fight, do not', () => withSource({ breachFree: 1 }, () => {
@@ -497,4 +497,17 @@ test('Source lever tuneNullify: Handler passes a shown ordinary fight without a 
   assert.equal(h.run.pending.hunter, 'trail');
   assert.equal(nullifyIce(h).ok, false, 'not the hunter');
   assert.equal(nullifiesLeft(setup('rogueElderFeast', ['ice'], { region: 'source', stage: 'mainframe' })), 0, 'Spook and Handler only');
+}));
+
+test('Source lever breachChance: the free loss is forgiven only when the roll at the loss succeeds', () => withSource({ breachFree: 1, breachChance: 0.5 }, () => {
+  const exit = (roll) => {
+    const s = setup('rogueElderBreach', ['ice', 'checkpoint'], { region: 'source', stage: 'mainframe' });
+    moveTo(s, 1, stub(0.99));
+    resolveIce(s, false, stub(roll));
+    moveTo(s, 2, stub(0.99));
+    moveTo(s, 3, stub(0.99));
+    return s.merge.clean;
+  };
+  assert.equal(exit(0.4), 1);
+  assert.equal(exit(0.6), 0);
 }));

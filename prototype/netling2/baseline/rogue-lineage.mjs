@@ -54,6 +54,9 @@ const JOBS = {
     // The packages (7.9): each line at about Dodge's 65% ('even'), and a softer one with nullify in place of the reroll.
     even: { breachFree: 1, feastClean: 80, feastHeal: 2, tuneReroll: { 1: 1, 2: 2 } },
     softer: { breachFree: 1, feastClean: 90, feastHeal: 2, tuneNullify: { 1: 1, 2: 2 } },
+    // Third round (7.10), the lines toward about 50%: Breach's free loss as a chance, then the package (Dodge's Source slip x0.5, Feast clean at 90
+    // with the heal x2, Tune's reroll 1 for the adult and the elder, Breach at the chance chosen from the steerer jobs).
+    'bchance50': { breachFree: 1, breachChance: 0.5 }, 'bchance60': { breachFree: 1, breachChance: 0.6 },
   }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
   // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
   'trait-spread': { SPREAD: '0.2' },
