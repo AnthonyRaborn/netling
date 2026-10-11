@@ -9,7 +9,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 4. **Drafted: the kits** (section 9, for choice): each ability is the role's with a hunt twist, Rogue's own perks, the role traits, existing items as keepsakes.
 5. **2026-10-11: the good end's second round and inheritance decided** (6.1, items 41 to 47) and measured (7.6): only a clean Source exit arms the good end, the mixed egg (any egg after a good end; the Rogue as parent; a Rogue trait to choose, 9.4a), inheritance needs a full life on every egg, and the crossings between Rogue and the NL-0 eggs are gated. The good end now comes in 24% of first Rogue lives (33% of all Rogue lives; a median 2.8 Rogue lives, about 15 days). Then **the Rogue trait decided and measured** (item 48, 7.7): capture halves (3.4% to 1.7% of Rogue lives) but the good end barely moves (35% a Rogue life) and the gap between the lines stays (Dodge about 65%, the others 24 to 29%), since the good end is gated by clean Source exits, which ordinary ICE decides. **Next: the maintainer's call on the line gap (levers in 7.7), then the Deep's disconnects (item 45).**
    Earlier: **Simulator stages 1 to 3 built and measured** (7.1 to 7.5): home life, the hunt in runs (every run setting decided, 7.4) and the lineage side (7.5). Stage 3's first measure: a Rogue line of a player who runs reaches the good end in its first Rogue life half the time and within three 89% of the time (a median 1.5 Rogue lives, about 8 real days), because the Rogue elder is easy at the decided feat tiers and the hunt rarely bites after a Source exit. The good end's length has no target yet; that, with difficulty (6.3, item 5), is the maintainer's next call.
-6. **2026-10-11: the Deep's disconnects measured for choice** (7.12; 6.1 item 45): 1.71x the hidden form's with the trait (from 1.84x); no ambush in the cordon gives 1.61x, the Deep's ambushes at 0.15 1.54x, both 1.49x.
+6. **2026-10-11: the Deep's disconnects measured for choice** (7.12; 6.1 item 45): 1.72x the hidden form's with the trait (from 1.84x); no ambush in the cordon gives 1.61x, the Deep's ambushes at 0.15 1.54x, both 1.49x.
 7. Then the text (section 10).
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
@@ -773,28 +773,28 @@ Reading it:
 
 | setting | adults: exit / disconnect % | adults: Breach / Dodge / Tune / Feast disconnect % | adults vs hidden | value, adults | elders: disconnect % (vs hidden elder) | relay push / quiet, adults (mean) |
 |---|---|---|---|---|---|---|
-| **today** (7.4's settings plus the trait) | 42.3 / 31.0 | 27.9 / 30.4 / 33.1 / 32.6 | **1.71x** | 2.81 | 26.1 (2.51x) | 1.20 to 1.60 (1.46) |
+| **today** (7.4's settings plus the trait) | 42.3 / 31.0 | 27.9 / 30.4 / 33.1 / 32.6 | **1.72x** | 2.81 | 26.1 (2.50x) | 1.20 to 1.60 (1.46) |
 | no ambush in the cordon (`cordonAmbush` 0.5) | 43.1 / 29.8 | 26.3 / 29.4 / 32.4 / 31.3 | 1.65x | 2.86 | 25.4 (2.44x) | |
 | **no ambush in the cordon** (`cordonAmbush` 0) | 43.7 / 29.2 | 25.6 / 28.4 / 31.8 / 30.8 | **1.61x** | 2.92 | 24.9 (2.39x) | 1.27 to 1.70 (1.53) |
-| Deep ambushes 0.2 (from 0.25) | 42.9 / 29.6 | 26.2 / 28.4 / 32.4 / 31.3 | 1.63x | 2.86 | 25.5 (2.45x) | |
+| Deep ambushes 0.2 (from 0.25) | 42.9 / 29.6 | 26.2 / 28.4 / 32.4 / 31.3 | 1.64x | 2.86 | 25.5 (2.44x) | |
 | **Deep ambushes 0.15** | 43.6 / 27.9 | 24.1 / 26.7 / 31.3 / 29.3 | **1.54x** | 2.94 | 24.1 (2.31x) | 1.23 to 1.66 (1.49) |
-| Deep ambushes 0.1 | 44.4 / 26.1 | 22.2 / 24.9 / 30.1 / 27.3 | 1.44x | 3.01 | 22.9 (2.20x) | |
-| Deep ambushes 0 | 45.0 / 24.7 | 19.7 / 22.5 / 30.5 / 26.0 | 1.36x | 3.18 | 22.0 (2.12x) | |
+| Deep ambushes 0.1 | 44.4 / 26.1 | 22.2 / 24.9 / 30.1 / 27.3 | 1.45x | 3.01 | 22.9 (2.20x) | |
+| Deep ambushes 0 | 45.0 / 24.7 | 19.7 / 22.5 / 30.5 / 26.0 | 1.37x | 3.18 | 22.0 (2.11x) | |
 | no cordon ambush + ambushes 0.2 | 44.0 / 28.1 | 24.6 / 26.8 / 31.3 / 29.9 | 1.56x | 2.95 | 24.5 (2.35x) | |
-| **no cordon ambush + ambushes 0.15** | 44.4 / 26.9 | 23.1 / 25.4 / 30.7 / 28.5 | **1.49x** | 3.00 | 23.5 (2.26x) | 1.26 to 1.71 (1.53) |
-| no cordon (for comparison) | 47.1 / 25.7 | 22.6 / 24.6 / 28.5 / 27.1 | 1.42x | 3.14 | 21.8 (2.10x) | |
-| no cordon, no ambushes (the floor) | 49.3 / 20.0 | 15.3 / 17.1 / 25.6 / 22.0 | 1.10x | 3.47 | 18.1 (1.74x) | |
+| **no cordon ambush + ambushes 0.15** | 44.4 / 26.9 | 23.1 / 25.4 / 30.7 / 28.5 | **1.49x** | 3.00 | 23.5 (2.25x) | 1.26 to 1.71 (1.53) |
+| no cordon (for comparison) | 47.1 / 25.7 | 22.6 / 24.6 / 28.5 / 27.1 | 1.42x | 3.14 | 21.8 (2.09x) | |
+| no cordon, no ambushes (the floor) | 49.3 / 20.0 | 15.3 / 17.1 / 25.6 / 22.0 | 1.11x | 3.47 | 18.1 (1.73x) | |
 
 Reading it:
-1. **The trait already brought it from 1.84x to 1.71x**: its +2 threshold made the trail hunter almost absent in the Deep (0.01 to 0.03 a run), so what is left is the cordon and the ambushes.
+1. **The trait already brought it from 1.84x to 1.72x**: its +2 threshold made the trail hunter almost absent in the Deep (0.01 to 0.03 a run), so what is left is the cordon and the ambushes.
 2. **Keeping ambushes out of the cordon, the smallest change named in 7.4, is not enough on its own** (1.61x). Lost ambushes are about 11 points of the adults' 31% (0.11 a run) and the cordon layer holds only part of them.
-3. **1.5x needs the Deep's ambush share lowered**: 0.15 alone gives 1.54x, with no cordon ambush 1.49x. The cordon itself, forcing a fight every run, is worth about 5 points (no cordon: 1.42x); both off leave 1.10x, so the rest of the gap is the kits, not the hunt.
+3. **1.5x needs the Deep's ambush share lowered**: 0.15 alone gives 1.54x, with no cordon ambush 1.49x. The cordon itself, forcing a fight every run, is worth about 5 points (no cordon: 1.42x); both off leave 1.11x, so the rest of the gap is the kits, not the hunt.
 4. **The elders stay at 2.1 to 2.5x whatever is done**, since the hidden elder is the strongest runner in the game (7.4 said the same); 4.4's aim reads as the adults'.
 5. **Tune is the outlier**: Spook's disconnects barely move (33.1% today, 30.5% with no ambushes at all) while the other three fall 7 to 8 points, since Spook already tells ambushes apart and meets the fewest; ambush levers help it least.
 6. **The relay question holds**: going on past the relay pays 1.49 to 1.53x what jacking out there pays on the adults against today's 1.46 (9.7 aims at about 1.33), since fewer ambushes after the relay make going on a little safer. A Deep run banks 4 to 7% more.
 7. Not run: whole lives (`rogue-stage2.mjs`) for any candidate; per run the change is 2 to 4 points of disconnects in one region, so capture and the elder gate should move little, but that is not measured.
 
-**For the maintainer.** (a) leave it at 1.71x (4.4's aim is a high-side target, and the elders are far off it anyway); (b) no ambush in the cordon only (1.61x; the fiction stays: the cordon is the corp's patrol line, the hunters wait elsewhere); (c) the Deep's ambushes at 0.15 (1.54x); (d) both (1.49x, the only one under 1.5x). Then the text (section 10).
+**For the maintainer.** (a) leave it at 1.72x (4.4's aim is a high-side target, and the elders are far off it anyway); (b) no ambush in the cordon only (1.61x; the fiction stays: the cordon is the corp's patrol line, the hunters wait elsewhere); (c) the Deep's ambushes at 0.15 (1.54x); (d) both (1.49x, the only one under 1.5x). Then the text (section 10).
 
 ## 8. The ten forms (concept briefs, for choice)
 
