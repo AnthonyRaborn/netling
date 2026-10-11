@@ -626,6 +626,43 @@ Reading it:
 
 **For the maintainer.** Levers for the line gap, not measured: (a) a Source-only help for the Breach, Tune and Feast lines (for example, Breach: one lost ordinary ICE fight in the Source does not spoil "clean"; Tune: its sight shows the Source's ICE types from the start; Feast: a won fight there heals more); (b) relax "clean" to at most one lost fight for every line, which lifts all lines and keeps Dodge ahead; (c) trim Dodge (its slip at the Source). The Deep's disconnects come after this (6.1, item 45).
 
+### 7.8 The line gap: Source-only levers measured (2026-10-11; for choice, nothing decided)
+
+**What was built** (fork, all off by default; `nr2.js` `rogue.source`, set with `ROGUE_RUN='{"source":{...}}'`; tests in `rogue-netrun.test.js`): `breachFree` (Mole and Sleeper may lose that many ordinary ICE fights in a Source run and still exit clean; a lost hunter fight, Sleeper's saved one included, still spoils it), `tuneTypes` (Spook and Handler read every Source ICE's game and tier from the start, as Foresight's fields on the whole map; an ambush shows a decoy reading, so it is not told apart; the planner now uses a known reading on danger-sensed nodes), `feastHeal` (Drop's and Stash's won-fight heal in the Source, ordinary and hunter fights, multiplied), `dodgeSlip` (Skip's and Exile's slip in the Source, ordinary ICE and Exile's ambush slip, multiplied). The lineage driver takes `SPREAD` (uneven per-game skill, `netrun-bot.mjs` `style.spread`). With every lever off the saved `trait` outputs reproduce exactly.
+
+**Measured** (`rogue-lineage.mjs` as 7.7, 200 lines of 10 Rogue lives; jobs in `baseline/rogue-lineage.mjs`, summary `baseline/rogue-levers-summary.mjs`). By line, each line's corp and street steerer, per Rogue life: good end / Source exit / good end in the first Rogue life (a clean exit equals the good end within a point in every row, so it is left out):
+
+| job | Breach | Dodge | Tune | Feast |
+|---|---|---|---|---|
+| trait (7.7) | 26 / 89 to 91 / 16 to 20 | 65 / 91 to 92 / 41 to 47 | 24 to 26 / 74 to 76 / 9 to 13 | 26 to 29 / 82 / 20 to 24 |
+| breachFree 1 | **66** / 89 to 91 / 46 to 50 | unchanged | unchanged | unchanged |
+| tuneTypes | unchanged | unchanged | 25 to 27 / 74 to 77 / 12 to 14 | unchanged |
+| feastHeal 2 | unchanged | unchanged | unchanged | 25 to 27 / 84 to 85 / 19 to 20 |
+| feastHeal 3 | unchanged | unchanged | unchanged | 25 to 27 / 84 to 85 / 18 to 20 |
+| dodgeSlip 0.75 | unchanged | 57 to 58 / 87 to 89 / 38 to 44 | unchanged | unchanged |
+| dodgeSlip 0.5 | unchanged | 49 to 50 / 82 to 85 / 33 to 38 | unchanged | unchanged |
+| uneven skill (SPREAD 0.2), no lever | 26 to 27 / 91 / 18 to 22 | 64 to 68 / 91 to 93 / 44 to 46 | 24 to 28 / 74 to 77 / 14 | 28 / 80 to 84 / 15 to 19 |
+| uneven skill, tuneTypes | as above | as above | 29 to 34 / 79 to 82 / 16 to 17 | as above |
+
+Captured stays 0 to 3% in every row. The attentive group (26 archetypes, 7.7's means):
+
+| | good end within 10 Rogue lives | by Rogue life 1 / 3 / 5 | first good end: Rogue lives / days | per Rogue life: elder / Source exit / clean exit / good end | captured | good ends in 10 Rogue lives |
+|---|---|---|---|---|---|---|
+| trait (7.7) | 98% (worst 94) | 25 / 64 / 84% | 2.8 / 14.3 | 90 / 80 / 35 / 35% | 1.7% | 3.5 |
+| breachFree 1, tuneTypes, feastHeal 2 | 99% (93) | 33 / 74 / 90% | 2.3 / 11.6 | 90 / 81 / 46 / 46% | 1.7% | 4.6 |
+| the same, dodgeSlip 0.75 | 99% (93) | 32 / 73 / 89% | 2.4 / 12.0 | 90 / 80 / 44 / 44% | 1.7% | 4.4 |
+| the same with feastHeal 3, dodgeSlip 0.5 | 98% (93) | 31 / 70 / 88% | 2.4 / 12.3 | 90 / 79 / 42 / 42% | 1.7% | 4.2 |
+
+A Source-run read-out (scratch, 1500 runs a line, careful bot at win 0.7, the elders) shows why: a clean exit means no lost fight, so only a lever that removes losses, or forgives one, moves it. With the types read, Spook and Handler's routing cut lost fights a Source run from 1.36 to 1.33 (the cordons leave little choice, and tier 2 costs a bot only 0.1 of win chance); Stash's x3 heal lifted exits from 31% to 37% but left clean exits at 10%, because a heal never undoes a loss and a healthier careful bot walks into more ICE.
+
+Reading it:
+1. **breachFree 1 closes Breach's gap on its own**: 26% to 66% a Rogue life, level with Dodge (65%), and the first Rogue life from 16 to 20% to 46 to 50%. Breach was already the line that exits the Source most (about 90%); forgiving one loss turns those exits clean.
+2. **tuneTypes and feastHeal do almost nothing for the good end** (Tune +1 point; Feast a point lower, within noise, with more exits that are not clean). Tune's lever is worth about +5 points only when the player is uneven across the games (SPREAD 0.2), the half a bot with one skill number cannot use; how uneven real players are is unknown.
+3. **dodgeSlip trims Dodge as expected** (0.75: 65% to 57%; 0.5: to 49%), at a small cost in its Source exits, and leaves the others where they are.
+4. **No mix of these four closes the gap for Tune and Feast.** With the three helps and Dodge at 0.5, the lines sit at Breach 66, Dodge 49 to 50, Tune 25 to 27, Feast 25 to 27%.
+
+**For the maintainer.** If the aim is lines within reach of each other, the measured shape is: the Breach lever as drafted (or not, if Breach should stay a harder line), and for Tune and Feast a lever that acts on losses or on "clean", not on information or heals. Candidates, not built: the same one-loss forgiveness for Tune and Feast (which is 7.7's lever (b) less Dodge; Dodge then needs a trim to stay level); Feast: a won Source fight wipes one earlier loss from that run's count (feeding on it); Tune: one Source ICE a run read and passed without a fight (a skip, as Breach's forgiven loss is a pass). Each needs a run; the forgiveness version should land near Breach's 66% by the Breach result.
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
