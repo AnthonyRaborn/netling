@@ -1,10 +1,11 @@
-// The Rogue egg in the simulator fork, stage 3 (the lineage side): docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 11 to 14. A Source exit arms the good
-// end, a clean one offers the merge at once, a mark after the latest Source exit disarms it, another exit re-arms it, and an armed elder's death is
-// the good end, never after a capture. Deterministic: maps are built by hand and every roll is a stub.
+// The Rogue egg in the simulator fork, stage 3 (the lineage side): docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 11 to 14 and 41 to 43. A clean Source
+// exit arms the good end and offers the merge at once (one with a lost fight arms nothing), a mark after the latest arming disarms it, another clean
+// exit re-arms it, and an armed elder's death is the good end, never after a capture. After it any egg can be chosen; an NL-0 egg hatches the mixed
+// egg, whose parent is the Rogue. Deterministic: maps are built by hand and every roll is a stub.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, CFG, MIN } = await import('./sim/sim.js');
+const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, fragmentOf, CFG, MIN, ROGUE, PERKS } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
@@ -52,7 +53,7 @@ const collapse = (s) => {
   tick(s, s.lastTick + MIN, stub(0.99));
 };
 
-test('a clean Source exit arms the good end and offers the merge; one with a lost fight arms it without the offer', () => withKits(() => {
+test('a clean Source exit arms the good end and offers the merge; one with a lost fight arms nothing', () => withKits(() => {
   const s = runTo(elder(), 'source', ['checkpoint']);
   assert.deepEqual([s.run.phase, s.run.result], ['done', 'jacked'], 'the exit jacked it out');
   assert.deepEqual(s.merge, { armed: true, exits: 1, clean: 1, disarmed: 0, declined: 0 });
@@ -60,10 +61,26 @@ test('a clean Source exit arms the good end and offers the merge; one with a los
   const r = runTo(elder(), 'source', ['ice'], true);
   assert.equal(r.run.result, 'jacked');
   assert.equal(r.run.tally.iceLost, 1);
-  assert.equal(r.merge.armed, true);
-  assert.equal(r.merge.clean, 0);
-  assert.equal(r.mergeOffer, false, 'a regular exit unlocks the good end but does not offer it');
+  assert.deepEqual(r.merge, { armed: false, exits: 1, clean: 0, disarmed: 0, declined: 0 }, 'only a clean exit arms (6.1, item 41)');
+  assert.equal(r.mergeOffer, false);
 }));
+
+test('a Source exit with a lost fight leaves an armed good end armed; with armClean off (stage 3) it arms without the offer', () => {
+  const s = elder();
+  sourceExit(s, T0, true);
+  declineMerge(s);
+  sourceExit(s, T0, false);
+  assert.deepEqual([s.merge.armed, s.mergeOffer, s.merge.exits], [true, false, 2]);
+  const saved = ROGUE.armClean;
+  ROGUE.armClean = false;
+  try {
+    const r = elder();
+    sourceExit(r, T0, false);
+    assert.deepEqual([r.merge.armed, r.mergeOffer], [true, false]);
+  } finally {
+    ROGUE.armClean = saved;
+  }
+});
 
 test('only a Rogue at the Source: an NL-0 elder at the Source and a Rogue at the Deep arm nothing', () => withKits(() => {
   assert.equal(runTo(elder('program', 'hiddenElder'), 'source', ['checkpoint']).merge, undefined);
@@ -73,7 +90,7 @@ test('only a Rogue at the Source: an NL-0 elder at the Source and a Rogue at the
   assert.equal(d.mergeOffer, undefined);
 }));
 
-test('a mark after the latest Source exit disarms the good end and withdraws the offer; another exit re-arms it; marks stay', () => {
+test('a mark after the latest arming disarms the good end and withdraws the offer; only another clean exit re-arms it; marks stay', () => {
   const s = elder();
   sourceExit(s, T0, true);
   addMark(s, T0, 'sweep ignored');
@@ -82,12 +99,13 @@ test('a mark after the latest Source exit disarms the good end and withdraws the
   assert.equal(s.mergeOffer, false);
   assert.equal(takeMerge(s, T0), false, 'the withdrawn offer cannot be taken');
   sourceExit(s, T0, false);
+  assert.equal(s.merge.armed, false, 'an exit with a lost fight does not re-arm');
+  sourceExit(s, T0, true);
   assert.equal(s.merge.armed, true);
+  assert.equal(s.mergeOffer, true, 'a clean exit offers the merge again');
   assert.equal(s.marks, 1, 're-arming removes no mark');
   addMark(s, T0, 'trail hunter');
   assert.equal(s.merge.disarmed, 2);
-  sourceExit(s, T0, true);
-  assert.equal(s.mergeOffer, true, 'a clean exit offers the merge again');
   assert.deepEqual([s.merge.exits, s.merge.clean], [3, 2]);
 });
 
@@ -117,7 +135,8 @@ test('declining keeps the good end armed, and the elder\'s death then plays it; 
   collapse(plain);
   assert.deepEqual([plain.deathCause, plain.goodEnd], ['neglect', null]);
   const disarmed = elder();
-  sourceExit(disarmed, T0, false);
+  sourceExit(disarmed, T0, true);
+  declineMerge(disarmed);
   addMark(disarmed, T0, 'sweep ignored');
   collapse(disarmed);
   assert.equal(disarmed.goodEnd, null, 'disarmed by a later mark');
@@ -127,7 +146,8 @@ test('never after a capture: the third mark disarms the good end and the capture
   const s = elder();
   addMark(s, T0, 'sweep ignored');
   addMark(s, T0, 'sweep ignored');
-  sourceExit(s, T0, false);
+  sourceExit(s, T0, true);
+  declineMerge(s);
   addMark(s, T0, 'trail hunter');
   tick(s, s.lastTick + MIN, stub(0.99));
   assert.deepEqual([s.stage, s.deathCause, s.goodEnd], ['dead', 'captured', null]);
@@ -136,7 +156,8 @@ test('never after a capture: the third mark disarms the good end and the capture
 test('Root Access still reverses a premature death of an armed elder, which stays armed for its later death', () => {
   const s = elder();
   s.rootAccess = true;
-  sourceExit(s, T0, false);
+  sourceExit(s, T0, true);
+  declineMerge(s);
   collapse(s);
   assert.notEqual(s.stage, 'dead');
   assert.equal(s.rootUsed, true);
@@ -156,15 +177,34 @@ test('the merge offer: one entry per NL-0 egg with a fragment, in page-completio
   assert.throws(() => pickEntry(offer, 'best'));
 });
 
-test('what follows a Rogue life: the chosen egg after the good end, Rogue again otherwise (or the first egg after a capture), Rogue after an NL-0 life', async () => {
+test('what follows a Rogue life: any egg after the good end (an NL-0 one is the mixed egg, the Rogue its parent), Rogue again otherwise (or the first egg after a capture), Rogue after an NL-0 life', async () => {
   const { nextLife } = await import('./sim/rogue-line.js');
   const order = ['program', 'iron', 'wetware'];
   const latest = { program: { form: 'breachCorp' }, iron: { form: 'dodgeStreet' }, wetware: { form: 'feastCorp' } };
   const own = { form: 'rogueAdultTune' };
-  assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'exit', cause: 'merged', fragment: own }, { order, latest }), { egg: 'program', fragment: latest.program, why: 'merged' });
+  assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'exit', cause: 'merged', fragment: own }, { order, latest }), { egg: 'program', fragment: own, why: 'merged', mixed: true });
+  assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'exit', cause: 'merged', fragment: own }, { order, latest, parent: 'fragment' }).fragment, latest.program, 'stage 3\'s assumption, kept as a switch');
+  assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'death', cause: 'neglect', fragment: own }, { order, latest, pick: 'rogue' }), { egg: 'rogue', fragment: own, why: 'rogue again' }, 'Rogue again: no mixed egg');
+  assert.throws(() => nextLife({ egg: 'rogue', goodEnd: 'exit', fragment: own }, { order, latest, parent: 'both' }));
   assert.equal(nextLife({ egg: 'rogue', goodEnd: 'death', cause: 'neglect', fragment: own }, { order, latest, pick: 'last' }).egg, 'wetware');
   assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: null, cause: 'captured', fragment: own }, { order, latest }), { egg: 'rogue', fragment: own, why: 'rogue again' });
   assert.equal(nextLife({ egg: 'rogue', goodEnd: null, cause: 'captured', fragment: own }, { order, latest, line: 'back' }).egg, 'program');
   assert.equal(nextLife({ egg: 'rogue', goodEnd: null, cause: 'neglect', fragment: own }, { order, latest, line: 'back' }).egg, 'rogue', 'back only after a capture');
   assert.deepEqual(nextLife({ egg: 'iron', cause: 'end of life cycle', fragment: latest.iron }, { order, latest }), { egg: 'rogue', fragment: latest.iron, why: 'rogue again' });
+});
+
+test('the mixed egg continues the Rogue\'s trait as any rebirth does: a Rogue Mole\'s trait streaks into an NL-0 Breach adult', () => {
+  const saved = PERKS.on;
+  PERKS.on = true;
+  try {
+    const rogue = createScript({ now: T0, rng: mulberry32(3) });
+    Object.assign(rogue, { egg: 'rogue', form: 'rogueAdultBreach' });
+    const parent = fragmentOf(rogue, 'rogueAdultBreach');
+    assert.ok(parent.trait, 'a Rogue adult leaves its role trait');
+    const child = createScript({ now: T0, rng: mulberry32(4), fragment: parent });
+    assert.equal(child.trait, parent.trait);
+    assert.equal(fragmentOf(child, 'breachStreet').level, 2, 'the same trait in the next egg is a streak');
+  } finally {
+    PERKS.on = saved;
+  }
 });

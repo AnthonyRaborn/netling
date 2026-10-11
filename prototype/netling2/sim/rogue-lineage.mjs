@@ -3,15 +3,17 @@
 //   A lineage starts at the first Rogue life, past the gate: Root held, the whole codex, all 18 egg pages, an elder in the Dex. Before it, one
 //   lead-in life of each NL-0 egg in page-completion order (program, iron, wetware) stands for the player's earlier lines: their fragments are the
 //   merge offer's first entries and the last is the first Rogue's parent. Lead-in lives are not counted.
-//   Then lives follow rogue-line.js: a good end (armed by a Source exit, sim.js sourceExit) hatches the next netling in the chosen NL-0 egg (M3),
-//   every NL-0 life is followed by Rogue again, and a Rogue life that did not reach the good end by Rogue again (LINEBOT=back: one NL-0 life after
-//   a capture). The lineage runs until it has had `rogueLives` Rogue lives, so a line can reach the good end more than once.
+//   Then lives follow rogue-line.js: a good end (armed by a clean Source exit, sim.js sourceExit) hatches the mixed egg, a netling of the chosen NL-0
+//   egg whose parent is the Rogue that died (PICK=rogue: Rogue again instead, no mixed egg), every NL-0 life is followed by Rogue again, and a
+//   Rogue life that did not reach the good end by Rogue again (LINEBOT=back: one NL-0 life after a capture). The lineage runs until it has had `rogueLives` Rogue lives, so a line can reach the good end more than once.
 //   Each life runs under its egg's rules: SIDES.owner per egg (Rogue none, Program Charge, Wetware Sync, Iron Heat with wear). The elder feat
 //   follows lineage-sweep.mjs's tiers: tier 2 (an elder in the Dex) until the account holds an elder of this egg (tier 3) or of this very line
 //   (tier 4); Rogue starts at tier 2.
-// Env (bot rules): MERGEBOT=accept|refuse (the offer at a clean Source exit; balance.mjs), PICK=first|last (the offer's entry), LINEBOT=stay|back,
-//   JSON=1. A lever, not a bot rule: FEAT=1 holds every Rogue elder to the first tier (1.0's feat: three Deep exits or two clean), whatever the
-//   account holds. The decided settings below are the defaults (the stage 2 measure's, rogue-stage2.mjs BASE); any of them can be set in the environment.
+// Env (bot rules): MERGEBOT=accept|refuse (the offer at a clean Source exit; balance.mjs), PICK=first|last|rogue (the egg after a good end),
+//   LINEBOT=stay|back, JSON=1. PARENT=fragment gives stage 3's first assumption back (the mixed egg's parent is the chosen egg's latest fragment),
+//   and ROGUE='{"armClean":false}' its arming (any Source exit). A lever, not a bot rule: FEAT=1 holds every Rogue elder to the first tier (1.0's
+//   feat: three Deep exits or two clean), whatever the account holds. The decided settings below are the defaults (the stage 2 measure's,
+//   rogue-stage2.mjs BASE); any of them can be set in the environment.
 process.env.TZ = 'UTC';
 const FINAL_SIDES = {
   charge: { hi: 80, hold: 180, exit: 65, gate: 0, slow: 0, bleed: 8, overflow: 2, playGain: 0.45, drop: 0.75 },
@@ -24,7 +26,7 @@ const BASE = {
 };
 for (const [k, v] of Object.entries(BASE)) process.env[k] ??= v;
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
-const { CFG, SIDES, IRON, lineOf } = await import('./sim.js');
+const { CFG, SIDES, IRON, lineOf, ROGUE } = await import('./sim.js');
 const { FRAGMENTS } = await import('./codex2.js');
 const { OWNER, nextLife } = await import('./rogue-line.js');
 
@@ -32,12 +34,13 @@ const [name, n, rogueLives] = [process.argv[2], Number(process.argv[3] ?? 200), 
 if (!ARCHETYPES[name]) throw new Error(`unknown archetype ${name}`);
 const PICK = process.env.PICK ?? 'first';
 const LINE = process.env.LINEBOT ?? 'stay';
+const PARENT = process.env.PARENT ?? 'rogue';
 const ORDER = ['program', 'iron', 'wetware'];
 const CODEX = FRAGMENTS.map((f) => f.id); // the whole codex (a Rogue player has the ending)
 const LADDER = { 1: [3, 2], 2: [2, 99], 3: [2, 1], 4: [1, 99] }; // lineage-sweep.mjs: [Deep exits, or clean ones] the elder feat asks
 const DAY = 24 * 60;
 
-function life(egg, seed, fragment, generation, owned) {
+function life(egg, seed, fragment, generation, owned, mixed = false) {
   SIDES.owner = OWNER[egg];
   IRON.on = egg === 'iron';
   let tier = 2;
@@ -50,7 +53,7 @@ function life(egg, seed, fragment, generation, owned) {
   CFG.featFor = null;
   const elder = (r.stageDays?.mainframe ?? 0) > 0;
   if (elder) (owned[egg] ??= new Set()).add(lineOf(r.form));
-  return { egg, cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
+  return { egg, mixed, cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
 }
 
 function lineage(i) {
@@ -67,11 +70,11 @@ function lineage(i) {
   let next = { egg: 'rogue', fragment };
   let rogue = 0;
   while (rogue < rogueLives) {
-    const r = life(next.egg, (i + 1) * 1000 + lives.length + 1, next.fragment, ++gen, owned);
+    const r = life(next.egg, (i + 1) * 1000 + lives.length + 1, next.fragment, ++gen, owned, Boolean(next.mixed));
     lives.push(r);
     if (r.egg === 'rogue') rogue++;
     else if (r.adult) latest[r.egg] = r.fragment; // the offer holds each egg's latest adult or elder fragment
-    next = nextLife(r, { order: ORDER, latest, pick: PICK, line: LINE });
+    next = nextLife(r, { order: ORDER, latest, pick: PICK, line: LINE, parent: PARENT });
   }
   return lives;
 }
@@ -92,7 +95,7 @@ const elders = R.filter((r) => r.elder);
 const exited = R.filter((r) => (r.merge?.exits ?? 0) > 0);
 const goods = R.filter((r) => r.goodEnd);
 const out = {
-  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, feat: process.env.FEAT ? Number(process.env.FEAT) : null,
+  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, parent: PARENT, armClean: ROGUE.armClean, feat: process.env.FEAT ? Number(process.env.FEAT) : null,
   // How often: lines with a good end within rogueLives Rogue lives, and good ends a line.
   reached: round(first.length / n),
   reachedBy: Object.fromEntries([1, 2, 3, 5, rogueLives].map((k) => [k, round(first.filter((f) => f.rogue <= k).length / n)])),
@@ -130,6 +133,7 @@ const out = {
   },
   deaths: Object.fromEntries([...new Set(R.map((r) => r.cause))].sort().map((c) => [c, share(R, (r) => r.cause === c)])),
   nl0Lives: L.flat().length - R.length,
+  mixedLives: L.flat().filter((r) => r.mixed).length, // NL-0 lives hatched from a good end (the mixed egg)
 };
 if (process.env.JSON) console.log(JSON.stringify(out));
 else {
@@ -138,5 +142,5 @@ else {
   console.log(`  good end reached ${(out.reached * 100).toFixed(0)}% (by Rogue life 1: ${(out.reachedBy[1] * 100).toFixed(0)}%, 2: ${(out.reachedBy[2] * 100).toFixed(0)}%, 3: ${(out.reachedBy[3] * 100).toFixed(0)}%, 5: ${(out.reachedBy[5] * 100).toFixed(0)}%) · ${out.goodEndsPerLine} good ends a line`);
   console.log(`  first good end: Rogue life ${f.rogueLives.median} (p90 ${f.rogueLives.p90}), life ${f.lives.median} (p90 ${f.lives.p90}), day ${f.days.median} (p90 ${f.days.p90}); at the exit ${(f.atExit * 100).toFixed(0)}%`);
   console.log(`  per Rogue life: elder ${(p.elder * 100).toFixed(0)}%, Source run ${(p.sourceRun * 100).toFixed(0)}%, Source exit ${(p.sourceExit * 100).toFixed(0)}% (clean ${(p.cleanExit * 100).toFixed(0)}%), good end ${(p.goodEnd * 100).toFixed(0)}% (exit ${(p.atExit * 100).toFixed(0)}, death ${(p.atDeath * 100).toFixed(0)}), captured ${(p.captured * 100).toFixed(1)}%, marks ${p.marks}, ${p.days} days`);
-  console.log(`  after a Source exit (${a.lives} lives): disarmed once ${(a.disarmedOnce * 100).toFixed(0)}%, no good end ${(a.lostIt * 100).toFixed(0)}% (captured ${(a.capturedAfter * 100).toFixed(0)}%), declined ${(a.declined * 100).toFixed(0)}%, ${a.exitsPerLife} exits a life · deaths ${JSON.stringify(out.deaths)} · NL-0 lives ${out.nl0Lives}`);
+  console.log(`  after a Source exit (${a.lives} lives): disarmed once ${(a.disarmedOnce * 100).toFixed(0)}%, no good end ${(a.lostIt * 100).toFixed(0)}% (captured ${(a.capturedAfter * 100).toFixed(0)}%), declined ${(a.declined * 100).toFixed(0)}%, ${a.exitsPerLife} exits a life · deaths ${JSON.stringify(out.deaths)} · NL-0 lives ${out.nl0Lives} (mixed ${out.mixedLives})`);
 }

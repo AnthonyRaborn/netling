@@ -284,6 +284,9 @@ export const ROGUE = {
   // Section 7.3: a won DEFEND also puts it straight into flow (the 3 hour build-up skipped; flow's
   // conditions still apply, so it holds only if the netling is in good shape).
   defendFlow: true, // decided (maintainer, 2026-10-10)
+  // Section 6.1, item 41 (decided, maintainer, 2026-10-11): only a clean Source exit arms the good end; a Source exit with a lost fight arms
+  // nothing (and leaves an armed good end as it was). Stage 3 armed it at any Source exit (ROGUE='{"armClean":false}').
+  armClean: true,
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
@@ -356,19 +359,20 @@ export function addMark(s, t, source) {
   }
 }
 
-// The good end (docs/NETLING_2_ROGUE_DRAFTS.md, 6.1 items 11 to 13; simulator stage 3). Only a Rogue elder reaches the Source. A Source exit arms the
-// good end; a clean one (no ICE fight lost on that run, hunter fights included: the elder feat's "clean") also offers the merge at once
-// (s.mergeOffer, answered by takeMerge or declineMerge). A mark taken after the latest Source exit disarms it (addMark), another Source exit
-// re-arms it, and marks never fade, so re-arming removes none. Once armed, the elder's death is the good end in place of an ordinary rebirth,
-// never after a capture (the third mark has disarmed it). s.goodEnd: null, 'exit' (the offer taken) or 'death'.
+// The good end (docs/NETLING_2_ROGUE_DRAFTS.md, 6.1 items 11 to 13 and 41; simulator stage 3). Only a Rogue elder reaches the Source. A clean Source
+// exit (no ICE fight lost on that run, hunter fights included: the elder feat's "clean") arms the good end and offers the merge at once
+// (s.mergeOffer, answered by takeMerge or declineMerge); a Source exit with a lost fight arms nothing (ROGUE.armClean; with it off, as in stage
+// 3, any Source exit arms and only a clean one offers). A mark taken after the latest arming disarms it (addMark), another clean exit re-arms it,
+// and marks never fade, so re-arming removes none. Once armed, the elder's death is the good end in place of an ordinary rebirth, never after a
+// capture (the third mark has disarmed it). s.goodEnd: null, 'exit' (the offer taken) or 'death'.
 export function sourceExit(s, t, clean) {
   if (!isRogue(s)) return;
   s.merge ??= { armed: false, exits: 0, clean: 0, disarmed: 0, declined: 0 };
   s.merge.exits++;
   if (clean) s.merge.clean++;
-  s.merge.armed = true;
+  if (clean || !ROGUE.armClean) s.merge.armed = true;
   s.mergeOffer = Boolean(clean);
-  log(s, t, clean ? '> source exit, clean. two fragments can open. merge?' : '> source exit. the merge waits for the end.');
+  log(s, t, clean ? '> source exit, clean. two fragments can open. merge?' : ROGUE.armClean ? '> source exit. not clean: nothing opens.' : '> source exit. the merge waits for the end.');
 }
 export function takeMerge(s, t, rng = null) {
   if (!s.mergeOffer || !s.merge?.armed || s.stage === 'dead') return false;

@@ -131,7 +131,7 @@ Rogue sees the whole map (the hidden ability), so a hunter placed on the map wou
 
 ### 5.1 When it happens
 
-**Superseded (2026-10-10, section 6.1):** the merge is the good end and needs a Rogue elder that has exited the Source; a clean exit offers it at once, and any exit unlocks it for the elder's death (6.1, item 9). The original draft follows.
+**Superseded (2026-10-10, section 6.1):** the merge is the good end and needs a Rogue elder that has exited the Source; a clean exit offers it at once, and any exit unlocks it for the elder's death (6.1, items 11 to 13). *(Revised 2026-10-11: only a clean exit arms it, 6.1 item 41.)* The original draft follows.
 
 The merge is offered when a **Rogue adult dies of old age** with fewer than three marks. Any other Rogue death (neglect, integrity collapse, capture) is an ordinary rebirth, so the merge is the reward for surviving the hunt to the end of a life. A Rogue that is not merged is reborn as Rogue (if the player picks it again, per A1) and the hunt goes on.
 
@@ -254,6 +254,15 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 14. **What the merge makes, in two steps.**
     - **First: the one-off ending (M3).** The good end plays the epilogue (5.4) and the next netling hatches in the chosen NL-0 fragment's egg as an ordinary netling. This is the easiest to plan and is the starting design. A2 stands: the Rogue's own fragment is merged with one NL-0 fragment the player picks (5.2).
     - **Later, if wanted: the two-parent hybrid (M1, 5.3)**, built on the chosen egg with some Rogue elements added and **balance deliberately ignored** (two traits at once is too hard to balance), with only a small sprite change as its visible sign. Under M1 the merge ends the hunt for that hybrid only: **choosing Rogue again later still meets the hunters.**
+    - *Revised 2026-10-11 (items 42 and 43): the hatchling's parent is the Rogue, not the chosen NL-0 fragment, and it carries the Rogue trait.*
+
+**The good end, second round (maintainer, 2026-10-11)**
+
+41. **Only a clean Source exit arms the good end** (no ICE fight lost on that run, hunter fights included; the same "clean" as before). A Source exit with a lost fight arms nothing and does not re-arm a disarmed good end; it leaves an armed one as it was. This replaces item 12's "a regular Source exit unlocks the merge" and item 13's "another Source exit can remove the hunter block" (now another *clean* exit). The clean exit still offers the merge at once; declining it keeps the good end armed for the elder's death.
+42. **The mixed egg.** After the good end the player picks an egg. Choosing Program, Iron or Wetware hatches the **mixed egg**: a netling of that egg whose **parent is the Rogue that just died**, so its traits continue as on any rebirth (a Rogue Mole's role trait streaks into a Breach line of the chosen egg, and so on), and which also carries **a special Rogue trait** (not designed yet; drafts in 9.4). This replaces item 14's M3 hatchling (an ordinary netling whose parent was the chosen NL-0 fragment) and the stage 3 assumption about its parent (7.5).
+43. **Any egg after the good end, and a new mixed egg needs a new good end.** Every egg is open at rebirth (item 1), Rogue included; the mixed egg comes only from choosing an NL-0 egg right after a good end. The good end is an end of a Rogue life, not of the game: each mixed egg needs its own Rogue life that reaches the good end.
+44. **Length and difficulty.** About half of first Rogue lives reaching the good end is fine (it is harder than the story progression). Confirmed for the simulator: the order the egg pages were completed in hardly matters, and a player who unlocks Rogue has played every NL-0 egg at least once (each egg finds only its own pages), so the lead-in life of each egg in `rogue-lineage.mjs` stands.
+45. **Rogue gets a trait of its own** (drafts in 9.4). **The Deep's disconnects** (1.8x the hidden form's against 4.4's 1.5x, 7.4) are revisited once the Rogue trait is decided. **The Dodge line stays as it is for now** (7.4).
 
 ### 6.2 Proposals, to confirm
 
@@ -286,7 +295,7 @@ Closed on 2026-10-10 (maintainer), kept for the record:
 
 Still open:
 3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark). Decided in direction (6.1, item 14): later, if wanted, with balance set aside; nothing to do before the simulator.
-5. Difficulty, after the simulator: the 4.4 targets are a high-side aim to come in under (4.4), and the relay goal is set (9.7). The simulator is now built (7.5); the good end's length is measured and still has no target.
+5. Difficulty, after the simulator: the 4.4 targets are a high-side aim to come in under (4.4), and the relay goal is set (9.7). The good end's length is set in direction (6.1, item 44: about half of first Rogue lives reaching it is fine) and re-measured under the clean-only arming (7.6). Still open: the Rogue trait (9.4), then the Deep's disconnects (6.1, item 45).
 
 ## 7. What it would take
 
@@ -356,7 +365,7 @@ Still open:
 4. **Two-hourly players** (corpo, runner, overclocker: 9 check-ins a day) lose the most: captured 26% in stage 1, 33% at the 4 hour lockout, 36% at 6 hours. Their gap is longer than the 90 minute window, so sweeps slip through whatever the lockout.
 5. Timed events fall slightly (10.4 to 9.7 a life at 6 hours) and sparse players are unchanged (about 63% captured), as expected.
 
-**Decided (maintainer, 2026-10-10): the 4 hour lockout**, with the 8 hour quiet; both are now the fork's Rogue defaults (`ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` gives stage 1 back). Still open: whether DEFEND should also be worth choosing (for example a won DEFEND removes a mark, which would reverse "nothing removes marks", or pays something HIDE does not), or stay the answer when there is no cover; and whether two-hourly players count as attentive (if so, the window is the lever for them, not the lockout).
+**Decided (maintainer, 2026-10-10): the 4 hour lockout**, with the 8 hour quiet; both are now the fork's Rogue defaults (`ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` gives stage 1 back). Both questions left open here were settled the same day (7.3 and 7.4): a won DEFEND also gives flow (decided, so DEFEND pays something HIDE does not), and two-hourly players are not a tuning target.
 
 ### 7.3 A won DEFEND into flow (2026-10-10, measured; for choice)
 
@@ -408,7 +417,7 @@ At the decided 4 hour lockout and 8 hour quiet (attentive group, 300 lives of ea
 
 **Measured at the decided settings** (attentive group, 300 lives each; `rogue-s2-decided.json`): full life 96.9 (no hunt in runs: 98.6), captured 3.1% (worst archetype 8%, the Breach steerers, then Feast corp), marks a life 0.39 from home and 0.18 from the trail hunter, the hunter met 0.74 times a life and lost 0.18, ambushes met 2.6 and lost 0.7 (a disconnect each, no mark), 18.8 runs a life with 2.0 disconnects, the Deep cleared in 76% of lives, the elder gate met in 27% (33% without the cordons, 35% with no hunt in runs): the cordons are where the elder gets harder. Per run (Rogue against the hidden form, careful bot, 1000 runs a form): disconnects Public Net 0.8 against 0.5%, Bazaar 0.9 against 0.9, Corp Grid 4.4 against 0.8, Ruins 5.8 against 3.2, the Deep 33.5 against 19.0 (1.8x), the Source 49.6 against 36.4 (1.4x); exit rates within 4 points in the four shallow regions (4.4's 10-point aim met), 12 and 9 points lower in the Deep and the Source. The elders sit further below the hidden elder (the Deep 29.1 against 10.7, the Source 45.6 against 25.2), since the hidden elder is the strongest runner in the game. Marks per Deep or Source run about 0.03 (adult) and 0.02 (elder).
 
-**Open after the decision:** the Deep's disconnects are a little over 4.4's 1.5x (1.8x) because a cordon forces a fight that may be an ambush; if that should come down, the smallest change is to keep ambushes out of cordon layers. The Breach line is the most captured (Mole has no avoidance, so it meets the most hunters and ambushes).
+**Open after the decision:** the Deep's disconnects are a little over 4.4's 1.5x (1.8x) because a cordon forces a fight that may be an ambush; if that should come down, the smallest change is to keep ambushes out of cordon layers. *(2026-10-11: still 1.84x after the relay and exit bonus decisions below, which change what a Deep run banks, not who disconnects; to revisit once the Rogue trait is decided, 6.1 item 45.)* The Breach line is the most captured (Mole has no avoidance, so it meets the most hunters and ambushes). *(Addressed below: a lost fight adds trail +1 for the Breach line.)*
 
 **The Breach line (2026-10-10, measured, for choice).** Under candidate A a lost ambush gives no mark, so the Breach line's extra captures come from the trail hunter: Mole and Sleeper have no avoidance, fight more, and each lost fight adds +2 trail, so they meet the hunter about 2.3 times a life (Tune and Feast 0.6 to 0.9, Dodge almost never). On the three Breach archetypes (300 lives each; levers in `nr2.js`, `kit.breach`, all off):
 
@@ -555,6 +564,12 @@ Reading it:
 
 **For the maintainer.** Section 7 left the good end's length without a target; this is the first measure. If the good end should be rarer or later than a life or two for a player who runs, the measured lever is Rogue's own elder feat (above); others not measured yet: only a clean Source exit arms the good end, more than one Source exit to arm it, or more of the hunt in the Source run itself. Not measured: sparse players (out of 7.2's tuning target), notifications, the one-time Source log line, and M1.
 
+### 7.6 The good end, second round: a clean exit arms it, the mixed egg (2026-10-11)
+
+**What was built** (fork): `ROGUE.armClean` (on, decided, 6.1 item 41): only a clean Source exit arms the good end; one with a lost fight arms nothing and leaves an armed good end as it was. `sim/rogue-line.js`: after a good end any egg can be chosen (`PICK=first|last|rogue`); an NL-0 egg hatches the mixed egg, whose parent is the Rogue (item 42; `PARENT=fragment` gives stage 3's assumption back). Nothing in the simulator acts on the mixed egg's Rogue trait yet (9.4a). Stage 3's saved jobs pin the old rules (`baseline/rogue-lineage.mjs`, `STAGE3`). Tests: `rogue-goodend.test.js` (11).
+
+**Measured:** running (`baseline/rogue-lineage.mjs`, jobs `clean`, `clean-refuse`, `clean-rogue`); results to follow.
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
@@ -671,7 +686,7 @@ What it shows:
 Drawn as options over the registered forms (`rogue-options.js`, `rogue-options.html`, GIF `docs/netling2-prototypes/shots/rogue-thermocamo-2.gif`; two tests in `rogue.test.js`).
 - **Skip and Exile, Cipher's shimmer** (`cipherScan`): Cipher's camouflage activation on Rogue's body, a motion layer. A scan band sweeps from the hood's top to the feet and back in 12 steps of 400 ms, scaled to the form's height; above it the body is solid, on it a dim row, below it plain body cells open into checker holes (the outline changes, as on Cipher, which hidden forms and Rogue may do). Differences from Cipher's own layer, so Rogue's marks survive: only plain body cells change (the arc, the tag and the eyes never do; Cipher's turns every dim cell solid above the band), and the face rows (the arc's rows to the row under the eyes) are kept whole, as Cipher keeps its face opening. The decoy is drawn as on every Rogue form, only where the original figure is empty, so it never fills the holes. Calm (reduced motion): no band, the decoy parked. The registered frames stay plain, so wearables and the frame rule are untouched.
 - **Spook and Handler, still camo** (`STATIC_CAMO_OPTIONS`): the checker in the same phase in both frames, so it does not shimmer. Body only, or head and body; head and body no longer needs Blank's exception to the frame rule, because the head is the same in both frames. The Ghost-and-Blank look of the ear points over a checkered head stays.
-- Foundling and Alias keep the one-band hint (it swaps phase with the frame, as Blank's does); whether the young forms should hint at the sweep instead is open.
+- Foundling and Alias keep the one-band hint (it swaps phase with the frame, as Blank's does); whether the young forms should hint at the sweep instead was open here. *(Decided in 6.1, items 30 and 31: Foundling keeps the hint; Alias shows two bands and the sweep hint.)*
 
 ### 8.4e Each line its own effect (2026-10-10, for review)
 
@@ -813,7 +828,27 @@ Mole Hardened, Skip Evasive, Spook Persistent, Drop Foraging, at the decided str
 - **Evasive** must name the sweep among the timed events it lengthens (today: trace, intrusion, overflow). With it a sweep's 90 minutes become 112 at strength 1 and 118 at the cap (1.25).
 - **Hardened** is weaker on Rogue (fewer infections to cut). Accepted for the first pass; it is the strongest trait on the NL-0 eggs.
 - **Untraceable** (the hidden trait) cuts corp traces, which Rogue never meets. Proposal: it acts on the sweep for Rogue (as 4.1 first drafted), so an NL-0 hidden line's trait helps a Rogue child. To confirm.
-- **Open, for after the first pass:** a Rogue trait of its own (for example one that cuts the trail of every run by a little), which would only streak within Rogue lives.
+- **Open, for after the first pass:** *(decided 2026-10-11 that Rogue gets one, 6.1 items 42 and 45; drafts in 9.4a)* a Rogue trait of its own (for example one that cuts the trail of every run by a little), which would only streak within Rogue lives.
+
+### 9.4a The Rogue trait (drafts for choice, 2026-10-11)
+
+Fixed by decision (6.1, items 42, 43 and 45): Rogue gets a trait of its own, and the mixed egg (an NL-0 netling hatched after a good end, the Rogue its parent) carries it **on top of** the trait it inherits as usual; a new mixed egg needs a new good end. Two choices remain: who carries the trait, and what it does. Nothing here is simulated. Today's frame for comparison: a netling holds one inherited trait (its parent's adult form's, at a level that streaks up to III) plus its grandparent's as history at half strength, and every trait so far acts at home (`sim.js`, `TRAIT_CFG`).
+
+**Who carries it.**
+
+| | Rogue lives | the mixed egg | its child | notes |
+|---|---|---|---|---|
+| **C1, innate to the egg (recommended)** | every Rogue has it, beside its role trait | has it for its one life, beside its inherited trait | does not | a second slot that is never inherited, always level 1 (no streak, no history), so it lasts exactly one mixed life per good end (item 43) and leaves the role-trait streaks across eggs (9.4) alone |
+| C2, the mixed egg only | role trait only | as C1 | does not | simplest, but Rogue lives then have no trait of their own, which item 45 asks for |
+| C3, Rogue's inherited trait (9.4's first idea) | in place of the role trait; streaks within Rogue lives | inherits it as its ordinary trait | ordinary inheritance | not recommended: it conflicts with item 42, since the mixed egg would carry the Rogue trait *instead of* the role trait that should continue, and Rogue lines lose the role-trait streak with the NL-0 eggs |
+
+**What it does.** Under C1 it must work under both rule sets: the hunt (Rogue lives) and the NL-0 rules (the mixed egg). Strength as the other traits (a full value, scaled by level; at C1 always level 1). Names are placeholders.
+
+- **E1, Unsigned (recommended): whatever hunts it finds it less.** Rogue: every region's trail threshold +2 (about +13% on the decided thresholds of 14 to 18), so the trail hunter comes later in a run. The mixed egg: corp traces 25% less often (its signature was never the corp's). *For:* one idea in both rule sets, cheap to explain and to simulate (`NR2.rogue.threshold`, `traceChancePerHour`). *Against:* the mixed egg's part overlaps Untraceable (separate traits, so an Untraceable line gets both, each under its own cap). *Balance:* +2 sits between the decided x1.5 thresholds and the x2 setting that made the hunter vanish (7.4), so it lowers capture and hunters met; that is why the Deep's disconnects wait for this choice (item 45).
+- **E2, Second sight: the egg's danger sense, carried over.** Rogue: its danger sense also tells an ambush from ordinary ICE one step past its ordinary sight (Spook and Handler, which already do, see one step further still). The mixed egg: at a run's start, the nodes of the first three layers show danger or quiet. *For:* the most distinctive; the merge shows in play, and it is Rogue's own mechanic. *Against:* the first trait that acts in runs, not at home (it breaks the trait frame), it needs a danger and quiet display in NL-0 runs, and the bots use information poorly (as measured for the Tune forms), so the simulator would understate it.
+- **E3, Off the books: the quiet ways stay quiet.** Rogue: market purchases and anomaly choices add no trail (moves and lost fights still do). The mixed egg: checkpoints never notice it (Rogue's checkpoint part, 6.1 item 6). *For:* a clear trade for Rogue (shop and choose freely, still pay for distance and fights) and it pairs with Drop's market perk. *Against:* for the mixed egg, unnoticed checkpoints also mean no checkpoint Standing (HIDE at a checkpoint is a Standing source), so it nudges the mixed egg's lean, which the NL-0 eggs' Standing design does not expect.
+
+**Recommendation: C1 with E1.** Then, once chosen: build it in the fork, re-run stage 2's attentive group and the lineage measure (7.6), and look at the Deep's disconnects again with the trait on (item 45).
 
 ### 9.5 The keepsakes (existing items)
 
@@ -830,6 +865,8 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 
 **Taken as starting points (maintainer, 2026-10-10):** the four abilities, the perks (Drop's widened to every market in a run), the role traits and the keepsakes, all to be measured; danger sense with the details proposed in 9.1 (marks on nodes, not lines; the trail hunter off the map; adult and elder the same; dark under Blackout). **Direction (maintainer):** Rogue gets **its own map build rules**, since its netrun rules differ anyway, as a balance lever against danger sense and the twists; drafted in 9.7. The items below stay open where not covered.
 
+
+*(2026-10-11: items 1 to 5 are settled. The abilities in the 9.2 table, elders included, are the decided starting points and are built in the simulator (7.4); the per-elder alternates were not taken. The perks, Untraceable on the sweep, danger sense and the keepsakes are built as drafted, 7.1 and 7.4. The list is kept for the record.)*
 
 1. The four abilities, or an alternate per elder (Sleeper: Gone to ground; Exile: Away is home; Handler: Turned; Stash: the forced cache).
 2. The four perks, or an alternate.

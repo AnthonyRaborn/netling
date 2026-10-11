@@ -17,11 +17,19 @@ const jobsAtOnce = Number(process.argv.find((a) => a.startsWith('--jobs='))?.spl
 const OUT = new Set(['corpo', 'runner', 'overclocker', 'casual', 'worker', 'hunter-casual', 'human-casual', 'human-regular', 'human-keen', 'human-bursty', 'neglectful']);
 const { ARCHETYPES } = await import('../sim/balance.mjs');
 const ATT = Object.keys(ARCHETYPES).filter((n) => !OUT.has(n));
+// Stage 3's first jobs (2026-10-10) pin its rules so their saved outputs reproduce: any Source exit arms the good end, and the hatchling after it
+// takes the chosen egg's latest fragment as its parent.
+const STAGE3 = { ROGUE: '{"armClean":false}', PARENT: 'fragment' };
 const JOBS = {
-  decided: {}, // MERGEBOT=accept, PICK=first, LINEBOT=stay
-  refuse: { MERGEBOT: 'refuse' }, // every offer declined: the good end only at death
-  back: { LINEBOT: 'back' }, // one NL-0 life after a capture
-  tier1: { FEAT: '1' }, // a lever: every Rogue elder at 1.0's feat (three Deep exits or two clean)
+  decided: { ...STAGE3 }, // MERGEBOT=accept, PICK=first, LINEBOT=stay
+  refuse: { ...STAGE3, MERGEBOT: 'refuse' }, // every offer declined: the good end only at death
+  back: { ...STAGE3, LINEBOT: 'back' }, // one NL-0 life after a capture
+  tier1: { ...STAGE3, FEAT: '1' }, // a lever: every Rogue elder at 1.0's feat (three Deep exits or two clean)
+  // The decisions of 2026-10-11 (docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 41 to 43), now the defaults: only a clean Source exit arms the good end,
+  // any egg can follow it, and the mixed egg's parent is the Rogue.
+  clean: {}, // MERGEBOT=accept, PICK=first (the mixed egg in the first NL-0 egg completed), LINEBOT=stay
+  'clean-refuse': { MERGEBOT: 'refuse' }, // the clean exit's offer declined: the good end at death if still armed
+  'clean-rogue': { PICK: 'rogue' }, // Rogue again after every good end: no mixed egg, every life a Rogue life
 };
 const todo = [];
 for (const [job, env] of Object.entries(JOBS)) {
