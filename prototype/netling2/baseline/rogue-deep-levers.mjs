@@ -61,13 +61,14 @@ const DISC = {
 // The first three rounds were measured with the relay in the middle layer (then the default), so they spell it out unless they move it.
 // All rounds were measured with the region's exit bonus 2 (then the default) unless they set it.
 const PRE = (over) => ({ exitBonus: { deep: 2 }, ...over, map: { relayAt: {}, ...(over.map ?? {}) } });
-// The first four rounds pin the Rogue trait and the Source set off (measured before them); the fifth runs today's defaults.
-const PIN = { ROGUE_TRAIT: '0', ROGUE_SOURCE: '0' };
+// The first four rounds pin the Rogue trait and the Source set off (measured before them); the fifth runs the defaults of its day (the trait
+// and the fifty set on, the Deep before 7.12). Every round pins the earlier Deep (ROGUE_DEEP=0), whose ambushes it varies.
+const PIN = { ROGUE_TRAIT: '0', ROGUE_SOURCE: '0', ROGUE_DEEP: '0' };
 const sim = (file, env, pin = PIN) => JSON.parse(execFileSync(process.execPath, [join(here, '..', 'sim', file), n, 'deep'], { env: { ...process.env, JSON: '1', ...pin, ...env }, maxBuffer: 1 << 26 }));
 const file = join(here, 'results', 'followup', 'rogue-deep-levers.json');
 const out = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
 const rounds = [...Object.entries(SETTINGS).map(([k, map]) => [k, PRE({ map })]), ...Object.entries(FAR).map(([k, o]) => [k, PRE(o)]), ...Object.entries(EXIT)];
-for (const [name, over, pin] of [...rounds, ...Object.entries(DISC).map(([k, o]) => [k, o, {}])]) {
+for (const [name, over, pin] of [...rounds, ...Object.entries(DISC).map(([k, o]) => [k, o, { ROGUE_DEEP: '0' }])]) {
   if (out[name]) continue;
   const ROGUE_RUN = JSON.stringify(over);
   out[name] = { relay: sim('rogue-relay.mjs', { ROGUE_RUN }, pin), runs: sim('rogue-netrun.mjs', { ROGUE_RUN, FORMS: 'rogue,hidden' }, pin) };

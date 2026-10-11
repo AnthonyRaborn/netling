@@ -187,7 +187,7 @@ test('danger sense: every unvisited node as danger or quiet, dark under Blackout
   assert.deepEqual(dangerView(setup('hidden', ['ice'], { egg: 'program' })), {}, 'an NL-0 netling has no danger sense');
 }));
 
-test('ambushes are a share of a region ICE nodes (none in the Public Net), drawn after the map', () => withKits(() => {
+test('ambushes are a share of a region ICE nodes outside its cordons (none in the Public Net), drawn after the map', () => withKits(() => {
   const count = (region) => {
     let ice = 0;
     let amb = 0;
@@ -196,14 +196,16 @@ test('ambushes are a share of a region ICE nodes (none in the Public Net), drawn
       const s = createScript({ now: 0, rng });
       Object.assign(s, { egg: 'rogue', stage: 'adult', form: 'rogueAdultBreach' });
       startRun(s, region, rng, []);
-      for (const n of s.run.map.nodes) if (n.type === 'ice') { ice++; if (n.ambush) amb++; }
+      const cordon = s.run.map.rogueRules?.cordon ?? [];
+      for (const n of s.run.map.nodes) if (n.type === 'ice' && !cordon.includes(n.layer)) { ice++; if (n.ambush) amb++; }
       assert.ok(s.run.map.nodes.every((n) => !n.ambush || n.type === 'ice'));
     }
     return amb / ice;
   };
   assert.equal(count('public'), 0);
   const deep = count('deep');
-  assert.ok(deep > 0.15 && deep < 0.35, `deep share ${deep}`);
+  const want = NR2.rogue.ambush.deep;
+  assert.ok(Math.abs(deep - want) < 0.07, `deep share outside the cordon ${deep}, set ${want}`);
 }));
 
 test('cordonAmbush (off): 0 keeps ambushes out of the cordon layers only, on the same random draws', () => withKits(() => {

@@ -73,6 +73,8 @@ const wanted = (job) => !filter || (filter.includes(',') ? filter.split(',').inc
 // Every job above was measured with the Source levers off (nr2.js rogue.source neutral), so each runs with ROGUE_SOURCE=0 and its own levers
 // on top; the decided defaults since 2026-10-11 (7.11, the fifty set) are the 'fifty' job's levers, and 'decided-fifty' runs them as the defaults.
 JOBS['decided-fifty'] = { ROGUE_SOURCE: '' };
+// decided-deep (7.12): the fork's defaults since then, the Deep's ambushes lowered (share 0.15, none in the cordon); compare with fifty.
+JOBS['decided-deep'] = { ROGUE_SOURCE: '', ROGUE_DEEP: '' };
 const todo = [];
 for (const [job, env] of Object.entries(JOBS)) {
   if (!wanted(job)) continue;
@@ -81,7 +83,7 @@ for (const [job, env] of Object.entries(JOBS)) {
 }
 console.log(`${todo.length} runs to do, ${lineages} lines of ${rogueLives} Rogue lives, ${jobsAtOnce} at once`);
 const run = ([job, env, a]) => new Promise((resolve) => {
-  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ROGUE_SOURCE: '0', ...env, JSON: '1' } });
+  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ROGUE_SOURCE: '0', ROGUE_DEEP: '0', ...env, JSON: '1' } });
   let buf = '';
   let err = '';
   p.stdout.on('data', (d) => (buf += d));

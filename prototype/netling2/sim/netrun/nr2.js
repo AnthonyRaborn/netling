@@ -110,10 +110,11 @@ export const NR2 = {
     trail: { move: 1, iceLost: 2, anomaly: 1, purchase: 1 }, // a won ICE adds nothing; the checkpoint HIDE never happens (checkpoints never notice Rogue)
     hunterTier: 1, // the tier its fight is played at (decided, 7.4: 1, ordinary speed; the draft had 2, the tier-2 speed and a lower win chance)
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
-    ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.25, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere)
-    // Lever for the Deep's disconnects (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 item 45, 7.12), off: { region: f } multiplies the ambush share in that
-    // region's cordon layers (0: a cordon fight is never an ambush). Regions not listed keep the share.
-    cordonAmbush: {},
+    ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.15, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere); the Deep's was 0.25 (7.12)
+    // { region: f } multiplies the ambush share in that region's cordon layers (0: a cordon fight is never an ambush); regions not listed keep the
+    // share. Decided (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 item 45, 7.12): none in the Deep's cordon, with the Deep's share at 0.15 (ambush above),
+    // so Rogue adults disconnect about 1.5x the hidden form's there. Both are kept as levers for after a playtest; ROGUE_DEEP=0 gives the earlier Deep.
+    cordonAmbush: { deep: 0 },
     ambushMark: false, // decided (7.4): a lost ambush is a disconnect but no mark (the draft: a mark too); only the trail hunter marks in runs
     dangerSense: true, // every node shows as danger (ICE, ambush) or quiet from the start of a run; dark under Blackout
     // The kits by role and level (9.2). Mole fights hunters as plain tier-2 ICE at its damage share; Sleeper turns one lost hunter fight a run into an
@@ -170,6 +171,12 @@ if (process.env.ROGUE_SOURCE) {
   const name = process.env.ROGUE_SOURCE === '0' ? 'off' : process.env.ROGUE_SOURCE;
   if (!SOURCE_SETS[name]) throw new Error(`ROGUE_SOURCE: unknown set ${process.env.ROGUE_SOURCE}`);
   NR2.rogue.source = sourceSet(name);
+}
+
+// ROGUE_DEEP=0 gives the Deep's ambushes as they were before 7.12 (share 0.25, cordon ambushes drawn as anywhere), for the runners measured then.
+if (process.env.ROGUE_DEEP === '0') {
+  NR2.rogue.ambush.deep = 0.25;
+  NR2.rogue.cordonAmbush = {};
 }
 
 // ROGUE_RUN='{"threshold":{"deep":15},"map":{"on":false}}' overrides NR2.rogue (objects merge one level down), for the stage 2 sweeps.

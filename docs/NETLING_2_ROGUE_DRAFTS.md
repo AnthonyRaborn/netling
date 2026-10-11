@@ -9,7 +9,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 4. **Drafted: the kits** (section 9, for choice): each ability is the role's with a hunt twist, Rogue's own perks, the role traits, existing items as keepsakes.
 5. **2026-10-11: the good end's second round and inheritance decided** (6.1, items 41 to 47) and measured (7.6): only a clean Source exit arms the good end, the mixed egg (any egg after a good end; the Rogue as parent; a Rogue trait to choose, 9.4a), inheritance needs a full life on every egg, and the crossings between Rogue and the NL-0 eggs are gated. The good end now comes in 24% of first Rogue lives (33% of all Rogue lives; a median 2.8 Rogue lives, about 15 days). Then **the Rogue trait decided and measured** (item 48, 7.7): capture halves (3.4% to 1.7% of Rogue lives) but the good end barely moves (35% a Rogue life) and the gap between the lines stays (Dodge about 65%, the others 24 to 29%), since the good end is gated by clean Source exits, which ordinary ICE decides. **Next: the maintainer's call on the line gap (levers in 7.7), then the Deep's disconnects (item 45).**
    Earlier: **Simulator stages 1 to 3 built and measured** (7.1 to 7.5): home life, the hunt in runs (every run setting decided, 7.4) and the lineage side (7.5). Stage 3's first measure: a Rogue line of a player who runs reaches the good end in its first Rogue life half the time and within three 89% of the time (a median 1.5 Rogue lives, about 8 real days), because the Rogue elder is easy at the decided feat tiers and the hunt rarely bites after a Source exit. The good end's length has no target yet; that, with difficulty (6.3, item 5), is the maintainer's next call.
-6. **2026-10-11: the Deep's disconnects measured for choice** (7.12; 6.1 item 45): 1.72x the hidden form's with the trait (from 1.84x); no ambush in the cordon gives 1.61x, the Deep's ambushes at 0.15 1.54x, both 1.49x.
+6. **2026-10-11: the Deep's disconnects decided** (6.1, item 50; 7.12): no ambush in the Deep's cordon and the Deep's ambush share 0.15, so Rogue adults disconnect 1.49x the hidden form's there (1.72x with the trait alone, 1.84x before it); both kept as levers for a playtest.
 7. Then the text (section 10).
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
@@ -264,7 +264,7 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 42. **The mixed egg.** After the good end the player picks an egg. Choosing Program, Iron or Wetware hatches the **mixed egg**: a netling of that egg whose **parent is the Rogue that just died**, so its traits continue as on any rebirth (a Rogue Mole's role trait streaks into a Breach line of the chosen egg, and so on), and which also carries **a special Rogue trait** (not designed yet; drafts in 9.4). This replaces item 14's M3 hatchling (an ordinary netling whose parent was the chosen NL-0 fragment) and the stage 3 assumption about its parent (7.5).
 43. **Any egg after the good end, and a new mixed egg needs a new good end.** Every egg is open at rebirth (item 1), Rogue included; the mixed egg comes only from choosing an NL-0 egg right after a good end. The good end is an end of a Rogue life, not of the game: each mixed egg needs its own Rogue life that reaches the good end.
 44. **Length and difficulty.** About half of first Rogue lives reaching the good end is fine (it is harder than the story progression). Confirmed for the simulator: the order the egg pages were completed in hardly matters, and a player who unlocks Rogue has played every NL-0 egg at least once (each egg finds only its own pages), so the lead-in life of each egg in `rogue-lineage.mjs` stands (the first Rogue hatches with no parent, item 47).
-45. **Rogue gets a trait of its own** (drafts in 9.4). **The Deep's disconnects** (1.8x the hidden form's against 4.4's 1.5x, 7.4) are revisited once the Rogue trait is decided. **The Dodge line stays as it is for now** (7.4).
+45. **Rogue gets a trait of its own** (drafts in 9.4). **The Deep's disconnects** (1.8x the hidden form's against 4.4's 1.5x, 7.4) are revisited once the Rogue trait is decided *(decided: item 50, 7.12)*. **The Dodge line stays as it is for now** (7.4).
 
 **Inheritance (maintainer, 2026-10-11, later the same day)**
 
@@ -278,6 +278,10 @@ Three rounds on one day; later items replace earlier text where they conflict, a
 **The line gap (maintainer, 2026-10-11)**
 
 49. **The lines at about 50% to start, 35% kept for tuning** (7.8 to 7.11). In the Source only: Mole's and Sleeper's lost ordinary fight is forgiven at a 50% roll, at most one a run; Skip's and Exile's slip works half as often; a Source exit by Drop or Stash also counts as clean at Integrity 80 or more; Spook and Handler replay one lost ordinary fight a run (reroll). Each line reaches the good end in about 47 to 51% of Rogue lives. The thirtyfive set (the roll at 20%, no Dodge slip in the Source, clean at Integrity 100, one nullify a run in place of the reroll) is the tuning option after a playtest, at today's overall pace. Then: the Deep's disconnects (item 45).
+
+**The Deep's disconnects (maintainer, 2026-10-11)**
+
+50. **Both Deep levers** (7.12; item 45): no ambush in the Deep's cordon and the Deep's ambush share 0.15 (from 0.25), so Rogue adults disconnect about 1.5x the hidden form's there (1.49x, from 1.72x). Both stay levers for after a playtest, in case human players find the Deep a little easier than the bot does (the share back toward 0.25, or the cordon ambushes back).
 
 ### 6.2 Proposals, to confirm
 
@@ -310,7 +314,7 @@ Closed on 2026-10-10 (maintainer), kept for the record:
 
 Still open:
 3. Whether and when M1 follows M3, and which Rogue elements a hybrid carries (traits, keepsakes, quirk keys, the small sprite mark). Decided in direction (6.1, item 14): later, if wanted, with balance set aside; nothing to do before the simulator.
-5. Difficulty, after the simulator: the 4.4 targets are a high-side aim to come in under (4.4), and the relay goal is set (9.7). The good end's length is set in direction (6.1, item 44: about half of first Rogue lives reaching it is fine) and re-measured under the clean-only arming (7.6). The Rogue trait is decided (6.1, item 48). Still open: the Deep's disconnects (6.1, item 45), measured for choice in 7.12.
+5. Difficulty, after the simulator: the 4.4 targets are a high-side aim to come in under (4.4), and the relay goal is set (9.7). The good end's length is set in direction (6.1, item 44: about half of first Rogue lives reaching it is fine) and re-measured under the clean-only arming (7.6). The Rogue trait is decided (6.1, item 48). The Deep's disconnects are decided (6.1, item 50; 7.12).
 
 ## 7. What it would take
 
@@ -767,7 +771,7 @@ Reading it:
 2. **Dodge needs its slip gone in the Source to come down to 35%**: the slip's effect flattens near zero (x0.25 43%, x0.1 39%, x0 35 to 36%), since Dodge also keeps its lighter trail and the hunter's lower threshold. In the fiction that is the Source seeing through Skip and Exile; it is the most visible change in either set.
 3. **thirtyfive swaps Tune's reroll for nullify** (the version that plays least like Dodge's slip) and needs no extra heal for Feast; Breach's roll is the same lever at a lower chance.
 
-### 7.12 The Deep's disconnects revisited (2026-10-11; for choice, nothing decided)
+### 7.12 The Deep's disconnects revisited, both levers decided (2026-10-11)
 
 6.1 item 45: with the Rogue trait decided, the Deep's disconnects (1.84x the hidden form's at 7.4, against 4.4's 1.5x aim) were to be looked at again. A lever in the fork, `rogue.cordonAmbush` (`nr2.js`, off: `{ region: f }` multiplies the ambush share in that region's cordon layers, one draw a node either way, so the decided map is unchanged); test in `rogue-netrun.test.js`. The fifth round of `baseline/rogue-deep-levers.mjs` (today's defaults, the trait on; 3000 Deep runs a form, careful bot; same file, `results/followup/rogue-deep-levers.json`). The hidden form: disconnects 18.1% (elder 10.4%).
 
@@ -794,7 +798,7 @@ Reading it:
 6. **The relay question holds**: going on past the relay pays 1.49 to 1.53x what jacking out there pays on the adults against today's 1.46 (9.7 aims at about 1.33), since fewer ambushes after the relay make going on a little safer. A Deep run banks 4 to 7% more.
 7. Not run: whole lives (`rogue-stage2.mjs`) for any candidate; per run the change is 2 to 4 points of disconnects in one region, so capture and the elder gate should move little, but that is not measured.
 
-**For the maintainer.** (a) leave it at 1.72x (4.4's aim is a high-side target, and the elders are far off it anyway); (b) no ambush in the cordon only (1.61x; the fiction stays: the cordon is the corp's patrol line, the hunters wait elsewhere); (c) the Deep's ambushes at 0.15 (1.54x); (d) both (1.49x, the only one under 1.5x). Then the text (section 10).
+**Decided (maintainer, 2026-10-11): both** (6.1, item 50): no ambush in the Deep's cordon and the Deep's ambush share 0.15, now the fork's defaults (`nr2.js`: `rogue.cordonAmbush: { deep: 0 }`, `rogue.ambush.deep` 0.15). Both are kept as levers for after a playtest, if human players find the Deep a little easier than the bot does: the share back toward 0.25 first, then the cordon ambushes (`cordonAmbush` 0.5 or 1). `ROGUE_DEEP=0` gives the Deep as it was before (share 0.25, cordon ambushes drawn as anywhere); every runner measured before this pins it (`baseline/rogue-stage2.mjs`, `rogue-lineage.mjs`, `rogue-dodge.mjs`, `rogue-hide-lock.mjs`, `rogue-deep-levers.mjs`), and their saved outputs reproduce (checked on the Deep sweep: byte-identical). Run directly, `sim/rogue-netrun.mjs` and `sim/rogue-relay.mjs` now use the new Deep. The two runners' `decided-deep` jobs measure whole lives at the new defaults (below).
 
 ## 8. The ten forms (concept briefs, for choice)
 
