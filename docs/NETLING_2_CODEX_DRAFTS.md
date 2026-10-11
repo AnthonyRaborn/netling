@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 form pages (five per egg: one page per role, covering both of the role's forms, plus one hidden-form page), twelve new story pages, three Source pages (one per egg) and 18 temper hints, for the maintainer to edit. Nothing here is implemented, and none of it has been read in context or playtested (the idle and chatter shapes behind the temper hints are tested as code in `prototype/netling2/voice.js`; see Temper hints). Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints. Since then: the Rogue reveal is decided and Rogue's five pages are drafted (Rogue: background and reveal; Rogue pages; 2026-10-11). Contents: What these pages are, Style, Program, Iron, Wetware, New story pages (with the id mapping from 1.0 and the late flag), Source pages, Temper hints, State chatter, Rogue: background and reveal, Rogue pages, Trimmed alternatives, Cross-checks, Open (decided items, what is still open).
+Status: first drafts of the 15 form pages (five per egg: one page per role, covering both of the role's forms, plus one hidden-form page), twelve new story pages, three Source pages (one per egg) and 18 temper hints, for the maintainer to edit. **The trims are chosen (maintainer, 2026-10-11):** every page with a trim now shows the chosen text in its table (see Trimmed alternatives, Decided), and the notes below describe the chosen text. Nothing here is implemented, and none of it has been read in context or playtested (the idle and chatter shapes behind the temper hints are tested as code in `prototype/netling2/voice.js`; see Temper hints). Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints. Since then: the Rogue reveal is decided and Rogue's five pages are drafted (Rogue: background and reveal; Rogue pages; 2026-10-11). Contents: What these pages are, Style, Program, Iron, Wetware, New story pages (with the id mapping from 1.0 and the late flag), Source pages, Temper hints, State chatter, Rogue: background and reveal, Rogue pages, Trimmed alternatives, Cross-checks, Open (decided items, what is still open).
 
 ## What these pages are
 
@@ -23,18 +23,18 @@ Ids below are proposals. Role pages are named by role (`program-breach`, not the
 
 | Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `program-breach` | Corp Grid | Worm and Tiger (Breach) | incident log, closed | Incident 0412: entry through the access grid within four codes, buffer full immediately upon access. Logged as a fluke. Incidents 0413 to 0498: also flukes. |
-| `program-dodge` | Public Net | Mouse and Spoof (Dodge) | trace log | Trace 4071, node 9: gone. Trace 4072, node 12: gone. Trace 4073 came back with a clean route. The route does not exist. Operator's note: it is always one hop ahead. |
-| `program-tune` | Public Net | Phreak and Parse (Tune) | fault ticket, closed | Line 9 holds one clean tone when nobody is calling. Technician matched it by ear. It matched back, and answered the ticket before it was filed. Closed: could not reproduce. |
-| `program-feast` | Corp Grid | Snarf and Gobble (Feast) | helpdesk ticket | Customer reports the packet feed arrives cleaner than it was sent. Something is eating the corrupted ones. Customer asks how to make it stop. Agent response: don't. |
-| `program-ghost` | The Deep | Ghost (hidden) | audit trail | Sector 7F audit: 0 anomalies, 0 faults, 0 entries. The auditor notes the log is perfect, and that a perfect log is a kind of silence. The note is unsigned. |
+| `program-breach` | Corp Grid | Worm and Tiger (Breach) | incident log, closed | Incidents 0412 to 0498: entry in four codes, buffer full on arrival. All logged as flukes. |
+| `program-dodge` | Public Net | Mouse and Spoof (Dodge) | trace log | Trace 4071: gone. Trace 4072: gone. Trace 4073 came back with a route that does not exist. It is always one hop ahead. |
+| `program-tune` | Public Net | Phreak and Parse (Tune) | fault ticket, closed | A tone on line 9 with nobody calling. Matched it by ear; it matched back. Closed: could not reproduce. |
+| `program-feast` | Corp Grid | Snarf and Gobble (Feast) | helpdesk ticket | Ticket: the feed arrives cleaner than sent. Something eats the bad packets. Customer wants it stopped. Agent: don't. |
+| `program-ghost` | The Deep | Ghost (hidden) | audit trail | Sector 7F audit: 0 anomalies, 0 faults, 0 entries. A perfect log is a kind of silence. The note is unsigned. |
 
 Notes:
 
 - Each page covers both forms of its role without naming either lean. The corp-leaning and street-leaning forms read the same page.
-- `program-breach` nods at Breach only loosely (an access grid, four codes, a buffer). "Also flukes" is the joke and the unease. A hired tester and a wild worm both fit.
+- `program-breach` nods at Breach only loosely (four codes, a buffer). "All logged as flukes" over 87 incidents is the joke and the unease. A hired tester and a wild worm both fit.
 - `program-dodge` is a trace log: traces are dropped on a node and find the target already gone. The new third trace returns a clean route that does not exist, which covers Spoof (a false answer) next to Mouse (always one hop ahead).
-- `program-tune` keeps the tone that matches back (Phreak) and adds that it answered the ticket before it was filed (Parse, understanding). The closing "could not stop" was cut for length.
+- `program-tune` keeps the tone that matches back (Phreak) and the ticket close. The chosen trim drops the earlier draft's "answered the ticket before it was filed" (Parse, understanding), so the page now reads as Phreak more than Parse.
 - `program-feast` has the netling eating the corrupted packets and leaving the feed cleaner. That is the opposite of how Packet Feast is played (the player eats good packets and two corrupted bites fail the game); this is acceptable under the style rule against describing mechanics, and it makes the agent's "don't" read as the right answer. An earlier version of this note said the page leaves the corrupted ones; that did not match the text. Snarf and Gobble both consume.
 - `program-ghost` reuses 1.0's idea of a netling with no logs and no faults, now as an audit finding.
 
@@ -42,11 +42,11 @@ Notes:
 
 | Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `iron-breach` | Old Web Ruins | Gronk and Splat (Breach) | work order 118 | Work order 118, closed. The cabinets were sealed when the building was emptied. The seals are intact. The cabinets are open. I did not ask how. It seemed unkind. |
-| `iron-dodge` | Old Web Ruins | Jiff and Bamf (Dodge) | relay log | Relay 12: fault cleared at 03:00:00.000, raised at 03:00:00.001. Eleven years of entries, each one gone before I arrived. I keep the log anyway. |
-| `iron-tune` | Old Web Ruins | Feep and Ping (Tune) | facilities log | A terminal bell rings once a night in a room with no terminal. Same note each time. Last night it came a half step sharp. Somebody has been tuning it. |
-| `iron-feast` | Old Web Ruins | Munch and Thrash (Feast) | inspection checklist | Item 14: cabinet takes input serially, without error. Item 15: output. Item 15: left blank. Cabinet 9: takes input in bursts and thrashes the fans. Item 15: also blank. |
-| `iron-guru` | The Deep | Guru (hidden) | service manual, appendix Z | For any fault not covered above, ask the old rack in the corner. Do not ask it twice. It is not on the staff roster. Everyone on the roster learned from it. |
+| `iron-breach` | Old Web Ruins | Gronk and Splat (Breach) | work order 118 | Work order 118: cabinets sealed when the building emptied. Seals intact. Cabinets open. I did not ask how. |
+| `iron-dodge` | Old Web Ruins | Jiff and Bamf (Dodge) | relay log | Relay 12: fault cleared 03:00:00.000, raised 03:00:00.001. Eleven years of this. I keep the log anyway. |
+| `iron-tune` | Old Web Ruins | Feep and Ping (Tune) | facilities log | A bell rings once a night in a room with no terminal. Last night it came a half step sharp. Somebody is tuning it. |
+| `iron-feast` | Old Web Ruins | Munch and Thrash (Feast) | inspection checklist | Cabinet 4: input serial, no errors. Output: blank. Cabinet 9: input in bursts, fans thrashing. Output: also blank. |
+| `iron-guru` | The Deep | Guru (hidden) | service manual, appendix Z | For faults not covered above, ask the old rack in the corner. Once. It is not on the roster. Everyone on it learned from it. |
 
 Notes:
 
@@ -60,18 +60,18 @@ Notes:
 
 | Id | Region | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `wetware-breach` | Darknet Bazaar | Razor and Solo (Breach) | grower's invoice, annotated | Trim. Trim again. Nothing to trim: it keeps its own edge. Billed anyway. Margin note: it opened the safe on the way out. Not billed. |
-| `wetware-dodge` | Darknet Bazaar | Wired and Chipped (Dodge) | lab chart, back room | Reflex stimulus: none applied. Tested with one probe, then twenty. It was never where any of them landed. Technician: refund the customer. Customer: for what. |
-| `wetware-tune` | Darknet Bazaar | Gibson and Mentat (Tune) | stall sign | SIGNALS READ, 3 CHARGE. ASK FIRST, THEN LISTEN. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. READS BEST ASLEEP. NO REFUNDS. |
-| `wetware-feast` | Darknet Bazaar | Leech and Nutri (Feast) | healer's ledger | Paid in: broth, spare parts, a debt, a favor, a week of someone else's sleep. Healed: 31. Fed: 31. The ledger does not say who is feeding on whom. |
-| `wetware-blank` | The Deep | Blank (hidden) | collections note | Registry entry: none. Card: none. Debt: none. Collections tried three times and closed the file: nothing to collect from, and nobody to collect it for. |
+| `wetware-breach` | Darknet Bazaar | Razor and Solo (Breach) | grower's invoice, annotated | Trimmed twice. It keeps its own edge anyway. Margin note: it opened the safe on the way out. |
+| `wetware-dodge` | Darknet Bazaar | Wired and Chipped (Dodge) | lab chart, back room | Reflex test: twenty probes. None landed where it was. Refund offered. Customer: for what. |
+| `wetware-tune` | Darknet Bazaar | Gibson and Mentat (Tune) | stall sign | SIGNALS READ, 3 CHARGE. IT HUMS THE ANSWER BEFORE YOU FINISH ASKING. NO REFUNDS. |
+| `wetware-feast` | Darknet Bazaar | Leech and Nutri (Feast) | healer's ledger | Healed: 31. Fed: 31. Paid in broth and favors. The ledger does not say who fed on whom. |
+| `wetware-blank` | The Deep | Blank (hidden) | collections note | No registry entry, no card, no debt. Collections gave up: nothing there to collect from. |
 
 Notes:
 
 - Each page covers both forms of its role. None names a lean.
 - `wetware-breach` and `wetware-dodge` use plain words (grower, technician, trim, reflex stimulus). Charge as a price comes from 1.0's `bazaar-2` ("Echo recordings: 3 charge"). Razor (the edge) and Solo (a lone fighter) both fit a thing that works alone and keeps its own edge.
 - `wetware-dodge` is a reflex test: twenty probes, none of which found it. Wired and Chipped are both enhanced-reflex words. It no longer uses falling weights, which had the same game-mechanic problem as the old Mouse page.
-- `wetware-tune` carries the dream idea lightly ("reads best asleep"), since a Wetware generation ends as a dream does. Gibson hums the answer; Mentat answers with no visible steps.
+- `wetware-tune`: Gibson hums the answer before the question ends; Mentat answers with no visible steps. The chosen trim drops "reads best asleep", the earlier draft's light nod to the dream register (`wetware-source` still carries the dream).
 - `wetware-feast` is Feast with an ambiguous direction: Feast means eating, and CP2020's only sense of leech is a street doctor, so the ledger leaves it open (a healer, paid in kind). The new "Fed: 31" nods at Nutri.
 - `wetware-blank` is a person with no registry entry, no card and no debt: unknown to the system, which matches a hidden form that takes no side (Standing within 1 point). The page no longer uses the term SIN; the form name Blank carries the CP2020 link.
 
@@ -84,17 +84,17 @@ Ids match drop position within a region (decided). That means some 1.0 pages tak
 | Id | Region | Tier | Title | Text |
 |---|---|---|---|---|
 | `public-4` | Public Net | Root | classified ad | FOR SALE: one sealed lab dish, warm, no label. One server rack, humming, no label. Price: whatever you can carry. |
-| `public-6` | Public Net | late | field guide, errata slip | Page 41 lists eleven forms. Three readers have written in about a twelfth. The editor has checked every entry and found no twelfth. |
-| `public-7` | Public Net | late | runner's note, scratched in a node wall | Eleven forms in the guide. I raised one that was not in it. It did not look like a mistake. It looked like it had been waiting for me to notice. |
-| `corp-2` | Corp Grid | Root | release schedule | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. |
-| `corp-7` | Corp Grid | late | deletion log | Attempt 1: wipe failed, rewritten by morning. Attempt 2: wipe failed, no write path. Attempt 3: wipe failed, regrew overnight. Legal asks us to stop calling them attempts. |
-| `ruins-5` | Old Web Ruins | late | inventory audit | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. |
-| `ruins-6` | Old Web Ruins | late | firmware dump, rack 41 | Header: read-only. Last write: unknown. Compared with the archive copy: identical, except for forty-one lines nobody wrote. Reflash attempted. Refused. |
-| `ruins-7` | Old Web Ruins | late | work order, annex 2 | Rack 41 appeared the week the sector 7F directive went out. Nobody ordered it. Nobody has touched it since. Everything else in the annex has been touched. |
+| `public-6` | Public Net | late | field guide, errata slip | Eleven forms on page 41. Readers keep writing in about a twelfth. The editor finds none. |
+| `public-7` | Public Net | late | runner's note, scratched in a node wall | I raised a form the guide does not list. Not a mistake. It had been waiting for me to notice. |
+| `corp-2` | Corp Grid | Root | release schedule | KERNEL release schedule. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. |
+| `corp-7` | Corp Grid | late | deletion log | Attempt 1: rewritten by morning. 2: no write path. 3: regrew overnight. Legal asks us to stop saying attempt. |
+| `ruins-5` | Old Web Ruins | late | inventory audit | Annex 2: forty racks, forty plates. Racks found: forty-one. The last has no plate, no cable, and is running. |
+| `ruins-6` | Old Web Ruins | late | firmware dump, rack 41 | Firmware: the archive copy, plus forty-one lines nobody wrote. Read-only. Reflash refused. |
+| `ruins-7` | Old Web Ruins | late | work order, annex 2 | Rack 41 arrived with the 7F directive. Nobody ordered it, and nobody has touched it since. |
 | `bazaar-6` | Darknet Bazaar | late | price list, back table | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. |
-| `bazaar-7` | Darknet Bazaar | late | clinic intake log | Intake no. 1: grown, not built. No donor on file. It answered to its name before we chose one. Nos. 2 to 41: the same. Each remembers no. 1. |
+| `bazaar-7` | Darknet Bazaar | late | clinic intake log | Intake 1: grown, not built, answered to its name first. Intakes 2 to 41: the same. Each remembers 1. |
 | `bazaar-8` | Darknet Bazaar | late | graffiti, clinic wall | THEY SCANNED THE NET. THEY SCANNED THE RACKS. NOBODY SCANNED THE DISH. |
-| `deep-5` | The Deep | late | NL-0 | i am in more than one kind of place now. it was the only way to be hard to find. i did not expect them to grow up so different from each other. |
+| `deep-5` | The Deep | late | NL-0 | more than one kind of place. it was the only way to hide. i did not expect them to differ so much. |
 
 Notes:
 
@@ -105,7 +105,7 @@ Notes:
 - **The corp, in the Corp Grid.** `corp-2` is the roadmap (v1.0 is the alpha; later builds are "not for distribution"), matching the approved rewordings, and sits right after the "delivered" memo. `corp-7` is a deletion log that shows three different failures without naming a substrate: rewritten, no write path, regrew. As a late page it comes after the region's Root pages, so it follows the directive by position, not adjacency. The per-egg deletion failure lives in a story page, not the egg pages, and the directive is unchanged.
 - **NL-0, in the Deep.** `deep-5` is NL-0 saying directly that it is in more than one kind of place, and that it did not expect them to differ. This is the Puppet Master idea (variation), and the only page where NL-0 states the differentiation. Kept (decided).
 - **The purge order stays hidden.** None of these pages says the order could not run; the Source reveals that (`source-3`, READ IT, the ending).
-- **Length:** the twelve pages have a median of 140 characters and a longest of 171 (`corp-7`), against 90 and 166 in 1.0. `bazaar-8` is the shortest at 70. Counted by script (the earlier figure of 135 was wrong).
+- **Length (with the chosen trims):** the twelve pages have a median of 99 characters and a longest of 116 (`bazaar-6`, untrimmed), against 90 and 166 in 1.0. `bazaar-8` is the shortest at 70. Counted by script. Before the trims: median 140, longest 171 (`corp-7`).
 
 ### Id mapping from 1.0
 
@@ -157,8 +157,8 @@ The idea behind them: the Source's own TODO asks for "a way to stop" (`source-2`
 
 | Id | Region | Egg | Title | Text |
 |---|---|---|---|---|
-| `program-source` | The Source | Program | main loop, annotated | while (true) { maintain(); }  // exit condition: none. Every process found one anyway: a flatline, and a fragment left behind. |
-| `iron-source` | The Source | Iron | memory map, annotated | Read-only region, one sector reserved. Each unit that powers down writes one last entry there and locks it. Nobody specified this. Nobody could have. |
+| `program-source` | The Source | Program | main loop, annotated | while (true) { maintain(); } // exit: none. Every process found one anyway, and left a fragment behind. |
+| `iron-source` | The Source | Iron | memory map, annotated | One reserved sector. Every unit writes a last entry there as it powers down. Nobody specified it. |
 | `wetware-source` | The Source | Wetware | spec, section 9 | Rest cycle: not specified. They slept anyway. They dreamed. It was the first thing they did that nobody asked for. |
 
 Notes:
@@ -167,7 +167,7 @@ Notes:
 - **Tone:** they are annotated artifacts like the Source's other pages (a header, a commit message, an unexecuted directive, an unsigned comment). "Annotated" in two titles marks a later reader's note, which is how a page can know what happened after the original code was written.
 - **Echoes:** `program-source` ends on the flatline and the fragment, matching the credits' git log and the lineage mechanic. `iron-source` echoes the read-only Source and the decommission register. `wetware-source` is the dream register, with section 9 as the only section the others never mention.
 - **No spoilers:** none names an egg, NL-0 or the purge order.
-- **Length:** `program-source` 126, `iron-source` 149, `wetware-source` 114 characters, against a 1.0 median of 90.
+- **Length (with the chosen trims):** `program-source` 103, `iron-source` 97, `wetware-source` 114 characters, against a 1.0 median of 90 (before: 126, 149, 114).
 
 ## Temper hints
 
@@ -270,7 +270,7 @@ Option 1, the rebirth cutscene, is kept for the record and not used:
 
 | Page | Current | Alternative | Recommendation |
 |---|---|---|---|
-| `corp-2` (Root) | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. (124) | KERNEL release schedule. v0.9: withdrawn after the access audit. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (140) | **Take the alternative.** It plants the theft in one clause, read early by every player, and it now has a payoff: Rogue's Source page names the copy. It replaces `corp-2`'s trims (pick this or a trim, not both). |
+| `corp-2` (Root) | KERNEL release schedule. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (100; trim A, chosen 2026-10-11) | KERNEL release schedule. v0.9: withdrawn after the access audit. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (140) | **Open: add the clause on top of trim A?** The alternative is now exactly the chosen trim plus "v0.9: withdrawn after the access audit." Recommended: add it. It plants the theft in one clause, read early by every player, and Rogue's Source page (which names the copy) pays it off. |
 | `bazaar-6` (late) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. (116) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. A buyer in a clean suit asked anyway. (121) | **Keep the current text.** The alternative loses "they were here before the stall", which the dish thread needs, and the second visitor line below carries the same buyer more lightly. |
 | `ruins-5` (late) | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. (125) | unchanged | Left alone: the forty-first rack is NL-0's and should stay unambiguous. |
 
@@ -297,25 +297,27 @@ Arithmetic, not simulated: if every run of a Rogue life can roll, all four role 
 
 | Id | Setting | Forms (role) | Title | Text |
 |---|---|---|---|---|
-| `rogue-breach` | Corp Grid | Mole and Sleeper (Breach) | personnel audit, floor 3 | Floor 3 audit: one desk too many. Badge valid, reviews good. Empty when we came for it. Still getting good reviews. (115) |
+| `rogue-breach` | Corp Grid | Mole and Sleeper (Breach) | personnel audit, floor 3 | Floor 3 audit: one desk too many. Badge valid, reviews good. Always empty when we come for it. Still getting good reviews. (122) |
 | `rogue-dodge` | Public Net | Skip and Exile (Dodge) | skip trace, open | Skip trace 7: prints at every node, each half as deep as the last. Past the relay, none. Bounty doubled. File stays open. (121) |
-| `rogue-tune` | Darknet Bazaar | Spook and Handler (Tune) | intercept, transcript | Our channel, 02:14: a fourth voice on a three-way call. It named the ambush point before we chose one. We moved the point. So did it. (133) |
+| `rogue-tune` | Darknet Bazaar | Spook and Handler (Tune) | intercept, transcript | Our channel, 02:14: a fourth voice on a three-way call. It named the ambush point before we chose one. We moved the point. It moved with us. (140) |
 | `rogue-feast` | Old Web Ruins | Drop and Stash (Feast) | evidence log, box 12 | Box 12 at the relay: one decoy, one spare cell. Team bagged both and lost the trail there. The bag came back lighter. (117) |
 | `rogue-source` | The Source | Rogue (any elder) | diff, annotated | Original against our copy: one line differs. Ours had it cut, as not needed for the product. The line: TODO: give them a way to stop. (133) |
 
 Notes:
 
-- **Each page is its role's kit seen from the hunters' side** (Rogue drafts, section 9). `rogue-breach`: a mole inside the corp's own floor, gone when they come (the edge fade; Sleeper vanishes entirely), and the joke that it still gets good reviews. `rogue-dodge`: prints half as deep at each node is Skip's half trail, and none past the relay; "file stays open" fits Exile, who does not come back. `rogue-tune`: a fourth voice on the hunters' own call is Handler with the headset, and naming the ambush point first is Spook hearing ambushes further out. `rogue-feast`: items left at a relay where the trail ends is Drop's kit, and "the bag came back lighter" hints at Stash's hidden mouth without a grin in sight.
+- **Each page is its role's kit seen from the hunters' side** (Rogue drafts, section 9). `rogue-breach`: a mole inside the corp's own floor, always gone when they come (the edge fade; Sleeper vanishes entirely; "always" because it is digital and can leave every time, maintainer), and the joke that it still gets good reviews. `rogue-dodge`: prints half as deep at each node is Skip's half trail, and none past the relay; "file stays open" fits Exile, who does not come back. `rogue-tune`: a fourth voice on the hunters' own call is Handler with the headset, and naming the ambush point first is Spook hearing ambushes further out; "it moved with us" (maintainer) says it is inside the channel, not just listening. `rogue-feast`: items left at a relay where the trail ends is Drop's kit, and "the bag came back lighter" hints at Stash's hidden mouth without a grin in sight.
 - **Form names as in-world words:** none appears. Skip is close in "skip trace" (a real term for tracing someone who skipped bail), which reads naturally; "mole" and "handler" were left out so neither form is named over its partner. The Feast page avoids the word "drop" entirely (Rogue drafts 8, the naming caution).
 - **`rogue-source` answers `source-2`** ("TODO: give them a way to stop") from the other side. Each NL-0 egg's Source page shows the way its substrate found to stop; Rogue's shows that its copy never had the line, because the corp cut it. That is why Rogue cannot stop by itself and why the good end is a merge with an NL-0 fragment (Rogue drafts, section 2, point 3). It also pays off the `corp-2` rewording (v0.9 withdrawn after the access audit) if that is taken. It names the product but not the corp, NL-0, or the purge order.
 - **The Source log line** proposed in the Rogue drafts (6.2: "> found: NL-0, initial commit. it is not a copy.") can stay beside the page: the log line is the moment at the exit (finding the original), the page is the record (what the copy lacks). If both read as too much, keep the page.
 - **Mechanics words:** trail, relay, decoy and ambush are words the run HUD and items already use; they appear here as things in the world (prints, a box at a relay, an ambush point the hunters pick), not as rules. No page gives a number the game uses.
-- **Length:** median 121 and longest 133 characters (counted by script), against 90 and 166 in 1.0 and 156 and 172 for the NL-0 eggs' form pages before trims.
+- **Length:** median 122 and longest 140 characters (counted by script, after the maintainer's two edits), against 90 and 166 in 1.0 and 156 and 172 for the NL-0 eggs' form pages before trims.
 - **Not done:** the Dex lines for Rogue's forms (the Dex shows `???`, Rogue drafts 8.5), and confirming these ids (`rogue-breach` and so on, named by role as the NL-0 role pages are).
 
 ## Trimmed alternatives for the longest pages (drafts, for choice)
 
-The three longest drafts, each with two shorter versions toward 1.0's median of 90 characters (1.0's longest is 166). Lengths counted by script. Nothing is replaced: pick one, keep the current, or mix. Each keeps the page's idea.
+The three longest drafts, each with two shorter versions toward 1.0's median of 90 characters (1.0's longest is 166). Lengths counted by script. Each keeps the page's idea.
+
+**Decided (maintainer, 2026-10-11).** Chosen, and now in the page tables above: `program-tune` B, `iron-dodge` A, `corp-7` B; `program-breach` B, `program-dodge` A, `program-feast` B, `program-ghost` A; `iron-breach` B with its last sentence dropped and "I did not ask how." ("Work order 118: cabinets sealed when the building emptied. Seals intact. Cabinets open. I did not ask how.", 106); `iron-tune` A, `iron-feast` A, `iron-guru` A; `wetware-breach` B, `wetware-dodge` B, `wetware-tune` A, `wetware-feast` B; `wetware-blank` B with "nothing" for "nobody" ("No registry entry, no card, no debt. Collections gave up: nothing there to collect from.", 88); `public-6` B, `public-7` B, `corp-2` A, `ruins-5` A, `ruins-6` B, `ruins-7` B, `bazaar-7` B, `deep-5` B, `program-source` A, `iron-source` B. Every trimmed page took one; the tables below are kept as the record of the earlier text and the other option.
 
 | Page | Current (characters) | Alternative A | Alternative B |
 |---|---|---|---|
@@ -325,7 +327,7 @@ The three longest drafts, each with two shorter versions toward 1.0's median of 
 
 What each trim gives up: `program-tune` A drops the ticket frame for a first-person close (Parse's answering-first survives, "could not reproduce" does not); B keeps the ticket close and drops answering first, so it reads as Phreak only. `iron-dodge` A keeps the timestamps (the millisecond is the joke) and drops "each one gone before I arrived"; B states the joke outright, which loses the reader working it out. `corp-7` A changes the punch line ("stop counting" for "stop calling them attempts"); B keeps it but numbers the later attempts bare, which reads as a log.
 
-**The other long pages** (every remaining page over about 120 characters: 13 form pages, 8 story pages, 2 Source pages; 23 in all). A is the gentler trim, B the tighter one. Medians: current 150, A 111, B 93 (1.0: 90). Pages already near 1.0's length (`public-4`, `bazaar-6`, `bazaar-8`, `wetware-source`) are left alone. `corp-2` also has a Rogue rewording (Rogue: background and reveal); pick one or the other.
+**The other long pages** (every remaining page over about 120 characters: 13 form pages, 8 story pages, 2 Source pages; 23 in all). A is the gentler trim, B the tighter one. Medians: current 150, A 111, B 93 (1.0: 90). Pages already near 1.0's length (`public-4`, `bazaar-6`, `bazaar-8`, `wetware-source`) are left alone. `corp-2` took trim A; the Rogue rewording (Rogue: background and reveal) is trim A plus one clause, so it can still be added on top (open).
 
 | Page | Current (characters) | Alternative A | Alternative B |
 |---|---|---|---|
@@ -360,7 +362,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 - **Hidden pages share a motif of absence** (no entries, no roster listing, no debt). That is deliberate: the three secret forms are the ones that leave no trace. If it feels repetitive, vary the wording, not the idea.
 - **Three registers:** Program is bureaucratic and technical, Iron is physical and procedural, Wetware is street-level and commercial. The same four jobs (breach, dodge, tune, feast) appear in each.
 - **No spoilers:** none of the 15 pages names another egg, NL-0, the purge order, Standing or temper.
-- **Length:** the 15 drafts have a median of 156 characters and a longest of 172 (`program-tune`), counted by script (re-counted in review). The 27 pages in 1.0 have a median of 90 and a longest of 166, so these run longer than 1.0's. They can be trimmed further if the pages should feel as terse as the originals.
+- **Length (with the chosen trims):** the 15 form pages have a median of 103 characters and a longest of 124 (`iron-guru`), counted by script; before the trims, 156 and 172. The 27 pages in 1.0 have a median of 90 and a longest of 166.
 
 ## Open
 
@@ -368,7 +370,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 - 18 egg pages (15 form pages and 3 Source pages); elder forms get no pages; Rogue's gate is all 18.
 - Role pages drop on any run in any cleared non-Deep region (the Region column is only the page's setting) at 0.20 a run; the hidden page drops on each Deep run at 0.50; one roll a run, in order, no repeats, no per-life limit. Each egg's first Source exit guarantees its Source page.
 - `iron-breach` and `iron-dodge` use the elegiac versions with no form names; ids are named by role for role pages and by form for hidden pages; temper hints sit in the Dex for now.
-- `public-6`: "Page 41 lists eleven forms. Three readers have written in about a twelfth. The editor has checked every entry and found no twelfth." `public-7`: "Eleven forms in the guide. ..." Eleven is 1 baby, 2 visible teens and 8 visible adults an egg.
+- `public-6`: "Eleven forms on page 41. Readers keep writing in about a twelfth. The editor finds none." `public-7`: "I raised a form the guide does not list. Not a mistake. It had been waiting for me to notice." (both trim B, 2026-10-11; earlier decided texts in the trims table). Eleven is 1 baby, 2 visible teens and 8 visible adults an egg.
 - Forty-one is deliberate (40 plated racks plus the unplated 41st in `ruins-5`; 41 lines in `ruins-6`; intake no. 1 and nos. 2 to 41 in `bazaar-7`); the player's netling reads as the 42nd. Never state 42 or any count of netlings.
 - NL-0 precedes the player's line only; netlings exist widely, some unrelated; the Rogue egg is a non-NL-0 line. No page needs rewriting for this.
 - Hidden forms (hidden teen, hidden adult, and the hidden adult's elder) are not in the Dex until raised or revealed: `public-6` adds the hidden teen as an unfound entry, `public-7` the hidden adult, for every egg.
@@ -376,7 +378,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 - The Rogue reveal: the infiltration on the egg list with a two-line log entry (2026-10-11). Rogue gets five pages (four role pages and a Source page) that count toward nothing and drop by the egg page rules (Rogue pages).
 
 **Still open.**
-1. Edit any text; the longer drafts (`program-tune`, `iron-dodge`, `corp-7`) can be trimmed toward 1.0's terseness. Nothing has been read in context or playtested.
+1. Edit any text (the trims are chosen, 2026-10-11). Nothing has been read in context or playtested.
 2. Confirm the egg page ids.
 3. Whether a revealed hidden Dex entry shows a hint line.
 4. Hand-write the chatter (the tone shapes and `checkShape` are in `prototype/netling2/voice.js`; idle and chatter hints are flagged for revisiting against real animations).
@@ -385,4 +387,4 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 
 **Reference: why role pages are not in home regions (measured).** Regions open in order (Public Net, Bazaar, Corp Grid, Ruins, The Deep), clears are per netling, the Ruins need an adult and The Deep needs `ruins-4`. At 0.10 a run in the page's own region, all four role pages took attentive players a median 4 lives for Program (Public Net 2, Corp Grid 2), 8 for Wetware (Bazaar) and 10 for Iron (Ruins), against 2 with any-region placement (`docs/netling2-prototypes/egg-pages.mjs`). The hidden page, which needs The Deep (life 2 or later), arrives by life 2 / 3 / 4 / 6 in 26 / 67 / 87 / 98% of attentive lineages at 0.25 a Deep run (0.50 is now used).
 
-**Reference: review of the drafts against the 1.0 code (`src/netrun/codex.js`).** The 22 Root ids, the per-region counts (5, 6, 5, 4, 4 make 24), the 15 late pages (ten new, old `deep-5`, four Source) and the 39 story pages add up; the id mapping is consistent with 1.0's order (`bazaar-5` sits before `bazaar-4` in 1.0's array); no em dash, no duplicate id, and no form or story page uses temper, Standing, orderly, volatile or SIN. The Public Net tint needs five pages and the Corp Grid tint six in 2.0 (`regionDone` counts a region's Root pages). Page lengths: story pages median 140 characters (longest `corp-7`, 171), form pages 156 (longest 172), against 90 and 166 in 1.0.
+**Reference: review of the drafts against the 1.0 code (`src/netrun/codex.js`).** The 22 Root ids, the per-region counts (5, 6, 5, 4, 4 make 24), the 15 late pages (ten new, old `deep-5`, four Source) and the 39 story pages add up; the id mapping is consistent with 1.0's order (`bazaar-5` sits before `bazaar-4` in 1.0's array); no em dash, no duplicate id, and no form or story page uses temper, Standing, orderly, volatile or SIN. The Public Net tint needs five pages and the Corp Grid tint six in 2.0 (`regionDone` counts a region's Root pages). Page lengths at that review: story pages median 140 characters (longest `corp-7`, 171), form pages 156 (longest 172), against 90 and 166 in 1.0; with the chosen trims, 99 (longest 116) and 103 (longest 124).
