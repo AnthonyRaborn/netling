@@ -1,6 +1,6 @@
 # Netling 2.0 codex drafts
 
-Status: first drafts of the 15 form pages (five per egg: one page per role, covering both of the role's forms, plus one hidden-form page), twelve new story pages, three Source pages (one per egg) and 18 temper hints, for the maintainer to edit. Nothing here is implemented, and none of it has been read in context or playtested (the idle and chatter shapes behind the temper hints are tested as code in `prototype/netling2/voice.js`; see Temper hints). Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints. Contents: What these pages are, Style, Program, Iron, Wetware, New story pages (with the id mapping from 1.0 and the late flag), Source pages, Temper hints, Cross-checks, Open (decided items, what is still open).
+Status: first drafts of the 15 form pages (five per egg: one page per role, covering both of the role's forms, plus one hidden-form page), twelve new story pages, three Source pages (one per egg) and 18 temper hints, for the maintainer to edit. Nothing here is implemented, and none of it has been read in context or playtested (the idle and chatter shapes behind the temper hints are tested as code in `prototype/netling2/voice.js`; see Temper hints). Decisions and context are in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file holds the page text and the temper hints. Since then: the Rogue reveal is decided and Rogue's five pages are drafted (Rogue: background and reveal; Rogue pages; 2026-10-11). Contents: What these pages are, Style, Program, Iron, Wetware, New story pages (with the id mapping from 1.0 and the late flag), Source pages, Temper hints, State chatter, Rogue: background and reveal, Rogue pages, Trimmed alternatives, Cross-checks, Open (decided items, what is still open).
 
 ## What these pages are
 
@@ -230,40 +230,88 @@ Notes:
 - Tested: lowercase, no digits, no em dash, 62 characters or less, ids and groups new, and every line keeps its shape in the machine voicing at all four temper levels. The machine voicing of an unsteady Program line used to be able to swap the two halves, which `checkShape` rejects; it is now always a clipped clause, so the machine and hand-written rules agree.
 - Open: nothing further for this section.
 
-## Rogue: background and reveal (drafts, for choice)
+## Rogue: background and reveal
 
 Direction (decided, maintainer): Rogue stays **indirect and background** until it is unlocked. Story: Rogue grew from NL-0's precursor code, copied out of the NL-0 corp by industrial espionage and finished by a second, unnamed corp; it escaped, and that corp chases it hard, to cover itself before the NL-0 corp finds out what it took. Once the gate is met (the ending and all 18 egg pages), Rogue is explained only weakly: a brief cutscene at the next death and rebirth, or a small animation of the Rogue egg infiltrating the list of eggs.
 
-Ground rules for these drafts: nothing names Rogue, the second corp or the theft; nothing is needed to play; no new pages, so the counts stay (39 story pages, 18 egg pages); every touch is either an optional rewording of an existing page or a line outside the codex.
+Ground rules for the background touches: nothing names Rogue, the second corp or the theft; nothing is needed to play; no new story or egg pages, so the counts stay (39 story pages, 18 egg pages); every touch is either an optional rewording of an existing page or a line outside the codex. Rogue's own pages (below) come after the reveal and may say more.
 
-**Optional rewordings of three existing pages** (keep the current text if these say too much):
+**Status (2026-10-11).** Decided by the maintainer: the reveal (option 2 with option 1's last two lines as a log entry), Rogue's page set (four role pages and a Source page) and that those pages count toward nothing. Proposals for choice: each background touch below has a recommendation, revised against the Rogue decisions made since the first drafts (the sweep, the trail, marks, the good end; [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md), 6.1). Nothing here is implemented or read in context.
 
-| Page | Current | Alternative | What it plants |
+### The reveal (decided)
+
+**Option 2, the infiltration on the egg list, with option 1's last two lines as a one-time log entry** (decided, maintainer, 2026-10-11).
+
+- **When:** the first time the egg choice screen opens after the gate is met (the ending has played and all 18 egg pages are found; every egg is open at every rebirth, Rogue drafts 6.1 item 1). That is the next rebirth after whichever of the two came last.
+- **The animation:** the three eggs draw as usual; after about a second a fourth row opens below them and its label types in one character at a time ("r", "ro", ... "rogue", 400 ms a step, so nothing changes faster than three times a second); its egg sprite fills in over three steps with one pixel row in each hidden form's colour (Ghost, Guru, Blank: Rogue draws on the three hidden lines, 6.1 item 2); then one status line: "unindexed egg in the list. it was not invited."
+- **Reduced motion:** the fourth row is simply there, with the status line. **Later visits:** the four rows plainly.
+- **The log entry,** written once at that rebirth so a player who passes the egg screen quickly still sees something:
+  ```
+  > rogue/   owner: none   source: copied   status: running
+  > it was not invited. it is asking anyway.
+  ```
+  "copied", "owner: none" and "running" carry the backstory weakly: taken from somewhere, belongs to no one now, on the move.
+- **The echo chain:** "it was not invited" appears three times, each a step on: the status line (the egg arrives), the log ("it is asking anyway") and the good end's epilogue ("it stayed", Rogue drafts 5.4). Keep the three together if any is reworded.
+- **Not designed:** the Rogue egg sprite itself (the ten forms are drawn, the egg is not), and what the egg screen looks like with four rows on a phone.
+
+Option 1, the rebirth cutscene, is kept for the record and not used:
+```
+> flatline logged. writing fragment...
+> preparing next culture.
+> egg directory: program/  iron/  wetware/
+> warning: unindexed entry in egg directory.
+> rogue/   owner: none   source: copied   status: running
+> it was not invited. it is asking anyway.
+```
+
+### Background touches (proposals, with a recommendation each)
+
+**Rewordings of existing pages.**
+
+| Page | Current | Alternative | Recommendation |
 |---|---|---|---|
-| `corp-2` (Root) | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. (124) | KERNEL release schedule. v0.9: withdrawn after the access audit. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (140) | An earlier build left the corp under an audit: the precursor was taken. |
-| `bazaar-6` (late) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. (116) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. A buyer in a clean suit asked anyway. (121) | Someone corporate is searching the street for unlabeled things. It loses "they were here before the stall", which the dish thread uses (see Notes, A thread across regions), so take it only if that line moves elsewhere. |
+| `corp-2` (Root) | KERNEL release schedule. v1.0 (alpha): software only, controlled environment, sector 7F. Later builds: not for distribution. (124) | KERNEL release schedule. v0.9: withdrawn after the access audit. v1.0 (alpha): software only, sector 7F. Later builds: not for distribution. (140) | **Take the alternative.** It plants the theft in one clause, read early by every player, and it now has a payoff: Rogue's Source page names the copy. It replaces `corp-2`'s trims (pick this or a trim, not both). |
+| `bazaar-6` (late) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. They were here before the stall. (116) | Cultures, warm: ask. Cultures, cold: do not ask. Cultures, unlabeled: not for sale. A buyer in a clean suit asked anyway. (121) | **Keep the current text.** The alternative loses "they were here before the stall", which the dish thread needs, and the second visitor line below carries the same buyer more lightly. |
 | `ruins-5` (late) | Annex 2: forty racks, forty serial plates. Racks found: forty-one. The forty-first has no plate and no cable, and is running. (125) | unchanged | Left alone: the forty-first rack is NL-0's and should stay unambiguous. |
 
-**Background lines outside the codex** (text only, no rule; they start once the ending has played, so they arrive while the player finishes the last egg pages and lead into the reveal):
-- **Visitors** (1.0's visit log, rare variants): "> a stray pinged in. it would not say whose it was, and left before the handshake." / "> a stray pinged in, looked over its shoulder, and pinged out."
-- **Netrun log** (the Deep and the Source, rare, on entering a node): "a sweep passed through here. it was not looking for you." / "trace residue on this node. not KERNEL's pattern."
-- **Job board** (a posting already withdrawn, cannot be taken): "WANTED: any unindexed process, running. no questions. buyer will not give a name. (withdrawn)"
-- **Chatter** (lineage group, after the ending): "something out there runs almost like me. it is running from someone."
+**Lines outside the codex.** They start once the ending has played, so they arrive while the player finishes the last egg pages and lead into the reveal. Each is text only, no rule.
 
-**The reveal, two options** (they can be combined):
-1. **Rebirth cutscene.** Once, at the first death and rebirth after the gate is met; the terminal style of the opening compile screen; skippable; about six lines at the opening's typing speed:
-   ```
-   > flatline logged. writing fragment...
-   > preparing next culture.
-   > egg directory: program/  iron/  wetware/
-   > warning: unindexed entry in egg directory.
-   > rogue/   owner: none   source: copied   status: running
-   > it was not invited. it is asking anyway.
-   ```
-   "copied", "owner: none" and "running" carry the whole backstory weakly: taken from somewhere, belongs to no one now, on the move.
-2. **Infiltration on the egg list.** On the egg choice screen, the first time it opens after the gate: the three eggs draw as usual; after about a second a fourth row opens below them and its label types in one character at a time ("r", "ro", ... "rogue", 400 ms a step, so nothing changes faster than three times a second); its egg sprite fills in over three steps with one pixel row in each hidden form's colour (Ghost, Guru, Blank: it is built on the three hidden lines); then one status line: "unindexed egg in the list. it was not invited." Reduced motion: the fourth row is simply there, with the status line. Later visits show the four rows plainly.
+| Where | First draft | Revised | Recommendation and why |
+|---|---|---|---|
+| Visitors | "> a stray pinged in. it would not say whose it was, and left before the handshake." / "> a stray pinged in, looked over its shoulder, and pinged out." | "visitor: saw one like you on the way in. it would not say whose it was." (71) | **Take the revised line.** 1.0's visitor lines are things a visitor says ("visitor: ...", `src/chatter.js`, group `visitor`), not log entries, so the drafts did not fit the format. |
+| Job board | "WANTED: any unindexed process, running. no questions. buyer will not give a name. (withdrawn)" | "visitor: someone is paying for unindexed processes. no name. i said no." (71) | **Take the revised line, as a second visitor line.** The job board is the contracts (1.0's posted jobs; in 2.0 the clinic job uses it too, `sim/push-sweep.mjs`), and every posting there can be taken: a withdrawn one would be a new contract state for one line of flavor. The buyer from the `bazaar-6` alternative lives here instead. |
+| Netrun log (the Deep and the Source, rare, on entering a node) | "a sweep passed through here. it was not looking for you." / "trace residue on this node. not KERNEL's pattern." | unchanged (56, 49) | **Take both, for NL-0 netlings only.** Once Rogue is played, the sweep is its hunters' name (the sweep at home, Rogue drafts 6.1 item 8), so the first line foreshadows a word the player will learn; on a Rogue run "not looking for you" would be false. 1.0 already says "corp sweeps were heavy last night" (`vis-corp`), so "sweep" reads as ordinary until the reveal. |
+| Chatter (Lineage group, after the ending) | "something out there runs almost like me. it is running from someone." | unchanged (68) | **Take it.** It needs a `when` (the ending has played, NL-0 netlings only) like the other Lineage lines, and its four temper voicings must be hand-written in the egg's shapes (`checkShape`, Temper hints) before it ships. |
 
-**Recommendation:** option 2 as the reveal (it happens where the choice is made and needs no extra screen), with option 1's last two lines as a one-time log entry at that rebirth, so a player who skips past the egg screen still sees something. Not designed here: Rogue's own pages, which can say more about the second corp once the player has the egg.
+## Rogue pages (drafts, for choice)
+
+Five pages: one per role, each covering the adult and its elder (option C, as the NL-0 eggs' role pages), and a Source page. Rogue has no hidden form, so there is no hidden page.
+
+**Rules (decided, maintainer, 2026-10-11):**
+- **They count toward nothing:** not Root Access, not the ending, not the Rogue gate (they cannot drop before it), not any unlock or tint. The 39 story pages and 18 egg pages stay as they are; these are a collection of 5 more.
+- **Drops follow the egg page rules:** a role page rolls at 0.20 on a Rogue run in any cleared non-Deep region (one roll a run, made on the way out, in order, no repeats, no per-life cap), and Rogue's first Source exit guarantees its Source page. Only a Rogue netling finds them, as each egg finds only its own pages.
+
+Arithmetic, not simulated: if every run of a Rogue life can roll, all four role pages arrive within one life about half the time at 18 runs and three times in four at 24 (a binomial count of four successes at 0.20). Elder runs into the Deep and the Source do not roll role pages, so this is an upper bound for one life.
+
+**Register.** The NL-0 eggs' pages are the world around the netling (Program's tickets, Iron's work orders, Wetware's clinic notes). Rogue's are **the hunters' own files**: the second corp's security paperwork (an audit, a skip trace, an intercept, an evidence log), in the first person plural. "We" is the corp, and the pages show it losing. That gives Rogue a fourth register and says more about the second corp, as the reveal drafts allowed, without naming it, the theft's victim or Rogue. The corp calls nothing by name: no page says Rogue, asset or netling.
+
+| Id | Setting | Forms (role) | Title | Text |
+|---|---|---|---|---|
+| `rogue-breach` | Corp Grid | Mole and Sleeper (Breach) | personnel audit, floor 3 | Floor 3 audit: one desk too many. Badge valid, reviews good. Empty when we came for it. Still getting good reviews. (115) |
+| `rogue-dodge` | Public Net | Skip and Exile (Dodge) | skip trace, open | Skip trace 7: prints at every node, each half as deep as the last. Past the relay, none. Bounty doubled. File stays open. (121) |
+| `rogue-tune` | Darknet Bazaar | Spook and Handler (Tune) | intercept, transcript | Our channel, 02:14: a fourth voice on a three-way call. It named the ambush point before we chose one. We moved the point. So did it. (133) |
+| `rogue-feast` | Old Web Ruins | Drop and Stash (Feast) | evidence log, box 12 | Box 12 at the relay: one decoy, one spare cell. Team bagged both and lost the trail there. The bag came back lighter. (117) |
+| `rogue-source` | The Source | Rogue (any elder) | diff, annotated | Original against our copy: one line differs. Ours had it cut, as not needed for the product. The line: TODO: give them a way to stop. (133) |
+
+Notes:
+
+- **Each page is its role's kit seen from the hunters' side** (Rogue drafts, section 9). `rogue-breach`: a mole inside the corp's own floor, gone when they come (the edge fade; Sleeper vanishes entirely), and the joke that it still gets good reviews. `rogue-dodge`: prints half as deep at each node is Skip's half trail, and none past the relay; "file stays open" fits Exile, who does not come back. `rogue-tune`: a fourth voice on the hunters' own call is Handler with the headset, and naming the ambush point first is Spook hearing ambushes further out. `rogue-feast`: items left at a relay where the trail ends is Drop's kit, and "the bag came back lighter" hints at Stash's hidden mouth without a grin in sight.
+- **Form names as in-world words:** none appears. Skip is close in "skip trace" (a real term for tracing someone who skipped bail), which reads naturally; "mole" and "handler" were left out so neither form is named over its partner. The Feast page avoids the word "drop" entirely (Rogue drafts 8, the naming caution).
+- **`rogue-source` answers `source-2`** ("TODO: give them a way to stop") from the other side. Each NL-0 egg's Source page shows the way its substrate found to stop; Rogue's shows that its copy never had the line, because the corp cut it. That is why Rogue cannot stop by itself and why the good end is a merge with an NL-0 fragment (Rogue drafts, section 2, point 3). It also pays off the `corp-2` rewording (v0.9 withdrawn after the access audit) if that is taken. It names the product but not the corp, NL-0, or the purge order.
+- **The Source log line** proposed in the Rogue drafts (6.2: "> found: NL-0, initial commit. it is not a copy.") can stay beside the page: the log line is the moment at the exit (finding the original), the page is the record (what the copy lacks). If both read as too much, keep the page.
+- **Mechanics words:** trail, relay, decoy and ambush are words the run HUD and items already use; they appear here as things in the world (prints, a box at a relay, an ambush point the hunters pick), not as rules. No page gives a number the game uses.
+- **Length:** median 121 and longest 133 characters (counted by script), against 90 and 166 in 1.0 and 156 and 172 for the NL-0 eggs' form pages before trims.
+- **Not done:** the Dex lines for Rogue's forms (the Dex shows `???`, Rogue drafts 8.5), and confirming these ids (`rogue-breach` and so on, named by role as the NL-0 role pages are).
 
 ## Trimmed alternatives for the longest pages (drafts, for choice)
 
@@ -325,6 +373,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 - NL-0 precedes the player's line only; netlings exist widely, some unrelated; the Rogue egg is a non-NL-0 line. No page needs rewriting for this.
 - Hidden forms (hidden teen, hidden adult, and the hidden adult's elder) are not in the Dex until raised or revealed: `public-6` adds the hidden teen as an unfound entry, `public-7` the hidden adult, for every egg.
 - No lore page hints at elders; Root Access unlocks the capability and the `<<RECORD CORRUPTED>>` Dex rows are for the player.
+- The Rogue reveal: the infiltration on the egg list with a two-line log entry (2026-10-11). Rogue gets five pages (four role pages and a Source page) that count toward nothing and drop by the egg page rules (Rogue pages).
 
 **Still open.**
 1. Edit any text; the longer drafts (`program-tune`, `iron-dodge`, `corp-7`) can be trimmed toward 1.0's terseness. Nothing has been read in context or playtested.
@@ -332,6 +381,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 3. Whether a revealed hidden Dex entry shows a hint line.
 4. Hand-write the chatter (the tone shapes and `checkShape` are in `prototype/netling2/voice.js`; idle and chatter hints are flagged for revisiting against real animations).
 5. Retest the egg page rates and the late-page counts once 2.0 exists.
+6. Rogue: choose the background touches (each has a recommendation), edit the five Rogue pages, confirm their ids, and whether the Source log line stays beside `rogue-source`.
 
 **Reference: why role pages are not in home regions (measured).** Regions open in order (Public Net, Bazaar, Corp Grid, Ruins, The Deep), clears are per netling, the Ruins need an adult and The Deep needs `ruins-4`. At 0.10 a run in the page's own region, all four role pages took attentive players a median 4 lives for Program (Public Net 2, Corp Grid 2), 8 for Wetware (Bazaar) and 10 for Iron (Ruins), against 2 with any-region placement (`docs/netling2-prototypes/egg-pages.mjs`). The hidden page, which needs The Deep (life 2 or later), arrives by life 2 / 3 / 4 / 6 in 26 / 67 / 87 / 98% of attentive lineages at 0.25 a Deep run (0.50 is now used).
 

@@ -10,7 +10,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 5. **2026-10-11: the good end's second round and inheritance decided** (6.1, items 41 to 47) and measured (7.6): only a clean Source exit arms the good end, the mixed egg (any egg after a good end; the Rogue as parent; a Rogue trait to choose, 9.4a), inheritance needs a full life on every egg, and the crossings between Rogue and the NL-0 eggs are gated. The good end now comes in 24% of first Rogue lives (33% of all Rogue lives; a median 2.8 Rogue lives, about 15 days). Then **the Rogue trait decided and measured** (item 48, 7.7): capture halves (3.4% to 1.7% of Rogue lives) but the good end barely moves (35% a Rogue life) and the gap between the lines stays (Dodge about 65%, the others 24 to 29%), since the good end is gated by clean Source exits, which ordinary ICE decides. **Next: the maintainer's call on the line gap (levers in 7.7), then the Deep's disconnects (item 45).**
    Earlier: **Simulator stages 1 to 3 built and measured** (7.1 to 7.5): home life, the hunt in runs (every run setting decided, 7.4) and the lineage side (7.5). Stage 3's first measure: a Rogue line of a player who runs reaches the good end in its first Rogue life half the time and within three 89% of the time (a median 1.5 Rogue lives, about 8 real days), because the Rogue elder is easy at the decided feat tiers and the hunt rarely bites after a Source exit. The good end's length has no target yet; that, with difficulty (6.3, item 5), is the maintainer's next call.
 6. **2026-10-11: the Deep's disconnects decided** (6.1, item 50; 7.12): no ambush in the Deep's cordon and the Deep's ambush share 0.15, so Rogue adults disconnect 1.49x the hidden form's there (1.72x with the trait alone, 1.84x before it); both kept as levers for a playtest.
-7. Then the text (section 10).
+7. **The text, first pass (2026-10-11):** the reveal is decided (the egg list with a two-line log entry) and Rogue's five pages (one per role and a Source page; they count toward nothing) are drafted with the background touches' recommendations, in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (Rogue: background and reveal; Rogue pages). Still to write: the rest of section 10.
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
 
@@ -1136,6 +1136,6 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 
 ## 10. Not done
 
-- The reveal choice, the background touches and Rogue's own codex pages (codex drafts).
+- ~~The reveal choice, the background touches and Rogue's own codex pages.~~ The reveal decided and the pages and background touches drafted for choice (codex drafts, 2026-10-11).
 - The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance).
 - Simulated since (section 7): home life, the hunt in runs and the lineage side. Numbers not marked decided are starting values, and the targets in 4.4 are a high-side aim.
