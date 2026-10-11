@@ -129,6 +129,10 @@ add('now-netrun-sweep', 'netrun-sweep.mjs', [LIVES], 'now-rules', {}, 300);
 add('now-challenge-sweep', 'challenge-sweep.mjs', [RUNS(2000)], 'now-rules', {}, 300);
 add('now-foresight-sweep', 'foresight-sweep.mjs', [RUNS(3000)], 'now-rules', {}, 300);
 
+// The full-life inheritance rule (decided 2026-10-11; sim.js INHERIT): only a death at the end of the life cycle passes the trait line on. The
+// lineage sweep is the one baseline measure that carries fragments from life to life, so it is re-run under the rule (filter "inherit-").
+for (const [a, n] of [['attentive', 15], ['daredevil', 20], ['casual', 40]]) add(`inherit-lineage-${a}`, 'lineage-sweep.mjs', [a, SMOKE ? 3 : 200, SMOKE ? 3 : n], 'now-rules', { JSON: '1', INHERIT: '{"fullLife":true}' }, 600);
+
 const outFile = (j) => join(out, `${j.name}.${j.env.JSON ? 'json' : 'txt'}`);
 // Resumable: a job whose output exists is skipped (outputs are written only after a clean exit). --force reruns everything.
 const todo = jobs.filter((j) => (!filter || j.name.includes(filter)) && (process.argv.includes('--force') || !existsSync(outFile(j)))).sort((a, b) => b.est - a.est);
@@ -138,7 +142,9 @@ const say = (m) => { const l = `${new Date().toISOString()} ${m}`; console.log(l
 let next = 0;
 const run = (j) => new Promise((resolve) => {
   const t0 = Date.now();
-  const env = { ...process.env, TZ: 'UTC', ...CONFIG[j.config], ...j.env };
+  // INHERIT: every job before the full-life inheritance rule (2026-10-11) passes the whole fragment at any death, so its output reproduces; the
+  // jobs that test the rule set it themselves.
+  const env = { ...process.env, TZ: 'UTC', INHERIT: '{"fullLife":false}', ...CONFIG[j.config], ...j.env };
   const p = spawn('node', [join(sim, j.script), ...j.args], { env, cwd: root });
   const chunks = []; const errs = [];
   p.stdout.on('data', (d) => chunks.push(d)); p.stderr.on('data', (d) => errs.push(d));

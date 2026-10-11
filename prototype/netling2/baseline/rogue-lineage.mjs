@@ -19,14 +19,15 @@ const { ARCHETYPES } = await import('../sim/balance.mjs');
 const ATT = Object.keys(ARCHETYPES).filter((n) => !OUT.has(n));
 // Stage 3's first jobs (2026-10-10) pin its rules so their saved outputs reproduce: any Source exit arms the good end, and the hatchling after it
 // takes the chosen egg's latest fragment as its parent.
-const STAGE3 = { ROGUE: '{"armClean":false}', PARENT: 'fragment' };
+const STAGE3 = { ROGUE: '{"armClean":false,"goodEndFullLife":false}', PARENT: 'fragment', CROSS: 'open', INHERIT: '{"fullLife":false}' };
 const JOBS = {
   decided: { ...STAGE3 }, // MERGEBOT=accept, PICK=first, LINEBOT=stay
   refuse: { ...STAGE3, MERGEBOT: 'refuse' }, // every offer declined: the good end only at death
   back: { ...STAGE3, LINEBOT: 'back' }, // one NL-0 life after a capture
   tier1: { ...STAGE3, FEAT: '1' }, // a lever: every Rogue elder at 1.0's feat (three Deep exits or two clean)
-  // The decisions of 2026-10-11 (docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 41 to 43), now the defaults: only a clean Source exit arms the good end,
-  // any egg can follow it, and the mixed egg's parent is the Rogue.
+  // The decisions of 2026-10-11 (docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 41 to 47), now the defaults: only a clean Source exit arms the good end,
+  // any egg can follow it, the mixed egg's parent is the Rogue, only a full life passes the trait line (and only an old-age death of an armed
+  // elder is the good end), and the crossings between Rogue and the NL-0 eggs are gated.
   clean: {}, // MERGEBOT=accept, PICK=first (the mixed egg in the first NL-0 egg completed), LINEBOT=stay
   'clean-refuse': { MERGEBOT: 'refuse' }, // the clean exit's offer declined: the good end at death if still armed
   'clean-rogue': { PICK: 'rogue' }, // Rogue again after every good end: no mixed egg, every life a Rogue life

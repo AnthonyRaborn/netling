@@ -287,6 +287,9 @@ export const ROGUE = {
   // Section 6.1, item 41 (decided, maintainer, 2026-10-11): only a clean Source exit arms the good end; a Source exit with a lost fight arms
   // nothing (and leaves an armed good end as it was). Stage 3 armed it at any Source exit (ROGUE='{"armClean":false}').
   armClean: true,
+  // Section 6.1, item 46 (decided, 2026-10-11): an armed elder's death is the good end only at the end of its life cycle; a death by neglect or
+  // integrity collapse is ordinary (no mixed egg). Stage 3 counted any death but a capture (ROGUE='{"goodEndFullLife":false}').
+  goodEndFullLife: true,
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
@@ -1731,6 +1734,14 @@ export function fragmentOf(s, form) {
   return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, history: s.trait ?? null };
 }
 
+// 2.0 inheritance (docs/NETLING_2_SKETCH.md, Lineage; decided, maintainer, 2026-10-11): only a full life passes the trait line on (the trait,
+// its streak level and the history), on every egg. A full life is a death at the end of the life cycle, as an adult or an elder, or Rogue's
+// good end taken at a clean Source exit. A death by neglect, integrity collapse or capture still leaves the quirk key, the keepsake and the
+// scrip. INHERIT='{"fullLife":false}' gives the earlier rule back (every death passes the whole fragment), so older outputs reproduce.
+export const INHERIT = { fullLife: true, ...(process.env.INHERIT ? JSON.parse(process.env.INHERIT) : {}) };
+export const FULL_LIFE_CAUSES = new Set(['end of life cycle', 'merged']);
+export const withoutTraitLine = (f) => f && { ...f, trait: null, level: 1, history: null };
+
 // NL-0 pulls a netling back from its first premature flatline. Old age still wins.
 function rootRescue(s, t, cause) {
   if (!s.rootAccess || s.rootUsed || cause === 'end of life cycle' || cause === 'captured' || cause === 'merged') return false; // the hunt is the one thing Root does not reach; the merge is chosen
@@ -1751,13 +1762,15 @@ function flatline(s, t, cause, rng = null) {
   s.stage = 'dead';
   s.deathCause = cause;
   s.diedAt = t;
-  s.goodEnd = cause === 'merged' ? 'exit' : s.merge?.armed && cause !== 'captured' ? 'death' : null; // Rogue's good end (sourceExit)
+  const goodDeath = ROGUE.goodEndFullLife ? cause === 'end of life cycle' : cause !== 'captured';
+  s.goodEnd = cause === 'merged' ? 'exit' : s.merge?.armed && goodDeath ? 'death' : null; // Rogue's good end (sourceExit)
   s.mergeOffer = false;
   // An open netrun dies with it: nothing is banked, and nothing should keep driving a dead netling.
   if (s.run) log(s, t, '> the netrun link went dead. loot lost.');
   s.run = null;
   const form = FORMS[lineOf(s.form)] ? lineOf(s.form) : adultForm(s, rng);
   s.fragment = fragmentOf(s, form);
+  if (INHERIT.fullLife && !FULL_LIFE_CAUSES.has(cause)) s.fragment = withoutTraitLine(s.fragment);
   log(s, t, `> FLATLINE: ${cause}. fragment recovered: ${s.fragment.trait ? TRAITS[s.fragment.trait].name : 'none'}.`);
 }
 

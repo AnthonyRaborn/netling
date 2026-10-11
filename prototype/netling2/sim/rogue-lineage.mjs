@@ -11,7 +11,8 @@
 //   (tier 4); Rogue starts at tier 2.
 // Env (bot rules): MERGEBOT=accept|refuse (the offer at a clean Source exit; balance.mjs), PICK=first|last|rogue (the egg after a good end),
 //   LINEBOT=stay|back, JSON=1. PARENT=fragment gives stage 3's first assumption back (the mixed egg's parent is the chosen egg's latest fragment),
-//   and ROGUE='{"armClean":false}' its arming (any Source exit). A lever, not a bot rule: FEAT=1 holds every Rogue elder to the first tier (1.0's
+//   ROGUE='{"armClean":false,"goodEndFullLife":false}' its arming and its good end at death, CROSS=open its crossings between Rogue and the
+//   NL-0 eggs, and INHERIT='{"fullLife":false}' its inheritance (every death passes the trait line). A lever, not a bot rule: FEAT=1 holds every Rogue elder to the first tier (1.0's
 //   feat: three Deep exits or two clean), whatever the account holds. The decided settings below are the defaults (the stage 2 measure's,
 //   rogue-stage2.mjs BASE); any of them can be set in the environment.
 process.env.TZ = 'UTC';
@@ -26,15 +27,16 @@ const BASE = {
 };
 for (const [k, v] of Object.entries(BASE)) process.env[k] ??= v;
 const { ARCHETYPES, simulate } = await import('./balance.mjs');
-const { CFG, SIDES, IRON, lineOf, ROGUE } = await import('./sim.js');
+const { CFG, SIDES, IRON, lineOf, ROGUE, INHERIT } = await import('./sim.js');
 const { FRAGMENTS } = await import('./codex2.js');
-const { OWNER, nextLife } = await import('./rogue-line.js');
+const { OWNER, nextLife, crossFragment } = await import('./rogue-line.js');
 
 const [name, n, rogueLives] = [process.argv[2], Number(process.argv[3] ?? 200), Number(process.argv[4] ?? 10)];
 if (!ARCHETYPES[name]) throw new Error(`unknown archetype ${name}`);
 const PICK = process.env.PICK ?? 'first';
 const LINE = process.env.LINEBOT ?? 'stay';
 const PARENT = process.env.PARENT ?? 'rogue';
+const CROSS = process.env.CROSS ?? 'gated';
 const ORDER = ['program', 'iron', 'wetware'];
 const CODEX = FRAGMENTS.map((f) => f.id); // the whole codex (a Rogue player has the ending)
 const LADDER = { 1: [3, 2], 2: [2, 99], 3: [2, 1], 4: [1, 99] }; // lineage-sweep.mjs: [Deep exits, or clean ones] the elder feat asks
@@ -53,7 +55,7 @@ function life(egg, seed, fragment, generation, owned, mixed = false) {
   CFG.featFor = null;
   const elder = (r.stageDays?.mainframe ?? 0) > 0;
   if (elder) (owned[egg] ??= new Set()).add(lineOf(r.form));
-  return { egg, mixed, cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
+  return { egg, mixed, inherited: Boolean(fragment?.trait), cause: r.cause, goodEnd: r.goodEnd, merge: r.merge, marks: r.marks, fragment: r.fragment, adult: r.adultForm !== null, elder, tier, days: r.ageMin / DAY, sourceRuns: r.regionRuns.source ?? 0 };
 }
 
 function lineage(i) {
@@ -67,14 +69,16 @@ function lineage(i) {
     fragment = r.fragment;
   }
   const lives = [];
-  let next = { egg: 'rogue', fragment };
+  let goodEnds = 0; // the account's good ends so far (a Rogue player's first good end opens NL-0 to Rogue inheritance)
+  let next = { egg: 'rogue', fragment: crossFragment(ORDER.at(-1), 'rogue', fragment, { goodEnds, cross: CROSS }) };
   let rogue = 0;
   while (rogue < rogueLives) {
     const r = life(next.egg, (i + 1) * 1000 + lives.length + 1, next.fragment, ++gen, owned, Boolean(next.mixed));
     lives.push(r);
     if (r.egg === 'rogue') rogue++;
+    if (r.goodEnd) goodEnds++;
     else if (r.adult) latest[r.egg] = r.fragment; // the offer holds each egg's latest adult or elder fragment
-    next = nextLife(r, { order: ORDER, latest, pick: PICK, line: LINE, parent: PARENT });
+    next = nextLife(r, { order: ORDER, latest, pick: PICK, line: LINE, parent: PARENT, goodEnds, cross: CROSS });
   }
   return lives;
 }
@@ -95,7 +99,7 @@ const elders = R.filter((r) => r.elder);
 const exited = R.filter((r) => (r.merge?.exits ?? 0) > 0);
 const goods = R.filter((r) => r.goodEnd);
 const out = {
-  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, parent: PARENT, armClean: ROGUE.armClean, feat: process.env.FEAT ? Number(process.env.FEAT) : null,
+  archetype: name, lineages: n, rogueLives, merge: process.env.MERGEBOT ?? 'accept', pick: PICK, line: LINE, parent: PARENT, armClean: ROGUE.armClean, goodEndFullLife: ROGUE.goodEndFullLife, cross: CROSS, fullLife: INHERIT.fullLife, feat: process.env.FEAT ? Number(process.env.FEAT) : null,
   // How often: lines with a good end within rogueLives Rogue lives, and good ends a line.
   reached: round(first.length / n),
   reachedBy: Object.fromEntries([1, 2, 3, 5, rogueLives].map((k) => [k, round(first.filter((f) => f.rogue <= k).length / n)])),
@@ -134,6 +138,7 @@ const out = {
   deaths: Object.fromEntries([...new Set(R.map((r) => r.cause))].sort().map((c) => [c, share(R, (r) => r.cause === c)])),
   nl0Lives: L.flat().length - R.length,
   mixedLives: L.flat().filter((r) => r.mixed).length, // NL-0 lives hatched from a good end (the mixed egg)
+  rogueInherited: share(R, (r) => r.inherited), // Rogue lives that hatched with a trait line
 };
 if (process.env.JSON) console.log(JSON.stringify(out));
 else {

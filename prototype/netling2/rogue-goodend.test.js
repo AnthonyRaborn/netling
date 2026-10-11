@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 process.env.TZ = 'UTC';
-const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, fragmentOf, CFG, MIN, ROGUE, PERKS } = await import('./sim/sim.js');
+const { createScript, tick, mulberry32, addMark, sourceExit, takeMerge, declineMerge, fragmentOf, lifeEnd, CFG, MIN, ROGUE, PERKS, INHERIT } = await import('./sim/sim.js');
 const { startRun, moveTo, resolveIce } = await import('./sim/netrun/run.js');
 const { NR2 } = await import('./sim/netrun/nr2.js');
 
@@ -50,6 +50,11 @@ function withKits(fn) {
 // One minute at the care-mistake limit: a premature death (neglect).
 const collapse = (s) => {
   s.careMistakes = CFG.maxMistakes;
+  tick(s, s.lastTick + MIN, stub(0.99));
+};
+// The last minute of its life cycle: a full life.
+const oldAge = (s) => {
+  s.ageMin = lifeEnd(s) - 1;
   tick(s, s.lastTick + MIN, stub(0.99));
 };
 
@@ -122,15 +127,31 @@ test('taking the offer ends the life as the good end at the exit; Root Access do
   assert.equal(takeMerge(s, T0), false, 'once only');
 });
 
-test('declining keeps the good end armed, and the elder\'s death then plays it; an unarmed death is ordinary', () => {
+test('declining keeps the good end armed, and the elder\'s death of old age then plays it; a premature or unarmed death is ordinary', () => {
   const s = elder();
   sourceExit(s, T0, true);
   assert.equal(declineMerge(s), true);
   assert.equal(s.mergeOffer, false);
   assert.deepEqual([s.merge.armed, s.merge.declined], [true, 1]);
   assert.equal(declineMerge(s), false, 'no offer left to decline');
-  collapse(s);
-  assert.deepEqual([s.stage, s.deathCause, s.goodEnd], ['dead', 'neglect', 'death']);
+  oldAge(s);
+  assert.deepEqual([s.stage, s.deathCause, s.goodEnd], ['dead', 'end of life cycle', 'death']);
+  const neglected = elder();
+  sourceExit(neglected, T0, true);
+  declineMerge(neglected);
+  collapse(neglected);
+  assert.deepEqual([neglected.deathCause, neglected.goodEnd], ['neglect', null], 'an armed elder\'s neglect death is not the good end (6.1, item 46)');
+  const saved = ROGUE.goodEndFullLife;
+  ROGUE.goodEndFullLife = false;
+  try {
+    const old = elder();
+    sourceExit(old, T0, true);
+    declineMerge(old);
+    collapse(old);
+    assert.equal(old.goodEnd, 'death', 'stage 3: any death but a capture');
+  } finally {
+    ROGUE.goodEndFullLife = saved;
+  }
   const plain = elder();
   collapse(plain);
   assert.deepEqual([plain.deathCause, plain.goodEnd], ['neglect', null]);
@@ -162,8 +183,9 @@ test('Root Access still reverses a premature death of an armed elder, which stay
   assert.notEqual(s.stage, 'dead');
   assert.equal(s.rootUsed, true);
   assert.equal(s.merge.armed, true);
-  collapse(s);
-  assert.deepEqual([s.stage, s.goodEnd], ['dead', 'death']);
+  s.careMistakes = 0; // the rescue leaves it one mistake short of the limit
+  oldAge(s);
+  assert.deepEqual([s.stage, s.deathCause, s.goodEnd], ['dead', 'end of life cycle', 'death']);
 });
 
 test('the merge offer: one entry per NL-0 egg with a fragment, in page-completion order; the bot picks the first or the last', async () => {
@@ -186,11 +208,12 @@ test('what follows a Rogue life: any egg after the good end (an NL-0 one is the 
   assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'exit', cause: 'merged', fragment: own }, { order, latest, parent: 'fragment' }).fragment, latest.program, 'stage 3\'s assumption, kept as a switch');
   assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: 'death', cause: 'neglect', fragment: own }, { order, latest, pick: 'rogue' }), { egg: 'rogue', fragment: own, why: 'rogue again' }, 'Rogue again: no mixed egg');
   assert.throws(() => nextLife({ egg: 'rogue', goodEnd: 'exit', fragment: own }, { order, latest, parent: 'both' }));
+  assert.equal(nextLife({ egg: 'rogue', goodEnd: null, cause: 'captured', fragment: { ...own, trait: 'persistent' } }, { order, latest, line: 'back' }).fragment.trait, null, 'Rogue to an NL-0 egg without a good end: no trait line');
   assert.equal(nextLife({ egg: 'rogue', goodEnd: 'death', cause: 'neglect', fragment: own }, { order, latest, pick: 'last' }).egg, 'wetware');
   assert.deepEqual(nextLife({ egg: 'rogue', goodEnd: null, cause: 'captured', fragment: own }, { order, latest }), { egg: 'rogue', fragment: own, why: 'rogue again' });
   assert.equal(nextLife({ egg: 'rogue', goodEnd: null, cause: 'captured', fragment: own }, { order, latest, line: 'back' }).egg, 'program');
   assert.equal(nextLife({ egg: 'rogue', goodEnd: null, cause: 'neglect', fragment: own }, { order, latest, line: 'back' }).egg, 'rogue', 'back only after a capture');
-  assert.deepEqual(nextLife({ egg: 'iron', cause: 'end of life cycle', fragment: latest.iron }, { order, latest }), { egg: 'rogue', fragment: latest.iron, why: 'rogue again' });
+  assert.deepEqual(nextLife({ egg: 'iron', cause: 'end of life cycle', fragment: latest.iron }, { order, latest, goodEnds: 1 }), { egg: 'rogue', fragment: latest.iron, why: 'rogue again' });
 });
 
 test('the mixed egg continues the Rogue\'s trait as any rebirth does: a Rogue Mole\'s trait streaks into an NL-0 Breach adult', () => {
@@ -206,5 +229,59 @@ test('the mixed egg continues the Rogue\'s trait as any rebirth does: a Rogue Mo
     assert.equal(fragmentOf(child, 'breachStreet').level, 2, 'the same trait in the next egg is a streak');
   } finally {
     PERKS.on = saved;
+  }
+});
+
+test('crossings between Rogue and the NL-0 eggs (6.1, item 47): Rogue to Rogue always, Rogue to NL-0 only through the good end, NL-0 to Rogue only after a first good end', async () => {
+  const { crossFragment } = await import('./sim/rogue-line.js');
+  const f = { form: 'breachStreet', trait: 'hardened', level: 2, history: 'evasive', quirk: { a: 1 }, keepsake: 'repairKit', scrip: 4 };
+  const none = { ...f, trait: null, level: 1, history: null };
+  assert.deepEqual(crossFragment('program', 'rogue', f, { goodEnds: 0 }), none, 'the first Rogue egg: no trait line, the rest kept');
+  assert.deepEqual(crossFragment('program', 'rogue', f, { goodEnds: 1 }), f);
+  assert.deepEqual(crossFragment('rogue', 'rogue', f), f);
+  assert.deepEqual(crossFragment('rogue', 'iron', f, { goodEnd: null, goodEnds: 3 }), none);
+  assert.deepEqual(crossFragment('rogue', 'iron', f, { goodEnd: 'death' }), f);
+  assert.deepEqual(crossFragment('iron', 'wetware', f), f, 'between NL-0 eggs as before');
+  assert.deepEqual(crossFragment('program', 'rogue', f, { cross: 'open' }), f, 'stage 3');
+  assert.throws(() => crossFragment('program', 'rogue', f, { cross: 'shut' }));
+});
+
+test('only a full life passes the trait line on (any egg): old age and the taken good end do, neglect and capture keep only quirk, keepsake and scrip', () => {
+  const saved = PERKS.on;
+  PERKS.on = true;
+  try {
+    const parent = (egg, form) => {
+      const s = elder(egg, form);
+      Object.assign(s, { trait: 'hardened', traitLevel: 1, history: 'evasive', scrip: 6 });
+      return s;
+    };
+    const old = parent('program', 'breachStreet');
+    old.stage = 'adult';
+    oldAge(old);
+    assert.equal(old.deathCause, 'end of life cycle');
+    assert.deepEqual([old.fragment.trait, old.fragment.level, old.fragment.history], ['hardened', 2, 'hardened'], 'a full adult life: the streak goes on');
+    const neglected = parent('program', 'breachStreet');
+    neglected.stage = 'adult';
+    collapse(neglected);
+    assert.equal(neglected.deathCause, 'neglect');
+    assert.deepEqual([neglected.fragment.trait, neglected.fragment.level, neglected.fragment.history], [null, 1, null]);
+    assert.ok(neglected.fragment.quirk && neglected.fragment.keepsake && neglected.fragment.scrip > 0, 'quirk, keepsake and scrip still pass');
+    const caught = parent('rogue', 'rogueElderBreach');
+    caught.marks = 2;
+    addMark(caught, T0, 'trail hunter');
+    tick(caught, caught.lastTick + MIN, stub(0.99));
+    assert.deepEqual([caught.deathCause, caught.fragment.trait], ['captured', null]);
+    const merged = parent('rogue', 'rogueElderBreach');
+    sourceExit(merged, T0, true);
+    takeMerge(merged, T0);
+    assert.equal(merged.fragment.trait, 'hardened', 'the good end at the exit is a full life');
+    INHERIT.fullLife = false;
+    const before = parent('program', 'breachStreet');
+    before.stage = 'adult';
+    collapse(before);
+    assert.equal(before.fragment.trait, 'hardened', 'INHERIT off: the earlier rule');
+  } finally {
+    PERKS.on = saved;
+    INHERIT.fullLife = true;
   }
 });
