@@ -1,5 +1,5 @@
 // Scripted netrun player, shared by tools/netrun-balance.mjs and tools/balance.mjs.
-import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem, foresightView, hunted, huntThreshold, sendAgent, dangerView, ambushSeen } from './netrun/run.js';
+import { startRun, moveTo, resolveIce, choose, runOptions, closeRun, visibleNodeIds, sellItem, foresightView, hunted, huntThreshold, sendAgent, dangerView, ambushSeen, nullifiesLeft, nullifyIce } from './netrun/run.js';
 import { INVENTORY_SLOTS, SCRIP, leanSeen, slotsUsed } from './sim.js';
 import { nodeById } from '../../../src/netrun/map.js';
 import { tierPenalty } from './netrun/nr2.js';
@@ -181,6 +181,24 @@ export function sellAtMarket(pet, keep = null) {
   return sold;
 }
 
+// The tuneNullify lever's bot rule: pass a fight it is likelier than average to lose (tier 2, or one of its weaker games), and spend what is left
+// on any ordinary fight once the ICE nodes still ahead on its best route are no more than the nulls left (it does not hoard them to the exit).
+function wantsNullify(pet, style) {
+  const run = pet.run;
+  const left = nullifiesLeft(pet);
+  if (!left || run.pending?.hunter) return false;
+  if (iceLoss(style, run.hot, { game: run.pending.game, tier: run.pending.tier }) > 1.001) return true;
+  return iceAhead(run.map, run.pos) <= left;
+}
+// The fewest ICE nodes on any path from this node to an exit (the node itself not counted).
+function iceAhead(map, id, memo = new Map()) {
+  if (memo.has(id)) return memo.get(id);
+  const node = nodeById(map, id);
+  const best = node.type === 'exit' || !node.edges.length ? 0 : Math.min(...node.edges.map((e) => (nodeById(map, e).type === 'ice' ? 1 : 0) + iceAhead(map, e, memo)));
+  memo.set(id, best);
+  return best;
+}
+
 // Plays one full run on the pet. Returns the finished run (before it's cleared).
 // style.challenge: a challenge id (netrun/challenges.js) for the run, in the Deep or the Source.
 export function playRun(pet, style, region, rng, codex = []) {
@@ -196,7 +214,8 @@ export function continueRun(pet, style, rng) {
   while (pet.run.phase !== 'done' && steps++ < 60) {
     if (style.stopAt?.(pet)) return pet.run;
     const run = pet.run;
-    if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, gameRate(style, run.pending.game) - tierPenalty(run.pending)), rng);
+    if (run.phase === 'ice' && wantsNullify(pet, style)) nullifyIce(pet);
+    else if (run.phase === 'ice') resolveIce(pet, rng() < winChance(pet.run.hot, gameRate(style, run.pending.game) - tierPenalty(run.pending)), rng);
     else if (run.phase === 'choice') {
       if (run.pending.kind === 'market' && !run.pending.counted) {
         run.pending.counted = true; // a clinic stays open after a fix: count and sell once

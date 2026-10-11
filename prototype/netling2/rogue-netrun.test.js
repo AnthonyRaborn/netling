@@ -355,7 +355,7 @@ test("the Rogue exit bonus (rogue.exitBonus, decided 1 in the Deep): in place of
 }));
 
 // The Source-only levers for the gap between the lines (nr2.js rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8). All off by default.
-const { foresightView } = await import('./sim/netrun/run.js');
+const { foresightView, nullifyIce, nullifiesLeft } = await import('./sim/netrun/run.js');
 const { planMove, RUN_STYLES } = await import('./sim/netrun-bot.mjs');
 function withSource(levers, fn) {
   const saved = { ...NR2.rogue.source };
@@ -377,7 +377,7 @@ function runLosing(form, types, region) {
 }
 
 test('Source levers: all off by default', () => {
-  assert.deepEqual(NR2.rogue.source, { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1 });
+  assert.deepEqual(NR2.rogue.source, { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } });
 });
 
 test('Source lever breachFree: a Sleeper with one lost ordinary fight in the Source still exits clean; two, or another line, or a lost hunter fight, do not', () => withSource({ breachFree: 1 }, () => {
@@ -445,4 +445,56 @@ test('Source lever tuneTypes: Handler reads every Source ICE game and tier (an a
   } finally {
     NR2.tiers = tiers;
   }
+}));
+
+test('Source lever feastClean: a Stash Source exit at that Integrity or more counts as clean despite a loss; below it, or another line, does not', () => withSource({ feastClean: 90 }, () => {
+  const exitAt = (form, integrity) => {
+    const s = setup(form, ['ice', 'checkpoint'], { region: 'source', stage: 'mainframe' });
+    moveTo(s, 1, stub(0.99));
+    resolveIce(s, false, stub(0.99));
+    s.stats.integrity = integrity;
+    moveTo(s, 2, stub(0.99));
+    moveTo(s, 3, stub(0.99));
+    return s.merge.clean;
+  };
+  assert.equal(exitAt('rogueElderFeast', 90), 1);
+  assert.equal(exitAt('rogueElderFeast', 89), 0);
+  assert.equal(exitAt('rogueElderBreach', 100), 0);
+}));
+
+test('Source lever tuneReroll: Handler replays a lost ordinary fight (no damage, no loss counted) as many times as its level allows', () => withSource({ tuneReroll: { 1: 1, 2: 2 } }, () => {
+  const s = setup('rogueElderTune', ['ice', 'checkpoint'], { region: 'source', stage: 'mainframe' });
+  moveTo(s, 1, stub(0.99));
+  const game = s.run.pending.game;
+  for (let i = 0; i < 2; i++) {
+    assert.equal(resolveIce(s, false, stub(0.99)).rerolled, true);
+    assert.deepEqual([s.run.phase, s.run.pending.game, s.stats.integrity, s.run.tally.iceLost], ['ice', game, 90, 0]);
+  }
+  assert.notEqual(resolveIce(s, false, stub(0.99)).rerolled, true, 'the third loss stands');
+  assert.equal(s.run.tally.iceLost, 1);
+  const a = setup('rogueAdultTune', ['ice'], { region: 'source', stage: 'adult' });
+  moveTo(a, 1, stub(0.99));
+  assert.equal(resolveIce(a, false, stub(0.99)).rerolled, true);
+  assert.notEqual(resolveIce(a, false, stub(0.99)).rerolled, true, 'the adult has one');
+  const d = setup('rogueElderTune', ['ice'], { region: 'deep', stage: 'mainframe' });
+  moveTo(d, 1, stub(0.99));
+  assert.notEqual(resolveIce(d, false, stub(0.99)).rerolled, true, 'Source only');
+}));
+
+test('Source lever tuneNullify: Handler passes a shown ordinary fight without a win or a loss, as many as its level allows; never a hunter fight', () => withSource({ tuneNullify: { 1: 1, 2: 2 } }, () => {
+  const s = setup('rogueElderTune', ['ice', 'ice', 'ice'], { region: 'source', stage: 'mainframe' });
+  assert.equal(nullifiesLeft(s), 2);
+  for (const to of [1, 2]) {
+    moveTo(s, to, stub(0.99));
+    assert.equal(nullifyIce(s).ok, true);
+    assert.equal(s.run.phase, 'map');
+  }
+  moveTo(s, 3, stub(0.99));
+  assert.equal(nullifyIce(s).ok, false, 'none left');
+  assert.deepEqual([s.run.tally.iceWon, s.run.tally.iceLost, s.run.tally.nullified], [0, 0, 2]);
+  const h = setup('rogueElderTune', ['relay'], { region: 'source', stage: 'mainframe', hunt: huntThreshold({ region: 'source' }) });
+  moveTo(h, 1, stub(0.99));
+  assert.equal(h.run.pending.hunter, 'trail');
+  assert.equal(nullifyIce(h).ok, false, 'not the hunter');
+  assert.equal(nullifiesLeft(setup('rogueElderFeast', ['ice'], { region: 'source', stage: 'mainframe' })), 0, 'Spook and Handler only');
 }));

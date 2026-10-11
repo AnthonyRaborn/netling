@@ -618,7 +618,8 @@ function encounterNode(pet, nodeId, rng) {
       if (run.region === 'source') {
         const lost = run.tally?.iceLost ?? 0;
         const hunters = run.tally?.hunterFightsLost ?? 0;
-        sourceExit(pet, pet.lastTick ?? 0, lost === 0 || (hunters === 0 && lost <= srcLever(pet, run, 'breach', 'breachFree', 0)));
+        const fed = srcLever(pet, run, 'feast', 'feastClean', 0); // the feastClean lever: well fed counts as clean
+        sourceExit(pet, pet.lastTick ?? 0, lost === 0 || (hunters === 0 && lost <= srcLever(pet, run, 'breach', 'breachFree', 0)) || (fed > 0 && pet.stats.integrity >= fed));
       }
       // The Mainframe gate counts this life's exits from The Deep, and the clean ones (no ICE fight lost on the way).
       if (run.region === 'deep') {
@@ -650,6 +651,13 @@ function resolveIceFight(pet, won, rng) {
   run.lastTier = run.pending?.tier ?? 1;
   const hunter = run.pending?.hunter ?? null;
   const deferred = run.pending?.deferred ?? null;
+  // The tuneReroll lever (nr2.js rogue.source): a lost ordinary fight is played again, the loss not counted, while rerolls last.
+  if (!won && !hunter && (run.rerolls ?? 0) < (srcLever(pet, run, 'tune', 'tuneReroll', null)?.[lvl(pet)] ?? 0)) {
+    run.rerolls = (run.rerolls ?? 0) + 1;
+    run.tally.rerolls = (run.tally.rerolls ?? 0) + 1;
+    note(run, `retuned: the ${run.pending?.game ?? 'ICE'} fight runs again.`);
+    return { ok: true, rerolled: true };
+  }
   run.phase = 'map';
   run.pending = null;
   const st = pet.stats;
@@ -741,6 +749,24 @@ export function sendAgent(pet) {
   run.tally.agents++;
   addTrail(run, -n);
   note(run, `agent sent out. trail -${n}.`);
+  return { ok: true };
+}
+
+// The tuneNullify lever (nr2.js rogue.source): ordinary ICE fights Spook or Handler may still pass without fighting in this Source run.
+export const nullifiesLeft = (pet) => {
+  const run = pet.run;
+  return run ? Math.max(0, (srcLever(pet, run, 'tune', 'tuneNullify', null)?.[lvl(pet)] ?? 0) - (run.nullified ?? 0)) : 0;
+};
+// Passes the ordinary ICE fight that shows now, as a slip (no win, no loss, no trail). Not a hunter fight.
+export function nullifyIce(pet) {
+  const run = pet.run;
+  if (!run || run.phase !== 'ice' || run.pending?.hunter || nullifiesLeft(pet) <= 0) return { ok: false };
+  run.nullified = (run.nullified ?? 0) + 1;
+  run.tally.nullified = (run.tally.nullified ?? 0) + 1;
+  run.tally.icePhased++;
+  note(run, `nulled: the ${run.pending.game} ICE goes quiet.`);
+  run.phase = 'map';
+  run.pending = null;
   return { ok: true };
 }
 

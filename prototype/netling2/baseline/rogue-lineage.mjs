@@ -45,6 +45,12 @@ const JOBS = {
     help: { breachFree: 1, tuneTypes: true, feastHeal: 2 }, // the three helps together
     'help-dodge75': { breachFree: 1, tuneTypes: true, feastHeal: 2, dodgeSlip: 0.75 },
     'help3-dodge50': { breachFree: 1, tuneTypes: true, feastHeal: 3, dodgeSlip: 0.5 },
+    // Second round (7.9): Feast clean at an Integrity threshold, with the heal x1 or x2; Tune's reroll and nullify at 1 a run for the adult and
+    // 1 or 2 for the elder.
+    'fclean80': { feastClean: 80 }, 'fclean90': { feastClean: 90 }, 'fclean100': { feastClean: 100 },
+    'fclean80-h2': { feastClean: 80, feastHeal: 2 }, 'fclean90-h2': { feastClean: 90, feastHeal: 2 }, 'fclean100-h2': { feastClean: 100, feastHeal: 2 },
+    'reroll1': { tuneReroll: { 1: 1, 2: 1 } }, 'reroll2': { tuneReroll: { 1: 1, 2: 2 } },
+    'null1': { tuneNullify: { 1: 1, 2: 1 } }, 'null2': { tuneNullify: { 1: 1, 2: 2 } },
   }).map(([job, source]) => [job, { ROGUE_RUN: JSON.stringify({ source }) }])),
   // Uneven per-game skill (SPREAD 0.2, as the Foresight sweep's middle value), for the tuneTypes lever's game half: the trait job and the lever.
   'trait-spread': { SPREAD: '0.2' },

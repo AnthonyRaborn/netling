@@ -129,7 +129,10 @@ export const NR2 = {
     // tuneTypes: Spook and Handler read every Source ICE's game and tier from the start (Foresight's fields, the whole map; an ambush shows a
     // decoy game and tier, so it is not told apart). feastHeal: Drop's and Stash's won-fight heal in the Source is multiplied by this.
     // dodgeSlip: Skip's and Exile's slip chance in the Source (ordinary ICE and Exile's ambush slip) is multiplied by this.
-    source: { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1 },
+    // Second round (7.9): feastClean, a Source exit by Drop or Stash also counts as clean at this much Integrity or more (0 off). tuneReroll, by
+    // level (1 adult, 2 elder), lost ordinary ICE fights Spook or Handler replays in a Source run (the loss is not counted). tuneNullify, by
+    // level, ordinary ICE fights it may pass without fighting in a Source run, chosen once the fight shows (nullifyIce). Hunter fights excluded.
+    source: { breachFree: 0, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
   },
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
