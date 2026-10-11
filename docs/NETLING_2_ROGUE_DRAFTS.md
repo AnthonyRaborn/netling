@@ -663,6 +663,53 @@ Reading it:
 
 **For the maintainer.** If the aim is lines within reach of each other, the measured shape is: the Breach lever as drafted (or not, if Breach should stay a harder line), and for Tune and Feast a lever that acts on losses or on "clean", not on information or heals. Candidates, not built: the same one-loss forgiveness for Tune and Feast (which is 7.7's lever (b) less Dodge; Dodge then needs a trim to stay level); Feast: a won Source fight wipes one earlier loss from that run's count (feeding on it); Tune: one Source ICE a run read and passed without a fight (a skip, as Breach's forgiven loss is a pass). Each needs a run; the forgiveness version should land near Breach's 66% by the Breach result.
 
+### 7.9 The line gap, second round: loss-based levers (2026-10-11; for choice, nothing decided)
+
+The maintainer's options after 7.8, aimed at every line but Dodge: Feast's exit counts as clean at a high Integrity, and Tune can reroll or nullify an ICE fight, counted like Phase (one for the adult, one or two for the elder).
+
+**What was built** (fork, off by default, `nr2.js` `rogue.source`; tests in `rogue-netrun.test.js`): `feastClean` (a Source exit by Drop or Stash also counts as clean at this Integrity or more, read at the exit; an addition to "no fight lost", so a Stash that lost nothing is still clean below it), `tuneReroll` by level (a lost ordinary fight in a Source run is played again, the same game and tier, with no damage and no loss counted, this many times a run), `tuneNullify` by level (this many ordinary fights a Source run passed without a win or a loss, chosen once the fight shows; `nullifyIce`). Hunter fights are excluded from both Tune levers. Bot rule for nullify (`netrun-bot.mjs` `wantsNullify`): pass a fight it is likelier than average to lose (tier 2, or a weaker game under uneven skill), and spend what is left on any fight once the fewest ICE nodes on a path to the exit are no more than the nulls left. Only elders reach the Source, so the adult count never applies while the levers are Source-only.
+
+**Measured** (as 7.8; each lever on its line's two steerers, the packages on the whole attentive group). Per Rogue life: good end / Source exit / good end in the first Rogue life:
+
+| job | the line | good end / Source exit / first Rogue life |
+|---|---|---|
+| none (7.7) | Feast | 26 to 29 / 82 / 20 to 24 |
+| feastClean 100 | Feast | 35 / 82 / 23 to 28 |
+| feastClean 90 | Feast | 44 / 82 / 27 to 34 |
+| feastClean 80 | Feast | 50 to 51 / 82 / 31 to 37 |
+| feastClean 100, heal x2 | Feast | 39 to 40 / 84 to 85 / 25 to 31 |
+| feastClean 90, heal x2 | Feast | 55 / 84 to 85 / 35 to 39 |
+| feastClean 80, heal x2 | Feast | **65 to 66** / 85 / 41 to 44 |
+| none (7.7) | Tune | 24 to 26 / 74 to 76 / 9 to 13 |
+| reroll 1 (elder 1) | Tune | 47 to 50 / 83 to 85 / 27 to 29 |
+| reroll 2 (elder 2) | Tune | **64 to 67** / 87 to 89 / 35 to 39 |
+| nullify 1 (elder 1) | Tune | 33 to 34 / 81 to 83 / 16 to 18 |
+| nullify 2 (elder 2) | Tune | 43 to 46 / 86 to 87 / 22 to 26 |
+
+Captured stays 1 to 3% in every row. The two packages, every line (Breach / Dodge / Tune / Feast, good end a Rogue life):
+
+| package | Breach | Dodge | Tune | Feast |
+|---|---|---|---|---|
+| none (7.7) | 26 | 65 | 24 to 26 | 26 to 29 |
+| **even**: breachFree 1, feastClean 80 with heal x2, reroll 2 | 66 | 65 | 64 to 67 | 65 to 66 |
+| **softer**: breachFree 1, feastClean 90 with heal x2, nullify 2 | 66 | 65 | 43 to 46 | 55 |
+
+The attentive group (7.7's means):
+
+| | good end within 10 Rogue lives | by Rogue life 1 / 3 / 5 | first good end: Rogue lives / days | per Rogue life: elder / Source exit / clean exit / good end | captured | good ends in 10 Rogue lives |
+|---|---|---|---|---|---|---|
+| none (7.7) | 98% (worst 94) | 25 / 64 / 84% | 2.8 / 14.3 | 90 / 80 / 35 / 35% | 1.7% | 3.5 |
+| even | 100% (100) | 44 / 87 / 97% | 1.8 / 8.5 | 90 / 84 / 63 / 63% | 1.5% | 6.3 |
+| softer | 100% (99) | 40 / 84 / 96% | 1.9 / 9.4 | 90 / 84 / 57 / 57% | 1.6% | 5.7 |
+
+Reading it:
+1. **Both options work where 7.8's did not**, because each acts on losses: Feast's threshold forgives losses a run's wins have healed back, and the reroll forgives a loss outright about 70% of the time (the bots' win chance).
+2. **Feast's threshold and heal are one knob together.** A lost Source fight costs about 50 Integrity and Stash heals 22 a win (44 at x2), so the threshold sets how many wins buy back a loss; 80 with the heal x2 matches Dodge, 90 with x2 sits about 10 points under.
+3. **Reroll beats nullify** at the same count (elder 2: 64 to 67% against 43 to 46%), since a reroll is only spent on a loss and a null can be spent on a fight that would have been won. Nullify is the one that plays unlike Dodge (a chosen, certain pass against a chance on every ICE); with the types-reading lever of 7.8 it would let a player pick the fight to pass, which the bots value little.
+4. **The even package lines up all four lines at about 65%**, and the group's good end rises from 35% to 63% a Rogue life (first good end 2.8 to 1.8 Rogue lives, 14 to 8.5 days). That is easier overall, not only more even: no target was set for the good end (4.4's targets cover survival, capture and runs, all unchanged here). If the old overall pace should hold, the alternative is to bring every line toward about 50%: Dodge's slip x0.5 (49 to 50%), Feast 90 with heal x2 (55%), Tune reroll 1 (47 to 50%), and Breach needs a smaller help than one free loss (66%), not measured.
+
+**For the maintainer.** Choose a target level for the lines (about 65%, Dodge as it is, or about 50%, Dodge trimmed), then the Tune lever (reroll for the level, nullify for the feel) and Feast's threshold and heal. The Deep's disconnects come after this (6.1, item 45).
+
 ## 8. The ten forms (concept briefs, for choice)
 
 Nothing here is drawn. Each brief gives the idea, the outline and the cues; the names are all decided (6.1, item 23), and the reasons and rejected alternates are kept below. The names follow the sketch's method: a reason from the vocabulary, a strength, and no collision with a form, item, region or reserved term (checked by search in `src/`, the prototype and the 2.0 docs; two cautions are noted where they apply).
