@@ -236,7 +236,7 @@ Direction (decided, maintainer): Rogue stays **indirect and background** until i
 
 Ground rules for the background touches: nothing names Rogue, the second corp or the theft; nothing is needed to play; no new story or egg pages, so the counts stay (39 story pages, 18 egg pages); every touch is either an optional rewording of an existing page or a line outside the codex. Rogue's own pages (below) come after the reveal and may say more.
 
-**Status (2026-10-11).** Decided by the maintainer: the reveal (option 2 with option 1's last two lines as a log entry), Rogue's page set (four role pages and a Source page) and that those pages count toward nothing. Proposals for choice: each background touch below has a recommendation, revised against the Rogue decisions made since the first drafts (the sweep, the trail, marks, the good end; [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md), 6.1). Nothing here is implemented or read in context.
+**Status (2026-10-12).** Decided by the maintainer: the reveal (option 2 with option 1's last two lines as a log entry), Rogue's page set (four role pages and a Source page), that those pages count toward nothing, their texts and ids, the Source log line beside `rogue-source`, and **every background touch as recommended below** (`corp-2` with the clause on 2026-10-11, the rest on 2026-10-12). The recommendations were revised against the Rogue decisions made since the first drafts (the sweep, the trail, marks, the good end; [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md), 6.1). Nothing here is implemented or read in context.
 
 ### The reveal (decided)
 
@@ -264,7 +264,7 @@ Option 1, the rebirth cutscene, is kept for the record and not used:
 > it was not invited. it is asking anyway.
 ```
 
-### Background touches (proposals, with a recommendation each)
+### Background touches (decided as recommended, 2026-10-12)
 
 **Rewordings of existing pages.**
 
@@ -308,10 +308,11 @@ Notes:
 - **Each page is its role's kit seen from the hunters' side** (Rogue drafts, section 9). `rogue-breach`: a mole inside the corp's own floor, always gone when they come (the edge fade; Sleeper vanishes entirely; "always" because it is digital and can leave every time, maintainer), and the joke that it still gets good reviews. `rogue-dodge`: prints half as deep at each node is Skip's half trail, and none past the relay; "file stays open" fits Exile, who does not come back. `rogue-tune`: a fourth voice on the hunters' own call is Handler with the headset, and naming the ambush point first is Spook hearing ambushes further out; "the voice follows" (maintainer) says it stays on the channel wherever the hunters go. `rogue-feast`: items left at a relay where the trail ends is Drop's kit, and "the bag came back lighter" hints at Stash's hidden mouth without a grin in sight.
 - **Form names as in-world words:** none appears. Skip is close in "skip trace" (a real term for tracing someone who skipped bail), which reads naturally; "mole" and "handler" were left out so neither form is named over its partner. The Feast page avoids the word "drop" entirely (Rogue drafts 8, the naming caution).
 - **`rogue-source` answers `source-2`** ("TODO: give them a way to stop") from the other side. Each NL-0 egg's Source page shows the way its substrate found to stop; Rogue's shows that its copy never had the line, because the corp cut it. That is why Rogue cannot stop by itself and why the good end is a merge with an NL-0 fragment (Rogue drafts, section 2, point 3). It also pays off `corp-2`'s v0.9 clause (withdrawn after the access audit; decided 2026-10-11). It names the product but not the corp, NL-0, or the purge order.
-- **The Source log line** proposed in the Rogue drafts (6.2: "> found: NL-0, initial commit. it is not a copy.") can stay beside the page: the log line is the moment at the exit (finding the original), the page is the record (what the copy lacks). If both read as too much, keep the page.
+- **The Source log line stays beside the page** (decided, maintainer, 2026-10-12): "> found: NL-0, initial commit. it is not a copy." at Rogue's first Source exit (Rogue drafts 6.2). The log line is the moment at the exit (finding the original), the page is the record (what the copy lacks).
 - **Mechanics words:** trail, relay, decoy and ambush are words the run HUD and items already use; they appear here as things in the world (prints, a box at a relay, an ambush point the hunters pick), not as rules. No page gives a number the game uses.
 - **Length:** median 122 and longest 138 characters (counted by script, after the maintainer's edits), against 90 and 166 in 1.0 and 156 and 172 for the NL-0 eggs' form pages before trims.
-- **Not done:** the Dex lines for Rogue's forms (the Dex shows `???`, Rogue drafts 8.5), and confirming these ids (`rogue-breach` and so on, named by role as the NL-0 role pages are).
+- **Ids confirmed** (maintainer, 2026-10-12): `rogue-breach`, `rogue-dodge`, `rogue-tune`, `rogue-feast`, `rogue-source`, named by role as the NL-0 role pages are.
+- **Not done:** the Dex lines for Rogue's forms (the Dex shows `???`, Rogue drafts 8.5).
 
 ## Trimmed alternatives for the longest pages (drafts, for choice)
 
@@ -376,6 +377,7 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 - Hidden forms (hidden teen, hidden adult, and the hidden adult's elder) are not in the Dex until raised or revealed: `public-6` adds the hidden teen as an unfound entry, `public-7` the hidden adult, for every egg.
 - No lore page hints at elders; Root Access unlocks the capability and the `<<RECORD CORRUPTED>>` Dex rows are for the player.
 - The Rogue reveal: the infiltration on the egg list with a two-line log entry (2026-10-11). Rogue gets five pages (four role pages and a Source page) that count toward nothing and drop by the egg page rules (Rogue pages).
+- Rogue's page texts and ids, the Source log line beside `rogue-source`, and every background touch as recommended (`corp-2` with the v0.9 clause; the two visitor lines; the netrun log lines for NL-0 netlings only; the Lineage chatter line, which still needs its voicings) (2026-10-11 and 2026-10-12).
 
 **Still open.**
 1. Edit any text (the trims are chosen, 2026-10-11). Nothing has been read in context or playtested.
@@ -383,7 +385,6 @@ What the trims give up, where it matters: `bazaar-7` A drops "each remembers no.
 3. Whether a revealed hidden Dex entry shows a hint line.
 4. Hand-write the chatter (the tone shapes and `checkShape` are in `prototype/netling2/voice.js`; idle and chatter hints are flagged for revisiting against real animations).
 5. Retest the egg page rates and the late-page counts once 2.0 exists.
-6. Rogue: choose the remaining background touches (`corp-2` is decided; the others have a recommendation each), edit the five Rogue pages, confirm their ids, and whether the Source log line stays beside `rogue-source`.
 
 **Reference: why role pages are not in home regions (measured).** Regions open in order (Public Net, Bazaar, Corp Grid, Ruins, The Deep), clears are per netling, the Ruins need an adult and The Deep needs `ruins-4`. At 0.10 a run in the page's own region, all four role pages took attentive players a median 4 lives for Program (Public Net 2, Corp Grid 2), 8 for Wetware (Bazaar) and 10 for Iron (Ruins), against 2 with any-region placement (`docs/netling2-prototypes/egg-pages.mjs`). The hidden page, which needs The Deep (life 2 or later), arrives by life 2 / 3 / 4 / 6 in 26 / 67 / 87 / 98% of attentive lineages at 0.25 a Deep run (0.50 is now used).
 
