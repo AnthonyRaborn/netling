@@ -31,7 +31,7 @@ export function spriteCells(sprite) {
 }
 
 // Palette color for a sprite character, the way renderLCD maps them.
-export const spriteColor = (ch, pal) => ({ '#': pal.main, o: pal.accent, '+': '#f5f5f5', x: blend(pal.main, 0.3, '#000000') })[ch];
+export const spriteColor = (ch, pal) => ({ '#': pal.main, o: pal.accent, '+': pal.mark ?? '#f5f5f5', x: blend(pal.main, 0.3, '#000000') })[ch];
 
 // Run an accessory's draw function and collect its pixels in sprite-local coordinates.
 // `anchors` is anchorsFor(sprite); `colors` is accessoryColors(id, custom) or null.

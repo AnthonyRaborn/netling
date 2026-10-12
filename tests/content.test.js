@@ -4,7 +4,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SPECIES, FORMS, TRAITS, FORM_MODS, KEEPSAKES, ITEMS, GAME_IDS, PALETTES, EVENTS, CFG } from '../src/sim.js';
-import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite } from '../src/sprites.js';
+import { SPRITES, ITEM_SPRITES, ITEM_COLORS, formSprite, paletteColors } from '../src/sprites.js';
+import { hexToRgb } from '../src/colors.js';
 import { REGIONS, REGION_ORDER, STAGE_ORDER } from '../src/netrun/regions.js';
 import { FRAGMENTS } from '../src/netrun/codex.js';
 import { ANOMALIES } from '../src/netrun/anomalies.js';
@@ -176,6 +177,19 @@ test('style items: unique ids, known rarity and regions, art that can draw', () 
   }
   assert.ok(ACCESSORIES.length > 0 && PROPS.length > 0);
   for (const p of PALETTES) assert.match(p.main, /^#[0-9a-f]{6}$/i);
+});
+
+test('a sprite\'s highlight marks and eyes stand clear of its body in every palette', () => {
+  const lum = (hex) => {
+    const [r, g, b] = hexToRgb(hex).map((v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+  for (const pal of PALETTES) {
+    const c = paletteColors(pal);
+    assert.ok(ratio(c['+'], c['#']) >= 2, `${pal.name}: marks on the body ${ratio(c['+'], c['#']).toFixed(2)}:1`);
+    assert.ok(ratio(c.o, c['#']) >= 2, `${pal.name}: eyes on the body ${ratio(c.o, c['#']).toFixed(2)}:1`);
+  }
 });
 
 test('every file the service worker lists exists, and the font is among them', () => {
