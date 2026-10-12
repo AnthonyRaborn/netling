@@ -195,19 +195,20 @@ export const IDEA_WEARABLES = [
     exclusive: true,
     // Recolorable, so placeWorn's blend check never swaps the cells over the body to another colour: the ring stays one tone all round.
     colors: [
-      ['ring', '#8fd8ff'],
+      ['ring', '#c0eeff'],
       ['glow', '#ffffff'],
     ],
     draw: (px, a, frame, time = 0, colors) => {
       // An unbroken oval round the head in one pale colour, with a glow (three bright cells and a softer cell either side) sliding round it
-      // counterclockwise (maintainer, 2026-10-12), a cell every 250 ms: a lap of 6 to 9 s. Redrawn from the maintainer's memory of
+      // counterclockwise (maintainer, 2026-10-12), two cells every 200 ms (the fastest the flash rule allows: each cell still holds a
+      // colour for 200 ms; maintainer asked for a brighter ring and a faster pulse): a lap of about 2.5 to 4 s. Redrawn from the maintainer's memory of
       // the 2026-10-07 version for Blank (a continuous oval glow with a pulsing motion), which was never committed; the first redraw
       // (blue dashes, a dash every 400 ms) read as broken and shaded. Kept findable whole, motion included, as the doc says.
-      const [ring, glow] = colors ?? ['#8fd8ff', '#ffffff'];
+      const [ring, glow] = colors ?? ['#c0eeff', '#ffffff'];
       const soft = mix(ring, glow);
       const cells = ringCells(a);
       const n = cells.length;
-      const head = (n - (step(time, 250) % n)) % n; // the cell list runs clockwise
+      const head = (n - ((step(time, 200) * 2) % n)) % n; // the cell list runs clockwise
       cells.forEach(([x, y], i) => {
         const d = Math.min((i - head + n) % n, (head - i + n) % n);
         px(x, y, d <= 1 ? glow : d === 2 ? soft : ring);
