@@ -199,19 +199,23 @@ export const IDEA_WEARABLES = [
       ['glow', '#ffffff'],
     ],
     draw: (px, a, frame, time = 0, colors) => {
-      // An unbroken oval round the head in one pale colour, with a glow (three bright cells and a softer cell either side) sliding round it
+      // An unbroken oval round the head in one pale colour, with a glow (three bright cells and a dim wake) sliding round it
       // counterclockwise (maintainer, 2026-10-12), two cells every 200 ms (the fastest the flash rule allows: each cell still holds a
       // colour for 200 ms; maintainer asked for a brighter ring and a faster pulse): a lap of about 2.5 to 4 s. Redrawn from the maintainer's memory of
       // the 2026-10-07 version for Blank (a continuous oval glow with a pulsing motion), which was never committed; the first redraw
       // (blue dashes, a dash every 400 ms) read as broken and shaded. Kept findable whole, motion included, as the doc says.
       const [ring, glow] = colors ?? ['#c0eeff', '#ffffff'];
-      const soft = mix(ring, glow);
+      // Behind the bright spot a dim wake moves with it (maintainer, 2026-10-12): two cells darker than the ring, then two halfway
+      // back, then the ring again. The glow moves two cells a step, so every cell it passes shows white, dim and halfway for one step
+      // each (200 ms, the flash rule's floor).
+      const dim = mix(ring, '#204a70');
+      const fade = mix(dim, ring);
       const cells = ringCells(a);
       const n = cells.length;
-      const head = (n - ((step(time, 200) * 2) % n)) % n; // the cell list runs clockwise
+      const head = (n - ((step(time, 200) * 2) % n)) % n; // the cell list runs clockwise, the glow counterclockwise
       cells.forEach(([x, y], i) => {
-        const d = Math.min((i - head + n) % n, (head - i + n) % n);
-        px(x, y, d <= 1 ? glow : d === 2 ? soft : ring);
+        const k = (i - head + n) % n; // 0 at the spot, counting back along the wake (clockwise); n - 1 is the cell just ahead
+        px(x, y, k <= 1 || k === n - 1 ? glow : k <= 3 ? dim : k <= 5 ? fade : ring);
       });
     },
   },
