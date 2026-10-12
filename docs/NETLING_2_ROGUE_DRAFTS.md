@@ -1160,12 +1160,12 @@ Format as the netrun drafts' 3.5: a name, a one-line description in the Dex and 
 |---|---|---|---|
 | Mole | **Inside man** | ICE hits it for less, and a hunter hits it no harder than plain ICE. (68) | on a hunter fight: `it has worked for them. it knows how they hit.` |
 | Sleeper | **Deep cover** | ICE hits it for less still. Once a run, a lost hunter fight costs no mark and no link. (86) | `lost to the hunter. kept its cover.` |
-| Skip | **On the lam** | ICE often never notices it, and it leaves half the trail on the move. (69) | on a slip: `gone before the ICE turned.` |
-| Exile | **Long gone** | Unnoticed more often, and it can slip past an ambush. (53) | `the ambush closed on an empty node.` |
-| Spook | **Listening post** | Sees node types two steps ahead, and hears an ambush a step further. (68) | when it tells an ambush apart: `ambush ahead. it heard them set up.` |
+| Skip | **On the lam** | ICE often never notices it, and it leaves half the trail on the move. (69) | on a slip: `gone before the ICE turned on.` (maintainer; it reads both ways: before the ICE switched on, and before it turned on it) |
+| Exile | **Over the wall** (maintainer, for Long gone) | Unnoticed more often, and it can slip past an ambush. (53) | `the ambush closed on an empty node.` |
+| Spook | **Wiretap** (maintainer, for Listening post) | Sees node types two steps ahead, and hears an ambush a step further. (68) | when it tells an ambush apart: `ambush ahead. it heard them set up.` |
 | Handler | **Agents out** | Three steps ahead, ambushes at four. Once a run it sends an agent the other way. (80) | `an agent went the other way. the trail followed it.` |
-| Drop | **Dead letter** | Finds more in caches and on beaten ICE, mends on a win. It can plant an item at a relay. (88) | `planted at the relay. the trail ends there.` |
-| Stash | **Hoard** | Finds more, mends more. What it plants at a relay is still there when it gets out. (82) | at the run's end: `it went back for what it left.` |
+| Drop | **Foldering** (maintainer's proposal, under discussion; was Dead letter) | Finds more in caches and on beaten ICE, mends on a win. It can plant an item at a relay. (88) | `saved to drafts at the relay. the trail ends there.` |
+| Stash | **Hoard** | Finds more, mends more. What it plants at a relay is still there when it gets out. (82) | at the run's end: `the drafts were still there. all of them.` |
 
 Notes:
 - **Two new buttons.** Handler's agent and Drop's relay item are the player's to use (the bot chooses them in the fork), so each needs a label: **SEND OUT** (Handler, any node, once a run) and **PLANT** (Drop and Stash, at a relay). PLANT replaces "leave", which would collide with the anomaly button LEAVE IT. Their hints, numberless: SEND OUT `throws them off for a while`; PLANT `one item, and the trail goes cold here`.
@@ -1180,7 +1180,8 @@ Notes:
 | Spook, Handler | one lost ordinary fight replayed | `it heard that one coming the second time.` |
 | Drop, Stash | the exit counts as clean at Integrity 80 or more | at the exit: `out with enough left. clean.` |
 
-- **Alternates:** *Tradecraft* as **Gut feeling** (plainer, and it names the shut third eye's sense rather than a skill); *Listening post* as **Wiretap**; *Long gone* as **Over the wall**.
+- **Alternates:** *Tradecraft* as **Gut feeling** (plainer, and it names the shut third eye's sense rather than a skill). *Wiretap* and *Over the wall* were alternates here and are now the names (maintainer, 2026-10-12); Over the wall is a prison break, which suits the elder that does not come back (`rogue-dodge`, "file stays open").
+- **Foldering (under discussion, maintainer's proposal, 2026-10-12).** Foldering is the digital dead drop: two people share one mail account and leave messages as unsent drafts, so nothing is ever sent and nothing crosses the wire to be read. *For:* it is the digital form of Dead letter on Rogue's software base, it avoids the word "drop", and a drafts folder is something that fills up, which leads into the elder's **Hoard** (the folder became a hoard; the hoard line above now says so). *Against:* few players know the term, and on its own it reads as filing. Proposal: take it, and let the log lines teach it ("saved to drafts at the relay", "the drafts were still there"), the way "skip trace" carries itself on its page. The button can stay **PLANT**, or become **DRAFT** (5) to match; DRAFT ties the button to the name, PLANT says what happens to the item. Dead letter stays the alternate.
 
 ### 10.3 The sweep (at home)
 
@@ -1214,7 +1215,7 @@ The sweep takes the trace's and the intrusion's slot (6.2), so it needs the even
 | The quiet after a won COUNTER | `> quiet on every channel. for now.` |
 | COUNTER lost | `> !! countered too late. they have a mark on it.` |
 | Ignored | `> !! the sweep found it. they have a mark on it.` |
-| The second mark (home or run) | `> !! two marks. one more and they take it.` |
+| The second mark (home or run) | `> !! two marks. one more and it burns itself.` |
 | The quiet ends (optional, no notification) | `> the channels are busy again.` |
 
 Notes: no line gives the Integrity cost (the HUD shows it; the care drafts' rule). "Mark" is the one word for both home and run, so the player learns that a mark is the same thing wherever it came from. The quiet's end line is optional: it tells an attentive player the 8 hours are over, at no notification cost, but it also turns an unseen timer into a seen one.
@@ -1226,7 +1227,7 @@ Notes: no line gives the Integrity cost (the HUD shows it; the care drafts' rule
 | Readout | Label | Hover |
 |---|---|---|
 | The trail (`run.hunt`) | **TRAIL** | "What it leaves behind. Full, and the hunter comes." |
-| Marks (three pips, home and run) | **MARKS** | "Marks they have on it. Three, and they take it." |
+| Marks (three pips, home and run) | **MARKS** | "Marks they have on it. At three, it burns itself before they can take it." |
 
 **Node marks.** Danger sense draws a mark, not a word, on every node; the screen reader and the hint read **danger** and **quiet**. Once a node is within sight it shows its real label, as on every egg. An ambush Spook or Handler has told apart is labelled **AMBUSH** (6; ICE stays ICE for the rest). The hunter's fight screen is titled **HUNTER**.
 
@@ -1234,8 +1235,8 @@ Notes: no line gives the Integrity cost (the HUD shows it; the care drafts' rule
 
 | Moment | Message |
 |---|---|
-| The trail passes half | `it is leaving a trail.` |
-| The trail is near full | `something is on the trail now.` |
+| The trail passes half | `something is on the trail now.` (maintainer: moved here from near full) |
+| The trail is near full | `hunters are circling closer now.` (maintainer) |
 | At a relay, with the trail past half (a hint, the relay question) | `out here, or one more layer?` |
 | A cordon on the map (the Deep and the Source, at the start) | `a cordon past the relay. no quiet way through.` |
 | The hunter arrives | `the hunter caught up.` |
@@ -1244,7 +1245,7 @@ Notes: no line gives the Integrity cost (the HUD shows it; the care drafts' rule
 | An ambush entered | `ambush. they were waiting.` |
 | An ambush beaten (its trail still rises) | `ambush broken. they know where it went.` |
 | An ambush lost | `!! ambush. a mark, and the link cut.` |
-| The third mark, anywhere | `!! third mark. they have it.` |
+| The third mark, anywhere | `!! third mark. it burned itself before they could.` (see 10.6, capture) |
 
 Notes: the trail lines are numberless, like the egg anomalies' hints; the meter shows the count. The cordon line says "past the relay" because a cordon always sits after one (9.7), which holds in the Source's second cordon only loosely; a plainer alternative is `a cordon ahead. no quiet way through.` The relay hint is the one line that asks the player something; it shows only when the trail is past half, so it does not nag a quiet run.
 
@@ -1278,8 +1279,21 @@ The other three each end in their own way (Program a flatline, Iron a decommissi
 | Log | `> FLATLINE: CAUSE. fragment recovered: TRAIT.` | `> GONE DARK: CAUSE. left for pickup: WHAT.` (WHAT is what crosses: the trait on a full life, else the keepsake) |
 | Cause, old age | end of life cycle | **end of the line** (the lineage and the run, both) |
 | Cause, collapse | integrity collapse | integrity collapse (unchanged; a plain fact reads well beside "gone dark") |
-| Capture | (none) | header **TAKEN**; line `netling.vN.0 was taken: three marks.`; log `> !! TAKEN. they closed the file.` then the pickup line |
+| Capture | (none) | header **TAKEN**; line `netling.vN.0 was taken: three marks. it burned itself first.`; log `> !! TAKEN. it burned itself first. nothing left for them to open.` then the pickup line (see below) |
 | The good end | (none) | the epilogue (5.4) plays; if the death screen shows after it, header **STAYED**, line `netling.vN.0 stayed.` (the reveal's echo chain, a fourth step; to keep or drop with the others) |
+
+**Capture as a self-destruct (maintainer, 2026-10-12).** At the third mark the hunters do not get it: Rogue would rather delete itself than be taken, so the life ends by its own hand an instant before capture. Text only; the rule is unchanged (three marks end the life, block the good end and pass no trait line; the quirk key, keepsake and scrip still cross, 6.1 item 46; the fork's cause stays `captured`). It fits what is already there: the pages show the corp losing, the hunters' file closes empty, the fragment still goes to the player ("left for pickup"), and BURN (10.5) is already the meter for what must not be left behind, so the last thing in the burn bag is itself. TAKEN stays the header (maintainer): the hunt took it from the player, even though the hunters got nothing.
+
+Drafts for the third-mark line (run message and home log; the death screen line above follows the chosen one):
+
+| | Line | Note |
+|---|---|---|
+| a (recommended) | `!! third mark. it burned itself before they could.` | plain; says who acted and that the corp lost |
+| b (maintainer's) | `!! third mark. burn notice in effect.` | ties to BURN and reads well, but a burn notice is, in the real term, issued by an agency to disown its own agent; a player who knows it may read the corp as the actor. It works if read as Rogue disowning itself, which no one else would do for it |
+| c | `!! third mark. into the burn bag, last of all itself.` | the BURN tie made explicit; longer |
+| d | `!! third mark. self-destruct.` then `> it left them nothing.` | the maintainer's word; two lines |
+
+Death screen alternates to the recommended line: `netling.vN.0 was taken: three marks. self-destruct.`; or a header **BURNED** in place of TAKEN (closer to what happened, and D2's one good fit; not recommended, since TAKEN was the maintainer's call). Art note: a self-destruct invites a death animation or mark of its own; not drawn, and it must keep to the flash rule (nothing faster than three times a second).
 
 **NL-0's rescue.** The fork lets Root Access pull a Rogue back from integrity collapse (never from capture, old age or the good end; `sim.js`, `rootRescue`). NL-0 reaching a line that is not its own deserves a line of its own: `> NL-0: not mine. not yet. (integrity collapse reversed. root access spent for this generation.)` Optional, on a capture with Root unspent: `> NL-0: i cannot reach them.` Both name NL-0, which Rogue's player already knows (the gate is the ending).
 
@@ -1295,6 +1309,10 @@ The other three each end in their own way (Program a flatline, Iron a decommissi
 4. The hunter's HUD words TRAIL and MARKS and the run messages (10.4).
 5. Meter words: R1 or R2 (10.5).
 6. Death register: D1, D2 or D3 (10.6), the capture header TAKEN, the good end's STAYED, and NL-0's rescue line.
+
+**First review (maintainer, 2026-10-12).**
+- **Decided:** Skip's line `gone before the ICE turned on.`; **Wiretap** (Spook) and **Over the wall** (Exile); the sweep's lines as drafted (10.3); the trail's half line `something is on the trail now.` and near-full line `hunters are circling closer now.`; **R2** for the meter words (TRUST, BURN; SHRED and BAG FULL with it); **D1, gone dark**, with every row but capture as drafted; both NL-0 lines; the third mark as a **self-destruct**, under the header **TAKEN** (10.6).
+- **Open:** **Foldering** for Drop (proposed, with Hoard following from it; the button PLANT or DRAFT); the third-mark line (a to d, 10.6) and the death screen line that follows it; the rest of 10.2 (Tradecraft, Inside man, Deep cover, On the lam, Agents out, the two buttons, the Source log lines); the hunter's other run messages and HUD words (10.4); STAYED.
 
 ## 11. Not done
 
