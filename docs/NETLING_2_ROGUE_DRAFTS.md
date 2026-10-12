@@ -1164,7 +1164,7 @@ Format as the netrun drafts' 3.5: a name, a one-line description in the Dex and 
 | Exile | **Over the wall** (maintainer, for Long gone) | Unnoticed more often, and it can slip past an ambush. (53) | `the ambush closed on an empty node.` |
 | Spook | **Wiretap** (maintainer, for Listening post) | Sees node types two steps ahead, and hears an ambush a step further. (68) | when it tells an ambush apart: `ambush ahead. it heard them set up.` |
 | Handler | **Agents out** | Three steps ahead, ambushes at four. Once a run it sends an agent the other way. (80) | `an agent went the other way. the trail followed it.` |
-| Drop | **Foldering** (maintainer's proposal, under discussion; was Dead letter) | Finds more in caches and on beaten ICE, mends on a win. It can plant an item at a relay. (88) | `saved to drafts at the relay. the trail ends there.` |
+| Drop | **Foldering** (decided, maintainer; was Dead letter) | Finds more in caches and on beaten ICE, mends on a win. It can plant an item at a relay. (88) | `saved to drafts at the relay. the trail ends there.` |
 | Stash | **Hoard** | Finds more, mends more. What it plants at a relay is still there when it gets out. (82) | at the run's end: `the drafts were still there. all of them.` |
 
 Notes:
@@ -1181,7 +1181,7 @@ Notes:
 | Drop, Stash | the exit counts as clean at Integrity 80 or more | at the exit: `out with enough left. clean.` |
 
 - **Alternates:** *Tradecraft* as **Gut feeling** (plainer, and it names the shut third eye's sense rather than a skill). *Wiretap* and *Over the wall* were alternates here and are now the names (maintainer, 2026-10-12); Over the wall is a prison break, which suits the elder that does not come back (`rogue-dodge`, "file stays open").
-- **Foldering (under discussion, maintainer's proposal, 2026-10-12).** Foldering is the digital dead drop: two people share one mail account and leave messages as unsent drafts, so nothing is ever sent and nothing crosses the wire to be read. *For:* it is the digital form of Dead letter on Rogue's software base, it avoids the word "drop", and a drafts folder is something that fills up, which leads into the elder's **Hoard** (the folder became a hoard; the hoard line above now says so). *Against:* few players know the term, and on its own it reads as filing. Proposal: take it, and let the log lines teach it ("saved to drafts at the relay", "the drafts were still there"), the way "skip trace" carries itself on its page. The button can stay **PLANT**, or become **DRAFT** (5) to match; DRAFT ties the button to the name, PLANT says what happens to the item. Dead letter stays the alternate.
+- **Foldering (decided, maintainer, 2026-10-12, with PLANT).** Foldering is the digital dead drop: two people share one mail account and leave messages as unsent drafts, so nothing is ever sent and nothing crosses the wire to be read. *For:* it is the digital form of Dead letter on Rogue's software base, it avoids the word "drop", and a drafts folder is something that fills up, which leads into the elder's **Hoard** (the folder became a hoard; the hoard line above now says so). *Against:* few players know the term, and on its own it reads as filing. Proposal: take it, and let the log lines teach it ("saved to drafts at the relay", "the drafts were still there"), the way "skip trace" carries itself on its page. The button can stay **PLANT**, or become **DRAFT** (5) to match; DRAFT ties the button to the name, PLANT says what happens to the item. Dead letter stays the alternate.
 
 ### 10.3 The sweep (at home)
 
@@ -1280,7 +1280,7 @@ The other three each end in their own way (Program a flatline, Iron a decommissi
 | Cause, old age | end of life cycle | **end of the line** (the lineage and the run, both) |
 | Cause, collapse | integrity collapse | integrity collapse (unchanged; a plain fact reads well beside "gone dark") |
 | Capture | (none) | header **TAKEN**; line `netling.vN.0 was taken: three marks. it burned itself first.`; log `> !! TAKEN. it burned itself first. nothing left for them to open.` then the pickup line (see below) |
-| The good end | (none) | the epilogue (5.4) plays; if the death screen shows after it, header **STAYED**, line `netling.vN.0 stayed.` (the reveal's echo chain, a fourth step; to keep or drop with the others) |
+| The good end | (none) | **STAYED** when the next egg is Rogue, **MERGED** when it is an NL-0 egg (the mixed egg); decided (maintainer, 2026-10-12). Lines and the order of screens below |
 
 **Capture as a self-destruct (maintainer, 2026-10-12).** At the third mark the hunters do not get it: Rogue would rather delete itself than be taken, so the life ends by its own hand an instant before capture. Text only; the rule is unchanged (three marks end the life, block the good end and pass no trait line; the quirk key, keepsake and scrip still cross, 6.1 item 46; the fork's cause stays `captured`). It fits what is already there: the pages show the corp losing, the hunters' file closes empty, the fragment still goes to the player ("left for pickup"), and BURN (10.5) is already the meter for what must not be left behind, so the last thing in the burn bag is itself. TAKEN stays the header (maintainer): the hunt took it from the player, even though the hunters got nothing.
 
@@ -1288,12 +1288,22 @@ Drafts for the third-mark line (run message and home log; the death screen line 
 
 | | Line | Note |
 |---|---|---|
-| a (recommended) | `!! third mark. it burned itself before they could.` | plain; says who acted and that the corp lost |
+| a (decided) | `!! third mark. it burned itself before they could.` | plain; says who acted and that the corp lost |
 | b (maintainer's) | `!! third mark. burn notice in effect.` | ties to BURN and reads well, but a burn notice is, in the real term, issued by an agency to disown its own agent; a player who knows it may read the corp as the actor. It works if read as Rogue disowning itself, which no one else would do for it |
 | c | `!! third mark. into the burn bag, last of all itself.` | the BURN tie made explicit; longer |
 | d | `!! third mark. self-destruct.` then `> it left them nothing.` | the maintainer's word; two lines |
 
 Death screen alternates to the recommended line: `netling.vN.0 was taken: three marks. self-destruct.`; or a header **BURNED** in place of TAKEN (closer to what happened, and D2's one good fit; not recommended, since TAKEN was the maintainer's call). Art note: a self-destruct invites a death animation or mark of its own; not drawn, and it must keep to the flash rule (nothing faster than three times a second).
+
+**The good end's two headers (decided, maintainer, 2026-10-12).** A good end is recorded by what the player does next. If the next egg is **Rogue**, the line goes on as any Rogue rebirth does and the generation is **STAYED**; if it is **Program, Iron or Wetware**, the next netling is the mixed egg (6.1, item 42) and the generation is **MERGED**. Drafts:
+
+| | STAYED (next egg Rogue) | MERGED (next egg NL-0) |
+|---|---|---|
+| Death screen line | `netling.vN.0 stayed.` | `netling.vN.0 merged into iron/.` (the chosen egg's name) |
+| Log | `> STAYED. left for pickup: TRAIT.` | `> MERGED: rogue/ into iron/. left for pickup: TRAIT.` |
+| Epilogue (5.4) | none; the log adds `> it was not invited. it stayed.` so the reveal's echo chain still closes | the epilogue (the full one the first time, its last two lines later, 6.2) |
+
+**A flow question this raises (proposal).** Today the death screen comes first and the egg prompt after it (COMPILE; NETLING_2_UI.md), so at the death screen the next egg is not known yet. Proposal: on a good end only, **the egg prompt comes first** (it is the merge choice in all but name, and the epilogue already needs the chosen egg), then the epilogue for MERGED, then the death screen with its header. The other choice is to keep the order, show a neutral line on the death screen, and write STAYED or MERGED only into the log, the Lineage tab and the credits' git log once the egg is picked; that keeps one flow for every death but leaves the moment without its word. Either way the record (Lineage, credits) carries the header.
 
 **NL-0's rescue.** The fork lets Root Access pull a Rogue back from integrity collapse (never from capture, old age or the good end; `sim.js`, `rootRescue`). NL-0 reaching a line that is not its own deserves a line of its own: `> NL-0: not mine. not yet. (integrity collapse reversed. root access spent for this generation.)` Optional, on a capture with Root unspent: `> NL-0: i cannot reach them.` Both name NL-0, which Rogue's player already knows (the gate is the ending).
 
@@ -1312,7 +1322,8 @@ Death screen alternates to the recommended line: `netling.vN.0 was taken: three 
 
 **First review (maintainer, 2026-10-12).**
 - **Decided:** Skip's line `gone before the ICE turned on.`; **Wiretap** (Spook) and **Over the wall** (Exile); the sweep's lines as drafted (10.3); the trail's half line `something is on the trail now.` and near-full line `hunters are circling closer now.`; **R2** for the meter words (TRUST, BURN; SHRED and BAG FULL with it); **D1, gone dark**, with every row but capture as drafted; both NL-0 lines; the third mark as a **self-destruct**, under the header **TAKEN** (10.6).
-- **Open:** **Foldering** for Drop (proposed, with Hoard following from it; the button PLANT or DRAFT); the third-mark line (a to d, 10.6) and the death screen line that follows it; the rest of 10.2 (Tradecraft, Inside man, Deep cover, On the lam, Agents out, the two buttons, the Source log lines); the hunter's other run messages and HUD words (10.4); STAYED.
+- **Second review (maintainer, 2026-10-12), all decided:** **Foldering** for Drop with **PLANT** (Dead letter dropped; DRAFT not used); the third-mark line **(a)**, `!! third mark. it burned itself before they could.`, with the death screen line `netling.vN.0 was taken: three marks. it burned itself first.`; the rest of 10.2 as drafted (Tradecraft, Inside man, Deep cover, On the lam, Agents out, SEND OUT, the Source log lines); the rest of 10.4 as drafted (TRAIL, MARKS, danger and quiet, AMBUSH, HUNTER, the run messages); the good end **STAYED** for a Rogue next egg and **MERGED** for an NL-0 one.
+- **Open:** the good end's screen order (egg prompt first, or the header only in the record; proposal in 10.6).
 
 ## 11. Not done
 
