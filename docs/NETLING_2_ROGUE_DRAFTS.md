@@ -1325,6 +1325,29 @@ Death screen alternates to the recommended line: `netling.vN.0 was taken: three 
 - **Second review (maintainer, 2026-10-12), all decided:** **Foldering** for Drop with **PLANT** (Dead letter dropped; DRAFT not used); the third-mark line **(a)**, `!! third mark. it burned itself before they could.`, with the death screen line `netling.vN.0 was taken: three marks. it burned itself first.`; the rest of 10.2 as drafted (Tradecraft, Inside man, Deep cover, On the lam, Agents out, SEND OUT, the Source log lines); the rest of 10.4 as drafted (TRAIL, MARKS, danger and quiet, AMBUSH, HUNTER, the run messages); the good end **STAYED** for a Rogue next egg and **MERGED** for an NL-0 one.
 - **Third review (maintainer, 2026-10-12):** the good end's screen order as proposed (the egg prompt first, then the epilogue for MERGED, then the death screen with its header), and the STAYED log lines as drafted. **Section 10 is fully decided**; what is left is in section 11.
 
+### 10.8 One feed: SCAVENGE (decided in direction, maintainer, 2026-10-12; the details for choice)
+
+**Decided (maintainer):** Rogue has no Standing, so it has **one feed button, SCAVENGE** (8 characters), not the corp and street pair. The other two eggs' two feeds differ by Standing (and Program's corp packet gives a little more Charge, the scavenged one rolls an infection), so with no Standing the second button has no reason to exist. The control bar keeps its place: the empty slot can stay dim or the row can close up (a layout question for the 2.0 UI pass, NETLING_2_UI.md). Rogue's packet is the scavenged one: 25 Charge, no Standing, no trail at home (6.1 item 5: feeding never adds trail).
+
+**What one packet breaks, and the proposals (built in the fork as `ROGUE.oneFeed`, off by default; tested in `rogue-sim.test.js`):**
+- **The temper packet preference** (a steady netling likes the same packet again, an unsteady one a change) has nothing to choose between: a steady Rogue would match on every feed and an unsteady one never. **Proposal: off for Rogue's feeds.** Temper still shows in the games' preference and in the three tells (10.9).
+- **The favorite-packet quirk** (+8 Sync on its favorite) would fire on every feed for half of Rogues and never for the others. **Proposal: it does nothing on a Rogue;** the quirk key still crosses lives, so a later NL-0 netling keeps it.
+- **Licensed** (corp packets give more Charge) can reach a Rogue as an inherited trait after the first good end (a Feast corp parent). **Proposal: it acts on SCAVENGE,** so an inherited trait is never dead weight.
+- **The infection roll.** Every Rogue feed would now roll it (12% a feed). The open choice below.
+
+**Measured** (fork, 300 lives of each of the 37 archetypes, the decided Rogue settings, `MERGEBOT=refuse`; outputs `baseline/results/followup/rogue-onefeed-*.json`; Program's line is the same settings with Program as owner, for scale):
+
+| | full life | infections a life (all / attentive 25) | captured | collapse |
+|---|---|---|---|---|
+| Rogue, two feeds (today's fork) | 77.9% | 6.05 / 6.8 | 16.6% | 5.5% |
+| **F1: SCAVENGE, the full infection roll** | 77.6% | 11.08 / 13.0 | 16.0% | 6.4% |
+| **F2: SCAVENGE, the roll at half** | 77.8% | 7.14 / 8.3 | 16.3% | 5.9% |
+| Program, for scale | 89.6% | 7.05 | | 10.4% |
+
+1. **Survival does not move** in either case (within 0.3 points, under the 1.5 points of noise at 300 lives; the attentive group is 98.5 to 98.7% in all three). A cure is a button press, and the bots press it.
+2. **The workload does.** F1 nearly doubles infections (6 to 11 a life; 13 for attentive players), so an attentive Rogue patches about twice as often as a Program player. F2 puts Rogue at about Program's count (7.1 against 7.05), which is where Rogue's missing intrusion (6.2) had left it a little under.
+3. **Recommendation: F2** (`oneFeedVirus` 0.5). Rogue is meant to be harder through the hunt, not through more chores, and the notification budget (4.4) is the scarce thing for an attentive player; F1 is kept as the harder option. The log keeps the infected-payload line: `> scavenged. charge up.`, and on an infection `> scavenged. charge up. !! payload was infected.`
+
 ### 10.9 Rogue's chatter and temper tell (drafts for choice, 2026-10-12)
 
 Rogue's netling speaks in chatter like every egg (first person, lowercase, one line every few hours), so it needs its own lines and its own temper shape for them. Data and tests: `prototype/netling2/rogue-lines.js`, `rogue-lines.test.js`; the shape is in `voice.js` (`chatterTone`, `checkShape`, `ROUTINE`, `STRAYS` for `rogue`; Rogue stays out of `EGGS`, as in `tell.js`, so the launch eggs' tests are unchanged).
@@ -1422,6 +1445,7 @@ Two descriptions, one per rule set, since the trait does different things on the
 
 - ~~The reveal choice, the background touches and Rogue's own codex pages.~~ The reveal, the pages and the background touches decided (codex drafts, 2026-10-11 and 2026-10-12).
 - ~~The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.~~ Drafted for choice (section 10, 2026-10-12).
-- Still to write: the good end's offer at a clean Source exit (the prompt and its two buttons), the Dex hints for Rogue's forms (8.5), the Rogue trait's name and description (placeholder Unsigned), the two feeds' labels and Standing words (Rogue has no Standing, 6.1 item 5), and the four temper voicings of any Rogue chatter.
+- ~~Still to write: the good end's offer, the Dex hints, the Rogue trait's name and description, the feeds, the chatter voicings.~~ Drafted for choice or decided (10.8 to 10.12, 2026-10-12): one feed SCAVENGE with F1 or F2, Rogue's chatter shape and lines, the NL-0 Lineage line's voicings, Rogue's temper hints (recommended dropped), the offer (STAY, NOT YET), the trait (Unsigned), no Dex hints.
+- Still open for the maintainer: 10.8 (F1 or F2, and the three one-feed proposals), 10.9 (the lines, the shape, the temper hints), 10.10, 10.11.
 - The renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance), and Rogue's dead and asleep marks.
 - Simulated since (section 7): home life, the hunt in runs and the lineage side. Numbers not marked decided are starting values, and the targets in 4.4 are a high-side aim.
