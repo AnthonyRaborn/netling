@@ -8,6 +8,7 @@
 // (render.js composeLCD), idle off so only the item moves. Sections by the hash (scale=n, t=ms freezes the clock for a screenshot):
 //   #sec=wear     every wearable entry (free and paid side by side for split and paid ideas) on six forms, one per egg plus a baby and Blank (Wetware's hidden elder, with its motion layer)
 //   #sec=motion   the moving wearables on one form, one column per 400 ms step (form=n, only=id)
+//   #sec=ring     the Light ring alone, an outfit, and the outfit with the ring (what the ring hides)
 //   #sec=props    every prop entry beside one form, and the moving ones per step
 //   #sec=crests   the five crests at 9x9, beside 1.0's Helix for scale
 import './ready.js';
@@ -84,6 +85,16 @@ if (SEC === 'wear') {
   const steps = Array.from({ length: 10 }, (_, i) => i);
   const ms = Number(hash.get('ms') ?? 400);
   sheet(rows, steps, (e) => [e.name.replace(/ \(paid\)$/, ''), e.version === 'paid' ? tag(e) : e.paid], (e, s) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, s * ms + 1), (s) => `${s * ms} ms`);
+} else if (SEC === 'ring') {
+  // The Light ring's exclusion (render.js exclusiveWorn): an outfit without the ring, then the same outfit with it, where the face item
+  // and anything on or inside the ring are not drawn.
+  const OUTFIT = [{ id: 'shades' }, { id: 'cap' }, { id: 'scarf' }, { id: 'halo' }];
+  const rows = [
+    { name: 'Light ring alone', worn: [{ id: 'laughingring' }] },
+    { name: 'Outfit: shades, cap, scarf, halo', worn: OUTFIT },
+    { name: 'Outfit + Light ring', worn: [...OUTFIT, { id: 'laughingring' }] },
+  ];
+  sheet(rows, FORMS, (r) => [r.name, r.worn.length > 1 && r.worn.some((w) => w.id === 'laughingring') ? 'the ring hides what it blocks' : ''], (r, f, t) => composeLCD({ ...f, idle: 'none', worn: r.worn }, t + 1), (f) => f.form.id);
 } else if (SEC === 'props') {
   const f = FORMS[1];
   const ms = Number(hash.get('ms') ?? 800);

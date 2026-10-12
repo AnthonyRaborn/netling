@@ -1,8 +1,9 @@
 // First drafts of the 2.0 style ideas' art (docs/NETLING_2_ACCESSORY_IDEAS.md): 26 wearables, 10 props and 5 crests, drawn as 1.0's are.
 // Nothing here is decided or shipped, and src/ is untouched: registerIdeas() adds the drafts to 1.0's tables at run time, so the real
 // placeWorn (anchors, the blend swap, orbiting floaters last) and drawProp place them, the way register.js adds the prototype forms.
-// The Laughing Man ring is here as the Light ring, redrawn from its description: the version rendered as one of Blank's elder options
-// (NETLING_2_SPRITES_HISTORY.md, "Blank's elder in motion") was never committed, and was only ever seen on the Wetware hidden line.
+// The Laughing Man ring is here as the Light ring, redrawn: the version rendered as one of Blank's elder options (NETLING_2_SPRITES_HISTORY.md,
+// "Blank's elder in motion") was never committed, and was only ever seen on the Wetware hidden line. It is the one exclusive idea
+// (render.js exclusiveWorn).
 //
 // Wearables: draw(px, a, frame, time, colors) over the authored anchors, as src/accessories.js. Props: draw(px, frame, time, extra) in
 // prop-local coordinates, standing on their bottom row, size [w, h]. Crests: 9x9, '#' lit, as 1.0's cosmetics.js.
@@ -189,14 +190,27 @@ export const IDEA_WEARABLES = [
     name: 'Light ring',
     slot: 'face',
     paid: 'free (find)',
-    draw: (px, a, frame, time = 0) => {
-      // A ring of dashes circling the face (2 cells lit, 1 clear), the dashes a deep blue (a pale one was swapped to white on bright
-      // bodies by the blend check, and the travelling dash vanished), one dash bright white and travelling round counterclockwise
-      // (maintainer, 2026-10-12) a dash every 400 ms (about 3 to 4 s a lap). Redrawn from the doc's description: the 2026-10-07
-      // version (one of Blank's elder options) was never committed. Kept findable whole, motion included, as the doc says.
-      ringDashes(a).forEach((dash, i, all) => {
-        const c = i === (all.length - (step(time, 400) % all.length)) % all.length ? '#ffffff' : '#1f5fa8'; // the dash list runs clockwise
-        for (const [x, y] of dash) px(x, y, c);
+    // Worn alone on the face, and over the head: the renderer (render.js exclusiveWorn) hides every other face item and any worn item
+    // whose pixels fall on the ring or inside it (maintainer, 2026-10-12).
+    exclusive: true,
+    // Recolorable, so placeWorn's blend check never swaps the cells over the body to another colour: the ring stays one tone all round.
+    colors: [
+      ['ring', '#8fd8ff'],
+      ['glow', '#ffffff'],
+    ],
+    draw: (px, a, frame, time = 0, colors) => {
+      // An unbroken oval round the head in one pale colour, with a glow (three bright cells and a softer cell either side) sliding round it
+      // counterclockwise (maintainer, 2026-10-12), a cell every 250 ms: a lap of 6 to 9 s. Redrawn from the maintainer's memory of
+      // the 2026-10-07 version for Blank (a continuous oval glow with a pulsing motion), which was never committed; the first redraw
+      // (blue dashes, a dash every 400 ms) read as broken and shaded. Kept findable whole, motion included, as the doc says.
+      const [ring, glow] = colors ?? ['#8fd8ff', '#ffffff'];
+      const soft = mix(ring, glow);
+      const cells = ringCells(a);
+      const n = cells.length;
+      const head = (n - (step(time, 250) % n)) % n; // the cell list runs clockwise
+      cells.forEach(([x, y], i) => {
+        const d = Math.min((i - head + n) % n, (head - i + n) % n);
+        px(x, y, d <= 1 ? glow : d === 2 ? soft : ring);
       });
     },
   },
@@ -460,25 +474,39 @@ export const IDEA_WEARABLES = [
   },
 ];
 
-// The Light ring's dashes: the cells of an ellipse a cell outside the head's sides and from two rows over the eyes to a row under
-// the mouth, in clockwise order from the top, cut into dashes of 2 cells with 1 clear between.
-function ringDashes(a) {
+// The Light ring's cells: an unbroken oval (each cell touching the next, corners included) from two cells outside the head's sides and
+// two rows over the head top to two rows under the mouth, clear of the head's outline so it reads as a glow round it, not a shaded edge; in clockwise order from the top.
+export function ringCells(a) {
   const cx = (a.headLeft + a.headRight) / 2;
-  const top = a.eyeRow - 2;
-  const bottom = a.mouthRow + 1;
+  const top = a.headTop - 2;
+  const bottom = a.mouthRow + 2;
   const cy = (top + bottom) / 2;
-  const rx = (a.headRight - a.headLeft) / 2 + 1;
+  const rx = (a.headRight - a.headLeft) / 2 + 2;
   const ry = (bottom - top) / 2;
   const cells = [];
-  for (let i = 0; i < 720; i++) {
-    const t = (i / 720) * Math.PI * 2 - Math.PI / 2;
+  for (let i = 0; i < 1440; i++) {
+    const t = (i / 1440) * Math.PI * 2 - Math.PI / 2;
     const x = Math.round(cx + Math.cos(t) * rx);
     const y = Math.round(cy + Math.sin(t) * ry);
-    if (!cells.some(([u, v]) => u === x && v === y)) cells.push([x, y]);
+    const last = cells[cells.length - 1];
+    if (last && last[0] === x && last[1] === y) continue;
+    if (cells.some(([u, v]) => u === x && v === y)) continue;
+    cells.push([x, y]);
   }
-  const dashes = [];
-  for (let i = 0; i + 1 < cells.length; i += 3) dashes.push(cells.slice(i, i + 2));
-  return dashes;
+  // Thin the line: drop a cell whose neighbours on both sides already touch each other, so the oval is one cell wide without
+  // corner clumps.
+  for (let k = 0; k < cells.length && cells.length > 8; ) {
+    const p = cells[(k - 1 + cells.length) % cells.length];
+    const q = cells[(k + 1) % cells.length];
+    if (Math.abs(p[0] - q[0]) <= 1 && Math.abs(p[1] - q[1]) <= 1) cells.splice(k, 1);
+    else k++;
+  }
+  return cells;
+}
+// The midpoint of two #rrggbb colours.
+function mix(c1, c2) {
+  const h = (c, i) => parseInt(c.slice(1 + i * 2, 3 + i * 2), 16);
+  return `#${[0, 1, 2].map((i) => Math.round((h(c1, i) + h(c2, i)) / 2).toString(16).padStart(2, '0')).join('')}`;
 }
 function heatsink(px, a, hot) {
   const x = a.bodyRight + 1;

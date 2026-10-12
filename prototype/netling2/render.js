@@ -36,7 +36,7 @@
 // (cache, virus, events, the attention mark), action reactions, the flow glow, the evolution strobe, the heat wash and the glitch shake.
 import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
 import { SPRITES, drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../../src/sprites.js';
-import { drawWorn, drawProp } from '../../src/accessories.js';
+import { drawWorn, drawProp, placeWorn, accessoryById } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
 import { idleOffset } from './idle.js';
@@ -175,7 +175,8 @@ export function composeLCD(pet, time, opts = {}) {
 
   // 5. Wearables, on the registered frame the tell wears (Program's blink keeps them on the open-eyed frame).
   if (worn.length && !form.hideWorn?.({ time, reduced })) {
-    ops.push({ op: 'worn', list: worn, sprite: form[wearKey], x, y, frame: tell.frame, dim: dimPet, time, pal });
+    const list = exclusiveWorn(worn, form[wearKey], { frame: tell.frame, time, pal });
+    ops.push({ op: 'worn', list, sprite: form[wearKey], x, y, frame: tell.frame, dim: dimPet, time, pal });
   }
 
   // 6. State marks, awake only.
@@ -197,6 +198,29 @@ export function composeLCD(pet, time, opts = {}) {
   // 8. The Z while resting.
   if (rest) ops.push({ op: 'rows', rows: SPRITES.z, x: 30, y: 3 + TOP + frame, colors: { '#': dimPet ? Z_DIM : pal.main } });
   return { bg, ops, box };
+}
+
+// An exclusive wearable (`exclusive: true` on its entry; so far only the style ideas' Light ring, accessory-ideas.js) is worn alone in its
+// slot and over its area: every other item of its slot is dropped, and so is any worn item with a pixel on the exclusive item's area (its
+// pixels and the cells they enclose, row by row), placed as placeWorn places the whole list. 1.0 has no exclusive item, so 1.0's lists
+// pass through unchanged. A 2.0 wardrobe would grey out what is hidden; the renderer only refuses to draw it.
+export function exclusiveWorn(list, sprite, { frame = 0, time = 0, pal = null } = {}) {
+  const ex = list.filter((w) => accessoryById(w.id)?.exclusive);
+  if (!ex.length) return list;
+  const placed = placeWorn(list, sprite, { frame, time, pal });
+  const area = new Set();
+  for (const w of placed.filter((p) => ex.some((e) => e.id === p.id))) {
+    const rows = new Map();
+    for (const { x, y } of w.pts) rows.set(y, [Math.min(x, rows.get(y)?.[0] ?? x), Math.max(x, rows.get(y)?.[1] ?? x)]);
+    for (const [y, [x0, x1]] of rows) for (let x = x0; x <= x1; x++) area.add(`${x},${y}`);
+  }
+  const slots = new Set(ex.map((e) => accessoryById(e.id).slot));
+  return list.filter((w) => {
+    if (ex.some((e) => e.id === w.id)) return true;
+    if (slots.has(accessoryById(w.id)?.slot)) return false;
+    const pts = placed.find((p) => p.id === w.id)?.pts ?? [];
+    return !pts.some(({ x, y }) => area.has(`${x},${y}`));
+  });
 }
 
 // Runs a scene on a 2D context whose cells are the LCD's (LCD_W x LCD_H; scale with the canvas size or a transform).

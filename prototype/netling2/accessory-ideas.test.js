@@ -5,10 +5,10 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE } from './accessory-ideas.js';
+import { ringCells, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE } from './accessory-ideas.js';
 import { ACCESSORIES, PROPS, placeWorn, anchorsFor } from '../../src/accessories.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
-import { composeLCD } from './render.js';
+import { composeLCD, exclusiveWorn } from './render.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
@@ -141,4 +141,47 @@ test('the crests are 9x9 of lit and dark cells', () => {
     assert.equal(c.pixels.length, 9, c.id);
     for (const r of c.pixels) assert.match(r, /^[#.]{9}$/, c.id);
   }
+});
+
+test('the Light ring is one unbroken oval on every form: each cell touches the next, corners included, and it closes', () => {
+  for (const { form } of ALL) {
+    for (const sprite of [form.a, form.b]) {
+      const cells = ringCells(anchorsFor(sprite));
+      assert.ok(cells.length >= 12, `${form.id}: ${cells.length} cells`);
+      assert.equal(new Set(cells.map(([x, y]) => `${x},${y}`)).size, cells.length, `${form.id}: no cell twice`);
+      cells.forEach(([x, y], i) => {
+        const [u, v] = cells[(i + 1) % cells.length];
+        assert.ok(Math.abs(x - u) <= 1 && Math.abs(y - v) <= 1, `${form.id}: a gap after ${x},${y}`);
+      });
+    }
+  }
+});
+
+test('the Light ring is worn alone on the face and over its area: other face items and anything on or inside it are not drawn', () => {
+  const OUTFIT = [{ id: 'shades' }, { id: 'visor' }, { id: 'cap' }, { id: 'crown' }, { id: 'scarf' }, { id: 'halo' }, { id: 'dataaura' }];
+  // Without the ring nothing is dropped (1.0's lists pass through).
+  assert.deepEqual(exclusiveWorn(OUTFIT, SETS.iron.ironAdultBreachStreet.a), OUTFIT);
+  let keptSomething = false;
+  for (const { form } of ALL) {
+    for (const time of [0, 1250, 4000]) {
+      const list = [...OUTFIT, { id: 'laughingring' }];
+      const kept = exclusiveWorn(list, form.a, { time });
+      assert.ok(kept.some((w) => w.id === 'laughingring'), form.id);
+      assert.ok(!kept.some((w) => w.id === 'shades' || w.id === 'visor'), `${form.id}: a face item is drawn with the ring`);
+      // What is kept never touches the ring's area (its cells and what they enclose, row by row).
+      const placed = placeWorn(list, form.a, { time });
+      const ring = placed.find((p) => p.id === 'laughingring').pts;
+      const rows = new Map();
+      for (const { x, y } of ring) rows.set(y, [Math.min(x, rows.get(y)?.[0] ?? x), Math.max(x, rows.get(y)?.[1] ?? x)]);
+      const inside = (x, y) => rows.has(y) && x >= rows.get(y)[0] && x <= rows.get(y)[1];
+      for (const w of kept.filter((k) => k.id !== 'laughingring')) {
+        keptSomething = true;
+        assert.ok(!placed.find((p) => p.id === w.id).pts.some(({ x, y }) => inside(x, y)), `${form.id} at ${time}: ${w.id} overlaps the ring`);
+      }
+      // The composed screen draws the filtered list.
+      const op = composeLCD({ form, egg: 'iron', idle: 'none', worn: list }, time).ops.find((o) => o.op === 'worn');
+      assert.deepEqual(op.list, exclusiveWorn(list, op.sprite, { frame: op.frame, time, pal: op.pal }));
+    }
+  }
+  assert.ok(keptSomething, 'something clear of the ring (the halo over the head) is still drawn on some form');
 });
