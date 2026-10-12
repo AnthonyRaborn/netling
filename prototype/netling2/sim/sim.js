@@ -294,6 +294,7 @@ export const ROGUE = {
   // With one packet the temper packet preference and the favorite-packet quirk have nothing to choose between, so both are off for Rogue (the
   // quirk key still crosses lives), and Licensed acts on the one feed. Off by default until decided (ROGUE='{"oneFeed":true}').
   oneFeed: false,
+  oneFeedVirus: 1, // the one feed's infection roll, as a share of the scavenged packet's (10.8 measures 1 and 0.5)
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
@@ -1941,7 +1942,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
         msg += ' it loves these.';
       }
       if (action === 'scav' && !s.virus && !shielded(s)) {
-        const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult') * mod(s, 'scavVirusMult');
+        const chance = 0.12 * (1 - traitEffect(s, 'hardened')) * mod(s, 'virusMult') * mod(s, 'scavVirusMult') * (oneFeed(s) ? ROGUE.oneFeedVirus : 1);
         if (rng() < chance) {
           s.virus = true;
           s.virusMin = 0;
