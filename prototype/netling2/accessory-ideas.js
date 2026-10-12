@@ -1,7 +1,8 @@
-// First drafts of the 2.0 style ideas' art (docs/NETLING_2_ACCESSORY_IDEAS.md): 25 wearables, 10 props and 5 crests, drawn as 1.0's are.
+// First drafts of the 2.0 style ideas' art (docs/NETLING_2_ACCESSORY_IDEAS.md): 26 wearables, 10 props and 5 crests, drawn as 1.0's are.
 // Nothing here is decided or shipped, and src/ is untouched: registerIdeas() adds the drafts to 1.0's tables at run time, so the real
 // placeWorn (anchors, the blend swap, orbiting floaters last) and drawProp place them, the way register.js adds the prototype forms.
-// The Laughing Man ring is left out: it was prototyped already (NETLING_2_SPRITES_HISTORY.md, "Blank's elder in motion").
+// The Laughing Man ring is here as the Light ring, redrawn from its description: the version rendered as one of Blank's elder options
+// (NETLING_2_SPRITES_HISTORY.md, "Blank's elder in motion") was never committed, and was only ever seen on the Wetware hidden line.
 //
 // Wearables: draw(px, a, frame, time, colors) over the authored anchors, as src/accessories.js. Props: draw(px, frame, time, extra) in
 // prop-local coordinates, standing on their bottom row, size [w, h]. Crests: 9x9, '#' lit, as 1.0's cosmetics.js.
@@ -183,6 +184,21 @@ export const IDEA_WEARABLES = [
   },
 
   // Face
+  {
+    id: 'laughingring',
+    name: 'Light ring',
+    slot: 'face',
+    paid: 'free (find)',
+    draw: (px, a, frame, time = 0) => {
+      // A ring of dashes circling the face (2 cells lit, 1 clear), the dashes a deep blue (a pale one was swapped to white on bright bodies by the blend check, and the travelling dash vanished), one dash bright white and
+      // travelling round clockwise a dash every 400 ms (about 3 to 4 s a lap). Redrawn from the doc's description: the 2026-10-07
+      // version (one of Blank's elder options) was never committed. Kept findable whole, motion included, as the doc says.
+      ringDashes(a).forEach((dash, i, all) => {
+        const c = i === step(time, 400) % all.length ? '#ffffff' : '#1f5fa8';
+        for (const [x, y] of dash) px(x, y, c);
+      });
+    },
+  },
   {
     id: 'scanvisor',
     name: 'Scan visor',
@@ -443,6 +459,26 @@ export const IDEA_WEARABLES = [
   },
 ];
 
+// The Light ring's dashes: the cells of an ellipse a cell outside the head's sides and from two rows over the eyes to a row under
+// the mouth, in clockwise order from the top, cut into dashes of 2 cells with 1 clear between.
+function ringDashes(a) {
+  const cx = (a.headLeft + a.headRight) / 2;
+  const top = a.eyeRow - 2;
+  const bottom = a.mouthRow + 1;
+  const cy = (top + bottom) / 2;
+  const rx = (a.headRight - a.headLeft) / 2 + 1;
+  const ry = (bottom - top) / 2;
+  const cells = [];
+  for (let i = 0; i < 720; i++) {
+    const t = (i / 720) * Math.PI * 2 - Math.PI / 2;
+    const x = Math.round(cx + Math.cos(t) * rx);
+    const y = Math.round(cy + Math.sin(t) * ry);
+    if (!cells.some(([u, v]) => u === x && v === y)) cells.push([x, y]);
+  }
+  const dashes = [];
+  for (let i = 0; i + 1 < cells.length; i += 3) dashes.push(cells.slice(i, i + 2));
+  return dashes;
+}
 function heatsink(px, a, hot) {
   const x = a.bodyRight + 1;
   for (const dy of [-1, 1, 3]) {

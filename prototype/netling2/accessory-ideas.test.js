@@ -32,13 +32,13 @@ const pixels = (draw, ...args) => {
 const wearPic = (e, sprite, time) => pixels((px, a, f, t) => e.draw(px, a, f, t, e.colors?.map(([, d]) => d)), anchorsFor(sprite), Math.floor(time / 500) % 2, time);
 const propPic = (e, time) => pixels((px, f, t) => e.draw(px, f, t, null), Math.floor(time / 500) % 2, time);
 
-test('every wearable, prop and crest idea in the doc has art, with the doc\'s Paid? value (the Laughing Man ring was prototyped already)', () => {
+test('every wearable, prop and crest idea in the doc has art, with the doc\'s Paid? value (the Laughing Man ring as the Light ring)', () => {
   const wear = ['Head', 'Face', 'Body', 'Float'].flatMap((h) => rowsOf(`${h} (`));
-  const want = [...wear.filter(([id]) => id !== 'laughingring'), ...rowsOf('Props (')];
+  const want = [...wear, ...rowsOf('Props (')];
   const have = new Map([...IDEA_WEARABLES, ...IDEA_PROPS].map((x) => [x.id, x.paid]));
-  assert.equal(want.length, 35);
+  assert.equal(want.length, 36);
   for (const [id, paid] of want) assert.equal(have.get(id), paid, id);
-  assert.equal(have.size, 35);
+  assert.equal(have.size, 36);
   const crests = doc.split('## Crests')[1].split('\n## ')[0];
   const crestIds = [...crests.matchAll(/\(`(\w+)`\)/g)].map((m) => m[1]);
   assert.deepEqual(IDEA_CRESTS.map((c) => c.id), crestIds);
@@ -113,7 +113,7 @@ test('nothing toggles faster than the flash rule: every cell holds each colour a
 });
 
 test('the still ideas do not move between the A and B frames or over time', () => {
-  const moving = new Set(['catears', 'beanie', 'censorbar', 'padlock', 'jammer', 'petridish']);
+  const moving = new Set(['laughingring', 'catears', 'beanie', 'censorbar', 'padlock', 'jammer', 'petridish']);
   const sprite = SETS.program.programAdultTuneCorp.a;
   for (const e of WEAR.filter((x) => x.version !== 'paid' && !moving.has(x.base ?? x.id))) {
     const pics = new Set([0, 500, 1300, 9000].map((t) => wearPic(e, sprite, t)));
