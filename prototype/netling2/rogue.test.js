@@ -89,7 +89,7 @@ test('the shared marks: two 2x2 eyes with a body cell on each side (room for the
   for (const id of ROGUE_ADULTS_ALL) assert.ok(size(ROGUE_ELDER_OF(id)) > size(id), `${id}: the elder's tag is larger`);
 });
 
-test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag dark; both keep the awake outline', () => {
+test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag dark (dim where it would touch an X); both keep the awake outline', () => {
   for (const f of forms) {
     const a = f.anchors.a;
     assert.equal(poseDistance(f.a, f.sleep), 0, `${f.id}: asleep outline`);
@@ -97,7 +97,11 @@ test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag d
     for (const kind of ['sleep', 'dead']) assert.deepEqual(roguePose(f.a, a, kind, f.id), f[kind]);
     const changed = (pose) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c !== f.a[y][x] ? [x, y] : null)).filter(Boolean));
     assert.ok(changed('sleep').length && changed('sleep').every(([, y]) => y === a.eyeRow || y === a.eyeRow + 1), `${f.id}: asleep changes only the eyes`);
-    for (const [x, y] of rogueTag(f.id)) assert.equal(f.dead[y][x], 'o', `${f.id}: the tag goes dark when dead`);
+    // Dark when dead, except where it would touch an X: then it stays dim (Foundling and Alias, decided).
+    const dimTag = ['rogueBaby', 'rogueTeen'].includes(f.id);
+    for (const [x, y] of rogueTag(f.id)) assert.equal(f.dead[y][x], dimTag ? 'x' : 'o', `${f.id}: the tag when dead`);
+    const near = rogueTag(f.id).some(([x, y]) => [-1, 0, 1].some((dy) => [-1, 0, 1].some((dx) => (dx || dy) && f.dead[y + dy]?.[x + dx] === 'o' && !rogueTag(f.id).some(([tx, ty]) => tx === x + dx && ty === y + dy))));
+    assert.equal(near, dimTag, dimTag ? `${f.id}: a dim tag that touches no X` : `${f.id}: a dark tag touches an X`);
     assert.ok(markDistance(f.a, f.dead) > 0);
   }
 });

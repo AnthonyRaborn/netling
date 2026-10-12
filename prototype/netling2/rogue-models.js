@@ -6,7 +6,7 @@
 //   asleep: no mark, only 1.0's slit eyes. The shut third eye is shut already.
 //   dead:   the scraped-off asset tag goes dark (decided, maintainer, 2026-10-12): the plate that was removed shows as a dark patch. It was
 //           drafted lit ('+'), but the dead colours draw '+' as the body's grey, so it did not show; 'o' is the darkest dead colour, as
-//           Iron's barcode and Program's flatline use.
+//           Iron's barcode and Program's flatline use. Where the tag would touch an X (Foundling, Alias) it stays dim.
 //   captured: no mark; the ash heap the self-destruct leaves (rogue-burn.js, decided), for the third mark only.
 // Every form carries the shadow, a motion layer (rogue-motion.js), registered as `motion`, and each older line its own effect with it: the
 // Breach line fades from the edges, the Dodge line shimmers as Cipher, the Feast line casts a bigger decoy (Stash's with a maw, a draft),
@@ -40,12 +40,17 @@ const FRAMES = { baby: ROGUE_BABY, ...ROGUE_TEENS, ...ROGUE_ADULTS, ...ROGUE_ELD
 const ANCHORS = { baby: ROGUE_BABY_ANCHORS, ...ROGUE_TEEN_ANCHORS, ...ROGUE_ADULT_ANCHORS, ...ROGUE_ELDER_ANCHORS };
 export const rogueTag = (id) => ROGUE_TAGS[rogueArtKey(id)];
 
-// The 1.0 generic poses (the X's as on the other eggs, models.js), plus the dark tag when dead.
+// The 1.0 generic poses (the X's as on the other eggs, models.js), plus the dark tag when dead. A tag that would touch an X (side or
+// corner) stays dim instead, so it does not run into the eye (decided, maintainer, 2026-10-12): on Foundling and Alias the only chest row
+// under the neck sits right below the X's lower arms, so their tags keep the awake frame's dim; the other eight go dark.
+export const tagTouchesX = (posed, tag) => tag.some(([x, y]) => [-1, 0, 1].some((dy) => [-1, 0, 1].some((dx) => (dx || dy) && posed[y + dy]?.[x + dx] === 'o')));
 export function roguePose(a, anchors, kind, newOrOldId) {
   const posed = pose(a, anchors.eyeRow, kind);
   if (kind !== 'dead') return posed;
+  const tag = rogueTag(newOrOldId);
+  if (tagTouchesX(posed, tag)) return posed; // the tag left as drawn: dim
   const g = posed.map((r) => [...r]);
-  for (const [x, y] of rogueTag(newOrOldId)) g[y][x] = 'o';
+  for (const [x, y] of tag) g[y][x] = 'o';
   return g.map((r) => r.join(''));
 }
 
