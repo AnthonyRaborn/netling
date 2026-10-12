@@ -238,7 +238,7 @@ export function checkIn(s, p, now, rng, ctx) {
   };
   ctx.overfedNow = false;
   const feed = () => {
-    for (let i = 0; i < 4 && s.stats.charge < chargeTarget() && !blockReason(s, 'corp') && !(process.env.ACTBOT === 'budget' && ACTS.charge.on && s.stats.charge >= ACTS.charge.line); i++) {
+    for (let i = 0; i < 4 && s.stats.charge < chargeTarget() && !blockReason(s, 'scav') && !(process.env.ACTBOT === 'budget' && ACTS.charge.on && s.stats.charge >= ACTS.charge.line); i++) {
       // `shown` bots see only the HUD's floors; on a shown tie they alternate packets (a lone tie rule would drift one way).
       const lean = leanSeen(s, p.shown);
       let corp = p.diet === 'balance' ? (p.shown && lean === 0 ? s.lastPacket !== 'corp' : lean <= 0) : rng() < p.diet;
@@ -251,6 +251,7 @@ export function checkIn(s, p, now, rng, ctx) {
       if (p.blocks && s.lastPacket && (ctx.blockRun ?? 0) < p.blocks) corp = s.lastPacket === 'corp';
       // WETBOT=settle: a player who sees Wetware's rejection building feeds the same type as last time until it fades.
       if (process.env.WETBOT === 'settle' && WET.on && s.lastPacket && (s.shock ?? 0) >= WET.line * 0.6) corp = s.lastPacket === 'corp';
+      if (ROGUE.oneFeed && s.egg === 'rogue') corp = false; // Rogue's one feed (10.8, proposal)
       const prev = s.lastPacket;
       const full = s.stats.charge >= 95;
       if (doAct(corp ? 'corp' : 'scav').ok && full) ctx.overfedNow = true;

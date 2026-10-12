@@ -290,10 +290,15 @@ export const ROGUE = {
   // Section 6.1, item 46 (decided, 2026-10-11): an armed elder's death is the good end only at the end of its life cycle; a death by neglect or
   // integrity collapse is ordinary (no mixed egg). Stage 3 counted any death but a capture (ROGUE='{"goodEndFullLife":false}').
   goodEndFullLife: true,
+  // Section 10.8 (proposal, 2026-10-12): Rogue has no Standing, so one feed button (SCAVENGE): the scavenged packet, with its infection roll.
+  // With one packet the temper packet preference and the favorite-packet quirk have nothing to choose between, so both are off for Rogue (the
+  // quirk key still crosses lives), and Licensed acts on the one feed. Off by default until decided (ROGUE='{"oneFeed":true}').
+  oneFeed: false,
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
 export const isRogue = (s) => s?.egg === 'rogue';
+export const oneFeed = (s) => ROGUE.oneFeed && isRogue(s);
 // The Rogue trait (docs/NETLING_2_ROGUE_DRAFTS.md 9.4a, C1 and E1; decided, maintainer, 2026-10-11; placeholder name Unsigned): whatever hunts it
 // finds it less. Innate, not inherited: every Rogue netling has it beside its role trait, and the mixed egg (an NL-0 netling hatched after a good
 // end, s.mixed) has it for its one life; its child does not. Always at full strength (no streak, no history). On a Rogue: every region's hunter
@@ -1826,6 +1831,7 @@ export function blockReason(s, action) {
   if (action === 'play' && s.stats.charge < 10 + (SIDES.on && s.stats.charge <= SIDES[ 'charge' ].lo ? SIDES.charge.gate * sideM('charge') : 0)) return 'not enough charge to play.';
   if (action === 'hide' && s.event?.type !== 'trace' && s.event?.type !== 'sweep') return 'no active trace.';
   if (action === 'hide' && s.event?.type === 'sweep' && hideLockLeft(s)) return `route burned. no cover for ${Math.ceil(hideLockLeft(s))}m.`;
+  if (action === 'corp' && oneFeed(s)) return 'no such feed.';
   if (action === 'comply' && s.event?.type !== 'trace') return s.event?.type === 'sweep' ? 'no owner to comply with.' : 'no active trace.';
   if (action === 'defend' && s.event?.type !== 'attack' && s.event?.type !== 'sweep') return 'no intrusion to defend against.';
   if (action === 'greet' && !s.visit) return 'nobody is here.';
@@ -1914,7 +1920,7 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       let gain = action === 'corp' ? 30 : 25;
       if (STAGE.on) gain *= STAGE.meal[s.stage] ?? 1;
       if (STAGE.rest.on) s.demand = Math.max(0, (s.demand ?? 0) - STAGE.rest.feedSub);
-      if (action === 'corp') gain *= 1 + traitEffect(s, 'licensed');
+      if (action === 'corp' || oneFeed(s)) gain *= 1 + traitEffect(s, 'licensed');
       gain *= 1 + traitEffect(s, 'foraging');
       st.charge = clamp(st.charge + gain);
       st.heat = clamp(st.heat + 2);
@@ -1924,13 +1930,13 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       let msg = action === 'corp' ? 'licensed packet consumed.' : 'scavenged data consumed.';
       {
         const lv = temperLevel(s);
-        const match = lv > 0 ? s.lastPacket === action : lv < 0 ? Boolean(s.lastPacket) && s.lastPacket !== action : false;
+        const match = oneFeed(s) ? false : lv > 0 ? s.lastPacket === action : lv < 0 ? Boolean(s.lastPacket) && s.lastPacket !== action : false;
         msg += prefApply(s, match);
         if (WET.on && s.lastPacket && s.lastPacket !== action) wetSwitch(s, now);
         s.feeds = (s.feeds ?? 0) + 1;
         s.lastPacket = action;
       }
-      if (s.quirk.favPacket === action) {
+      if (s.quirk.favPacket === action && !oneFeed(s)) {
         st.sync = clamp(st.sync + 8);
         msg += ' it loves these.';
       }

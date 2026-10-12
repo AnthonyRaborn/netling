@@ -1325,6 +1325,99 @@ Death screen alternates to the recommended line: `netling.vN.0 was taken: three 
 - **Second review (maintainer, 2026-10-12), all decided:** **Foldering** for Drop with **PLANT** (Dead letter dropped; DRAFT not used); the third-mark line **(a)**, `!! third mark. it burned itself before they could.`, with the death screen line `netling.vN.0 was taken: three marks. it burned itself first.`; the rest of 10.2 as drafted (Tradecraft, Inside man, Deep cover, On the lam, Agents out, SEND OUT, the Source log lines); the rest of 10.4 as drafted (TRAIL, MARKS, danger and quiet, AMBUSH, HUNTER, the run messages); the good end **STAYED** for a Rogue next egg and **MERGED** for an NL-0 one.
 - **Third review (maintainer, 2026-10-12):** the good end's screen order as proposed (the egg prompt first, then the epilogue for MERGED, then the death screen with its header), and the STAYED log lines as drafted. **Section 10 is fully decided**; what is left is in section 11.
 
+### 10.9 Rogue's chatter and temper tell (drafts for choice, 2026-10-12)
+
+Rogue's netling speaks in chatter like every egg (first person, lowercase, one line every few hours), so it needs its own lines and its own temper shape for them. Data and tests: `prototype/netling2/rogue-lines.js`, `rogue-lines.test.js`; the shape is in `voice.js` (`chatterTone`, `checkShape`, `ROUTINE`, `STRAYS` for `rogue`; Rogue stays out of `EGGS`, as in `tell.js`, so the launch eggs' tests are unchanged).
+
+**The shape, from the glance.** Rogue's motion tell is a glance over its shoulder (8.1; `tell.js`), so its lines stop to look:
+- **Steady:** a check after a fixed count of words, `(clear)` every fifth word (every third strongly). The glance on the beat, finding nothing. Countable, as the other eggs' steady shapes are.
+- **Unsteady:** it breaks off to look behind it, `(behind?)`, once somewhere inside the line, then picks the line up again; strongly, it looks back twice and never finishes (the line ends on the look).
+- **Idle (the third channel):** steady, a four-step watch on the clock: left, right, behind, still. Unsteady, strays that are never in the watch: flinch, freeze, duck, bolt. Names only; nothing is drawn.
+
+Example (Mole): `i sat at their desk all day. nobody looked up.`
+
+| Steady | Strongly steady | Unsteady | Strongly unsteady |
+|---|---|---|---|
+| i sat at their desk (clear) all day. nobody looked up. | i sat at (clear) their desk all (clear) day. nobody looked (clear) up. | i sat at their desk all day. (behind?) nobody looked up. | i sat at their desk (behind?) all day. (behind?) |
+
+**Body lines** (one each for the baby, the teen and the four adults; elders have none, as on every egg):
+
+| Form | Line |
+|---|---|
+| Foundling | nobody sent for me. i came anyway. |
+| Alias | new name today. it fits better than the last. |
+| Mole | i sat at their desk all day. nobody looked up. |
+| Skip | i was gone before they finished the sentence. |
+| Spook | they talk on an open channel. i just listen. |
+| Drop | i left something for you. same place as before. |
+
+**State lines** (two a state, in the existing Overclock, Overdrive and Overlink groups and hints):
+
+| State | Lines |
+|---|---|
+| Overclock | running hot. heat shows up on their scans. / too warm to hide well. worth it, for now. |
+| Overdrive | full up. i could run for days if i had to. / packed and ready. say the word and we go. |
+| Overlink | you are the only one i talk to. keep it that way. / when you play, i forget to look behind me. |
+
+Notes:
+- **Echoes:** Foundling's line is the reveal's "it was not invited. it is asking anyway." from the inside; Mole's is `rogue-breach`; Spook's is `rogue-tune` from the other end of the call; Drop's is the dead letter left for the player. The last Overlink line is the glance turned off: closest to the player, it stops checking behind it (its unsteady voicings still look, right after "when you play,").
+- **Tested** (`rogue-lines.test.js`): one line per non-elder form; two per state; lowercase, no digits, no em dash; body lines 50 characters or less and state lines 62 (the other eggs' limits); no state name; no Rogue form name as a word and never "drop"; no repeat of any egg's line or 1.0's; every hand-written voicing passes `checkShape`; the steady voicings only add the checks; the machine voicing keeps the shape on any line at every level and seed; and the idle watch and strays.
+- **The NL-0 Lineage line** "something out there runs almost like me. it is running from someone." (decided as a background touch, codex drafts) now has its four voicings in each launch egg's shape, as that decision required before it ships (`LINEAGE_ROGUE_LINE`, id `lin-almost-like-me`, tested). Program: `something out there runs / almost like me. it / is running from someone.`, clipped `something out there runs almost -`; Iron: `1: something out there. 2: runs almost like me. 3: running from someone. ok.`, bell `UNKNOWN UNIT RUNNING!`; Wetware: `something out there ... runs almost like ... me. it is ... running from someone.`, mid thought `-- there runs almost like me. it is running from someone.`. The strong voicings are in the file.
+
+**Temper hints for Rogue (to confirm whether wanted).** The other eggs show one pair of hints per tell channel in the Dex (codex drafts, Temper hints). Rogue's forms show `???` and get no Dex hints (decided, 10.12), so the question is whether the egg's temper hints go too. Drafts, in case they stay:
+
+| Tell | Steady end | Unsteady end |
+|---|---|---|
+| Motion | Watch where it looks. It checks over its shoulder on the same count, every time. | Watch where it looks. It checks behind it whenever it likes, either way. |
+| Idle | Left alone, it keeps watch: each way in turn, then still. Count the checks: the count holds. | Left alone, it flinches at nothing and stops halfway. |
+| Chatter | It stops to make sure it is clear. Count the words between checks: the count never changes. | It breaks off mid line to look behind it. |
+
+Recommendation: **drop them with the Dex hints**, for the reason the maintainer gave for the forms: a Rogue player has read every other egg's hints by then, and the glance, the watch and the checks are the same three tells in a new skin.
+
+### 10.10 The good end's offer (drafts for choice, 2026-10-12)
+
+At a clean Source exit (no fight lost on the run, hunter fights included; 6.1 item 41) a Rogue elder is offered the good end at once; declining keeps it armed for the elder's death at the end of its life cycle, unless a later mark disarms it (item 13), and another clean exit re-arms it and offers it again.
+
+**The offer** (on the run's end screen, after the Source's results and, on the first exit, after `> found: NL-0, initial commit. it is not a copy.`):
+
+```
+the Source is behind it. it found the line its copy was missing.
+it can stay.
+```
+
+| Button | Label | Hint |
+|---|---|---|
+| Accept | **STAY** | `this life ends here, by choice.` (31) |
+| Decline | **NOT YET** | `it can stay later, if not marked.` (33) |
+
+**Log lines around it:**
+
+| Moment | Line |
+|---|---|
+| STAY | the good end flow (10.6: the egg prompt, the epilogue for MERGED, the death screen) |
+| NOT YET | `> not yet. it can still stay when its time comes.` |
+| A later mark disarms it | `> !! they marked it. staying is off until it comes out clean again.` |
+| Another clean exit re-arms it | the offer again (STAY, NOT YET) |
+| An armed elder reaches the end of its life cycle | the good end flow, no prompt (it was already chosen by declining) |
+
+Notes: STAY carries the echo chain ("it was not invited. it stayed.") into the button itself; NOT YET is NL-0's own "not yet" from the Root rescue line, which a Rogue player has seen. No line says "good end", "merge" or "armed". Hints are kept to 35 characters, the length of 1.0's longest anomaly hint and the tutorial's hint limit. The hint for NOT YET is the one place the player is told that a mark matters after the Source; it is a rule they need to make the choice, and it gives no number. Alternate labels: **STAY HERE** (9) and **KEEP GOING** (10, one over the limit, so not used); **GO ON** for NOT YET (shorter, but "go on" also reads as "continue to the good end").
+
+### 10.11 The Rogue trait's name and description (drafts for choice, 2026-10-12)
+
+The trait (6.1 item 48; 9.4a, C1 with E1): innate on every Rogue and on the mixed egg for its one life, never inherited. On a Rogue, every region's hunter threshold +2; on the mixed egg, a quarter of its corp traces arrive as visitors. Trait descriptions follow `sim.js` `TRAITS` (a name and a short plain sentence, no number: "Corp traces find it less often").
+
+| Name | On a Rogue | On the mixed egg | Note |
+|---|---|---|---|
+| **Unsigned** (recommended; the placeholder) | `The hunters take longer to pick up its trail.` | `Some corp traces turn out to be friendly visitors.` | unsigned code carries no signature, and the hunt hunts a signature (section 2; the epilogue's "sweep: signature not found") |
+| No signature | as above | as above | says the same plainly; longer, and close to the epilogue's line |
+| Off the books | as above | as above | tradecraft; it was E3's name for a different effect, which may confuse the record |
+
+Two descriptions, one per rule set, since the trait does different things on the two; the Lineage tab and the Dex show the one for the netling's egg. "Friendly" is there because a corp trace that becomes a visitor would otherwise read as a corp visit.
+
+### 10.12 The Dex (decided, maintainer, 2026-10-12)
+
+**No Dex hints for Rogue's forms; each shows `???` until found.** A Rogue player has played every NL-0 egg; with four adults, one per game, and no Standing, evolution by wins is intuited from the other eggs. This closes 8.5's open item.
+
 ## 11. Not done
 
 - ~~The reveal choice, the background touches and Rogue's own codex pages.~~ The reveal, the pages and the background touches decided (codex drafts, 2026-10-11 and 2026-10-12).

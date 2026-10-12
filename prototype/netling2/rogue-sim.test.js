@@ -300,3 +300,29 @@ test('runs: a Rogue adult is never noticed at checkpoints and runs on its role b
     NR2.abilities = saved;
   }
 });
+
+test('one feed (10.8, off by default): with it on, a Rogue has only the scavenged packet, no packet preference or favorite, and Licensed acts on it', () => {
+  assert.equal(ROGUE.oneFeed, false);
+  const s0 = fresh();
+  assert.ok(act(s0, 'corp', T0, stub(0.9)).ok, 'off: both feeds as before');
+  ROGUE.oneFeed = true;
+  try {
+    const s = fresh();
+    assert.equal(act(s, 'corp', T0, stub(0.9)).ok, false);
+    s.quirk.favPacket = 'scav';
+    s.tLevel = 2; // strongly steady: a repeat packet would match its preference on another egg
+    s.lastPacket = 'scav';
+    const sync = s.stats.sync;
+    assert.ok(act(s, 'scav', T0, stub(0.9)).ok);
+    assert.equal(s.stats.sync, sync, 'no favorite bonus and no preference bonus');
+    const other = fresh('rogueAdultBreach', { egg: 'program' });
+    other.quirk.favPacket = 'scav';
+    other.tLevel = 2;
+    other.lastPacket = 'scav';
+    const before = other.stats.sync;
+    act(other, 'scav', T0, stub(0.9));
+    assert.equal(other.stats.sync, Math.min(100, before + 8 + CFG.prefStrong), 'the favorite and the preference still work on an NL-0 egg');
+  } finally {
+    ROGUE.oneFeed = false;
+  }
+});

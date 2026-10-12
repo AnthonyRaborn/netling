@@ -24,6 +24,10 @@
 //             unsteady: a fault bell: the first few words in capitals, "!" (strongly, prefixed FAULT).
 //   wetware   steady: a pause "..." after every third word (every second strongly).
 //             unsteady: bursts that start mid thought: "-- " then the tail, strongly with the head after, as if answering.
+//   rogue     (the hidden egg; not in EGGS, as in tell.js) its tell is the glance over its shoulder, so its lines stop to look:
+//             steady: a check, "(clear)", after every fifth word (every third strongly), the glance on the beat finding nothing.
+//             unsteady: it breaks off to look behind it, "(behind?)", once somewhere inside the line and picks up again;
+//             strongly, twice, and the line is never finished (it ends on the look back).
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 
 export const SLOT_MS = FLASH_TOGGLE_MS;
@@ -41,12 +45,14 @@ export const ROUTINE = {
   program: ['scan', 'sort', 'flush', 'sync'],
   iron: ['neck', 'arm', 'hip', 'base'], // a joint-by-joint self check
   wetware: ['stretch', 'rest', 'stretch', 'rest'],
+  rogue: ['left', 'right', 'behind', 'still'], // a watch: it checks each way, then holds still (docs/NETLING_2_ROGUE_DRAFTS.md 10.9)
 };
 // Never in the routine, so a stray is always recognisable as unscheduled.
 export const STRAYS = {
   program: ['probe', 'fork', 'loop', 'spawn'],
   iron: ['port', 'relay', 'fan', 'lamp'],
   wetware: ['sniff', 'twist', 'curl', 'tap'],
+  rogue: ['flinch', 'freeze', 'duck', 'bolt'],
 };
 
 export const STEP_MS = { 1: 12_000, 2: 6_000 };
@@ -88,6 +94,9 @@ export function idleBehavior({ egg, level, time, seed = 0 }) {
 export const PROGRAM_BEAT = { 1: 4, 2: 2 }; // words per beat
 export const WETWARE_PAUSE = { 1: 3, 2: 2 }; // words between pauses
 export const IRON_ITEMS = 3;
+export const ROGUE_CHECK = { 1: 5, 2: 3 }; // words between checks
+export const ROGUE_CLEAR = '(clear)';
+export const ROGUE_LOOK = '(behind?)';
 
 const words = (text) => text.split(/\s+/).filter(Boolean);
 const chunk = (list, size) => {
@@ -99,6 +108,7 @@ const chunk = (list, size) => {
 function steadyTone(egg, level, w) {
   if (egg === 'program') return chunk(w, PROGRAM_BEAT[level]).map((c) => c.join(' ')).join(' / ');
   if (egg === 'wetware') return chunk(w, WETWARE_PAUSE[level]).map((c) => c.join(' ')).join(' ... ');
+  if (egg === 'rogue') return chunk(w, ROGUE_CHECK[level]).map((c) => c.join(' ')).join(` ${ROGUE_CLEAR} `);
   // iron: three items, as even as the line allows, never more than three whatever its length
   const items = Math.min(IRON_ITEMS, w.length);
   const parts = Array.from({ length: items }, (_, i) => w.slice(Math.floor((i * w.length) / items), Math.floor(((i + 1) * w.length) / items)))
@@ -118,6 +128,16 @@ function unsteadyTone(egg, level, w, seed) {
     const loud = Math.min(w.length, strong ? 2 : 3);
     const head = w.slice(0, loud).join(' ').toUpperCase().replace(/[.,!?;:]+$/, '');
     return `${strong ? 'FAULT: ' : ''}${head}!`;
+  }
+  if (egg === 'rogue') {
+    // It breaks off to look back somewhere inside the line (never before the first word or after the last).
+    if (w.length < 2) return `${w.join(' ')} ${ROGUE_LOOK}`;
+    const at = 1 + Math.floor(hash(w.length * 13 + seed) * (w.length - 1));
+    if (!strong) return [...w.slice(0, at), ROGUE_LOOK, ...w.slice(at)].join(' ');
+    // Strongly: it looks back twice and never finishes; the second look comes before the line's last word.
+    const first = Math.max(1, Math.min(at, w.length - 2));
+    const second = first + 1 + Math.floor(hash(w.length * 17 + seed) * Math.max(1, w.length - 1 - first - 1));
+    return [...w.slice(0, first), ROGUE_LOOK, ...w.slice(first, Math.min(second, w.length - 1)), ROGUE_LOOK].join(' ');
   }
   // wetware: start mid thought, as if answering someone else
   const drop = Math.min(Math.max(0, w.length - 2), 1 + Math.floor(hash(w.length * 11 + seed) * 2));
@@ -140,9 +160,10 @@ export function checkShape({ egg, level, text }) {
   const bad = [];
   if (level === 0) return bad;
   if (level > 0) {
-    if (egg === 'program' || egg === 'wetware') {
-      const sep = egg === 'program' ? ' / ' : ' ... ';
-      const size = (egg === 'program' ? PROGRAM_BEAT : WETWARE_PAUSE)[level];
+    if (egg === 'program' || egg === 'wetware' || egg === 'rogue') {
+      const sep = { program: ' / ', wetware: ' ... ', rogue: ` ${ROGUE_CLEAR} ` }[egg];
+      const size = { program: PROGRAM_BEAT, wetware: WETWARE_PAUSE, rogue: ROGUE_CHECK }[egg][level];
+      if (egg === 'rogue' && text.includes(ROGUE_LOOK)) bad.push('a steady line never looks behind it');
       const parts = text.split(sep).map(wordCount);
       if (parts.length < 2) bad.push(`needs at least two parts split by "${sep.trim()}"`);
       parts.slice(0, -1).forEach((c, i) => { if (c !== size) bad.push(`part ${i + 1} has ${c} words, not ${size}`); });
@@ -162,6 +183,13 @@ export function checkShape({ egg, level, text }) {
   if (egg === 'program') {
     if (!/ -( |$)/.test(text)) bad.push('needs a clipped clause ending in " -"');
     if (strong && (text.match(/ -( |$)/g) ?? []).length < 2) bad.push('strong: the clipped clause must be said twice');
+  } else if (egg === 'rogue') {
+    const looks = text.split(ROGUE_LOOK).length - 1;
+    if (text.includes(ROGUE_CLEAR)) bad.push('an unsteady line never checks clear');
+    if (looks !== (strong ? 2 : 1)) bad.push(`needs ${strong ? 'two looks' : 'one look'} "${ROGUE_LOOK}" (${looks} found)`);
+    if (text.startsWith(ROGUE_LOOK)) bad.push('the look comes inside the line, not before it');
+    if (!strong && text.endsWith(ROGUE_LOOK)) bad.push('mild: it picks the line up again after the look');
+    if (strong && !text.endsWith(ROGUE_LOOK)) bad.push('strong: it never finishes, the line ends on the look');
   } else if (egg === 'iron') {
     if (text !== text.toUpperCase() || !text.endsWith('!')) bad.push('must be capitals and end with "!"');
     if (strong !== text.startsWith('FAULT: ')) bad.push(strong ? 'strong must start with "FAULT: "' : 'only strong starts with "FAULT: "');
