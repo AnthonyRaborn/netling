@@ -9,11 +9,11 @@ import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { MAX_BUGS } from './glitch.js';
 import { QUIRKS } from './idle.js';
-import { drawLCD } from './render.js';
+import { drawLCD, TOP } from './render.js';
 
 const SETS = { iron: () => forms('B'), program: programForms, wetware: wetwareForms, rogue: rogueForms };
-const CROP = { x: 5, y: 0, w: 30, h: 24 }; // the part of the 40x28 screen that holds a pet
-const FULL_WIDTH = { x: 0, y: 0, w: 40, h: 24 }; // a visiting pet stands at the right edge, outside CROP
+const CROP = { x: 5, y: 0, w: 30, h: 24 + TOP }; // the part of the screen that holds a pet (render.js; 1.0's 24 rows and the headroom)
+const FULL_WIDTH = { x: 0, y: 0, w: 40, h: 24 + TOP }; // a visiting pet stands at the right edge, outside CROP
 const LEVELS = [[-2, 'strongly unsteady'], [-1, 'unsteady'], [0, 'middle'], [1, 'steady'], [2, 'strongly steady']];
 const SEED = 1;
 let quirk = 'none'; // the 1.0 idle shown under the temper tell (the section's own control)

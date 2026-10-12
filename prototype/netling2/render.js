@@ -1,10 +1,10 @@
 // The 2.0 renderer pass (docs/NETLING_2_ROGUE_DRAFTS.md 11.1, "The renderer", accepted; docs/NETLING_2_SPRITES.md, Next phase item 2):
-// one pass that draws every egg's layers on the 40x28 LCD, in the order the plan fixes. Not 1.0's src/render.js (under the freeze), and
+// one pass that draws every egg's layers on the LCD (1.0's 40x28 plus TOP rows), in the order the plan fixes. Not 1.0's src/render.js (under the freeze), and
 // not a game: it draws a pet from a plain description of what it looks like now, so the future 2.0 app, the review page and the tests
 // all draw the same picture.
 //
 // composeLCD(pet, time, opts) is pure: it returns the scene as a list of draw operations (no DOM, no canvas), so tests can check it.
-// paintLCD(ctx, scene) runs those on any 2D context of 40x28 cells; drawLCD(ctx, pet, time, opts) does both.
+// paintLCD(ctx, scene) runs those on any 2D context of LCD_W x LCD_H cells; drawLCD(ctx, pet, time, opts) does both.
 //
 // Order (the accepted plan):
 //   0. the room: the LCD background, darker with the lights off.
@@ -50,16 +50,20 @@ import { metronomeFrame, METRONOME_SIZE } from './metronome-art.js';
 import { rogueGlance, rogueTag } from './rogue-models.js';
 import { burnFrame, pickBurn, BURN_STEPS, BURN_STEP_MS } from './rogue-burn.js';
 
+// The screen is 1.0's 40x28 with TOP rows added above (maintainer, 2026-10-12): 1.0's idle reserves 5 rows over a pet, which the
+// holologo (6 rows up) and, on 2.0's 15 row forms, the halo, cursor, extra life and glitch moth overran by a row, and the holologo by 2
+// on Program's strong hop. Everything 1.0 lays out keeps its place relative to the floor, TOP rows lower; only the headroom grows.
+export const TOP = 2;
 export const LCD_W = 40;
-export const LCD_H = 28;
+export const LCD_H = 28 + TOP;
 export const LCD_BG = '#0b2226'; // 1.0's defaults (src/render.js); the wardrobe's tint passes its own in opts.tint
 export const LCD_BG_DARK = '#03090a';
 export const BURN_MS = BURN_STEPS * BURN_STEP_MS;
-export const FLOOR = 20; // an awake netling stands with its last row on row 19, as in 1.0; resting and dead one row lower
+export const FLOOR = 20 + TOP; // an awake netling stands with its last row on the row above, as on 1.0's row 19; resting and dead one lower
 // The Metronome's colours: the review render's (a brown case, a dark dial window, a light rod, a yellow weight). A draft, not decided.
 export const METRONOME_COLORS = { '#': '#8a5a2b', x: '#2a1a10', '+': '#d8d8d8', o: '#f9f002' };
 const Z_DIM = '#2f6b73';
-const PROP_FLOOR = 21; // src/accessories.js: props stand on this row at the right edge
+const PROP_FLOOR = 21 + TOP; // src/accessories.js: props stand on its row 21 at the right edge (paintLCD shifts 1.0's props by TOP)
 
 export const IDLE_HOLDS = {
   held: idleClock,
@@ -118,7 +122,7 @@ export function composeLCD(pet, time, opts = {}) {
       ops.push({ op: 'rows', rows, x: Math.floor((LCD_W - rows[0].length) / 2), y: FLOOR + 1 - rows.length, colors: DEAD_COLORS });
     }
     box = { x: ops[0].x, y: ops[0].y, w: ops[0].rows[0].length, h: ops[0].rows.length };
-    ops.push({ op: 'rect', x: 0, y: 23, w: LCD_W, h: 1, color: pal.accent }); // 8. the flatline
+    ops.push({ op: 'rect', x: 0, y: 23 + TOP, w: LCD_W, h: 1, color: pal.accent }); // 8. the flatline
     return { bg, ops, box };
   }
 
@@ -155,7 +159,7 @@ export function composeLCD(pet, time, opts = {}) {
   } else if (visiting) {
     const b = visitMotion({ w, h, visitorWidth: pet.visitorWidth ?? 16, time, calm: reduced });
     x = b.x;
-    y = b.y;
+    y = b.y + TOP; // visit.js keeps 1.0's floor
   } else {
     const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.held)({ egg, level: v.level, time, seed, reduced });
     const wander = v.idle !== 'none' ? idleOffset(v.idle, h, clock) : { x: 0, y: 0 };
@@ -191,11 +195,11 @@ export function composeLCD(pet, time, opts = {}) {
   }
 
   // 8. The Z while resting.
-  if (rest) ops.push({ op: 'rows', rows: SPRITES.z, x: 30, y: 3 + frame, colors: { '#': dimPet ? Z_DIM : pal.main } });
+  if (rest) ops.push({ op: 'rows', rows: SPRITES.z, x: 30, y: 3 + TOP + frame, colors: { '#': dimPet ? Z_DIM : pal.main } });
   return { bg, ops, box };
 }
 
-// Runs a scene on a 2D context whose cells are the LCD's (40x28; scale with the canvas size or a transform).
+// Runs a scene on a 2D context whose cells are the LCD's (LCD_W x LCD_H; scale with the canvas size or a transform).
 export function paintLCD(ctx, { bg, ops }) {
   ctx.globalAlpha = 1;
   ctx.fillStyle = bg;
@@ -206,7 +210,13 @@ export function paintLCD(ctx, { bg, ops }) {
       drawSprite(ctx, o.rows, o.x, o.y, o.colors);
       ctx.globalAlpha = 1;
     } else if (o.op === 'worn') drawWorn(ctx, o.list, o.sprite, o.x, o.y, o.frame, o.dim, o.time, o.pal);
-    else if (o.op === 'prop') drawProp(ctx, o.id, LCD_W, o.frame, o.time, o.extra, o.dim);
+    else if (o.op === 'prop') {
+      // 1.0's props stand on 1.0's floor; move them down with it.
+      ctx.save();
+      ctx.translate(0, TOP);
+      drawProp(ctx, o.id, LCD_W, o.frame, o.time, o.extra, o.dim);
+      ctx.restore();
+    }
     else if (o.op === 'rect') {
       ctx.fillStyle = o.color;
       ctx.fillRect(o.x, o.y, o.w, o.h);

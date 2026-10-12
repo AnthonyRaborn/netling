@@ -81,7 +81,7 @@
       import { QUIRKS } from './idle.js';
       import { guardedNeglect } from './needs.js';
       import { MAX_BUGS } from './glitch.js';
-      import { drawLCD, IDLE_HOLDS } from './render.js';
+      import { drawLCD, IDLE_HOLDS, LCD_W, LCD_H } from './render.js';
       import { KINDS } from './marks.js';
       import { authoring, sharedCells, lineOverlaps, modelGap, teenOverlaps, iouB, elderTable } from './metrics.js';
 
@@ -97,7 +97,7 @@
         const state = { palette: 0, egg: 'auto', idle: 'none', visit: false, temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, seams: 0, states: 'none', prop: '', idleHold: 'held', dark: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
         const A = forms('A');
         const B = forms('B');
-        const LCD = { w: 40, h: 28 };
+        const LCD = { w: LCD_W, h: LCD_H };
         const BG = '#0b2226';
         const STATE_SETS = { none: [], ...Object.fromEntries(KINDS.map((k) => [k, [{ kind: k }]])), all: KINDS.map((kind) => ({ kind })) };
 

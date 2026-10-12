@@ -8,9 +8,10 @@
 // the hash (#sec=blank, #sec=handler, #sec=holologo; scale=n): every LCD is the 2.0 renderer's (render.js composeLCD), idle off for the
 // first two so the steps line up. The holologo options are drawn here only (src/ is under the freeze): `now` is 1.0's (a.top - 4),
 // `lower` one row lower (a.top - 3), `clamp` 1.0's position pushed down only on the frames where it would leave the screen.
+// Since the headroom (render.js TOP) the screen has TOP more rows on top; the dim line marks 1.0's top edge, where it used to clip.
 import './ready.js';
 import { ACCESSORIES, placeWorn } from '../../src/accessories.js';
-import { composeLCD, paintLCD, LCD_W, LCD_H } from './render.js';
+import { composeLCD, paintLCD, LCD_W, LCD_H, TOP } from './render.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
@@ -34,7 +35,7 @@ function withHolo(scene, option) {
       let pts = w.pts;
       if (option === 'clamp' && w.id === 'holologo') {
         const top = Math.min(...pts.map((p) => p.y + o.y));
-        if (top < 0) pts = pts.map((p) => ({ ...p, y: p.y - top }));
+        if (top < TOP) pts = pts.map((p) => ({ ...p, y: p.y - top + TOP }));
       }
       for (const p of pts) ops.push({ op: 'rect', x: o.x + p.x, y: o.y + p.y, w: 1, h: 1, color: p.color });
     }
@@ -83,14 +84,14 @@ if (SEC === 'blank' || SEC === 'handler') {
       for (let t = 0; t < 60000; t += 100) {
         const sc = composeLCD({ form: f, egg, idle: 'walk', worn: [{ id: 'holologo' }] }, t);
         const w = sc.ops.find((o) => o.op === 'worn');
-        if (w && placeWorn(w.list, w.sprite, { frame: w.frame, time: t, minRow: -w.y })[0].pts.some((p) => p.y + w.y < 0)) { clipping.push({ f, egg, t }); break; }
+        if (w && placeWorn(w.list, w.sprite, { frame: w.frame, time: t, minRow: -w.y })[0].pts.some((p) => p.y + w.y < TOP)) { clipping.push({ f, egg, t }); break; }
       }
     }
     clipping.sort((p, q) => q.f.a.length - p.f.a.length);
     picks.push({ ...clipping[0], name: `${clipping[0].f.id}` }, { ...clipping.at(-1), name: `${clipping.at(-1).f.id}` });
   }
-  grid(['now', 'lower', 'clamp'], picks, (o) => ({ now: 'now: 1.0 (a.top - 4), at a moment it clips', lower: 'lower: one row lower (a.top - 3)', clamp: 'clamp: 1.0, pushed down only when it would clip' })[o],
-    (o, p) => withHolo(composeLCD({ form: p.f, egg: p.egg, idle: 'walk', worn: [{ id: 'holologo' }] }, p.t), o));
+  grid(['now', 'lower', 'clamp'], picks, (o) => ({ now: 'now: 1.0 (a.top - 4), at a moment it crosses 1.0\'s top (dim line)', lower: 'lower: one row lower (a.top - 3)', clamp: 'clamp: 1.0, pushed down only when it would clip' })[o],
+    (o, p) => { const sc = withHolo(composeLCD({ form: p.f, egg: p.egg, idle: 'walk', worn: [{ id: 'holologo' }] }, p.t), o); sc.ops.unshift({ op: 'rect', x: 0, y: TOP - 1, w: LCD_W, h: 1, color: '#1c3a3f' }); return sc; });
 }
 document.title += ' (ready)';
 </script>

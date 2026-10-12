@@ -1,9 +1,10 @@
 // The 2.0 renderer pass (render.js): every egg's forms through every layer, the accepted drawing order, the motion pad, hideWorn, the visit
-// pause, the self-destruct, the idle hold switch and the flash rule (CLAUDE.md rule 7) on the composed screen.
+// pause, the self-destruct, the idle hold switch, the flash rule (CLAUDE.md rule 7) on the composed screen and the headroom (TOP).
 import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { composeLCD, paintLCD, drawLCD, LCD_W, LCD_H, BURN_MS, IDLE_HOLDS } from './render.js';
+import { composeLCD, paintLCD, drawLCD, LCD_W, LCD_H, TOP, FLOOR, BURN_MS, IDLE_HOLDS } from './render.js';
+import { ACCESSORIES, placeWorn, drawProp } from '../../src/accessories.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
@@ -18,16 +19,24 @@ const ALL = Object.entries(SETS).flatMap(([egg, set]) => Object.values(set).map(
 const STATES = [{ kind: 'overclock' }, { kind: 'overdrive' }, { kind: 'overlink', strained: true }];
 const WORN = [{ id: 'crown' }, { id: 'shades' }];
 
-// A 40x28 grid that keeps each cell's colour (alpha kept apart: Wetware's shade is a slow dip, not a colour change).
+// An LCD_W x LCD_H grid that keeps each cell's colour (alpha kept apart: Wetware's shade is a slow dip, not a colour change). It follows
+// translate, save and restore, which paintLCD uses to move 1.0's props down with the floor.
 function gridCtx() {
   const cells = Array.from({ length: LCD_H }, () => Array(LCD_W).fill(null));
   let alphaSeen = 1;
+  let off = { x: 0, y: 0 };
+  const saved = [];
   return {
     cells,
     fillStyle: null,
     get globalAlpha() { return alphaSeen; },
     set globalAlpha(v) { alphaSeen = v; },
-    fillRect(x, y, w, h) {
+    save() { saved.push({ ...off }); },
+    restore() { off = saved.pop() ?? { x: 0, y: 0 }; },
+    translate(x, y) { off = { x: off.x + x, y: off.y + y }; },
+    fillRect(x0, y0, w, h) {
+      const x = x0 + off.x;
+      const y = y0 + off.y;
       for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (j >= 0 && j < LCD_H && i >= 0 && i < LCD_W) cells[j][i] = this.fillStyle;
     },
   };
@@ -243,6 +252,41 @@ test('no cell of the screen changes more than six times in any second (every lay
   const form = SETS.iron.ironAdultBreachStreet;
   const strobe = { ...form, motion: (rows, a, { time }) => (Math.floor(time / 100) % 2 ? rows.map((r) => r.replaceAll('#', 'x')) : rows) };
   assert.ok(worstPerSecond({ form: strobe, egg: 'iron', idle: 'none' }, {}) > 6, 'a strobe passed');
+});
+
+test('the screen is 1.0\'s with TOP rows of headroom: 1.0\'s layout moves down by TOP, and no wearable leaves the top on any form', () => {
+  assert.equal(LCD_H, 28 + TOP);
+  assert.equal(FLOOR, 20 + TOP);
+  const form = SETS.iron.ironAdultBreachStreet;
+  const box = composeLCD({ form, egg: 'iron', idle: 'none' }, 0).box;
+  assert.equal(box.y + box.h, 20 + TOP, 'an awake netling stands on 1.0\'s floor, TOP rows lower');
+  const dead = composeLCD({ form, egg: 'iron', pose: 'dead', death: { cause: 'starved' } }, 0).ops.at(-1);
+  assert.equal(dead.y, 23 + TOP, 'the flatline');
+  // A 1.0 prop moves down with the floor.
+  const firstRow = (g) => g.cells.findIndex((r) => r.some((c) => c !== null && c !== '#000'));
+  const shifted = gridCtx();
+  paintLCD(shifted, { bg: '#000', ops: [{ op: 'prop', id: 'deck', frame: 0, time: 0 }] });
+  const plain = gridCtx();
+  drawProp(plain, 'deck', LCD_W, 0, 0);
+  assert.ok(firstRow(plain) > 0);
+  assert.equal(firstRow(shifted), firstRow(plain) + TOP, 'a 1.0 prop moves down with the floor');
+  // Every wearable on every form, at the highest its frame stands in 1.0's three idles at every temper level (Program's strong hop and
+  // the drift included): before the headroom the holologo went 2 rows over, the halo, cursor, extra life and glitch moth 1.
+  const ids = ACCESSORIES.filter((a) => a.slot !== 'prop').map((a) => a.id);
+  for (const { egg, form: f } of ALL) {
+    const top = new Map();
+    for (const level of [-2, -1, 0, 1, 2]) for (const idle of ['sway', 'hover', 'walk']) for (let t = 0; t < 30000; t += 100) {
+      const w = composeLCD({ form: f, egg, level, idle, worn: [{ id: 'cap' }], seed: 7 }, t).ops.find((o) => o.op === 'worn');
+      if (!w) continue;
+      const k = `${w.sprite === f.a ? 'a' : 'b'}${w.frame}`;
+      if (!(top.get(k) <= w.y)) top.set(k, w.y);
+    }
+    for (const [k, oy] of top) for (const id of ids) for (let t = 0; t < 4000; t += 200) {
+      const sprite = k[0] === 'a' ? f.a : f.b;
+      const ys = placeWorn([{ id }], sprite, { frame: Number(k[1]), time: t })[0].pts.map((p) => p.y + oy);
+      assert.ok(Math.min(...ys) >= 0, `${f.id} with ${id} (frame ${k}): row ${Math.min(...ys)}`);
+    }
+  }
 });
 
 test('the same pet at the same time draws the same screen (no hidden state)', () => {
