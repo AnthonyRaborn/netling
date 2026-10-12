@@ -54,7 +54,7 @@ c.width = (cols * (W + GAP) + GAP) * SC;
 c.height = 3 * (LABEL + 8) + (Math.ceil(set.length / 2) + set.length + REF.length) * (H * SC + 6) + 10; // set before drawing: resizing clears
 const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-let y = heading(ctx, 'ROGUE, first drafts: awake, the B frame, the glance either way (the temper tell), asleep, dead (the tag lit). The shut third eye is the dim pair above the eyes.', 0);
+let y = heading(ctx, 'ROGUE, first drafts: awake, the B frame, the glance either way (the temper tell), asleep, dead (the tag dark, X's apart). The shut third eye is the dim pair above the eyes.', 0);
 for (let i = 0; i < set.length; i += 2) {
   [set[i], set[i + 1]].filter(Boolean).forEach((f, half) => {
     POSES.forEach(([name, get], j) => cell(ctx, GAP + (half * POSES.length + j) * (W + GAP), y, get(f), `${f.name} ${name}`));

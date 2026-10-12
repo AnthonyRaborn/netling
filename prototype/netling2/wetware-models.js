@@ -8,7 +8,7 @@
 //   dead:   a PALE trace, a run of dim cells across the chest: the pulse that stops and the colour going out of the tissue (the
 //           opposite of Program's bright flatline; the dream ends, and the next one starts as a new culture).
 // Marks only: they replace body cells (never the eyes or the outline).
-import { pose, eyeGroups } from './models.js';
+import { pose, eyeGroups, xCentres } from './models.js';
 import { idMaps, nameOf } from './form-ids.js';
 import { blankMotion } from './blank-motion.js';
 import { WETWARE_BABY, WETWARE_BABY_ANCHORS, WETWARE_TEENS, WETWARE_TEEN_ANCHORS, WETWARE_ADULTS, WETWARE_ADULT_ANCHORS, WETWARE_ELDERS, WETWARE_ELDER_ANCHORS } from './wetware-art.js';
@@ -83,20 +83,19 @@ function wiredDead(a, id) {
 }
 // 1.0's dead X is 3x3 centred on the eye's rounded centre. On an eye two cells wide that rounds to the right for both eyes, so the
 // pair of X's sit off the face's centre line (2.5 columns in from the left, 3.5 from the right). Here a half-cell centre rounds toward the
-// middle of the sprite, so the pair is symmetric. The eyes clear to the body colour as in 1.0.
+// middle of the sprite, so the pair is symmetric, or away from the other eye where the X's would sit under two columns apart
+// (xCentres in models.js, decided). The eyes clear to the body colour as in 1.0.
 const X3 = [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]];
 function wetwareDead(a, eyeRow, fill = '#') {
   const g = a.map((row) => [...row]);
   const groups = eyeGroups(a, eyeRow);
   for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
-  const middle = (a[0].length - 1) / 2;
-  for (const cells of groups) {
-    const cx = cells.reduce((n, [x]) => n + x, 0) / cells.length;
-    const cy = cells.reduce((n, [, y]) => n + y, 0) / cells.length;
-    const mx = Number.isInteger(cx) ? cx : cx < middle ? Math.ceil(cx) : Math.floor(cx);
-    const my = Math.round(cy);
+  const centres = xCentres(groups, a[0].length); // X apart where the pair would sit under two columns apart (models.js)
+  groups.forEach((cells, i) => {
+    const mx = centres[i];
+    const my = Math.round(cells.reduce((n, [, y]) => n + y, 0) / cells.length);
     for (const [dx, dy] of X3) if (g[my + dy]?.[mx + dx] !== undefined && g[my + dy][mx + dx] !== '.') g[my + dy][mx + dx] = 'o';
-  }
+  });
   return g.map((row) => row.join(''));
 }
 // Chipped's right eye is a cyber lens in the highlight colour ('+'), not the accent. The generic pose only knows accent eyes, so it is

@@ -4,7 +4,9 @@
 //
 // Rogue's marks (a proposal, easy to change):
 //   asleep: no mark, only 1.0's slit eyes. The shut third eye is shut already.
-//   dead:   the scraped-off asset tag lights up (its dim cells turn highlight): the plate that was removed shows through at the end.
+//   dead:   the scraped-off asset tag goes dark (decided, maintainer, 2026-10-12): the plate that was removed shows as a dark patch. It was
+//           drafted lit ('+'), but the dead colours draw '+' as the body's grey, so it did not show; 'o' is the darkest dead colour, as
+//           Iron's barcode and Program's flatline use.
 //   captured: no mark; the ash heap the self-destruct leaves (rogue-burn.js, decided), for the third mark only.
 // Every form carries the shadow, a motion layer (rogue-motion.js), registered as `motion`, and each older line its own effect with it: the
 // Breach line fades from the edges, the Dodge line shimmers as Cipher, the Feast line casts a bigger decoy (Stash's with a maw, a draft),
@@ -38,12 +40,12 @@ const FRAMES = { baby: ROGUE_BABY, ...ROGUE_TEENS, ...ROGUE_ADULTS, ...ROGUE_ELD
 const ANCHORS = { baby: ROGUE_BABY_ANCHORS, ...ROGUE_TEEN_ANCHORS, ...ROGUE_ADULT_ANCHORS, ...ROGUE_ELDER_ANCHORS };
 export const rogueTag = (id) => ROGUE_TAGS[rogueArtKey(id)];
 
-// The 1.0 generic poses (the half-cell X centre rounds toward the middle, as on the other eggs), plus the lit tag when dead.
+// The 1.0 generic poses (the X's as on the other eggs, models.js), plus the dark tag when dead.
 export function roguePose(a, anchors, kind, newOrOldId) {
   const posed = pose(a, anchors.eyeRow, kind);
   if (kind !== 'dead') return posed;
   const g = posed.map((r) => [...r]);
-  for (const [x, y] of rogueTag(newOrOldId)) g[y][x] = '+';
+  for (const [x, y] of rogueTag(newOrOldId)) g[y][x] = 'o';
   return g.map((r) => r.join(''));
 }
 

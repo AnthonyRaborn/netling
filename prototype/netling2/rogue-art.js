@@ -384,7 +384,7 @@ export const ROGUE_ELDER_ANCHORS = {
   dropElder: { headTop: 2, eyeRow: 4, mouthRow: 6, neckRow: 7 },
 };
 
-// The scraped-off asset tag on each form: [column, row] of every cell, all dim in the A frame. The dead pose lights it (rogue-models.js);
+// The scraped-off asset tag on each form: [column, row] of every cell, all dim in the A frame. The dead pose darkens it (rogue-models.js);
 // the tests check it is where these say. Rows are below the neck, so the frames carry it unchanged.
 const block = (x0, y0, w, h) => Array.from({ length: w * h }, (_, i) => [x0 + (i % w), y0 + Math.floor(i / w)]);
 export const ROGUE_TAGS = {

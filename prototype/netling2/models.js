@@ -92,18 +92,33 @@ export function eyeGroups(rows, eyeRow) {
   );
   return groups;
 }
+// The dead X's centres, one per eye: a 3x3 X on each eye's centre, a half-cell centre rounding toward the middle of the sprite so a symmetric
+// pair mirrors. X APART (decided, maintainer, 2026-10-12, all eggs): where that leaves the two X's under two columns apart (they touched on
+// 22 forms across the four eggs, read as one dark blob in the dead colours), each half-cell centre rounds away from the other eye instead.
+// On the narrowest heads an outer arm then lands on the head's outline (accepted).
+export function xCentres(groups, width) {
+  const middle = (width - 1) / 2;
+  const cx = (cells) => cells.reduce((n, [x]) => n + x, 0) / cells.length;
+  const toward = (c, mid) => (c % 1 !== 0.5 ? Math.round(c) : c < mid ? Math.ceil(c) : Math.floor(c));
+  const away = (c, mid) => (c % 1 !== 0.5 ? Math.round(c) : c < mid ? Math.floor(c) : Math.ceil(c));
+  const inward = groups.map((cells) => toward(cx(cells), middle));
+  if (groups.length !== 2 || Math.abs(inward[1] - inward[0]) - 3 >= 2) return inward;
+  const between = (cx(groups[0]) + cx(groups[1])) / 2;
+  return groups.map((cells) => away(cx(cells), between));
+}
+
 export function pose(a, eyeRow, kind, fill = '#') {
   const g = a.map((r) => [...r]);
   const groups = eyeGroups(a, eyeRow);
   // Any other accent cell on the head above the eyes (a hidden form's third eye) goes dark in both poses.
   a.forEach((row, y) => y < eyeRow && y >= eyeRow - 2 && [...row].forEach((ch, x) => ch === 'o' && (g[y][x] = fill)));
   for (const cells of groups) for (const [x, y] of cells) g[y][x] = fill;
-  for (const cells of groups) {
+  const centres = xCentres(groups, a[0].length);
+  groups.forEach((cells, i) => {
     // A half-cell centre (every two-cell eye) rounds toward the middle of the sprite, not to the right as 1.0 does, so the dead X's of a
-    // symmetric pair mirror each other (Wetware's dead pose has done this since the review; Iron and Program use this one).
-    const cx = cells.reduce((n, [x]) => n + x, 0) / cells.length;
-    const middle = (a[0].length - 1) / 2;
-    const mx = cx % 1 === 0.5 ? (cx < middle ? Math.ceil(cx) : Math.floor(cx)) : Math.round(cx);
+    // symmetric pair mirror each other (Wetware's dead pose has done this since the review; Iron and Program use this one), unless the
+    // X's would sit under two columns apart (xCentres).
+    const mx = centres[i];
     const my = Math.round(cells.reduce((n, [, y]) => n + y, 0) / cells.length);
     if (kind === 'dead') {
       for (const [dx, dy] of [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]]) if (g[my + dy]?.[mx + dx] !== undefined && g[my + dy][mx + dx] !== '.') g[my + dy][mx + dx] = 'o';
@@ -111,7 +126,7 @@ export function pose(a, eyeRow, kind, fill = '#') {
       const bottom = Math.max(...cells.map(([, y]) => y));
       for (const [x, y] of cells) if (y === bottom) g[y][x] = 'o';
     }
-  }
+  });
   return g.map((r) => r.join(''));
 }
 

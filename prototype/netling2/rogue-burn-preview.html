@@ -44,9 +44,7 @@ const col = (i) => GAP + i * (W + GAP);
 {
   const BS = SC * 2;
   const big = document.getElementById('big');
-  const BIG = [['drafted', (f) => rogueDead(f, 'lit', 'inward')], ['X apart', (f) => rogueDead(f, 'lit', 'apart')],
-    ['+ tag dark', (f) => rogueDead(f, 'dark', 'apart')], ['+ tag hole', (f) => rogueDead(f, 'hole', 'apart')],
-    ['awake', (f) => f.a]];
+  const BIG = [['decided', (f) => f.dead], ['lit tag (draft)', (f) => rogueDead(f, 'lit')], ['awake', (f) => f.a]];
   const which = ['rogueBaby', 'rogueAdultBreach', 'rogueAdultDodge', 'rogueAdultFeast', 'rogueElderBreach'].map((id) => rogueForms()[id]);
   const bw = 20, bh = 17;
   big.width = (BIG.length * (bw + 2) + 2) * BS;
@@ -54,8 +52,8 @@ const col = (i) => GAP + i * (W + GAP);
   const b = big.getContext('2d');
   b.imageSmoothingEnabled = false;
   b.fillStyle = '#c7f9ff'; b.font = `${Math.max(12, SC * 2.6)}px monospace`; b.textBaseline = 'top';
-  b.fillText('DEAD, in the dead colours the game uses. Left to right: as drafted (X\'s touching, the lit tag invisible), the X\'s apart,', 4, 2);
-  b.fillText('then with the tag drawn dark or as a hole; the last column is the awake frame, to show where the tag is.', 4, 2 + LABEL * 0.9);
+  b.fillText('DEAD in the dead colours (decided): X\'s apart, tag dark.', 4, 2);
+  b.fillText('Middle: the first draft\'s lit tag, invisible here. Right: awake.', 4, 2 + LABEL * 0.9);
   which.forEach((f, i) => BIG.forEach(([name, get], j) => {
     const sprite = get(f);
     b.save(); b.translate((2 + j * (bw + 2)) * BS, LABEL * 2 + i * (bh * BS + 8)); b.scale(BS, BS);
@@ -114,7 +112,7 @@ for (const f of set) strip(f, 'tag');
 y = heading(ctx, 'B. FROM THE FEET UP, and C. EMBERS, on four forms.', y + 8);
 for (const burn of ['feet', 'embers']) for (const f of SAMPLE) strip(f, burn);
 
-y = heading(ctx, 'DEAD: the drafted lit tag in the palette, then in the DEAD_COLORS the game draws a dead netling in (the tag is gone), and the alternates.', y + 8);
+y = heading(ctx, 'DEAD: the tag lit in the palette, then the options in the DEAD_COLORS the game draws a dead netling in (decided: dark), all with the X\'s apart.', y + 8);
 const deadCols = [
   ['lit, palette', (f) => rogueDead(f, 'lit'), pal],
   ...Object.entries(DEAD_MARKS).map(([k, name]) => [`${name}, dead colours`, (f) => rogueDead(f, k), DEAD_COLORS]),
@@ -126,7 +124,7 @@ for (const f of set) {
   if (other) cell(ctx, col(deadCols.length + 1), y, other[1].dead, `${other[0]} dead`, DEAD_COLORS);
   y += ROW;
 }
-y = heading(ctx, 'ASLEEP: drafted (none) and the alternates, lights on (palette) and lights off (DIM_COLORS).', y + 8);
+y = heading(ctx, 'ASLEEP: none (decided, as drafted) and the alternates not used, lights on (palette) and lights off (DIM_COLORS).', y + 8);
 for (const f of set) {
   Object.entries(SLEEP_MARKS).forEach(([k, name], j) => {
     cell(ctx, col(2 * j), y, rogueSleep(f, k), `${j ? '' : f.name + ' '}${name}`);

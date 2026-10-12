@@ -89,7 +89,7 @@ test('the shared marks: two 2x2 eyes with a body cell on each side (room for the
   for (const id of ROGUE_ADULTS_ALL) assert.ok(size(ROGUE_ELDER_OF(id)) > size(id), `${id}: the elder's tag is larger`);
 });
 
-test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag lit; both keep the awake outline', () => {
+test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag dark; both keep the awake outline', () => {
   for (const f of forms) {
     const a = f.anchors.a;
     assert.equal(poseDistance(f.a, f.sleep), 0, `${f.id}: asleep outline`);
@@ -97,7 +97,7 @@ test('asleep: the 1.0 slit eyes and nothing else; dead: the X eyes and the tag l
     for (const kind of ['sleep', 'dead']) assert.deepEqual(roguePose(f.a, a, kind, f.id), f[kind]);
     const changed = (pose) => f[pose].flatMap((row, y) => [...row].map((c, x) => (c !== f.a[y][x] ? [x, y] : null)).filter(Boolean));
     assert.ok(changed('sleep').length && changed('sleep').every(([, y]) => y === a.eyeRow || y === a.eyeRow + 1), `${f.id}: asleep changes only the eyes`);
-    for (const [x, y] of rogueTag(f.id)) assert.equal(f.dead[y][x], '+', `${f.id}: the tag lights when dead`);
+    for (const [x, y] of rogueTag(f.id)) assert.equal(f.dead[y][x], 'o', `${f.id}: the tag goes dark when dead`);
     assert.ok(markDistance(f.a, f.dead) > 0);
   }
 });

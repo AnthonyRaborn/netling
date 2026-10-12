@@ -6,7 +6,6 @@ import './ready.js'; // first: registers the forms before src/sim.js can load sr
 import { rogueForms, rogueTag } from './rogue-models.js';
 import { burnFrame, leftOf, catchSteps, pickBurn, BURNS, BURN_OPTIONS, LEFT_OPTIONS, BURN_STEPS, BURN_STEP_MS, BURN_RINGS, BURN } from './rogue-burn.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
-import { rogueDead } from './rogue-marks.js';
 
 const forms = Object.values(rogueForms());
 
@@ -121,21 +120,3 @@ test('every form carries the decided capture pose, the ash heap', () => {
   for (const f of forms) assert.deepEqual(f.captured, leftOf(f.a, 'ash'), f.name);
 });
 
-// The dead X's apart (a draft for the maintainer, rogue-marks.js): two columns between the X's wherever the drafted ones were closer, and
-// still mirror images on every form whose eyes are; forms already two apart keep their pose.
-test('the X\'s apart: at least two columns between them, mirrored, and only where the drafted ones were closer', () => {
-  const xs = (rows, f) => {
-    const e = f.anchors.a.eyeRow;
-    const cols = [...new Set([e - 1, e, e + 1, e + 2].flatMap((y) => [...rows[y]].map((c, x) => (c === 'o' ? x : -1)).filter((x) => x >= 0)))].sort((a, b) => a - b);
-    let gap = 0; // the widest run of columns without an X cell, inside the span of the two X's
-    for (let i = 1; i < cols.length; i++) gap = Math.max(gap, cols[i] - cols[i - 1] - 1);
-    return { cols, gap };
-  };
-  for (const f of forms) {
-    const before = xs(f.dead, f), after = xs(rogueDead(f, 'lit', 'apart'), f);
-    assert.ok(after.gap >= 2, `${f.name}: ${after.gap} columns between the X's`);
-    if (before.gap >= 2) assert.deepEqual(rogueDead(f, 'lit', 'apart'), f.dead, `${f.name}: changed though already apart`);
-    const lo = after.cols[0], hi = after.cols.at(-1);
-    assert.deepEqual(after.cols.map((x) => lo + hi - x).sort((a, b) => a - b), after.cols, `${f.name}: the X's do not mirror`);
-  }
-});
