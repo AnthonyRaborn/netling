@@ -341,3 +341,17 @@ Consistent run with the final design (eased wear, Overdrive and Overlink rules, 
 
 `baseline/gap-reruns.mjs pressure`, 1000 lives, default, greedy and sip Sync bots; outputs `baseline/results/gaps/pressure-*.txt`. Readings are in `docs/NETLING_2_EGG_PRESSURES.md`, Numbers ("Re-run under the now rules"). In short: the sip bot equals the default bot; greedy Wetware's infection cost rose from about +1.7 to +4.8 to +6.1 and greedy play on Wetware now costs the never-entering archetypes 3 to 13 points of full life (the overplay strain is the likely cause, not isolated); Iron's excess infections are +1.1 (daredevil) and +1.8 (overclocker). Results 6 to 24 are not re-run one by one: they are the design's history, and their rules have since changed.
 
+## Result 26: what drives greedy Overlink's cost (2026-10-12)
+
+`baseline/gap-reruns.mjs fix-`, the greedy row of Result 25 (1000 lives, now rules, final design) with one change each; outputs `baseline/results/gaps/fix-*.txt`. Wetware against the same greedy bot with no pressure: infections attentive / sysadmin / daredevil, then full life worker / human-regular / overclocker.
+
+| Variant | Infections (att / sys / dare) | Drops (att / sys) | Full life (worker / h-regular / overclocker) |
+|---|---|---|---|
+| decided (Result 25) | +4.8 / +6.1 / +4.0 | +19% / +32% | 63.5 to 50.5 / 25.8 to 18.7 / 95.7 to 90.5 |
+| `OVERUSE` off | +1.5 / +1.9 / +1.4 | +33% / +40% | 64.6 to 63.0 / 25.5 to 24.7 / 96.9 to 96.8 |
+| Wetware strain add 0 | +0.9 / +0.5 / +0.8 | +33% / +41% | 63.5 to 62.3 / 25.8 to 24.8 / 95.7 to 96.0 |
+| no strain from plays inside Overlink | +4.4 / +5.3 / +3.6 | +21% / +32% | unchanged (50.5 / 18.5 / 90.5) |
+| Wetware strain add 10 | +3.7 / +4.2 / +2.9 | +24% / +35% | 63.5 to 57.1 / 25.8 to 22.2 / 95.7 to 94.1 |
+
+Readings. **The strain is the cause:** with its add at 0 the cost falls to under 1 infection and the never-entering players are within about 1 point (the overplay's own 2 Integrity a play, on every egg, stays). **The strain comes from plays outside the state, not inside it:** skipping it inside Overlink changes almost nothing, so the "double charge" idea is wrong; a greedy player builds it playing at 90+ before entering, during the 24 hour burnout lockout, and on the days it never enters (which is all a casual or worker greedy player ever does). Lowering the add to 10 (the shared value) takes off about a quarter of the cost. With no strain the greedy trade is close to what the design was sized for (Result 21: +35% to +48% drops for +1.7 infections). Not decided; for the maintainer.
+
