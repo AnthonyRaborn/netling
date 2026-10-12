@@ -10,7 +10,7 @@ Status (handoff, 2026-10-10): the design is largely decided with the maintainer 
 5. **2026-10-11: the good end's second round and inheritance decided** (6.1, items 41 to 47) and measured (7.6): only a clean Source exit arms the good end, the mixed egg (any egg after a good end; the Rogue as parent; a Rogue trait to choose, 9.4a), inheritance needs a full life on every egg, and the crossings between Rogue and the NL-0 eggs are gated. The good end now comes in 24% of first Rogue lives (33% of all Rogue lives; a median 2.8 Rogue lives, about 15 days). Then **the Rogue trait decided and measured** (item 48, 7.7): capture halves (3.4% to 1.7% of Rogue lives) but the good end barely moves (35% a Rogue life) and the gap between the lines stays (Dodge about 65%, the others 24 to 29%), since the good end is gated by clean Source exits, which ordinary ICE decides. **Next: the maintainer's call on the line gap (levers in 7.7), then the Deep's disconnects (item 45).**
    Earlier: **Simulator stages 1 to 3 built and measured** (7.1 to 7.5): home life, the hunt in runs (every run setting decided, 7.4) and the lineage side (7.5). Stage 3's first measure: a Rogue line of a player who runs reaches the good end in its first Rogue life half the time and within three 89% of the time (a median 1.5 Rogue lives, about 8 real days), because the Rogue elder is easy at the decided feat tiers and the hunt rarely bites after a Source exit. The good end's length has no target yet; that, with difficulty (6.3, item 5), is the maintainer's next call.
 6. **2026-10-11: the Deep's disconnects decided** (6.1, item 50; 7.12): no ambush in the Deep's cordon and the Deep's ambush share 0.15, so Rogue adults disconnect 1.49x the hidden form's there (1.72x with the trait alone, 1.84x before it); both kept as levers for a playtest.
-7. **The text, first pass (2026-10-11):** the reveal is decided (the egg list with a two-line log entry) and Rogue's five pages (one per role and a Source page; they count toward nothing) and the background touches are decided (texts and ids confirmed, the background touches as recommended, the Source log line kept; 2026-10-12), in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (Rogue: background and reveal; Rogue pages). Still to write: the rest of section 10.
+7. **The text, first pass (2026-10-11):** the reveal is decided (the egg list with a two-line log entry) and Rogue's five pages (one per role and a Source page; they count toward nothing) and the background touches are decided (texts and ids confirmed, the background touches as recommended, the Source log line kept; 2026-10-12), in [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (Rogue: background and reveal; Rogue pages). The rest (ability flavor, the sweep and the hunter, meter words, the death register) drafted for choice in section 10 (2026-10-12).
 
 The original status of this file, kept for the record: first design drafts for step 1 of the sketch's Next steps (Draft the Rogue egg), written 2026-10-09 for the maintainer to choose from; nothing then was decided, simulated or drawn.
 
@@ -1000,7 +1000,7 @@ Checks (`rogue.test.js`): no option changes a cell of the figure; the arcs leave
 
 ### 8.5 Ids and the Dex
 
-Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints and Rogue's flavor words for its meters and death register (as the eggs table has for the other three) are not drafted.
+Ids as in 7 (`rogueBaby`, `rogueTeen`, `rogueAdultBreach` and so on); display names map onto them in `form-ids.js` when chosen. The Dex shows `???` (6.1, item 7). Dex hints are not drafted; Rogue's meter words and death register are drafted for choice in 10.5 and 10.6.
 
 ### 8.6 Not decided in the briefs
 
@@ -1134,8 +1134,172 @@ Not used: the Corp voucher (its trace skip does nothing for Rogue) and the Memor
 
 **For the maintainer:** the order and the starting values above (no comment yet; taken as starting values), and the fights-avoided range (60 to 75%), still a proposal. Decided: fights at home as before and possibly more in runs; the 4.4 targets as a high-side aim to come in under; continuing past the relay pays about 33% more at a matching risk.
 
-## 10. Not done
+## 10. The rest of the text (drafts for choice, 2026-10-12)
+
+The text section 10 listed as not done: the abilities' flavor, the sweep's and the hunter's wording, Rogue's meter words and its death register. Nothing here is implemented, read in context, read on a device or played; every line is a first draft for the maintainer to choose and edit. Lengths are in characters, counted by script; 1.0's ability lines run 32 to 121 (`src/netrun/run.js`, `FORM_ABILITIES`).
+
+### 10.1 Rogue's own register
+
+The pages already have a register (the hunters' files, codex drafts). The netling's side needs one too, for the log, the HUD and the death screen. **Proposal: a fugitive's tradecraft, terse, in the status-line voice the reveal set** ("rogue/ owner: none source: copied status: running", "it was not invited. it is asking anyway.", "found: NL-0, initial commit. it is not a copy."). Under the egg's own rules (care drafts' Frame): log lines lowercase with `> `, run messages with no prefix, `!!` on the penalty lines, button labels in capitals at 9 characters or fewer, no number the player is not already shown, and the netling as "it". The hunters are "they" and are never named, as on the pages.
+
+The base vocabulary stays software (Rogue is a copy of the precursor code, so its virus is a virus and its bug a bug); only the hunt and a few meters take tradecraft words. Words kept out: the form names (Mole, Skip, Spook, Drop, Sleeper, Exile, Handler, Stash, Alias, Foundling) as common words, "drop" anywhere (8.3's caution), "slip" outside a run (Wetware's fault word), "fever", "drift", "worn", "reboot", and the anomaly button LEAVE IT (1.0, "do nothing").
+
+### 10.2 The abilities' flavor
+
+Format as the netrun drafts' 3.5: a name, a one-line description in the Dex and the run's ability line (1.0's `FORM_ABILITIES` style: "Name: what it does."), and the log line the run prints when the part acts. The elder line says what it adds, as 1.0's `MAINFRAME_ABILITIES` do. The placeholders of 9.2 are kept where they read well and changed where they collide.
+
+**The egg's own part (every Rogue form that jacks in):**
+
+| Name | Description | Log line |
+|---|---|---|
+| **Tradecraft** | Every node reads as danger or quiet from the start. Checkpoints never notice it. (80) | at the run's start: `danger and quiet, every node. no names yet.`; at a checkpoint: `the checkpoint never looked up.` |
+
+**The four lines:**
+
+| Form | Name | Description | Log line |
+|---|---|---|---|
+| Mole | **Inside man** | ICE hits it for less, and a hunter hits it no harder than plain ICE. (68) | on a hunter fight: `it has worked for them. it knows how they hit.` |
+| Sleeper | **Deep cover** | ICE hits it for less still. Once a run, a lost hunter fight costs no mark and no link. (86) | `lost to the hunter. kept its cover.` |
+| Skip | **On the lam** | ICE often never notices it, and it leaves half the trail on the move. (69) | on a slip: `gone before the ICE turned.` |
+| Exile | **Long gone** | Unnoticed more often, and it can slip past an ambush. (53) | `the ambush closed on an empty node.` |
+| Spook | **Listening post** | Sees node types two steps ahead, and hears an ambush a step further. (68) | when it tells an ambush apart: `ambush ahead. it heard them set up.` |
+| Handler | **Agents out** | Three steps ahead, ambushes at four. Once a run it sends an agent the other way. (80) | `an agent went the other way. the trail followed it.` |
+| Drop | **Dead letter** | Finds more in caches and on beaten ICE, mends on a win. It can plant an item at a relay. (88) | `planted at the relay. the trail ends there.` |
+| Stash | **Hoard** | Finds more, mends more. What it plants at a relay is still there when it gets out. (82) | at the run's end: `it went back for what it left.` |
+
+Notes:
+- **Two new buttons.** Handler's agent and Drop's relay item are the player's to use (the bot chooses them in the fork), so each needs a label: **SEND OUT** (Handler, any node, once a run) and **PLANT** (Drop and Stash, at a relay). PLANT replaces "leave", which would collide with the anomaly button LEAVE IT. Their hints, numberless: SEND OUT `throws them off for a while`; PLANT `one item, and the trail goes cold here`.
+- **Renamed from 9.2:** Drop's *Dead drop* is **Dead letter** (a dead letter box is the British name for the same thing), for 8.3's caution; Handler's *Runs agents* is **Agents out**, a name rather than a phrase. *Hoard* stays (Stash and hoard are near, but one is a form and one a part, as Hardened and Firewall were in 1.0); the alternate is **Nest egg**.
+- **Inside man's line** echoes `rogue-breach` (a desk on the hunters' own floor). **Hoard's line** echoes `rogue-feast` ("the bag came back lighter"). **Agents out** is Handler's split shadow in play (8.4i).
+- **The Source rules (6.1, item 49) stay out of the descriptions** (the Dex would then carry four Source clauses the player meets late), and each gets a log line when it acts, so it is learned in play:
+
+| Line | Source rule | Log line |
+|---|---|---|
+| Mole, Sleeper | one lost ordinary fight forgiven, at a roll | `that one did not count. no one saw it.` |
+| Skip, Exile | the slip works half as often | none (a reduction has no moment) |
+| Spook, Handler | one lost ordinary fight replayed | `it heard that one coming the second time.` |
+| Drop, Stash | the exit counts as clean at Integrity 80 or more | at the exit: `out with enough left. clean.` |
+
+- **Alternates:** *Tradecraft* as **Gut feeling** (plainer, and it names the shut third eye's sense rather than a skill); *Listening post* as **Wiretap**; *Long gone* as **Over the wall**.
+
+### 10.3 The sweep (at home)
+
+The sweep takes the trace's and the intrusion's slot (6.2), so it needs the event bar, the alert line, a notification and its log lines.
+
+**Event bar and answers.**
+
+| 1.0 | Rogue | Note |
+|---|---|---|
+| Corp trace and Intrusion | **SWEEP** | the fork's label already |
+| HIDE | **LIE LOW** | HIDE means street Standing on the NL-0 eggs; Rogue has none, so the word is free to be its own |
+| DEFEND | **COUNTER** | countersurveillance; it plays the intrusion's mini-game as DEFEND does |
+| Decoy (item) | Decoy | unchanged; the item name is the same in every egg |
+
+**Alert line** (key `sweep`; it replaces `trace` and `attack` for Rogue):
+- `Sweep inbound. LIE LOW or COUNTER within Nm.` (45 with two digits)
+- In the HIDE lockout: `Sweep inbound and no cover. COUNTER within Nm.` (47)
+
+**Notification:** class Events, title **Netling: sweep inbound**, body the alert line (care drafts, Notification texts).
+
+**Log lines.**
+
+| Moment | Line |
+|---|---|
+| A sweep starts | `> !! sweep inbound. 90m to get clear.` |
+| LIE LOW | `> it lay low. the sweep went past.` |
+| The lockout starts (with LIE LOW) | `> that route is burned. no cover for 4h.` (the fork's "route burned. no cover for Nm.", in the log's voice) |
+| LIE LOW refused in the lockout (the button's hint) | `no cover yet. COUNTER, or a Decoy.` |
+| Decoy | `> the sweep followed the decoy instead.` (the fork's line, kept) |
+| COUNTER won | `> sweep countered. they lost the signal.` |
+| The quiet after a won COUNTER | `> quiet on every channel. for now.` |
+| COUNTER lost | `> !! countered too late. they have a mark on it.` |
+| Ignored | `> !! the sweep found it. they have a mark on it.` |
+| The second mark (home or run) | `> !! two marks. one more and they take it.` |
+| The quiet ends (optional, no notification) | `> the channels are busy again.` |
+
+Notes: no line gives the Integrity cost (the HUD shows it; the care drafts' rule). "Mark" is the one word for both home and run, so the player learns that a mark is the same thing wherever it came from. The quiet's end line is optional: it tells an attentive player the 8 hours are over, at no notification cost, but it also turns an unseen timer into a seen one.
+
+### 10.4 The hunter (in runs)
+
+**The HUD.** Two Rogue-only readouts beside the egg's meters (10.5):
+
+| Readout | Label | Hover |
+|---|---|---|
+| The trail (`run.hunt`) | **TRAIL** | "What it leaves behind. Full, and the hunter comes." |
+| Marks (three pips, home and run) | **MARKS** | "Marks they have on it. Three, and they take it." |
+
+**Node marks.** Danger sense draws a mark, not a word, on every node; the screen reader and the hint read **danger** and **quiet**. Once a node is within sight it shows its real label, as on every egg. An ambush Spook or Handler has told apart is labelled **AMBUSH** (6; ICE stays ICE for the rest). The hunter's fight screen is titled **HUNTER**.
+
+**Run messages** (no prefix, `!!` on the penalty lines; the home log adds `> netrun (region): ` before the last one, as on every egg):
+
+| Moment | Message |
+|---|---|
+| The trail passes half | `it is leaving a trail.` |
+| The trail is near full | `something is on the trail now.` |
+| At a relay, with the trail past half (a hint, the relay question) | `out here, or one more layer?` |
+| A cordon on the map (the Deep and the Source, at the start) | `a cordon past the relay. no quiet way through.` |
+| The hunter arrives | `the hunter caught up.` |
+| The hunter beaten | `hunter shaken. the trail goes cold.` |
+| The hunter wins | `!! the hunter got a mark on it. link cut.` |
+| An ambush entered | `ambush. they were waiting.` |
+| An ambush beaten (its trail still rises) | `ambush broken. they know where it went.` |
+| An ambush lost | `!! ambush. a mark, and the link cut.` |
+| The third mark, anywhere | `!! third mark. they have it.` |
+
+Notes: the trail lines are numberless, like the egg anomalies' hints; the meter shows the count. The cordon line says "past the relay" because a cordon always sits after one (9.7), which holds in the Source's second cordon only loosely; a plainer alternative is `a cordon ahead. no quiet way through.` The relay hint is the one line that asks the player something; it shows only when the trail is past half, so it does not nag a quiet run.
+
+### 10.5 Rogue's meter words
+
+Rogue has all four meters and the cache, with no main bar (6.1, item 3). Two sets:
+
+| 1.0 meter | R1, Program's words | R2, two tradecraft words (recommended) | R2 hover text |
+|---|---|---|---|
+| Charge | CHG | CHG | "Charge. Feed it." |
+| Sync | SYN | **TRUST** | "Its trust in you. Play with it." |
+| Integrity | INT | INT | "Its soundness. At zero too long, it goes dark." |
+| Heat | HEAT | HEAT | "Running hot hurts it. Cool it." |
+| Cache (pips) | CACHE | **BURN** | "What it must not leave behind. Shred it." |
+
+- **R1** says the copy outright: Rogue reads like Program because it was cut from the same code, and the hunt (TRAIL, MARKS) carries all its difference. Cheapest; no new word to learn.
+- **R2 (recommended)** gives Rogue a screen of its own with two words that fit a fugitive and collide with nothing: TRUST (the player is the one contact it has; Sync's "play with it" reads true) and BURN (a burn bag, the waste a spy has to destroy). With BURN, the purge button is **SHRED** and the overflow event **BAG FULL**, answered by SHRED; every other label stays Program's. The alert lines follow: `Trust is fading. It wants to play.`; `The burn bag is filling up.`
+- **Not proposed:** COVER for Integrity (strong, but a blown cover reads as capture, and capture is the marks, not Integrity); a tradecraft word for Heat ("heat" already means pursuit in the slang, and LIE LOW raises the meter, which would read backwards). Heat stays HEAT and is plainly the temperature.
+- The run HUD follows the meter words, as on every egg (care drafts, decided).
+
+### 10.6 The death register
+
+The other three each end in their own way (Program a flatline, Iron a decommission, Wetware a waking), which answers the Source's TODO three times. Rogue's copy had that line cut (`rogue-source`), so its register should be **one that does not stop**: it is not over, only out of reach. The one real stop is the good end, "it stayed" (5.4).
+
+**D1, gone dark (recommended).** A fugitive who goes dark drops off every channel and is not heard from again. Nothing says it ended.
+
+| Where | 1.0 | Rogue (D1) |
+|---|---|---|
+| Death screen header | FLATLINE | **GONE DARK** (9) |
+| Death screen line | `netling.vN.0 is gone: CAUSE.` | `netling.vN.0 has gone dark: CAUSE.` |
+| Log | `> FLATLINE: CAUSE. fragment recovered: TRAIT.` | `> GONE DARK: CAUSE. left for pickup: WHAT.` (WHAT is what crosses: the trait on a full life, else the keepsake) |
+| Cause, old age | end of life cycle | **end of the line** (the lineage and the run, both) |
+| Cause, collapse | integrity collapse | integrity collapse (unchanged; a plain fact reads well beside "gone dark") |
+| Capture | (none) | header **TAKEN**; line `netling.vN.0 was taken: three marks.`; log `> !! TAKEN. they closed the file.` then the pickup line |
+| The good end | (none) | the epilogue (5.4) plays; if the death screen shows after it, header **STAYED**, line `netling.vN.0 stayed.` (the reveal's echo chain, a fourth step; to keep or drop with the others) |
+
+**NL-0's rescue.** The fork lets Root Access pull a Rogue back from integrity collapse (never from capture, old age or the good end; `sim.js`, `rootRescue`). NL-0 reaching a line that is not its own deserves a line of its own: `> NL-0: not mine. not yet. (integrity collapse reversed. root access spent for this generation.)` Optional, on a capture with Root unspent: `> NL-0: i cannot reach them.` Both name NL-0, which Rogue's player already knows (the gate is the ending).
+
+**Alternates.** **D2, burned** (an agent whose cover is blown): strong for capture, wrong for old age, and close to the lockout's "route burned". **D3, signal lost**: plain and safe, but it sits next to Program's flatline and says nothing of Rogue.
+
+**Not drafted here:** Rogue's dead and asleep sprite marks (art; the other eggs have a chest mark each, NETLING_2_SPRITES.md), and its failure words (virus, cache, fault, bug, the clearing button), proposed to stay Program's under either meter set, with BURN replacing the cache word under R2.
+
+### 10.7 For the maintainer
+
+1. The register (10.1): tradecraft on a software base, the netling as "it", the hunters as "they".
+2. The ability names and lines (10.2), the two buttons SEND OUT and PLANT, and whether the Source rules show only as log lines.
+3. The sweep's labels LIE LOW and COUNTER, the alert lines and the log lines (10.3), and whether the quiet's end gets a line.
+4. The hunter's HUD words TRAIL and MARKS and the run messages (10.4).
+5. Meter words: R1 or R2 (10.5).
+6. Death register: D1, D2 or D3 (10.6), the capture header TAKEN, the good end's STAYED, and NL-0's rescue line.
+
+## 11. Not done
 
 - ~~The reveal choice, the background touches and Rogue's own codex pages.~~ The reveal, the pages and the background touches decided (codex drafts, 2026-10-11 and 2026-10-12).
-- The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register; the renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance).
+- ~~The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.~~ Drafted for choice (section 10, 2026-10-12).
+- Still to write: the good end's offer at a clean Source exit (the prompt and its two buttons), the Dex hints for Rogue's forms (8.5), the Rogue trait's name and description (placeholder Unsigned), the two feeds' labels and Standing words (Rogue has no Standing, 6.1 item 5), and the four temper voicings of any Rogue chatter.
+- The renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance), and Rogue's dead and asleep marks.
 - Simulated since (section 7): home life, the hunt in runs and the lineage side. Numbers not marked decided are starting values, and the targets in 4.4 are a high-side aim.
