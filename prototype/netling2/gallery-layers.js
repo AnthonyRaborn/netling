@@ -1,20 +1,15 @@
 // The "layers" section of the generated galleries (make-gallery.mjs): the prototype's temper tell, neglect and bugs on every
-// form of the egg, drawn by the same code the review page uses (tell.js, neglect.js, glitch.js, idle.js), with the gallery's own
+// form of the egg, drawn by the 2.0 renderer pass (render.js), as the review page is, with the gallery's own
 // palette, tint, scale, calm, live, time and wearable controls. The gallery's renderer does not run these layers; this section
 // draws them beside it. Everything here is a pure view of the sprites; nothing is stored.
 import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
-import { rogueForms, rogueGlance } from './rogue-models.js';
-import { neglected } from './neglect.js';
-import { glitched, MAX_BUGS } from './glitch.js';
-import { temperTell, tellPose, idleClock } from './tell.js';
-import { idleOffset, QUIRKS } from './idle.js';
-import { visitLayers, visitMotion } from './visit.js';
-import { drawSprite, paletteColors } from '../../src/sprites.js';
-import { PALETTES } from '../../src/sim.js';
-import { drawWorn } from '../../src/accessories.js';
+import { rogueForms } from './rogue-models.js';
+import { MAX_BUGS } from './glitch.js';
+import { QUIRKS } from './idle.js';
+import { drawLCD } from './render.js';
 
 const SETS = { iron: () => forms('B'), program: programForms, wetware: wetwareForms, rogue: rogueForms };
 const CROP = { x: 5, y: 0, w: 30, h: 24 }; // the part of the 40x28 screen that holds a pet
@@ -23,39 +18,19 @@ const LEVELS = [[-2, 'strongly unsteady'], [-1, 'unsteady'], [0, 'middle'], [1, 
 const SEED = 1;
 let quirk = 'none'; // the 1.0 idle shown under the temper tell (the section's own control)
 
-// One picture: the form with a layer state, on the LCD background. `tell` null draws the still pose.
+// One picture: the form with a layer state, drawn by the 2.0 renderer pass (render.js) and cropped. `tell` false draws the still pose.
 function picture(env, f, state) {
-  const CROP_ = state.visit ? FULL_WIDTH : CROP;
-  // A visit pauses the motion layers (tell, idle, bug twitch) and plays 1.0's bounce (visit.js).
-  const { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg, still = false } = { ...state, ...visitLayers(state, state.visit) };
-  const t = tell ? temperTell({ egg, level, time, reduced, seed: SEED }) : { frame: 0, blink: false, dx: 0, dy: 0, shade: 1 };
-  const { draw: key, wear } = tellPose(t, 'awake');
-  const base = f[key];
-  const anchors = f.anchors[key];
-  const rusty = neglect ? neglected(base, anchors, neglect, SEED) : base;
-  const torn = bugs ? glitched(rusty, anchors, bugs, { time, reduced: reduced || still, seed: SEED }) : rusty;
-  // Rogue's glance moves the eyes only; wearables stay placed on the unglanced frame (f[wear], below).
-  const look = t.glance ? rogueGlance(torn, anchors, t.glance) : torn;
-  const shown = f.motion && key !== 'sleep' ? f.motion(look, anchors, { time, reduced }) : look;
-  const wander = idle !== 'none' ? idleOffset(idle, base.length, idleClock({ egg, level, time })) : { x: 0, y: 0 };
-  const bounce = state.visit ? visitMotion({ w: base[0].length, h: base.length, time, calm: reduced }) : null;
-  const x = (bounce ? bounce.x : Math.floor((40 - base[0].length) / 2) + t.dx + wander.x) - CROP_.x;
-  const xShown = (bounce ? bounce.x : Math.floor((40 - shown[0].length) / 2) + t.dx + wander.x) - CROP_.x;
-  const y = bounce ? bounce.y : 20 - base.length + t.dy + wander.y;
-  const pal = PALETTES[env.palettes()[0]];
-  const canvas = env.el('canvas', { width: CROP_.w, height: CROP_.h });
+  const crop = state.visit ? FULL_WIDTH : CROP;
+  const { level = 0, neglect = 0, bugs = 0, time = 0, reduced = true, idle = 'none', tell = false, egg } = state;
+  const canvas = env.el('canvas', { width: crop.w, height: crop.h });
   const sc = Math.min(env.scale(), 4);
-  canvas.style.width = `${CROP_.w * sc}px`;
-  canvas.style.height = `${CROP_.h * sc}px`;
+  canvas.style.width = `${crop.w * sc}px`;
+  canvas.style.height = `${crop.h * sc}px`;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = env.tint().lcd;
-  ctx.fillRect(0, 0, CROP_.w, CROP_.h);
-  ctx.globalAlpha = t.shade;
-  drawSprite(ctx, shown, xShown, y, paletteColors(pal));
-  ctx.globalAlpha = 1;
-  const worn = env.worn();
-  // A form that vanishes (Rogue's Sleeper) hides what it wears while it is gone.
-  if (worn.length && !f.hideWorn?.({ time, reduced })) drawWorn(ctx, worn.map((id) => ({ id })), f[wear], x, y, t.frame, false, time, pal);
+  ctx.translate(-crop.x, -crop.y);
+  const pet = { form: f, egg, palette: env.palettes()[0], level: tell ? level : 0, seed: SEED, idle, neglect, bugs, visit: Boolean(state.visit), worn: env.worn().map((id) => ({ id })) };
+  const tint = env.tint();
+  drawLCD(ctx, pet, tell ? time : 0, { reduced: tell ? reduced : true, tint: { lcd: tint.lcd, dark: tint.dark ?? tint.lcd } });
   return canvas;
 }
 
