@@ -27,6 +27,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Look up the source vocabulary behind the Netling 2.0 names and failure models (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
 | Continue the Netling 2.0 sprites (all 66 forms, rules the tests enforce, commands, the next phase; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
+| Read or edit the Netling 2.0 accessory ideas (26 wearables in text, no art; nothing decided) | [NETLING_2_ACCESSORY_IDEAS.md](NETLING_2_ACCESSORY_IDEAS.md) |
 | Trace why a Netling 2.0 sprite decision was made (drafts, rejected options, measurements; archive) | [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) |
 | Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
 | Read the Netling 2.0 egg pressures (each egg's bar, special states, costs and benefits, play styles) | [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md) |
