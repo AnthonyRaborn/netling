@@ -208,15 +208,7 @@ export const IDEA_WEARABLES = [
       // Behind the bright spot a dim wake moves with it (maintainer, 2026-10-12): two cells darker than the ring, then two halfway
       // back, then the ring again. The glow moves two cells a step, so every cell it passes shows white, dim and halfway for one step
       // each (200 ms, the flash rule's floor).
-      const dim = mix(ring, '#204a70');
-      const fade = mix(dim, ring);
-      const cells = ringCells(a);
-      const n = cells.length;
-      const head = (n - ((step(time, 200) * 2) % n)) % n; // the cell list runs clockwise, the glow counterclockwise
-      cells.forEach(([x, y], i) => {
-        const k = (i - head + n) % n; // 0 at the spot, counting back along the wake (clockwise); n - 1 is the cell just ahead
-        px(x, y, k <= 1 || k === n - 1 ? glow : k <= 3 ? dim : k <= 5 ? fade : ring);
-      });
+      drawRing(px, a, time, ring, glow);
     },
   },
   {
@@ -508,6 +500,102 @@ export function ringCells(a) {
   }
   return cells;
 }
+function drawRing(px, a, time, ring, glow) {
+  const dim = mix(ring, '#204a70');
+  const fade = mix(dim, ring);
+  const cells = ringCells(a);
+  const n = cells.length;
+  const head = (n - ((step(time, 200) * 2) % n)) % n; // the cell list runs clockwise, the glow counterclockwise
+  cells.forEach(([x, y], i) => {
+    const k = (i - head + n) % n; // 0 at the spot, counting back along the wake (clockwise); n - 1 is the cell just ahead
+    px(x, y, k <= 1 || k === n - 1 ? glow : k <= 3 ? dim : k <= 5 ? fade : ring);
+  });
+}
+
+// --- the Light ring's face (mockups, 2026-10-12; not wired into the ring yet) ----------------------------------------------------
+// The maintainer's idea: every other lap the oval fills in with a smiley face, then clears, while the glow keeps circling; in and out
+// by a wipe, row by row from the top. Two face styles to compare, drawn as stills at a wipe stage: ringFace(px, a, style, shown),
+// where `shown` (0 to 1) is how much of the face the wipe has drawn, top down.
+//   plain: a smiley, two eyes and a grin.
+//   cap:   Laughing Man-ish: a cap (a dark dome and a brim line across the top), eyes under the brim, a wide grin with a tooth row.
+// The fill is the ring's colour, so ring and face read as one disc; the features are the wake's dark blue.
+export const FACE_STYLES = ['plain', 'cap'];
+// The cells inside the ring, row by row: { y0, y1, rows: Map(y -> [x0, x1]) }.
+export function ringInside(a) {
+  const rows = new Map();
+  for (const [x, y] of ringCells(a)) rows.set(y, [Math.min(x, rows.get(y)?.[0] ?? x), Math.max(x, rows.get(y)?.[1] ?? x)]);
+  const inside = new Map();
+  for (const [y, [x0, x1]] of rows) if (x1 - x0 >= 2) inside.set(y, [x0 + 1, x1 - 1]);
+  const ys = [...rows.keys()];
+  const y0 = Math.min(...ys) + 1;
+  const y1 = Math.max(...ys) - 1;
+  for (const y of [...inside.keys()]) if (y < y0 || y > y1) inside.delete(y);
+  return { y0, y1, rows: inside };
+}
+export function ringFace(px, a, style, shown = 1, ring = '#c0eeff') {
+  const ink = '#204a70';
+  const { y0, y1, rows } = ringInside(a);
+  const H = y1 - y0 + 1;
+  const cx = Math.round((a.headLeft + a.headRight) / 2);
+  const last = y0 + Math.ceil(shown * H) - 1; // the wipe's lowest drawn row
+  const feature = new Map(); // "x,y" -> colour
+  const put = (x, y, c = ink) => feature.set(`${x},${y}`, c);
+  const W = Math.max(...[...rows.values()].map(([x0, x1]) => x1 - x0 + 1));
+  const ex = Math.max(2, Math.round(W * 0.22)); // eye offset from the middle
+  if (style === 'plain') {
+    const eyeY = y0 + Math.round(H * 0.3);
+    for (const x of [cx - ex, cx + ex]) for (const dy of [0, 1]) put(x, eyeY + dy);
+    // a curved grin: a flat bottom and corners climbing two rows
+    const mY = y0 + Math.round(H * 0.72);
+    const mw = Math.max(2, Math.round(W * 0.3));
+    for (let x = cx - mw + 1; x <= cx + mw - 1; x++) put(x, mY);
+    for (const [d, dy] of [[mw, 1], [mw + 1, 2]]) {
+      put(cx - d, mY - dy);
+      put(cx + d, mY - dy);
+    }
+  } else {
+    // the cap: a dark dome over the top rows, a brim line under it reaching past the dome on the right
+    const brim = y0 + Math.max(1, Math.round(H * 0.22)) - (H <= 10 ? 1 : 0); // on small ovals a one-row dome, so the eyes keep a clear row above and below
+    for (const [y, [x0, x1]] of rows) {
+      if (y < brim) for (let x = x0 + 1; x <= x1 - 1; x++) put(x, y);
+      if (y === brim) for (let x = x0; x <= x1; x++) put(x, y);
+    }
+    const eyeY = brim + 2;
+    for (const x of [cx - ex, cx + ex]) for (const dy of [0, 1]) put(x, eyeY + dy);
+    // the grin: a wide dark crescent with a row of teeth (white) inside it
+    const mY = Math.min(y1 - 2, eyeY + 3); // a clear row between the eyes and the grin (and the brim), so nothing joins into a frame
+    // Each grin row is centred on its own row of the oval and kept a cell inside it (the oval narrows towards the bottom).
+    const mw = Math.max(3, Math.round(W * 0.36));
+    [0, 1, 2].forEach((dy) => {
+      const [x0, x1] = rows.get(mY + dy) ?? [cx, cx];
+      const mid = Math.round((x0 + x1) / 2);
+      const half = Math.min(mw - dy, Math.floor((x1 - x0) / 2) - 1);
+      for (let x = mid - half; x <= mid + half; x++) put(x, mY + dy, dy === 1 && x !== mid - half && x !== mid + half && (x - mid) % 2 ? '#ffffff' : ink);
+    });
+  }
+  for (const [y, [x0, x1]] of rows) {
+    if (y > last) continue;
+    for (let x = x0; x <= x1; x++) px(x, y, feature.get(`${x},${y}`) ?? ring);
+  }
+}
+// Mock entries for the review page only: the ring (glow where `time` puts it) with a face at a wipe stage. Ids
+// laughingring.face.<style>.<percent>.
+export const RING_FACE_STAGES = [100, 50];
+export const RING_FACE_MOCKS = FACE_STYLES.flatMap((style) =>
+  RING_FACE_STAGES.map((pct) => ({
+    id: `laughingring.face.${style}.${pct}`,
+    name: `Light ring face: ${style === 'plain' ? 'plain smiley' : 'cap and grin'}, ${pct === 100 ? 'full' : `wipe ${pct}%`}`,
+    slot: 'face',
+    exclusive: true,
+    version: 'only',
+    paid: 'mockup',
+    draw: (px, a, frame, time = 0) => {
+      ringFace(px, a, style, pct / 100);
+      drawRing(px, a, time, '#c0eeff', '#ffffff');
+    },
+  })),
+);
+
 // The midpoint of two #rrggbb colours.
 function mix(c1, c2) {
   const h = (c, i) => parseInt(c.slice(1 + i * 2, 3 + i * 2), 16);
@@ -777,8 +865,8 @@ export function registerIdeas() {
   if (registered) return;
   registered = true;
   const taken = new Set(STYLE_ITEMS.map((x) => x.id));
-  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...PROP_ENTRIES]) if (taken.has(x.id)) throw new Error(`style idea ${x.id} clashes with a 1.0 id`);
-  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT]) {
+  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_FACE_MOCKS, ...PROP_ENTRIES]) if (taken.has(x.id)) throw new Error(`style idea ${x.id} clashes with a 1.0 id`);
+  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_FACE_MOCKS]) {
     const entry = { ...x, rarity: 'common', source: 'earned', draw: x.draw };
     ACCESSORIES.push(entry);
     STYLE_ITEMS.push(entry);
