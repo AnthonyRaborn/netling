@@ -2,6 +2,7 @@
 <meta charset="utf-8">
 <title>Rogue self-destruct and marks</title>
 <style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="big"></canvas>
 <canvas id="live"></canvas>
 <canvas id="c"></canvas>
 <script type="module">
@@ -38,6 +39,32 @@ function heading(ctx, text, y) {
   return y + LABEL;
 }
 const col = (i) => GAP + i * (W + GAP);
+
+// --- large: the dead pose in the dead colours, as drafted and with the fixes, at twice the scale (the differences are a few cells) --------
+{
+  const BS = SC * 2;
+  const big = document.getElementById('big');
+  const BIG = [['drafted', (f) => rogueDead(f, 'lit', 'inward')], ['X apart', (f) => rogueDead(f, 'lit', 'apart')],
+    ['+ tag dark', (f) => rogueDead(f, 'dark', 'apart')], ['+ tag hole', (f) => rogueDead(f, 'hole', 'apart')],
+    ['awake', (f) => f.a]];
+  const which = ['rogueBaby', 'rogueAdultBreach', 'rogueAdultDodge', 'rogueAdultFeast', 'rogueElderBreach'].map((id) => rogueForms()[id]);
+  const bw = 20, bh = 17;
+  big.width = (BIG.length * (bw + 2) + 2) * BS;
+  big.height = LABEL * 2 + which.length * (bh * BS + 8) + 10;
+  const b = big.getContext('2d');
+  b.imageSmoothingEnabled = false;
+  b.fillStyle = '#c7f9ff'; b.font = `${Math.max(12, SC * 2.6)}px monospace`; b.textBaseline = 'top';
+  b.fillText('DEAD, in the dead colours the game uses. Left to right: as drafted (X\'s touching, the lit tag invisible), the X\'s apart,', 4, 2);
+  b.fillText('then with the tag drawn dark or as a hole; the last column is the awake frame, to show where the tag is.', 4, 2 + LABEL * 0.9);
+  which.forEach((f, i) => BIG.forEach(([name, get], j) => {
+    const sprite = get(f);
+    b.save(); b.translate((2 + j * (bw + 2)) * BS, LABEL * 2 + i * (bh * BS + 8)); b.scale(BS, BS);
+    b.fillStyle = '#0b2226'; b.fillRect(0, 0, bw, bh);
+    drawSprite(b, sprite, Math.floor((bw - sprite[0].length) / 2), bh - 1 - sprite.length, j === BIG.length - 1 ? pal : DEAD_COLORS);
+    b.fillStyle = '#c7f9ffaa'; b.font = '1.6px monospace'; b.fillText(`${f.name}: ${name}`, 0.5, 0.3);
+    b.restore();
+  }));
+}
 
 // --- live strip: each form, each burn: awake 1.6 s, the burn 4 s, the capture pose (ash) 2.4 s, looping ---------------------------------
 const AWAKE_MS = 1600, DEAD_MS = 2400, LOOP = AWAKE_MS + BURN_STEPS * BURN_STEP_MS + DEAD_MS;
@@ -77,7 +104,7 @@ c.height = 5 * (LABEL + 8) + rowsNeeded * ROW + 10;
 const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-let y = heading(ctx, 'A. FROM THE TAG (recommended): steps of 400 ms, then the capture pose in the dead colours (ash heap, scorch, nothing).', 0);
+let y = heading(ctx, 'A. FROM THE TAG (decided: A, B and C all used, one at random per death; the ash heap is what is left): steps of 400 ms, then the capture poses in the dead colours.', 0);
 const strip = (f, burn) => {
   for (let s = 0; s < BURN_STEPS; s++) cell(ctx, col(s), y, burnFrame(f.a, rogueTag(f.id), { time: s * BURN_STEP_MS, burn, left: 'ash' }), `${s ? '' : f.name + ' '}${s}`);
   Object.keys(LEFT_OPTIONS).forEach((left, j) => cell(ctx, col(BURN_STEPS + j), y, leftOf(f.a, left), left, DEAD_COLORS));

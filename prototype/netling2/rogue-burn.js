@@ -1,13 +1,14 @@
 // The self-destruct: how a Rogue dies at the third mark (docs/NETLING_2_ROGUE_DRAFTS.md, 10.6 and 11.1). The hunters do not get it: it
-// burns itself into nothingness an instant before capture. Drafts for choice, not registered on the forms: three burns and three poses for
-// what is left (the capture dead pose). The rule is unchanged (the cause stays `captured`); this is art only.
+// burns itself into nothingness an instant before capture. Decided (maintainer, 2026-10-12): all three burns are used, one picked at random
+// when it hits (`pickBurn`, seeded so a reload during the burn keeps the same one), and what is left is the ash heap (registered on every
+// form as `captured`, rogue-models.js). The rule is unchanged (the cause stays `captured`); this is art only.
 //
 // A burn is a one-shot sequence, not a loop: a pure function of (sprite, tag, time since the third mark) in steps of 400 ms (the motion
 // layers' step, twice FLASH_TOGGLE_MS). Every painted cell goes the same way exactly once: body -> FRONT (the burning edge, the highlight
 // colour) -> ASH (dim) -> what is left there (the capture pose's cell, usually empty). Each state holds at least one whole step and no cell
 // ever goes back, so nothing toggles, let alone faster than three times a second (project rule 7; tested). The front is one ring of
 // cells, never a filled area.
-//   A. FROM THE TAG (recommended): it lights where the asset tag was scraped off, the last trace of whose it was, and burns outward from
+//   A. FROM THE TAG: it lights where the asset tag was scraped off, the last trace of whose it was, and burns outward from
 //      there through the body (4-neighbour distance from the tag). The burn bag's last item is itself.
 //   B. FROM THE FEET UP: a burning line rises row by row from the hem to the hood, ash beneath it, like a page held to a flame.
 //   C. EMBERS: cells catch in a scattered order (seeded per form, fixed), so it crumbles from everywhere at once.
@@ -15,7 +16,8 @@
 // Calm (reduced motion): no burn; the capture pose is shown at once, as 1.0 shows its dead pose.
 //
 // What is left (the capture dead pose, drawn in the dead colours like every dead pose):
-//   ASH (recommended): a low heap of ash on the floor where it stood, its footprint's width. "it left them nothing" but a heap.
+//   ASH (decided): a low heap of ash on the floor where it stood, its footprint's width. "it left them nothing" but a heap.
+// Not used, kept for the record and the review page:
 //   SCORCH: its outline only, dim, a burn mark where it stood. The form still reads, so the death screen shows who it was.
 //   NOTHING: no cell at all. The most literal; the death screen shows an empty spot.
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
@@ -105,15 +107,20 @@ export function leftOf(sprite, option) {
 }
 
 export const BURN_OPTIONS = {
-  tag: 'A. from the tag (recommended)',
+  tag: 'A. from the tag',
   feet: 'B. from the feet up',
   embers: 'C. embers',
 };
 export const LEFT_OPTIONS = {
-  ash: 'ash heap (recommended)',
+  ash: 'ash heap (decided)',
   scorch: 'scorch outline',
   nothing: 'nothing',
 };
+
+export const BURNS = Object.keys(BURN_OPTIONS);
+// Which burn plays (decided: one of the three at random when it hits). `seed` is any whole number fixed for that death (the renderer uses
+// the death's time, `diedAt`), so the same death always burns the same way, across reloads and redraws.
+export const pickBurn = (seed) => BURNS[Math.floor(rng(Math.abs(Math.trunc(seed)) ^ 0x5eed)() * BURNS.length)];
 
 // One frame of the burn at `time` ms since the third mark. `sprite` is the form's A frame (the glance and wearables are dropped: wearables
 // burn with it, so the renderer stops drawing them at step 0). -> rows, or null once the burn is over (draw the capture pose from then on).
