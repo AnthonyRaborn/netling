@@ -41,6 +41,9 @@ for (const bot of ['default', 'greedy', 'sip']) {
 // 4. fix-*: candidate fixes for greedy Overlink's cost (2026-10-12): the greedy row of pressure-* with OVERUSE off, Wetware's strain add at 0 (the
 //    strain alone isolated), no strain from plays inside Overlink (strain.sync.inState false), and Wetware's add at 10 (the shared value).
 const FIXES = { 'overuse-off': { on: false }, 'strain0': { on: true, strain: { sync: { add: 0 } } }, 'no-strain-in-state': { on: true, strain: { sync: { inState: false } } }, 'strain10': { on: true, strain: { sync: { add: 10 } } } };
+// Second round (2026-10-12): a smaller add (5, 3) against a later strain line for Wetware (95, 100: strain.sync.playLine; every overplay at 90+
+// still costs the shared 2 Integrity).
+Object.assign(FIXES, { 'strain5': { on: true, strain: { sync: { add: 5 } } }, 'strain3': { on: true, strain: { sync: { add: 3 } } }, 'line95': { on: true, strain: { sync: { playLine: 95 } } }, 'line100': { on: true, strain: { sync: { playLine: 100 } } } });
 for (const [fix, overuse] of Object.entries(FIXES)) {
   const env = { ...NOW, OVERUSE: JSON.stringify(overuse), BUGS: JSON.stringify(NOW_BUGS), SIDES: JSON.stringify({ ownerMult: 3, teenStates: true, ironBenefit: 3, ...FINAL_SIDES }), SYNCBOT: 'greedy' };
   jobs.push({ name: `fix-${fix}`, script: SIDES_SWEEP, args: ['1000', 'attentive,sysadmin,casual,worker,human-regular,daredevil,overclocker', JSON.stringify({ ironWear: true })], env, ext: 'txt' });

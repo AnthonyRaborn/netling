@@ -77,6 +77,20 @@ test('strain.sync.inState false (a measurement switch): a play inside Overlink b
   assert.equal(OVERUSE.strain.sync.inState, undefined, 'off by default: plays inside Overlink build strain');
 });
 
+test('strain.sync.playLine (a measurement switch): Wetware builds strain only from its own line, while every overplay still costs Integrity', () => {
+  egg('sync');
+  OVERUSE.strain.sync.playLine = 100;
+  const at95 = make({ sync: 95 });
+  act(at95, 'play', T0, stub(0.99), { game: 'breach', won: true });
+  assert.equal(at95.ostrain ?? 0, 0, 'under its line: no strain');
+  assert.equal(at95.stats.integrity, 100 - OVERUSE.int, 'the overplay still costs Integrity');
+  const full = make({ sync: 100 });
+  act(full, 'play', T0, stub(0.99), { game: 'breach', won: true });
+  assert.equal(full.ostrain, OVERUSE.strain.sync.add);
+  restore();
+  assert.equal(OVERUSE.strain.sync.playLine, undefined, 'off by default: the shared line');
+});
+
 test('overfeeding: a full netling takes three more feeds, the third writes a cache file, the fourth is refused, and the count resets under 85', () => {
   egg('charge');
   const s = make({ charge: 96 });
