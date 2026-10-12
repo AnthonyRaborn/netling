@@ -190,11 +190,12 @@ export const IDEA_WEARABLES = [
     slot: 'face',
     paid: 'free (find)',
     draw: (px, a, frame, time = 0) => {
-      // A ring of dashes circling the face (2 cells lit, 1 clear), the dashes a deep blue (a pale one was swapped to white on bright bodies by the blend check, and the travelling dash vanished), one dash bright white and
-      // travelling round clockwise a dash every 400 ms (about 3 to 4 s a lap). Redrawn from the doc's description: the 2026-10-07
+      // A ring of dashes circling the face (2 cells lit, 1 clear), the dashes a deep blue (a pale one was swapped to white on bright
+      // bodies by the blend check, and the travelling dash vanished), one dash bright white and travelling round counterclockwise
+      // (maintainer, 2026-10-12) a dash every 400 ms (about 3 to 4 s a lap). Redrawn from the doc's description: the 2026-10-07
       // version (one of Blank's elder options) was never committed. Kept findable whole, motion included, as the doc says.
       ringDashes(a).forEach((dash, i, all) => {
-        const c = i === step(time, 400) % all.length ? '#ffffff' : '#1f5fa8';
+        const c = i === (all.length - (step(time, 400) % all.length)) % all.length ? '#ffffff' : '#1f5fa8'; // the dash list runs clockwise
         for (const [x, y] of dash) px(x, y, c);
       });
     },
