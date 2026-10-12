@@ -359,7 +359,7 @@ function moveToNode(pet, nodeId, rng) {
   const repair = upgraded(pet) ? RUN_CFG.initMoveRepair : RUN_CFG.daemonMoveRepair;
   if (ability(pet) === 'daemon' && repair) st.integrity = clamp(st.integrity + repair);
   if (ab2(pet)) {
-    const up = NR2.ab.upkeep[ab2(pet)]?.[lvl(pet)] ?? 0; // Tune street, elder: repairs a little every move
+    const up = NR2.ab.upkeepRegion?.[run.region]?.[ab2(pet)]?.[lvl(pet)] ?? NR2.ab.upkeep[ab2(pet)]?.[lvl(pet)] ?? 0; // Tune street, elder: repairs a little every move (the Source its own value)
     if (up) st.integrity = clamp(st.integrity + up);
     // Unplugged: a form whose relay patch is dark may repair a little every move instead (off at 0; maintainer's open question, notes section 13).
     const dark = run.challenge === 'unplugged' ? NR2.ab.darkUpkeep?.[ab2(pet)]?.[lvl(pet)] ?? 0 : 0;

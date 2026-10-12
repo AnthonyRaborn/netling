@@ -93,6 +93,7 @@ export const NR2 = {
     sight: { tuneCorp: { 1: 2, 2: 3 } }, // steps of node types ahead; hidden sees the whole map
     darkUpkeep: { tuneCorp: { 1: 0, 2: 0 } }, // under Unplugged only: Integrity per move for a form whose relay patch is dark (0 = off; sizes tried in notes section 13)
     upkeep: { tuneStreet: { 1: 0, 2: 3 } }, // Integrity restored per move (the street elder's second part; 6 until Foresight was measured, decided 3 with Foresight at depth 2: notes section 12)
+    upkeepRegion: { source: { tuneStreet: { 2: 2 } } }, // a region's own repair, over `upkeep` (decided, maintainer, 2026-10-12: 2 in the Source, where 3 put the elder at 128% on the chosen maps; notes section 15)
     concession: { 1: { exchangePrice: 11, scrip: 3, exitItems: 1, winHeal: 11 }, 2: { exchangePrice: 11, scrip: 4, exitItems: 1, winHeal: 18 } }, // feastCorp: cheaper exchange, loose scrip on top, a company-store item at the exit (exitItems: tuned in, a proposal; scrip alone was too weak a part)
     scavenge: { 1: { cache: 0.55, iceWin: 0.35, winHeal: 11 }, 2: { cache: 0.7, iceWin: 0.5, winHeal: 22 } }, // feastStreet: tuned to the parity yardstick; winHeal is a small sustain (Integrity restored by a won ICE), decided as fitting the theme
     forcedCacheForms: ['feastCorp'], // level 2 only

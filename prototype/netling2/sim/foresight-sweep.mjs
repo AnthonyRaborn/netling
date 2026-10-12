@@ -1,6 +1,6 @@
 // What Foresight (Tune street) is worth, with a bot that has uneven per-game skill (netrun-bot.mjs, style.spread) and a pre-rolled map (nr2.js `fate`).
 // Usage: node prototype/netling2/sim/foresight-sweep.mjs [runs=3000] [regions=ruins,deep,source] [styles=careful,skilled] [spreads=0,0.2,0.4]
-//   UPKEEP=0,3,6  the elder's repair per move to try (level 2 only; each value repeats the variants; default 6, the value in nr2.js).
+//   UPKEEP=0,3,6  the elder's repair per move to try in every region (level 2 only; each value repeats the variants; default: nr2.js, 3 and 2 in the Source).
 //   JSON=1 prints JSON.
 // For each region, style and skill spread: the nine forms with no Foresight (the yardstick mean of banked value, nr2 abilities and tiers on), Tune
 // street blind, and Tune street with each Foresight variant: depth (1 = the next step, 2 = two steps) and fields (game; game and tier; game, tier
@@ -43,7 +43,7 @@ const run = (style, spread, form, level, region) => sum(Array.from({ length: n }
 
 const rows = [];
 for (const region of regions) for (const style of styles) for (const spread of spreads) for (const level of [1, 2]) for (const upkeep of level === 2 && upkeeps.length ? upkeeps : [null]) {
-  if (upkeep !== null) NR2.ab.upkeep.tuneStreet[2] = upkeep;
+  if (upkeep !== null) { NR2.ab.upkeep.tuneStreet[2] = upkeep; NR2.ab.upkeepRegion = {}; } // UPKEEP tries one value in every region
   NR2.foresight.on = false;
   const blind = Object.fromEntries(ALL.map((f) => [f, run(style, spread, f, level, region)]));
   const mean = ALL.reduce((a, f) => a + blind[f].value, 0) / ALL.length;

@@ -882,6 +882,28 @@ test('Tune street, decided: the elder repairs 3 a move, reads the ICE\'s game tw
   reset();
 });
 
+test('Tune street, decided 2026-10-12: the elder repairs 2 a move in the Source and 3 elsewhere', () => {
+  reset();
+  assert.deepEqual(NR2.ab.upkeepRegion, { source: { tuneStreet: { 2: 2 } } });
+  const after = (region, form = 'tuneStreetElder') => {
+    const rng = mulberry32(5);
+    const x = createScript({ now: 0, rng });
+    x.stage = 'mainframe';
+    x.form = form;
+    set({ abilities: true });
+    Object.assign(x.stats, { charge: 100, integrity: 50, heat: 30 });
+    startRun(x, region, rng, []);
+    const node = runOptions(x.run)[0];
+    node.type = 'cache';
+    moveTo(x, node.id, rng);
+    return x.stats.integrity;
+  };
+  assert.equal(after('source'), 52);
+  assert.equal(after('deep'), 53);
+  assert.equal(after('source', 'tuneCorpElder'), 50, 'no other form repairs');
+  reset();
+});
+
 // --- challenges under the 2.0 abilities (drafts, ground rule 5; sim/challenge-sweep.mjs) ---------------------------------------------
 function challengeRun(form, level, challenge, patch = {}, seed = 5) {
   set({ abilities: true, ...patch });
