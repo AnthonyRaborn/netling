@@ -1963,7 +1963,8 @@ export function act(s, action, now, rng = Math.random, opts = {}) {
       if (OVERUSE.on && st.sync >= OVERUSE.playLine) { // overplaying: every egg pays a little Integrity, Wetware also builds strain
         st.integrity = clamp(st.integrity - OVERUSE.int);
         SIDE_METER.overplays++;
-        if (ownerStrain() && SIDES.owner === 'sync') addStrain(s, now);
+        // strain.sync.inState false (a measurement switch, 2026-10-12): a play inside Overlink builds no strain, since the burnout and the step already price it
+        if (ownerStrain() && SIDES.owner === 'sync' && (OVERUSE.strain.sync.inState !== false || !heldNow(s, 'sync'))) addStrain(s, now);
       }
       if (OVERUSE.on && st.heat >= OVERUSE.heatLine) { // overheating: every egg pays a little Integrity (Iron's wear is its extra strain)
         st.integrity = clamp(st.integrity - OVERUSE.int);

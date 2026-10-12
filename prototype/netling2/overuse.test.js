@@ -62,6 +62,21 @@ test('every egg: a game at the Sync line or the Heat line costs Integrity; Wetwa
   }
 });
 
+test('strain.sync.inState false (a measurement switch): a play inside Overlink builds no strain, one outside it still does', () => {
+  egg('sync');
+  OVERUSE.strain.sync.inState = false;
+  const inside = make({ sync: OVERUSE.playLine });
+  inside.sideHeld = { charge: false, sync: true, heat: false };
+  act(inside, 'play', T0, stub(0.99), { game: 'breach', won: true });
+  assert.equal(inside.ostrain ?? 0, 0, 'inside Overlink');
+  assert.equal(inside.stats.integrity, 100 - OVERUSE.int, 'the overplay still costs Integrity');
+  const outside = make({ sync: OVERUSE.playLine });
+  act(outside, 'play', T0, stub(0.99), { game: 'breach', won: true });
+  assert.equal(outside.ostrain, OVERUSE.strain.sync.add);
+  restore();
+  assert.equal(OVERUSE.strain.sync.inState, undefined, 'off by default: plays inside Overlink build strain');
+});
+
 test('overfeeding: a full netling takes three more feeds, the third writes a cache file, the fourth is refused, and the count resets under 85', () => {
   egg('charge');
   const s = make({ charge: 96 });
