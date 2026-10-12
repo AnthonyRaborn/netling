@@ -355,3 +355,19 @@ Consistent run with the final design (eased wear, Overdrive and Overlink rules, 
 
 Readings. **The strain is the cause:** with its add at 0 the cost falls to under 1 infection and the never-entering players are within about 1 point (the overplay's own 2 Integrity a play, on every egg, stays). **The strain comes from plays outside the state, not inside it:** skipping it inside Overlink changes almost nothing, so the "double charge" idea is wrong; a greedy player builds it playing at 90+ before entering, during the 24 hour burnout lockout, and on the days it never enters (which is all a casual or worker greedy player ever does). Lowering the add to 10 (the shared value) takes off about a quarter of the cost. With no strain the greedy trade is close to what the design was sized for (Result 21: +35% to +48% drops for +1.7 infections). Not decided; for the maintainer.
 
+## Result 27: a smaller strain or a later line (2026-10-12)
+
+Second round of Result 26 (same settings; outputs `baseline/results/gaps/fix-strain5.txt`, `fix-strain3.txt`, `fix-line95.txt`, `fix-line100.txt`; the line variants use `strain.sync.playLine`, and every overplay at 90+ still costs the shared 2 Integrity). Wetware, greedy bot, against no pressure:
+
+| Variant | Infections (att / sys / dare) | Drops (att / sys) | Full life (worker / h-regular / overclocker; off 63.5 / 25.8 / 95.7) |
+|---|---|---|---|
+| decided, add 15 at 90 | +4.8 / +6.1 / +4.0 | +19% / +32% | 50.5 / 18.7 / 90.5 |
+| add 10 | +3.7 / +4.2 / +2.9 | +24% / +35% | 57.1 / 22.2 / 94.1 |
+| add 5 | +2.4 / +2.3 / +1.9 | +27% / +37% | 58.4 / 25.1 / 94.4 |
+| add 3 | +1.8 / +1.6 / +1.6 | +30% / +38% | 60.5 / 27.5 / 93.3 |
+| add 0 | +0.9 / +0.5 / +0.8 | +33% / +41% | 62.3 / 24.8 / 96.0 |
+| add 15 at 95 | +3.1 / +3.7 / +2.6 | +24% / +35% | 54.8 / 22.0 / 93.5 |
+| add 15 at 100 | +0.9 / +0.5 / +1.0 | +33% / +41% | 62.3 / 24.7 / 96.1 |
+
+Readings. **A later line is nearly all or nothing:** at 100 the strain only follows a play made at a full bar, which the greedy bot (it stops at full) almost never makes, so the result equals no strain; at 95 it keeps most of the cost. **A smaller add scales smoothly:** add 3 brings greedy Overlink to about the cost the design was sized for (Result 21: +1.7 infections for +35% to +48% drops) and leaves the worker 3 points down; add 5 keeps a little more cost (about +2.3, worker 5 points down). Noise: about 1.5 points of full life for the worker and 0.15 infections. The bot does not adapt; a human sees the strain readout and the warning. Not decided; for the maintainer.
+
