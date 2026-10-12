@@ -12,6 +12,8 @@
 //   2. the tell: temperTell (tell.js) picks the frame, Program's blink, Iron's settle and drift, Wetware's shade; Rogue's glance moves
 //      the eyes (rogueGlance), on the awake frames only.
 //   3. neglect (neglect.js), the seams (seams.js: Iron's wear, Program's and Wetware's strain; a draft, see there) and bugs (glitch.js).
+//   3a. the idle action (idle-actions.js, a draft): the temper tell's third channel, awake and not visiting; it holds the frame on A for
+//      Rogue's still and freeze, skips Rogue's glance while it moves the eyes or the head, and is drawn after the motion layer (below).
 //   4. the motion layer (form.motion), awake only, paused during a visit. It returns padded rows, drawn at the figure's x minus the pad,
 //      so the figure does not move; the figure's position and wander use the unpadded width.
 //   5. wearables (1.0's drawWorn), placed on the registered, unglanced, unpadded frame; skipped while form.hideWorn({ time, reduced }) is
@@ -24,8 +26,9 @@
 //
 // The idle hold (decided, docs/NETLING_2_SPRITES.md Next phase item 1): 1.0's idle masks a positional tell, so the idle's clock pauses
 // around it (tell.js idleClock): a steady Iron's settle, and since 2026-10-12 an unsteady Iron's drift steps and a strongly unsteady
-// Program's hops. opts.idleHold picks the clock: 'held' (the decided rule), 'steady' (the earlier rule, a steady Iron only) or 'none'
-// (the plain 1.0 idle), the last two for comparison on the review page.
+// Program's hops, and while an idle action plays (decided 2026-10-12; idle-actions.js heldClock). opts.idleHold picks the clock: 'held'
+// (the decided rule), 'tell' (the tell's holds without the actions'), 'steady' (the earlier rule, a steady Iron only) or 'none' (the
+// plain 1.0 idle), the others for comparison on the review page. opts.idleActions = false leaves the idle actions out (for comparison).
 //
 // The self-destruct (Rogue drafts 11.1, decided): when a netling with a capture pose dies with cause `captured`, and opts.burnStart is
 // set (the UI sets it when it sees a fresh capture, as the evolution strobe is set), the screen plays burnFrame for BURN_MS in the
@@ -36,7 +39,7 @@
 // (cache, virus, events, the attention mark), action reactions, the flow glow, the evolution strobe, the heat wash and the glitch shake.
 import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
 import { SPRITES, drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../../src/sprites.js';
-import { drawWorn, drawProp, placeWorn, accessoryById } from '../../src/accessories.js';
+import { drawWorn, drawProp, placeWorn, accessoryById, DIM_WEARABLE } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
 import { idleOffset } from './idle.js';
@@ -49,6 +52,7 @@ import { metronome } from './metronome.js';
 import { metronomeFrame, METRONOME_SIZE } from './metronome-art.js';
 import { rogueGlance, rogueTag } from './rogue-models.js';
 import { burnFrame, pickBurn, BURN_STEPS, BURN_STEP_MS } from './rogue-burn.js';
+import { actionAt, applyAction, warpPoint, heldClock } from './idle-actions.js';
 
 // The screen is 1.0's 40x28 with TOP rows added above (maintainer, 2026-10-12): 1.0's idle reserves 5 rows over a pet, which the
 // holologo (6 rows up) and, on 2.0's 15 row forms, the halo, cursor, extra life and glitch moth overran by a row, and the holologo by 2
@@ -66,7 +70,8 @@ const Z_DIM = '#2f6b73';
 const PROP_FLOOR = 21 + TOP; // src/accessories.js: props stand on its row 21 at the right edge (paintLCD shifts 1.0's props by TOP)
 
 export const IDLE_HOLDS = {
-  held: idleClock,
+  held: heldClock,
+  tell: idleClock,
   steady: ({ egg, level, time }) => (level > 0 ? idleClock({ egg, level, time }) : time),
   none: ({ time }) => time,
 };
@@ -93,10 +98,10 @@ const frameOf = (time) => Math.floor(time / 500) % 2;
 //   visitorWidth = 16,
 //   death = null,         { cause, diedAt } when pose is 'dead'
 // }
-// opts: { reduced = false, idleHold = 'held', burnStart = null, tint = null ({ lcd, dark }) }
+// opts: { reduced = false, idleHold = 'held', idleActions = true, burnStart = null, tint = null ({ lcd, dark }) }
 export function composeLCD(pet, time, opts = {}) {
   const { form, egg, palette = 0, pose = 'awake', lightsOn = true, seed = 0, worn = [], prop = null, propExtra = null, death = null } = pet;
-  const { reduced = false, idleHold = 'held', burnStart = null, tint = null } = opts;
+  const { reduced = false, idleHold = 'held', idleActions = true, burnStart = null, tint = null } = opts;
   const pal = PALETTES[palette] ?? PALETTES[0];
   const colors = paletteColors(pal);
   const dead = pose === 'dead';
@@ -132,13 +137,18 @@ export function composeLCD(pet, time, opts = {}) {
   const v = visitLayers({ level: pet.level ?? 0, idle: pet.idle ?? 'walk', neglect: pet.neglect ?? 0, bugs: pet.bugs ?? 0 }, visiting);
 
   // 1 and 2. The frame and the tell.
-  const tell = awake ? temperTell({ egg, level: v.level, time, reduced, seed }) : { frame, blink: false, dx: 0, dy: 0, shade: 1 };
+  const tell0 = awake ? temperTell({ egg, level: v.level, time, reduced, seed }) : { frame, blink: false, dx: 0, dy: 0, shade: 1 };
+  // 3a. The idle action (awake, not visiting: visitLayers sets the level to 0, which has none).
+  const act = awake && idleActions ? actionAt({ egg, level: v.level, time, seed, reduced, form }) : null;
+  const ap = act?.pose ?? null;
+  const tell = ap?.hold ? { ...tell0, frame: 0 } : tell0;
   const { draw: key, wear: wearKey } = tellPose(tell, pose);
   const registered = form[key];
   const anchors = form.anchors[key] ?? form.anchors.a;
   const w = registered[0].length;
   const h = registered.length;
-  let rows = tell.glance ? rogueGlance(registered, anchors, tell.glance) : registered;
+  const glance = ap && (ap.look || ap.head || ap.back) ? 0 : tell.glance;
+  let rows = glance ? rogueGlance(registered, anchors, glance) : registered;
 
   // 3. Neglect, the seams, bugs. The twitch moves only when awake, motion is allowed and no visit is on.
   if (v.neglect) rows = neglected(rows, anchors, v.neglect, seed);
@@ -147,7 +157,11 @@ export function composeLCD(pet, time, opts = {}) {
   if (v.bugs) rows = glitched(rows, anchors, v.bugs, { time, reduced: reduced || !awake || Boolean(v.still), seed });
 
   // 4. The motion layer: awake, not visiting.
-  if (form.motion && awake && !visiting) rows = form.motion(rows, anchors, { time, reduced });
+  if (form.motion && awake && !visiting) rows = form.motion(rows, anchors, { time, reduced: reduced || Boolean(ap?.hold) });
+
+  // The idle action's pose, on the (possibly padded) rows: it may add or take a row, bottom aligned.
+  let lift = 0;
+  if (ap) ({ rows, lift } = applyAction(rows, form, key, ap, Math.floor((rows[0].length - w) / 2)));
 
   // Where it stands: 1.0's idle on the tell's clock (held around each settle, drift step and hop), the tell's offsets kept inside the
   // idle's reach (driftWithin), or 1.0's visit bounce, or the resting spot.
@@ -163,20 +177,29 @@ export function composeLCD(pet, time, opts = {}) {
   } else {
     const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.held)({ egg, level: v.level, time, seed, reduced });
     const wander = v.idle !== 'none' ? idleOffset(v.idle, h, clock) : { x: 0, y: 0 };
-    x = Math.floor((LCD_W - w) / 2) + wander.x + driftWithin(tell.dx, wander.x);
-    y = FLOOR - h + wander.y + tell.dy;
+    const mx = ap?.move?.[0] ?? 0;
+    x = Math.floor((LCD_W - w) / 2) + wander.x + driftWithin(tell.dx + mx, wander.x);
+    y = FLOOR - h + wander.y + tell.dy + (ap?.move?.[1] ?? 0);
   }
   box = { x, y, w, h };
   const pad = Math.floor((rows[0].length - w) / 2);
 
   let spriteColors = colors;
   if (rest) spriteColors = dimPet ? DIM_COLORS : colors; // every 2.0 form has its own sleep pose (1.0's rule for those)
-  ops.push({ op: 'rows', rows, x: x - pad, y, colors: spriteColors, alpha: tell.shade });
+  ops.push({ op: 'rows', rows, x: x - pad, y: y - lift, colors: spriteColors, alpha: tell.shade });
 
   // 5. Wearables, on the registered frame the tell wears (Program's blink keeps them on the open-eyed frame).
+  // Under an idle action they follow the head and the lift (warpPoint); turned away (Rogue's behind) the face items are not seen.
   if (worn.length && !form.hideWorn?.({ time, reduced })) {
-    const list = exclusiveWorn(calmWorn(worn, { calm: rest || visiting, reduced }), form[wearKey], { frame: tell.frame, time, pal });
-    ops.push({ op: 'worn', list, sprite: form[wearKey], x, y, frame: tell.frame, dim: dimPet, time, pal });
+    let list = exclusiveWorn(calmWorn(worn, { calm: rest || visiting, reduced }), form[wearKey], { frame: tell.frame, time, pal });
+    if (ap?.back) list = list.filter((it) => accessoryById(it.id)?.slot !== 'face');
+    const warp = ap && (ap.head || ap.lift) ? (px, py) => warpPoint(px, py, form, wearKey, ap) : null;
+    ops.push({ op: 'worn', list, sprite: form[wearKey], x, y, frame: tell.frame, dim: dimPet, time, pal, warp });
+  }
+
+  // The idle action's marks: single cells beside the figure, in its colours.
+  if (ap?.marks) {
+    for (const [mx, my, ch] of ap.marks(form)) ops.push({ op: 'rect', x: x + mx, y: y + my, w: 1, h: 1, color: spriteColors[ch] });
   }
 
   // 6. State marks, awake only.
@@ -243,6 +266,15 @@ export function paintLCD(ctx, { bg, ops }) {
       ctx.globalAlpha = o.alpha ?? 1;
       drawSprite(ctx, o.rows, o.x, o.y, o.colors);
       ctx.globalAlpha = 1;
+    } else if (o.op === 'worn' && o.warp) {
+      // drawWorn, with each pixel moved by the idle action's pose.
+      for (const it of placeWorn(o.list, o.sprite, { frame: o.frame, time: o.time, pal: o.pal, minRow: -o.y })) {
+        for (const p of it.pts) {
+          const [px, py] = o.warp(p.x, p.y);
+          ctx.fillStyle = o.dim ? DIM_WEARABLE : p.color;
+          ctx.fillRect(o.x + px, o.y + py, 1, 1);
+        }
+      }
     } else if (o.op === 'worn') drawWorn(ctx, o.list, o.sprite, o.x, o.y, o.frame, o.dim, o.time, o.pal);
     else if (o.op === 'prop') {
       // 1.0's props stand on 1.0's floor; move them down with it.

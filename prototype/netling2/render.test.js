@@ -168,13 +168,13 @@ test('the room: lights off darkens it, a netling asleep in the dark is dimmed, t
   assert.equal(composeLCD({ form, egg: 'program', pose: 'dead' }, 0).ops.at(-1).w, LCD_W, 'the flatline');
 });
 
-test('the idle hold switch: held (decided) holds around the settle, drift steps and hops; steady is the earlier rule; none is 1.0', () => {
-  assert.deepEqual(Object.keys(IDLE_HOLDS), ['held', 'steady', 'none']);
+test('the idle hold switch: held (decided) holds around the settle, drift steps, hops and idle actions; tell leaves the actions out; steady is the earlier rule; none is 1.0', () => {
+  assert.deepEqual(Object.keys(IDLE_HOLDS), ['held', 'tell', 'steady', 'none']);
   const form = SETS.iron.ironAdultBreachStreet;
   let moved = 0;
   for (let t = 6000 - 200; t < 6000 + 600; t += 50) {
     const pet = { form, egg: 'iron', level: 1, idle: 'sway' };
-    for (const hold of ['held', 'steady']) {
+    for (const hold of ['held', 'tell', 'steady']) {
       assert.equal(composeLCD(pet, t, { idleHold: hold }).box.x, composeLCD(pet, 6000 - 200, { idleHold: hold }).box.x, `${hold}: moved at ${t}`);
     }
     if (composeLCD(pet, t, { idleHold: 'none' }).box.x !== composeLCD(pet, 6000 - 200, { idleHold: 'none' }).box.x) moved++;
@@ -189,10 +189,10 @@ test('the idle hold switch: held (decided) holds around the settle, drift steps 
   for (let t = hop - 200; t < hop + 600; t += 50) assert.equal(at(t, 'held').x, at(hop - 200, 'held').x, `held: moved at ${t}`);
   assert.equal(at(hop, 'held').y, at(hop - 200, 'held').y - 1, 'the hop is a row up on a still idle');
   assert.deepEqual(at(hop + 50, 'steady'), at(hop + 50, 'none'), 'steady does not hold a Program');
-  // Wetware and Rogue never hold.
+  // The tell never holds Wetware or Rogue (their idle actions do: idle-actions.test.js).
   for (const egg of ['wetware', 'rogue']) for (const level of [-2, 2]) for (const t of [5900, 6100, 6400]) {
     const p = { form: Object.values(SETS[egg])[3], egg, level, idle: 'sway', seed: 1 };
-    assert.deepEqual(composeLCD(p, t).box, composeLCD(p, t, { idleHold: 'none' }).box);
+    assert.deepEqual(composeLCD(p, t, { idleHold: 'tell', idleActions: false }).box, composeLCD(p, t, { idleHold: 'none', idleActions: false }).box);
   }
   assert.equal(BEAT_MS[1], 6000);
 });

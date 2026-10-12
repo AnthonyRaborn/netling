@@ -94,7 +94,7 @@
         const { ACCESSORIES } = await import('../../src/accessories.js');
 
         // temper is the hidden number; level is what the tell shows (it only moves GUARD past a threshold)
-        const state = { palette: 0, egg: 'auto', idle: 'none', visit: false, temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, seams: 0, states: 'none', prop: '', idleHold: 'held', dark: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
+        const state = { palette: 0, egg: 'auto', idle: 'none', visit: false, temper: -8, level: -2, seed: 1, reduced: false, wear: '', pose: 'awake', anchors: false, seams: 0, states: 'none', prop: '', idleHold: 'held', idleActions: 'on', dark: false, paused: false, neglect: 0, bugs: 0, stats: { charge: 70, sync: 70, integrity: 100, heat: 20 } };
         const A = forms('A');
         const B = forms('B');
         const LCD = { w: LCD_W, h: LCD_H };
@@ -148,6 +148,7 @@
         select('states', Object.keys(STATE_SETS).map((k) => [k, k]), 'state marks ');
         select('prop', [['', 'no prop'], ['metronome', 'Metronome (draft)']], 'prop ');
         select('idleHold', Object.keys(IDLE_HOLDS).map((k) => [k, k]), 'idle hold ');
+        select('idleActions', [['on', 'on'], ['off', 'off']], 'idle actions (draft) ');
         flag('dark', 'lights off ');
         select('wear', [['', 'no wearable'], ...ACCESSORIES.filter((a) => a.slot !== 'prop').map((a) => [a.id, a.id])], 'wear ');
 
@@ -217,7 +218,7 @@
             states: fixed ? [] : STATE_SETS[state.states], worn: state.wear ? [{ id: state.wear }] : [], prop: fixed ? null : state.prop || null,
             death: { cause: 'old age', diedAt: 0 },
           };
-          const { box } = drawLCD(ctx, pet, fixed ? 0 : time, { reduced: state.reduced || Boolean(fixed), idleHold: state.idleHold });
+          const { box } = drawLCD(ctx, pet, fixed ? 0 : time, { reduced: state.reduced || Boolean(fixed), idleHold: state.idleHold, idleActions: state.idleActions !== 'off' });
           const y = box.y;
           const anchorsKey = state.pose === 'dead' ? 'a' : state.pose === 'sleep' ? 'sleep' : 'a';
           if (state.anchors) {
