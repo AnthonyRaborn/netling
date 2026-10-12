@@ -1,0 +1,104 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Style ideas: the art drafts</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+// Review renders for the style ideas' art (accessory-ideas.js; docs/NETLING_2_ACCESSORY_IDEAS.md): every LCD is the 2.0 renderer's
+// (render.js composeLCD), idle off so only the item moves. Sections by the hash (scale=n, t=ms freezes the clock for a screenshot):
+//   #sec=wear     every wearable entry (free and paid side by side for split and paid ideas) on five forms, one per egg plus a baby
+//   #sec=motion   the moving wearables on one form, one column per 400 ms step
+//   #sec=props    every prop entry beside one form, and the moving ones per step
+//   #sec=crests   the five crests at 9x9, beside 1.0's Helix for scale
+import './ready.js';
+import { registerIdeas, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, IDEA_CRESTS } from './accessory-ideas.js';
+import { composeLCD, paintLCD, LCD_W, LCD_H } from './render.js';
+import { forms } from './models.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
+import { rogueForms } from './rogue-models.js';
+registerIdeas();
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 4);
+const SEC = hash.get('sec') ?? 'wear';
+const FIXED = hash.has('t') ? Number(hash.get('t')) : null;
+const GAP = 3, LABEL = 18, NAME_W = 230;
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+const I = forms('B'), P = programForms(), W = wetwareForms(), R = rogueForms();
+const FORMS = [
+  { form: I.ironBaby, egg: 'iron' },
+  { form: I.ironAdultBreachStreet, egg: 'iron' },
+  { form: P.programAdultTuneCorp, egg: 'program' },
+  { form: W.wetwareElderFeastStreet, egg: 'wetware' },
+  { form: R.rogueAdultDodge, egg: 'rogue' },
+];
+const tag = (e) => (e.version === 'only' ? e.paid : e.version === 'free' ? (e.paid === 'split' ? 'FREE: still (reduced-motion frame)' : 'FREE: plainer still') : e.paid === 'split' ? 'PAID: animated' : 'PAID');
+
+// rows x cols of LCDs, a label per row on the left; cell(row, col, time) -> scene. Redrawn every frame unless the clock is fixed.
+function sheet(rows, cols, label, cell, colName) {
+  c.width = NAME_W + (cols.length * (LCD_W + GAP)) * SC;
+  c.height = LABEL + rows.length * (LCD_H + GAP) * SC + 4;
+  const draw = (time) => {
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#c7f9ff'; ctx.font = '12px monospace'; ctx.textBaseline = 'top';
+    cols.forEach((col, i) => ctx.fillText(colName(col), NAME_W + i * (LCD_W + GAP) * SC, 2));
+    rows.forEach((r, j) => {
+      const y0 = LABEL + j * (LCD_H + GAP) * SC;
+      const [l1, l2] = label(r);
+      ctx.fillStyle = '#c7f9ff'; ctx.font = '13px monospace'; ctx.fillText(l1, 4, y0 + 8);
+      ctx.fillStyle = l2.startsWith('PAID') ? '#f9f002' : l2.startsWith('FREE') ? '#39ff14' : '#7aa'; ctx.font = '11px monospace'; ctx.fillText(l2, 4, y0 + 26);
+      cols.forEach((col, i) => {
+        ctx.save(); ctx.translate(NAME_W + i * (LCD_W + GAP) * SC, y0); ctx.scale(SC, SC);
+        ctx.beginPath(); ctx.rect(0, 0, LCD_W, LCD_H); ctx.clip(); // the LCD's edge, as the real canvas (the Leash cable runs off it)
+        paintLCD(ctx, cell(r, col, time));
+        ctx.restore();
+      });
+    });
+  };
+  if (FIXED != null) draw(FIXED);
+  else { const loop = (t) => { draw(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+}
+
+const moving = (e, slotDraw) => {
+  // An entry moves if its pixels differ anywhere over 12 s at 100 ms (a quick look; the tests check it properly).
+  const a = { top: 2, headTop: 4, headLeft: 3, headRight: 14, eyeRow: 7, eyeLeft: 4, eyeRight: 13, eyeCols: [4, 5, 12, 13], mid: 10, bodyLeft: 4, bodyRight: 13, cx: 8, mouthRow: 9, mouthLeft: 6, mouthRight: 10, neckRow: 11, neckLeft: 4, neckRight: 13, bottom: 15 };
+  const pic = (t) => { const out = []; slotDraw(e, (x, y, col) => out.push(`${x},${y},${col}`), a, t); return out.sort().join(' '); };
+  const first = pic(0);
+  for (let t = 100; t < 12000; t += 100) if (pic(t) !== first) return true;
+  return false;
+};
+const wearDraw = (e, px, a, t) => e.draw(px, a, Math.floor(t / 500) % 2, t, e.colors ? e.colors.map(([, d]) => d) : undefined);
+const propDraw = (e, px, a, t) => e.draw(px, Math.floor(t / 500) % 2, t, null);
+
+if (SEC === 'wear') {
+  const rows = [...WEARABLE_ENTRIES.slice(0, WEARABLE_ENTRIES.findIndex((e) => e.base === 'heatsink') + 1), HEATSINK_HOT, ...WEARABLE_ENTRIES.slice(WEARABLE_ENTRIES.findIndex((e) => e.base === 'heatsink') + 1)];
+  const from = Number(hash.get('from') ?? 0), n = Number(hash.get('n') ?? rows.length);
+  sheet(rows.slice(from, from + n), FORMS, (e) => [`${e.name.replace(/ \((free|paid)\)$/, '')} [${e.slot}]`, tag(e)], (e, f, t) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, t + 1), (f) => f.form.id);
+} else if (SEC === 'motion') {
+  const rows = WEARABLE_ENTRIES.filter((e) => e.version !== 'free' && moving(e, wearDraw));
+  const f = FORMS[1];
+  const steps = Array.from({ length: 10 }, (_, i) => i);
+  const ms = Number(hash.get('ms') ?? 400);
+  sheet(rows, steps, (e) => [e.name.replace(/ \(paid\)$/, ''), e.version === 'paid' ? tag(e) : e.paid], (e, s) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, s * ms + 1), (s) => `${s * ms} ms`);
+} else if (SEC === 'props') {
+  const f = FORMS[1];
+  const ms = Number(hash.get('ms') ?? 800);
+  const steps = Array.from({ length: 8 }, (_, i) => i);
+  sheet(PROP_ENTRIES, steps, (e) => [e.name.replace(/ \((free|paid)\)$/, ''), tag(e)], (e, s, t) => composeLCD({ ...f, idle: 'none', prop: e.id, propExtra: e.base === 'petridish' ? { growth: s / 7 } : null }, FIXED != null ? s * ms + 1 : t + 1), (s) => (FIXED != null ? `${s * ms} ms (dish: ${Math.round((s / 7) * 100)}%)` : 'live'));
+} else {
+  const CS = 10;
+  const helix = ['.#.....#.', '..#.#.#..', '...#.#...', '....#....', '...#.#...', '..#.#.#..', '.#.....#.', '..#.#.#..', '...#.#...'];
+  const all = [...IDEA_CRESTS, { id: 'helix', name: 'Helix (1.0, for scale)', pixels: helix }];
+  c.width = all.length * (9 * CS + 40) + 20; c.height = 9 * CS + 60;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, c.width, c.height);
+  all.forEach((cr, i) => {
+    const x0 = 20 + i * (9 * CS + 40);
+    ctx.fillStyle = '#0b2226'; ctx.fillRect(x0 - 4, 26, 9 * CS + 8, 9 * CS + 8);
+    cr.pixels.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') { ctx.fillStyle = '#05d9e8'; ctx.fillRect(x0 + x * CS, 30 + y * CS, CS, CS); } }));
+    ctx.fillStyle = '#c7f9ff'; ctx.font = '12px monospace'; ctx.textBaseline = 'top'; ctx.fillText(cr.name, x0 - 4, 6);
+  });
+}
+document.title += ' (ready)';
+</script>
