@@ -301,6 +301,18 @@ test('worn accessories draw body, face, head, float; props and unknown ids are s
   assert.deepEqual(wornFrom({}, ['cap']), []);
 });
 
+test('Headphones worn with a Visor leave a gap between the cups and the band', () => {
+  for (const [name, sprite] of FORM_SPRITES) {
+    const [visor, phones] = placeWorn([{ id: 'visor' }, { id: 'headphones' }], sprite);
+    const [alone] = placeWorn([{ id: 'visor' }], sprite);
+    assert.deepEqual(visor.pts, alone.pts, `${name}: the visor is unchanged`);
+    // The cups used to sit on the band's rows, against its ends, and read as one band. Now they share no row with it.
+    const rows = new Set(visor.pts.map((p) => p.y));
+    for (const p of phones.pts) assert.ok(!rows.has(p.y), `${name}: a headphone pixel at ${p.x},${p.y} is on a visor row`);
+    assert.ok(phones.pts.every((p) => p.y >= 0), `${name}: the cups stay on the sprite`);
+  }
+});
+
 test('worn together, body items slide down and halos rise, never off the sprite or above the screen', () => {
   const sprites = FORM_SPRITES.map(([, s]) => s);
   const cells = (w) => new Set(w.pts.map((p) => `${p.x},${p.y}`));

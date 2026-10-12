@@ -3,7 +3,7 @@
 import { blend } from './colors.js';
 
 // The colors of a living netling's sprite marks in palette `pal` ({ main, accent }).
-export const paletteColors = (pal) => ({ '#': pal.main, o: pal.accent, '+': '#f5f5f5', x: blend(pal.main, 0.3, '#000000') });
+export const paletteColors = (pal) => ({ '#': pal.main, o: pal.accent, '+': pal.mark ?? '#f5f5f5', x: blend(pal.main, 0.3, '#000000') });
 
 export const SPRITES = {
   script: [

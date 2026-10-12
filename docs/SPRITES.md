@@ -26,6 +26,9 @@ State of the art review: how the sprites are built, what the checks measure, wha
 - **Any `#rrggbb` is allowed** in the wardrobe, so a player can pick a clashing color. The automatic state means it only happens by choice.
 - **Daemon's animation** reads about as distinct as the other adults, the Ghost aside.
 - **The strobe of an evolution hides the wearable** (the pet is a white silhouette).
+- **Headphones with a Visor.** The cups used to sit on the Visor's rows against its ends and read as one band with a cup at each end (`placeWorn`). Worn together, the cups now shrink to two rows and ride up clear of the band, to the top corners of the head. Alone, both are unchanged.
+- **Wearables follow the body between frames.** On ten forms (Bitling, Kernel, Stub, Shell, Firewall, Airgap, Ghost, Whisper, Glitch, Panic) and a little on Chrome and Plat, some wearables shift between the A and B frames, because the head, eyes or whole body shift (Glitch and Panic move up to 5 columns). Holding them still would leave them off the body, so this is kept; the head wearables of the squashed-antenna forms ride down a row on purpose. Fixing it would mean redrawing those B frames with a rigid head.
+- **Highlight marks.** The `+` cells (nose, cheeks, teeth) are white on neon and ultra and a dark indigo (`mark` in `PALETTES`) on ice, acid, toxic and origin, where white measured 1.1 to 1.6:1 against the body. Toxic's eyes are a deeper teal for the same reason.
 - **Some pairs share a spot.** Headphones cover the Earpiece and the edge of a Cyber eye (all ear or eye-side devices), and the orbiting Drone buddy, Data aura and Glitch moth pass over whatever they cross.
 
 ## What works
@@ -40,7 +43,7 @@ State of the art review: how the sprites are built, what the checks measure, wha
 
 For regressions (rerun the audit):
 
-- Off-screen wearable cases: 0.
+- Off-screen wearable cases: 39, all the Holo logo, 1 px above the screen at the top of an idle motion (worst: Bitling bounce), on 13 of the 14 forms (not Init). Known and left as is; an earlier version of this line said 0.
 - Wearables that lose half or more of their pixels awake and lit: 2 (Crown in 1 of 84 form and palette cases, Earpiece in 2: Ghost and Whisper).
 - Wearables that lose half or more asleep with the lights off: 0.
 - Highest wearable pair overlaps: Shades and Visor up to 0.67 on Chrome and Plat (the Visor is now three unbroken lines; the colors differ), Cap and Party hat 0.58 (different colors).

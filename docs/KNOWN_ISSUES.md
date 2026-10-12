@@ -25,7 +25,7 @@ Things that work as coded but are easy to misunderstand, and things not yet veri
 
 ## Verified facts
 
-- `npm test`: 500 tests pass.
+- `npm test`: 505 tests pass.
 - Integrity recovers from 0 to 100 in 20 hours awake or 12.5 hours of dark sleep or naps; across a real day with the lights off at night, 14.6 to 17.8 hours depending on the start time, before care actions (measured with the sim, Charge and Heat held fine).
 - Every module reachable from `main.js` is in the service worker's `SHELL` (`tests/shell.test.js`).
 - The codex has 27 fragments.
