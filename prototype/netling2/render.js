@@ -175,7 +175,7 @@ export function composeLCD(pet, time, opts = {}) {
 
   // 5. Wearables, on the registered frame the tell wears (Program's blink keeps them on the open-eyed frame).
   if (worn.length && !form.hideWorn?.({ time, reduced })) {
-    const list = exclusiveWorn(worn, form[wearKey], { frame: tell.frame, time, pal });
+    const list = exclusiveWorn(calmWorn(worn, { calm: rest || visiting, reduced }), form[wearKey], { frame: tell.frame, time, pal });
     ops.push({ op: 'worn', list, sprite: form[wearKey], x, y, frame: tell.frame, dim: dimPet, time, pal });
   }
 
@@ -198,6 +198,16 @@ export function composeLCD(pet, time, opts = {}) {
   // 8. The Z while resting.
   if (rest) ops.push({ op: 'rows', rows: SPRITES.z, x: 30, y: 3 + TOP + frame, colors: { '#': dimPet ? Z_DIM : pal.main } });
   return { bg, ops, box };
+}
+
+// A wearable can name a calmer stand-in: `quietId` drawn while resting or in a visit, `stillId` with reduced motion (so far only the style
+// ideas' Light ring, whose face phase stops). 1.0's wearables name none and pass through unchanged.
+export function calmWorn(list, { calm = false, reduced = false } = {}) {
+  return list.map((w) => {
+    const acc = accessoryById(w.id);
+    const id = (reduced && acc?.stillId) || (calm && acc?.quietId) || w.id;
+    return id === w.id ? w : { ...w, id };
+  });
 }
 
 // An exclusive wearable (`exclusive: true` on its entry; so far only the style ideas' Light ring, accessory-ideas.js) is worn alone in its

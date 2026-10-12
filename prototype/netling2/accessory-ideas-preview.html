@@ -8,6 +8,7 @@
 // (render.js composeLCD), idle off so only the item moves. Sections by the hash (scale=n, t=ms freezes the clock for a screenshot):
 //   #sec=wear     every wearable entry (free and paid side by side for split and paid ideas) on six forms, one per egg plus a baby and Blank (Wetware's hidden elder, with its motion layer)
 //   #sec=motion   the moving wearables on one form, one column per 400 ms step (form=n, only=id)
+//   #sec=versions the Light ring's two versions (smiley, cap and grin) live
 //   #sec=face     mockups of the ring's face phase: two styles, full and mid-wipe
 //   #sec=ring     the Light ring alone, an outfit, and the outfit with the ring (what the ring hides)
 //   #sec=props    every prop entry beside one form, and the moving ones per step
@@ -86,9 +87,13 @@ if (SEC === 'wear') {
   const steps = Array.from({ length: 10 }, (_, i) => i);
   const ms = Number(hash.get('ms') ?? 400);
   sheet(rows, steps, (e) => [e.name.replace(/ \(paid\)$/, ''), e.version === 'paid' ? tag(e) : e.paid], (e, s) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, s * ms + 1), (s) => `${s * ms} ms`);
+} else if (SEC === 'versions') {
+  // The Light ring's two versions live: the face wipes in from the right every other lap, holds, and clears from the right.
+  const rows = [{ id: 'laughingring', name: 'Light ring (smiley)' }, { id: 'laughingring.cap', name: 'Light ring (cap and grin)' }];
+  sheet(rows, FORMS, (r) => [r.name, 'face every other lap'], (r, f, t) => composeLCD({ ...f, idle: 'none', worn: [{ id: r.id }] }, t + 1), (f) => f.form.id);
 } else if (SEC === 'face') {
-  // Mockups of the Light ring's face phase (accessory-ideas.js ringFace): two styles, full and halfway through the wipe.
-  sheet(RING_FACE_MOCKS, FORMS, (e) => [e.name.replace('Light ring face: ', ''), 'MOCKUP: not wired into the ring'], (e, f, t) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, t + 1), (f) => f.form.id);
+  // Stills of the Light ring's two faces (accessory-ideas.js ringFace): full and halfway through the wipe in, from the right.
+  sheet(RING_FACE_MOCKS, FORMS, (e) => [e.name.replace('Light ring face: ', ''), 'still of the face phase'], (e, f, t) => composeLCD({ ...f, idle: 'none', worn: [{ id: e.id }] }, t + 1), (f) => f.form.id);
 } else if (SEC === 'ring') {
   // The Light ring's exclusion (render.js exclusiveWorn): an outfit without the ring, then the same outfit with it, where the face item
   // and anything on or inside the ring are not drawn.

@@ -5,10 +5,10 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ringCells, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE } from './accessory-ideas.js';
+import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE } from './accessory-ideas.js';
 import { ACCESSORIES, PROPS, placeWorn, anchorsFor } from '../../src/accessories.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
-import { composeLCD, exclusiveWorn } from './render.js';
+import { composeLCD, exclusiveWorn, calmWorn } from './render.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
@@ -184,4 +184,76 @@ test('the Light ring is worn alone on the face and over its area: other face ite
     }
   }
   assert.ok(keptSomething, 'something clear of the ring (the halo over the head) is still drawn on some form');
+});
+
+test('the Light ring\'s faces: on every form the eyes keep a clear row from the mouth and the cap, and every part shows', () => {
+  for (const { form } of ALL) {
+    for (const sprite of [form.a, form.b]) {
+      for (const style of ['plain', 'cap']) {
+        const f = faceFeatures(anchorsFor(sprite), style);
+        assert.equal(f.eyes.length >= 2, true, `${form.id} ${style}: eyes`);
+        assert.ok(f.mouth.length >= 3, `${form.id} ${style}: mouth`);
+        if (style === 'cap') assert.ok(f.cap.length >= 3 && f.teeth.length >= 1, `${form.id}: cap and teeth`);
+        const other = new Set([...f.mouth, ...f.cap, ...f.teeth].map(([x, y]) => `${x},${y}`));
+        for (const [x, y] of f.eyes) for (const dx of [-1, 0, 1]) for (const dy of [-1, 0, 1]) assert.ok(!other.has(`${x + dx},${y + dy}`), `${form.id} ${style}: an eye at ${x},${y} touches the mouth or cap`);
+      }
+    }
+  }
+});
+
+test('the face wipes in and out from right to left, every other lap (or third, on a small ring), and never cuts off', () => {
+  for (const { form } of [ALL[0], ...ALL.filter(({ form }) => ['ironAdultBreachStreet', 'rogueAdultDodge', 'wetwareElderHidden'].includes(form.id))]) {
+    const a = anchorsFor(form.a);
+    const { x0, x1 } = ringInside(a);
+    const lap = ringCells(a).length * 100;
+    const total = FACE_MS.fill + FACE_MS.hold + FACE_MS.clear;
+    const laps = Math.max(2, 1 + Math.ceil(total / lap));
+    assert.ok(lap + total <= laps * lap, `${form.id}: the face fits its cycle`);
+    const cols = (t) => {
+      const m = faceMask(a, t);
+      const out = [];
+      if (m) for (let x = x0; x <= x1; x++) if (m(x)) out.push(x);
+      return out;
+    };
+    assert.equal(faceMask(a, 0), null, 'no face in the first lap');
+    assert.equal(faceMask(a, lap - 100), null);
+    let prev = [];
+    for (let t = lap; t < lap + FACE_MS.fill; t += 100) {
+      const c = cols(t);
+      assert.ok(c.length && c.at(-1) === x1 && c.length >= prev.length, `${form.id} at ${t}: fills from the right`);
+      prev = c;
+    }
+    assert.equal(cols(lap + FACE_MS.fill).length, x1 - x0 + 1, 'full when the hold starts');
+    prev = cols(lap + FACE_MS.fill);
+    for (let t = lap + FACE_MS.fill + FACE_MS.hold; t < lap + total; t += 100) {
+      const c = cols(t);
+      assert.ok(c.length < prev.length && (!c.length || c[0] === x0), `${form.id} at ${t}: clears from the right`);
+      prev = c;
+    }
+    assert.equal(faceMask(a, lap + total), null, 'gone after the clear');
+    assert.ok(faceMask(a, laps * lap + lap + FACE_MS.fill), 'and back the next cycle');
+  }
+});
+
+test('both versions of the Light ring draw a face; asleep, in a visit and with reduced motion the renderer draws the faceless ring', () => {
+  const form = SETS.iron.ironAdultBreachStreet;
+  const a = anchorsFor(form.a);
+  const lap = ringCells(a).length * 100;
+  const pic = (id, t) => pixels((px) => ACCESSORIES.find((x) => x.id === id).draw(px, a, 0, t));
+  for (const id of ['laughingring', 'laughingring.cap']) assert.ok(pic(id, lap + 1000).split(' ').length > pic(id, 0).split(' ').length + 20, `${id} fills in`);
+  assert.notEqual(pic('laughingring', lap + 1000), pic('laughingring.cap', lap + 1000), 'two different faces');
+  for (const id of ['laughingring', 'laughingring.cap']) {
+    assert.deepEqual(calmWorn([{ id }, { id: 'halo' }], { calm: true }), [{ id: 'laughingring.quiet' }, { id: 'halo' }]);
+    assert.deepEqual(calmWorn([{ id }], { reduced: true }), [{ id: 'laughingring.still' }]);
+    assert.deepEqual(calmWorn([{ id }]), [{ id }]);
+  }
+  const ringOnly = ringCells(a).length;
+  for (let t = 0; t < 20_000; t += 100) assert.equal(pic('laughingring.quiet', t).split(' ').length, ringOnly, 'no face while quiet');
+  assert.equal(new Set([0, 3000, 9999].map((t) => pic('laughingring.still', t))).size, 1, 'still with reduced motion');
+  // Through the renderer: asleep, visiting and reduced all swap the ring.
+  const op = (pet, opts) => composeLCD({ form, egg: 'iron', idle: 'none', worn: [{ id: 'laughingring.cap' }], ...pet }, lap + 1000, opts).ops.find((o) => o.op === 'worn').list[0].id;
+  assert.equal(op({}), 'laughingring.cap');
+  assert.equal(op({ pose: 'sleep' }), 'laughingring.quiet');
+  assert.equal(op({ visit: true }), 'laughingring.quiet');
+  assert.equal(op({}, { reduced: true }), 'laughingring.still');
 });

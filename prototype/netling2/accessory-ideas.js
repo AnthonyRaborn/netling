@@ -204,12 +204,19 @@ export const IDEA_WEARABLES = [
       // colour for 200 ms; maintainer asked for a brighter ring and a faster pulse): a lap of about 2.5 to 4 s. Redrawn from the maintainer's memory of
       // the 2026-10-07 version for Blank (a continuous oval glow with a pulsing motion), which was never committed; the first redraw
       // (blue dashes, a dash every 400 ms) read as broken and shaded. Kept findable whole, motion included, as the doc says.
-      const [ring, glow] = colors ?? ['#c0eeff', '#ffffff'];
       // Behind the bright spot a dim wake moves with it (maintainer, 2026-10-12): two cells darker than the ring, then two halfway
       // back, then the ring again. The glow moves two cells a step, so every cell it passes shows white, dim and halfway for one step
-      // each (200 ms, the flash rule's floor).
-      drawRing(px, a, time, ring, glow);
+      // each (200 ms, the flash rule's floor). Every other lap the face (below, "the Light ring's face") wipes in and out.
+      ringWithFace('plain')(px, a, frame, time, colors);
     },
+    // Two versions, one per face (maintainer, 2026-10-12): this one with the plain smiley, laughingring.cap with the cap and grin.
+    variants: [
+      { id: 'laughingring', name: 'Light ring (smiley)', style: 'plain' },
+      { id: 'laughingring.cap', name: 'Light ring (cap and grin)', style: 'cap' },
+    ],
+    // What render.js calmWorn draws instead: no face asleep or in a visit, and a still ring with reduced motion.
+    quietId: 'laughingring.quiet',
+    stillId: 'laughingring.still',
   },
   {
     id: 'scanvisor',
@@ -512,15 +519,17 @@ function drawRing(px, a, time, ring, glow) {
   });
 }
 
-// --- the Light ring's face (mockups, 2026-10-12; not wired into the ring yet) ----------------------------------------------------
-// The maintainer's idea: every other lap the oval fills in with a smiley face, then clears, while the glow keeps circling; in and out
-// by a wipe, row by row from the top. Two face styles to compare, drawn as stills at a wipe stage: ringFace(px, a, style, shown),
-// where `shown` (0 to 1) is how much of the face the wipe has drawn, top down.
-//   plain: a smiley, two eyes and a grin.
-//   cap:   Laughing Man-ish: a cap (a dark dome and a brim line across the top), eyes under the brim, a wide grin with a tooth row.
-// The fill is the ring's colour, so ring and face read as one disc; the features are the wake's dark blue.
+// --- the Light ring's face (maintainer, 2026-10-12) --------------------------------------------------------------------------------
+// Every other lap the oval fills in with a face and clears again while the glow keeps circling. In and out by a wipe from right to left
+// both times: the face appears from the right edge, holds, then disappears from the right edge. Two versions of the ring, one per face:
+//   plain: a smiley, two eyes and a curved grin.
+//   cap:   Laughing Man-ish: a dark cap (dome and brim), eyes under it, a wide grin with a tooth row.
+// The fill is the ring's colour, so ring and face read as one disc; the features are the wake's dark blue. Not drawn asleep, during a
+// visit or with reduced motion (render.js calmWorn swaps in the faceless ring).
 export const FACE_STYLES = ['plain', 'cap'];
-// The cells inside the ring, row by row: { y0, y1, rows: Map(y -> [x0, x1]) }.
+export const FACE_MS = { fill: 800, hold: 1500, clear: 800 };
+const INK = '#204a70';
+// The cells inside the ring, row by row: { y0, y1, x0, x1, rows: Map(y -> [x0, x1]) }.
 export function ringInside(a) {
   const rows = new Map();
   for (const [x, y] of ringCells(a)) rows.set(y, [Math.min(x, rows.get(y)?.[0] ?? x), Math.max(x, rows.get(y)?.[1] ?? x)]);
@@ -530,67 +539,114 @@ export function ringInside(a) {
   const y0 = Math.min(...ys) + 1;
   const y1 = Math.max(...ys) - 1;
   for (const y of [...inside.keys()]) if (y < y0 || y > y1) inside.delete(y);
-  return { y0, y1, rows: inside };
+  const spans = [...inside.values()];
+  return { y0, y1, x0: Math.min(...spans.map((r) => r[0])), x1: Math.max(...spans.map((r) => r[1])), rows: inside };
 }
-export function ringFace(px, a, style, shown = 1, ring = '#c0eeff') {
-  const ink = '#204a70';
-  const { y0, y1, rows } = ringInside(a);
+// The face's features as cell lists, laid out top down so that the eyes always have a clear row between them and the mouth (and the
+// cap): on a small oval the eyes shrink to one row, the grin's corners climb one row instead of two, the cap loses its dome and the
+// toothy grin loses its bottom row. -> { eyes, mouth, cap, teeth } of [x, y].
+export function faceFeatures(a, style) {
+  const { y0, y1, x0: left, x1: right, rows } = ringInside(a);
   const H = y1 - y0 + 1;
-  const cx = Math.round((a.headLeft + a.headRight) / 2);
-  const last = y0 + Math.ceil(shown * H) - 1; // the wipe's lowest drawn row
-  const feature = new Map(); // "x,y" -> colour
-  const put = (x, y, c = ink) => feature.set(`${x},${y}`, c);
   const W = Math.max(...[...rows.values()].map(([x0, x1]) => x1 - x0 + 1));
-  const ex = Math.max(2, Math.round(W * 0.22)); // eye offset from the middle
+  const cx = Math.round((left + right) / 2); // the oval's middle, not the head's, so the face is symmetric inside it
+  const out = { eyes: [], mouth: [], cap: [], teeth: [] };
+  // keeps a cell only if it is inside its row of the oval with a cell to spare
+  const fits = (x, y) => rows.has(y) && x > rows.get(y)[0] && x < rows.get(y)[1];
+  const add = (part, x, y) => fits(x, y) && out[part].push([x, y]);
+  const ex = Math.max(2, Math.round(W * 0.22));
   if (style === 'plain') {
-    const eyeY = y0 + Math.round(H * 0.3);
-    for (const x of [cx - ex, cx + ex]) for (const dy of [0, 1]) put(x, eyeY + dy);
-    // a curved grin: a flat bottom and corners climbing two rows
-    const mY = y0 + Math.round(H * 0.72);
-    const mw = Math.max(2, Math.round(W * 0.3));
-    for (let x = cx - mw + 1; x <= cx + mw - 1; x++) put(x, mY);
-    for (const [d, dy] of [[mw, 1], [mw + 1, 2]]) {
-      put(cx - d, mY - dy);
-      put(cx + d, mY - dy);
-    }
+    const eh = H >= 8 ? 2 : 1;
+    const eyeY = y0 + Math.max(1, Math.round(H * 0.22));
+    for (const x of [cx - ex, cx + ex]) for (let dy = 0; dy < eh; dy++) add('eyes', x, eyeY + dy);
+    const top = eyeY + eh + 1; // the mouth's highest row: a clear row under the eyes
+    // corners climb two rows when there is height and width for it, else one
+    const climb = top + 2 <= y1 - 1 && W >= 10 ? 2 : 1;
+    const mY = Math.min(y1 - 1, Math.max(y0 + Math.round(H * 0.72), top + climb));
+    const mw = Math.max(2, Math.min(Math.round(W * 0.3), Math.floor(W / 2) - 1 - climb));
+    for (let x = cx - mw + 1; x <= cx + mw - 1; x++) add('mouth', x, mY);
+    for (let k = 1; k <= climb; k++) for (const d of [-(mw + k - 1), mw + k - 1]) add('mouth', cx + d, mY - k);
   } else {
-    // the cap: a dark dome over the top rows, a brim line under it reaching past the dome on the right
-    const brim = y0 + Math.max(1, Math.round(H * 0.22)) - (H <= 10 ? 1 : 0); // on small ovals a one-row dome, so the eyes keep a clear row above and below
+    const eh = H >= 9 ? 2 : 1;
+    const gh = H >= 8 ? 3 : 2;
+    const dome = Math.max(0, Math.min(Math.max(1, Math.round(H * 0.2)), H - (1 + 1 + eh + 1 + gh)));
+    const brim = y0 + dome;
     for (const [y, [x0, x1]] of rows) {
-      if (y < brim) for (let x = x0 + 1; x <= x1 - 1; x++) put(x, y);
-      if (y === brim) for (let x = x0; x <= x1; x++) put(x, y);
+      if (y < brim) for (let x = x0 + 1; x <= x1 - 1; x++) out.cap.push([x, y]);
+      if (y === brim) for (let x = x0; x <= x1; x++) out.cap.push([x, y]);
     }
     const eyeY = brim + 2;
-    for (const x of [cx - ex, cx + ex]) for (const dy of [0, 1]) put(x, eyeY + dy);
-    // the grin: a wide dark crescent with a row of teeth (white) inside it
-    const mY = Math.min(y1 - 2, eyeY + 3); // a clear row between the eyes and the grin (and the brim), so nothing joins into a frame
+    for (const x of [cx - ex, cx + ex]) for (let dy = 0; dy < eh; dy++) add('eyes', x, eyeY + dy);
+    const mY = eyeY + eh + 1;
     // Each grin row is centred on its own row of the oval and kept a cell inside it (the oval narrows towards the bottom).
     const mw = Math.max(3, Math.round(W * 0.36));
-    [0, 1, 2].forEach((dy) => {
+    for (let dy = 0; dy < gh; dy++) {
       const [x0, x1] = rows.get(mY + dy) ?? [cx, cx];
       const mid = Math.round((x0 + x1) / 2);
       const half = Math.min(mw - dy, Math.floor((x1 - x0) / 2) - 1);
-      for (let x = mid - half; x <= mid + half; x++) put(x, mY + dy, dy === 1 && x !== mid - half && x !== mid + half && (x - mid) % 2 ? '#ffffff' : ink);
-    });
+      for (let x = mid - half; x <= mid + half; x++) {
+        // every other cell of the teeth row (the middle row, or the top one on a two-row grin), or its one middle cell when narrow
+        const teethRow = gh === 3 ? 1 : 0;
+        const tooth = dy === teethRow && x !== mid - half && x !== mid + half && (half < 2 ? x === mid : (x - mid) % 2 !== 0);
+        add(tooth ? 'teeth' : 'mouth', x, mY + dy);
+      }
+    }
   }
-  for (const [y, [x0, x1]] of rows) {
-    if (y > last) continue;
-    for (let x = x0; x <= x1; x++) px(x, y, feature.get(`${x},${y}`) ?? ring);
-  }
+  return out;
 }
-// Mock entries for the review page only: the ring (glow where `time` puts it) with a face at a wipe stage. Ids
-// laughingring.face.<style>.<percent>.
+// Paints the face where show(x) is true (the wipe's mask), the fill everywhere else inside the ring.
+export function ringFace(px, a, style, show = () => true, ring = '#c0eeff') {
+  const f = faceFeatures(a, style);
+  const colour = new Map();
+  for (const part of ['eyes', 'mouth', 'cap']) for (const [x, y] of f[part]) colour.set(`${x},${y}`, INK);
+  for (const [x, y] of f.teeth) colour.set(`${x},${y}`, '#ffffff');
+  for (const [y, [x0, x1]] of ringInside(a).rows) for (let x = x0; x <= x1; x++) if (show(x)) px(x, y, colour.get(`${x},${y}`) ?? ring);
+}
+// Where the face is at `time`: null (not showing) or the wipe's mask over columns. The cycle is a whole number of laps (a lap is the
+// glow's way round, 100 ms a cell): the face starts at the second lap and the cycle is two laps, or three on a ring too small for the
+// face's 3.1 s to fit inside two, so the face never cuts off. The wipe moves a column at a time on a 100 ms clock.
+export function faceMask(a, time) {
+  const lap = ringCells(a).length * 100;
+  const total = FACE_MS.fill + FACE_MS.hold + FACE_MS.clear;
+  const laps = Math.max(2, 1 + Math.ceil(total / lap));
+  const u = Math.floor(((time ?? 0) % (laps * lap)) / 100) * 100 - lap;
+  if (u < 0 || u >= total) return null;
+  const { x0, x1 } = ringInside(a);
+  const width = x1 - x0 + 1;
+  if (u < FACE_MS.fill) {
+    const n = Math.ceil(((u + 100) / FACE_MS.fill) * width); // columns drawn so far, from the right
+    return (x) => x > x1 - n;
+  }
+  if (u < FACE_MS.fill + FACE_MS.hold) return () => true;
+  const gone = Math.ceil(((u - FACE_MS.fill - FACE_MS.hold + 100) / FACE_MS.clear) * width); // columns cleared, from the right
+  return (x) => x <= x1 - gone;
+}
+// The ring with its face phase, for each style.
+const ringWithFace = (style) => (px, a, frame, time = 0, colors) => {
+  const [ring, glow] = colors ?? ['#c0eeff', '#ffffff'];
+  const mask = faceMask(a, time);
+  if (mask) ringFace(px, a, style, mask, ring);
+  drawRing(px, a, time, ring, glow);
+};
+// The faceless rings render.js swaps in (calmWorn): asleep or in a visit the glow keeps circling; with reduced motion it stands still.
+export const RING_CALM = [
+  { id: 'laughingring.quiet', name: 'Light ring (asleep, in a visit)', draw: (px, a, frame, time = 0, colors) => drawRing(px, a, time, ...(colors ?? ['#c0eeff', '#ffffff'])) },
+  { id: 'laughingring.still', name: 'Light ring (reduced motion)', draw: (px, a, frame, time, colors) => drawRing(px, a, 0, ...(colors ?? ['#c0eeff', '#ffffff'])) },
+].map((x) => ({ ...x, slot: 'face', exclusive: true, version: 'only', paid: 'free (find)', colors: [['ring', '#c0eeff'], ['glow', '#ffffff']] }));
+// Stills for the review page: each face full and halfway through the wipe in (from the right). Ids laughingring.face.<style>.<percent>.
 export const RING_FACE_STAGES = [100, 50];
 export const RING_FACE_MOCKS = FACE_STYLES.flatMap((style) =>
   RING_FACE_STAGES.map((pct) => ({
     id: `laughingring.face.${style}.${pct}`,
-    name: `Light ring face: ${style === 'plain' ? 'plain smiley' : 'cap and grin'}, ${pct === 100 ? 'full' : `wipe ${pct}%`}`,
+    name: `Light ring face: ${style === 'plain' ? 'plain smiley' : 'cap and grin'}, ${pct === 100 ? 'full' : `wipe in ${pct}%`}`,
     slot: 'face',
     exclusive: true,
     version: 'only',
     paid: 'mockup',
     draw: (px, a, frame, time = 0) => {
-      ringFace(px, a, style, pct / 100);
+      const { x0, x1 } = ringInside(a);
+      const n = Math.ceil(((x1 - x0 + 1) * pct) / 100);
+      ringFace(px, a, style, (x) => x > x1 - n);
       drawRing(px, a, time, '#c0eeff', '#ffffff');
     },
   })),
@@ -849,6 +905,7 @@ const freeOf = (x, args) =>
 const versions = (list, args) =>
   list.flatMap((x) => {
     const base = { ...x, base: x.id };
+    if (x.variants) return x.variants.map((v) => ({ ...base, id: v.id, name: v.name, version: 'only', draw: args === 'wear' ? ringWithFace(v.style) : x.draw }));
     if (x.paid !== 'split' && x.paid !== 'paid') return [{ ...base, version: 'only' }];
     return [
       { ...base, id: x.id + FREE, name: `${x.name} (free)`, version: 'free', draw: freeOf(x, args) },
@@ -865,8 +922,8 @@ export function registerIdeas() {
   if (registered) return;
   registered = true;
   const taken = new Set(STYLE_ITEMS.map((x) => x.id));
-  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_FACE_MOCKS, ...PROP_ENTRIES]) if (taken.has(x.id)) throw new Error(`style idea ${x.id} clashes with a 1.0 id`);
-  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_FACE_MOCKS]) {
+  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_CALM, ...RING_FACE_MOCKS, ...PROP_ENTRIES]) if (taken.has(x.id)) throw new Error(`style idea ${x.id} clashes with a 1.0 id`);
+  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT, ...RING_CALM, ...RING_FACE_MOCKS]) {
     const entry = { ...x, rarity: 'common', source: 'earned', draw: x.draw };
     ACCESSORIES.push(entry);
     STYLE_ITEMS.push(entry);
