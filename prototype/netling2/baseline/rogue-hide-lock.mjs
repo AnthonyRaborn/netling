@@ -27,6 +27,7 @@ const BASE = {
   ROGUE_TRAIT: '0', // measured before the Rogue trait (2026-10-11): pinned off so the saved outputs reproduce
   ROGUE_SOURCE: '0', // measured before the Source levers became the defaults (2026-10-11, Rogue drafts 7.11): pinned off
   ROGUE_DEEP: '0', // measured before the Deep's ambushes were lowered (2026-10-11, Rogue drafts 7.12): pinned to the earlier Deep
+  ROGUE_FEED: '0', // measured before Rogue's one feed (2026-10-12, Rogue drafts 10.8): pinned to the two feeds
 };
 
 const jobs = [];

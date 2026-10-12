@@ -290,11 +290,12 @@ export const ROGUE = {
   // Section 6.1, item 46 (decided, 2026-10-11): an armed elder's death is the good end only at the end of its life cycle; a death by neglect or
   // integrity collapse is ordinary (no mixed egg). Stage 3 counted any death but a capture (ROGUE='{"goodEndFullLife":false}').
   goodEndFullLife: true,
-  // Section 10.8 (proposal, 2026-10-12): Rogue has no Standing, so one feed button (SCAVENGE): the scavenged packet, with its infection roll.
-  // With one packet the temper packet preference and the favorite-packet quirk have nothing to choose between, so both are off for Rogue (the
-  // quirk key still crosses lives), and Licensed acts on the one feed. Off by default until decided (ROGUE='{"oneFeed":true}').
-  oneFeed: false,
-  oneFeedVirus: 1, // the one feed's infection roll, as a share of the scavenged packet's (10.8 measures 1 and 0.5)
+  // Section 10.8 (decided, maintainer, 2026-10-12): Rogue has no Standing, so one feed button (SCAVENGE): the scavenged packet, with its
+  // infection roll at half (F2). With one packet the temper packet preference and the favorite-packet quirk have nothing to choose between, so
+  // both are off for Rogue (the quirk key still crosses lives), and Licensed acts on the one feed. Runs measured before it pin the two feeds
+  // with ROGUE_FEED=0 so their saved outputs reproduce.
+  oneFeed: process.env.ROGUE_FEED !== '0',
+  oneFeedVirus: 0.5, // the one feed's infection roll, as a share of the scavenged packet's (decided; F1 was 1)
   ...(process.env.ROGUE && process.env.ROGUE !== '1' ? JSON.parse(process.env.ROGUE) : {}),
 };
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;

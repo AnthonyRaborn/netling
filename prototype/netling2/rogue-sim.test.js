@@ -301,10 +301,12 @@ test('runs: a Rogue adult is never noticed at checkpoints and runs on its role b
   }
 });
 
-test('one feed (10.8, off by default): with it on, a Rogue has only the scavenged packet, no packet preference or favorite, and Licensed acts on it', () => {
-  assert.equal(ROGUE.oneFeed, false);
+test('one feed (10.8, decided): a Rogue has only the scavenged packet, at half its infection roll, with no packet preference or favorite', () => {
+  assert.equal(ROGUE.oneFeed, true);
+  assert.equal(ROGUE.oneFeedVirus, 0.5);
+  ROGUE.oneFeed = false;
   const s0 = fresh();
-  assert.ok(act(s0, 'corp', T0, stub(0.9)).ok, 'off: both feeds as before');
+  assert.ok(act(s0, 'corp', T0, stub(0.9)).ok, 'pinned off (ROGUE_FEED=0): both feeds as before');
   ROGUE.oneFeed = true;
   try {
     const s = fresh();
@@ -322,7 +324,16 @@ test('one feed (10.8, off by default): with it on, a Rogue has only the scavenge
     const before = other.stats.sync;
     act(other, 'scav', T0, stub(0.9));
     assert.equal(other.stats.sync, Math.min(100, before + 8 + CFG.prefStrong), 'the favorite and the preference still work on an NL-0 egg');
+    // The infection roll at half: 0.12 x 0.5 = 0.06, so a roll of 0.07 is clean on a Rogue and infects any other egg's scavenged packet.
+    const r = fresh();
+    r.stats.charge = 40;
+    act(r, 'scav', T0, stub(0.07));
+    assert.equal(r.virus, false);
+    const p = fresh('rogueAdultBreach', { egg: 'program' });
+    p.stats.charge = 40;
+    act(p, 'scav', T0, stub(0.07));
+    assert.equal(p.virus, true);
   } finally {
-    ROGUE.oneFeed = false;
+    ROGUE.oneFeed = true;
   }
 });

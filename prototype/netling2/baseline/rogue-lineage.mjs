@@ -83,7 +83,7 @@ for (const [job, env] of Object.entries(JOBS)) {
 }
 console.log(`${todo.length} runs to do, ${lineages} lines of ${rogueLives} Rogue lives, ${jobsAtOnce} at once`);
 const run = ([job, env, a]) => new Promise((resolve) => {
-  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ROGUE_SOURCE: '0', ROGUE_DEEP: '0', ...env, JSON: '1' } });
+  const p = spawn(process.execPath, [driver, a, String(lineages), String(rogueLives)], { env: { ...process.env, ARCH: '', ROGUE_SOURCE: '0', ROGUE_DEEP: '0', ROGUE_FEED: '0', ...env, JSON: '1' } });
   let buf = '';
   let err = '';
   p.stdout.on('data', (d) => (buf += d));
