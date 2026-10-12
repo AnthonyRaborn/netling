@@ -72,7 +72,7 @@ test('only Program blinks, and only on the beat: the other skins never ask for t
 
 // --- Iron's steady hold (maintainer: the idle pauses around the settle) ----------------------------------------------------------
 import { readFileSync } from 'node:fs';
-import { idleClock, idleHeld, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
+import { idleClock, idleHeld, unsteadyEvents, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
 import { idleOffset, QUIRKS } from './idle.js';
 
 test('idle.js uses the same walk constants as src/render.js', () => {
@@ -84,16 +84,23 @@ test('idle.js uses the same walk constants as src/render.js', () => {
   assert.match(src, /Math\.sin\(time \/ 600\) \* 2\) - 1/);
 });
 
-test('the hold only applies to a steady Iron: every other egg and level keeps the real clock', () => {
+test('the hold applies to Iron off level 0 and a strongly unsteady Program only: every other egg and level keeps the real clock', () => {
   for (const egg of EGGS) {
     for (const level of [-2, -1, 0, 1, 2]) {
-      const holds = egg === 'iron' && level > 0;
+      const holds = (egg === 'iron' && level !== 0) || (egg === 'program' && level === -2);
+      let held = 0;
       for (let time = 0; time < 30_000; time += 130) {
-        assert.equal(idleClock({ egg, level, time }), holds ? idleClock({ egg, level, time }) : time);
-        if (!holds) assert.equal(idleHeld({ egg, level, time }), false);
+        if (idleClock({ egg, level, time, seed: 4 }) !== time) held++;
+        if (!holds) assert.equal(idleHeld({ egg, level, time, seed: 4 }), false);
       }
+      assert.equal(held > 0, holds, `${egg} ${level}: ${held}`);
     }
   }
+  // Reduced motion has no drift steps or hops, so nothing unsteady is held (the steady beat still is).
+  for (const [egg, level] of [['iron', -1], ['iron', -2], ['program', -2]]) {
+    for (let time = 0; time < 30_000; time += 130) assert.equal(idleClock({ egg, level, time, seed: 4, reduced: true }), time);
+  }
+  assert.notEqual(idleClock({ egg: 'iron', level: 1, time: 10_000, reduced: true }), 10_000);
 });
 
 test('the idle clock is continuous and never runs backwards: the pause resumes where it stopped, with no jump', () => {
@@ -138,6 +145,70 @@ test('the idle runs at its own pace between beats, and is paused for 13% (steady
     const run = idleClock({ egg: 'iron', level, time: span + 5000 }) - idleClock({ egg: 'iron', level, time: 5000 });
     assert.ok(Math.abs(run - span * (1 - share)) <= 1, `level ${level}: ${run} ms of idle in ${span} ms`);
   }
+});
+
+// --- the hold extended to the unsteady end (maintainer, 2026-10-12) ----------------------------------------------------------
+const UNSTEADY = [['iron', -1], ['iron', -2], ['program', -2]];
+const moves = (egg, level, seed, t) => {
+  const r = temperTell({ egg, level, time: t, seed });
+  return egg === 'iron' ? r.dx : r.dy;
+};
+
+test('unsteadyEvents lists exactly the moments the drift changes column or a hop starts', () => {
+  for (const [egg, level] of UNSTEADY) for (const seed of [0, 3, 9]) {
+    const ev = unsteadyEvents({ egg, level, seed, from: 0, to: 60_000 });
+    assert.ok(ev.length > 5, `${egg} ${level}: ${ev.length} events`);
+    const seen = new Set(ev.map((e) => Math.ceil(e)));
+    let prev = moves(egg, level, seed, 0);
+    for (let t = 1; t < 60_000; t++) {
+      const now = moves(egg, level, seed, t);
+      const event = now !== prev && (egg === 'iron' || now !== 0);
+      assert.equal(seen.has(t), event, `${egg} ${level} seed ${seed} at ${t}`);
+      prev = now;
+    }
+    // A window agrees with the whole list.
+    assert.deepEqual(unsteadyEvents({ egg, level, seed, from: 13_000, to: 29_000 }), ev.filter((e) => e >= 13_000 && e < 29_000));
+  }
+});
+
+test('the unsteady hold: the idle is still around every drift step and hop, the clock is continuous, and a late clock agrees', () => {
+  for (const [egg, level] of UNSTEADY) for (const seed of [1, 7]) {
+    let last = idleClock({ egg, level, seed, time: 0 });
+    for (let time = 1; time < 40_000; time++) {
+      const now = idleClock({ egg, level, seed, time });
+      assert.ok(now >= last && now - last <= 1, `${egg} ${level} at ${time}: ${last} -> ${now}`);
+      last = now;
+    }
+    for (const e of unsteadyEvents({ egg, level, seed, from: 1000, to: 40_000 })) {
+      for (const quirk of QUIRKS) {
+        const first = idleOffset(quirk, 14, idleClock({ egg, level, seed, time: e - HOLD_BEFORE_MS }));
+        for (let time = e - HOLD_BEFORE_MS; time < e + HOLD_AFTER_MS; time += 10) {
+          assert.deepEqual(idleOffset(quirk, 14, idleClock({ egg, level, seed, time })), first, `${egg} ${level} ${quirk}: moved at ${time}`);
+          assert.equal(idleHeld({ egg, level, seed, time }), true);
+        }
+      }
+    }
+    // Hours in, the chunked clock still matches a walk over the windows, and the idle still runs between events.
+    const t = 3 * 3_600_000 + 1234;
+    const ev = unsteadyEvents({ egg, level, seed, from: 0, to: t + HOLD_BEFORE_MS });
+    let paused = 0;
+    let reach = 0;
+    for (const e of ev) {
+      const a = Math.max(reach, e - HOLD_BEFORE_MS);
+      const b = Math.min(t, e + HOLD_AFTER_MS);
+      if (b > a) paused += b - a;
+      reach = Math.max(reach, b);
+    }
+    assert.ok(Math.abs(idleClock({ egg, level, seed, time: t }) - (t - paused)) < 1e-6, `${egg} ${level}: late clock`);
+  }
+});
+
+test('the unsteady hold stills the idle 20% (Iron -1), 60% (Iron -2) and about 28% (Program -2) of the time', () => {
+  const span = 3_600_000;
+  const share = (egg, level, seed) => 1 - (idleClock({ egg, level, seed, time: span }) / span);
+  assert.ok(Math.abs(share('iron', -1, 2) - 0.2) < 0.005);
+  assert.ok(Math.abs(share('iron', -2, 2) - 0.6) < 0.005);
+  for (const seed of [1, 2, 3]) assert.ok(Math.abs(share('program', -2, seed) - 0.28) < 0.02, `seed ${seed}: ${share('program', -2, seed)}`);
 });
 
 // --- visits: the layers pause, the sprite plays 1.0's bounce ---------------------------------------------------------------

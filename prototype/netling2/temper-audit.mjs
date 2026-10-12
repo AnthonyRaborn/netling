@@ -2,13 +2,14 @@
 // Measurements, not rules; the rules are tested in temper-pass.test.js and proto.test.js.
 //   1. Which wearables the tell pushes off the 40x28 screen that 1.0's idle alone does not (idle extremes: 8 columns, rows from
 //      the render.js headroom rule), on every form of its own egg.
-//   2. How often 1.0's idle wander hides a positional tell: the Iron settle (one row down for 400 ms on the beat) and the drift.
+//   2. How often 1.0's idle wander hides a positional tell: the Iron settle (one row down for 400 ms on the beat), and the unsteady
+//      end (Iron's drift steps, Program's strong hop), with the idle free and held (idleClock).
 // The idle model below is a copy of src/render.js (wanderPos, sway, hover); keep them in step.
 import './ready.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
-import { temperTell, idleClock, driftWithin, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
+import { temperTell, idleClock, unsteadyEvents, driftWithin, BEAT_MS, HOLD_BEFORE_MS, HOLD_AFTER_MS } from './tell.js';
 import { idleOffset, QUIRKS } from './idle.js';
 import { placeWorn, ACCESSORIES } from '../../src/accessories.js';
 
@@ -69,3 +70,32 @@ for (const h of [11, 14, 15]) {
 }
 // How much of the time the idle is paused.
 for (const level of [1, 2]) console.log(`   idle paused ${(100 * (HOLD_BEFORE_MS + HOLD_AFTER_MS) / BEAT_MS[level]).toFixed(0)}% of the time at level +${level}`);
+
+// The unsteady end (decided 2026-10-12: the hold extends to it). A drift step or hop is clean when the idle does not move at all from
+// 200 ms before it to 600 ms after it; 12 seeds, 2 minutes each.
+console.log('\n   the unsteady end: share of drift steps (Iron) and hops (Program at -2) with no idle movement in the window, free -> held,');
+console.log('   and how much of the time the held idle stands still:');
+for (const [egg, level] of [['iron', -1], ['iron', -2], ['program', -2]]) {
+  const cells = [];
+  for (const quirk of QUIRKS) {
+    const tally = { free: 0, held: 0, n: 0 };
+    for (let seed = 1; seed <= 12; seed++) {
+      for (const h of [11, 14, 15]) {
+        for (const e of unsteadyEvents({ egg, level, seed, from: 1000, to: 121_000 })) {
+          tally.n++;
+          for (const [key, clock] of [['free', (u) => u], ['held', (u) => idleClock({ egg, level, seed, time: u })]]) {
+            const at = (u) => JSON.stringify(idleOffset(quirk, h, clock(u)));
+            const first = at(e - HOLD_BEFORE_MS);
+            let still = true;
+            for (let u = e - HOLD_BEFORE_MS; u < e + HOLD_AFTER_MS && still; u += 25) still = at(u) === first;
+            if (still) tally[key]++;
+          }
+        }
+      }
+    }
+    cells.push(`${quirk} ${(100 * tally.free / tally.n).toFixed(0)}% -> ${(100 * tally.held / tally.n).toFixed(0)}%`);
+  }
+  const still = [1, 2, 3].map((seed) => 1 - idleClock({ egg, level, seed, time: 3_600_000 }) / 3_600_000);
+  const mean = (100 * still.reduce((a, b) => a + b) / still.length).toFixed(0);
+  console.log(`   ${egg.padEnd(7)} ${String(level).padStart(2)}: ${cells.join(', ')}; idle still ${mean}% of the time`);
+}

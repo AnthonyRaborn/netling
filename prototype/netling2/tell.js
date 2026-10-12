@@ -15,8 +15,10 @@
 //
 // Per egg skins (a proposal):
 //   iron      steady: it SETTLES, dropping a row for 400 ms on the beat, and 1.0's idle wander PAUSES around it (see idleClock),
-//             so the drop is the only thing moving.  unsteady: it drifts off its grid a column at a time.
-//   program   steady: it BLINKS (the sleep pose for 200 ms).               unsteady: frames stutter and it hops a row.
+//             so the drop is the only thing moving.  unsteady: it drifts off its grid a column at a time (the idle pauses around
+//             each step too).
+//   program   steady: it BLINKS (the sleep pose for 200 ms).               unsteady: frames stutter and it hops a row (strongly
+//             unsteady; the idle pauses around each hop).
 //   wetware   steady: a clean BEAT (one smooth dip in brightness).         unsteady: the pulse goes irregular.
 //   rogue     steady: it GLANCES, the eyes shifting a cell to the left for 500 ms on the beat (a look over its shoulder).
 //             unsteady: glances come at random times and to either side, more often at -2. (The hidden Rogue egg; not in EGGS, which the
@@ -73,6 +75,13 @@ function frameOf(level, time, seed) {
   return hash(slot * 31 + seed) < STUTTER[level] ? 1 - steady : steady;
 }
 
+// Program's strong hop: one row up for a whole slot, 8% of slots. Shared with the idle hold (unsteadyEvents), so the two cannot disagree.
+const HOP_CHANCE = 0.08;
+const hops = (slot, seed) => hash(slot * 13 + seed) < HOP_CHANCE;
+// Iron's drift cycle: it slides off its grid over DRIFT_MS and snaps back at the next cycle.
+const DRIFT_MS = 4000;
+const driftAmp = (level, cycle) => (level === -2 ? 2 : cycle % 2 ? 1 : 0);
+
 // -> { frame: 0 | 1 (A or B), blink (show the sleep pose), dx, dy (columns and rows off the idle position), shade (1 = full) }
 export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
   const out = { frame: Math.floor(time / FRAME_MS) % 2, blink: false, dx: 0, dy: 0, shade: 1 };
@@ -101,12 +110,12 @@ export function temperTell({ egg, level, time, reduced = false, seed = 0 }) {
   const strong = level === -2;
   if (egg === 'iron') {
     // Drift: it slides off its grid a column at a time and snaps back, like a calibration correcting.
-    const cycle = Math.floor(time / 4000);
-    const amp = strong ? 2 : cycle % 2 ? 1 : 0;
+    const cycle = Math.floor(time / DRIFT_MS);
+    const amp = driftAmp(level, cycle);
     const dir = hash(cycle * 17 + seed) < 0.5 ? -1 : 1;
-    out.dx = dir * Math.min(amp, Math.floor(((time % 4000) / 4000) * (amp + 1)));
+    out.dx = dir * Math.min(amp, Math.floor(((time % DRIFT_MS) / DRIFT_MS) * (amp + 1)));
   } else if (egg === 'program') {
-    if (strong && hash(Math.floor(time / SLOT_MS) * 13 + seed) < 0.08) out.dy = -1;
+    if (strong && hops(Math.floor(time / SLOT_MS), seed)) out.dy = -1;
   } else if (egg === 'rogue') {
     // The frames keep the 1.0 rhythm; the eyes carry the tell. A glance fills one whole frame (500 ms) and starts on a frame boundary, so
     // the picture still changes at most every 500 ms.
@@ -143,11 +152,20 @@ export function tellPose(tell, pose = 'awake') {
 // several times a second), so on its own the settle is the only row change in its window for 0 to 86% of beats (npm run
 // proto:temper). Decided (maintainer): a steady Iron holds still on each beat. The idle wander pauses from HOLD_BEFORE_MS before
 // the beat to HOLD_AFTER_MS after it and picks up where it stopped, with no jump. The renderer evaluates the idle (sway, hover,
-// wander, and its hop frames) at idleClock(...) instead of the real time. Only Iron's steady levels pause; every other egg and
-// level returns the time unchanged.
+// wander, and its hop frames) at idleClock(...) instead of the real time.
+//
+// Decided (maintainer, 2026-10-12): the hold extends to the unsteady end. The same window pauses the idle around each step of
+// Iron's drift (each column it slides, and the snap back) and each of Program's strong hops, which 1.0's idle masked as it masked
+// the settle (2 to 42% of them clean before, 100% now; docs/NETLING_2_SPRITES.md, Temper pass notes). The cost: the idle stands
+// still 20% of the time for an unsteady Iron, 60% strongly unsteady (three steps every 4 s), about 28% for a strongly unsteady
+// Program. Reduced motion has no
+// drift steps or hops (temperTell), so it holds nothing there. Wetware and Rogue never hold, nor does level 0 or Program at -1.
 export const HOLD_BEFORE_MS = 200;
 export const HOLD_AFTER_MS = 600;
 const HOLD_MS = HOLD_BEFORE_MS + HOLD_AFTER_MS;
+
+const holdsSteady = (egg, level) => egg === 'iron' && level > 0;
+const holdsUnsteady = (egg, level, reduced) => !reduced && ((egg === 'iron' && level < 0) || (egg === 'program' && level === -2));
 
 // How long the idle has been paused by time `time` (ms), for a beat every `interval` ms.
 function pausedBy(time, interval) {
@@ -156,16 +174,72 @@ function pausedBy(time, interval) {
   return (started - 1) * HOLD_MS + Math.min(HOLD_MS, time - (started * interval - HOLD_BEFORE_MS));
 }
 
-// -> true while the idle is held (the settle falls inside this window).
-export function idleHeld({ egg, level, time }) {
-  if (egg !== 'iron' || !(level > 0)) return false;
-  const interval = BEAT_MS[level];
-  const into = (time + HOLD_BEFORE_MS) % interval;
-  return time + HOLD_BEFORE_MS >= interval && into < HOLD_MS;
+// -> the times in [from, to), ascending, at which the unsteady tell moves the netling: Iron's drift changes column (each step out
+// and the snap back), Program's strong hop starts. Exact, from the same rules as temperTell.
+export function unsteadyEvents({ egg, level, seed = 0, from, to }) {
+  const out = [];
+  if (egg === 'iron') {
+    for (let c = Math.max(0, Math.floor(from / DRIFT_MS)); c * DRIFT_MS < to; c++) {
+      const amp = driftAmp(level, c);
+      const times = [];
+      if (c > 0 && driftAmp(level, c - 1) > 0) times.push(c * DRIFT_MS); // the snap back onto the grid
+      for (let k = 1; k <= amp; k++) times.push(c * DRIFT_MS + (DRIFT_MS * k) / (amp + 1));
+      for (const t of times) if (t >= from && t < to) out.push(t);
+    }
+  } else if (egg === 'program' && level === -2) {
+    for (let s = Math.max(0, Math.ceil(from / SLOT_MS)); s * SLOT_MS < to; s++) if (hops(s, seed) && !hops(s - 1, seed)) out.push(s * SLOT_MS);
+  }
+  return out;
+}
+
+// The paused time inside [a, b): the union of the windows around the unsteady events, clipped.
+function unsteadyPausedIn(egg, level, seed, a, b) {
+  let paused = 0;
+  let reach = a; // the end of what is already counted
+  for (const e of unsteadyEvents({ egg, level, seed, from: a - HOLD_AFTER_MS, to: b + HOLD_BEFORE_MS })) {
+    const start = Math.max(reach, e - HOLD_BEFORE_MS);
+    const end = Math.min(b, e + HOLD_AFTER_MS);
+    if (end > start) paused += end - start;
+    reach = Math.max(reach, end);
+  }
+  return paused;
+}
+
+// Paused time is summed per chunk and kept per netling (egg, level, seed), so a clock hours in costs a lookup, not a walk from 0.
+// The cache only memoizes: the result is the same with or without it.
+const CHUNK_MS = 4000;
+const cumulative = new Map();
+function unsteadyPausedBy(egg, level, seed, time) {
+  if (time <= 0) return 0;
+  const key = `${egg}|${level}|${seed}`;
+  let cum = cumulative.get(key);
+  if (!cum) {
+    if (cumulative.size >= 64) cumulative.clear();
+    cumulative.set(key, (cum = [0]));
+  }
+  const k = Math.floor(time / CHUNK_MS);
+  while (cum.length <= k) {
+    const j = cum.length - 1;
+    cum.push(cum[j] + unsteadyPausedIn(egg, level, seed, j * CHUNK_MS, (j + 1) * CHUNK_MS));
+  }
+  return cum[k] + unsteadyPausedIn(egg, level, seed, k * CHUNK_MS, time);
+}
+
+// -> true while the idle is held (the settle, a drift step or a hop falls inside this window).
+export function idleHeld({ egg, level, time, seed = 0, reduced = false }) {
+  if (holdsSteady(egg, level)) {
+    const interval = BEAT_MS[level];
+    const into = (time + HOLD_BEFORE_MS) % interval;
+    return time + HOLD_BEFORE_MS >= interval && into < HOLD_MS;
+  }
+  if (!holdsUnsteady(egg, level, reduced) || time < 0) return false;
+  const near = unsteadyEvents({ egg, level, seed, from: time - HOLD_AFTER_MS, to: time + HOLD_BEFORE_MS + 1 });
+  return near.some((e) => time >= e - HOLD_BEFORE_MS && time < e + HOLD_AFTER_MS);
 }
 
 // -> the time to give the 1.0 idle in place of the real time. Continuous and never runs backwards.
-export function idleClock({ egg, level, time }) {
-  if (egg !== 'iron' || !(level > 0)) return time;
-  return time - pausedBy(time, BEAT_MS[level]);
+export function idleClock({ egg, level, time, seed = 0, reduced = false }) {
+  if (holdsSteady(egg, level)) return time - pausedBy(time, BEAT_MS[level]);
+  if (holdsUnsteady(egg, level, reduced)) return time - unsteadyPausedBy(egg, level, seed, time);
+  return time;
 }

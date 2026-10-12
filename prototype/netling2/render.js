@@ -22,10 +22,10 @@
 //
 // Clocks: `time` is the renderer's clock (as 1.0's frame rhythm), not the game clock; `opts.reduced` is the reduced-motion setting.
 //
-// The idle mask (an open decision, docs/NETLING_2_SPRITES.md Next phase item 1): Iron's unsteady drift and Program's hop are still
-// masked by 1.0's idle. opts.idleHold picks how the idle's clock runs: 'steady' (decided so far: a steady Iron holds the idle still
-// around each beat, tell.js idleClock) or 'none' (the plain 1.0 idle, no hold, for comparison). Other answers to the decision (a longer
-// hold, an idle jitter for unsteady netlings) go in IDLE_HOLDS as further entries.
+// The idle hold (decided, docs/NETLING_2_SPRITES.md Next phase item 1): 1.0's idle masks a positional tell, so the idle's clock pauses
+// around it (tell.js idleClock): a steady Iron's settle, and since 2026-10-12 an unsteady Iron's drift steps and a strongly unsteady
+// Program's hops. opts.idleHold picks the clock: 'held' (the decided rule), 'steady' (the earlier rule, a steady Iron only) or 'none'
+// (the plain 1.0 idle), the last two for comparison on the review page.
 //
 // The self-destruct (Rogue drafts 11.1, decided): when a netling with a capture pose dies with cause `captured`, and opts.burnStart is
 // set (the UI sets it when it sees a fresh capture, as the evolution strobe is set), the screen plays burnFrame for BURN_MS in the
@@ -62,7 +62,8 @@ const Z_DIM = '#2f6b73';
 const PROP_FLOOR = 21; // src/accessories.js: props stand on this row at the right edge
 
 export const IDLE_HOLDS = {
-  steady: idleClock,
+  held: idleClock,
+  steady: ({ egg, level, time }) => (level > 0 ? idleClock({ egg, level, time }) : time),
   none: ({ time }) => time,
 };
 
@@ -88,10 +89,10 @@ const frameOf = (time) => Math.floor(time / 500) % 2;
 //   visitorWidth = 16,
 //   death = null,         { cause, diedAt } when pose is 'dead'
 // }
-// opts: { reduced = false, idleHold = 'steady', burnStart = null, tint = null ({ lcd, dark }) }
+// opts: { reduced = false, idleHold = 'held', burnStart = null, tint = null ({ lcd, dark }) }
 export function composeLCD(pet, time, opts = {}) {
   const { form, egg, palette = 0, pose = 'awake', lightsOn = true, seed = 0, worn = [], prop = null, propExtra = null, death = null } = pet;
-  const { reduced = false, idleHold = 'steady', burnStart = null, tint = null } = opts;
+  const { reduced = false, idleHold = 'held', burnStart = null, tint = null } = opts;
   const pal = PALETTES[palette] ?? PALETTES[0];
   const colors = paletteColors(pal);
   const dead = pose === 'dead';
@@ -144,8 +145,8 @@ export function composeLCD(pet, time, opts = {}) {
   // 4. The motion layer: awake, not visiting.
   if (form.motion && awake && !visiting) rows = form.motion(rows, anchors, { time, reduced });
 
-  // Where it stands: 1.0's idle on the tell's clock (a steady Iron holds it around each beat), the tell's offsets kept inside the idle's
-  // reach (driftWithin), or 1.0's visit bounce, or the resting spot.
+  // Where it stands: 1.0's idle on the tell's clock (held around each settle, drift step and hop), the tell's offsets kept inside the
+  // idle's reach (driftWithin), or 1.0's visit bounce, or the resting spot.
   let x;
   let y;
   if (rest) {
@@ -156,7 +157,7 @@ export function composeLCD(pet, time, opts = {}) {
     x = b.x;
     y = b.y;
   } else {
-    const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.steady)({ egg, level: v.level, time });
+    const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.held)({ egg, level: v.level, time, seed, reduced });
     const wander = v.idle !== 'none' ? idleOffset(v.idle, h, clock) : { x: 0, y: 0 };
     x = Math.floor((LCD_W - w) / 2) + wander.x + driftWithin(tell.dx, wander.x);
     y = FLOOR - h + wander.y + tell.dy;

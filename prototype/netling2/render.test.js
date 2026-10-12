@@ -10,7 +10,7 @@ import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 import { DEAD_COLORS, DIM_COLORS, paletteColors } from '../../src/sprites.js';
 import { PALETTES } from '../../src/sim.js';
-import { IDLE_MAX_X, BEAT_MS } from './tell.js';
+import { IDLE_MAX_X, BEAT_MS, unsteadyEvents } from './tell.js';
 import { pickBurn } from './rogue-burn.js';
 
 const SETS = { iron: forms('B'), program: programForms(), wetware: wetwareForms(), rogue: rogueForms() };
@@ -159,21 +159,31 @@ test('the room: lights off darkens it, a netling asleep in the dark is dimmed, t
   assert.equal(composeLCD({ form, egg: 'program', pose: 'dead' }, 0).ops.at(-1).w, LCD_W, 'the flatline');
 });
 
-test('the idle hold switch: steady holds a steady Iron around its beat, none is the plain 1.0 idle', () => {
-  assert.deepEqual(Object.keys(IDLE_HOLDS), ['steady', 'none']);
+test('the idle hold switch: held (decided) holds around the settle, drift steps and hops; steady is the earlier rule; none is 1.0', () => {
+  assert.deepEqual(Object.keys(IDLE_HOLDS), ['held', 'steady', 'none']);
   const form = SETS.iron.ironAdultBreachStreet;
   let moved = 0;
   for (let t = 6000 - 200; t < 6000 + 600; t += 50) {
     const pet = { form, egg: 'iron', level: 1, idle: 'sway' };
-    const held = composeLCD(pet, t, { idleHold: 'steady' }).box.x;
-    assert.equal(held, composeLCD(pet, 6000 - 200, { idleHold: 'steady' }).box.x, `steady: moved at ${t}`);
+    for (const hold of ['held', 'steady']) {
+      assert.equal(composeLCD(pet, t, { idleHold: hold }).box.x, composeLCD(pet, 6000 - 200, { idleHold: hold }).box.x, `${hold}: moved at ${t}`);
+    }
     if (composeLCD(pet, t, { idleHold: 'none' }).box.x !== composeLCD(pet, 6000 - 200, { idleHold: 'none' }).box.x) moved++;
   }
   assert.ok(moved > 0, 'none held the idle too');
-  // The other eggs never hold.
-  for (const t of [5900, 6100, 6400]) {
-    const pet = { form: SETS.program[Object.keys(SETS.program)[0]], egg: 'program', level: 1, idle: 'sway' };
-    assert.deepEqual(composeLCD(pet, t, { idleHold: 'steady' }).box, composeLCD(pet, t, { idleHold: 'none' }).box);
+  assert.equal(composeLCD({ form, egg: 'iron', level: 1 }, 6100).box.x, composeLCD({ form, egg: 'iron', level: 1 }, 6100, { idleHold: 'held' }).box.x, 'held is the default');
+  // A strongly unsteady Program: held stills the idle around each hop, so only the hop moves it; steady and none do not.
+  const prog = SETS.program.programAdultBreachCorp;
+  const pet = { form: prog, egg: 'program', level: -2, idle: 'sway', seed: 3 };
+  const hop = unsteadyEvents({ egg: 'program', level: -2, seed: 3, from: 2000, to: 60_000 })[0];
+  const at = (t, idleHold) => composeLCD(pet, t, { idleHold }).box;
+  for (let t = hop - 200; t < hop + 600; t += 50) assert.equal(at(t, 'held').x, at(hop - 200, 'held').x, `held: moved at ${t}`);
+  assert.equal(at(hop, 'held').y, at(hop - 200, 'held').y - 1, 'the hop is a row up on a still idle');
+  assert.deepEqual(at(hop + 50, 'steady'), at(hop + 50, 'none'), 'steady does not hold a Program');
+  // Wetware and Rogue never hold.
+  for (const egg of ['wetware', 'rogue']) for (const level of [-2, 2]) for (const t of [5900, 6100, 6400]) {
+    const p = { form: Object.values(SETS[egg])[3], egg, level, idle: 'sway', seed: 1 };
+    assert.deepEqual(composeLCD(p, t).box, composeLCD(p, t, { idleHold: 'none' }).box);
   }
   assert.equal(BEAT_MS[1], 6000);
 });
