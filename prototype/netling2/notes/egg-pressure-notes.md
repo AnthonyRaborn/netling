@@ -336,3 +336,8 @@ Consistent run with the final design (eased wear, Overdrive and Overlink rules, 
 - Before the rule (Result 24 baseline, hint sweep): Overdrive first reached as a baby in 59% of attentive lives (sysadmin 63%, daredevil 68%), Overlink in 29% (46%, 49%); the teen-stage captions never showed for them.
 - After: no state reached as a baby; captions Charge 100% and Sync 99% to 100% for attentive, sysadmin and daredevil, about 2 hours before the state; human-regular 16% and 3%; casual and worker 0%.
 - Ordinary five unchanged (infections within 0.5, full-life within 0.03). Iron heavy players: drops over the no-pressure run daredevil +8.9 -> +7.3, overclocker +7.6 -> +6.3 (babies no longer overclock); infections unchanged (8.2 and 10.7). Other eggs within noise.
+
+## Result 25: the final design under the now rules (2026-10-12)
+
+`baseline/gap-reruns.mjs pressure`, 1000 lives, default, greedy and sip Sync bots; outputs `baseline/results/gaps/pressure-*.txt`. Readings are in `docs/NETLING_2_EGG_PRESSURES.md`, Numbers ("Re-run under the now rules"). In short: the sip bot equals the default bot; greedy Wetware's infection cost rose from about +1.7 to +4.8 to +6.1 and greedy play on Wetware now costs the never-entering archetypes 3 to 13 points of full life (the overplay strain is the likely cause, not isolated); Iron's excess infections are +1.1 (daredevil) and +1.8 (overclocker). Results 6 to 24 are not re-run one by one: they are the design's history, and their rules have since changed.
+
