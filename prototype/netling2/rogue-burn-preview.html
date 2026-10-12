@@ -1,0 +1,110 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Rogue self-destruct and marks</title>
+<style>body{margin:0;background:#000;color:#c7f9ff;font:14px monospace}canvas{display:block}</style>
+<canvas id="live"></canvas>
+<canvas id="c"></canvas>
+<script type="module">
+// Review page for the last of Rogue's art (docs/NETLING_2_ROGUE_DRAFTS.md, 11.1): the self-destruct at the third mark (three burns and three
+// capture poses, rogue-burn.js) and the asleep and dead marks (drafted and alternates, rogue-marks.js), drawn in the colours the game uses:
+// the palette while it lives and burns, 1.0's DEAD_COLORS once dead, DIM_COLORS asleep with the lights off.
+// Open with `npm run serve`: http://localhost:5174/prototype/netling2/rogue-burn-preview.html (#scale=5&palette=0&live=0 to freeze the strip).
+import './ready.js';
+import { drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../../src/sprites.js';
+import { PALETTES } from '../../src/sim.js';
+import { forms as ironForms } from './models.js';
+import { programForms } from './program-models.js';
+import { wetwareForms } from './wetware-models.js';
+import { rogueForms, rogueTag } from './rogue-models.js';
+import { burnFrame, leftOf, BURN_OPTIONS, LEFT_OPTIONS, BURN_STEPS, BURN_STEP_MS } from './rogue-burn.js';
+import { DEAD_MARKS, SLEEP_MARKS, rogueDead, rogueSleep } from './rogue-marks.js';
+
+const hash = new URLSearchParams(location.hash.slice(1));
+const SC = Number(hash.get('scale') ?? 5);
+const pal = paletteColors(PALETTES[Number(hash.get('palette') ?? 0)]);
+const set = Object.values(rogueForms());
+const W = 24, H = 17, GAP = 2, LABEL = 22, ROW = H * SC + 6;
+const frozen = hash.get('live') === '0';
+
+function cell(ctx, x0, y0, sprite, label, colors = pal) {
+  ctx.save(); ctx.translate(x0 * SC, y0); ctx.scale(SC, SC);
+  ctx.fillStyle = '#0b2226'; ctx.fillRect(0, 0, W, H);
+  drawSprite(ctx, sprite, Math.floor((W - sprite[0].length) / 2), H - 1 - sprite.length, colors);
+  ctx.fillStyle = '#c7f9ff88'; ctx.font = '2px monospace'; ctx.textBaseline = 'top'; ctx.fillText(label, 1, 0);
+  ctx.restore();
+}
+function heading(ctx, text, y) {
+  ctx.fillStyle = '#c7f9ff'; ctx.font = `${Math.max(11, SC * 2.4)}px monospace`; ctx.textBaseline = 'top'; ctx.fillText(text, 4, y + 2);
+  return y + LABEL;
+}
+const col = (i) => GAP + i * (W + GAP);
+
+// --- live strip: each form, each burn: awake 1.6 s, the burn 4 s, the capture pose (ash) 2.4 s, looping ---------------------------------
+const AWAKE_MS = 1600, DEAD_MS = 2400, LOOP = AWAKE_MS + BURN_STEPS * BURN_STEP_MS + DEAD_MS;
+const live = document.getElementById('live');
+const burns = Object.keys(BURN_OPTIONS);
+const perRow = 2; // forms side by side
+live.width = (col(perRow * burns.length) + 4) * SC;
+live.height = LABEL + Math.ceil(set.length / perRow) * ROW + 10;
+const lctx = live.getContext('2d');
+lctx.imageSmoothingEnabled = false;
+function drawLive(now) {
+  const t = frozen ? AWAKE_MS + 4.5 * BURN_STEP_MS : now % LOOP;
+  lctx.fillStyle = '#000'; lctx.fillRect(0, 0, live.width, live.height);
+  heading(lctx, `LIVE: the self-destruct at the third mark, A / B / C side by side (awake, burn ${BURN_STEPS * BURN_STEP_MS / 1000} s, then the ash heap in the dead colours)`, 0);
+  set.forEach((f, i) => burns.forEach((burn, j) => {
+    const x = col((i % perRow) * burns.length + j), y = LABEL + Math.floor(i / perRow) * ROW;
+    if (t < AWAKE_MS) return cell(lctx, x, y, f.motion(f.a, f.anchors.a, { time: t }), `${f.name} ${burn}`);
+    const frame = burnFrame(f.a, rogueTag(f.id), { time: t - AWAKE_MS, burn, left: 'ash' });
+    if (frame) cell(lctx, x, y, frame, `${f.name} ${burn}`);
+    else cell(lctx, x, y, leftOf(f.a, 'ash'), `${f.name} ${burn}`, DEAD_COLORS);
+  }));
+  if (!frozen) requestAnimationFrame(drawLive);
+}
+requestAnimationFrame(drawLive);
+
+// --- static sheet ------------------------------------------------------------------------------------------------------------------
+const c = document.getElementById('c');
+const SAMPLE = ['rogueBaby', 'rogueAdultBreach', 'rogueElderDodge', 'rogueElderTune'].map((id) => rogueForms()[id]);
+const others = [
+  ['Iron', Object.values(ironForms('B')).find((f) => f.stage === 'adult')],
+  ['Program', Object.values(programForms()).find((f) => f.stage === 'adult')],
+  ['Wetware', Object.values(wetwareForms()).find((f) => f.stage === 'adult')],
+];
+const rowsNeeded = set.length + 2 * SAMPLE.length + set.length + set.length + 1;
+c.width = (col(BURN_STEPS + 3) + 4) * SC;
+c.height = 5 * (LABEL + 8) + rowsNeeded * ROW + 10;
+const ctx = c.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+let y = heading(ctx, 'A. FROM THE TAG (recommended): steps of 400 ms, then the capture pose in the dead colours (ash heap, scorch, nothing).', 0);
+const strip = (f, burn) => {
+  for (let s = 0; s < BURN_STEPS; s++) cell(ctx, col(s), y, burnFrame(f.a, rogueTag(f.id), { time: s * BURN_STEP_MS, burn, left: 'ash' }), `${s ? '' : f.name + ' '}${s}`);
+  Object.keys(LEFT_OPTIONS).forEach((left, j) => cell(ctx, col(BURN_STEPS + j), y, leftOf(f.a, left), left, DEAD_COLORS));
+  y += ROW;
+};
+for (const f of set) strip(f, 'tag');
+y = heading(ctx, 'B. FROM THE FEET UP, and C. EMBERS, on four forms.', y + 8);
+for (const burn of ['feet', 'embers']) for (const f of SAMPLE) strip(f, burn);
+
+y = heading(ctx, 'DEAD: the drafted lit tag in the palette, then in the DEAD_COLORS the game draws a dead netling in (the tag is gone), and the alternates.', y + 8);
+const deadCols = [
+  ['lit, palette', (f) => rogueDead(f, 'lit'), pal],
+  ...Object.entries(DEAD_MARKS).map(([k, name]) => [`${name}, dead colours`, (f) => rogueDead(f, k), DEAD_COLORS]),
+  ['awake, dead colours', (f) => f.a, DEAD_COLORS],
+];
+for (const f of set) {
+  deadCols.forEach(([name, get, colors], j) => cell(ctx, col(j), y, get(f), `${j ? '' : f.name + ' '}${name}`, colors));
+  const other = others[set.indexOf(f)]; // the other eggs' dead marks beside the first three rows, for comparison
+  if (other) cell(ctx, col(deadCols.length + 1), y, other[1].dead, `${other[0]} dead`, DEAD_COLORS);
+  y += ROW;
+}
+y = heading(ctx, 'ASLEEP: drafted (none) and the alternates, lights on (palette) and lights off (DIM_COLORS).', y + 8);
+for (const f of set) {
+  Object.entries(SLEEP_MARKS).forEach(([k, name], j) => {
+    cell(ctx, col(2 * j), y, rogueSleep(f, k), `${j ? '' : f.name + ' '}${name}`);
+    cell(ctx, col(2 * j + 1), y, rogueSleep(f, k), 'lights off', DIM_COLORS);
+  });
+  y += ROW;
+}
+</script>

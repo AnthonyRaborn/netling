@@ -1447,5 +1447,61 @@ Two descriptions, one per rule set, since the trait does different things on the
 - ~~The Rogue abilities' flavor text, the sweep's and hunter's wording, Rogue's meter words and death register.~~ Drafted for choice (section 10, 2026-10-12).
 - ~~Still to write: the good end's offer, the Dex hints, the Rogue trait's name and description, the feeds, the chatter voicings.~~ Drafted for choice or decided (10.8 to 10.12, 2026-10-12): one feed SCAVENGE with F1 or F2, Rogue's chatter shape and lines, the NL-0 Lineage line's voicings, Rogue's temper hints (recommended dropped), the offer (STAY, NOT YET), the trait (Unsigned), no Dex hints.
 - **All of section 10 is decided** (maintainer, 2026-10-12): F2 and the three one-feed answers, the chatter as drafted, no Rogue temper hints, the offer, Unsigned. What is left for Rogue's text is only what a build will turn up (wording read in context and on a device).
-- The renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance), and Rogue's dead and asleep marks.
+- The renderer work the layers need (Sleeper's `hideWorn`, the motion layers including Exile's turn-taking and Handler's arcs beside the head, the glance), and Rogue's dead and asleep marks. **Drafted for choice (2026-10-12, 11.1):** the self-destruct (three burns, three capture poses), the marks again (the drafted dead mark does not show in the dead colours) and a renderer proposal; no code in a renderer yet.
 - Simulated since (section 7): home life, the hunt in runs and the lineage side. Numbers not marked decided are starting values, and the targets in 4.4 are a high-side aim.
+
+### 11.1 The last art: the self-destruct, the marks, and a renderer proposal (drafts for choice, 2026-10-12)
+
+Asked for by the maintainer in this order: the self-destruct look first, then the marks, then a proposal for the renderer before any code. The self-destruct is an animation and then a dead pose of its own; the theme (maintainer): **Rogue burns itself into nothingness instead of being captured.** Review page `prototype/netling2/rogue-burn-preview.html` (a live strip of all three burns on every form, then the static sheet); screenshot `docs/netling2-prototypes/shots/rogue-self-destruct-and-marks.png`, animation `rogue-self-destruct.gif`. Code: `rogue-burn.js`, `rogue-marks.js`, tested by `rogue-burn.test.js` (7 tests). None of it is registered on the forms until chosen.
+
+**The burn** (`burnFrame`). A one-shot sequence from the third mark, in 400 ms steps (the motion layers' step, twice `FLASH_TOGGLE_MS`), 10 steps, **4 s** on every form (the front crosses the figure in 8 steps, scaled to its size; the last front turns to ash and clears). Each cell goes the same way once: body, then the **front** (the highlight colour, `+`), then **ash** (dim), then what is left. Wearables burn with it: the renderer stops drawing them at the first step. While it burns, what is left shows as ash; the dead colours take over when it ends.
+
+| Burn | What it does | Why |
+|---|---|---|
+| **A. From the tag** (recommended) | lights where the asset tag was scraped off and burns outward through the body (4-neighbour distance from the tag), the hood last | the tag is the last trace of whose it was, so the burn starts with the identity; the burn bag's last item is itself (10.6) |
+| B. From the feet up | a burning line rises from the hem to the hood, ash beneath, like a page held to a flame | the plainest read of "burning"; the front is a whole row, so it is the brightest of the three (up to 26% of a small form lit at once) |
+| C. Embers | cells catch in a scattered order (fixed per form), so it crumbles from everywhere at once | the most "disintegrating"; reads busier, and the eyes go early |
+
+**What is left** (`leftOf`, the capture dead pose, drawn in 1.0's `DEAD_COLORS` like every dead pose):
+
+| Pose | What it is | Note |
+|---|---|---|
+| **Ash** (recommended) | a low heap on the floor, three rows at most, as wide as its footprint | "it left them nothing" but a heap; reads at a glance as "burned", and the death screen is not empty |
+| Scorch | its outline only, dim | the form still reads, so the death screen shows who it was; the closest to an ordinary dead pose |
+| Nothing | no cell at all | the most literal; the death screen shows an empty spot (1.0 draws its flatline trace under the pet, so the screen still has something) |
+
+**The flash rule, checked** (tests): the picture changes only on 400 ms step edges; no cell changes more than three times or lights twice, and none goes back to the body once it has caught; the front stays under 30% of the figure at every step (it is an edge, never a filled area; worst: B 26%, A 23%, C 22%). Under reduced motion there is no burn: the capture pose shows at once, as 1.0 shows its dead pose. Not seen on a device.
+
+**The marks, again: the drafted dead mark is invisible in the game.** A dead netling is drawn in 1.0's `DEAD_COLORS` (`src/sprites.js`), where `+` and `#` are the same grey. The drafted dead mark lights the tag in `+`, so on the dead screen the tag disappears, and the dim tag of the awake frames goes with it (the sheet's "lit, dead colours" column). It only shows in the palette colours, which the game never uses for a dead netling. The other eggs' dead marks use `o` (Iron's barcode, Program's flatline: the darkest cell in the dead colours) or `x` (Wetware's dim trace), and both read. Alternates (`rogueDead`):
+
+| Dead mark | Look in the dead colours |
+|---|---|
+| lit (as drafted) | nothing: the tag is the body's grey |
+| **dark** (recommended) | the tag a dark plate, read as Iron's barcode is; the plate that was removed shows as a dark patch |
+| hole | the tag a hole through the body: where the plate was torn off, nothing is left; reads as clearly, but a hole in a dead body may read as a wound |
+
+This is the ordinary dead mark (old age and the other deaths); capture uses the burn's pose instead.
+
+Asleep (`rogueSleep`), shown with the lights on (palette) and off (`DIM_COLORS`):
+
+| Asleep mark | What it is |
+|---|---|
+| **none** (as drafted; recommended to keep) | only 1.0's slit eyes; the third eye is shut already. Reads as asleep in both lights |
+| one eye open | the left eye stays as awake, the right a slit: it sleeps with one eye open, tied to the glance. Reads at a glance; may read as a wink, or as awake |
+| shadow on lookout | the decoy parked one cell out while it sleeps, a still layer keeping watch. Faint on the Tune line, whose camo is already dim |
+
+**The renderer: a proposal, no code.** Rogue's layers need nothing that the other eggs' do not; they wait on the shared step (sprites handoff, Next phase item 2: no 2.0 layer is in a real renderer yet). Recommended: one pass for all eggs, in a 2.0 renderer (not 1.0's `src/render.js`, which is under the freeze), drawing in the order the prototype's review page (`index.html`) already uses:
+
+1. **The frame:** A or B on 1.0's 500 ms rhythm, or asleep, or dead (the capture pose when the cause is `captured`).
+2. **The tell:** on Rogue, `rogueGlance` on the awake frames when the tell's `glance` is set (one 500 ms frame, aligned to the frame rhythm).
+3. **Neglect and bugs**, as on every egg.
+4. **The motion layer** (`form.motion`), awake only: not asleep, not dead, and paused during a visit (`visitLayers`). It returns padded rows (3 cells a side, 4 on the Feast line), drawn at the figure's x minus the pad, so the figure does not move; the figure's position and wander still use the unpadded width. A shadow may clip at the screen edge (it is dim and decorative; check on a device).
+5. **Wearables**, placed on the registered, unglanced, unpadded frame, and skipped while `form.hideWorn({ time, reduced })` is true (Sleeper's three vanished steps).
+6. **State marks**, as on every egg.
+
+Clocks: the layers and the burn take the renderer's `time` (as 1.0's frame rhythm), not the game clock, and the existing reduced-motion setting as `reduced`.
+
+**The self-destruct in the UI**, on the evolution strobe's pattern (`app.flashUntil` in `ui/life.js`): when the UI sees the netling die with cause `captured` and the death is fresh (`now() - diedAt` under 2 minutes, as the surge sound's rule), it sets a burn start; for 4 s the screen draws `burnFrame` in the palette colours with no wearables, then the capture pose in the dead colours. The flatline sound plays at the start; the death screen opens when the burn ends, so it is seen. No save field: a death caught up on load (a sweep that captured it while the page was closed) shows the pose only. When it is built: a home-screen test like `tests/draw.test.js`'s that the burning screen toggles nothing faster than `FLASH_TOGGLE_MS`, and one that `hideWorn` is honoured.
+
+**For the maintainer:** the burn (A recommended), what is left (ash recommended), the dead mark (dark recommended), the asleep mark (none recommended), and whether the renderer pass covers every egg at once (recommended) or Rogue first.
+
