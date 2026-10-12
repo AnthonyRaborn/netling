@@ -1,0 +1,721 @@
+{
+  "runs": 1000,
+  "trait": null,
+  "lives": null,
+  "codex": null,
+  "cfg": null,
+  "archetypes": {
+    "casual": {
+      "runs": 1000,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.348,
+      "adult": 0.98,
+      "fullLife": 0.951,
+      "medianDays": 5,
+      "mistakes": 6.64,
+      "deaths": {
+        "end of life cycle": 0.951,
+        "integrity collapse": 0.049
+      },
+      "teens": {
+        "teenStreet": 0.535,
+        "teenCorp": 0.465
+      },
+      "adults": {
+        "breachCorp": 0.154,
+        "tuneStreet": 0.13,
+        "breachStreet": 0.125,
+        "dodgeStreet": 0.121,
+        "dodgeCorp": 0.12,
+        "tuneCorp": 0.118,
+        "feastCorp": 0.11,
+        "feastStreet": 0.102
+      },
+      "mistakeKinds": {
+        "charge": 1.7,
+        "sync": 2.56,
+        "heat": 0.03
+      },
+      "stageDays": {
+        "baby": 0.29,
+        "teen": 1.61,
+        "adult": 2.98,
+        "mainframe": 0
+      },
+      "standing": {
+        "corp": 43.98,
+        "street": 44.64
+      },
+      "temper": -0.68,
+      "levelAtEnd": {
+        "0": 0.719,
+        "1": 0.051,
+        "2": 0.001,
+        "-2": 0.006,
+        "-1": 0.223
+      },
+      "levelTime": {
+        "0": 0.78,
+        "1": 0.043,
+        "2": 0.001,
+        "-2": 0.004,
+        "-1": 0.171
+      },
+      "hold12h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0.005
+      },
+      "holdDay": {
+        "strongSteady": null,
+        "strongUnsteady": 2.5
+      },
+      "hold24h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0
+      },
+      "neglect2Hours": 17.62,
+      "bugs": {
+        "end": 0,
+        "peak": 0,
+        "fixed": 0,
+        "atCeiling": 1,
+        "avg": 0,
+        "ceilingTime": 1,
+        "scripSpent": 0,
+        "standingSpent": 0,
+        "clinicVisits": 3.49
+      },
+      "rest": {
+        "calls": 9.95,
+        "onTime": 3.5,
+        "late": 3.17,
+        "lapsed": 2.76,
+        "tiredShare": 0.133
+      },
+      "pressure": {
+        "viruses": 6.8,
+        "events": 8.67,
+        "answered": 2.83,
+        "rattles": 0,
+        "rattledEvents": 0,
+        "rattlePaid": 0,
+        "wearMax": 0,
+        "switches": 0,
+        "feeds": 87.7,
+        "shockMax": 0,
+        "shockHighShare": 0,
+        "wearHighShare": 0
+      },
+      "pref": {
+        "actions": 29.2,
+        "matches": 16.7,
+        "bonus": 33.9
+      },
+      "atAdult": {
+        "corp": 16.3,
+        "street": 16.29,
+        "gap": 5.01,
+        "leanCertain": 0.46,
+        "roleCertain": 0.001,
+        "temper": 0.3,
+        "level": {
+          "0": 0.774,
+          "1": 0.074,
+          "2": 0.002,
+          "-2": 0.003,
+          "-1": 0.146
+        },
+        "bugs": 0,
+        "wins": 14.79,
+        "mistakes": 2.57
+      },
+      "atTeen": {
+        "corp": 3.21,
+        "street": 3.47,
+        "gap": 2.11,
+        "leanCertain": 0.085,
+        "tied": 0.514,
+        "temper": -0.26,
+        "level": {
+          "0": 0.906,
+          "1": 0.004,
+          "2": 0,
+          "-2": 0,
+          "-1": 0.09
+        },
+        "mistakes": 0.73,
+        "wins": 3.94,
+        "minWins": 0.31
+      },
+      "wins": 35.17,
+      "events": 8.67,
+      "traces": 4.92,
+      "tracesIgnored": 1.44,
+      "attention": {
+        "requestsMet": 1.8,
+        "greeted": 0.27,
+        "flowHours": 0.06,
+        "hotHours": 1.76,
+        "chatterSeen": 0.27
+      },
+      "itemsHeld": 11.51,
+      "fullAtCheckIn": 0.358,
+      "netruns": {
+        "runs": 18.14,
+        "disconnects": 2.36,
+        "fragments": 11.16,
+        "codexCapped": 0.704,
+        "cleared": {
+          "public": 1,
+          "bazaar": 0.997,
+          "corp": 0.99,
+          "ruins": 0.976,
+          "deep": 0.148,
+          "source": 0
+        },
+        "byRegion": {
+          "public": 4.64,
+          "bazaar": 4.68,
+          "corp": 4.57,
+          "ruins": 3.62,
+          "deep": 0.63,
+          "source": 0
+        }
+      },
+      "mainframe": {
+        "deepCleared": 0.148,
+        "met": 0,
+        "feat": 0.012,
+        "featThenDied": 0.012,
+        "medianHours": null,
+        "p10Hours": null,
+        "leftMedianHours": null,
+        "leftP10Hours": null,
+        "lateFeat": null,
+        "deepRunsToClear": 2.31,
+        "deepDisconnectsToClear": 1.31,
+        "feats": {
+          "one Deep exit": {
+            "met": 0.148,
+            "leftMedianHours": 48
+          },
+          "two Deep exits": {
+            "met": 0.046,
+            "leftMedianHours": 42.9
+          },
+          "three Deep exits": {
+            "met": 0.008,
+            "leftMedianHours": 45.5
+          },
+          "a clean Deep exit": {
+            "met": 0.047,
+            "leftMedianHours": 48
+          },
+          "a Deep exit with at most 2 faults": {
+            "met": 0.013,
+            "leftMedianHours": 48
+          },
+          "two clean Deep exits": {
+            "met": 0.008,
+            "leftMedianHours": 43.5
+          },
+          "three Deep exits or two clean": {
+            "met": 0.012,
+            "leftMedianHours": 43.5
+          },
+          "two Deep exits and flow once": {
+            "met": 0.002,
+            "leftMedianHours": 43
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
+          }
+        }
+      },
+      "scrip": {
+        "end": 56.5,
+        "peak": 77.5,
+        "bought": 5.4,
+        "sold": 8.94,
+        "affordable": 0.655,
+        "marketsPerRun": 0.77
+      }
+    },
+    "human-casual": {
+      "runs": 1000,
+      "teen": 0.998,
+      "segfaultBeforeTeen": 0.173,
+      "adult": 0.337,
+      "fullLife": 0.073,
+      "medianDays": 1.38,
+      "mistakes": 6.03,
+      "deaths": {
+        "integrity collapse": 0.927,
+        "end of life cycle": 0.073
+      },
+      "teens": {
+        "teenCorp": 0.508,
+        "teenStreet": 0.49
+      },
+      "adults": {
+        "tuneCorp": 0.055,
+        "dodgeCorp": 0.049,
+        "breachStreet": 0.045,
+        "feastCorp": 0.041,
+        "breachCorp": 0.041,
+        "tuneStreet": 0.038,
+        "feastStreet": 0.034,
+        "dodgeStreet": 0.034
+      },
+      "mistakeKinds": {
+        "charge": 2.74,
+        "sync": 2.67,
+        "lights": 0.32,
+        "heat": 0.05
+      },
+      "stageDays": {
+        "baby": 0.29,
+        "teen": 0.96,
+        "adult": 0.55,
+        "mainframe": 0
+      },
+      "standing": {
+        "corp": 9.42,
+        "street": 8.35
+      },
+      "temper": -3.08,
+      "levelAtEnd": {
+        "0": 0.397,
+        "1": 0.001,
+        "2": 0,
+        "-2": 0.078,
+        "-1": 0.524
+      },
+      "levelTime": {
+        "0": 0.675,
+        "1": 0,
+        "2": 0,
+        "-2": 0.018,
+        "-1": 0.307
+      },
+      "hold12h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0.001
+      },
+      "holdDay": {
+        "strongSteady": null,
+        "strongUnsteady": 2.3
+      },
+      "hold24h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0
+      },
+      "neglect2Hours": 18.56,
+      "bugs": {
+        "end": 0,
+        "peak": 0,
+        "fixed": 0,
+        "atCeiling": 1,
+        "avg": 0,
+        "ceilingTime": 1,
+        "scripSpent": 0,
+        "standingSpent": 0,
+        "clinicVisits": 0.37
+      },
+      "rest": {
+        "calls": 5.33,
+        "onTime": 1.86,
+        "late": 1.7,
+        "lapsed": 1.49,
+        "tiredShare": 0.147
+      },
+      "pressure": {
+        "viruses": 2.36,
+        "events": 3.6,
+        "answered": 0.68,
+        "rattles": 0,
+        "rattledEvents": 0,
+        "rattlePaid": 0,
+        "wearMax": 0,
+        "switches": 0,
+        "feeds": 20.9,
+        "shockMax": 0,
+        "shockHighShare": 0,
+        "wearHighShare": 0
+      },
+      "pref": {
+        "actions": 14.9,
+        "matches": 6.4,
+        "bonus": 13.5
+      },
+      "atAdult": {
+        "corp": 10.67,
+        "street": 10.14,
+        "gap": 3.88,
+        "leanCertain": 0.309,
+        "roleCertain": 0.567,
+        "temper": -2.23,
+        "level": {
+          "0": 0.401,
+          "1": 0.006,
+          "2": 0,
+          "-2": 0.056,
+          "-1": 0.537
+        },
+        "bugs": 0,
+        "wins": 12.22,
+        "mistakes": 5.66
+      },
+      "atTeen": {
+        "corp": 2.13,
+        "street": 1.83,
+        "gap": 1.45,
+        "leanCertain": 0.028,
+        "tied": 0.627,
+        "temper": -1.64,
+        "level": {
+          "0": 0.823,
+          "1": 0,
+          "2": 0,
+          "-2": 0.001,
+          "-1": 0.176
+        },
+        "mistakes": 2.06,
+        "wins": 2.57,
+        "minWins": 0.02
+      },
+      "wins": 10.06,
+      "events": 3.6,
+      "traces": 1.93,
+      "tracesIgnored": 1.13,
+      "attention": {
+        "requestsMet": 0.38,
+        "greeted": 0.09,
+        "flowHours": 0.02,
+        "hotHours": 1.62,
+        "chatterSeen": 0.09
+      },
+      "itemsHeld": 2.99,
+      "fullAtCheckIn": 0.022,
+      "netruns": {
+        "runs": 1.95,
+        "disconnects": 0.26,
+        "fragments": 1.62,
+        "codexCapped": 0.004,
+        "cleared": {
+          "public": 0.646,
+          "bazaar": 0.373,
+          "corp": 0.229,
+          "ruins": 0.138,
+          "deep": 0.003,
+          "source": 0
+        },
+        "byRegion": {
+          "public": 0.84,
+          "bazaar": 0.53,
+          "corp": 0.34,
+          "ruins": 0.23,
+          "deep": 0.01,
+          "source": 0
+        }
+      },
+      "mainframe": {
+        "deepCleared": 0.003,
+        "met": 0,
+        "feat": 0,
+        "featThenDied": 0,
+        "medianHours": null,
+        "p10Hours": null,
+        "leftMedianHours": null,
+        "leftP10Hours": null,
+        "lateFeat": null,
+        "deepRunsToClear": 1.33,
+        "deepDisconnectsToClear": 0.33,
+        "feats": {
+          "one Deep exit": {
+            "met": 0.002,
+            "leftMedianHours": 47.9
+          },
+          "two Deep exits": {
+            "met": 0.001,
+            "leftMedianHours": 24.6
+          },
+          "three Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "a clean Deep exit": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "a Deep exit with at most 2 faults": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0.001,
+            "leftMedianHours": 24.6
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
+          }
+        }
+      },
+      "scrip": {
+        "end": 9.8,
+        "peak": 9.3,
+        "bought": 0.14,
+        "sold": 0.13,
+        "affordable": 0.216,
+        "marketsPerRun": 0.76
+      }
+    },
+    "hunter-casual": {
+      "runs": 1000,
+      "teen": 1,
+      "segfaultBeforeTeen": 0.092,
+      "adult": 0.951,
+      "fullLife": 0.898,
+      "medianDays": 5,
+      "mistakes": 3.95,
+      "deaths": {
+        "end of life cycle": 0.898,
+        "integrity collapse": 0.102
+      },
+      "teens": {
+        "teenCorp": 0.501,
+        "teenStreet": 0.499
+      },
+      "adults": {
+        "dodgeStreet": 0.133,
+        "tuneStreet": 0.13,
+        "feastStreet": 0.127,
+        "breachStreet": 0.122,
+        "breachCorp": 0.12,
+        "dodgeCorp": 0.109,
+        "feastCorp": 0.108,
+        "tuneCorp": 0.102
+      },
+      "mistakeKinds": {
+        "charge": 1.65,
+        "sync": 2.29,
+        "heat": 0.02
+      },
+      "stageDays": {
+        "baby": 0.29,
+        "teen": 1.59,
+        "adult": 2.85,
+        "mainframe": 0
+      },
+      "standing": {
+        "corp": 25.38,
+        "street": 25.48
+      },
+      "temper": 0.05,
+      "levelAtEnd": {
+        "0": 0.867,
+        "1": 0.052,
+        "2": 0,
+        "-2": 0,
+        "-1": 0.081
+      },
+      "levelTime": {
+        "0": 0.868,
+        "1": 0.031,
+        "2": 0,
+        "-2": 0,
+        "-1": 0.101
+      },
+      "hold12h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0
+      },
+      "holdDay": {
+        "strongSteady": null,
+        "strongUnsteady": null
+      },
+      "hold24h": {
+        "strongSteady": 0,
+        "strongUnsteady": 0
+      },
+      "neglect2Hours": 15.49,
+      "bugs": {
+        "end": 0,
+        "peak": 0,
+        "fixed": 0,
+        "atCeiling": 1,
+        "avg": 0,
+        "ceilingTime": 1,
+        "scripSpent": 0,
+        "standingSpent": 0,
+        "clinicVisits": 0
+      },
+      "rest": {
+        "calls": 10.1,
+        "onTime": 3.56,
+        "late": 3.31,
+        "lapsed": 2.89,
+        "tiredShare": 0.13
+      },
+      "pressure": {
+        "viruses": 7.1,
+        "events": 8.35,
+        "answered": 3.86,
+        "rattles": 0,
+        "rattledEvents": 0,
+        "rattlePaid": 0,
+        "wearMax": 0,
+        "switches": 0,
+        "feeds": 73.2,
+        "shockMax": 0,
+        "shockHighShare": 0,
+        "wearHighShare": 0
+      },
+      "pref": {
+        "actions": 18.6,
+        "matches": 11.3,
+        "bonus": 22.6
+      },
+      "atAdult": {
+        "corp": 10.39,
+        "street": 10.16,
+        "gap": 0.53,
+        "leanCertain": 0,
+        "roleCertain": 0,
+        "temper": 0.2,
+        "level": {
+          "0": 0.825,
+          "1": 0.062,
+          "2": 0,
+          "-2": 0,
+          "-1": 0.113
+        },
+        "bugs": 0,
+        "wins": 18,
+        "mistakes": 1.82
+      },
+      "atTeen": {
+        "corp": 2.46,
+        "street": 2.43,
+        "gap": 0.17,
+        "leanCertain": 0,
+        "tied": 0.98,
+        "temper": -0.33,
+        "level": {
+          "0": 0.938,
+          "1": 0,
+          "2": 0,
+          "-2": 0.001,
+          "-1": 0.061
+        },
+        "mistakes": 0.66,
+        "wins": 4.35,
+        "minWins": 0.74
+      },
+      "wins": 43.77,
+      "events": 8.35,
+      "traces": 4.71,
+      "tracesIgnored": 1.41,
+      "attention": {
+        "requestsMet": 1.81,
+        "greeted": 0.27,
+        "flowHours": 0.09,
+        "hotHours": 1.03,
+        "chatterSeen": 0.26
+      },
+      "itemsHeld": 5.15,
+      "fullAtCheckIn": 0.01,
+      "netruns": {
+        "runs": 0,
+        "disconnects": 0,
+        "fragments": 0,
+        "codexCapped": 0,
+        "cleared": {
+          "public": 0,
+          "bazaar": 0,
+          "corp": 0,
+          "ruins": 0,
+          "deep": 0,
+          "source": 0
+        },
+        "byRegion": {
+          "public": 0,
+          "bazaar": 0,
+          "corp": 0,
+          "ruins": 0,
+          "deep": 0,
+          "source": 0
+        }
+      },
+      "mainframe": {
+        "deepCleared": 0,
+        "met": 0,
+        "feat": 0,
+        "featThenDied": 0,
+        "medianHours": null,
+        "p10Hours": null,
+        "leftMedianHours": null,
+        "leftP10Hours": null,
+        "lateFeat": null,
+        "deepRunsToClear": null,
+        "deepDisconnectsToClear": null,
+        "feats": {
+          "one Deep exit": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "a clean Deep exit": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "a Deep exit with at most 2 faults": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two clean Deep exits": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "three Deep exits or two clean": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits and flow once": {
+            "met": 0,
+            "leftMedianHours": null
+          },
+          "two Deep exits, one jacked into in flow": {
+            "met": 0,
+            "leftMedianHours": null
+          }
+        }
+      },
+      "scrip": {
+        "end": 6.5,
+        "peak": 0,
+        "bought": 0,
+        "sold": 0,
+        "affordable": 0,
+        "marketsPerRun": 0
+      }
+    }
+  }
+}
