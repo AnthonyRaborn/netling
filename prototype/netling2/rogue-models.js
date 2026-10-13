@@ -1,4 +1,4 @@
-// The hidden Rogue egg's forms (docs/NETLING_2_ROGUE_DRAFTS.md, section 8), built like Wetware's (wetware-models.js): A and B share the
+// The hidden Rogue egg's forms (docs/archive/netling2/ROGUE_DRAFTS.md, section 8), built like Wetware's (wetware-models.js): A and B share the
 // head, eyes and neck; sleep and dead are the 1.0 generic poses plus Rogue's own mark. Ten forms: one baby, one teen (no lean: Rogue has
 // no Standing), one adult per role and each adult's elder. First drafts for review.
 //

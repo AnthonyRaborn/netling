@@ -74,7 +74,7 @@ const sum = (rs) => {
   return { disc: share((r) => r.result === 'disconnected'), exit: share((r) => r.exit), items: avg('items'), scrip: avg('scrip'), value: Math.round((100 * rs.reduce((a, x) => a + (fill ? x.invWorth : x.items) + x.scrip / VALUE_PER_ITEM, 0)) / rs.length) / 100, int: avg('intSpent'), hard: avg('hard'), ice: avg('ice'), slipped: avg('slipped'), forced: avg('forced') };
 };
 
-// The parity yardstick (settled at the maintainer's request; see notes/netrun-sim-notes.md): banked value per run, in common items
+// The parity yardstick (settled at the maintainer's request; see docs/archive/netling2/notes/netrun-sim-notes.md): banked value per run, in common items
 // (items banked plus scrip over one common item's price, 15), and the exit rate. A disconnect banks nothing, so value includes survival.
 const VALUE_PER_ITEM = 15;
 const fill = Number(process.env.INVFILL ?? 0); // with a starting inventory, value is the change in what the inventory is worth (price over 15) plus scrip over 15

@@ -3,7 +3,7 @@
 //   jobFilter: substring of a job name (for example "balance" or "clinic"); default runs everything.
 // Configurations ("config" below):
 //   core     no switches: the 2.0 core rules only (Standing, temper, bugs, clinic, soft push), egg pressures and netrun rules off
-//   full-<egg>  NR2=all PERKS=1 and that egg's final pressure design (docs/NETLING_2_EGG_PRESSURES.md): Iron = wear plus Overclock x3,
+//   full-<egg>  NR2=all PERKS=1 and that egg's final pressure design (docs/archive/netling2/EGG_PRESSURES.md): Iron = wear plus Overclock x3,
 //            Program = Overdrive, Wetware = Overlink with its brake; owner multiplier 3, hold 3 awake hours
 //   rules    NR2=all PERKS=1 and no egg pressure (sweeps that do not model a pressure, or set their own)
 // Sweeps that set a pressure themselves (clinic-final, grace, hint, heat-hint) run under "rules".

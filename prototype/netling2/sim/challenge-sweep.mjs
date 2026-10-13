@@ -1,4 +1,4 @@
-// Challenge runs under the 2.0 rules (docs/NETLING_2_NETRUN_DRAFTS.md, ground rule 5; challenges in src/netrun/challenges.js): the share of runs
+// Challenge runs under the 2.0 rules (docs/archive/netling2/NETRUN_DRAFTS.md, ground rule 5; challenges in src/netrun/challenges.js): the share of runs
 // that complete each challenge (reach the exit with the rule kept) for every form at both levels, in the Deep and the Source, with the abilities,
 // the ICE tiers and Foresight on. The 1.0 table (docs/NETRUN.md, Challenges) used one flat bot and no abilities of this kind.
 // Usage: node prototype/netling2/sim/challenge-sweep.mjs [runs=2000] [regions=deep,source] [styles=careful,skilled] [challenges=glass,unplugged,blackout,baremetal]

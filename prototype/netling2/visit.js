@@ -1,4 +1,4 @@
-// Visits (docs/NETLING_2_SPRITES.md, Temper pass). A visit is short, and the 1.0 screen is busy with two sprites bouncing
+// Visits (docs/netling2/SPRITES_HANDOFF.md, Temper pass). A visit is short, and the 1.0 screen is busy with two sprites bouncing
 // toward each other, so the prototype's MOTION layers pause during one (maintainer): no temper tell, no idle wander and no bug
 // twitch. What the netling looks like stays: neglect and the still bug tears (and the state marks, which are not motion quirks
 // and which 1.0 also draws during a visit). The sprite plays 1.0's own visit animation, a plain bounce, and nothing else.

@@ -1,4 +1,4 @@
-// The holologo clip (1.0's open decision; docs/NETLING_2_SPRITES_HISTORY.md, "The holologo clip") on every 2.0 form through the 2.0
+// The holologo clip (1.0's open decision; docs/archive/netling2/SPRITES_HISTORY.md, "The holologo clip") on every 2.0 form through the 2.0
 // renderer (render.js), against three options drawn here only: now (1.0, a.top - 4), lower (a.top - 3), clamp (1.0's position pushed
 // down only on the frames where it would leave the screen). 1.0's idles sway, hover and walk, sampled every 100 ms. src/ is untouched.
 // Since the headroom (render.js TOP, 2026-10-12) nothing leaves the 2.0 screen: `clipped` counts rows above 1.0's top edge (row TOP),

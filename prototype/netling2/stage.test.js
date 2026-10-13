@@ -1,4 +1,4 @@
-// Tests for the 2.0 stage care in the simulator fork (STAGE in sim/sim.js; docs/NETLING_2_STAGE_CARE_DRAFTS.md): the stage tables (a 7 hour baby, the adult
+// Tests for the 2.0 stage care in the simulator fork (STAGE in sim/sim.js; docs/archive/netling2/STAGE_CARE_DRAFTS.md): the stage tables (a 7 hour baby, the adult
 // age at 46 hours, baby drain, cache by stage) and the rest call with tired. Everything is off by default. Deterministic: stub or seeded rng, fixed clock.
 import test from 'node:test';
 import assert from 'node:assert/strict';

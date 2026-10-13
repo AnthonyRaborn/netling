@@ -1,4 +1,4 @@
-// The focus review page's pure half (review.html; docs/NETLING_2_SPRITES.md, Commands): one registry of every 2.0 form across the four
+// The focus review page's pure half (review.html; docs/netling2/SPRITES_HANDOFF.md, Commands): one registry of every 2.0 form across the four
 // eggs, the page's state as a URL hash (so a link reopens the exact view: forms, aspect, settings and the frozen time), the presets
 // that pick a set of forms, and the change track that finds when the composed picture changes. No DOM; review.test.js drives it.
 import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)

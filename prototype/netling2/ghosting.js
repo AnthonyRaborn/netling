@@ -1,4 +1,4 @@
-// Ghosting, the screen effect (docs/NETLING_2_ACCESSORY_IDEAS.md, "Screen effects"): old LCD lag. A cell that turns off, or changes colour,
+// Ghosting, the screen effect (docs/archive/netling2/ACCESSORY_IDEAS.md, "Screen effects"): old LCD lag. A cell that turns off, or changes colour,
 // does not snap to its new colour: it fades from the old one over GHOST_MS. Pure: it works on a grid of cell colours (the screen's
 // 40x30 '#rrggbb' strings, as render.test.js's grid keeps them) and the clock, so the tests drive it without a canvas; the review page
 // feeds it the canvas's cells.

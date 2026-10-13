@@ -1,5 +1,5 @@
 // Rogue, simulator stage 2: netrun outcomes per region for the four Rogue forms (adult and elder) against the NL-0 hidden form and the NL-0 forms
-// of the same role base, on the fork's rules (NR2=all). docs/NETLING_2_ROGUE_DRAFTS.md 4.2, 4.4, 9 and 7.4.
+// of the same role base, on the fork's rules (NR2=all). docs/archive/netling2/ROGUE_DRAFTS.md 4.2, 4.4, 9 and 7.4.
 // Usage: node prototype/netling2/sim/rogue-netrun.mjs [runs=1000] [regions=public,bazaar,corp,ruins,deep,source] [styles=careful]
 //   FORMS=rogue,hidden,base   which groups (default all three). JSON=1 prints JSON. RUNBOT=quiet makes every Rogue run a quiet runner.
 //   ROGUE_RUN='{...}'          overrides NR2.rogue (nr2.js), for example '{"map":{"on":false},"dangerSense":false}'.

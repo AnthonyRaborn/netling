@@ -1,4 +1,4 @@
-// The Metronome prop's art (docs/NETLING_2_SKETCH.md, Temper cosmetics; docs/NETLING_2_SPRITES.md, Next phase): 5x8, one frame per
+// The Metronome prop's art (docs/archive/netling2/SKETCH_FULL.md, Temper cosmetics; docs/netling2/SPRITES_HANDOFF.md, Next phase): 5x8, one frame per
 // pendulum position from metronome.js (-1 left, 0 upright, +1 right). DRAFT for review, not decided art. Not shipped.
 // Same letters as the sprites: '#' the case, 'x' its dark dial window, '+' the rod, 'o' the weight. Only the three rod rows change between
 // frames; the case never moves. The prop sits at the right of the floor, like 1.0's props.

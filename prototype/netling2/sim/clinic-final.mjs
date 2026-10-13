@@ -1,6 +1,6 @@
 // The clinic against the final egg-pressure design: share of market nodes and scrip fee, per egg, per archetype. Each egg runs with its
 // own pressure (Iron: wear and Overclock x3; Program: Overdrive; Wetware: Overlink with its brake), owner multiplier 3, tripled benefits
-// and doubled costs as in docs/NETLING_2_EGG_PRESSURES.md. Usage: node prototype/netling2/sim/clinic-final.mjs [lives=150] [bases]
+// and doubled costs as in docs/archive/netling2/EGG_PRESSURES.md. Usage: node prototype/netling2/sim/clinic-final.mjs [lives=150] [bases]
 process.env.TZ = 'UTC';
 const lives = Number(process.argv[2] ?? 150);
 const bases = (process.argv[3] ?? 'casual,worker,attentive,human-regular,overclocker').split(',');

@@ -1,6 +1,8 @@
 # Netling 2.0 perks, traits, keepsakes and new items
 
-Status: designed with the maintainer on paper, then built as switches in the simulator fork (`prototype/netling2/sim/`, `sim.js`) and measured on bots. Nothing is in a game: there is no 2.0 game code. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions), [NETLING_2_NETRUN_DRAFTS.md](NETLING_2_NETRUN_DRAFTS.md) (the nine forms' netrun abilities), [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) (per-egg names and wording). Values are starting values to measure, not tuned.
+> **Archived 2026-10-13.** Not the source of truth; kept for history and measurements. Current: docs/netling2/DESIGN.md, section 11. Index: [README.md](README.md).
+
+Status: designed with the maintainer on paper, then built as switches in the simulator fork (`prototype/netling2/sim/`, `sim.js`) and measured on bots. Nothing is in a game: there is no 2.0 game code. Companions: [SKETCH_FULL.md](SKETCH_FULL.md) (decisions), [NETRUN_DRAFTS.md](NETRUN_DRAFTS.md) (the nine forms' netrun abilities), [CARE_DRAFTS.md](../../netling2/text/CARE_DRAFTS.md) (per-egg names and wording). Values are starting values to measure, not tuned.
 
 ## Frame (Decided, maintainer)
 
@@ -78,4 +80,4 @@ Per-egg names and wording for the new items, art, hover text, the Dex lines for 
 
 ## First balance pass (bots, `PERKS=1`)
 
-Full results: `prototype/netling2/notes/perks-traits-notes.md`. In short: no outlier above about 12 points. For a worker (full-life rate 80% before) the forms run from 82 (Feast) to 90 (Breach, Tune corp) with the perk, the level I trait and the keepsake; Hardened (Breach) is the strongest, Foraging (Feast) the weakest (about +1 to +3). No perk or trait rescues the fatal long gap (human-casual 5%), so none becomes a gap cure. Casual and overclocker play barely move (a ceiling). Not measured: the egg pressure states, steering, the new items in a run, a human. **Decided (maintainer): trim Hardened's cap to 1.25 and leave the rest to playtesting.** The worker may need some tuning down; fine for now. Foraging and the Feast perks stay as they are until the playtest.
+Full results: `docs/archive/netling2/notes/perks-traits-notes.md`. In short: no outlier above about 12 points. For a worker (full-life rate 80% before) the forms run from 82 (Feast) to 90 (Breach, Tune corp) with the perk, the level I trait and the keepsake; Hardened (Breach) is the strongest, Foraging (Feast) the weakest (about +1 to +3). No perk or trait rescues the fatal long gap (human-casual 5%), so none becomes a gap cure. Casual and overclocker play barely move (a ceiling). Not measured: the egg pressure states, steering, the new items in a run, a human. **Decided (maintainer): trim Hardened's cap to 1.25 and leave the rest to playtesting.** The worker may need some tuning down; fine for now. Foraging and the Feast perks stay as they are until the playtest.

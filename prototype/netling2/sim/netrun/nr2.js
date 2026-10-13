@@ -1,10 +1,10 @@
-// Netling 2.0 netrun rules that are decided in docs/NETLING_2_NETRUN_DRAFTS.md, as switchable settings for the simulator fork.
+// Netling 2.0 netrun rules that are decided in docs/archive/netling2/NETRUN_DRAFTS.md, as switchable settings for the simulator fork.
 // Everything is OFF by default so the tables in docs/netling2-prototypes/README.md stay reproducible (no 2.0 form had a run
 // ability in them). Switch on with NR2='{"abilities":true,"tiers":true,...}' or NR2=all. Pure: imports nothing.
 //
 // What is DECIDED (maintainer) and what is MINE (starting values to measure) is marked on each block. Nothing here is tuned.
 
-// The Source levers for the gap between the Rogue lines (NR2.rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8 to 7.11). off: none (every measure
+// The Source levers for the gap between the Rogue lines (NR2.rogue.source; docs/archive/netling2/ROGUE_DRAFTS.md 7.8 to 7.11). off: none (every measure
 // before 7.11). fifty: decided, the default. thirtyfive: kept for tuning after a playtest.
 export const SOURCE_SETS = {
   off: { breachFree: 0, breachChance: 1, tuneTypes: false, feastHeal: 1, dodgeSlip: 1, feastClean: 0, tuneReroll: { 1: 0, 2: 0 }, tuneNullify: { 1: 0, 2: 0 } },
@@ -23,7 +23,7 @@ export const NR2 = {
   // A held pressure state resumes after a jack-out (decided), with a window before the bars can end it (decided: 5 minutes).
   // An error-out also gets the window in the design; the fork has no error-out, so only a jack-out does.
   graceMin: 5,
-  // Foresight (Tune street, docs/NETLING_2_NETRUN_DRAFTS.md section 3.3): what the netling sees INSIDE the nodes it can see. `fate` pre-rolls what is in
+  // Foresight (Tune street, docs/archive/netling2/NETRUN_DRAFTS.md section 3.3): what the netling sees INSIDE the nodes it can see. `fate` pre-rolls what is in
   // a node (an ICE's game and tier, whether a cache is filled) from a per-run seed, so it can be known before arrival and does not depend on the route
   // (the daily trace already works this way). Off by default; `fate` alone changes only which random numbers decide those rolls. `foresight.on` lets a
   // Tune street netling read the nodes within `depth` steps (by level: adult 1 = the next step, elder 2), the `fields` it is allowed (game, tier, cache).
@@ -98,11 +98,11 @@ export const NR2 = {
     scavenge: { 1: { cache: 0.55, iceWin: 0.35, winHeal: 11 }, 2: { cache: 0.7, iceWin: 0.5, winHeal: 22 } }, // feastStreet: tuned to the parity yardstick; winHeal is a small sustain (Integrity restored by a won ICE), decided as fitting the theme
     forcedCacheForms: ['feastCorp'], // level 2 only
   },
-  // Rogue (sim.js ROGUE), simulator stage 1: each Rogue adult and elder runs on its role's base ability from docs/NETLING_2_ROGUE_DRAFTS.md, 9.2
+  // Rogue (sim.js ROGUE), simulator stage 1: each Rogue adult and elder runs on its role's base ability from docs/archive/netling2/ROGUE_DRAFTS.md, 9.2
   // (Mole Hardened, Skip Unseen, Spook Lookahead, Drop Scavenge) at the NL-0 numbers, plus the checkpoint part (run.js). A stand-in: the hunt twists,
   // Skip's trimmed slip, danger sense, the trail and the hunters come with stage 2.
   rogueBase: { rogueAdultBreach: 'breachStreet', rogueAdultDodge: 'dodgeStreet', rogueAdultTune: 'tuneCorp', rogueAdultFeast: 'feastStreet' },
-  // Rogue, simulator stage 2 (docs/NETLING_2_ROGUE_DRAFTS.md 4.2, 6.2, 9.1, 9.2): the trail, the trail hunter, ambush nodes, danger sense and the
+  // Rogue, simulator stage 2 (docs/archive/netling2/ROGUE_DRAFTS.md 4.2, 6.2, 9.1, 9.2): the trail, the trail hunter, ambush nodes, danger sense and the
   // hunt twists, for a Rogue netling (sim.js isRogue) only. On by default (Rogue itself is off unless ROGUE is set); NR2='{"rogue":{"on":false}}'
   // gives stage 1's runs back. Every number is the draft's starting value. The count is `run.hunt` in code (1.0's daily already has `run.trail`).
   rogue: {
@@ -113,7 +113,7 @@ export const NR2 = {
     hunterMult: 1.5, // the hunter (trail or ambush) is tier-2 ICE at this much of the region's ICE damage; no ICE slip works on it
     ambush: { corp: 1 / 6, ruins: 1 / 6, deep: 0.15, source: 0.25 }, // the share of a region's ICE nodes that are ambushes (none elsewhere); the Deep's was 0.25 (7.12)
     // { region: f } multiplies the ambush share in that region's cordon layers (0: a cordon fight is never an ambush); regions not listed keep the
-    // share. Decided (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 item 45, 7.12): none in the Deep's cordon, with the Deep's share at 0.15 (ambush above),
+    // share. Decided (docs/archive/netling2/ROGUE_DRAFTS.md 6.1 item 45, 7.12): none in the Deep's cordon, with the Deep's share at 0.15 (ambush above),
     // so Rogue adults disconnect about 1.5x the hidden form's there. Both are kept as levers for after a playtest; ROGUE_DEEP=0 gives the earlier Deep.
     cordonAmbush: { deep: 0 },
     ambushMark: false, // decided (7.4): a lost ambush is a disconnect but no mark (the draft: a mark too); only the trail hunter marks in runs
@@ -138,7 +138,7 @@ export const NR2 = {
     // The exit's bonus items for a Rogue netling, by region, in place of the region's exitBonus. Decided (7.4): 1 in the Deep (the region's is 2),
     // so going on past the relay pays about a third more than jacking out there. Regions not listed keep their own.
     exitBonus: { deep: 1 },
-    // Levers for the gap between the Rogue lines (docs/NETLING_2_ROGUE_DRAFTS.md 7.7 and 7.8), the Source only, all off (measured, not decided).
+    // Levers for the gap between the Rogue lines (docs/archive/netling2/ROGUE_DRAFTS.md 7.7 and 7.8), the Source only, all off (measured, not decided).
     // breachFree: lost ordinary ICE fights a Mole or Sleeper may have in a Source run and still exit clean (hunter fights still spoil it).
     // tuneTypes: Spook and Handler read every Source ICE's game and tier from the start (Foresight's fields, the whole map; an ambush shows a
     // decoy game and tier, so it is not told apart). feastHeal: Drop's and Stash's won-fight heal in the Source is multiplied by this.
@@ -154,7 +154,7 @@ export const NR2 = {
 
   // ---- Egg run problems as light extra costs (decided: light to start; the sizes are mine) ----
   cost: {
-    ironMinutesPerMove: 2.5, // Iron: minutes of wear accrual a move is worth, at Heat over the wear line (the run itself takes no simulated time). Sized by notes/netrun-sim-notes.md, section 11 (was 1)
+    ironMinutesPerMove: 2.5, // Iron: minutes of wear accrual a move is worth, at Heat over the wear line (the run itself takes no simulated time). Sized by docs/archive/netling2/notes/netrun-sim-notes.md, section 11 (was 1)
     programLostFightBleed: 4, // Program: a lost fight at Charge 80+ costs this much more Integrity
     wetwareLostFightInfect: 0.04, // Wetware: a lost fight rolls an infection at this chance
   },

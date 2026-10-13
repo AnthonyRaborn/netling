@@ -1,4 +1,4 @@
-// The self-destruct: how a Rogue dies at the third mark (docs/NETLING_2_ROGUE_DRAFTS.md, 10.6 and 11.1). The hunters do not get it: it
+// The self-destruct: how a Rogue dies at the third mark (docs/archive/netling2/ROGUE_DRAFTS.md, 10.6 and 11.1). The hunters do not get it: it
 // burns itself into nothingness an instant before capture. Decided (maintainer, 2026-10-12): all three burns are used, one picked at random
 // when it hits (`pickBurn`, seeded so a reload during the burn keeps the same one), and what is left is the ash heap (registered on every
 // form as `captured`, rogue-models.js). The rule is unchanged (the cause stays `captured`); this is art only.

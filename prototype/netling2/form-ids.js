@@ -38,7 +38,7 @@ export const FORM_NAMES = {
   wetwareElderBreachCorp: 'Lancet', wetwareElderBreachStreet: 'Frag', wetwareElderDodgeCorp: 'Plat', wetwareElderDodgeStreet: 'Surge',
   wetwareElderTuneCorp: 'Savant', wetwareElderTuneStreet: 'Observer', wetwareElderFeastCorp: 'Broth', wetwareElderFeastStreet: 'Helminth', wetwareElderHidden: 'Cipher',
 };
-// The hidden Rogue egg's names (decided, maintainer; docs/NETLING_2_ROGUE_DRAFTS.md, section 8). Kept apart from FORM_NAMES, which
+// The hidden Rogue egg's names (decided, maintainer; docs/archive/netling2/ROGUE_DRAFTS.md, section 8). Kept apart from FORM_NAMES, which
 // holds the three launch eggs' 66 forms (its tests count them and give each body chatter lines; Rogue's are in rogue-lines.js).
 export const ROGUE_NAMES = {
   rogueBaby: 'Foundling', rogueTeen: 'Alias',

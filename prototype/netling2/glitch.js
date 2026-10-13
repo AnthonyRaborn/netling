@@ -1,4 +1,4 @@
-// What bugs look like (docs/NETLING_2_SKETCH.md, Bugs): glitches on the sprite. A bug is a count from 0 to 5 that stays until it
+// What bugs look like (docs/archive/netling2/SKETCH_FULL.md, Bugs): glitches on the sprite. A bug is a count from 0 to 5 that stays until it
 // is cleared (scrip, Standing or a netrun debug station), so the look is PERSISTENT: a pure function of the bug count, with
 // nothing about time in the part you can always read. Each bug tears one row of the body a column sideways, in a fixed order,
 // so a new bug adds a tear and clearing one removes the last, and a count can be read at a glance. Neglect (needs.js) is a

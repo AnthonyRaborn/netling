@@ -1,4 +1,4 @@
-// The three egg-flavored anomalies (docs/NETLING_2_NETRUN_DRAFTS.md, section 6; decided as a go, the content below is mine to measure):
+// The three egg-flavored anomalies (docs/archive/netling2/NETRUN_DRAFTS.md, section 6; decided as a go, the content below is mine to measure):
 // Program's STACK OVERFLOW, Iron's BIT-ROT PATCH and Wetware's GRAFT. Each is an ordinary anomaly in 1.0's shape (two options, each
 // leaning Standing or temper through c.lean) that turns up only for netlings of its own egg, in any region but the Source, the daily
 // trace and the tutorial. Switch on with NR2='{"eggAnomalies":true}'. Pure: no imports.

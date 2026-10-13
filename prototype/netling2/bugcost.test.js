@@ -1,4 +1,4 @@
-// Tests for the bug fix cost rules in the simulator fork (BUG_CFG.standingOnlyIfShort and a clearStanding other than 2; docs/NETLING_2_STAGE_CARE_DRAFTS.md,
+// Tests for the bug fix cost rules in the simulator fork (BUG_CFG.standingOnlyIfShort and a clearStanding other than 2; docs/archive/netling2/STAGE_CARE_DRAFTS.md,
 // section 9). Both are off or unchanged by default. Deterministic: no rng.
 import test from 'node:test';
 import assert from 'node:assert/strict';

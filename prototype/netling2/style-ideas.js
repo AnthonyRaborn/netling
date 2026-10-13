@@ -1,4 +1,4 @@
-// The non-audio style ideas beyond the wearables, props and crests (docs/NETLING_2_ACCESSORY_IDEAS.md): the shells, tints, screen effects and
+// The non-audio style ideas beyond the wearables, props and crests (docs/archive/netling2/ACCESSORY_IDEAS.md): the shells, tints, screen effects and
 // device labels, as data in 1.0's shapes (src/cosmetics.js). Their looks are in style-ideas.css (shells, effects, labels) and ghosting.js
 // (the Ghosting pixel effect); this file holds what the game would list: id, name, hint and the colours the tests measure.
 // Nothing is decided or shipped. Unlocks are the doc's placeholders in words (`unlock`): they name 2.0 mechanics (the clinic, bugs,

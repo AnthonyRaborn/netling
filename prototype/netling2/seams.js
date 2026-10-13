@@ -1,4 +1,4 @@
-// Wear and strain seams (docs/NETLING_2_CARE_DRAFTS.md, Iron wear; and Overuse and owner strain: the same mark on every egg): a small static seam on one edge of the sprite once wear passes the line,
+// Wear and strain seams (docs/netling2/text/CARE_DRAFTS.md, Iron wear; and Overuse and owner strain: the same mark on every egg): a small static seam on one edge of the sprite once wear passes the line,
 // a second at heavy wear, and they go one at a time as wear fades. DRAFT for review, not decided art. Not shipped.
 //
 // A seam is a split in the casing: the outline cell is cut out ('.') and the body cell diagonally inward goes dim ('x'). Rust (neglect.js)

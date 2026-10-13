@@ -1,4 +1,4 @@
-// Rogue, the relay question (docs/NETLING_2_ROGUE_DRAFTS.md 9.7, decided: continuing past the relay before a cordon pays about a third more, at a
+// Rogue, the relay question (docs/archive/netling2/ROGUE_DRAFTS.md 9.7, decided: continuing past the relay before a cordon pays about a third more, at a
 // matching risk). The careful bot plays a Rogue run in a region with a cordon right after the relay layer (the Deep, the Source) until it stands at
 // that layer's relay; the run is then copied and played both ways: QUIET jacks out there, PUSH goes on (the dead drop first for Drop and Stash while
 // there is trail; always on, even when hurt; later relays by the bot's own rule). Runs that never stand at that relay are counted, not split.

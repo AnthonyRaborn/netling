@@ -1,6 +1,6 @@
 // Rogue's chatter: one base line for its baby, teen and each adult (elders have none, as on every egg), two lines for each bar state, and
 // the NL-0 eggs' one Rogue-facing Lineage line. Every line with its four temper voicings in the shapes voice.js tests (checkShape).
-// DRAFTS for the maintainer to edit (docs/NETLING_2_ROGUE_DRAFTS.md, 10.9); not wired into any game, not read on a device or by a player.
+// DRAFTS for the maintainer to edit (docs/archive/netling2/ROGUE_DRAFTS.md, 10.9); not wired into any game, not read on a device or by a player.
 // Rogue's shape follows its tell, the glance over its shoulder: steady lines stop to check, "(clear)" every fifth word (every third
 // strongly), as the steady voicings of the other eggs only add their separators; unsteady lines break off to look behind, "(behind?)",
 // once and pick up again, strongly twice without finishing. Rogue's register (10.1): a fugitive's tradecraft, terse, first person in

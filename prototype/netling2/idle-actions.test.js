@@ -99,7 +99,7 @@ test('the middle level has no idle action; steady plays the routine in order on 
 test('composed with every layer on, every action on every form stays on the screen', () => {
   for (const { egg, form } of ALL) {
     for (const level of LEVELS) for (const idle of ['sway', 'walk']) for (let t = 0; t < 40_000; t += 250) {
-      // Without the form's motion layer: a hidden elder's echo can clip at the far end of the wander on its own (docs/NETLING_2_SPRITES.md,
+      // Without the form's motion layer: a hidden elder's echo can clip at the far end of the wander on its own (docs/netling2/SPRITES_HANDOFF.md,
       // 2a), and render.test.js covers the layers; this checks what the action adds.
       const pet = { form: { ...form, motion: undefined }, egg, level, seed: 4, idle, neglect: 1, bugs: 2, seams: 1, worn: [{ id: 'crown' }, { id: 'shades' }] };
       if (!actionAt({ egg, level, time: t, seed: 4, form })) continue; // only what an action draws (the rest is render.test.js's)

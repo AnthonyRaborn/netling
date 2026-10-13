@@ -1,4 +1,4 @@
-// The 2.0 story pages for the simulator fork (docs/NETLING_2_CODEX_DRAFTS.md): 24 Root pages and 15 late pages, by region, in drop order.
+// The 2.0 story pages for the simulator fork (docs/netling2/text/CODEX_DRAFTS.md): 24 Root pages and 15 late pages, by region, in drop order.
 // Only ids, regions and tiers matter to the rules (titles are for the run log). Egg pages (15 form pages and 3 Source pages) are in EGG_PAGES
 // below: they drop on their own rules (NR2.eggPages, netrun/run.js), outside the cap. Replaces 1.0's 22-page list in the fork.
 //   Root pages count toward Root Access. Late pages (decided) never do, and drop only once the line holds Root Access.
@@ -33,9 +33,9 @@ export function nextFragment(region, known, rootAccess = false) {
   return FRAGMENTS.find((f) => f.region === region && !known.includes(f.id) && (f.tier === 'root' || held))?.id ?? null;
 }
 
-// Egg pages (decided, docs/NETLING_2_SKETCH.md, Codex): per egg four role pages, one hidden-form page and one Source page. Role pages drop in this
+// Egg pages (decided, docs/archive/netling2/SKETCH_FULL.md, Codex): per egg four role pages, one hidden-form page and one Source page. Role pages drop in this
 // order (one roll a run in any cleared non-Deep region), the hidden page on a Deep run, the Source page at the egg's first Source exit. Any member
-// of an egg finds its egg's pages; no repeats, no per-life cap. Ids are the drafts' (docs/NETLING_2_CODEX_DRAFTS.md).
+// of an egg finds its egg's pages; no repeats, no per-life cap. Ids are the drafts' (docs/netling2/text/CODEX_DRAFTS.md).
 export const EGGS = ['program', 'iron', 'wetware'];
 const HIDDEN_PAGE = { program: 'ghost', iron: 'guru', wetware: 'blank' };
 export const EGG_PAGES = Object.fromEntries(

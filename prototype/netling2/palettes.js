@@ -1,4 +1,4 @@
-// Five new netling palettes for 2.0 (docs/NETLING_2_ACCESSORY_IDEAS.md, "Palettes"). Nothing here is decided or shipped; src/ is not edited.
+// Five new netling palettes for 2.0 (docs/archive/netling2/ACCESSORY_IDEAS.md, "Palettes"). Nothing here is decided or shipped; src/ is not edited.
 // A palette is { name, main, accent, mark?, ink? } as 1.0's (`ink` is new, below) (src/sim.js PALETTES); the body is `main`, the eyes and the flatline `accent`, and
 // `mark` the small highlight marks (white unless white would vanish).
 //

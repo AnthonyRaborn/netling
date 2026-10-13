@@ -1,4 +1,4 @@
-// The Rogue egg in the simulator fork, stage 2 (runs): docs/NETLING_2_ROGUE_DRAFTS.md 4.2, 6.2, 9.1 and 9.2. The trail (`run.hunt`), the trail
+// The Rogue egg in the simulator fork, stage 2 (runs): docs/archive/netling2/ROGUE_DRAFTS.md 4.2, 6.2, 9.1 and 9.2. The trail (`run.hunt`), the trail
 // hunter, ambushes, marks from lost hunter fights, danger sense and the hunt twists of the four kits. Deterministic: maps are built by hand and every
 // roll is a stub.
 import test from 'node:test';
@@ -389,7 +389,7 @@ test("the Rogue exit bonus (rogue.exitBonus, decided 1 in the Deep): in place of
   }
 }));
 
-// The Source-only levers for the gap between the lines (nr2.js rogue.source; docs/NETLING_2_ROGUE_DRAFTS.md 7.8). All off by default.
+// The Source-only levers for the gap between the lines (nr2.js rogue.source; docs/archive/netling2/ROGUE_DRAFTS.md 7.8). All off by default.
 const { foresightView, nullifyIce, nullifiesLeft } = await import('./sim/netrun/run.js');
 const { planMove, RUN_STYLES } = await import('./sim/netrun-bot.mjs');
 const { sourceSet } = await import('./sim/netrun/nr2.js');

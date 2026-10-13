@@ -1,6 +1,6 @@
 # Netling 2.0 deployment plan
 
-How Netling 2.0 reaches players, decided with the maintainer on 2026-10-13 before the app is built. Nothing here is built or tested yet. Where a claim about a tool or platform is from general knowledge rather than a test, it says so; check those against current docs when the work starts. For 1.0 (a PWA on GitHub Pages) see [PLATFORMS.md](PLATFORMS.md).
+How Netling 2.0 reaches players, decided with the maintainer on 2026-10-13 before the app is built. Nothing here is built or tested yet. Where a claim about a tool or platform is from general knowledge rather than a test, it says so; check those against current docs when the work starts. For 1.0 (a PWA on GitHub Pages) see [PLATFORMS.md](../PLATFORMS.md).
 
 ## Decided
 
@@ -17,7 +17,7 @@ Why Capacitor on Android and not Tauri everywhere: Capacitor's local-notificatio
 
 ## The forecast and the seed
 
-Stage care relies on notifications while the app is closed (the rest call; the Events, Care and Cooldowns classes; [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), 2.6). No shell runs the game's JS reliably in the background, and 1.0 rolls events with `Math.random` during catch-up, so nothing knows ahead of time when an event will happen. The design:
+Stage care relies on notifications while the app is closed (the rest call; the Events, Care and Cooldowns classes; [STAGE_CARE_DRAFTS.md](../archive/netling2/STAGE_CARE_DRAFTS.md), 2.6). No shell runs the game's JS reliably in the background, and 1.0 rolls events with `Math.random` during catch-up, so nothing knows ahead of time when an event will happen. The design:
 
 1. **On going to the background,** draw a fresh seed (`crypto.getRandomValues`) and store it in the save. Simulate forward from the current state with an RNG built from that seed over a fixed **horizon of 36 hours** (decided; an unattended netling is not expected to last much past 24 hours unless hibernated, and 36 leaves a margin). The player cannot act while the app is closed, so the forecast is exact. Schedule a notification for each notifying item in it, within the per-class rules and the budget of 6 a day for Events.
 2. **On reopening,** catch-up runs the elapsed time with the same seeded RNG, so it reproduces the forecast exactly. Then the seed is discarded, every pending notification is cancelled, and play continues on a fresh seed.
@@ -28,7 +28,7 @@ Properties:
 - Only the seed (and the horizon's end) is stored, not the forecast's outcomes, so there is no outcome list to tamper with. A tampered seed only picks a different random future. That is acceptable for a single-player game, but the seed still needs a `clean*` function like any stored value.
 - The sim stays pure, `(state, now, rng)`, so tests and the balance tools drive it as before.
 - **Test to add first:** for random states and gaps, the forecast's events equal what catch-up produces, notification by notification. If those ever disagree, a notification announces an event that never happens.
-- Clock changes: notifications carry absolute times. A clock that jumps is handled like 1.0's catch-up handles it (see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)); reopening cancels and reschedules regardless.
+- Clock changes: notifications carry absolute times. A clock that jumps is handled like 1.0's catch-up handles it (see [KNOWN_ISSUES.md](../KNOWN_ISSUES.md)); reopening cancels and reschedules regardless.
 
 Android limits (general knowledge, to confirm in the spike): Android 14 and later deny exact alarms by default to apps that are not clocks or calendars, and Doze batches inexact alarms. Expect notifications up to several minutes late. That is fine against event windows of 60 or 30 minutes, but a notification must never claim a precise time.
 

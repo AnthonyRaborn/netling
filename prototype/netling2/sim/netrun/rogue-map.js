@@ -1,4 +1,4 @@
-// Rogue's own map build rules (docs/NETLING_2_ROGUE_DRAFTS.md 9.7), simulator stage 2b: applied to an ordinary map after it is built, so every
+// Rogue's own map build rules (docs/archive/netling2/ROGUE_DRAFTS.md 9.7), simulator stage 2b: applied to an ordinary map after it is built, so every
 // random number here is drawn after the ordinary map's, and a map with every rule off is the ordinary map. Pure: (map, rng, rules).
 //   relayFactor  relays beyond one in the relay layer stay with this chance (the others re-roll as another node type): the escape is a place.
 //   toIce        { region: share } of checkpoints that become ICE (the Corp Grid's corp patrols that do notice Rogue).

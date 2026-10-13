@@ -1,241 +1,99 @@
 # Netling 2.0 rule prototypes
 
-## The 2.0 simulator (current)
+Operational reference for the 2.0 rule simulator in `prototype/netling2/sim/` (a fork of 1.0's simulator, netrun rules and balance bot; `src/` and `tools/` are untouched, and before any 2.0 change the fork reproduced `npm run balance` exactly: casual, 100 lives). Not shipped, not in `sw.js`.
 
-`prototype/netling2/sim/` is a fork of 1.0's simulator carrying the 2.0 core life rules as real rules, replacing the scratch patch described further down for everything it covers. `src/` and `tools/` are untouched, and the fork reproduced 1.0's `npm run balance` output exactly before any 2.0 change (casual, 100 lives), so its diffs show only the 2.0 rules. It is a prototype: not shipped, not in `sw.js`.
+**Status.** Nothing here is player-tested. Every number comes from scripted bots, so it is a starting value for the maintainer to decide on, not a measurement of people. Noise is about 2 to 3 points on a rate at 300 lives (about 1.5 points a share on temper levels; differences under about 3 points near 93% are noise). Read "Known limits" before quoting a figure.
 
-| File | What it is |
+Long result tables and per-run narrative live in `../archive/netling2/PROTOTYPES_README_FULL.md` (a byte-identical copy of the previous README; headings below are quoted from it). Design history is in `../archive/netling2/`; the notes files are in `../archive/netling2/notes/` (`docs/archive/netling2/notes/netrun-sim-notes.md`, `docs/archive/netling2/notes/perks-traits-notes.md`, `docs/archive/netling2/notes/egg-pressure-notes.md`). Whole-suite 1000-life re-runs: `../../prototype/netling2/baseline/README.md`.
+
+## Running things
+
+All commands run from the repo root with Node 22. `npm run proto:test` runs the prototype's tests.
+
+| Command | What it does |
 |---|---|
-| `sim/sim.js` | Fork of `src/sim.js`. Standing as two tracks, temper with a 24 hour half-life and the five levels (the flicker guard is `tell.js`'s), bugs, no fault cap, teen and adult evolution with the tie-break weights, care preferences, 22 generic forms per egg |
-| `sim/netrun/run.js` | Fork of `src/netrun/run.js`: ICE games enter the preference history; a disconnect fault owes a bug roll |
-| `sim/netrun-bot.mjs`, `sim/balance.mjs` | Forks of the scripted netrun player and `tools/balance.mjs` (same archetypes, same settings, new report lines) |
-| `sim.test.js` | 38 tests, one or more per rule and one for the role steerers (`npm run proto:test`) |
-| `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain (see Role steerers) |
-| `sim/push-sweep.mjs` | Whether the soft push gets a bugged player to a clinic (see Soft push to run) |
-| `sim/clinic-sweep.mjs` | The clinic against no clearing and home clearing, by share of market nodes (see The clinic) |
-| `sim/challenge-sweep.mjs` | The four challenge runs under the 2.0 abilities and ICE tiers: completion by form and level (netrun notes, section 13) |
-| `sim/foresight-sweep.mjs` | What Foresight (Tune street) is worth: uneven per-game skill, pre-rolled node contents, depth and fields (netrun notes, section 12) |
-| `sim/runcost-sweep.mjs` | The egg run costs at the life level: per archetype, lifetimes with `NR2.eggCost` off and on, and what each cost did (`EGG=iron|program|wetware`; netrun notes, section 11) |
-| `sim/egg-anomaly-sweep.mjs` | The egg-flavored anomalies: what each does to a run of its own egg (`EGG=iron|program|wetware`; see the netrun notes, section 10) |
-| `sim/gap-sweep.mjs`, `sim/human-sweep.mjs` | Survival against the longest gap between check-ins, and against irregular schedules (see Noisy players) |
-| `sim/bug-sweep.mjs` | How a player should handle bugs and what each way costs (see Bug policies) |
-| `sim/temper-sweep.mjs` | How much play the Metronome's 12 hour hold takes (see Temper seekers) |
-| `sim/hunter-sweep.mjs` | How much play the hidden forms take (see Hidden-path hunters) |
+| `npm run proto:balance [runs] [archetype]` | Lifetime simulations per archetype (`sim/balance.mjs`). `DETAIL=1` full report, `JSON=1` JSON (level keys are -2 to 2). 300 lives of all archetypes take about 3.5 minutes |
+| `npm run proto:netrun` | `sim/netrun-sweep.mjs`: per-form netrun outcomes and a parity read-out |
+| `npm run proto:lineage` | `sim/lineage-sweep.mjs`: lives to finish the 18 egg pages (replaces `lines`, `lines2`, `rogue`, `rogue2` on the fork); also tracks the ending and the Rogue gate |
+| `node prototype/netling2/baseline/run-all.mjs` | Every sweep at 1000 lives into `baseline/results` (resumable; read `baseline/README.md` first; never import it, importing runs it) |
 
-**Perks, traits and keepsakes (added later; `PERKS=1`, off by default so every table here reproduces).** Perks by role and lean, traits by role, one keepsake per form, and two new items (Decoy, Salvage cell): design in `docs/NETLING_2_PERKS_TRAITS_DRAFTS.md`, first balance pass in `prototype/netling2/notes/perks-traits-notes.md`. `FORCE_ADULT=<form>` makes every netling grow into that form (a measurement aid). `npm run proto:lineage` now also tracks the ending and the Rogue gate (netrun notes, section 14).
+Environment switches (all off by default, so older tables reproduce). JSON values are objects merged over the defaults.
 
-**Rogue egg, stage 1: home life (added later; `ROGUE=1`, off by default so every table here reproduces).** Rogue as a per-life egg (`s.egg === 'rogue'`): no Standing, one teen, the adult by most wins, the sweep in place of the trace and the intrusion, marks and capture at three, Rogue's perks, traits and keepsakes, and in runs each role's base ability plus the checkpoint part as a stand-in. Run with `SIDES` owner `"none"` (every state at x1); `ROGUE='{"sweepWindowMin":180}'` overrides a number; the bot answers sweeps by `SWEEPBOT=hide|defend|mix`. Design and results: `docs/NETLING_2_ROGUE_DRAFTS.md`, sections 7 and 7.1; outputs `prototype/netling2/baseline/results/followup/rogue-stage1-*` (summary `rogue-stage1-summary.md`). In short: mean full life 79.6% against 89.7% for the NL-0 eggs, all of it on sparse players captured by sweeps that expire (casual 33%, attentive 100%); a 180 minute window brings casual back to 98%. Section 7.2 adds the HIDE lockout and DEFEND's quiet (4 hours and 8 hours, the Rogue defaults since the maintainer chose the 4 hour lockout; `ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` reproduces stage 1; `SWEEPBOT=reserve`; DEFEND into flow (7.3) is now the default). **Stage 2, the hunt in runs** (`NR2.rogue`, on for Rogue; `ROGUE_RUN` overrides it): the trail, the trail hunter, ambushes, danger sense, the kits and Rogue's map rules; `sim/rogue-netrun.mjs` (per region) and `baseline/rogue-stage2.mjs` (whole lives); results and the two candidate settings in the drafts doc, 7.4 (driver `baseline/rogue-hide-lock.mjs`, outputs `rogue-72-*`, for 7.2). **Stage 3, the lineage side** (`sim.js` `sourceExit`, `takeMerge`, `declineMerge`; `sim/rogue-line.js`): a Source exit arms the good end, a clean one offers the merge at once (`MERGEBOT=accept|refuse`), a later mark disarms it, an armed elder's death plays it, and the next netling hatches in the chosen NL-0 egg (M3). `sim/rogue-lineage.mjs <archetype> [lines] [rogueLives]` plays Rogue lines with the NL-0 lives between them (`PICK`, `LINEBOT`, and the lever `FEAT=1`); runner `baseline/rogue-lineage.mjs`, summary `baseline/rogue-lineage-summary.mjs`, outputs `rogue-lineage-*`; results in the drafts doc, 7.5. The whole-life Rogue drivers of stages 1 and 2 pin `MERGEBOT=refuse`, which reproduces their outputs.
+| Switch | Turns on / sets |
+|---|---|
+| `NR2=all` (or a JSON object) | Decided 2.0 netrun rules (`sim/netrun/nr2.js`): abilities per role and lean, harder ICE tier, forced filled cache, 5 minute grace window, light egg run costs, inventory rule, fate, Foresight, wider maps |
+| `PERKS=1` | Perks by role and lean, traits by role, one keepsake per form, Decoy and Salvage cell. `FORCE_ADULT=<form>` makes every netling grow into that form (measurement aid) |
+| `ROGUE=1` (or JSON) | Rogue as a per-life egg (no Standing, one teen, sweep in place of trace and intrusion, capture at three marks). Run with `SIDES` owner `"none"`. `SWEEPBOT=hide\|defend\|mix\|reserve` answers sweeps; `ROGUE_RUN` overrides the hunt in runs; `MERGEBOT=accept\|refuse` for the Source exit merge |
+| `SIDES='{...}'` | Two-sided Charge and Sync, special states (Surge, Wired, Overclock, Overdrive, Overlink), play penalty, burnout; `owner` picks the egg boosted (x`ownerMult`). `SYNCBOT=greedy\|sip\|budget`, `PROGBOT`, `WETBOT`, `ACTBOT` set bot habits |
+| `IRON='{...}'` | Iron's wear (hot line 75, cold line 20, rest cooling floor 20). `IRONBOT=avoid\|chill` cooling bots. `WET='{...}'` is Wetware's shock stand-in (not with `IRON`) |
+| `OVERUSE='{...}'` | Owner strain: overfeeding (Program) and overplaying (Wetware) add strain that raises infection hazard |
+| `BRAKE='{...}'` | Wetware's Overlink brake (break at Integrity 40, 12 hour lock); needs `SIDES` (and `OVERUSE` for the strain break) |
+| `STAGE='{...}'` | Stage-care package (stage drain and cache multipliers, rest button, tired state) |
+| `STANDINGGAIN=n` | Multiplies every Standing source (costs and tie weights stay absolute) |
+| `BUGS='{...}'` | Bug settings: `chance`, `max`, `on`, `homeClear`, `integrityFlat`, `regenCut`, `charge`, `sync`, `heat`, `integrity`, `startBugs`. Defaults are `BUG_CFG` |
+| `CLINIC='{...}'` | `clinicShare` (0.25), `healingOnlyAtClinic` |
+| `CLEAR=scrip\|both\|none` | How bots clear bugs unless the archetype sets its own `fix`: scrip, or scrip and 2 Standing, or never |
+| `PREF='{"on":false}'`, `PREFBOT=follow` | Care preferences off; bots follow their netling's preference |
+| `INV`, `EGG=iron\|program\|wetware`, `SIM=1.0` | Inventory rules for `item-sweep.mjs` (`'{"slots":8,"stack":3,"scrap":0.5}'`); egg for `runcost-sweep.mjs` and `egg-anomaly-sweep.mjs`; `gap-sweep.mjs` on 1.0's simulator |
 
-**Netrun rules (added after the tables below; see `prototype/netling2/notes/netrun-sim-notes.md`).** The fork also carries the decided 2.0 netrun rules as switches in `sim/netrun/nr2.js`, off by default so the tables below reproduce: one ability per role and lean at two levels, a harder tier of ICE, the forced filled cache, the 5 minute grace window and light egg run costs (`NR2=all` switches them on). The codex cap is now 12, Root Access arrives mid-life, and the elder feat can follow the account (`CFG.featFor`). New commands: `npm run proto:netrun` (`sim/netrun-sweep.mjs`, per-form netrun outcomes and a parity read-out), `npm run proto:lineage` (`sim/lineage-sweep.mjs`, lives to finish the 18 egg pages, replacing `lines`, `lines2`, `rogue` and `rogue2` on the fork) and `sim/grace-sweep.mjs`, and `sim/item-sweep.mjs` (what the inventory loses; `INV='{"slots":8,"stack":3,"scrap":0.5}'` tries inventory rules, `NR2.inventory` is the decided stacking plus end-of-run choice). **The tables below were re-run with these rules on (`NR2=all`, 300 lives unless a sweep says otherwise; 200 for the sweeps that default to 200, 150 for the clinic against the final pressure design): the clinic, soft push, fidelity, role, hunter, noisy, gap, bug policy, temper seeker and steerer tables carry the refreshed figures, and they mostly agree with the earlier ones within noise (about 2 to 3 points). Where they moved by more than noise: casual and worker end more unsteady (the harder ICE and the new abilities change disconnects), the daredevil and overclocker end more unsteady still, unsteady-warm play holds the Metronome more often, the Segfault route reaches the bug ceiling more often (14% of lives against 5%), and survival at 4 and 5 hour gaps is lower (the earlier gap table predates the stronger bugs). Not re-run: the egg pressure sweeps, the exchange stock and the quoted bug-lethality experiments (their text still carries the figures it was measured with).** The notes file lists what is stale and which sweep tests which open balance question.
+Rogue defaults: HIDE lockout 4 hours, DEFEND quiet 8 hours; `ROGUE='{"hideLockMin":0,"defendQuietMin":0}'` reproduces stage 1.
 
-**Baseline check (1000 lives, `NR2=all PERKS=1`; `prototype/netling2/baseline/`).** A later full re-run with perks on and more lives was compared with the tables below. Most rows agree within noise: role-sweep, hunters at 6 and 17 check-ins a day, gap, bug policies for the worker, the exchange stock, the item sweep and the grace windows. Where the baseline differs by more than noise (perks are the likely cause, not checked): `seek-unsteady` holds 12 hours in 33% of lives at 17 check-ins a day (table 44%) and 24 hours in 11% (21%); the Segfault seeker reaches the bug ceiling in 16% with 14.6 faults; `hunter-shown` at 9 check-ins a day gives the hidden teen and adult in 51% and 52% (45% and 44%); clinic-sweep casual is 93% / 95% / 95% (no way, home, clinic 25%) and the worker 82% with no way and 82% with clinics, ceiling 16%; bug-sweep casual ignoring bugs is 92% full life, 7.5 faults, 0.91 bugs, 13% at the ceiling; push-sweep worker with no push 82%, ceiling 16%, and with statements and the job board at 50% 86%, 0.28 bugs, 4% at the ceiling. The tables keep the `NR2=all` figures they were measured with; read the ranges, not the single numbers. The egg pressure and run-cost results in the baseline belong to the egg pressure work and are not compared here.
+## Map of sim/ tools
 
-Run: `npm run proto:balance [runs] [archetype]` (`DETAIL=1` for the full report, `JSON=1` for JSON, whose level keys are the numbers -2 to 2). Settings beyond 1.0's: `CLEAR=scrip|both|none` (how bots clear bugs unless the archetype sets its own `fix`: scrip at check-ins, or also 2 Standing, one from each track; default `scrip`), `PREF='{"on":false}'` (preferences off), `PREFBOT=follow` (bots follow their netling's preference), `BUGS='{"chance":0.5,"max":8}'`. 300 lives of all 36 archetypes take about 3.5 minutes.
+| File | Question it answers |
+|---|---|
+| `sim/sim.js`, `sim/netrun/*` | The rules: Standing as two tracks, temper (24 hour half-life, five levels), bugs, no fault cap, teen/adult evolution, care preferences, 22 generic forms per egg; netrun rules, `nr2.js` switches, egg anomalies, Rogue map |
+| `sim/netrun-bot.mjs`, `sim/balance.mjs` | Scripted netrun player and the archetype balance tool |
+| `sim/role-sweep.mjs` | How committed to one game a player must be for the role to be certain |
+| `sim/hunter-sweep.mjs` | How much play the hidden forms take |
+| `sim/temper-sweep.mjs` | How much play the Metronome's 12 hour hold takes |
+| `sim/gap-sweep.mjs`, `sim/human-sweep.mjs` | Survival against the longest gap between check-ins, and against irregular schedules |
+| `sim/bug-sweep.mjs` | How a player should handle bugs (home-clearing policies, sets `homeClear`) |
+| `sim/clinic-sweep.mjs`, `sim/clinic-final.mjs` | The clinic against no clearing and home clearing; against the final egg pressure design (share and fee) |
+| `sim/push-sweep.mjs` | Whether the soft push gets a bugged player to a clinic |
+| `sim/challenge-sweep.mjs` | The four challenge runs under 2.0 abilities and ICE tiers (netrun notes, section 13) |
+| `sim/foresight-sweep.mjs` | What Foresight (Tune street) is worth (netrun notes, section 12; `UPKEEP`) |
+| `sim/runcost-sweep.mjs`, `sim/egg-anomaly-sweep.mjs` | Egg run costs at the life level; egg-flavored anomalies (netrun notes, sections 11 and 10) |
+| `sim/grace-sweep.mjs`, `sim/item-sweep.mjs`, `sim/exchange-stock.mjs` | The grace window; what the inventory loses; whether the corp exchange stock moves the bots |
+| `sim/sides-sweep.mjs`, `iron-sweep`, `iron-cold-sweep`, `band-sweep`, `stat-profile` (all `.mjs`) | Egg pressures: two-sided stats, Iron's wear, its cold line and rest floor, level bands (rejected), per-stat profiles (`docs/archive/netling2/notes/egg-pressure-notes.md`) |
+| `sim/hint-sweep.mjs`, `sim/heat-hint-sweep.mjs` | How often the one-time pre-state and Overclock/wear captions show (`HINT_MIN`) |
+| `sim/rogue-netrun.mjs`, `sim/rogue-lineage.mjs` | Rogue's hunt per region; Rogue lines with NL-0 lives between them (`PICK`, `LINEBOT`, `FEAT=1`) |
+| `baseline/*.mjs` | Whole-suite 1000-life runner and Rogue/gap re-run drivers (`gap-reruns.mjs` runs the "Do bugs kill?" re-run) |
 
-**The clinic (maintainer's design, first pass).** Bugs cannot be cleared away from a netrun; the only way is a **clinic**, a third kind of market node (`flavor: 'clinic'`, rolled once per market node at `clinicShare` 0.25, so black and corp markets keep three quarters between them). A clinic is unaligned (no Standing lean), fixes one bug for the market Charge fee (12) plus 15 scrip, or 2 Standing in a split the player picks (2 corp, 1 and 1, or 2 street), and stays open after a fix, so several can be bought in a visit; a purchase or leaving ends it. It is also the only market that sells the healing items, Coolant cell, Repair kit and Antivirus patch (`HEALING`; the black market's and the corp exchange's stock no longer contain them; the corp exchange sells voucher 3, booster 2, bypass chip 1 and memory 1 instead, a proposal: `sim/exchange-stock.mjs` shows that without it every exchange visit offered the same voucher and memory pair, and that the bots move within noise under any of the four stocks tried), 12 Charge plus the item's scrip price, with no accessory offer. Healing items are still found as loot and dropped by wins and events. Bots with bugs prefer a clinic when one is in sight (`seekClinic`) and pay by their `fix` policy (default scrip first, then Standing). `CLINIC='{"clinicShare":0.5,"healingOnlyAtClinic":false}'` overrides the settings; `BUGS='{"homeClear":true}'` allows clearing at a check-in as before. What the maintainer did not specify and I chose: the share, the fee, the stock weights (coolant 3, repair 3, antivirus 2), one fix at a time with the visit staying open, and clinic nodes in daily traces (none).
+More sweeps exist in `sim/` (`overuse-sweep`, `elder-sweep`, `act-sweep`, ...); see each file's header and `baseline/README.md`.
 
-`clinic-sweep.mjs [lives] [bases]` compares ways of handling bugs. 300 lives, full-life rate, bugs carried on average, bugs at the end, lives that reached the ceiling, clinic visits and bugs cleared a life:
+Archetypes added in the fork (defined in `sim/balance.mjs`): `steer-<role>-corp|street` (breach, dodge, tune, feast), `nudge-breach`, `hunter-exact|shown|shown-rotation|casual`, `human-casual|regular|keen|bursty`, `seek-steady|unsteady|unsteady-segfault`.
 
-| Base | Case | Full life | Bugs average / end | Ceiling | Visits / cleared |
-|---|---|---|---|---|---|
-| casual | no way to clear | 91% | 0.97 / 2.25 | 16% | 0.0 / 0.0 |
-| casual | home clearing (earlier rules) | 95% | 0.12 / 0.07 | 0% | 0.0 / 1.7 |
-| casual | clinic 10% | 95% | 0.51 / 0.97 | 5% | 1.7 / 1.2 |
-| casual | **clinic 25%** | 94% | 0.28 / 0.48 | 2% | 3.5 / 1.4 |
-| casual | clinic 50% | 93% | 0.16 / 0.34 | 0% | 6.8 / 1.4 |
-| casual | clinic 25%, healing also in markets | 95% | 0.23 / 0.42 | 0% | 3.7 / 1.4 |
-| worker | no way to clear | 79% | 1.04 / 2.57 | 27% | 0.0 / 0.0 |
-| worker | home clearing (earlier rules) | 84% | 0.82 / 1.79 | 19% | 0.0 / 0.7 |
-| worker | **clinic 25%** | 83% | 0.83 / 2.01 | 21% | 0.6 / 0.4 |
-| worker | clinic 50% | 83% | 0.72 / 1.73 | 18% | 1.2 / 0.7 |
-| attentive | **clinic 25%** | 100% | 0.01 / 0.03 | 0% | 5.9 / 0.1 |
-| overclocker | **clinic 25%** | 95% | 0.23 / 0.54 | 2% | 0.0 / 0.0 |
-| human-regular | no way to clear | 29% | 0.49 / 1.48 | 5% | 0.0 / 0.0 |
-| human-regular | **clinic 25%** | 26% | 0.34 / 1.04 | 3% | 0.9 / 0.3 |
+## The clinic
 
-Reading it (bug effects as chosen below). A player who netruns often (casual makes 17 runs a life) meets a clinic 3.5 times and carries 0.3 bugs on average: 94% full life, about as good as clearing at home (95%) and above having no way to clear (91%). **A player who rarely or never netruns cannot clear bugs at all**: the careful worker (2 runs a life, only when healthy and soon back) meets 0.6 clinics, ends at 83% against 79% with no way to clear, and reaches the bug ceiling in 21% of lives; the overclocker (no runs) and the noisy players (3 runs) are no better off. That removes the Standing price's use for exactly the players the sketch said it was for ("the Standing price helps those who do not run"): the Standing payment now needs a netrun too. Removing the healing items from the other markets changes little at this scale (casual ends alive 94% of the time against 95% when the markets still stock them, within noise). Limits: bots detour to a clinic only when it is one step ahead or within three steps and visible; the clinic's share, fee and stock are guesses; bugs do not carry between lives.
+Decided design input (maintainer's design, kept after re-measuring against the final pressure design). Bugs cannot be cleared away from a netrun; only at a **clinic**, a third unaligned market node (`flavor: 'clinic'`, `clinicShare` 0.25 of market nodes). It fixes one bug for the market Charge fee (12) plus 15 scrip, or 2 Standing (2 corp, 1 and 1, or 2 street), stays open after a fix, and is the only market selling the healing items (Coolant cell, Repair kit, Antivirus patch; stock weights 3, 3, 2, unmeasured). Bots with bugs prefer a clinic in sight and pay by their `fix` policy.
 
-**The clinic against the final pressure design (re-measured).** `sim/clinic-final.mjs [lives] [bases]`: each egg with its own pressure (Iron wear and Overclock x3, Program Overdrive, Wetware Overlink with its brake, owner x3, tripled benefits, doubled costs), the default bots, 150 lives a cell, share of market nodes 10% / 25% (now) / 40% and a scrip fee of 10 / 15 (now) / 25 at the 25% share. Simulator output only, not unit-tested.
-- **Share.** 25% stays the best. Casual: full-life 0.947 to 0.953 at 25% (0.920 to 0.947 at 10%, 0.927 to 0.933 at 40%), bugs carried 0.24 to 0.26 on average (0.41 to 0.46 at 10%, 0.16 to 0.19 at 40%), bug ceiling in 0.7% of lives (2% to 5% at 10%, none at 40%). A larger share clears a little more but takes market nodes away and costs about two points of full-life. Attentive players visit 5.5 to 5.9 times a life at 25% and clear 0.1 to 0.2 bugs: they rarely have any.
-- **Fee.** 10, 15 and 25 scrip give the same outcomes within noise (scrip spent 1 to 19 a life, never binding): the fee is not a lever; keep 15.
-- **Eggs.** The three eggs behave the same at the clinic (casual faults 6.7 to 7.0, bugs carried 0.24 to 0.26); the final pressure design does not change what the clinic needs to do.
-- **Workers still hit the bug ceiling.** Worker full-life 0.847 to 0.853, bugs carried 0.75 to 0.77, 17% to 19% of lives at the ceiling at any share (20% to 21% at 10%): a worker makes 0.5 clinic visits a life, so the share barely matters; the soft push (statements and the clinic job) is the lever, and it was not on in this run (its earlier measurement took the worker's ceiling from 20% to 4%).
-- **Overclocker and sysadmin-like players never run,** so they never visit and clear nothing (bugs carried 0.17 to 0.34); the clinic is irrelevant to them.
-- **Not measured:** the stock weights (coolant 3, repair 3, antivirus 2); the bots' item use is simple, so a measurement would say little about a human.
-- **Decision (kept):** share 25% and fee 15 scrip or 2 Standing; stock weights unchanged.
+- Share 25% is the best of 10/25/40; the fee is not a lever.
+- Casual: 94% full life, 3.5 visits (no way to clear 91%, home clearing 95%).
+- Players who rarely or never netrun cannot clear bugs: worker 83% against 79% with no way to clear, 21% at the bug ceiling; the overclocker (no runs) never visits.
+- The soft push (statements plus the clinic job, 70% of offered jobs while bugged, 15 scrip) is the lever for workers: ceiling 21% to 6% when it acts half the time.
 
-**Soft push to run (maintainer's request).** A bugged netling should be nudged to a clinic without being forced. Two nudges are modeled; neither is a penalty.
-- **The netling says so.** It logs a line when a bug settles in (a different one at 3 or more bugs) and now and then while it is idle and bugged (`bugNagPerHour` 0.15, the chatter rate), each pointing at the clinics out on the net. Text only: no rule depends on it. The bots cannot read it, so `pushRuns` stands for how likely a player is to act on it.
-- **A clinic job.** A new contract kind, `clinic` ("get a bug fixed at a clinic"): posted only while the netling has bugs (70% of the jobs it is offered, `clinicContractChance`), at twice the usual rate (`contractBuggedMult`), pays 15 scrip (a fix's price) and nothing else, and when it is taken along every market early enough in the map is a clinic, so every route passes one. It lapses after 6 hours as any job does. Bots read the board at each check-in only if they set `contracts`; a posted job takes the bot to its region. `pushRuns` is the chance a bugged (or job-holding) player goes for a netrun despite their usual reluctance (a player who does not run goes carefully; a player who does ignores `runChance` and the 'back soon' rule).
+Full results: ../archive/netling2/PROTOTYPES_README_FULL.md, sections "The clinic (maintainer's design, first pass)", "The clinic against the final pressure design (re-measured)" and "Soft push to run (maintainer's request)".
 
-`push-sweep.mjs [lives] [bases]` compares: no push; the statements alone (the player goes 50% of the time when bugged); statements and the job board (goes 50%); the job board alone; and a player who always goes. 300 lives; bugs on average, lives at the bug ceiling, clinic visits and runs a life, full-life rate:
+## Headline findings (decided inputs only)
 
-| Base | Case | Bugs average | Ceiling | Visits | Runs | Full life |
-|---|---|---|---|---|---|---|
-| worker | no push | 0.83 | 21% | 0.6 | 2.0 | 83% |
-| worker | statements, goes 50% | 0.49 | 8% | 1.1 | 3.5 | 82% |
-| worker | statements + job board, 50% | 0.32 | 6% | 2.4 | 4.6 | 88% |
-| worker | job board only | 0.69 | 17% | 0.9 | 2.1 | 86% |
-| worker | statements + job board, always | 0.20 | 2% | 3.1 | 6.8 | 89% |
-| human-regular | no push | 0.34 | 3% | 0.9 | 3.1 | 26% |
-| human-regular | statements + job board, 50% | 0.21 | 0% | 1.9 | 4.7 | 35% |
-| human-casual | no push | 0.42 | 3% | 0.3 | 1.9 | 4% |
-| human-casual | statements + job board, always | 0.36 | 1% | 1.0 | 2.8 | 8% |
-| overclocker (no runs) | no push | 0.23 | 2% | 0.0 | 0.0 | 95% |
-| overclocker | statements, goes 50% | 0.10 | 1% | 0.3 | 1.0 | 96% |
-| overclocker | statements + job board, 50% | 0.08 | 0% | 2.3 | 7.5 | 95% |
+1. **Survival depends on the longest awake gap, not on check-in count.** Casual, evenly spaced, full life: 2 h 99%, 3 h 94%, 4 h 90%, 5 h 58%, 6 h 19%, 8 h 3% (1.0 behaves the same). Six check-ins a day at random times survive in 37% to 40% of lives. A work-day gap is not survivable (maintainer decided it stays). Full table: archive file, "Noisy players".
+2. **Bugs kill moderately (decided: doubling plus flat 0.5 an hour a bug).** `BUG_CFG`: Charge and Sync +16%, Heat +20%, damage +8%, `integrityFlat` 0.5. Under the now rules (1000 lives, 30% a fault) points of full life lost to bugs: casual 0.7, worker 28.7, human-regular 6.2, human-keen 1.9; the worker carries 1.96 bugs and sits at the ceiling in 45% of lives (the spiral to watch). Archive file, "Do bugs kill? (decided: yes, moderately)".
+3. **Role is cheap to steer.** Share of plays in one game: 0.2 gives role certain in 31%, 0.5 in 96%, 0.8 in 100%. Archive file, "Role steerers".
+4. **The hidden forms need wins, not Standing.** Tracks stay within 1 of each other in 96% to 100% of lives; hurdle is 3 wins in every game by 17 hours and 29 wins in all by 51 hours. `hunter-shown` at 17 check-ins a day: hidden teen 85%, adult 97%; 9 a day 45% and 44%; 6 a day 5% and 1%. Archive file, "Hidden-path hunters".
+5. **Following the preference works against the hidden path and the role.** Hidden adult for `hunter-shown` falls from 98% to 22%; steerers fail to reach a certain role in 27% to 41% of lives. Archive file, "Hidden-path hunters following their netling's preference" and "Role steerers following their netling's preference".
+6. **Metronome (12 hour hold) at 17 check-ins a day:** `seek-steady` 90%, `seek-unsteady` 44%, `seek-unsteady-segfault` 92% (13.2 faults, 14% at the bug ceiling). `seek-steady` falls to 30% at 9 a day and 1% at 6 a day. Archive file, "Temper seekers".
+7. **Care preferences pull the unsteady end back:** overclocker's 12 hour unsteady hold 89% with preferences off against 80% on; daredevil 45% against 35%. Archive file, "New findings".
+8. **Rogue stage 1:** mean full life 79.6% against 89.7% for the NL-0 eggs, all on sparse players captured by expiring sweeps (casual 33%, attentive 100%); a 180 minute window brings casual to 98%. Design and results: `../archive/netling2/ROGUE_DRAFTS.md`, sections 7 to 7.5.
+9. Egg pressures, perks and netrun abilities: figures are in `../archive/netling2/EGG_PRESSURES.md`, `PERKS_TRAITS_DRAFTS.md` and the notes files, not here.
 
-Reading it. The nudges work for players who can run: the worker's bugs fall from 0.83 to 0.32 on average and the bug ceiling from 21% to 6% of lives, with survival up from 83% to 88%, when both nudges act half the time; the overclocker, who never ran, clears its bugs once it is nudged (0.23 to 0.08). The statements alone move a worker less (0.49 bugs, 8% at the ceiling) and do not help survival (82%): a nudged run ignores the 'be back soon' rule and costs some disconnects. The job board alone helps a little (0.69, 86%). A noisy player who is rarely around (`human-casual`, 4% full life) gains little because they do not live to see a clinic. **Side effects to know:** bots that read the board accept every kind of job, not only the clinic one, so their scrip rises (a worker ends with about 46 against 20), which is an economy effect of using contracts at all (1.0's bots never did) and not part of the push. The statements consume random numbers, so runs with bugs differ slightly from before they existed.
-
-**Do bugs kill? (decided: yes, moderately).** The maintainer's thought: neglect or inconsistent care leads to bugs, bugs push toward death, not necessarily a spiral. With the first effects (Charge and Sync drain +8% a bug, Heat gain +10%, Integrity damage +4%) they **hardly did**: holding five bugs from birth cost a casual netling a point and a worker 5 points, and bugs on against bugs off cost -3 to 1 points of full life (noise) for casual, worker, human-regular and human-keen. Candidates measured, in points of full life lost to bugs (30% a fault / 50%; casual, worker, human-regular, human-keen): a flat Integrity loss of 0.75 an hour a bug: -1, 4, 1, 2 / -1, 7, 3, 1; doubling every multiplier: 1, 1, 3, 0 / 3, 10, 5, 5; doubling and a flat 0.5: 1, 8, 6, 4 / 3, 22, 5, 8; tripling: 1, 14, 6, 3 / 5, 31, 10, 7 with the careful worker at the ceiling in 27% to 56% of lives (the spiral). **The maintainer chose doubling plus a flat 0.5 an hour a bug**, now the default (`BUG_CFG`: Charge and Sync +16%, Heat +20%, damage +8%, `integrityFlat` 0.5). With it, 400 lives each, points of full life lost to bugs at 30% a fault / 50%: casual 1 / 2, worker 6 / 22, attentive 0 / 0, human-regular 5 / 8, human-keen 3 / 5; the careful worker, who cannot reach clinics, carries 0.84 bugs on average and is at the ceiling in 21% of lives (52% at 50% a fault); and holding bugs from birth (no new ones) a casual netling lives 95%, 95%, 93%, 74% with 0, 2, 3, 5 bugs, a worker 90%, 81%, 65%, 19%, an attentive one 100%, 100%, 100%, 99%. **Re-run under the now rules (2026-10-12; `prototype/netling2/baseline/gap-reruns.mjs`, outputs `baseline/results/gaps/bugs-*`, 1000 lives, `NR2=all PERKS=1` with stage care, Standing gain 2, the fix rule and cost 5, the break and `OVERUSE`; 30% a fault):** points of full life lost to bugs (bugs on against `max` 0): casual 0.7 (95.1 to 94.4), worker 28.7 (93.2 to 64.5), human-regular 6.2 (31.0 to 24.8), human-keen 1.9 (67.5 to 65.6). The worker, who cannot reach clinics, now carries 1.96 bugs on average and is at the ceiling in 45% of lives (0.84 and 21% before): its cost went from 6 to 29 points, the spiral this paragraph warned of; the baseline README's stage-care follow-up ties the worker's drop to the baby stage (x2.4 drain, a baby's faults roll bugs), not isolated here (its "worker with no push 82.4 to 64.5%" is the same row). Held from birth with no new ones (`startBugs` 0, 2, 3, 5, `chance` 0): casual 95.5%, 92.2%, 90.5%, 75.8%; worker 91.2%, 78.0%, 60.8%, 14.4%; attentive 99.7%, 99.8%, 99.8%, 99.6%; so a held bug costs about what it did (within 4 points, the worker slightly more), and the worker's larger loss comes from catching more bugs, not from each bug hurting more. Not re-run: the 50% a fault column and the candidate effects (rejected). Bugs off by `max` 0 and by `chance` 0 differ by about 2 points for the worker (93.2 against 91.2) through the random numbers the roll consumes, so read 2 points as noise here. So neglect now costs lives where it did not, mostly for players who cannot clear (the worker's ceiling rate is the spiral to watch), and a clinic recovers most of it (casual with no way to clear 87%, with clinics 95%; worker 78% and 83%, 85% with half the markets clinics). The tables in Bug policies (home clearing), the noisy-player and temper-seeker tables and the earlier role and hunter tables were measured before the change, with the weaker bugs; the clinic and push tables were re-run. Knobs: `BUGS='{"integrityFlat":0.75,"regenCut":0.15,"charge":0.16,"sync":0.16,"heat":0.2,"integrity":0.08}'` (`regenCut` cuts Integrity regeneration by that share a bug); `startBugs` starts a life with that many (experiments only).
-
-**Rules modeled** (sketch sections in brackets): Standing sources, 0.25 a packet, 1 for COMPLY, HIDE, an ignored trace, a voucher, a Black ICE shard, checkpoint and anomaly choices, 0.5 for market purchases, nothing for care or games (Standing; netrun leans pass through an adapter, `attachAxes`); temper sources and decay, items +1, Segfault -4, shown level with guard 1.0 (Temper); bugs 30% a fault, ceiling 5, drains +8%, +8%, +10% Heat, +4% Integrity damage, cleared at a clinic node for 15 scrip or 2 Standing plus Charge (Bugs, and The clinic above); faults uncapped, integrity collapse and the end of the cycle the only deaths (Risks); teen and adult forms by fractional Standing against whole-number cutpoints (the gap's whole part sets the weight; decided by the maintainer) and wins, hidden teen at 3 wins each, hidden adult at 4 each and 29, tracks within a point (Evolution); care preferences with the Sync bonus, the request bias and ICE in the history (Care preferences). It also records, per life, awake time at each temper level, the longest unbroken 12 hour hold at a strong level with neglect level 2 paused (the Metronome's test), and awake hours at neglect level 2.
-
-**Not modeled:** the sketch's debug station anomaly (dropped; the clinic replaces it), the clinic's look on the map, and the value of the exchange's new stock to a human (the bots buy the first wanted offer); 2.0 perks, traits, keepsakes and netrun abilities (undesigned, so the 22 forms differ only in how they are reached and the three eggs behave the same); Root Access granted at once and the elder tiers (progression layer, use the drivers below); egg pages and the Rogue gate (since added: `lineage-sweep.mjs`, with real egg page drops under `NR2.eggPages`); neglect's look; the sprite. The 1.0 archetypes cycle games in a fixed order, so for them the role is never certain (the top two games stay within 5 wins); the role steerers below are the only ones that choose a game. No bot reacts to a glitching sprite; the Standing display (floors) is not modeled.
-
-**Fidelity checks** (300 lives, share of lives ending at each shown temper level, strongly unsteady / unsteady / middle / steady / strongly steady; the sketch's figures came from the scratch patch):
-
-| Archetype | Sketch | This simulator |
-|---|---|---|
-| Casual | 0/20/76/4/0 | 1/28/68/3/0 |
-| Worker | 2/37/60/0/0 | 13/48/39/0/0 |
-| Attentive | 0/0/10/46/43 | 0/0/14/44/42 |
-| Steer-daemon | 0/0/1/25/74 | 0/0/2/20/78 |
-| Steer-glitch | 6/49/45/0/0 | 7/53/39/1/0 |
-| Daredevil | 24/53/22/0/0 | 36/56/7/0/0 |
-| Overclocker | 72/27/0/0/0 | 84/16/0/0/0 |
-| Neglectful | 18/56/25/0/0 | 15/41/44/0/0 |
-
-Also in line (refreshed): casual Standing by adulthood about 8.8 and 8.9 (the sketch: about 10 and 8); a worker without clearing 9.7 faults and 27% at the bug ceiling (the sketch: 7.7 and 17%; the bugs are stronger now); the 12 hour hold reach with neglect level 2 paused: attentive 43% (52%), steer-daemon 81% (87%), daredevil 38% (34%), steer-glitch 6% (5%), overclocker 81% (90%). Casual full-life rate 94% (the sketch: 95.7% without the cap). **The hot end does not reproduce** (daredevil and overclocker end more unsteady), and the gap is not explained: it does not come from bugs (switching them off changes nothing), and switching care preferences off widens it (overclocker 91% strongly unsteady, daredevil 35%), so preferences narrow it without closing it.
-
-**Role steerers.** Nine archetypes added: `steer-<role>-corp` and `steer-<role>-street` for breach, dodge, tune and feast (attentive, steering the lean as `steer-chrome` and `steer-firewall` do, and giving 80% of their plays to one game, the rest rotating; they decline requests for other games), and `nudge-breach` (50% of plays in one game, packets and traces leaning corp). 300 lives each: every steerer ends as exactly its role and lean (100%), with the role certain (a lead of 5 or more wins) and the lean certain at adulthood in 100% of lives; at the teen check the lean is certain in 85% to 99% (corp 85% to 94%, street 95% to 99%), which matches the sketch's 92% to 98% measured on 1.0's allegiance. The half-committed `nudge-breach` still ends as a breach form 98% of the time (breachCorp 95%) with the role certain in 95%. `role-sweep.mjs [lives] [shares]` varies the share of plays given to one game with no lean steering (300 lives; the rest rotate, so a share of 0 is the plain rotation):
-
-| Share of plays in one game | Role certain at adulthood | Adult is a role of that game (a quarter by chance) |
-|---|---|---|
-| 0 | 1% | 26% |
-| 0.1 | 10% | 41% |
-| 0.2 | 31% | 60% |
-| 0.3 | 61% | 80% |
-| 0.5 | 96% | 98% |
-| 0.8 | 100% | 100% |
-
-So role is cheap to steer: a player who gives one game twice the plays of each other game (a share of 0.2 is 40% of plays against 20% each) already ends in that role two times in three, and a share of 0.5 is nearly certain. This is the middle the sketch said it had not measured. It is one bot design (the focus game is chosen at random each play, wins are at the archetype's win rate for every game, and the play count is fixed by Sync need), and it ignores care preferences (`PREFBOT` unset), which pull a steady netling toward its last two games and an unsteady one away from them.
-
-**Hidden-path hunters.** Four archetypes added to the hunter `ghosthunter` (1.0's, which balances packets and trace answers and rotates the games): `hunter-exact` also plays whichever game it has won least and answers requests only for games that are not ahead; `hunter-shown` is the same but sees only the HUD's floors of Standing (`shown`, the `leanSeen` helper; on a shown tie it alternates packets); `hunter-shown-rotation` keeps the plain rotation to isolate the display; `hunter-casual` is `hunter-shown` on a casual schedule and skill. 300 lives each:
-
-| Archetype | Hidden teen | Hidden adult | Wins 3 in each game by the teen check | Gap at most 1 at the teen check |
-|---|---|---|---|---|
-| `ghosthunter` (rotation, true fractions) | 36% | 96% | 36% | 100% |
-| `hunter-exact` | 82% | 95% | 82% | 100% |
-| `hunter-shown` | 85% | 98% | 86% | 99% |
-| `hunter-shown-rotation` | 39% | 97% | n/a | n/a |
-| `hunter-casual` | 0% | 0% | 0% | 96% |
-
-So the Standing condition is not the hurdle even when the player sees only floors: the tracks stay within 1 of each other in 96% to 100% of lives, because a player who balances keeps the gap small and fractions only add a quarter point either way. The hurdle is wins: 3 in every game by 17 hours (plain rotation reaches it in 36%, aiming at the least-won game in 82% to 86%) and, for the adult, 29 wins in all by 51 hours (96% to 98% for these gamers). `hunter-sweep.mjs [lives] [gaps] [winRates]` varies play: with `hunter-shown`, hourly check-ins (17 a day) give a hidden teen in 85% and a hidden adult in 97%; every two hours (9 a day) 45% and 44%; every three (6 a day) 5% and 1%; fewer, nothing. Win rate matters at nine check-ins a day (60%: 24% and 10%; 75%: 45% and 44%; 90%: 71% and 82%). These bots are gamers (they play toward a Sync of 90 and up to four games a check-in), so they play far more than the other archetypes (about 75 wins a life against 50 for `attentive`). Read it as: the hidden forms need an attentive, game-focused player who also balances packets; the sketch's aim that they be hard to reach by accident holds, and the wins requirement, not the Standing one, is what makes it hard. Limits: bots that decide perfectly from the floors; no real player counts wins per game without a tally, and the sketch's wins-per-game tally per life is what would make this possible.
-
-**Noisy players.** Four `human-*` archetypes with schedules and habits that vary: `perDay` check-ins a day (scaled 0.7 to 1.3 each day, at random times that cluster in the morning, around midday and in the evening, 15 minutes apart at least), a share of busy days (1 or 2 check-ins) and off days (0 or 1), chores skipped one time in `lapse` (curing, purging, cooling, trace and intrusion answers, the lights), a mood that moves the win rate each check-in, a favorite game for a share of plays and any other game otherwise, netruns only some of the time, and topping up Charge and Sync before a gap of 4 hours or more (`prepare`). `human-casual` (6 a day, busy 25%, off 10%, lapse 20%), `human-regular` (9 a day), `human-keen` (14 a day) and `human-bursty` (14, 1, 10, 0, 12 check-ins on days 1 to 5). There is no steering: packets and trace answers are random. 300 lives:
-
-| Archetype | Teen | Adult | Full life | Median days | Deaths by integrity collapse |
-|---|---|---|---|---|---|
-| `human-casual` | 78% | 28% | 4% | 1.4 | 96% |
-| `human-regular` | 93% | 64% | 26% | 3.3 | 74% |
-| `human-keen` | 97% | 88% | 65% | 5.0 | 35% |
-| `human-bursty` | 100% | 15% | 0% | 1.6 | 100% |
-
-**This is the main finding: survival depends on the longest awake gap, not on how often the player checks in.** `gap-sweep.mjs` runs the casual archetype with check-ins evenly spaced every N hours from 07:00 to 23:00 (300 lives; `SIM=1.0` runs 1.0's simulator for the same table):
-
-| Gap | Check-ins a day | Full life, 2.0 | Full life, 1.0 |
-|---|---|---|---|
-| 2 h | 9 | 99% | 99% |
-| 3 h | 6 | 94% | 95% |
-| 4 h | 5 | 90% | 84% |
-| 5 h | 4 | 58% | 35% |
-| 6 h | 3 | 19% | 27% |
-| 8 h | 3 | 3% | 0% |
-
-Gaps of 4 hours or less are survivable, 5 hours costs four lives in ten, and 6 hours or more (a work day away) kills most netlings (decided by the maintainer to stay: a work-day gap is not survivable), in 1.0 as well as in this simulator. Six check-ins a day at random times survive in only 40% of lives (`human-sweep.mjs`: 4 a day 9%, 6 37%, 8 60%, 10 74%, 12 88%, 16 93%), against 95% when they are evenly spaced; adding lapses lowers each by 3 to 20 points; adding busy and off days (a quarter of days with 1 or 2 check-ins, a tenth with 0 or 1) caps survival near 25% however many check-ins the other days have (6 a day: 6%, 16 a day: 22%), because one day with at most two check-ins is usually fatal. Topping up before a long gap made no consistent difference (runs with and without `prepare` were within about 10 points of each other, in both directions). For the deaths, at 8-hour gaps a life takes about 3.9 Charge faults and 3.4 Sync faults and dies by integrity collapse at a median of day 1.3; the exact drain that kills it was not traced. **This contradicts the comment on `drainCurve` in `src/sim.js` ("long gaps (a work day, the night) still cost faults without being fatal") and `docs/BALANCE.md`'s picture of a casual player.** It is a 1.0 property carried into 2.0 (the fault cap's removal helps a little: 1.0's neglect deaths became collapses or survivals), so it is a question for the maintainer, not a simulator fault: whether a work-day gap should be survivable (a gentler drain when it is far from full, a floor on Integrity loss while Charge is at 0, or the sketch's hibernation made easier to reach). Limits: bots top up to 85 or 94, not 100; a real player may cool, patch and play more cleverly before leaving; the bots do not carry items for a long gap beyond an Antivirus patch; 200 to 300 lives a cell.
-
-**Bug policies (home clearing; the rules no longer allow it, so these tables used `BUGS='{"homeClear":true}'`, which `bug-sweep.mjs` sets).** An archetype's `fix` sets how it handles bugs (at a clinic only `mode` and `split` apply): `mode` (`scrip`, `standing`, `both` or `none`), `at` (clear once it carries this many) and `split` (how a Standing payment is taken: `even`, 1 from each track; `leader`, 2 from the larger; `trailer`, 2 from the smaller). The report now gives the average bugs carried, the share of time at the ceiling and what clearing cost in scrip and Standing. `bug-sweep.mjs [lives] [bases] [policies]` runs a base archetype under eight policies. 300 lives, the default rule (30% a fault, ceiling 5), faults by the end of life, average bugs carried, lives that reached the ceiling, adult Standing gap:
-
-| Policy | casual: full life, faults, bugs, ceiling, gap | worker: full life, faults, bugs, ceiling, gap |
-|---|---|---|
-| ignore | 89%, 7.7, 0.97, 19%, 2.54 | 81%, 9.7, 1.00, 27%, 1.91 |
-| scrip, at once | 96%, 5.8, 0.11, 1%, 2.52 | 84%, 8.8, 0.76, 18%, 1.89 |
-| scrip, from 2 bugs | 94%, 6.3, 0.25, 1%, 2.63 | 85%, 9.1, 0.82, 17%, 1.90 |
-| scrip, at the ceiling | 93%, 6.5, 0.39, 3%, 2.64 | 82%, 9.4, 0.93, 25%, 1.90 |
-| Standing, even split | 93%, 5.4, 0.04, 0%, 2.54 | 91%, 5.4, 0.03, 0%, 1.79 |
-| Standing, from the leader | 93%, 5.5, 0.04, 0%, 2.29 | 90%, 5.4, 0.03, 0%, 1.65 |
-| Standing, from the trailer | 94%, 5.5, 0.06, 0%, 3.65 | 89%, 6.0, 0.15, 1%, 2.74 |
-| scrip, then Standing | 95%, 5.4, 0.04, 0%, 2.54 | 91%, 5.4, 0.03, 0%, 1.80 |
-
-A worker ends a life with about 11 scrip after spending 12 on bugs, so clearing with scrip alone leaves it carrying 0.65 bugs on average and 7% of lives at the ceiling, while paying 3.5 Standing (about 15% of the 23 it ends with) clears nearly everything. Clearing is worth doing at once: waiting for 2 bugs costs a casual netling a point or two of survival and 0.3 bugs carried, and waiting for the ceiling is no better than ignoring them. Ignoring costs a casual netling about 3 points of full life and 1.2 faults, and a worker about 0 points (its deaths come from elsewhere). A Standing payment moves the lean by the split: from the trailer widens the adult gap by about 1 (casual 2.8 to 3.7), from the leader narrows it by about 0.2 (0.4 at the harsh rule), and an even split leaves it. A payment from the trailer also fails whenever that track is under 2, so a steerer (whose trailing track stays near 1) cannot use it, which is what the sketch called the hidden retooling effect and also a limit on it. With the harsh rule (50% a fault, ceiling 8, `BUGS` set) a worker ignoring bugs reaches the ceiling in 26% of lives and carries 1.8 on average; scrip at once leaves 17% and 1.45; Standing leaves none and 0.06. Casual at the harsh rule: ignoring 90% full life and 1.6 bugs, scrip at once 92% and 0.23 (42 scrip), Standing 94% and 0.07 (5.9 Standing). A steerer (`corpo`) rarely has bugs even then (0.1 on average, 0.5 Standing a life when it pays). Limits: bots clear only at check-ins; the netrun debug station is not modeled; bugs do not carry across lives (a proposal in the sketch); the policies are single rules, not a player who weighs the lean.
-
-**Hidden-path hunters following their netling's preference** (`PREFBOT=follow`, 300 lives; as for the steerers, following replaces the bot's game and packet choices with the preference's):
-
-| Archetype | Hidden teen, ignoring | Following | Hidden adult, ignoring | Following |
-|---|---|---|---|---|
-| `ghosthunter` | 36% | 24% | 96% | 19% |
-| `hunter-exact` | 82% | 62% | 95% | 22% |
-| `hunter-shown` | 85% | 66% | 98% | 22% |
-| `hunter-shown-rotation` | 39% | 24% | 97% | 19% |
-
-Following costs the hidden adult almost entirely, for two reasons seen in `hunter-shown`: the tracks end within 1 point in only 24% of lives (the mean gap is 3.4, against 0.25) because a steady netling repeats its last packet and the balancing is gone, and 4 wins in every game falls from 100% to 63%. The hidden teen suffers less (24% to 66% reach it) because it asks for less. That agrees with the sketch's earlier finding that a balance seeker that followed would fall from 100% to 3% within a point. So a steady netling's pull toward routine works against the hidden path, and the player has to ignore it, as the sketch noted; a hunter's temper is mostly steady (`ghosthunter` ends steady or strongly steady in 97% of lives), so the pull is nearly always on.
-
-**Temper seekers.** Three archetypes aim at a strong temper level for the Metronome's 12 hour hold (neglect level 2 paused): `seek-steady` (cools early, balances, orderly anomaly choices), `seek-unsteady` (plays warm, up to Heat 80, risky anomaly choices) and `seek-unsteady-segfault` (the same, and uses every Segfault it finds: temper -4, two faults, bugs). The report now gives the median day of the first 12 hour hold and the share that held 24 hours (`holdDay`, `hold24h`). 300 lives, hourly check-ins:
-
-| Archetype | Held 12 hours | Median day | Held 24 hours | Faults a life | Bugs at the ceiling |
-|---|---|---|---|---|---|
-| `seek-steady` | 90% | 2.5 | 64% | 0.2 | 0% |
-| `seek-unsteady` | 44% | 3.2 | 21% | 1.7 | 1% |
-| `seek-unsteady-segfault` | 92% | 2.1 | 74% | 13.2 | 14% |
-
-`temper-sweep.mjs [lives] [gaps] [archetypes]` varies check-ins (200 lives; run it with `PREF='{"on":false}'` for the same without care preferences). Share that held 12 hours, preferences on (off in brackets):
-
-| Check-ins a day | `seek-steady` | `seek-unsteady` | `seek-unsteady-segfault` |
-|---|---|---|---|
-| 17 | 90% (87%) | 44% (49%) | 92% (97%) |
-| 9 | 30% (27%) | 30% (45%) | 86% (92%) |
-| 6 | 1% (0%) | 23% (34%) | 49% (53%) |
-| 3 | 0% (0%) | 5% (6%) | 6% (4%) |
-
-Reading it: the steady end takes near hourly attention (an unattended netling does not reach flow); the unsteady end is open to a player who checks in 6 to 9 times a day, and a Segfault is what makes it cheap, because warm play alone only reaches 23% to 44% of lives. The Segfault route costs a lot: about 13 faults a life, a bug ceiling reached by 14% of lives and a worse full-life rate at 6 check-ins a day (92% to 96% against 99% to 100%; that last pair is from the first measurement and was not re-checked). So the two ends are not symmetric in effort, which the sketch said it wanted ("neither end is the good one"): steady is the high-attention reward, unsteady the cheaper and riskier one. Preferences matter less here than in the earlier archetypes (the unsteady warm-play seeker loses 1 to 15 points to them, as the overclocker did; the steady seekers gain 1 to 3, within noise at 200 lives, about 3 points a share). Limits: bots that use every Segfault they find (a real player may keep them), one fixed heat policy for the warm seekers, and no tuning of the 12 hour length or the neglect rule, which the sketch measured separately on 1.0's simulator.
-
-**Role steerers following their netling's preference** (`PREFBOT=follow`, 300 lives). The follow bot replaces whatever game it would play with the preference's (a steady netling repeats its last game, an unsteady one plays the least-played game not among its last two), so for a steerer it is a conflict between the steering and the preference, not a combination. The steerers are steady most of the time (the 29% to 70% shares in their level lines), so mostly the routine wins:
-
-| Archetype | Role and lean ignoring the preference | Following it |
-|---|---|---|
-| `steer-breach-corp` | breachCorp 100%, role certain 100% | breachCorp 79%, role certain 60% |
-| `steer-breach-street` | breachStreet 100%, 100% | breachStreet 87%, 74% |
-| `steer-tune-corp` | tuneCorp 100%, 100% | tuneCorp 73%, 59% |
-| `steer-tune-street` | tuneStreet 100%, 100% | tuneStreet 83%, 72% |
-| `nudge-breach` | a breach form 98%, role certain 96% | breachCorp 65% (a breach form 71%), role certain 56% |
-| No focus (share 0) | role certain 0%, in the role 28% | role certain 17%, in the role 30% |
-| Share 0.2 / 0.5 | certain 32% / 93%, in the role 68% / 97% | certain 25% / 59%, in the role 50% / 77% |
-
-Following costs a steerer its role (a lead of 5 wins is no longer reached in 27% to 41% of lives) and the Standing lean stays certain. With no steering at all it locks a steady netling into whichever game came last, so the role is certain in 17% of lives against 0%. That agrees with the sketch's earlier finding that following the routine makes a role likely (59% to 71% certain) where ignoring it leaves it near 5% to 8%, and it adds that the lock-in is on the game played last, not on the one the player prefers. Limits: one bot, the steady lock-in is on the last game only (the rule allows either of the last two), and no real player is this consistent.
-
-**New findings:** care preferences pull the unsteady end back. A matched action gives Sync, so a hot player plays less. With preferences off the overclocker's 12 hour unsteady hold reaches 89% of lives against 80% with them, the daredevil's 45% against 35%, and overclockers ending strongly unsteady 91% against 83%. The sketch measured the preference and the Metronome separately, so their interaction was not seen. Clearing bugs with Standing as a fallback (`CLEAR=both`) cuts a worker's final bugs from 1.24 to 0.04 and the bug ceiling from 7% to 0 at the cost of a few Standing points; with no clearing a worker ends with 2.1 bugs and 14% at the ceiling.
-
-Not verified: `npm run smoke`, any device check, and the temper-level differences above beyond the sample noise (about 1.5 points a share at 300 lives).
-
-## The scratch patch (earlier figures)
-
-
-Scratch prototypes that test Netling 2.0 rule ideas on 1.0's headless simulator (`tools/balance.mjs`, `src/sim.js`). They are not part of the game and are not shipped, tested or wired into `sw.js`. They exist so the numbers in [NETLING_2_SKETCH.md](../NETLING_2_SKETCH.md) can be reproduced and re-run, and so a later session knows exactly what was and was not modeled.
-
-Everything here stands in for rules that do not exist yet. 1.0's single signed allegiance stands in for Standing, and 1.0's stability axis stands in for temper. Treat every figure as a rough guide. Retest the numbers when 2.0 is built.
-
-## What the patch changes
-
-`netling2-prototype.patch` is a unified diff against 1.0 (`src/sim.js`, `src/netrun/run.js`, `tools/balance.mjs`). Apply it only to a scratch copy, never to the repository's game code. It adds, all switched by environment variables or off by default where noted:
-
-- **Bugs** (`BUG_CFG`, env `BUGS`): a fault rolls a bug (chance 0.3, ceiling 5), each bug adds to Charge and Sync drain (8% each), Heat drift (10%) and Integrity drain (4%), Segfault rolls 25% none, 60% one, 15% two, and bots clear bugs at check-ins for 15 scrip when `clear` is true. `on: false` turns bugs off. The temper decay (`tdecay`) is also set through `BUGS`.
-- **Temper stand-in:** `s.axes.stability` multiplied by `tdecay` each minute (24-hour half-life is 0.999519). `ITEMTEMPER=1` makes a Coolant cell and an Antivirus patch add 1 to it.
-- **Standing stand-in:** `s.standing` accumulates the positive and negative changes to 1.0's allegiance as two track totals.
-- **Care preferences** (`PREF`, `PREFBOT`): temper level decides a Sync bonus for routine or novelty, game requests can be biased (`reqbias`, `steadyMode: "last2"`), `distinct` keeps the last two plays distinct, `ice` adds netrun ICE games to the history. `PREFBOT=follow` makes the bot follow the preference; anything else ignores it.
-- **Counters:** per-action counts (`s.actCount`), anomaly nodes met (`s.anomalies`), games won, bug and preference totals in the result of `simulate()`.
+Baseline cross-check (1000 lives, `NR2=all PERKS=1`): most rows agree within noise; the differences are listed in the archive file under "Baseline check". Read ranges, not single numbers.
 
 ## Reproducing a run
+
+Preferred: run the fork in the repository (`npm run proto:balance ...` or `node prototype/netling2/sim/<sweep>.mjs [lives] [bases]`) with the switches above. Seeds are fixed, so a run repeats; bug rolls change the random stream, so scenarios do not share exact lives.
+
+The earlier figures (the sketch's) came from the scratch patch: `docs/netling2-prototypes/netling2-prototype.patch` is a unified diff against 1.0 (`src/sim.js`, `src/netrun/run.js`, `tools/balance.mjs`) adding bugs (`BUGS`), a temper stand-in, a Standing stand-in, care preferences (`PREF`, `PREFBOT`) and counters. Apply it only to a scratch copy, never to the repository's game code:
 
 ```bash
 mkdir /tmp/n2 && cp -r src tools package.json /tmp/n2/ && cd /tmp/n2
@@ -243,42 +101,22 @@ patch -p1 < <repo>/docs/netling2-prototypes/netling2-prototype.patch
 cp <repo>/docs/netling2-prototypes/*.mjs .
 ```
 
-`guard.mjs` and `hold.mjs` read each minute's temper through a hook that is not in the patch; add it to the scratch copy with `sed -i 's|^    tick(s, t0 + minute \* MIN, rng);|&\n    globalThis.__sample?.(s, minute);|' tools/balance.mjs`.
+The drivers in this directory (`gap`, `standing`, `bugs`, `temper`, `pref`, `acts`, `guard`, `hold`) need the patched copy; `lines`, `lines2` need an unpatched copy; `egg-pages` reads `tools/baseline/lineages.json`; `rogue`, `rogue2` read the `lines` outputs. `guard.mjs` and `hold.mjs` also need a sampler hook in the scratch copy's `tools/balance.mjs`; `lines2` with `MID=1` needs a one-line Root Access hook. Per-driver commands and settings: ../archive/netling2/PROTOTYPES_README_FULL.md, section "Reproducing a run". Patch contents: same file, section "What the patch changes". The patch was built against 1.0 at the time of writing; if `src/sim.js` changes, re-apply by hand. Prefer the fork for anything new.
 
-Run from the scratch copy with Node 22. Each driver takes an archetype name from `tools/balance.mjs` and a number of lives.
-
-| Measurement | Command (example) | Settings used for the sketch |
-|---|---|---|
-| Standing gap and tie-break leader chance | `BUGS='{"on":false}' node gap.mjs casual 0.25 300` | packets at 0.25 (the second argument), decisions at 1.0's values |
-| Standing track totals, anomaly nodes, runs | `BUGS='{"on":false}' node standing.mjs casual 200` | packets 0.25, no fault cap |
-| Bugs, death rates, clearing | `BUGS='{"clear":true}' NOCAP=1 node bugs.mjs casual 300 S2` | `NOCAP=1` removes the fault cap; scenarios B1 (1.0 as is, `BUGS='{"on":false}'` and no `NOCAP`), B2 (`on:false` with `NOCAP`), S1 (`{}`), S2 (`clear`), S3 (`clear`, `chance` 0.5), S4 (`chance` 0.5, `max` 8) |
-| Temper levels | `ITEMTEMPER=1 FLOW=0.5 S1=3 S2=6 U1=2 U2=6 BUGS='{"clear":true,"tdecay":0.999519}' node temper.mjs attentive 300` | flow +0.5 an hour, 24-hour decay, items +1, thresholds -6, -2, +3, +6 |
-| Care preferences | `ITEMTEMPER=1 PREF='{"on":true,"reqbias":true,"steadyMode":"last2","distinct":true,"ice":true}' PREFBOT=follow BUGS='{"clear":true,"tdecay":0.999519}' node pref.mjs attentive 300 FOLB3I` | follow bot; `PREFBOT=ignore` for the ignore bot; `PREF='{"on":false}'` for off |
-| Temper level flips, flow against overclocked time, decay timing | `VARIANT=minute ITEMTEMPER=1 BUGS='{"clear":true,"tdecay":1}' node guard.mjs attentive 200` | needs the sampler hook (below); `VARIANT=minute\|hour\|sixh` is when the 24-hour decay is applied (`tdecay` must be 1 so the driver applies it), `GUARDS=0,0.25,0.5,1,1.5` |
-| Time at each temper level, longest holds | `ITEMTEMPER=1 BUGS='{"clear":true,"tdecay":1}' node hold.mjs attentive 200` | flow +0.5 an hour, guard 1.0, thresholds -6, -2, +3, +6; `NEG=2` (or 1) makes awake minutes at that neglect level not count toward a hold, `NEGMODE=pause\|reset` |
-| Long lineages per life (runs by region, elder, Source exit) | `TAG=_s2 CAP=12 EXITS=2 CLEAN=1 ROOT=nodeep node lines.mjs attentive 300 10` | run in a scratch copy of the UNPATCHED repo (`cp -r src tools package.json`); writes `lines-<archetype><TAG>.json`; `CAP` is codex fragments a life, `EXITS` and `CLEAN` the elder feat, `BEFORE` the hours before the end of life that the elder gate opens, `ROOT=nodeep\|sixteen` shrinks the Root list (the sim always uses the 22 of 1.0) |
-| Lives to finish the 18 egg pages under Source page rules | `TAG=_s2 ROLE=0.2 HID=0.5 node rogue.mjs attentive` | needs `lines-<archetype><TAG>.json`; `ROLE` and `HID` set the role and hidden page rates (defaults 0.10 and 0.25), `ONLY='guaranteed first Source exit'` runs one rule; role pages 0.10 a non-Deep run, hidden page 0.25 a Deep run, three eggs one after another, eggs 2 and 3 drawn from post-Root lives |
-| Lives to finish the 18 egg pages with a lighter elder feat after the first | `MODE=e1 TAG=_ease node lines2.mjs attentive 300 10` (also `MODE=later`, `MODE=laterEasy`, `EXITS=3 CLEAN=2` for the hard feat, `CAP`), then `ROLE=0.2 HID=0.5 node rogue2.mjs name l2-attentive-e1_ease.json l2-attentive-later_ease.json` | scratch copy of the unpatched repo; egg 1 from an empty codex, eggs 2 and 3 start with Root held and the codex full. `MID=1` makes Root arrive the moment the codex completes, as in the game (`drainCodexInbox`); the balance tool only grants it to the next netling, so without `MID=1` egg 1 runs about a life too long. `MID=1` needs one line in `tools/balance.mjs` after `tick(s, t0 + minute * MIN, rng);`: `if (globalThis.__rootMid && !s.rootAccess && ROOT_FRAGMENT_IDS.every((id) => ctx.codex.includes(id))) s.rootAccess = true;` |
-| Iron's wear (egg pressure) widened with a Sync effect and lower thresholds | `node prototype/netling2/sim/iron-sweep.mjs 400 daredevil,overclocker,attentive` | runs in the repository (the fork in `prototype/netling2/sim/`); `IRON.lock` is the extra Sync drain at wear 100, `IRONBOT=avoid` the cooling bot; results in `prototype/netling2/notes/egg-pressure-notes.md`, Result 6 |
-| State mark colors and placement (Overclock orange, Overdrive white sparks, Overlink sky-blue dots, four vision modes) | `node prototype/netling2/mark-colors.mjs` (candidate table); open `prototype/netling2/marks-preview.html` over `npm run serve` (or see `docs/netling2-prototypes/state-mark-colors.png`) | `prototype/netling2/marks.js` and `mark-colors.mjs`, tests in `marks.test.js`; wording in `docs/NETLING_2_CARE_DRAFTS.md`, State clues |
-| The one-time pre-state caption (how often it shows, when, against the state it teaches) | `node prototype/netling2/sim/hint-sweep.mjs 150`; `HINT_MIN=60|120|150` sets the build time | `SIDES.<bar>.hintMin` (120), `hintAt` and `heldAt` on the netling; captions in `prototype/netling2/state-hints.js`; wording in `docs/NETLING_2_CARE_DRAFTS.md`, Pre-state caption |
-| The one-time Overclock and Iron wear captions (how many netlings see each, and how early) | `node prototype/netling2/sim/heat-hint-sweep.mjs 150` | `ocAt` and `wearAt` on the netling; captions in `prototype/netling2/state-hints.js` (`OVERCLOCK_HINTS`, `IRON_WEAR_HINT`); wording in `docs/NETLING_2_CARE_DRAFTS.md`, Pre-state caption |
-| The clinic node's look (a pink plus beside the 1.0 nodes in every region palette) | open `prototype/netling2/clinic-preview.html` over `npm run serve` (or see `docs/netling2-prototypes/clinic-node.png`) | `prototype/netling2/clinic-node.js` (`drawClinicNode`), tests in `clinic-node.test.js`; wording in `docs/NETLING_2_CARE_DRAFTS.md`, Clinic look |
-| Two-sided Charge and Sync, special states (Surge, Wired), play penalty and burnout | `node prototype/netling2/sim/sides-sweep.mjs 200 attentive '<overrides json>'`; `SYNCBOT=greedy|sip|budget` sets the Sync play habit | `SIDES` in `sim.js` (off by default); config and results in `prototype/netling2/notes/egg-pressure-notes.md`, Results 10 to 21; summary in `docs/NETLING_2_EGG_PRESSURES.md` |
-| Iron pushed from both ends (cold line and nap and sleep cooling floor) | `node prototype/netling2/sim/iron-cold-sweep.mjs 400 attentive,casual,worker,daredevil` and `node prototype/netling2/sim/stat-profile.mjs 150` | `IRON.cold` and `IRON.restFloor` (both default 0, off); `IRONBOT=chill` is a player who cools at 30; results in `prototype/netling2/notes/egg-pressure-notes.md`, Result 7 |
-| A band on Charge (Wetware) or Sync (Program) | `node prototype/netling2/sim/band-sweep.mjs charge 400` (or `sync`) and `STAT=charge node prototype/netling2/sim/stat-profile.mjs 150` | `BANDS` in `sim.js` (off by default); the finding is that a level band taxes check-in cadence for these two meters; results in `prototype/netling2/notes/egg-pressure-notes.md`, Result 8 |
-| Egg page pace by placement | `node egg-pages.mjs` | needs only `tools/baseline/lineages.json`; compares home-region placement with any-region at 0.10 a run, and the hidden page's Deep rate |
-| Actions per life | `BUGS='{"on":false}' node acts.mjs casual` | counts feeds, plays, cooling and so on over 100 lives |
-
-**Which copy each driver needs.** Patched copy (the patch above): `gap`, `standing`, `bugs`, `temper`, `pref`, `acts`, `guard`, `hold`. Unpatched copy (`cp -r src tools package.json`): `lines`, `lines2`. No simulator: `egg-pages` (reads `tools/baseline/lineages.json`), `rogue` and `rogue2` (read the `lines` and `lines2` output).
-
-Results are printed as one JSON line each. The sketch quotes them with their limits.
+Also cut (same archive file): the section "Rules modeled" (full rule list and what the sim records per life), "Not modeled", and "Fidelity checks" (sketch against this simulator; the hot end, daredevil and overclocker, does not reproduce and the gap is unexplained).
 
 ## Known limits
 
-- The bots are 1.0's archetypes. They cycle mini-games in a fixed order and choose packets at random, so they cannot stand in for a player with habits. The preference-following bot sees temper directly, which a real player has to infer.
-- Bugs from netrun-disconnect faults are not rolled, Heat from actions is not scaled by bugs, and clearing by Standing or by a netrun anomaly is not modeled (only the scrip route, at scheduled check-ins).
-- Standing is 1.0's one signed number, so a netling with both tracks high looks balanced. Hidden-path "low on both" was replaced by "within 1 point" for that reason.
-- Sample sizes are 150 to 300 lives per cell, so differences under about 3 points on a rate near 93% are noise. Bug rolls change the random stream, so scenarios do not share exact lives.
-- `tools/balance.mjs` grants Root Access to the next netling after the codex completes; the game grants it at once. `lines2.mjs` with `MID=1` (plus the one-line hook in its row) models the game; `lines.mjs` and the first Rogue-gate tables in the sketch do not, and run egg 1 about a life long.
-- The patch was built against 1.0 at the time of writing; if `src/sim.js` changes, re-apply by hand.
+- The bots are 1.0's archetypes plus the added ones. They cycle mini-games in a fixed order (only the role steerers choose a game) and choose packets at random, so they cannot stand in for a player with habits. The preference-following bot sees temper directly, which a real player has to infer. No bot reacts to a glitching sprite. The hunters decide perfectly from the floors; no real player counts wins per game without a tally.
+- Bots detour to a clinic only when it is one step ahead or within three steps and visible. The clinic's share, fee and stock weights are guesses. Bugs do not carry between lives. The value of the exchange's stock to a human is not modeled (bots buy the first wanted offer).
+- Bots top up Charge and Sync to 85 or 94, not 100, and carry only an Antivirus patch for a long gap. Segfault seekers use every Segfault they find; the warm seekers have one fixed heat policy; the 12 hour length and neglect rule were not tuned here.
+- The Standing display (floors) and neglect's look are not modeled. In the scratch patch Standing is 1.0's one signed number, so a netling with both tracks high looks balanced and "low on both" was replaced by "within 1 point"; the fork has two real tracks.
+- Sample sizes are 150 to 300 lives per cell in the older tables (1000 in the baseline), so differences under about 3 points on a rate near 93% are noise. Side effect of the soft push: bots that read the job board accept every kind of job, so their scrip rises (a worker ends with about 46 against 20).
+- `tools/balance.mjs` (patched or unpatched copy) grants Root Access to the next netling after the codex completes; the game grants it at once (in the fork Root Access arrives mid-life, as in the game; `lines2.mjs` with `MID=1` models it in a scratch copy). `lines.mjs` and the first Rogue-gate tables in the sketch run egg 1 about a life long.
+- Tables not re-run after later rule changes keep the figures they were measured with: the egg pressure sweeps, the exchange stock, and the quoted bug-lethality experiments. Not verified: `npm run smoke`, any device check.
+
+Full limits as first written: ../archive/netling2/PROTOTYPES_README_FULL.md, section "Known limits".
+
+## Cut sections (all in ../archive/netling2/PROTOTYPES_README_FULL.md)
+
+Tables and discussion removed from this file, by heading: "Role steerers", "Hidden-path hunters", "Noisy players", "Bug policies (home clearing; ...)" (single-rule clearing policies; superseded because home clearing is no longer allowed), "Temper seekers", "Fidelity checks", "Rules modeled", "Not modeled", "Baseline check", "Do bugs kill? (decided: yes, moderately)" (candidate effects and the old 400-life runs), "Soft push to run (maintainer's request)", "The clinic (maintainer's design, first pass)", "The 2.0 simulator (current)" (the per-run notes on NR2, PERKS and Rogue stages 1 to 3), and "What the patch changes".

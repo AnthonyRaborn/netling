@@ -1,7 +1,7 @@
-// First drafts of the 2.0 style ideas' art (docs/NETLING_2_ACCESSORY_IDEAS.md): 26 wearables, 10 props and 5 crests, drawn as 1.0's are.
+// First drafts of the 2.0 style ideas' art (docs/archive/netling2/ACCESSORY_IDEAS.md): 26 wearables, 10 props and 5 crests, drawn as 1.0's are.
 // Nothing here is decided or shipped, and src/ is untouched: registerIdeas() adds the drafts to 1.0's tables at run time, so the real
 // placeWorn (anchors, the blend swap, orbiting floaters last) and drawProp place them, the way register.js adds the prototype forms.
-// The Laughing Man ring is here as the Light ring, redrawn: the version rendered as one of Blank's elder options (NETLING_2_SPRITES_HISTORY.md,
+// The Laughing Man ring is here as the Light ring, redrawn: the version rendered as one of Blank's elder options (docs/archive/netling2/SPRITES_HISTORY.md,
 // "Blank's elder in motion") was never committed, and was only ever seen on the Wetware hidden line. It is the one exclusive idea
 // (render.js exclusiveWorn).
 //

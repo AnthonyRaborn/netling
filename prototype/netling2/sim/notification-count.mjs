@@ -1,4 +1,4 @@
-// How many things would reach the player a day? A counting script for docs/NETLING_2_STAGE_CARE_DRAFTS.md (section 2.6): over seeded lives, per stage and per
+// How many things would reach the player a day? A counting script for docs/archive/netling2/STAGE_CARE_DRAFTS.md (section 2.6): over seeded lives, per stage and per
 // 15 awake hours, how often an event opens, a visit starts and an attention request is posted (all as they are in the fork today), plus a SHADOW of the
 // draft's rest call (hidden sleep demand, observed only; it changes nothing). Stages here are by age as the draft proposes: baby under 7 hours, teen
 // 7 to 46 hours, adult after that (the shipped 17 and 51 hour stages are not used). The shadow assumes every call is answered.

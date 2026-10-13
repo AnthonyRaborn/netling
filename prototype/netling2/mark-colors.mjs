@@ -1,4 +1,4 @@
-// Picks the colors of the Overdrive sparks and Overlink dots (docs/NETLING_2_CARE_DRAFTS.md, State clues). Overclock's wisps are 1.0's
+// Picks the colors of the Overdrive sparks and Overlink dots (docs/netling2/text/CARE_DRAFTS.md, State clues). Overclock's wisps are 1.0's
 // orange (#ff9f1c). Needs: contrast of at least 3:1 against the LCD background (WCAG 1.4.11, non-text), and the three marks far apart
 // in color for normal vision and for protan, deutan and tritan simulations (Machado et al. 2009, full severity), measured as CIE76 distance.
 // Usage: node prototype/netling2/mark-colors.mjs

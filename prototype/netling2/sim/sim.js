@@ -1,4 +1,4 @@
-// Netling 2.0 simulation core: a fork of src/sim.js carrying the 2.0 core life rules from docs/NETLING_2_SKETCH.md. It is a
+// Netling 2.0 simulation core: a fork of src/sim.js carrying the 2.0 core life rules from docs/archive/netling2/SKETCH_FULL.md. It is a
 // prototype (not shipped, not in sw.js); src/sim.js is untouched. Differences from 1.0, each marked `2.0` below:
 //   Standing   two non-negative tracks (s.standing) replace the signed allegiance.
 //   Temper     s.temper replaces stability: 24 hour half-life decay, five levels with the flicker guard (s.tLevel),
@@ -219,7 +219,7 @@ export const ITEMS = {
   repair: { name: 'Repair kit', desc: 'Restores 40 Integrity. Works while asleep.' },
   overclock: { name: 'Bypass chip', desc: 'Cuts 1h off the netrun uplink cooldown (never below 2h).' },
   segfault: { name: 'Segfault', desc: 'Crashes it on purpose: +2 faults. Faults shape how it grows up, and ten end its life.', awake: true },
-  // 2.0 (docs/NETLING_2_PERKS_TRAITS_DRAFTS.md): drop tables and stock list them only with PERKS.on.
+  // 2.0 (docs/archive/netling2/PERKS_TRAITS_DRAFTS.md): drop tables and stock list them only with PERKS.on.
   decoy: { name: 'Decoy', desc: 'Waves off the current or next intrusion. Leans indie.' },
   salvage: { name: 'Salvage cell', desc: '+50 Charge, may carry a virus. Leans indie.' },
 };
@@ -260,11 +260,11 @@ export const LEANS = ['corp', 'street'];
 const cap1 = (x) => x[0].toUpperCase() + x.slice(1);
 export const roleForm = (role, lean) => `${role}${cap1(lean)}`;
 const ADULTS = ROLES.flatMap((r) => LEANS.map((l) => roleForm(r, l)));
-// 2.0 perks, traits and keepsakes (docs/NETLING_2_PERKS_TRAITS_DRAFTS.md): off unless PERKS=1 (or PERKS.on is set), so every earlier table
+// 2.0 perks, traits and keepsakes (docs/archive/netling2/PERKS_TRAITS_DRAFTS.md): off unless PERKS=1 (or PERKS.on is set), so every earlier table
 // stays reproducible. Perks are by role and lean, traits by role (hidden has its own), keepsakes one per form.
 export const PERKS = { on: process.env.PERKS === '1' };
 const TRAIT_OF = { breach: 'hardened', dodge: 'evasive', tune: 'persistent', feast: 'foraging' };
-// 2.0 Rogue egg (docs/NETLING_2_ROGUE_DRAFTS.md, sections 6 to 9; section 7's simulator build, stage 1: home life). A per-life egg: a netling is
+// 2.0 Rogue egg (docs/archive/netling2/ROGUE_DRAFTS.md, sections 6 to 9; section 7's simulator build, stage 1: home life). A per-life egg: a netling is
 // Rogue when s.egg === 'rogue' (balance.mjs sets it for every life when ROGUE is set; ROGUE='{"...":...}' also overrides the numbers). Rogue has
 // no Standing (reset every minute), no main bar (run it with SIDES.owner 'none': every state at x1, no owner strain, no Iron wear), one teen,
 // four adults by most wins (no lean) and their elders through the ordinary gate. At home the sweep takes the slot of both the corp trace and
@@ -301,7 +301,7 @@ export const ROGUE = {
 CFG.sweepWindowMin = ROGUE.sweepWindowMin;
 export const isRogue = (s) => s?.egg === 'rogue';
 export const oneFeed = (s) => ROGUE.oneFeed && isRogue(s);
-// The Rogue trait (docs/NETLING_2_ROGUE_DRAFTS.md 9.4a, C1 and E1; decided, maintainer, 2026-10-11; placeholder name Unsigned): whatever hunts it
+// The Rogue trait (docs/archive/netling2/ROGUE_DRAFTS.md 9.4a, C1 and E1; decided, maintainer, 2026-10-11; placeholder name Unsigned): whatever hunts it
 // finds it less. Innate, not inherited: every Rogue netling has it beside its role trait, and the mixed egg (an NL-0 netling hatched after a good
 // end, s.mixed) has it for its one life; its child does not. Always at full strength (no streak, no history). On a Rogue: every region's hunter
 // threshold is `threshold` higher (netrun/run.js huntThreshold). On the mixed egg: a share `traceToVisit` of its corp traces become visitors
@@ -327,7 +327,7 @@ export const SPECIES = {
   ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [f, { name: cap1(f), stage: 'adult' }])),
   // Elders (the Mainframe stage of 1.0): one per adult, same gate as 1.0.
   ...Object.fromEntries([...ADULTS, 'hidden'].map((f) => [`${f}Elder`, { name: `${cap1(f)}Elder`, stage: 'mainframe', line: f }])),
-  // Rogue (ids as in docs/NETLING_2_ROGUE_DRAFTS.md, section 7): the baby is the shared one, one teen, four adults and their elders.
+  // Rogue (ids as in docs/archive/netling2/ROGUE_DRAFTS.md, section 7): the baby is the shared one, one teen, four adults and their elders.
   rogueTeen: { name: 'Alias', stage: 'teen' },
   ...Object.fromEntries(ROLES.map((r) => [`rogueAdult${cap1(r)}`, { name: { breach: 'Mole', dodge: 'Skip', tune: 'Spook', feast: 'Drop' }[r], stage: 'adult' }])),
   ...Object.fromEntries(ROLES.map((r) => [`rogueElder${cap1(r)}`, { name: { breach: 'Sleeper', dodge: 'Exile', tune: 'Handler', feast: 'Stash' }[r], stage: 'mainframe', line: `rogueAdult${cap1(r)}` }])),
@@ -351,7 +351,7 @@ export const PERK_MODS = {
   feastCorp: { corpSync: 5, scavSync: -5 }, // Chrome's: loves corp packets, sulks at scavenged data
   feastStreet: { scavVirusMult: 0.5 }, // the infection roll on scavenged data halved
   hidden: { chargeDrainMult: 0.85, syncDrainMult: 0.85 },
-  // Rogue's own (docs/NETLING_2_ROGUE_DRAFTS.md, 9.3); the elder keeps its adult's.
+  // Rogue's own (docs/archive/netling2/ROGUE_DRAFTS.md, 9.3); the elder keeps its adult's.
   rogueAdultBreach: { sweepIntegrity: 10 }, // Mole: a sweep ignored or a DEFEND lost costs Integrity -10, not -20 (the mark stays)
   rogueAdultDodge: { sweepMult: 0.7 }, // Skip: sweeps 30% less often
   rogueAdultTune: { chargeDrainMult: 0.9, syncDrainMult: 0.9 }, // Spook: Charge and Sync drain 10% slower
@@ -376,7 +376,7 @@ export function addMark(s, t, source) {
   }
 }
 
-// The good end (docs/NETLING_2_ROGUE_DRAFTS.md, 6.1 items 11 to 13 and 41; simulator stage 3). Only a Rogue elder reaches the Source. A clean Source
+// The good end (docs/archive/netling2/ROGUE_DRAFTS.md, 6.1 items 11 to 13 and 41; simulator stage 3). Only a Rogue elder reaches the Source. A clean Source
 // exit (no ICE fight lost on that run, hunter fights included: the elder feat's "clean") arms the good end and offers the merge at once
 // (s.mergeOffer, answered by takeMerge or declineMerge); a Source exit with a lost fight arms nothing (ROGUE.armClean; with it off, as in stage
 // 3, any Source exit arms and only a clean one offers). A mark taken after the latest arming disarms it (addMark), another clean exit re-arms it,
@@ -486,7 +486,7 @@ export function rollQuirk(rng, { origin = false } = {}) {
 
 // The seven-day life every netling had before lives were shortened; saves without s.life get it.
 export const LEGACY_LIFE = { teenAt: 24 * 60, adultAt: 72 * 60, lifespan: 7 * 24 * 60 };
-// 2.0 stage care (docs/NETLING_2_STAGE_CARE_DRAFTS.md; off by default so every older table is unchanged). STAGE='{"on":true}' switches on the stage tables:
+// 2.0 stage care (docs/archive/netling2/STAGE_CARE_DRAFTS.md; off by default so every older table is unchanged). STAGE='{"on":true}' switches on the stage tables:
 // a shorter baby (7 hours) and the adult age at 46 hours (decided), a baby drain multiplier (x2.4, kept for now), cache chance by stage (decided: baby x2,
 // elder x0.25; the elder is the 'mainframe' stage in this fork) and a meal size by stage (proposal, all 1 = unchanged). STAGE='{"rest":{"on":true}}'
 // switches on the rest call and tired (starting values from the draft: a hidden sleep demand that rises while awake, a call at 60 answered with the nap
@@ -1582,7 +1582,7 @@ export function traceMinutesLeft(s) {
 }
 
 // 2.0 measurements kept on the state: awake minutes at each shown temper level, and the longest unbroken awake hold at each
-// strong level (the Metronome's unlock test, docs/NETLING_2_SKETCH.md). Sleep pauses a hold, a change of shown level ends it, and
+// strong level (the Metronome's unlock test, docs/archive/netling2/SKETCH_FULL.md). Sleep pauses a hold, a change of shown level ends it, and
 // an awake minute at neglect level 2 is not counted (the clock pauses, it does not reset).
 function stepHold(s, rest) {
   if (rest) return;
@@ -1623,7 +1623,7 @@ function checkMistake(s, t, key, cond, label, grace = CFG.mistakeGraceMin) {
   }
 }
 
-// --- 2.0 evolution (docs/NETLING_2_SKETCH.md, Evolution) ---------------------------------------------------
+// --- 2.0 evolution (docs/archive/netling2/SKETCH_FULL.md, Evolution) ---------------------------------------------------
 
 // A choice among options: each option's weight falls with its gap to the leader (CFG.tieWeights, indexed by the gap's whole part).
 // Standing is fractional underneath (the HUD shows floors), wins are whole numbers.
@@ -1756,7 +1756,7 @@ export function fragmentOf(s, form) {
   return { form, trait, quirk: { ...s.quirk }, keepsake: KEEPSAKES[form], rootUsed: s.rootUsed, scrip: inheritedScrip(s), level, history: s.trait ?? null };
 }
 
-// 2.0 inheritance (docs/NETLING_2_SKETCH.md, Lineage; decided, maintainer, 2026-10-11): only a full life passes the trait line on (the trait,
+// 2.0 inheritance (docs/archive/netling2/SKETCH_FULL.md, Lineage; decided, maintainer, 2026-10-11): only a full life passes the trait line on (the trait,
 // its streak level and the history), on every egg. A full life is a death at the end of the life cycle, as an adult or an elder, or Rogue's
 // good end taken at a clean Source exit. A death by neglect, integrity collapse or capture still leaves the quirk key, the keepsake and the
 // scrip. INHERIT='{"fullLife":false}' gives the earlier rule back (every death passes the whole fragment), so older outputs reproduce.

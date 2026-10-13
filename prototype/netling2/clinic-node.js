@@ -1,4 +1,4 @@
-// The clinic node on the netrun map (docs/NETLING_2_CARE_DRAFTS.md, Clinic look). Drawn like the 1.0 nodes in src/netrun/view.js
+// The clinic node on the netrun map (docs/netling2/text/CARE_DRAFTS.md, Clinic look). Drawn like the 1.0 nodes in src/netrun/view.js
 // (canvas rects, a fixed color so the type reads at a glance in every region), as an addition for the 2.0 map; nothing in src/ is
 // changed. A thick plus: the one node shape with four equal arms, no box and no circle (the markets are boxes, the relay a circle with
 // one bar, the checkpoint two bars). Pink-lilac is not used by any 1.0 node (ICE takes the region's accent, #ff2a6d, which is red).

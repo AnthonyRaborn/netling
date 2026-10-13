@@ -1,6 +1,8 @@
 # Netling 2.0: baseline, the break, stage care and map width
 
-Handover from the session on branch `ccr-d71db475-tnfy9b`, written 2026-10-09. It covers what that session measured and decided with the maintainer, what was only discussed, and what to do next. The main design record is still [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md); this file is additive so the two branches can merge without conflicts.
+> **Archived 2026-10-13.** Not the source of truth; kept for history and measurements. Current: docs/netling2/DESIGN.md, sections 6 to 8. Index: [README.md](README.md).
+
+Handover from the session on branch `ccr-d71db475-tnfy9b`, written 2026-10-09. It covers what that session measured and decided with the maintainer, what was only discussed, and what to do next. The main design record is still [SKETCH_FULL.md](SKETCH_FULL.md); this file is additive so the two branches can merge without conflicts.
 
 Decided means the maintainer chose it. Proposal means it was discussed or suggested and nobody has chosen. Everything here is simulator-tested only; no device check, playtest or `npm run smoke` was run.
 
@@ -25,7 +27,7 @@ Decided means the maintainer chose it. Proposal means it was discussed or sugges
 
 ## The break (decided, maintainer)
 
-Design and numbers: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "The break". In short:
+Design and numbers: [EGG_PRESSURES.md](EGG_PRESSURES.md), "The break". In short:
 
 - A cost trigger with a warning, for all three states (Iron's Overclock, Program's Overdrive, Wetware's Overlink). While a state is active: Integrity under 70 gives a one-time warning; under **40** the state ends, the bar is pushed well below its exit line (Charge to at most 50, Sync 55, Heat 35), the state is locked out for **12 hours**, and the netling takes **one fault** (care mistake, temper loss, a bug roll).
 - Simulator switch: `BRAKE='{"on":true}'` (off by default so every older table is unchanged; `sim/sim.js`, `BRAKE`). Knobs: `warnInt`, `breakInt`, `lockMin`, `drop`, `faults`, `integrityHit`.
@@ -36,7 +38,7 @@ Design and numbers: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "T
 - Open: the warning line (70); how real players read the warning; whether `watch` (stop feeding under Integrity 70) is a fair model of a person; wording for the discharge, throttle and crash.
 - Note that the break protects careless players without making careful play pay more in benefit (a watching Tune corp player and a greedy one end with about equal win drops). If care should earn more, the lever is a bigger consequence, not the lockout length.
 
-## Stage care and rest (decisions from conversation; the draft is [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), which is the place to read and edit; this section is the summary)
+## Stage care and rest (decisions from conversation; the draft is [STAGE_CARE_DRAFTS.md](STAGE_CARE_DRAFTS.md), which is the place to read and edit; this section is the summary)
 
 Starting point: care is the same at every stage in 1.0 and in the 2.0 fork (drain is one number per meter; stage only changes the netrun cooldown). Vpets make young pets need more and older pets need less and more regular care. The package, in the order discussed:
 
@@ -70,7 +72,7 @@ Draft sections 9 and 10. `STANDINGGAIN` multiplies every source of Standing; on 
 ## Next steps, in the agreed order
 
 1. Map width: decided and built (above); still to check: the route guarantees and the phone map. The tier gradient was declined.
-2. The stage tables and the rest call are **built in the fork** (`STAGE`, `stage.test.js`) and measured alone and on each egg with the break: see the draft, sections 7 and 8. The baby was decided afterwards (drain 2.4 with bugs, Standing gain 2, no multiplier; "Decisions of 2026-10-09, after the stage-care measurements" below), as was the Cooldowns default (off). The stage-care draft document: **started and answered** (seven questions answered 2026-10-09), [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) (what care is today, the baby, elder, cache and rest call with starting numbers, the notification count, a test plan; its open questions are all answered). Measured alone and on top of each egg's pressure and the break (draft sections 7 and 8).
+2. The stage tables and the rest call are **built in the fork** (`STAGE`, `stage.test.js`) and measured alone and on each egg with the break: see the draft, sections 7 and 8. The baby was decided afterwards (drain 2.4 with bugs, Standing gain 2, no multiplier; "Decisions of 2026-10-09, after the stage-care measurements" below), as was the Cooldowns default (off). The stage-care draft document: **started and answered** (seven questions answered 2026-10-09), [STAGE_CARE_DRAFTS.md](STAGE_CARE_DRAFTS.md) (what care is today, the baby, elder, cache and rest call with starting numbers, the notification count, a test plan; its open questions are all answered). Measured alone and on top of each egg's pressure and the break (draft sections 7 and 8).
 3. A community sketch (document only): moved to after the sprite review (maintainer, 2026-10-09).
 4. Alongside: done 2026-10-09: Iron and Wetware watch bots (`IRONBOT=watch`, `SYNCBOT=watch|avoid`) and a player who watches every bar (`STATEBOT=watch`), measured on all three eggs (`sim/state-bot-sweep.mjs`, tests in `statebot.test.js`; baseline README, "players who mind the break"); wording for the break drafted for choice (care drafts, "The break": log lines, alert lines, lockout readout words, a field manual line, a one-time caption, optional strained chatter). The hunter binger was done earlier (draft section 12).
 

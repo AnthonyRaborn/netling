@@ -1,4 +1,4 @@
-// Rogue, the Dodge line's levers (docs/NETLING_2_ROGUE_DRAFTS.md 7.4): whole lives of the two Dodge steerers (steer-dodge-corp, steer-dodge-street)
+// Rogue, the Dodge line's levers (docs/archive/netling2/ROGUE_DRAFTS.md 7.4): whole lives of the two Dodge steerers (steer-dodge-corp, steer-dodge-street)
 // at the decided stage 2 settings (rogue-stage2.mjs BASE), under the off-by-default levers in nr2.js kit.dodge: headStart (H), thresholdDelta (T)
 // and slipTrail (+S). The other lines' steerers at the decided settings are the "others" job. Writes results/followup/rogue-dodge-<name>.json;
 // skips files that exist (resumable). The per-region run figures came from sim/rogue-netrun.mjs (FORMS=rogue, 3000 runs) with the same ROGUE_RUN.

@@ -1,5 +1,5 @@
 // The egg run costs (NR2.eggCost, netrun/nr2.js `cost`) at the life level: per archetype, a lifetime with the costs off and on, for one egg's
-// pressure. The pass bar (docs/NETLING_2_EGG_PRESSURES.md): the ordinary archetypes (attentive, sysadmin, casual, worker, human-regular) stay
+// pressure. The pass bar (docs/archive/netling2/EGG_PRESSURES.md): the ordinary archetypes (attentive, sysadmin, casual, worker, human-regular) stay
 // within noise on full-life rate, infections and temper; the players who live on the egg's bar (daredevil, overclocker) may move a little.
 // Usage: EGG=iron|program|wetware node prototype/netling2/sim/runcost-sweep.mjs [lives=300] [archetypes] [cost-overrides-json]
 //   cost-overrides-json: e.g. '{"programLostFightBleed":6}' (NR2.cost); 'off' only compares the cases listed in CASES.

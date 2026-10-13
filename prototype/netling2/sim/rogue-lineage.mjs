@@ -1,4 +1,4 @@
-// The Rogue lineage (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 items 11 to 14, section 7; simulator stage 3): how often a Rogue line reaches the good end,
+// The Rogue lineage (docs/archive/netling2/ROGUE_DRAFTS.md 6.1 items 11 to 14, section 7; simulator stage 3): how often a Rogue line reaches the good end,
 // and how long it takes. Usage: node prototype/netling2/sim/rogue-lineage.mjs <archetype> [lineages=200] [rogueLives=10]
 //   A lineage starts at the first Rogue life, past the gate: Root held, the whole codex, all 18 egg pages, an elder in the Dex. Before it, one
 //   lead-in life of each NL-0 egg in page-completion order (program, iron, wetware) stands for the player's earlier lines: their fragments are the

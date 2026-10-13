@@ -1,4 +1,4 @@
-// The 2.0 perks, traits, keepsakes and the two new items (docs/NETLING_2_PERKS_TRAITS_DRAFTS.md), behind PERKS.on in the simulator fork.
+// The 2.0 perks, traits, keepsakes and the two new items (docs/archive/netling2/PERKS_TRAITS_DRAFTS.md), behind PERKS.on in the simulator fork.
 // Deterministic: every test injects the clock and the rng.
 import test from 'node:test';
 import assert from 'node:assert/strict';

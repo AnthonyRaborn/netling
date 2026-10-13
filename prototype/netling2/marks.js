@@ -1,4 +1,4 @@
-// The sprite marks for the three bar states (docs/NETLING_2_CARE_DRAFTS.md, State clues), as pure functions of time, so a test can
+// The sprite marks for the three bar states (docs/netling2/text/CARE_DRAFTS.md, State clues), as pure functions of time, so a test can
 // check them against the temper tell. Nothing here draws or touches the DOM.
 //
 // Overclock (1.0): three heat wisps climb above the top edge. Overdrive: two sparks hop along the base, under the feet. Overlink:

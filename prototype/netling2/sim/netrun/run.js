@@ -124,7 +124,7 @@ export const MAINFRAME_ABILITIES = {
   panic: 'Slips through the first two ICE of each run for certain.',
   whisper: 'ICE misses it more often still.',
 };
-// A Rogue form runs on its role's base ability (NR2.rogueBase) until its own kit is built (docs/NETLING_2_ROGUE_DRAFTS.md, 9.2; simulator stage 2).
+// A Rogue form runs on its role's base ability (NR2.rogueBase) until its own kit is built (docs/archive/netling2/ROGUE_DRAFTS.md, 9.2; simulator stage 2).
 const ability = (pet) => (pet.stage === 'adult' || pet.stage === 'mainframe' ? NR2.rogueBase[lineOf(pet.form)] ?? lineOf(pet.form) : null);
 const upgraded = (pet) => pet.stage === 'mainframe';
 // 2.0 abilities (nr2.js): the ability key is the adult form's id (breachCorp ... feastStreet, hidden); level 1 adult, 2 elder.

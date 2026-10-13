@@ -1,5 +1,5 @@
 // Wearables over the motion layers of Blank's elder (blank-motion.js) and Handler (rogue-motion.js signalMotion), through the real
-// placeWorn, on both frames and all 12 steps. A measurement for review (docs/NETLING_2_SPRITES.md, Next phase item 3), not a rule.
+// placeWorn, on both frames and all 12 steps. A measurement for review (docs/netling2/SPRITES_HANDOFF.md, Next phase item 3), not a rule.
 // node prototype/netling2/wear-motion-audit.mjs
 import './ready.js';
 import { ACCESSORIES, placeWorn } from '../../src/accessories.js';

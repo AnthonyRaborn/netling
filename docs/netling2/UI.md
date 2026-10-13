@@ -1,6 +1,6 @@
 # Netling 2.0 UI design (first pass)
 
-Status: a design discussion with the maintainer, phone portrait first. Nothing here is implemented or playtested. A clickable mock exists (see The mock); it is a static page with fake state and was never part of the repo or `src/`. Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions; open item 8 is the UI item this starts to answer), [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) (the per-egg meter, button and event names this UI uses) and [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md) (the states the vitals show).
+Status: a design discussion with the maintainer, phone portrait first. Nothing here is implemented or playtested. A clickable mock exists (see The mock); it is a static page with fake state and was never part of the repo or `src/`. Companions: [SKETCH_FULL.md](../archive/netling2/SKETCH_FULL.md) (decisions; open item 8 is the UI item this starts to answer), [CARE_DRAFTS.md](text/CARE_DRAFTS.md) (the per-egg meter, button and event names this UI uses) and [EGG_PRESSURES.md](../archive/netling2/EGG_PRESSURES.md) (the states the vitals show).
 
 Every item below is marked **Decided** (the maintainer said so in the design conversation) or **Proposal** (mine, not yet confirmed). This is a redesign test, so decided items can still change.
 
@@ -93,7 +93,7 @@ Every item below is marked **Decided** (the maintainer said so in the design con
 - **Decided: game wins are counted clearly and reset each life.** They show in the PLAY tray and in STATUS, so LIBRARY has no win rows.
 - **Bugs and neglect** show as a glitch on the pet plus one line in STATUS saying what is wrong and that the clinic fixes bugs.
 - **STATUS log** shows the last three lines and expands to a scrolling list.
-- **Open: Rogue.** The Rogue egg has no Standing; its Standing display is replaced by the trail ([NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md)). STATUS needs a Rogue variant, and the Rogue skin and its dock names are not designed.
+- **Open: Rogue.** The Rogue egg has no Standing; its Standing display is replaced by the trail ([ROGUE_DRAFTS.md](../archive/netling2/ROGUE_DRAFTS.md)). STATUS needs a Rogue variant, and the Rogue skin and its dock names are not designed.
 - **Open: LIBRARY structure.** The Dex structure for hints and whether a revealed hidden entry shows a hint line (sketch open item 8) are not settled here.
 
 ## STYLE (the wardrobe)

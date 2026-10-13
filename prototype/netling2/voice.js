@@ -1,4 +1,4 @@
-// The other two temper tell channels: idle behavior and chatter tone (docs/NETLING_2_SKETCH.md, The temper tell). Pure
+// The other two temper tell channels: idle behavior and chatter tone (docs/archive/netling2/SKETCH_FULL.md, The temper tell). Pure
 // functions of (egg, level, time or text, seed), like tell.js, so they need no state and survive reloads. Nothing here
 // touches the DOM, storage or the 1.0 simulator.
 //
@@ -7,7 +7,7 @@
 // What this proves and what it does not. It fixes a SHAPE for each channel that a player can count (steady) or cannot
 // predict (unsteady), and tests that the shape holds. It does not render anything (no pose, no status line, no chatter box
 // is drawn), and the chatter shaping is a text transform on 1.0's lines, so it is a measuring aid: the shipped 2.0 lines
-// for body-bound chatter would be written by hand in these shapes. See docs/NETLING_2_CODEX_DRAFTS.md (Temper hints).
+// for body-bound chatter would be written by hand in these shapes. See docs/netling2/text/CODEX_DRAFTS.md (Temper hints).
 //
 // Idle behavior. Middle: none (the 1.0 idle). Steady: a ROUTINE, the same four steps in the same order, each step on an exact
 // clock, so the cycle can be counted and the next step predicted (a step every 12 s steady, every 6 s strongly: the same
@@ -45,7 +45,7 @@ export const ROUTINE = {
   program: ['scan', 'sort', 'flush', 'sync'],
   iron: ['neck', 'arm', 'hip', 'base'], // a joint-by-joint self check
   wetware: ['stretch', 'rest', 'stretch', 'rest'],
-  rogue: ['left', 'right', 'behind', 'still'], // a watch: it checks each way, then holds still (docs/NETLING_2_ROGUE_DRAFTS.md 10.9)
+  rogue: ['left', 'right', 'behind', 'still'], // a watch: it checks each way, then holds still (docs/archive/netling2/ROGUE_DRAFTS.md 10.9)
 };
 // Never in the routine, so a stray is always recognisable as unscheduled.
 export const STRAYS = {

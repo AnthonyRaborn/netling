@@ -1,7 +1,7 @@
 // The temper tell: how a netling's hidden temper shows in its sprite motion. A pure function of (egg, level, time, seed), like
 // the 1.0 idle in render.js, so it needs no state and survives reloads. Nothing here touches the DOM or storage.
 //
-// Levels follow docs/NETLING_2_SKETCH.md (Temper, The temper tell): temper is one hidden number, and the
+// Levels follow docs/archive/netling2/SKETCH_FULL.md (Temper, The temper tell): temper is one hidden number, and the
 // tell reads its level:
 //     -2 strongly unsteady (temper <= -6)    -1 unsteady (-6 to -2)    0 middle (-2 to +3), no tell
 //     +1 steady (+3 to +6)                   +2 strongly steady (+6 or more)
@@ -156,7 +156,7 @@ export function tellPose(tell, pose = 'awake') {
 //
 // Decided (maintainer, 2026-10-12): the hold extends to the unsteady end. The same window pauses the idle around each step of
 // Iron's drift (each column it slides, and the snap back) and each of Program's strong hops, which 1.0's idle masked as it masked
-// the settle (2 to 42% of them clean before, 100% now; docs/NETLING_2_SPRITES.md, Temper pass notes). The cost: the idle stands
+// the settle (2 to 42% of them clean before, 100% now; docs/netling2/SPRITES_HANDOFF.md, Temper pass notes). The cost: the idle stands
 // still 20% of the time for an unsteady Iron, 60% strongly unsteady (three steps every 4 s), about 28% for a strongly unsteady
 // Program. Reduced motion has no
 // drift steps or hops (temperTell), so it holds nothing there. Wetware and Rogue never hold, nor does level 0 or Program at -1.

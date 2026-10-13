@@ -1,4 +1,4 @@
-// Tests for the temper pass (docs/NETLING_2_SPRITES.md, Next phase 3): the tell composed with 1.0's idle wander and with
+// Tests for the temper pass (docs/netling2/SPRITES_HANDOFF.md, Next phase 3): the tell composed with 1.0's idle wander and with
 // wearables, on every form of every egg. Deterministic. The findings that are measurements, not rules (how often Iron's settle
 // is masked by the idle, which wearables the tell clips) come from `node prototype/netling2/temper-audit.mjs`.
 import { test } from 'node:test';

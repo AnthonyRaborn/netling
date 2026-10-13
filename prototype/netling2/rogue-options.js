@@ -1,4 +1,4 @@
-// Options for the Rogue drafts' review (docs/NETLING_2_ROGUE_DRAFTS.md, 8.4b to 8.4f): the camo helpers that drew the decided camo into
+// Options for the Rogue drafts' review (docs/archive/netling2/ROGUE_DRAFTS.md, 8.4b to 8.4f): the camo helpers that drew the decided camo into
 // rogue-art.js, and the alternatives not chosen, for the record and the options page. Pure functions of the rows; nothing here is registered.
 //
 // Third eye: decided, the arc (8.4b), now drawn in rogue-art.js; the other three options (pair, four, slit) are in the git history of this

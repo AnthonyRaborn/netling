@@ -1,4 +1,4 @@
-// What drives the neglect look (docs/NETLING_2_SKETCH.md, Evolution: neglect and bugs on the sprite; docs/NETLING_2_SPRITES.md, Layers): the care needs left unmet, read from the four
+// What drives the neglect look (docs/archive/netling2/SKETCH_FULL.md, Evolution: neglect and bugs on the sprite; docs/netling2/SPRITES_HANDOFF.md, Layers): the care needs left unmet, read from the four
 // care stats (0 to 100). It is TRANSIENT by design: a pure function of the stats now, so it clears as soon as the needs are met.
 // Bugs are the persistent layer and have their own look (glitch.js).
 //

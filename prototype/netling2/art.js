@@ -1,5 +1,5 @@
 // Netling 2.0 sprite prototype: one Iron line, baby to elder (four forms). Same string-row format as src/sprites.js ('#' main,
-// 'o' accent, '+' highlight, 'x' dim fill, '.' empty). Not shipped and not imported by the game; see docs/NETLING_2_SPRITES.md.
+// 'o' accent, '+' highlight, 'x' dim fill, '.' empty). Not shipped and not imported by the game; see docs/netling2/SPRITES_HANDOFF.md.
 //
 // Iron is firmware and infrastructure: blocky, rigid, read-only. Its marks: a write-protect notch in the top edge, square
 // shoulders, vent bays, pin feet.

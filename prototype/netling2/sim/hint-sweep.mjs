@@ -1,4 +1,4 @@
-// The one-time pre-state caption (docs/NETLING_2_CARE_DRAFTS.md, Pre-state caption): how often it would show, and when, against the
+// The one-time pre-state caption (docs/netling2/text/CARE_DRAFTS.md, Pre-state caption): how often it would show, and when, against the
 // state it is meant to teach. The caption fires once a netling per bar after SIDES.<bar>.hintMin (120) minutes of building toward the
 // state. Final egg-pressure design, owner multiplier 3, default bots. Usage: node prototype/netling2/sim/hint-sweep.mjs [lives=200] [bases]
 process.env.TZ = 'UTC';

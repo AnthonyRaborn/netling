@@ -1,5 +1,8 @@
 # Egg pressure notes (scratch, not for docs yet)
 
+> **Archived 2026-10-13.** Measurement log; not the source of truth. Current decisions: docs/netling2/DESIGN.md. Index: [README.md](../README.md).
+
+
 Status: brainstorm. Nothing implemented or measured. Keep out of docs until simulator numbers exist.
 
 ## Decisions so far (maintainer)
@@ -339,7 +342,7 @@ Consistent run with the final design (eased wear, Overdrive and Overlink rules, 
 
 ## Result 25: the final design under the now rules (2026-10-12)
 
-`baseline/gap-reruns.mjs pressure`, 1000 lives, default, greedy and sip Sync bots; outputs `baseline/results/gaps/pressure-*.txt`. Readings are in `docs/NETLING_2_EGG_PRESSURES.md`, Numbers ("Re-run under the now rules"). In short: the sip bot equals the default bot; greedy Wetware's infection cost rose from about +1.7 to +4.8 to +6.1 and greedy play on Wetware now costs the never-entering archetypes 3 to 13 points of full life (the overplay strain is the likely cause, not isolated); Iron's excess infections are +1.1 (daredevil) and +1.8 (overclocker). Results 6 to 24 are not re-run one by one: they are the design's history, and their rules have since changed.
+`baseline/gap-reruns.mjs pressure`, 1000 lives, default, greedy and sip Sync bots; outputs `baseline/results/gaps/pressure-*.txt`. Readings are in `docs/archive/netling2/EGG_PRESSURES.md`, Numbers ("Re-run under the now rules"). In short: the sip bot equals the default bot; greedy Wetware's infection cost rose from about +1.7 to +4.8 to +6.1 and greedy play on Wetware now costs the never-entering archetypes 3 to 13 points of full life (the overplay strain is the likely cause, not isolated); Iron's excess infections are +1.1 (daredevil) and +1.8 (overclocker). Results 6 to 24 are not re-run one by one: they are the design's history, and their rules have since changed.
 
 ## Result 26: what drives greedy Overlink's cost (2026-10-12)
 

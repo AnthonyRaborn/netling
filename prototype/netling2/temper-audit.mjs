@@ -1,4 +1,4 @@
-// The temper pass audit (docs/NETLING_2_SPRITES.md, Next phase 3). `node prototype/netling2/temper-audit.mjs` (or npm run proto:temper).
+// The temper pass audit (docs/netling2/SPRITES_HANDOFF.md, Next phase 3). `node prototype/netling2/temper-audit.mjs` (or npm run proto:temper).
 // Measurements, not rules; the rules are tested in temper-pass.test.js and proto.test.js.
 //   1. Which wearables the tell pushes off the 40x28 screen that 1.0's idle alone does not (idle extremes: 8 columns, rows from
 //      the render.js headroom rule), on every form of its own egg.

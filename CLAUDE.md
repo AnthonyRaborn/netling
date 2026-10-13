@@ -9,7 +9,7 @@ the maintainer explicitly asks for that feature in the conversation; if a reques
 soft freeze and ask first. In scope: bug fixes, balance fixes, accessibility fixes, fixes for current browsers, and
 doc corrections. A full freeze (v1.0) follows the maintainer's device testing. Every rule below still applies.
 
-Exception: the branch `claude/game-egg-differentiation-xkl6x2` (the Netling 2.0 planning and sprite prototype) is not under the freeze, per the maintainer; keep any game-code change there minimal, tested and reported. See `docs/NETLING_2_SKETCH.md` (Handoff).
+Exception: the branch `claude/game-egg-differentiation-xkl6x2` (the Netling 2.0 planning and sprite prototype) is not under the freeze, per the maintainer; keep any game-code change there minimal, tested and reported. Start at `docs/netling2/README.md`; the prototype has its own `prototype/netling2/CLAUDE.md` (commands, traps).
 
 ## Commands
 
@@ -19,14 +19,7 @@ npm run smoke     # browser test; needs: npm install --no-save playwright && npx
 npm run balance   # lifetime simulations per player archetype (JSON=1, LIVES=n, TRAIT=form; see docs/TESTING.md)
 npm run serve     # http://localhost:5174
 
-# Netling 2.0 sprite prototype (prototype/netling2/, not shipped; see docs/NETLING_2_SPRITES.md)
-npm run proto:test     # its tests (522)
-npm run proto:temper   # the temper tell against 1.0's idle and wearables (measurements, not rules)
-npm run proto:balance  # the 2.0 core-rules simulator (prototype/netling2/sim/): lifetime simulations per archetype, same settings as npm run balance plus CLEAR, PREF, PREFBOT, BUGS
-node prototype/netling2/baseline/run-all.mjs   # the 2.0 simulator baseline: every sweep at 1000 lives into prototype/netling2/baseline/results (resumable; read its README first; never import the file, importing runs it)
-npm run proto:audit    # the real sprite audit on Iron's forms (EGG=program, EGG=wetware, EGG=all or EGG=rogue; proto:audit:program, proto:audit:wetware)
-# focus review page: npm run serve, then /prototype/netling2/review.html (pick forms and one aspect; every setting is in the link)
-npm run proto:gallery  # generates prototype/netling2/gallery-iron.html, gallery-program.html, gallery-wetware.html and gallery-rogue.html (the real gallery on each egg's forms)
+# Netling 2.0 prototype commands (proto:test, proto:balance, proto:audit, proto:gallery, baseline): see prototype/netling2/CLAUDE.md
 ```
 
 ## Map
@@ -35,8 +28,8 @@ npm run proto:gallery  # generates prototype/netling2/gallery-iron.html, gallery
 - `src/netrun/`: expeditions (`run.js` rules, `map.js`, `regions.js`, `anomalies.js`, `codex.js`, `view.js`).
 - `src/ui/`: DOM code; `ui/app.js` holds the shared `app` object, the write gate and `loadAll`.
 - `src/storage.js`, `src/sanitize.js`, `src/transfer.js`: everything about persistence and moving saves.
-- `prototype/netling2/sim/`: a fork of the simulator, netrun rules and balance bot with the core 2.0 rules (Standing, temper, bugs, the clinic, the egg pressures `SIDES` and `IRON`, the perks, traits and keepsakes behind `PERKS=1`, and the Rogue egg behind `ROGUE=1`: home life, the hunt in runs and the good end; `sim/rogue-lineage.mjs` measures Rogue lines); `npm run proto:balance`, see `docs/netling2-prototypes/README.md`. `src/` is untouched by it.
-- `prototype/netling2/`: the Netling 2.0 sprite prototype. Not shipped, not in `sw.js`. `render.js` is its renderer pass: every egg's layers on the LCD (1.0's 40x28 plus 2 rows of headroom on top, `TOP`) in one pure compose step. Import `ready.js` first in any script that draws wearables on its forms (see the trap in `docs/NETLING_2_SPRITES.md`, Commands).
+- `prototype/netling2/sim/`: fork of the simulator, netrun rules and balance bot carrying the 2.0 rules behind switches (details: `docs/netling2-prototypes/README.md`). `src/` is untouched by it.
+- `prototype/netling2/`: the Netling 2.0 sprite prototype and renderer pass (`render.js`). Not shipped, not in `sw.js`. Docs: `docs/netling2/` (active), `docs/archive/netling2/` (history). Local notes: `prototype/netling2/CLAUDE.md`.
 - `sw.js`: network-first service worker with a hand-written `SHELL` file list. Its `CACHE` name must equal `VERSION` in `src/version.js`; bump both per release so open pages are offered the update.
 
 ## Rules that are easy to break

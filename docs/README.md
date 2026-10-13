@@ -23,27 +23,17 @@ When code and a doc disagree, the code is right: fix the doc.
 | Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
-| Plan how Netling 2.0 ships (native apps only: Capacitor on Android, Tauri on desktop with the pet window and portable mode, notifications by forecast, the widget) | [NETLING_2_DEPLOY.md](NETLING_2_DEPLOY.md) |
+| Start Netling 2.0 work (index, reading order, doc rules) | [netling2/README.md](netling2/README.md) |
+| Read what is decided for Netling 2.0 (eggs, forms, Standing, temper, bugs, pressures, stage care, netrun, Rogue) | [netling2/DESIGN.md](netling2/DESIGN.md) |
+| See what is open or next for Netling 2.0 | [netling2/OPEN_ITEMS.md](netling2/OPEN_ITEMS.md) |
+| Continue the Netling 2.0 sprites (status, commands, rules the tests enforce, what is left; prototype in `prototype/netling2/`) | [netling2/SPRITES_HANDOFF.md](netling2/SPRITES_HANDOFF.md) |
+| Plan how Netling 2.0 ships (Capacitor on Android, Tauri on desktop, notifications by forecast, the widget) | [netling2/DEPLOY.md](netling2/DEPLOY.md) |
+| Read the Netling 2.0 UI design (phone portrait layout, dock, trays, wardrobe, egg skins) | [netling2/UI.md](netling2/UI.md) |
+| Review drafted Netling 2.0 text (codex pages, care wording, Rogue text) | [netling2/text/](netling2/text/) |
+| Run or read the Netling 2.0 balance simulator and its limits | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
+| Re-run or inspect the Netling 2.0 1000-life baseline | [../prototype/netling2/baseline/README.md](../prototype/netling2/baseline/README.md) |
+| Trace why a Netling 2.0 decision was made (full sketch, drafts, measurement logs, sprite history; archive) | [archive/netling2/README.md](archive/netling2/README.md) |
 | Read how the Mainframe stage and the Source were decided, built and measured | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
-| Look up the source vocabulary behind the Netling 2.0 names and failure models (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
-| Get a short overview of Netling 2.0 and how it differs from 1.0 | [NETLING_2_SUMMARY.md](NETLING_2_SUMMARY.md) |
-| Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
-| Continue the Netling 2.0 sprites (all 66 forms, rules the tests enforce, commands, the next phase; prototype in `prototype/netling2/`) | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md) |
-| Check a Netling 2.0 sprite closely (frames, motion, damage layers, wearables on the focus review page) and see the remaining sprite tasks | [NETLING_2_SPRITES.md](NETLING_2_SPRITES.md), "Sprite checks: where to look, and what is left" |
-| Read or edit the Netling 2.0 accessory and style ideas (wearables, props, shells, tints, effects, sounds, crests, music, label, and which could be paid; first art drafts of the wearables, props and crests in the prototype, including the Light ring; nothing decided) | [NETLING_2_ACCESSORY_IDEAS.md](NETLING_2_ACCESSORY_IDEAS.md) |
-| Trace why a Netling 2.0 sprite decision was made (drafts, rejected options, measurements; archive) | [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md) |
-| Read or edit the Netling 2.0 codex page drafts | [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) |
-| Read the Netling 2.0 egg pressures (each egg's bar, special states, costs and benefits, play styles) | [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md) |
-| Read the Netling 2.0 UI design (phone portrait layout, pips and danger zones, the attention lane, dock and trays, the menu, the wardrobe, egg skins, screens; decided against proposed) | [NETLING_2_UI.md](NETLING_2_UI.md) |
-| Read or edit the Netling 2.0 care wording (meters, buttons, events, items, alerts, clinic and bug statements) | [NETLING_2_CARE_DRAFTS.md](NETLING_2_CARE_DRAFTS.md) |
-| Read or edit the Netling 2.0 perks, lineage traits, keepsakes and the two new items (Decoy, Salvage cell) | [NETLING_2_PERKS_TRAITS_DRAFTS.md](NETLING_2_PERKS_TRAITS_DRAFTS.md) |
-| Read or edit the Netling 2.0 netrun drafts (adult abilities, elder upgrades, how the eggs differ in a run, anomalies) | [NETLING_2_NETRUN_DRAFTS.md](NETLING_2_NETRUN_DRAFTS.md) |
-| Continue the Netling 2.0 Rogue egg (its design and decisions, the ten forms and their effects; where to pick up: the status block at its top) | [NETLING_2_ROGUE_DRAFTS.md](NETLING_2_ROGUE_DRAFTS.md) |
-| Read the Netling 2.0 simulator baseline (every sweep re-run at 1000 lives, the Program/perks finding, the break's numbers) and how to re-run it | [../prototype/netling2/baseline/README.md](../prototype/netling2/baseline/README.md) |
-| Read or edit the Netling 2.0 stage-care drafts (a shorter, harder baby, elder mess, the rest call, the notification budget, with starting numbers and a test plan) | [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md) |
-| Pick up the last session's work: the break, stage care and the rest call, map width, what is parked and what to do next | [NETLING_2_BASELINE_AND_STAGE_CARE.md](NETLING_2_BASELINE_AND_STAGE_CARE.md) |
-| Run or read the Netling 2.0 balance simulator (core rules, archetypes, sweeps, every measured table and its limits) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
-| Re-run or inspect the Netling 2.0 rule prototypes (bugs, temper, Standing, care preferences, egg page pace, elder stage and Rogue gate pace) | [netling2-prototypes/README.md](netling2-prototypes/README.md) |
 
 ## The project in one paragraph
 

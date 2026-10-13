@@ -1,4 +1,4 @@
-// The simulator gaps left after the "now" set (docs/NETLING_2_SKETCH.md, Next steps item 3; 2026-10-12): the two experiments no sweep
+// The simulator gaps left after the "now" set (docs/archive/netling2/SKETCH_FULL.md, Next steps item 3; 2026-10-12): the two experiments no sweep
 // covers, re-run as balance.mjs calls. Resumable like run-all.mjs: an output that exists is skipped (pass --force to re-run).
 //   node prototype/netling2/baseline/gap-reruns.mjs [filter] [--jobs=4] [--force]
 // Outputs: results/gaps/<job>.json (balance.mjs JSON=1) and results/gaps/<job>.txt (sides-sweep.mjs).
@@ -6,10 +6,10 @@
 // 1. bugs-*: "Do bugs kill?" (docs/netling2-prototypes/README.md) under the now rules at 1000 lives. bugs on against bugs off (max 0) for
 //    casual, worker, human-regular and human-keen; and bugs held from birth (startBugs 0, 2, 3, 5 with no new ones, chance 0) for casual,
 //    worker and attentive. The now rules' BUGS keys are repeated, since BUGS replaces keys one by one (sim.js).
-// 2. hardened-*: the Breach rows of the perks first pass (notes/perks-traits-notes.md) with Hardened's cap at 1.25, in that pass's own
+// 2. hardened-*: the Breach rows of the perks first pass (docs/archive/netling2/notes/perks-traits-notes.md) with Hardened's cap at 1.25, in that pass's own
 //    settings (NR2=all, 500 lives, FORCE_ADULT, the same seeds), so they compare with its tables: A no perks, B the perk, D perk + trait I +
 //    keepsake, E perk + trait III.
-// 3. pressure-*: the egg pressures' final design under the now rules, the figures in docs/NETLING_2_EGG_PRESSURES.md (Numbers; notes
+// 3. pressure-*: the egg pressures' final design under the now rules, the figures in docs/archive/netling2/EGG_PRESSURES.md (Numbers; notes
 //    Results 21 to 24). The now-sides-sweep and now-iron-sweep jobs ran on the fork's defaults (owner x2, no hold, burnout or brake), not
 //    on this design, so these are the first now-rule figures for it: sides-sweep.mjs at 1000 lives with the decided SIDES (run-all.mjs
 //    FINAL_SIDES, x3 owner, teen states, ironBenefit 3), Iron's eased wear on the Iron rows, and the default, greedy and sip Sync bots.

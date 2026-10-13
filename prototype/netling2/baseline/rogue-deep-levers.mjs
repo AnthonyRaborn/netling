@@ -1,4 +1,4 @@
-// Rogue, the Deep's map levers against the relay question (docs/NETLING_2_ROGUE_DRAFTS.md 7.4, 9.7): each setting runs sim/rogue-relay.mjs (the
+// Rogue, the Deep's map levers against the relay question (docs/archive/netling2/ROGUE_DRAFTS.md 7.4, 9.7): each setting runs sim/rogue-relay.mjs (the
 // relay read-out) and sim/rogue-netrun.mjs (whole Deep runs, Rogue forms and the hidden form) in the Deep only, at the decided settings plus the
 // lever. guardShare and relayFactor act in every region in the fork; only the Deep is measured here. Writes results/followup/rogue-deep-levers.json.
 // Resumable: settings already in the output file are kept. Usage: node prototype/netling2/baseline/rogue-deep-levers.mjs [runs=3000]

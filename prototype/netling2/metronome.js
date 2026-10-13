@@ -1,4 +1,4 @@
-// The Metronome prop's pendulum (docs/NETLING_2_SKETCH.md, Temper cosmetics). A pure function of (level, time, seed, reduced) like
+// The Metronome prop's pendulum (docs/archive/netling2/SKETCH_FULL.md, Temper cosmetics). A pure function of (level, time, seed, reduced) like
 // tell.js, so the prop needs no state. The pendulum sits on one side or the other: -1 left, 0 upright, +1 right.
 //   steady (+1, +2)   it swings on its own even beat, every 1 s (every 0.5 s strongly), alternating sides: tick, tock. The tell's beat
 //                     (6 s, 3 s strongly) is a whole number of ticks, so the tell lands on a tick. (It swung on the tell's beat until the

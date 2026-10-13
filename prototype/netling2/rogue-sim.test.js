@@ -1,4 +1,4 @@
-// The Rogue egg in the simulator fork, stage 1 (home life): docs/NETLING_2_ROGUE_DRAFTS.md, sections 6, 7 and 9. A per-life egg (s.egg 'rogue'):
+// The Rogue egg in the simulator fork, stage 1 (home life): docs/archive/netling2/ROGUE_DRAFTS.md, sections 6, 7 and 9. A per-life egg (s.egg 'rogue'):
 // no Standing, one teen, the adult by most wins, the sweep in place of the trace and the intrusion, marks and capture, Rogue's perks, traits and
 // keepsakes, and in runs each role's base ability plus the checkpoint part. Deterministic: every test injects the clock and the rng.
 import test from 'node:test';

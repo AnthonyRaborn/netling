@@ -694,7 +694,7 @@ test('egg anomalies: each option leans, through the same adapter as 1.0\'s (alle
   reset();
 });
 
-// --- egg run cost sizes (notes/netrun-sim-notes.md, section 11) ----------------------------------------------------------------------
+// --- egg run cost sizes (docs/archive/netling2/notes/netrun-sim-notes.md, section 11) ----------------------------------------------------------------------
 const { COST_METER } = await import('./sim/netrun/run.js');
 
 test('egg run costs: the sizes in force, and Iron\'s wear a move is proportional to the minutes a move is worth', () => {

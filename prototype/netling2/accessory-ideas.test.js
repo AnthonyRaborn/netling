@@ -1,4 +1,4 @@
-// The style ideas' art drafts (accessory-ideas.js; docs/NETLING_2_ACCESSORY_IDEAS.md): every undrawn idea has art, the free and paid
+// The style ideas' art drafts (accessory-ideas.js; docs/archive/netling2/ACCESSORY_IDEAS.md): every undrawn idea has art, the free and paid
 // versions relate as the doc's Paid options say, nothing leaves the top of the 2.0 screen on any form, nothing toggles faster than the
 // flash rule (CLAUDE.md rule 7), still items stay still, props stay inside their size, and the crests are 9x9.
 import './ready.js';
@@ -23,7 +23,7 @@ registerPalettes(); // the ideas' automatic colours for every palette, and the n
 const SETS = { iron: forms('B'), program: programForms(), wetware: wetwareForms(), rogue: rogueForms() };
 const ALL = Object.entries(SETS).flatMap(([egg, set]) => Object.values(set).map((form) => ({ egg, form })));
 const WEAR = [...WEARABLE_ENTRIES, HEATSINK_HOT];
-const doc = readFileSync(new URL('../../docs/NETLING_2_ACCESSORY_IDEAS.md', import.meta.url), 'utf8');
+const doc = readFileSync(new URL('../../docs/archive/netling2/ACCESSORY_IDEAS.md', import.meta.url), 'utf8');
 // [id, paid] from the doc's tables, per section.
 const rowsOf = (heading) => {
   const part = doc.split(`## ${heading}`)[1].split('\n## ')[0];

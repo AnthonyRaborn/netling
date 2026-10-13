@@ -1,4 +1,4 @@
-// The Rogue lineage side (docs/NETLING_2_ROGUE_DRAFTS.md 6.1 items 1, 11 to 14, 41 to 43 and 6.2; simulator stage 3): what follows a Rogue life.
+// The Rogue lineage side (docs/archive/netling2/ROGUE_DRAFTS.md 6.1 items 1, 11 to 14, 41 to 43 and 6.2; simulator stage 3): what follows a Rogue life.
 // Pure; the driver is rogue-lineage.mjs.
 //   After the good end the player may choose any egg (6.1, item 43). Choosing an NL-0 egg hatches the mixed egg: a netling of that egg whose
 //   parent is the Rogue that just died, so its traits continue as on any rebirth (decided, item 42), and which will carry the Rogue trait (not

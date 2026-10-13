@@ -1,6 +1,9 @@
 # Perks, traits, keepsakes and the two new items: first balance pass
 
-Design: `docs/NETLING_2_PERKS_TRAITS_DRAFTS.md`. Built in the simulator fork behind `PERKS=1` (`PERKS.on`, off by default: with it off, 100 simulated lives across attentive, casual, daredevil and worker are byte-identical to before). Tests: `prototype/netling2/perks.test.js` (8). Measurement aid: `FORCE_ADULT=<form>` makes every netling grow into that form (fork only). Bots with 1.0's scripted players, `NR2=all`, 500 runs a cell, the same seeds in every configuration (so differences are paired and tighter than the usual noise, about 2 points near 80% and 1 point near 95%).
+> **Archived 2026-10-13.** Measurement log; not the source of truth. Current decisions: docs/netling2/DESIGN.md. Index: [README.md](../README.md).
+
+
+Design: `docs/archive/netling2/PERKS_TRAITS_DRAFTS.md`. Built in the simulator fork behind `PERKS=1` (`PERKS.on`, off by default: with it off, 100 simulated lives across attentive, casual, daredevil and worker are byte-identical to before). Tests: `prototype/netling2/perks.test.js` (8). Measurement aid: `FORCE_ADULT=<form>` makes every netling grow into that form (fork only). Bots with 1.0's scripted players, `NR2=all`, 500 runs a cell, the same seeds in every configuration (so differences are paired and tighter than the usual noise, about 2 points near 80% and 1 point near 95%).
 
 ## What was run
 

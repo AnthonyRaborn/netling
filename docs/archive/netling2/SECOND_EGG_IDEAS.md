@@ -1,6 +1,8 @@
 # Second egg: vocabulary and idea reference
 
-**Status: reference only.** Written for fitting a second egg into 1.0; planning moved to a from-scratch 2.0 with three eggs (Program, Iron, Wetware) and a hidden Rogue egg, all decided in [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md). The candidate analysis, recommendation and open questions of the first version were superseded and are removed (full text: `git show 9114a22:docs/SECOND_EGG_IDEAS.md`). What remains is the source vocabulary the 2.0 names, failure models and care verbs were drawn from, and ideas not yet used. Nothing here is implemented or tested.
+> **Archived 2026-10-13.** Not the source of truth; kept for history and measurements. Current: nothing (reference only). Index: [README.md](README.md).
+
+**Status: reference only.** Written for fitting a second egg into 1.0; planning moved to a from-scratch 2.0 with three eggs (Program, Iron, Wetware) and a hidden Rogue egg, all decided in [SKETCH_FULL.md](SKETCH_FULL.md). The candidate analysis, recommendation and open questions of the first version were superseded and are removed (full text: `git show 9114a22:docs/archive/netling2/SECOND_EGG_IDEAS.md`). What remains is the source vocabulary the 2.0 names, failure models and care verbs were drawn from, and ideas not yet used. Nothing here is implemented or tested.
 
 **Sources** (local copies are not kept; re-download if needed): Jargon File 1.0.0.33 (read in full) and 4.4.7 (about 90 of 2,300 entries sampled); Cyberpunk 2020 slang glossary (WyldeSide, read in full); FDA "Glossary of Computer System Software Development Terminology" (8/95; about 110 of 768 entries read). No term comes from anywhere else.
 

@@ -1,4 +1,4 @@
-// Rogue, the levers for the gap between the lines (docs/NETLING_2_ROGUE_DRAFTS.md 7.8): reads results/followup/rogue-lineage/<job>/<archetype>.json
+// Rogue, the levers for the gap between the lines (docs/archive/netling2/ROGUE_DRAFTS.md 7.8): reads results/followup/rogue-lineage/<job>/<archetype>.json
 // (baseline/rogue-lineage.mjs) and prints, per job, each line's two steerers (corp and street) per Rogue life: good end, clean Source exit, Source
 // exit, the good end in the first Rogue life, captured; then, for the jobs run on the whole attentive group, the group means as 7.7 gives them.
 // Usage: node prototype/netling2/baseline/rogue-levers-summary.mjs

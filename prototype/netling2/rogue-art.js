@@ -1,4 +1,4 @@
-// The hidden Rogue egg's ten forms (docs/NETLING_2_ROGUE_DRAFTS.md, section 8): first drafts for review, nothing decided about the art.
+// The hidden Rogue egg's ten forms (docs/archive/netling2/ROGUE_DRAFTS.md, section 8): first drafts for review, nothing decided about the art.
 // Marks as everywhere: '#' main, 'o' accent (the eyes), 'x' dim, '+' highlight (unused awake: Rogue has no mouth), '.' empty.
 //
 // What every form carries (section 8.1):

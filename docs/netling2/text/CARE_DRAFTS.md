@@ -1,6 +1,9 @@
 # Netling 2.0 care drafts
 
-Status: first-pass proposals for the per-egg meters and care buttons (sketch, Next steps). Nothing here is implemented or playtested; the per-egg pressure the wording sits on is measured on the simulator ([NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md)). Companions: [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) (decisions) and [NETLING_2_CODEX_DRAFTS.md](NETLING_2_CODEX_DRAFTS.md) (page text and the same three registers).
+> **Status (2026-10-13): Drafted care wording (meters, buttons, events, items, alerts, clinic and bug statements, the break, stage care and notifications). Much is decided; the maintainer's text review is pending.** Design context: [../DESIGN.md](../DESIGN.md). Open items: [../OPEN_ITEMS.md](../OPEN_ITEMS.md).
+
+
+Status: first-pass proposals for the per-egg meters and care buttons (sketch, Next steps). Nothing here is implemented or playtested; the per-egg pressure the wording sits on is measured on the simulator ([EGG_PRESSURES.md](../../archive/netling2/EGG_PRESSURES.md)). Companions: [SKETCH_FULL.md](../../archive/netling2/SKETCH_FULL.md) (decisions) and [CODEX_DRAFTS.md](CODEX_DRAFTS.md) (page text and the same three registers).
 
 ## Frame (maintainer answers, first pass, not set in stone)
 
@@ -21,7 +24,7 @@ Rules for the words: Program is bureaucratic and technical, Iron is physical and
 | Heat `HEAT` | HEAT | HEAT | TEMP | "Running hot wears it out. Vent it." / "A fever hurts it. Cool it down." |
 | Cache (pips) `CACHE` | CACHE | ROT | WASTE | "Bit rot. Scrub it." / "Waste builds up. Flush it." |
 
-**Decided (maintainer): the run HUD follows these meter words** (FOOD, HLTH, TEMP for Wetware; PWR, LOCK for Iron), not only the home screen, so the netrun tips and log lines (NETLING_2_NETRUN_DRAFTS.md, section 7) read true. The netrun's button names (CONTINUE, JACK OUT) and the node label ICE are the same in every egg.
+**Decided (maintainer): the run HUD follows these meter words** (FOOD, HLTH, TEMP for Wetware; PWR, LOCK for Iron), not only the home screen, so the netrun tips and log lines (docs/archive/netling2/NETRUN_DRAFTS.md, section 7) read true. The netrun's button names (CONTINUE, JACK OUT) and the node label ICE are the same in every egg.
 
 ## Care buttons
 
@@ -219,7 +222,7 @@ What a player can read: a steady beat with steady marks (calm and in a state); a
 
 Verified (marks.js and marks.test.js; the prototype suite passes): the marks step only on the 400 ms grid and never change faster, hold still in calm mode, occupy different places (no shared pixel), and the new ones never touch the body at any egg or level in the sampled drift. Not done: drawn in a real frame, a device check, any playtest.
 
-Archive hints and chatter lines for the states are drafted in `NETLING_2_CODEX_DRAFTS.md`, State chatter and Archive hints. Open: whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
+Archive hints and chatter lines for the states are drafted in `docs/netling2/text/CODEX_DRAFTS.md`, State chatter and Archive hints. Open: whether strongly unsteady netlings should show the marks more nervously (rejected here to keep rule 1).
 
 ## Pre-state caption (draft, first pass)
 
@@ -293,7 +296,7 @@ The clinic's share (25%) and fee (15 scrip or 2 Standing) were re-measured again
 
 ## The break (drafts, first pass, for the maintainer to choose)
 
-Wording for the break (decided rule: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "The break"): while a state is held, Integrity under 70 warns once; under 40 the state ends, the bar drops well below its exit line, the netling takes one fault and the state is locked out for 12 hours. Every egg manages every bar and can reach every state, and only the owner's benefits are larger (maintainer, 2026-10-09), so every egg needs all three rows, Overclock included (its break applies on every egg: `BRAKE.allOverclock`). Nothing here is implemented, read in context or read on a device.
+Wording for the break (decided rule: [EGG_PRESSURES.md](../../archive/netling2/EGG_PRESSURES.md), "The break"): while a state is held, Integrity under 70 warns once; under 40 the state ends, the bar drops well below its exit line, the netling takes one fault and the state is locked out for 12 hours. Every egg manages every bar and can reach every state, and only the owner's benefits are larger (maintainer, 2026-10-09), so every egg needs all three rows, Overclock included (its break applies on every egg: `BRAKE.allOverclock`). Nothing here is implemented, read in context or read on a device.
 
 Rules followed: lowercase log lines with `> `, `!!` for the break itself as for 1.0's other bad news; no state name and no number in log lines or chatter (the label and readout word carry the name, as for the states themselves); the 12 hours was said as "half a day" in option A, as Overlink's burnout says "until tomorrow" (the decided option B says "for a while"); words already taken are avoided: "patch" (Program's cure), "reset" (Program's rest word), "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "fever" (Wetware's power surge); the fault word follows Failures (fault, fault, slip).
 
@@ -351,7 +354,7 @@ Decided (maintainer, 2026-10-09): the warning notifies, in the **Care** class (o
 
 ## Overuse and owner strain (drafts, first pass)
 
-Wording for the overuse rules (design: [NETLING_2_EGG_PRESSURES.md](NETLING_2_EGG_PRESSURES.md), "Overuse and owner strain"). Same rules as above: lowercase log lines, no number, no state name, the egg's register, and the fault words from Failures. The basic lines show on every egg when an action past the line costs Integrity; the strain lines show only on the owner's egg, past the strain's warning line, as Iron's "> tolerances are slipping." does. Nothing here is read in context.
+Wording for the overuse rules (design: [EGG_PRESSURES.md](../../archive/netling2/EGG_PRESSURES.md), "Overuse and owner strain"). Same rules as above: lowercase log lines, no number, no state name, the egg's register, and the fault words from Failures. The basic lines show on every egg when an action past the line costs Integrity; the strain lines show only on the owner's egg, past the strain's warning line, as Iron's "> tolerances are slipping." does. Nothing here is read in context.
 
 | Moment | Program | Iron | Wetware |
 |---|---|---|---|
@@ -377,7 +380,7 @@ Open: "cyberpsychosis" is the maintainer's theme for Wetware's strain; in-game W
 
 ## Stage care and notifications (drafts, first pass)
 
-Wording for the stage-care rules ([NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), section 2) and the three notification classes (its section 2.6), plus a review of the strain readout words. Drafted 2026-10-09 for the maintainer to choose and edit; nothing here is implemented, read in context, read on a device or played. Rules followed, as above: lowercase log lines with `> `, sentence case for alert and notification text, button names in capitals, no state name and no hidden number, the egg's register (Program bureaucratic and technical, Iron physical and procedural, Wetware street-level and plain), the egg's fault word. Words kept out because they are taken: "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "cool" (a care button), "drift" (Iron's virus), "true" and "out of true" (Iron's bugs), "worn" (Iron's wear readout), "fever" (Wetware's surge), "slip" outside a fault (Wetware's fault word), "spent", "drained" and "throttled" (the lockout readout words).
+Wording for the stage-care rules ([STAGE_CARE_DRAFTS.md](../../archive/netling2/STAGE_CARE_DRAFTS.md), section 2) and the three notification classes (its section 2.6), plus a review of the strain readout words. Drafted 2026-10-09 for the maintainer to choose and edit; nothing here is implemented, read in context, read on a device or played. Rules followed, as above: lowercase log lines with `> `, sentence case for alert and notification text, button names in capitals, no state name and no hidden number, the egg's register (Program bureaucratic and technical, Iron physical and procedural, Wetware street-level and plain), the egg's fault word. Words kept out because they are taken: "reboot" (post-crash recovery), "defrag" (a bug-clearing candidate), "cool" (a care button), "drift" (Iron's virus), "true" and "out of true" (Iron's bugs), "worn" (Iron's wear readout), "fever" (Wetware's surge), "slip" outside a fault (Wetware's fault word), "spent", "drained" and "throttled" (the lockout readout words).
 
 ### The rest call
 

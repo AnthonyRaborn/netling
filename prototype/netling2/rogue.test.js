@@ -1,4 +1,4 @@
-// Tests for the hidden Rogue egg's ten forms (first drafts; docs/NETLING_2_ROGUE_DRAFTS.md, section 8): the frame and wearable rules every
+// Tests for the hidden Rogue egg's ten forms (first drafts; docs/archive/netling2/ROGUE_DRAFTS.md, section 8): the frame and wearable rules every
 // egg obeys, Rogue's shared marks, the shadow layer and the glance tell. Run with `npm run proto:test`. Deterministic.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

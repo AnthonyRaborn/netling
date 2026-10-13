@@ -28,7 +28,7 @@ const JOBS = {
   refuse: { ...STAGE3, MERGEBOT: 'refuse' }, // every offer declined: the good end only at death
   back: { ...STAGE3, LINEBOT: 'back' }, // one NL-0 life after a capture
   tier1: { ...STAGE3, FEAT: '1' }, // a lever: every Rogue elder at 1.0's feat (three Deep exits or two clean)
-  // The decisions of 2026-10-11 (docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 41 to 47), now the defaults: only a clean Source exit arms the good end,
+  // The decisions of 2026-10-11 (docs/archive/netling2/ROGUE_DRAFTS.md 6.1, items 41 to 47), now the defaults: only a clean Source exit arms the good end,
   // any egg can follow it, the mixed egg's parent is the Rogue, only a full life passes the trait line (and only an old-age death of an armed
   // elder is the good end), and the crossings between Rogue and the NL-0 eggs are gated.
   clean: { ...NO_TRAIT }, // MERGEBOT=accept, PICK=first (the mixed egg in the first NL-0 egg completed), LINEBOT=stay
@@ -36,7 +36,7 @@ const JOBS = {
   'clean-rogue': { ...NO_TRAIT, PICK: 'rogue' }, // Rogue again after every good end: no mixed egg, every life a Rogue life
   // The Rogue trait (decided 2026-10-11, 9.4a C1 and E1; sim.js ROGUE_TRAIT), on the fork's defaults: every rule decided so far.
   trait: {},
-  // Levers for the gap between the lines (docs/NETLING_2_ROGUE_DRAFTS.md 7.8; nr2.js rogue.source, all off by default), on top of the trait job.
+  // Levers for the gap between the lines (docs/archive/netling2/ROGUE_DRAFTS.md 7.8; nr2.js rogue.source, all off by default), on top of the trait job.
   ...Object.fromEntries(Object.entries({
     breach1: { breachFree: 1 }, // Mole and Sleeper: one lost ordinary fight in the Source still exits clean
     tune: { tuneTypes: true }, // Spook and Handler: every Source ICE's game and tier from the start

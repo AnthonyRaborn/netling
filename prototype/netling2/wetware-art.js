@@ -1,5 +1,5 @@
 // Netling 2.0 sprite prototype: the Wetware egg. Same string-row format as src/sprites.js ('#' main, 'o' accent, '+' highlight,
-// 'x' dim fill, '.' empty). Not shipped; see docs/NETLING_2_SPRITES.md.
+// 'x' dim fill, '.' empty). Not shipped; see docs/netling2/SPRITES_HANDOFF.md.
 //
 // Wetware is grown tissue running software, so its baby is an ORGANOID: a lump of cultured tissue with a folded cortex (the dim 'x'
 // folds across the top of the head), a face, and four root-like tendrils instead of feet. Chosen by the maintainer from three
@@ -424,7 +424,7 @@ export const WETWARE_ADULT_ANCHORS = {
 // One elder per adult, hand-drawn as Program's and Iron's were: 18 columns against 16, keeping the adult's own marks and growing a
 // feature of its own. Rows 0 to the neck row are the same in A and B and the body's bottom is the same row in both. Wired's is 1.0's
 // Plat (the mainframe of Chrome, which Wired is), as the maintainer suggested; its B frame keeps Plat's head still and steps the feet.
-// A hand-drawn Wired elder was drawn for comparison and came out 0.96 like Plat (see NETLING_2_SPRITES_HISTORY.md, Wetware elders).
+// A hand-drawn Wired elder was drawn for comparison and came out 0.96 like Plat (see docs/archive/netling2/SPRITES_HISTORY.md, Wetware elders).
 export const WETWARE_ELDERS = {
   // Razor's elder: a bigger crest, a wider jaw and shoulders, longer blades down both forearms. The blades are accent ('o'), as on
   // Razor: in highlight they drew in acid's, toxic's and origin's dark mark colour, 1.1:1 against the screen (maintainer's review).

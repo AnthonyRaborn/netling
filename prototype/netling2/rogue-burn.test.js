@@ -1,4 +1,4 @@
-// Tests for the self-destruct drafts (rogue-burn.js; docs/NETLING_2_ROGUE_DRAFTS.md, 11.1): every burn on every Rogue form keeps to the
+// Tests for the self-destruct drafts (rogue-burn.js; docs/archive/netling2/ROGUE_DRAFTS.md, 11.1): every burn on every Rogue form keeps to the
 // flash rule (project rule 7), ends on its capture pose, and the poses keep the form's size. Deterministic.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

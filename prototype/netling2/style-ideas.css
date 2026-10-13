@@ -1,4 +1,4 @@
-/* Netling 2.0 style ideas (docs/NETLING_2_ACCESSORY_IDEAS.md): the shells, screen effects and device labels, written as 1.0's are in style.css
+/* Netling 2.0 style ideas (docs/archive/netling2/ACCESSORY_IDEAS.md): the shells, screen effects and device labels, written as 1.0's are in style.css
    (.device.shell-<id>, .screen.fx-<id>) so they would move there unchanged. Prototype only: not loaded by the game, not in sw.js. Load it
    after style.css. The tints are data (style-ideas.js: a tint is just two colours) and Ghosting is a pixel effect (ghosting.js), so
    neither is here. Every rule below is checked by style-ideas.test.js: the ids, the light shells' dimmer colour, how fast anything moves

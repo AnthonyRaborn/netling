@@ -1,4 +1,4 @@
-// Tests for the 2.0 simulator fork (prototype/netling2/sim/): the core life rules of docs/NETLING_2_SKETCH.md. Deterministic: every
+// Tests for the 2.0 simulator fork (prototype/netling2/sim/): the core life rules of docs/archive/netling2/SKETCH_FULL.md. Deterministic: every
 // test injects the clock and the rng. 1.0's own rules are tested by tests/*.test.js against src/sim.js, which this fork leaves alone.
 import test from 'node:test';
 import assert from 'node:assert/strict';

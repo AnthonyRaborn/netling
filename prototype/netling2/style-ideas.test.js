@@ -1,4 +1,4 @@
-// The shells, tints, screen effects and device labels (style-ideas.js, style-ideas.css, ghosting.js; docs/NETLING_2_ACCESSORY_IDEAS.md):
+// The shells, tints, screen effects and device labels (style-ideas.js, style-ideas.css, ghosting.js; docs/archive/netling2/ACCESSORY_IDEAS.md):
 // every one in the doc is built, the HUD text reads on every shell, nothing moves faster than CLAUDE.md rule 7 allows, no overlay
 // darkens the screen past what a netling can be read through, every tint holds every palette at 1.0's contrast, Ghosting fades and never
 // blinks, and the labels read on every shell.
@@ -20,7 +20,7 @@ import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 
 registerPalettes();
 registerIdeas();
-const doc = readFileSync(new URL('../../docs/NETLING_2_ACCESSORY_IDEAS.md', import.meta.url), 'utf8');
+const doc = readFileSync(new URL('../../docs/archive/netling2/ACCESSORY_IDEAS.md', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./style-ideas.css', import.meta.url), 'utf8');
 const base = readFileSync(new URL('../../style.css', import.meta.url), 'utf8');
 const idsOf = (heading) => [...doc.split(`## ${heading}`)[1].split('\n## ')[0].matchAll(/^\|[^|]*\(`(\w+)`\)/gm)].map((m) => m[1]);

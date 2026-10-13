@@ -1,4 +1,4 @@
-// The tutorial run's wording per egg (docs/NETLING_2_NETRUN_DRAFTS.md, section 7): the nudge before the first run, the five tip
+// The tutorial run's wording per egg (docs/archive/netling2/NETRUN_DRAFTS.md, section 7): the nudge before the first run, the five tip
 // captions, the node hints the tutorial shows, the run log lines it prints, and the party hat gift line. Drafts for the maintainer to
 // edit; not wired into any game. Shaped on 1.0's own text: `TUTORIAL_TIPS` and `TYPE_HINT` in src/netrun/view.js, the `note()` lines in
 // src/netrun/run.js and `finishOnboarding` / `renderNudge` in src/ui/onboarding.js.

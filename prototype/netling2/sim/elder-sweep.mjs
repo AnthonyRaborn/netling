@@ -1,4 +1,4 @@
-// The elder stage under the decided rules (docs/NETLING_2_STAGE_CARE_DRAFTS.md: the elder cache x0.25 and the rest call's lower demand). In
+// The elder stage under the decided rules (docs/archive/netling2/STAGE_CARE_DRAFTS.md: the elder cache x0.25 and the rest call's lower demand). In
 // single-life runs no netling reaches the elder, because the gate needs Root earned in the life and three Deep exits; CODEX=deep starts every
 // life knowing the way down and holding Root (as the game would grant it), so archetypes that run the Deep can reach it.
 // Compares variants of the elder's stage rules and reports, per archetype: lives reaching the elder, elder days, and per elder awake day the

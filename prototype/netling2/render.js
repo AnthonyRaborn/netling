@@ -1,4 +1,4 @@
-// The 2.0 renderer pass (docs/NETLING_2_ROGUE_DRAFTS.md 11.1, "The renderer", accepted; docs/NETLING_2_SPRITES.md, Next phase item 2):
+// The 2.0 renderer pass (docs/archive/netling2/ROGUE_DRAFTS.md 11.1, "The renderer", accepted; docs/netling2/SPRITES_HANDOFF.md, Next phase item 2):
 // one pass that draws every egg's layers on the LCD (1.0's 40x28 plus TOP rows), in the order the plan fixes. Not 1.0's src/render.js (under the freeze), and
 // not a game: it draws a pet from a plain description of what it looks like now, so the future 2.0 app, the review page and the tests
 // all draw the same picture.
@@ -25,7 +25,7 @@
 //
 // Clocks: `time` is the renderer's clock (as 1.0's frame rhythm), not the game clock; `opts.reduced` is the reduced-motion setting.
 //
-// The idle hold (decided, docs/NETLING_2_SPRITES.md Next phase item 1): 1.0's idle masks a positional tell, so the idle's clock pauses
+// The idle hold (decided, docs/netling2/SPRITES_HANDOFF.md Next phase item 1): 1.0's idle masks a positional tell, so the idle's clock pauses
 // around it (tell.js idleClock): a steady Iron's settle, and since 2026-10-12 an unsteady Iron's drift steps and a strongly unsteady
 // Program's hops, and while an idle action plays (decided 2026-10-12; idle-actions.js heldClock). opts.idleHold picks the clock: 'held'
 // (the decided rule), 'tell' (the tell's holds without the actions'), 'steady' (the earlier rule, a steady Iron only) or 'none' (the

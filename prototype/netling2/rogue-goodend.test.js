@@ -1,4 +1,4 @@
-// The Rogue egg in the simulator fork, stage 3 (the lineage side): docs/NETLING_2_ROGUE_DRAFTS.md 6.1, items 11 to 14 and 41 to 43. A clean Source
+// The Rogue egg in the simulator fork, stage 3 (the lineage side): docs/archive/netling2/ROGUE_DRAFTS.md 6.1, items 11 to 14 and 41 to 43. A clean Source
 // exit arms the good end and offers the merge at once (one with a lost fight arms nothing), a mark after the latest arming disarms it, another clean
 // exit re-arms it, and an armed elder's death is the good end, never after a capture. After it any egg can be chosen; an NL-0 egg hatches the mixed
 // egg, whose parent is the Rogue. Deterministic: maps are built by hand and every roll is a stub.

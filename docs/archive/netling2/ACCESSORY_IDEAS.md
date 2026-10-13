@@ -1,6 +1,8 @@
 # Netling 2.0 accessory and style ideas (drafts; first art in the prototype)
 
-An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0's 41 carry over unchanged; [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), "Wearables (41) and props (8)"), props, and the wardrobe's other categories (shell, tint, screen effect, sound, crest, music, label; [NETLING_2_UI.md](NETLING_2_UI.md), "STYLE (the wardrobe)"). 26 wearables, 10 props and 48 other style items (84 in all: 71 after the two duplicates were dropped, plus seven effects paired with the new shells, five more crests and the Paper tint on 2026-10-13), plus three bigger asks, and a planning note on which could be paid (Paid options). **Nothing here is decided or shipped.** First art drafts of the wearables, props and crests exist in the prototype (Art drafts, below), and the shells, tints, screen effects and device labels are built there too (Build pass, below); sounds and music are text only. Names and ids are suggestions: an id becomes permanent only once it ships (CLAUDE.md rule 1), so none is reserved yet. Spoilers for the hidden forms where noted.
+> **Archived 2026-10-13.** Not the source of truth; kept for history and measurements. Current: nothing (an idea backlog; art drafts are in prototype/netling2/style-ideas.js). Index: [README.md](README.md).
+
+An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0's 41 carry over unchanged; [SKETCH_FULL.md](SKETCH_FULL.md), "Wearables (41) and props (8)"), props, and the wardrobe's other categories (shell, tint, screen effect, sound, crest, music, label; [UI.md](../../netling2/UI.md), "STYLE (the wardrobe)"). 26 wearables, 10 props and 48 other style items (84 in all: 71 after the two duplicates were dropped, plus seven effects paired with the new shells, five more crests and the Paper tint on 2026-10-13), plus three bigger asks, and a planning note on which could be paid (Paid options). **Nothing here is decided or shipped.** First art drafts of the wearables, props and crests exist in the prototype (Art drafts, below), and the shells, tints, screen effects and device labels are built there too (Build pass, below); sounds and music are text only. Names and ids are suggestions: an id becomes permanent only once it ships (CLAUDE.md rule 1), so none is reserved yet. Spoilers for the hidden forms where noted.
 
 ## How to read the entries (wearables)
 
@@ -8,7 +10,7 @@ An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0'
 - **Rarity and source** follow 1.0's scheme: common, rare or very rare; found anywhere, in one region (Public Net, Corp Grid, Darknet Bazaar, Old Web Ruins, the Deep, the Source), sold at a corp exchange or the black market, or earned. A suggestion, for the maintainer to balance.
 - **Fits** names an egg or form whose look it echoes. It is flavour only: in 1.0 any netling can wear anything, and nothing here proposes changing that.
 - **Motion** is described where an item moves. Every motion keeps the flash rule (no toggle faster than `FLASH_TOGGLE_MS`, 200 ms; most steps here are 400 ms) and has a still version for reduced motion.
-- **Room.** The 2.0 screen has 2 rows of headroom over 1.0's ([NETLING_2_SPRITES.md](NETLING_2_SPRITES.md), item 1a), so a float item may sit up to the holologo's height (6 rows over the head) without leaving the screen. Taller ones would need measuring.
+- **Room.** The 2.0 screen has 2 rows of headroom over 1.0's ([SPRITES_HANDOFF.md](../../netling2/SPRITES_HANDOFF.md), item 1a), so a float item may sit up to the holologo's height (6 rows over the head) without leaving the screen. Taller ones would need measuring.
 
 ## Head (8)
 
@@ -27,7 +29,7 @@ An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0'
 
 | Name (suggested id) | Rarity, source | Fits | Description | Paid? |
 |---|---|---|---|---|
-| Light ring, was the Laughing Man ring (`laughingring`) | very rare, the Deep | Wetware, Blank | Seen first as one of Blank's elder options (2026-10-07; [NETLING_2_SPRITES_HISTORY.md](NETLING_2_SPRITES_HISTORY.md), "Blank's elder in motion"), not chosen for Blank, never committed, and redrawn as an accessory (2026-10-12; Art drafts, below). An unbroken pale oval round the head with a bright glow and a dim wake sliding round it counterclockwise; every other lap the oval fills in with a face from the right, holds and clears from the right. Two versions: a plain smiley (`laughingring`), and a cap and grin (`laughingring.cap`). Worn alone: it hides other face items and anything on or inside it. Shop name: "Light ring" (maintainer; was "Smiling ring"). | free (find) |
+| Light ring, was the Laughing Man ring (`laughingring`) | very rare, the Deep | Wetware, Blank | Seen first as one of Blank's elder options (2026-10-07; [SPRITES_HISTORY.md](SPRITES_HISTORY.md), "Blank's elder in motion"), not chosen for Blank, never committed, and redrawn as an accessory (2026-10-12; Art drafts, below). An unbroken pale oval round the head with a bright glow and a dim wake sliding round it counterclockwise; every other lap the oval fills in with a face from the right, holds and clears from the right. Two versions: a plain smiley (`laughingring`), and a cap and grin (`laughingring.cap`). Worn alone: it hides other face items and anything on or inside it. Shop name: "Light ring" (maintainer; was "Smiling ring"). | free (find) |
 | Scan visor (`scanvisor`) | rare, Corp Grid | Program | A thin dark band across the eyes with one bright cell sweeping left and right inside it, a step every 400 ms. Unlike the Visor, the eyes show through as dim cells, so the face still reads. | split |
 | War paint (`warpaint`) | common, Darknet Bazaar | street lean | Two short stripes under each eye in a contrasting colour (recolorable). Still. | free (find) |
 | Teardrop code (`teardrop`) | rare, black market | Rogue | One accent cell under one eye and a dim cell under it, like a tattooed tear. The smallest face item; reads as a story, not a decoration. | free (find) |
@@ -58,7 +60,7 @@ An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0'
 
 ## Props (10)
 
-1.0 has 8 (Cyberdeck, Boom box, Coffee mug, Briefcase, Burner phone, Spray can, and the earned Mini device and Plush); 2.0 adds the **Metronome** (decided, earned at the strong temper levels; [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), "Temper cosmetics"). Props stand on the floor at the right edge, are drawn with `draw(px, frame, time, extra)` and can animate under the same flash rule.
+1.0 has 8 (Cyberdeck, Boom box, Coffee mug, Briefcase, Burner phone, Spray can, and the earned Mini device and Plush); 2.0 adds the **Metronome** (decided, earned at the strong temper levels; [SKETCH_FULL.md](SKETCH_FULL.md), "Temper cosmetics"). Props stand on the floor at the right edge, are drawn with `draw(px, frame, time, extra)` and can animate under the same flash rule.
 
 | Name (suggested id) | Rarity, source | Fits | Description | Paid? |
 |---|---|---|---|---|
@@ -75,7 +77,7 @@ An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0'
 
 ## Shells (7)
 
-In 2.0 the shell recolors the UI surfaces (strip, lane, dock, trays, rows), and the default shell defers to the egg skin. 10 of 1.0's 15 shells unlock by discovering a 1.0 form and need new conditions ([NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), the table near "Shells (15)"). These ideas could fill those slots or sit beside them. Hints are in 1.0's voice (lowercase, short, no form names).
+In 2.0 the shell recolors the UI surfaces (strip, lane, dock, trays, rows), and the default shell defers to the egg skin. 10 of 1.0's 15 shells unlock by discovering a 1.0 form and need new conditions ([SKETCH_FULL.md](SKETCH_FULL.md), the table near "Shells (15)"). These ideas could fill those slots or sit beside them. Hints are in 1.0's voice (lowercase, short, no form names).
 
 | Name (suggested id) | Unlock (suggestion) | Hint | Description | Paid? |
 |---|---|---|---|---|
@@ -191,7 +193,7 @@ Every table above has a **Paid?** column. There is no monetization in 1.0 or in 
 | split | A still version free (findable), the animated version paid. The still version is exactly the reduced-motion picture, so a reduced-motion player gives up nothing by not paying, and the store should say that a paid animation will not move for them. |
 
 **Constraints (from how the game works today).**
-- **Nothing can verify a purchase yet.** Saves and transfer codes are offline and self-contained, and "the lock is not copy protection" ([DATA_AND_SAVES.md](DATA_AND_SAVES.md)); stored and imported data is treated as hostile. A purchase cannot live in the save or the transfer code without being copyable, so paid items need an outside source of truth (app store purchases, for one). That is new infrastructure and the largest cost here.
+- **Nothing can verify a purchase yet.** Saves and transfer codes are offline and self-contained, and "the lock is not copy protection" ([DATA_AND_SAVES.md](../../DATA_AND_SAVES.md)); stored and imported data is treated as hostile. A purchase cannot live in the save or the transfer code without being copyable, so paid items need an outside source of truth (app store purchases, for one). That is new infrastructure and the largest cost here.
 - **Paid items stay out of the drop tables, the shops and the visitor gifts.** Visitors wear random findable wearables and can gift them (`visitAccGifts`), which would hand out a paid item for free. Showing a paid item on a visitor or a visitor card is fine (it advertises itself).
 - **Paid items keep every rule:** the flash rule, the 3:1 contrast check on every palette, the room rules, and no gameplay effect.
 
@@ -304,7 +306,7 @@ Props and wearables carry an egg in their "Fits" column, which is a look and a s
 ## Open questions
 
 - **How many to add, if any.** 1.0 has 41 wearables and 49 style items in all; this list has 84. A handful per category would keep the wardrobe readable; the maintainer picks.
-- **Where props live in the 2.0 wardrobe.** The UI's decided tabs are HEAD, FACE, BACK, SHELL, TINT, FX, SOUND, CREST, MUSIC and LABEL ([NETLING_2_UI.md](NETLING_2_UI.md)); props and two of 1.0's wear slots (body, float) are not named there. Worth settling before any are added.
+- **Where props live in the 2.0 wardrobe.** The UI's decided tabs are HEAD, FACE, BACK, SHELL, TINT, FX, SOUND, CREST, MUSIC and LABEL ([UI.md](../../netling2/UI.md)); props and two of 1.0's wear slots (body, float) are not named there. Worth settling before any are added.
 - **Unlocks are placeholders.** Every condition above uses 2.0 mechanics as they stand in the simulator (Standing, the clinic, bugs, the egg pressures, the Rogue hunt) and would need the same measuring as 1.0's (how many lives a casual or attentive player takes to get one).
 - **Duplicates (resolved 2026-10-13, maintainer):** the Three of a kind shell is dropped (the Three eggs crest stays) and the Hazard orange tint is dropped (1.0's Heatwave stays). The Clinic sound's hint no longer repeats the Waiting room track's.
 - **Egg ties.** Planned, not built (Egg ties: the plan, above): a source rule, two per egg, Rogue included. Still open: the unlock wording, Condensation's unlock, and when the Rogue ties become visible.

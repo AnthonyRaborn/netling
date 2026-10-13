@@ -1,4 +1,4 @@
-// The motion layers of the hidden Rogue egg's ten forms (docs/NETLING_2_ROGUE_DRAFTS.md, 6.1 and 8.4a to 8.4f). All follow the hidden
+// The motion layers of the hidden Rogue egg's ten forms (docs/archive/netling2/ROGUE_DRAFTS.md, 6.1 and 8.4a to 8.4f). All follow the hidden
 // elders' echo rules (blank-motion.js, echo-motion.js): a pure function of (sprite, anchors, time) returning padded rows, a layer over the
 // sprite and not a different sprite (the registered A and B frames still obey the frame rules, and wearables sit on them), 12 steps of
 // 400 ms, a still version under reduced motion. None touches the eyes, the arc or the tag: only plain body cells ('#') and empty cells.
