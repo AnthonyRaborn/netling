@@ -19,6 +19,8 @@ import { guardedLevel } from '../tell.js';
 import { neglectLevel } from '../needs.js';
 
 export const MIN = 60_000;
+// The stored forecast seed is data like any other: a 32-bit unsigned integer or nothing.
+export const cleanSeed = (v) => (Number.isInteger(v) && v >= 0 && v <= 0xffffffff ? v : null);
 export const SAVE_VERSION = 2;
 
 export const CFG = {
@@ -600,6 +602,7 @@ export function createScript({ now, generation = 1, fragment = null, rng = Math.
     contract: null, // an open netrun job: { kind, region, n?, scrip, item, postedAge } (netrun/run.js)
     contractCheckAge: null, // the netling minute the UI last looked at posting one
     wokeAt: null, // when it last woke from the night's sleep (not a nap or hibernation)
+    seed: null, // the forecast's 32-bit seed while the app is in the background, else null (sim/forecast.js); cleanSeed on load
     deepExits: { all: 0, clean: 0 }, // exits from The Deep this life, and the clean ones (the Mainframe gate)
     lifeBonus: 0, // minutes of life gained (a mainframe's extra day)
     flowMin: 0, // minutes in a row in good shape, awake
@@ -1734,6 +1737,7 @@ export function migrate(s) {
   s.contract ??= null;
   s.contractCheckAge ??= null;
   s.wokeAt ??= null;
+  s.seed = cleanSeed(s.seed);
   s.deepExits ??= { all: 0, clean: 0 };
   s.lifeBonus ??= 0;
   s.flowMin ??= 0;

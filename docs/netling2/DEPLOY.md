@@ -71,7 +71,7 @@ Portable is not a separate build: the portable download is the same program zipp
 
 ## Build order
 
-1. **Engine:** seeded RNG and the forecast in the 2.0 sim (`prototype/netling2/sim/` first), with the forecast-equals-catch-up test.
+1. **Engine (done in the fork, bot-tested only):** `prototype/netling2/sim/forecast.js` (`newSeed`, `forecast`, `catchUp`, `replay`, `notifications`) with `prototype/netling2/forecast.test.js`. Decided with the maintainer: a 32-bit seed (`mulberry32`) is enough; the forecast carries every item (events and attention requests, cooldowns, visits) except care notices, of which it carries only the soonest (`care: 'first'`; `'last'` and `'none'` exist); `notifications()` then drops visitors, applies the 6 a day cap to Events and leaves Cooldowns off. The forecast is computed when the app goes to the background and discarded on reopening, when `catchUp` runs the same seed. The save has a `seed` field (null by default, `cleanSeed` on load). Limits found: the time zone read at waking is not covered (a zone change while closed can differ), and an unattended netling usually dies within 36 hours in the bot lives, so most forecasts are short. Still to do in the real app: store the seed on backgrounding, cancel on open, wire to the shells.
 2. **Android spike:** a Capacitor shell loading the web core; schedule notifications from a forecast; check on the maintainer's phone with exact alarms denied and the phone in Doze. This is the riskiest piece, so it comes early.
 3. **Storage backends** behind `store`: file on desktop (with portable mode), Filesystem or Preferences on Android.
 4. **Desktop shell:** Tauri main window, pet window, tray, portable mode; builds in Actions.
