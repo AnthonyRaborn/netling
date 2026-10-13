@@ -2,56 +2,56 @@
 // for the new palettes in palettes.js, as src/wearable-colors.js has them for the six.
 export const NEW_AUTO_COLORS = {
   'cap': [
-    { ember: '#b967ff', cobalt: '#05d9e8' },
+    { ember: '#b967ff', cobalt: '#05d9e8', mint: '#c8d0dc' },
   ],
   'scarf': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff2a6d' },
   ],
   'shades': [
-    { ember: '#050508', cobalt: '#050508' },
-    { ember: '#3a3f49', cobalt: '#5d7a80' },
+    { ember: '#050508', cobalt: '#050508', mint: '#050508' },
+    { ember: '#3a3f49', cobalt: '#5d7a80', mint: '#5d7a80' },
   ],
   'visor': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d' },
-    { ember: '#b967ff', cobalt: '#ffffff' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#b967ff' },
+    { ember: '#b967ff', cobalt: '#ffffff', mint: '#ffffff' },
   ],
   'mohawk': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c' },
   ],
   'tattoo': [
-    { ember: '#39ff14', cobalt: '#39ff14' },
+    { ember: '#39ff14', cobalt: '#39ff14', mint: '#39ff14' },
   ],
   'rebreather': [
-    { ember: '#b967ff', cobalt: '#ff2a6d' },
-    { ember: '#7843a6', cobalt: '#a61b47' },
+    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#c8d0dc' },
+    { ember: '#7843a6', cobalt: '#a61b47', mint: '#82878f' },
   ],
   'partyhat': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d' },
-    { ember: '#f9f002', cobalt: '#39ff14' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c' },
+    { ember: '#f9f002', cobalt: '#39ff14', mint: '#f9f002' },
   ],
   'bowtie': [
-    { ember: '#b967ff', cobalt: '#ff2a6d' },
+    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#b967ff' },
   ],
   'blush': [
-    { ember: '#ff6b9a', cobalt: '#ff6b9a' },
+    { ember: '#ff6b9a', cobalt: '#ff6b9a', mint: '#c8d0dc' },
   ],
   'laughingring': [
-    { ember: '#c0eeff', cobalt: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
   ],
   'laughingring.cap': [
-    { ember: '#c0eeff', cobalt: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
   ],
   'warpaint': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#c8d0dc' },
   ],
   'laughingring.quiet': [
-    { ember: '#c0eeff', cobalt: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
   ],
   'laughingring.still': [
-    { ember: '#c0eeff', cobalt: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
   ],
 };

@@ -29,7 +29,7 @@ const ratio = (a, b) => {
 
 test('the palettes are added before origin, which stays last, once', () => {
   registerPalettes();
-  assert.deepEqual(PALETTES.map((p) => p.name), ['ice', 'neon', 'acid', 'toxic', 'ultra', 'ember', 'cobalt', 'origin']);
+  assert.deepEqual(PALETTES.map((p) => p.name), ['ice', 'neon', 'acid', 'toxic', 'ultra', 'ember', 'cobalt', 'mint', 'origin']);
   assert.equal(new Set(PALETTES.map((p) => p.name)).size, PALETTES.length);
 });
 
@@ -41,6 +41,7 @@ test('each new palette meets the contrast and distinctness bars 1.0\'s six meet,
       assert.ok(ratio(p.accent, lcd) >= 4.4, `${p.name} accent on ${lcd}: ${ratio(p.accent, lcd).toFixed(2)}`);
     }
     assert.ok(ratio(p.main, p.accent) >= 2.1, `${p.name} eyes on the body: ${ratio(p.main, p.accent).toFixed(2)}`);
+    assert.ok(ratio(p.mark ?? '#f5f5f5', p.main) >= 2, `${p.name} highlight marks on the body: ${ratio(p.mark ?? '#f5f5f5', p.main).toFixed(2)}`);
     for (const q of PALETTES.filter((x) => x.name !== p.name)) assert.ok(deltaE(p.main, q.main) >= 35, `${p.name} against ${q.name}: ${deltaE(p.main, q.main).toFixed(0)}`);
   }
 });
@@ -59,7 +60,7 @@ test('nothing worn blends into a new palette, and every form composes inside the
         }
       }
     }
-    for (const palette of [5, 6]) {
+    for (const palette of [5, 6, 7]) {
       const { box } = composeLCD({ form, egg, palette, idle: 'none', worn: [{ id: 'crown' }] }, 1000);
       assert.ok(box.x >= 0 && box.x + box.w <= LCD_W && box.y >= 0 && box.y + box.h <= LCD_H, `${form.id} on palette ${palette}`);
     }

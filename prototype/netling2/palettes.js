@@ -1,4 +1,4 @@
-// Two new netling palettes for 2.0 (docs/NETLING_2_ACCESSORY_IDEAS.md, "Palettes"). Nothing here is decided or shipped; src/ is not edited.
+// Three new netling palettes for 2.0 (docs/NETLING_2_ACCESSORY_IDEAS.md, "Palettes"). Nothing here is decided or shipped; src/ is not edited.
 // A palette is { name, main, accent, mark? } as 1.0's (src/sim.js PALETTES); the body is `main`, the eyes and the flatline `accent`, and
 // `mark` the small highlight marks (white unless white would vanish).
 //
@@ -18,6 +18,8 @@ export const NEW_PALETTES = [
   { name: 'ember', main: '#ff8a1a', accent: '#fff3d6' },
   // Blue: ice is cyan and ultra is violet, with nothing between. A yellow accent, as ultra's, keeps it in the family.
   { name: 'cobalt', main: '#4d8dff', accent: '#f9f002' },
+  // Mint: between ice's cyan and toxic's lime, 52 from its nearest body (ice). Pink eyes, as ice's: 2.8:1 on the body. The marks (teeth, nose) are dark: white on this body is 1.17:1, as on acid and toxic.
+  { name: 'mint', main: '#5dffb0', accent: '#ff2a6d', mark: '#2b1b5a' },
 ];
 
 // Adds the palettes before `origin` (the last, root-only one), so rolling the base palettes would reach them and `origin` stays last.

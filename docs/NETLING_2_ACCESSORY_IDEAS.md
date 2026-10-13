@@ -214,14 +214,15 @@ First drafts of every wearable (26, the Light ring in two versions), prop (10) a
 
 ## Palettes (2026-10-13)
 
-Two more netling palettes, built in `prototype/netling2/palettes.js` (`registerPalettes()`; `src/` untouched). 1.0 has six (ice cyan, neon pink, acid yellow, toxic green, ultra violet, and origin's pale lilac, root-only); the gaps are orange and a true blue.
+Three more netling palettes, built in `prototype/netling2/palettes.js` (`registerPalettes()`; `src/` untouched). 1.0 has six (ice cyan, neon pink, acid yellow, toxic green, ultra violet, and origin's pale lilac, root-only); the gaps are orange and a true blue.
 
 | Name (id) | Body | Eyes (accent) | Why |
 |---|---|---|---|
 | Ember (`ember`) | `#ff8a1a` orange | `#fff3d6` warm white | Fills the gap between neon and acid. A mid-tone accent cannot be 2.1:1 on a body this bright and 4.4:1 on the dark screen at once, so the eyes are warm white. |
 | Cobalt (`cobalt`) | `#4d8dff` blue | `#f9f002` yellow | Fills the gap between ice and ultra. Yellow eyes, as ultra's. |
+| Mint (`mint`) | `#5dffb0` mint green | `#ff2a6d` pink | Fills the gap between ice's cyan and toxic's lime (52 from ice, the nearest). Its highlight marks are dark (`#2b1b5a`), as acid's and toxic's, since white on it is 1.17:1. Added after a second search of sixteen candidates (2026-10-13): the only one to pass every bar. |
 
-Bars, from the six: the body 4.5:1 and the accent 4.4:1 against every tint's screen colour, the accent 2.1:1 against the body, and the body at least 35 apart (CIE76) from every other body. Both pass (palettes.test.js), and so does the wearables' blend check on every form (1.0's, the ideas, and the recolorable ones through automatic colours computed by `tools/wearable-colors.mjs`'s own method). Candidates dropped: coral and rose (their accents fail the screen contrast), aqua (too near toxic), a darker cobalt (`#3d7bff`, 4.2:1 on the screen). **Not done:** 1.0's `rollQuirk` rolls only the palettes that existed when `sim.js` loaded (`BASE_PALETTES`), so a newly hatched netling does not roll them until the real sim changes; the palettes are placed before `origin`, so `origin` moves from index 5 to 7, which a save-format change in 2.0 must account for (`quirk.palette` is an index); the wearables' automatic colours, the gallery and the field manual would be regenerated; no device look.
+Bars, from the six: the body 4.5:1 and the accent 4.4:1 against every tint's screen colour, the accent 2.1:1 against the body, the highlight marks 2:1 on the body (white, or a dark mark as acid, toxic and origin have), and the body at least 35 apart (CIE76) from every other body. Both pass (palettes.test.js), and so does the wearables' blend check on every form (1.0's, the ideas, and the recolorable ones through automatic colours computed by `tools/wearable-colors.mjs`'s own method). Candidates dropped: coral and rose (their accents fail the screen contrast), aqua (too near toxic), a darker cobalt (`#3d7bff`, 4.2:1 on the screen). **Not done:** 1.0's `rollQuirk` rolls only the palettes that existed when `sim.js` loaded (`BASE_PALETTES`), so a newly hatched netling does not roll them until the real sim changes; the palettes are placed before `origin`, so `origin` moves from index 5 to 8, which a save-format change in 2.0 must account for (`quirk.palette` is an index); the wearables' automatic colours, the gallery and the field manual would be regenerated; no device look.
 
 ## Build pass: shells, tints, effects, labels, the Lava lamp glow (2026-10-13)
 
