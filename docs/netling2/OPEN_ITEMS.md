@@ -32,8 +32,8 @@ Verified state: `npm test` and `npm run proto:test` passed at the last recorded 
 
 ## D. 1.0 items touching this work
 
-18. **Branch `bugfix`** (from `main`, not merged, version not bumped): the netrun fix for a Glitch, Ghost or Panic that slips past ICE (also `77a12e7` on this branch) and corrected drain notes (a work-day gap is fatal; comment and doc change only, `d082f02`). Merging and bumping the version is the maintainer's call.
-19. 1.0 art problems left under the freeze: the holologo clip (settled for 2.0 by the taller screen), headphones plus visor merging into one band, ice's white marks at 1.59:1, and 1.0 forms that move wearables between frames.
+18. *(Done.)* Branch `bugfix` was merged to `main` (PR #29, version `netling-v70`) and `main` is merged into this branch: the netrun fix for a Glitch, Ghost or Panic that slips past ICE (`77a12e7` here, `daddee8` there), the corrected drain notes, and the headphones/visor and highlight-mark fixes. Delete this item when convenient.
+19. 1.0 art problems left under the freeze: the holologo clip (1 px, left as is; settled for 2.0 by the taller screen). Fixed in v70: headphones plus visor merging into one band, and low-contrast highlight marks on ice, acid, toxic and origin. 1.0 forms that move wearables between frames are documented as kept (`docs/SPRITES.md`), not a defect.
 
 ## E. Parked (do not start without the maintainer)
 

@@ -1047,6 +1047,17 @@ export function placeWorn(list, sprite, { frame = 0, time = 0, pal = null, minRo
   const orbits = (w) => Boolean(accessoryById(w.id).orbits);
   const ordered = wearOrder(list);
   const worn = [...ordered.filter((w) => !orbits(w)), ...ordered.filter(orbits)].map((w) => ({ id: w.id, dy: 0, pts: pixelsOf(w) }));
+  // The Headphones' cups sit at eye level, right against the ends of the Visor, and read as one band with a cup at each
+  // end. Worn with a Visor the cups shrink to two rows and ride up clear of its band, to the top corners of the head.
+  const phones = worn.find((w) => w.id === 'headphones');
+  if (phones && worn.some((w) => w.id === 'visor')) {
+    const xs = phones.pts.map((p) => p.x);
+    const [lo, hi] = [Math.min(...xs), Math.max(...xs)];
+    const eyeRow = a.eyeRow;
+    phones.pts = phones.pts
+      .filter((p) => !((p.x === lo || p.x === hi) && p.y === eyeRow + 1))
+      .map((p) => (p.x === lo || p.x === hi ? { ...p, y: p.y - 2 } : p));
+  }
   const key = (x, y) => `${x},${y}`;
   const taken = new Set();
   for (const w of worn) if (!ROOM[w.id] && !orbits(w)) for (const p of w.pts) taken.add(key(p.x, p.y));

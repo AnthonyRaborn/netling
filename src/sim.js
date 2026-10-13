@@ -13,8 +13,9 @@ export const CFG = {
   bootMinutes: 3,
   drainPerHour: { charge: 15.4, sync: 13.2 },
   // Charge and Sync drain faster the fuller they are: the rate above is scaled from `empty` at 0 to
-  // `full` at 100. Topping up often means more to do; a stat left low eases off, so long gaps
-  // (a work day, the night) still cost faults without being fatal.
+  // `full` at 100. Topping up often means more to do; a stat left low eases off, which softens
+  // short gaps but not long ones: an awake gap of 6 hours or more (a work day away) is fatal to
+  // most netlings (docs/BALANCE.md, Drain).
   drainCurve: { empty: 0.39, full: 2 },
   sleepDrainMult: 0.5, // asleep with the lights on: restless
   sleepDarkDrainMult: 0.33, // asleep in the dark: real rest
@@ -322,11 +323,11 @@ export const traitLabel = (id, level = 1) => (id ? `${TRAITS[id].name}${level > 
 const traitEffect = (s, id) => TRAIT_CFG.full[id] * traitStrength(s, id);
 
 export const PALETTES = [
-  { name: 'ice', main: '#05d9e8', accent: '#ff2a6d' },
-  { name: 'neon', main: '#ff2a6d', accent: '#05d9e8' },
   // `mark` is the color of the sprite's small highlight marks (nose, cheeks, teeth; '+' in the art), white unless the body is so
-  // light that white disappears: by luminance, white on acid is 1.1:1, on origin 1.1:1 and on toxic 1.2:1 (2 to 3.3 elsewhere).
-  // Toxic's accent (its eyes) was cyan on bright green, 1.3:1; the deeper teal is 2.7:1 and still reads on the dark screen (4.5:1).
+  // light that white disappears: by luminance, white on ice is 1.6:1, on acid 1.1:1, on origin 1.1:1 and on toxic 1.2:1 (2 to 3.3 on
+  // neon and ultra). Toxic's accent (its eyes) was cyan on bright green, 1.3:1; the deeper teal is 2.7:1 and still reads on the dark screen.
+  { name: 'ice', main: '#05d9e8', accent: '#ff2a6d', mark: '#2b1b5a' },
+  { name: 'neon', main: '#ff2a6d', accent: '#05d9e8' },
   { name: 'acid', main: '#f9f002', accent: '#ff2a6d', mark: '#2b1b5a' },
   { name: 'toxic', main: '#39ff14', accent: '#0891b2', mark: '#2b1b5a' },
   { name: 'ultra', main: '#b967ff', accent: '#f9f002' },
