@@ -111,7 +111,8 @@ export const WETWARE_TEEN_ANCHORS = {
 //   Mentat (Tune): an oversized cortex on a narrow body in a robe: someone who stares at a problem and answers.
 //   Nutri (Feast): a round, wide body with a big mouth and a dark feeding band across the belly.
 export const WETWARE_ADULTS = {
-  // Razor
+  // Razor. The blades on the forearms are accent ('o'): highlight drew them in acid's, toxic's and origin's dark mark colour, 1.1:1
+  // against the screen, so they vanished (maintainer's review); accent is 4.49:1 or more on every palette.
   razor: {
     a: [
       '.....#xxxx#.....',
@@ -125,9 +126,9 @@ export const WETWARE_ADULTS = {
       '.....#+##+#.....',
       '......####......',
       '..############..',
-      '+##.########.##+',
-      '+##.########.##+',
-      '+..###....###..+',
+      'o##.########.##o',
+      'o##.########.##o',
+      'o..###....###..o',
     ],
     b: [
       '.....#xxxx#.....',
@@ -141,9 +142,9 @@ export const WETWARE_ADULTS = {
       '.....#+##+#.....',
       '......####......',
       '..############..',
-      '+##.########.##+',
-      '+##.########.##+',
-      '+.###......###.+',
+      'o##.########.##o',
+      'o##.########.##o',
+      'o.###......###.o',
     ],
   },
   // Wired: 1.0's Chrome, head frozen (1.0's B frame moves the visor's lights and eyes; only its arms are taken from B).
@@ -425,7 +426,8 @@ export const WETWARE_ADULT_ANCHORS = {
 // Plat (the mainframe of Chrome, which Wired is), as the maintainer suggested; its B frame keeps Plat's head still and steps the feet.
 // A hand-drawn Wired elder was drawn for comparison and came out 0.96 like Plat (see NETLING_2_SPRITES_HISTORY.md, Wetware elders).
 export const WETWARE_ELDERS = {
-  // Razor's elder: a bigger crest, a wider jaw and shoulders, longer blades down both forearms.
+  // Razor's elder: a bigger crest, a wider jaw and shoulders, longer blades down both forearms. The blades are accent ('o'), as on
+  // Razor: in highlight they drew in acid's, toxic's and origin's dark mark colour, 1.1:1 against the screen (maintainer's review).
   razorElder: {
     a: [
       '.....#xxxxxx#.....',
@@ -439,10 +441,10 @@ export const WETWARE_ELDERS = {
       '.....#+####+#.....',
       '.......####.......',
       '..##############..',
-      '+##..########..##+',
-      '+##..########..##+',
-      '+##..########..##+',
-      '+..####....####..+',
+      'o##..########..##o',
+      'o##..########..##o',
+      'o##..########..##o',
+      'o..####....####..o',
     ],
     b: [
       '.....#xxxxxx#.....',
@@ -456,10 +458,10 @@ export const WETWARE_ELDERS = {
       '.....#+####+#.....',
       '.......####.......',
       '..##############..',
-      '+##..########..##+',
-      '+##..########..##+',
-      '+##..########..##+',
-      '+.####......####.+',
+      'o##..########..##o',
+      'o##..########..##o',
+      'o##..########..##o',
+      'o.####......####.o',
     ],
   },
   // Solo's elder: a taller bristle crop, a wider ocular band and jaw, shoulders to the edge of the screen, heavier arms with fists.

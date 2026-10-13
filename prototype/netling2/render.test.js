@@ -295,3 +295,28 @@ test('the same pet at the same time draws the same screen (no hidden state)', ()
     assert.deepEqual(screen(pet, 7777), screen(pet, 7777));
   }
 });
+
+test('Cipher\'s neglect shows through its camouflage at every step, and the still camouflage keeps the usual patches (maintainer\'s review)', () => {
+  const W = wetwareForms();
+  const form = W.wetwareElderHidden;
+  assert.ok(form.motion && form.neglectOverMotion);
+  const spriteRows = (s) => s.ops.find((o) => o.op === 'rows').rows;
+  const diff = (a, b) => a.reduce((n, r, y) => n + [...r].filter((c, x) => c !== b[y][x]).length, 0);
+  for (const reduced of [false, true]) {
+    for (let t = 0; t < 4800; t += 400) {
+      const pet = { form, egg: 'wetware', level: 0, idle: 'none' };
+      const clean = spriteRows(composeLCD({ ...pet, neglect: 0 }, t, { reduced }));
+      const one = diff(clean, spriteRows(composeLCD({ ...pet, neglect: 1 }, t, { reduced })));
+      const two = diff(clean, spriteRows(composeLCD({ ...pet, neglect: 2 }, t, { reduced })));
+      assert.ok(one >= 3 && two > one, `reduced ${reduced}, t ${t}: ${one} then ${two} cells`);
+    }
+  }
+  // moving, the patches are dim cells only, and the outline is the camouflage's own
+  const pet = { form, egg: 'wetware', level: 0, idle: 'none' };
+  for (let t = 0; t < 4800; t += 400) {
+    const [clean, worn] = [0, 2].map((neglect) => spriteRows(composeLCD({ ...pet, neglect }, t)));
+    clean.forEach((r, y) => [...r].forEach((c, x) => {
+      if (c !== worn[y][x]) assert.ok(c === '#' && worn[y][x] === 'x', `t ${t} (${x}, ${y}): ${c} to ${worn[y][x]}`);
+    }));
+  }
+});

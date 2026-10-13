@@ -44,7 +44,7 @@ import { PALETTES } from '../../src/sim.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
 import { idleOffset } from './idle.js';
 import { visitLayers, visitMotion } from './visit.js';
-import { neglected } from './neglect.js';
+import { neglected, neglectedOverMotion } from './neglect.js';
 import { glitched } from './glitch.js';
 import { placeSeams, seamCells, seams } from './seams.js';
 import { stateMarks, MARK_COLORS } from './marks.js';
@@ -151,13 +151,18 @@ export function composeLCD(pet, time, opts = {}) {
   let rows = glance ? rogueGlance(registered, anchors, glance) : registered;
 
   // 3. Neglect, the seams, bugs. The twitch moves only when awake, motion is allowed and no visit is on.
-  if (v.neglect) rows = neglected(rows, anchors, v.neglect, seed);
+  // A motion layer that repaints the body (Cipher's camouflage) takes the neglect after it, while it moves (neglect.js).
+  const moving = Boolean(form.motion) && awake && !visiting;
+  const motionReduced = reduced || Boolean(ap?.hold);
+  const lateNeglect = v.neglect && moving && !motionReduced && form.neglectOverMotion;
+  if (v.neglect && !lateNeglect) rows = neglected(rows, anchors, v.neglect, seed);
   const seamLevel = pet.seams ?? 0;
   if (seamLevel) rows = seams(rows, seamCells(placeSeams(form), seamLevel));
   if (v.bugs) rows = glitched(rows, anchors, v.bugs, { time, reduced: reduced || !awake || Boolean(v.still), seed });
 
   // 4. The motion layer: awake, not visiting.
-  if (form.motion && awake && !visiting) rows = form.motion(rows, anchors, { time, reduced: reduced || Boolean(ap?.hold) });
+  if (moving) rows = form.motion(rows, anchors, { time, reduced: motionReduced });
+  if (lateNeglect) rows = neglectedOverMotion(rows, registered, anchors, v.neglect, seed, Math.floor((rows[0].length - w) / 2));
 
   // The idle action's pose, on the (possibly padded) rows: it may add or take a row, bottom aligned.
   let lift = 0;
