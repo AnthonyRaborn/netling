@@ -14,6 +14,7 @@
 //   3. neglect (neglect.js), the seams (seams.js: Iron's wear, Program's and Wetware's strain; a draft, see there) and bugs (glitch.js).
 //   3a. the idle action (idle-actions.js, a draft): the temper tell's third channel, awake and not visiting; it holds the frame on A for
 //      Rogue's still and freeze, skips Rogue's glance while it moves the eyes or the head, and is drawn after the motion layer (below).
+//   3b. facing: a form with faceFrom (Worm, Fork) mirrors its lower rows while the idle carries it left (idle.js idleFacing).
 //   4. the motion layer (form.motion), awake only, paused during a visit. It returns padded rows, drawn at the figure's x minus the pad,
 //      so the figure does not move; the figure's position and wander use the unpadded width.
 //   5. wearables (1.0's drawWorn), placed on the registered, unglanced, unpadded frame; skipped while form.hideWorn({ time, reduced }) is
@@ -42,7 +43,7 @@ import { SPRITES, drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../
 import { drawWorn, drawProp, placeWorn, accessoryById, DIM_WEARABLE } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
-import { idleOffset } from './idle.js';
+import { idleOffset, idleFacing } from './idle.js';
 import { visitLayers, visitMotion } from './visit.js';
 import { neglected, neglectedOverMotion } from './neglect.js';
 import { glitched } from './glitch.js';
@@ -160,6 +161,13 @@ export function composeLCD(pet, time, opts = {}) {
   if (seamLevel) rows = seams(rows, seamCells(placeSeams(form), seamLevel));
   if (v.bugs) rows = glitched(rows, anchors, v.bugs, { time, reduced: reduced || !awake || Boolean(v.still), seed });
 
+  // 3b. Facing (Worm and Fork): the rows from form.faceFrom down are drawn heading right; mirrored while the idle carries it left
+  // (idle.js idleFacing, on the idle's own clock). After the damage layers, so a patch or a tear on the tail turns with it.
+  const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.held)({ egg, level: v.level, time, seed, reduced });
+  if (form.faceFrom != null && awake && !visiting && v.idle !== 'none' && idleFacing(v.idle, clock) < 0) {
+    rows = rows.map((r, y) => (y >= form.faceFrom ? [...r].reverse().join('') : r));
+  }
+
   // 4. The motion layer: awake, not visiting.
   if (moving) rows = form.motion(rows, anchors, { time, reduced: motionReduced });
   if (lateNeglect) rows = neglectedOverMotion(rows, registered, anchors, v.neglect, seed, Math.floor((rows[0].length - w) / 2));
@@ -180,7 +188,6 @@ export function composeLCD(pet, time, opts = {}) {
     x = b.x;
     y = b.y + TOP; // visit.js keeps 1.0's floor
   } else {
-    const clock = (IDLE_HOLDS[idleHold] ?? IDLE_HOLDS.held)({ egg, level: v.level, time, seed, reduced });
     const wander = v.idle !== 'none' ? idleOffset(v.idle, h, clock) : { x: 0, y: 0 };
     const mx = ap?.move?.[0] ?? 0;
     x = Math.floor((LCD_W - w) / 2) + wander.x + driftWithin(tell.dx + mx, wander.x);

@@ -28,3 +28,18 @@ export function idleOffset(quirk, h, time) {
   const walk = wanderPos(time);
   return { x: walk.x, y: Math.max(-up, Math.round(walk.y * (up + down)) - up + (walk.moving && !frame ? -1 : 0)) };
 }
+
+// Which way the idle carries the netling: +1 right, -1 left (forms with `faceFrom` turn their lower body to match; render.js). The walk
+// faces the way of its latest hop and keeps it through the pause; sway and hover face the way they are gliding (the sign of the slope),
+// so they turn at the ends of each swing. Pure, on the same clock as idleOffset. Not a 1.0 rule (1.0 never turns a sprite).
+export function idleFacing(quirk, time) {
+  if (quirk === 'sway') return Math.cos(time / 1500) < 0 ? -1 : 1;
+  if (quirk === 'hover') return Math.cos(time / 2600) < 0 ? -1 : 1;
+  if (quirk !== 'walk') return 1;
+  // the latest segment whose hop changed column (the hop starts as its segment starts); a still segment keeps the one before
+  for (let k = Math.floor(time / WALK_SEGMENT_MS), n = 0; n < 64; k--, n++) {
+    const d = spot(k).x - spot(k - 1).x;
+    if (d) return d < 0 ? -1 : 1;
+  }
+  return 1;
+}

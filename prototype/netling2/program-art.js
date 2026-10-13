@@ -103,8 +103,9 @@ export const PROGRAM_ADULTS = {
       '...##......##...',
     ],
   },
-  // Worm (Breach, street): a head with jaws on a narrower column, striped down the body (the stripes step between frames) and a tail that wags one cell to each side (a one-sided flick read as
-  // pushing the other way, a moonwalk whenever the walk idle went that way; maintainer's review).
+  // Worm (Breach, street): a head with jaws on a narrower column, striped down the body (the stripes step between frames) and a tail that swishes. The flick
+  // is drawn for a Worm heading right; the renderer mirrors the tail when it heads left (`faceFrom`, render.js; maintainer's review:
+  // a one-sided flick read as a moonwalk going the other way, and a symmetric wag or a body wave lost the original's read).
   worm: {
     a: [
       '......#..#......',
@@ -120,7 +121,7 @@ export const PROGRAM_ADULTS = {
       '....xxxxxxxx....',
       '....########....',
       '....xxxxxxxx....',
-      '......######....',
+      '.....######.....',
     ],
     b: [
       '......#..#......',
@@ -136,7 +137,7 @@ export const PROGRAM_ADULTS = {
       '....########....',
       '....xxxxxxxx....',
       '....########....',
-      '....######......',
+      '...######.......',
     ],
   },
   // Mouse (Dodge, corp): small and round, big round ears, a nose, thin legs and a tail that flicks.
@@ -420,7 +421,7 @@ const wormA = [
   '.....########.....',
   '.....xxxxxxxx.....',
   '.....########.....',
-  '.......######.....',
+  '......######......',
 ];
 // Mouse's elder: both ears whole and set where the adult's are, a tag (the dim patch) on the right one, whisker arms. (Redrawn: a torn,
 // lowered right ear thinned the margin to its own adult to 0.038, against Snarf.)
@@ -528,7 +529,7 @@ const snarfA = [
 
 export const PROGRAM_ELDERS = {
   tigerElder: pair(tigerA, swap(tigerA, 14, ['...##........##...'])),
-  wormElder: pair(wormA, swap(wormA, 10, ['.....########.....', '.....xxxxxxxx.....', '.....########.....', '.....xxxxxxxx.....', '.....######.......'])),
+  wormElder: pair(wormA, swap(wormA, 10, ['.....########.....', '.....xxxxxxxx.....', '.....########.....', '.....xxxxxxxx.....', '....######........'])),
   mouseElder: pair(mouseA, swap(mouseA, 12, ['..##############..', '....##......##..##'])),
   spoofElder: pair(spoofA, swap(spoofA, 14, ['..##..##..##..##..'])),
   parseElder: pair(parseA, swap(parseA, 14, ['...##........##...'])),
