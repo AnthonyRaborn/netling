@@ -1025,7 +1025,7 @@ export const DIM_WEARABLE = '#2f6b73';
 // Worn together, some make room (ROOM): a body item slides down past the face and head items, a halo or spark rises
 // above a hat, never above minRow (the screen's top edge, in sprite rows). Each takes the shift that leaves the fewest
 // pixels covered, the smallest on a tie. Orbiting ones (`orbits: true`: the drone, the data aura, the glitch moth) draw last, in front of everything, and nothing makes room for them.
-const ROOM = {
+export const ROOM = {
   scarf: 1, barcode: 1, kernelpin: 1, checksum: 1, lanyard: 1, necktie: 1, spikedcollar: 1, bandolier: 1, bowtie: 1, goldchain: 1, powercell: 1,
   halo: -1, spark: -1, holologo: -1, raincloud: -1, cursor: -1, progressbar: -1, extralife: -1,
 };

@@ -14,7 +14,8 @@
 //          picture, at `stillAt` ms, as the doc asks ("a reduced-motion player gives up nothing by not paying").
 //   paid:  the doc gives no free version, so the comparison is a plainer still drawing (`plain`), for the maintainer to judge the gap.
 // Every motion steps no faster than FLASH_TOGGLE_MS (most at 400 ms), and the tests check it cell by cell.
-import { ACCESSORIES, PROPS, STYLE_ITEMS, anchorsFor } from '../../src/accessories.js';
+import { ACCESSORIES, PROPS, STYLE_ITEMS, ROOM, anchorsFor } from '../../src/accessories.js';
+import { AUTO_COLORS } from '../../src/wearable-colors.js';
 import { SPRITES } from '../../src/sprites.js';
 
 export const FREE = '.free'; // the id suffix of a split or paid idea's free comparison version (prototype only; no id is reserved)
@@ -302,8 +303,8 @@ export const IDEA_WEARABLES = [
       // A dotted chain from both sides of the neck to two small grey plates, one hanging a row lower. Still.
       const y = a.neckRow;
       for (const [x, dy] of [[a.cx - 3, 0], [a.cx - 2, 1], [a.cx + 2, 0], [a.cx + 1, 1]]) px(x, y + dy, STEEL);
-      for (const dy of [2, 3]) px(a.cx - 1, y + dy, LIGHT);
-      for (const dy of [3, 4]) px(a.cx, y + dy, '#a8b0bc');
+      for (const dy of [1, 2]) px(a.cx - 1, y + dy, LIGHT);
+      for (const dy of [2, 3]) px(a.cx, y + dy, '#a8b0bc');
     },
   },
   {
@@ -403,9 +404,9 @@ export const IDEA_WEARABLES = [
     paid: 'split',
     stillAt: 0, // "1"
     draw: (px, a, frame, time = 0) => {
-      // A red badge with a white digit over the head's top right corner, counting 1 to 9 and over again, one every 3 s.
+      // A red badge with a white digit on the head's top right corner, half outside it, as on an app icon, counting 1 to 9 and over again, one every 3 s.
       const n = (step(time, 3000) % 9) + 1;
-      const x0 = a.headRight - 2;
+      const x0 = a.headRight;
       const y0 = a.headTop - 5;
       grid(px, x0, y0, ['.###.', '#####', '#####', '#####', '#####', '#####', '.###.'], { '#': '#ff1a4a' });
       grid(px, x0 + 1, y0 + 1, DIGITS[n], { '#': '#ffffff' });
@@ -915,6 +916,23 @@ const versions = (list, args) =>
 export const WEARABLE_ENTRIES = versions(IDEA_WEARABLES, 'wear');
 export const PROP_ENTRIES = versions(IDEA_PROPS, 'prop');
 
+// Which way each body or float idea makes room for the others, as 1.0's ROOM does (src/accessories.js; the only src/ change is that it is
+// exported): 1 slides a body item down past the face items, -1 lifts a float item over the hats. Measured against every non-orbiting
+// 1.0 and idea wearable on a third of the forms, with the screen's top out of the way: the shift that leaves the fewest cells covered.
+// The Leash cable lifts (it hangs from the neck; sliding down left it on the jaw items four times as often); the Notification badge
+// still meets a few wide hats at the top right after the four rows ROOM allows.
+export const IDEA_ROOM = {
+  dogtags: 1, hazardsash: 1, pulsepatch: 1, heatsink: 1, visitorpass: 1, leashcable: -1,
+  spinner: -1, badge: -1, thoughtbubble: -1, padlock: -1,
+};
+// The Light ring is recolorable, so placeWorn's blend swap leaves it alone; on a body it would melt into (ice's cyan, origin's pale
+// lilac) it gets its own automatic colors instead, as 1.0's recolorable wearables do (src/wearable-colors.js). Checked on every
+// form, palette and frame in the tests.
+export const RING_AUTO = [
+  { ice: '#ffffff', origin: '#4aa8ff' },
+  { ice: '#4aa8ff', origin: '#ff9ad0' },
+];
+
 // Adds every entry to 1.0's tables (idempotent). The Leash cable needs the sprite's last row, which 1.0's anchors do not keep: `bottom`
 // is added to the anchors the draw sees. Call it from the review page and the tests only, never from anything the 1.0 tests load.
 let registered = false;
@@ -933,6 +951,11 @@ export function registerIdeas() {
     PROPS.push(entry);
     STYLE_ITEMS.push(entry);
   }
+  for (const x of [...WEARABLE_ENTRIES, HEATSINK_HOT]) {
+    const dir = IDEA_ROOM[(x.base ?? x.id).replace(/\.hot$/, '')];
+    if (dir) ROOM[x.id] = dir;
+  }
+  for (const id of ['laughingring', 'laughingring.cap', 'laughingring.quiet', 'laughingring.still']) AUTO_COLORS[id] = RING_AUTO;
   // anchorsFor caches one object per sprite, so the row is added once to every registered sprite (1.0's and the prototype's).
   for (const s of Object.values(SPRITES)) {
     if (!Array.isArray(s) || typeof s[0] !== 'string') continue;

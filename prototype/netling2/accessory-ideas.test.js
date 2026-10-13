@@ -5,8 +5,10 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE } from './accessory-ideas.js';
-import { ACCESSORIES, PROPS, placeWorn, anchorsFor } from '../../src/accessories.js';
+import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM } from './accessory-ideas.js';
+import { ACCESSORIES, PROPS, ROOM, placeWorn, anchorsFor } from '../../src/accessories.js';
+import { PALETTES } from '../../src/sim.js';
+import { deltaE } from '../../src/colors.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 import { composeLCD, exclusiveWorn, calmWorn } from './render.js';
 import { forms } from './models.js';
@@ -256,4 +258,55 @@ test('both versions of the Light ring draw a face; asleep, in a visit and with r
   assert.equal(op({ pose: 'sleep' }), 'laughingring.quiet');
   assert.equal(op({ visit: true }), 'laughingring.quiet');
   assert.equal(op({}, { reduced: true }), 'laughingring.still');
+});
+
+test('no idea blends into any palette: where a cell touches the body its colour is 30 apart from the body (the 1.0 blend swap, and the ring\'s own automatic colours)', () => {
+  const times = [0, 800, 1600];
+  for (const { form } of ALL) {
+    for (const sprite of [form.a, form.b]) {
+      const touches = (x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (sprite[y + dy]?.[x + dx] ?? '.') !== '.');
+      for (const pal of PALETTES) {
+        for (const e of WEAR) {
+          for (const time of times) {
+            for (const p of placeWorn([{ id: e.id }], sprite, { time, pal })[0].pts) {
+              if (touches(p.x, p.y)) assert.ok(deltaE(p.color, pal.main) >= 30, `${form.id} ${pal.name} ${e.id} at ${p.x},${p.y}: ${p.color} blends into ${pal.main}`);
+            }
+          }
+        }
+      }
+    }
+  }
+});
+
+test('the body and float ideas make room: every version is in 1.0\'s ROOM table, and the room clears the hats and face items it is meant to', () => {
+  const room = (e) => IDEA_ROOM[(e.base ?? e.id).replace(/\.hot$/, '')];
+  for (const e of WEAR.filter((x) => room(x))) assert.equal(ROOM[e.id], room(e), e.id);
+  // Every body and float idea that is not an orbiter has a rule, and a rule only where it is that slot's.
+  for (const e of WEAR.filter((x) => (x.slot === 'body' || x.slot === 'float') && !x.orbits)) assert.ok(room(e), `${e.id} makes room`);
+  for (const e of WEAR.filter((x) => x.orbits)) assert.equal(ROOM[e.id], undefined, `${e.id} orbits, so nothing makes room for it`);
+  const sample = ALL.filter((_, i) => i % 3 === 0);
+  const others = ACCESSORIES.filter((x) => !x.id.includes('.') && (x.slot === 'head' || x.slot === 'face') && !x.exclusive && !x.orbits && x.source !== 'earned');
+  assert.ok(others.length > 15);
+  const covered = (id, o, f) => {
+    const w = placeWorn([{ id }, { id: o.id }], f.a, { time: 800, minRow: -99 });
+    const set = new Set(w.find((x) => x.id === o.id).pts.map((p) => `${p.x},${p.y}`));
+    return w.find((x) => x.id === id).pts.some((p) => set.has(`${p.x},${p.y}`));
+  };
+  const rate = (id) => {
+    let hits = 0;
+    let n = 0;
+    for (const { form } of sample) for (const o of others) if (o.slot !== ACCESSORIES.find((x) => x.id === id).slot) { n++; if (covered(id, o, form)) hits++; }
+    return hits / n;
+  };
+  // 1.0's own body items are the yardstick (the Scarf is covered 1.7% of the time on this sample, the Necktie 1.5%): none of the ideas more than 6%
+  // (worst: the Notification badge, then the Visitor pass, which meet a wide hat or a low jaw item after the four rows ROOM allows).
+  for (const e of WEAR.filter((x) => x.version !== 'paid' && room(x))) {
+    const withRoom = rate(e.id);
+    const saved = ROOM[e.id];
+    delete ROOM[e.id];
+    const without = rate(e.id);
+    ROOM[e.id] = saved;
+    assert.ok(withRoom < without, `${e.id}: room helps (${withRoom} against ${without})`);
+    assert.ok(withRoom <= 0.06, `${e.id}: ${(withRoom * 100).toFixed(1)}% still covered`);
+  }
 });
