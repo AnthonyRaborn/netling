@@ -6,8 +6,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM, LAMP_DIM, LAMP_BLOB_DARK } from './accessory-ideas.js';
-import { ACCESSORIES, PROPS, PROP_FLOOR, ROOM, placeWorn, anchorsFor } from '../../src/accessories.js';
+import { ACCESSORIES, PROPS, PROP_FLOOR, ROOM, placeWorn, anchorsFor, accessoryColors } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
+import { registerPalettes } from './palettes.js';
 import { deltaE } from '../../src/colors.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 import { composeLCD, paintLCD, exclusiveWorn, calmWorn, LCD_W, LCD_H, TOP } from './render.js';
@@ -17,6 +18,7 @@ import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 
 registerIdeas();
+registerPalettes(); // the ideas' automatic colours for every palette, and the new palettes themselves
 const SETS = { iron: forms('B'), program: programForms(), wetware: wetwareForms(), rogue: rogueForms() };
 const ALL = Object.entries(SETS).flatMap(([egg, set]) => Object.values(set).map((form) => ({ egg, form })));
 const WEAR = [...WEARABLE_ENTRIES, HEATSINK_HOT];
@@ -346,4 +348,25 @@ test('the Lava lamp glows on the floor with the lights off when its switch is on
   // The free (plain) lamp glows too, with its one resting blob.
   const plain = cellsOf({ prop: 'lavalamp.free' });
   assert.ok(pool(plain).length >= 12);
+});
+
+test('the Goggles, Hard hat, Hood and Dog tags are recolorable: every slot is drawn, defaults match the plain draw, and each palette has automatic colours', () => {
+  const a = anchorsFor(SETS.iron.ironAdultBreachStreet.a);
+  const paint = (e, colors) => pixels((px) => e.draw(px, a, 0, 0, colors));
+  for (const id of ['goggles', 'hardhat', 'hood', 'dogtags']) {
+    const e = ACCESSORIES.find((x) => x.id === id);
+    assert.ok(e.colors?.length >= 2, `${id} is recolorable`);
+    assert.equal(paint(e, e.colors.map(([, d]) => d)), paint(e, undefined), `${id}: defaults are the plain picture`);
+    // Each slot shows: painting every slot a different sentinel puts each sentinel on screen.
+    const sentinels = e.colors.map((_, i) => `#0${i + 1}0${i + 1}0${i + 1}`);
+    const seen = paint(e, sentinels);
+    sentinels.forEach((s, i) => assert.ok(seen.includes(s), `${id}: slot ${e.colors[i][0]} is drawn`));
+    // Automatic colours exist for every palette, and a player's own pick overrides them.
+    for (const pal of PALETTES) {
+      const auto = accessoryColors(id, null, pal);
+      assert.equal(auto.length, e.colors.length);
+      for (const c of auto) assert.match(c, /^#[0-9a-f]{6}$/i, `${id} on ${pal.name}`);
+    }
+    assert.deepEqual(accessoryColors(id, e.colors.map(() => '#123456'), PALETTES[0]), e.colors.map(() => '#123456'));
+  }
 });

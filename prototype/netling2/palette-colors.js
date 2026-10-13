@@ -2,56 +2,73 @@
 // for the new palettes in palettes.js, as src/wearable-colors.js has them for the six.
 export const NEW_AUTO_COLORS = {
   'cap': [
-    { ember: '#b967ff', cobalt: '#05d9e8', mint: '#c8d0dc' },
+    { ember: '#b967ff', cobalt: '#05d9e8', mint: '#c8d0dc', peach: '#05d9e8', rose: '#05d9e8' },
   ],
   'scarf': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff2a6d' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff2a6d', peach: '#ff2a6d', rose: '#ff9f1c' },
   ],
   'shades': [
-    { ember: '#050508', cobalt: '#050508', mint: '#050508' },
-    { ember: '#3a3f49', cobalt: '#5d7a80', mint: '#5d7a80' },
+    { ember: '#050508', cobalt: '#050508', mint: '#050508', peach: '#05d9e8', rose: '#05d9e8' },
+    { ember: '#3a3f49', cobalt: '#5d7a80', mint: '#5d7a80', peach: '#b967ff', rose: '#b967ff' },
   ],
   'visor': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#b967ff' },
-    { ember: '#b967ff', cobalt: '#ffffff', mint: '#ffffff' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#b967ff', peach: '#ff2a6d', rose: '#b967ff' },
+    { ember: '#b967ff', cobalt: '#ffffff', mint: '#ffffff', peach: '#05d9e8', rose: '#05d9e8' },
   ],
   'mohawk': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c', peach: '#ff2a6d', rose: '#ff9f1c' },
   ],
   'tattoo': [
-    { ember: '#39ff14', cobalt: '#39ff14', mint: '#39ff14' },
+    { ember: '#39ff14', cobalt: '#39ff14', mint: '#39ff14', peach: '#39ff14', rose: '#39ff14' },
   ],
   'rebreather': [
-    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#c8d0dc' },
-    { ember: '#7843a6', cobalt: '#a61b47', mint: '#82878f' },
+    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#c8d0dc', peach: '#05d9e8', rose: '#05d9e8' },
+    { ember: '#7843a6', cobalt: '#a61b47', mint: '#82878f', peach: '#038d97', rose: '#038d97' },
   ],
   'partyhat': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c' },
-    { ember: '#f9f002', cobalt: '#39ff14', mint: '#f9f002' },
+    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#ff9f1c', peach: '#ff2a6d', rose: '#ff9f1c' },
+    { ember: '#f9f002', cobalt: '#39ff14', mint: '#f9f002', peach: '#f9f002', rose: '#f9f002' },
   ],
   'bowtie': [
-    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#b967ff' },
+    { ember: '#b967ff', cobalt: '#ff2a6d', mint: '#b967ff', peach: '#b967ff', rose: '#b967ff' },
   ],
   'blush': [
-    { ember: '#ff6b9a', cobalt: '#ff6b9a', mint: '#c8d0dc' },
+    { ember: '#ff6b9a', cobalt: '#ff6b9a', mint: '#c8d0dc', peach: '#ff2a6d', rose: '#b967ff' },
+  ],
+  'goggles': [
+    { ice: '#ff9f1c', neon: '#c8d0dc', acid: '#c8d0dc', toxic: '#c8d0dc', ultra: '#c8d0dc', ember: '#c8d0dc', cobalt: '#c8d0dc', mint: '#c8d0dc', peach: '#ff2a6d', rose: '#ff9f1c', origin: '#ff9f1c' },
+    { ice: '#b967ff', neon: '#05d9e8', acid: '#05d9e8', toxic: '#05d9e8', ultra: '#05d9e8', ember: '#05d9e8', cobalt: '#05d9e8', mint: '#b967ff', peach: '#05d9e8', rose: '#05d9e8', origin: '#b967ff' },
+    { ice: '#f9f002', neon: '#b967ff', acid: '#b967ff', toxic: '#b967ff', ultra: '#ff2a6d', ember: '#b967ff', cobalt: '#ff2a6d', mint: '#ff9f1c', peach: '#b967ff', rose: '#c8f0ff', origin: '#ff2a6d' },
+  ],
+  'hardhat': [
+    { ice: '#f9c802', neon: '#f9c802', acid: '#f5f5f5', toxic: '#f9c802', ultra: '#f5f5f5', ember: '#f9f002', cobalt: '#f5f5f5', mint: '#f9c802', peach: '#f9f002', rose: '#f9c802', origin: '#f9c802' },
+    { ice: '#ff9f1c', neon: '#ff9f1c', acid: '#ff2a6d', toxic: '#ff9f1c', ultra: '#ff9f1c', ember: '#c8d0dc', cobalt: '#ff9f1c', mint: '#ff9f1c', peach: '#ff2a6d', rose: '#ff9f1c', origin: '#ff9f1c' },
+  ],
+  'hood': [
+    { ice: '#b967ff', neon: '#b967ff', acid: '#c8d0dc', toxic: '#b967ff', ultra: '#c8d0dc', ember: '#b967ff', cobalt: '#c8d0dc', mint: '#c8d0dc', peach: '#b967ff', rose: '#b967ff', origin: '#ff2a6d' },
+    { ice: '#7843a6', neon: '#7843a6', acid: '#82878f', toxic: '#7843a6', ultra: '#82878f', ember: '#7843a6', cobalt: '#82878f', mint: '#82878f', peach: '#7843a6', rose: '#7843a6', origin: '#a61b47' },
   ],
   'laughingring': [
-    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff', peach: '#05d9e8', rose: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6', peach: '#038d97', rose: '#7d9ba6' },
   ],
   'laughingring.cap': [
-    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff', peach: '#05d9e8', rose: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6', peach: '#038d97', rose: '#7d9ba6' },
   ],
   'warpaint': [
-    { ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#c8d0dc' },
+    { ice: '#b967ff', neon: '#b967ff', acid: '#c8d0dc', toxic: '#ff2a6d', ultra: '#ff2a6d', ember: '#ff2a6d', cobalt: '#ff2a6d', mint: '#c8d0dc', peach: '#05d9e8', rose: '#05d9e8', origin: '#ff2a6d' },
+  ],
+  'dogtags': [
+    { ice: '#b967ff', neon: '#b967ff', acid: '#c8d0dc', toxic: '#c8d0dc', ultra: '#ff2a6d', ember: '#b967ff', cobalt: '#ff2a6d', mint: '#c8d0dc', peach: '#05d9e8', rose: '#05d9e8', origin: '#b967ff' },
+    { ice: '#ff9f1c', neon: '#c8d0dc', acid: '#05d9e8', toxic: '#05d9e8', ultra: '#c8d0dc', ember: '#c8d0dc', cobalt: '#c8d0dc', mint: '#b967ff', peach: '#b967ff', rose: '#b967ff', origin: '#ff9f1c' },
   ],
   'laughingring.quiet': [
-    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff', peach: '#05d9e8', rose: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6', peach: '#038d97', rose: '#7d9ba6' },
   ],
   'laughingring.still': [
-    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff' },
-    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6' },
+    { ember: '#c0eeff', cobalt: '#c0eeff', mint: '#c0eeff', peach: '#05d9e8', rose: '#c0eeff' },
+    { ember: '#7d9ba6', cobalt: '#7d9ba6', mint: '#7d9ba6', peach: '#038d97', rose: '#7d9ba6' },
   ],
 };

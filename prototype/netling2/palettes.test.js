@@ -29,7 +29,7 @@ const ratio = (a, b) => {
 
 test('the palettes are added before origin, which stays last, once', () => {
   registerPalettes();
-  assert.deepEqual(PALETTES.map((p) => p.name), ['ice', 'neon', 'acid', 'toxic', 'ultra', 'ember', 'cobalt', 'mint', 'origin']);
+  assert.deepEqual(PALETTES.map((p) => p.name), ['ice', 'neon', 'acid', 'toxic', 'ultra', 'ember', 'cobalt', 'mint', 'peach', 'rose', 'origin']);
   assert.equal(new Set(PALETTES.map((p) => p.name)).size, PALETTES.length);
 });
 
@@ -38,7 +38,8 @@ test('each new palette meets the contrast and distinctness bars 1.0\'s six meet,
   for (const p of NEW_PALETTES) {
     for (const lcd of lcds) {
       assert.ok(ratio(p.main, lcd) >= 4.5, `${p.name} main on ${lcd}: ${ratio(p.main, lcd).toFixed(2)}`);
-      assert.ok(ratio(p.accent, lcd) >= 4.4, `${p.name} accent on ${lcd}: ${ratio(p.accent, lcd).toFixed(2)}`);
+      const ink = p.ink ?? p.accent;
+      assert.ok(ratio(ink, lcd) >= 4.4, `${p.name} on-screen colour on ${lcd}: ${ratio(ink, lcd).toFixed(2)}`);
     }
     assert.ok(ratio(p.main, p.accent) >= 2.1, `${p.name} eyes on the body: ${ratio(p.main, p.accent).toFixed(2)}`);
     assert.ok(ratio(p.mark ?? '#f5f5f5', p.main) >= 2, `${p.name} highlight marks on the body: ${ratio(p.mark ?? '#f5f5f5', p.main).toFixed(2)}`);
@@ -60,7 +61,7 @@ test('nothing worn blends into a new palette, and every form composes inside the
         }
       }
     }
-    for (const palette of [5, 6, 7]) {
+    for (const palette of [5, 6, 7, 8, 9]) {
       const { box } = composeLCD({ form, egg, palette, idle: 'none', worn: [{ id: 'crown' }] }, 1000);
       assert.ok(box.x >= 0 && box.x + box.w <= LCD_W && box.y >= 0 && box.y + box.h <= LCD_H, `${form.id} on palette ${palette}`);
     }

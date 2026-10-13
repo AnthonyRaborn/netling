@@ -13,17 +13,20 @@
 //   #sec=ring     the Light ring alone, an outfit, and the outfit with the ring (what the ring hides)
 //   #sec=eggs     every wearable on a baby and an adult of each of the four eggs (the four-egg review; from=n, n=n page through the rows)
 //   #sec=room     the body and float ideas worn with hats and face items (the room rules: they slide down or lift to clear them)
-//   #sec=palettes the Light ring and a few body-touching wearables on all six palettes (the blend check, by eye)
+//   #sec=palettes the Light ring and a few body-touching wearables on every palette (the blend check, by eye)
 //   #sec=props    every prop entry beside one form, and the moving ones per step
 //   #sec=crests   the five crests at 9x9, beside 1.0's Helix for scale
 import './ready.js';
 import { RING_FACE_MOCKS, registerIdeas, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, IDEA_CRESTS } from './accessory-ideas.js';
+import { registerPalettes } from './palettes.js';
+import { PALETTES } from '../../src/sim.js';
 import { composeLCD, paintLCD, LCD_W, LCD_H } from './render.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
 import { rogueForms } from './rogue-models.js';
 registerIdeas();
+registerPalettes();
 const hash = new URLSearchParams(location.hash.slice(1));
 const SC = Number(hash.get('scale') ?? 4);
 const SEC = hash.get('sec') ?? 'wear';
@@ -124,8 +127,8 @@ if (SEC === 'wear') {
   const cols = OUTFITS.flatMap((o, i) => FORMS.slice(1, 3).map((f) => ({ ...f, o, key: i })));
   sheet(rows, cols, (e) => [`${e.name.replace(/ \((free|paid)\)$/, '')} [${e.slot}]`, tag(e)], (e, f, t) => composeLCD({ ...f, idle: 'none', worn: [...f.o, { id: e.id }] }, t + 1), (f) => `${f.o[0].id} ${f.egg}`);
 } else if (SEC === 'palettes') {
-  const rows = ['laughingring', 'laughingring.cap', 'dogtags', 'hazardsash', 'visitorpass', 'pulsepatch.free', 'scanvisor.free', 'warpaint', 'hood'].map((id) => WEARABLE_ENTRIES.find((e) => e.id === id) ?? { id, name: id, slot: '', paid: '' });
-  sheet(rows, [0, 1, 2, 3, 4, 5], (e) => [e.name, e.paid], (e, pal, t) => composeLCD({ ...FORMS[1], palette: pal, idle: 'none', worn: [{ id: e.id }] }, t + 1), (pal) => ['ice', 'neon', 'acid', 'toxic', 'ultra', 'origin'][pal]);
+  const rows = ['laughingring', 'laughingring.cap', 'goggles', 'hardhat', 'hood', 'dogtags', 'warpaint', 'hazardsash', 'visitorpass'].map((id) => WEARABLE_ENTRIES.find((e) => e.id === id) ?? { id, name: id, slot: '', paid: '' });
+  sheet(rows, PALETTES.map((_, i) => i), (e) => [e.name, e.paid], (e, pal, t) => composeLCD({ ...FORMS[1], palette: pal, idle: 'none', worn: [{ id: e.id }] }, t + 1), (pal) => PALETTES[pal].name);
 } else if (SEC === 'props') {
   const f = FORMS[1];
   const ms = Number(hash.get('ms') ?? 800);

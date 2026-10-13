@@ -36,6 +36,8 @@ const eyesOf = (a) => {
   return { left: left.length ? left : [a.eyeLeft], right: right.length ? right : [a.eyeRight] };
 };
 
+// A step darker (the second dog tag plate): the colour mixed 15% toward black.
+const shade = (c) => `#${[1, 3, 5].map((i) => Math.round(parseInt(c.slice(i, i + 2), 16) * 0.85).toString(16).padStart(2, '0')).join('')}`;
 const DARK = '#050508';
 const STEEL = '#8a93a3';
 const LIGHT = '#c8d0dc';
@@ -62,14 +64,16 @@ export const IDEA_WEARABLES = [
     name: 'Goggles',
     slot: 'head',
     paid: 'free (find)',
-    draw: (px, a) => {
+    colors: [['strap', '#5a3a22'], ['frame', '#6a6a7a'], ['glint', '#c8f0ff']], // recolorable, as 1.0's ten: the dark lens stays as drawn
+    draw: (px, a, frame, time, colors) => {
+      const [strap, rim, glint] = colors ?? ['#5a3a22', '#6a6a7a', '#c8f0ff'];
       // Pushed up on the forehead: a strap on the head's top row (never lower than the row over the eyes) and a round dark lens over
       // each eye, a highlight cell in each.
       const y = Math.min(a.headTop, a.eyeRow - 2);
-      for (let x = a.headLeft; x <= a.headRight; x++) px(x, y, '#5a3a22');
+      for (let x = a.headLeft; x <= a.headRight; x++) px(x, y, strap);
       const { left, right } = eyesOf(a);
       for (const x0 of [left[0], right[right.length - 1] - 1]) {
-        grid(px, x0 - 1, y - 2, ['.##.', '#hl#', '#ll#', '.##.'], { '#': '#6a6a7a', h: '#c8f0ff', l: '#1a2a30' });
+        grid(px, x0 - 1, y - 2, ['.##.', '#hl#', '#ll#', '.##.'], { '#': rim, h: glint, l: '#1a2a30' });
       }
     },
   },
@@ -78,9 +82,11 @@ export const IDEA_WEARABLES = [
     name: 'Hard hat',
     slot: 'head',
     paid: 'free (find)',
-    draw: (px, a) => {
+    colors: [['shell', '#f9c802'], ['stripe', '#7a5a10']],
+    draw: (px, a, frame, time, colors) => {
+      const [shell, stripe] = colors ?? ['#f9c802', '#7a5a10'];
       // A yellow dome, one dark stripe down its middle, and a brim out to both sides (the Cap's brim juts one way only).
-      grid(px, a.cx - 4, a.headTop - 3, ['...ydy...', '..yydyy..', 'yyyyyyyyy'], { y: '#f9c802', d: '#7a5a10' });
+      grid(px, a.cx - 4, a.headTop - 3, ['...ydy...', '..yydyy..', 'yyyyyyyyy'], { y: shell, d: stripe });
     },
   },
   {
@@ -157,11 +163,11 @@ export const IDEA_WEARABLES = [
     name: 'Hood',
     slot: 'head',
     paid: 'free (find)',
-    draw: (px, a) => {
+    colors: [['cloth', '#3d2a55'], ['edge', '#5d4a7a']],
+    draw: (px, a, frame, time, colors) => {
       // A dark drape over the head top and down both sides to the eye row, the face left clear. One cell wider than the head on each
       // side (the outline check the doc asks for is in the tests: it stays on screen on every form).
-      const c = '#3d2a55';
-      const edge = '#5d4a7a';
+      const [c, edge] = colors ?? ['#3d2a55', '#5d4a7a'];
       for (let x = a.headLeft; x <= a.headRight; x++) px(x, a.headTop - 1, c);
       for (let x = a.headLeft - 1; x <= a.headRight + 1; x++) px(x, a.headTop, x === a.headLeft - 1 || x === a.headRight + 1 ? edge : c);
       for (let y = a.headTop + 1; y <= a.eyeRow + 1; y++) {
@@ -299,12 +305,14 @@ export const IDEA_WEARABLES = [
     name: 'Dog tags',
     slot: 'body',
     paid: 'free (find)',
-    draw: (px, a) => {
+    colors: [['chain', '#8a93a3'], ['tags', '#c8d0dc']], // the second plate is a step darker than the first, as drawn
+    draw: (px, a, frame, time, colors) => {
+      const [chain, plate] = colors ?? ['#8a93a3', '#c8d0dc'];
       // A dotted chain from both sides of the neck to two small grey plates, one hanging a row lower. Still.
       const y = a.neckRow;
-      for (const [x, dy] of [[a.cx - 3, 0], [a.cx - 2, 1], [a.cx + 2, 0], [a.cx + 1, 1]]) px(x, y + dy, STEEL);
-      for (const dy of [1, 2]) px(a.cx - 1, y + dy, LIGHT);
-      for (const dy of [2, 3]) px(a.cx, y + dy, '#a8b0bc');
+      for (const [x, dy] of [[a.cx - 3, 0], [a.cx - 2, 1], [a.cx + 2, 0], [a.cx + 1, 1]]) px(x, y + dy, chain);
+      for (const dy of [1, 2]) px(a.cx - 1, y + dy, plate);
+      for (const dy of [2, 3]) px(a.cx, y + dy, shade(plate));
     },
   },
   {

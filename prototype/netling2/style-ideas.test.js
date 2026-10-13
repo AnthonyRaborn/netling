@@ -102,7 +102,7 @@ test('the tints hold every palette at 1.0\'s contrast on the screen colour, and 
     assert.ok(luminance(t.dark) < luminance(t.lcd), `${t.id}: lights off is darker`);
     for (const p of PALETTES) {
       assert.ok(ratio(p.main, t.lcd) >= 4.5, `${t.id} / ${p.name} main: ${ratio(p.main, t.lcd).toFixed(2)}`);
-      assert.ok(ratio(p.accent, t.lcd) >= 4.4, `${t.id} / ${p.name} accent: ${ratio(p.accent, t.lcd).toFixed(2)}`);
+      assert.ok(ratio(p.ink ?? p.accent, t.lcd) >= 4.4, `${t.id} / ${p.name} on-screen colour: ${ratio(p.ink ?? p.accent, t.lcd).toFixed(2)}`);
     }
     for (const old of COSMETICS.tint) assert.ok(deltaE(t.lcd, old.lcd) >= 6, `${t.id} is too near ${old.id}`);
   }
@@ -115,7 +115,7 @@ test('Infrared recolours by brightness: the brightest goes orange, dim goes deep
   for (const p of PALETTES) {
     const [main, accent] = [infraredMap(p.main), infraredMap(p.accent)];
     assert.ok(ratio(main, t.lcd) >= 4.5, `${p.name} body ${main} on the screen: ${ratio(main, t.lcd).toFixed(2)}`);
-    assert.ok(ratio(accent, t.lcd) >= 3, `${p.name} eyes on the screen`);
+    assert.ok(ratio(infraredMap(p.ink ?? p.accent), t.lcd) >= 3, `${p.name} on-screen colour`);
     assert.ok(ratio(main, accent) >= 1.5, `${p.name} eyes on the body: ${ratio(main, accent).toFixed(2)} (${main} ${accent})`);
   }
 });

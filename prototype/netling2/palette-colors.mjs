@@ -6,7 +6,7 @@
 import './ready.js';
 import { writeFileSync } from 'node:fs';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { registerIdeas } from './accessory-ideas.js';
+import { registerIdeas, WEARABLE_ENTRIES, HEATSINK_HOT } from './accessory-ideas.js';
 import { PALETTES } from '../../src/sim.js';
 import { computeAutoColors } from '../../tools/wearable-colors.mjs';
 import { NEW_PALETTES, addPalettes } from './palettes.js';
@@ -16,7 +16,14 @@ export function computeNewColors() {
   addPalettes();
   const { out } = computeAutoColors();
   const table = {};
-  for (const [id, slots] of Object.entries(out)) table[id] = slots.map((byPalette) => Object.fromEntries(NEW_PALETTES.map((p) => [p.name, byPalette[p.name]])));
+  // 1.0's recolorable wearables already have entries for its six palettes (src/wearable-colors.js), so only the new palettes are added. The
+  // ideas' recolorable ones (the War paint, the Goggles, Hard hat, Hood and Dog tags) have none, so they get every palette. The Light ring keeps
+  // its hand-picked pair for ice and origin (RING_AUTO) and takes the new palettes only.
+  const ideas = new Set([...WEARABLE_ENTRIES, HEATSINK_HOT].map((e) => e.id).filter((id) => !id.startsWith('laughingring')));
+  for (const [id, slots] of Object.entries(out)) {
+    const names = ideas.has(id) ? PALETTES.map((p) => p.name) : NEW_PALETTES.map((p) => p.name);
+    table[id] = slots.map((byPalette) => Object.fromEntries(names.map((n) => [n, byPalette[n]])));
+  }
   return table;
 }
 export function render(table) {

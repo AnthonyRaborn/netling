@@ -129,7 +129,7 @@ export function composeLCD(pet, time, opts = {}) {
       ops.push({ op: 'rows', rows, x: Math.floor((LCD_W - rows[0].length) / 2), y: FLOOR + 1 - rows.length, colors: DEAD_COLORS });
     }
     box = { x: ops[0].x, y: ops[0].y, w: ops[0].rows[0].length, h: ops[0].rows.length };
-    ops.push({ op: 'rect', x: 0, y: 23 + TOP, w: LCD_W, h: 1, color: pal.accent }); // 8. the flatline
+    ops.push({ op: 'rect', x: 0, y: 23 + TOP, w: LCD_W, h: 1, color: pal.ink ?? pal.accent }); // 8. the flatline (`ink`: a palette's colour for what is drawn on the screen, palettes.js)
     return { bg, ops, box };
   }
 
