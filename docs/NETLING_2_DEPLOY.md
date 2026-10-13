@@ -48,11 +48,13 @@ Home-screen widgets cannot host a webview.
 
 | Platform | Form | Catch |
 |---|---|---|
-| Windows | A folder or zip with the `.exe` (Tauri embeds the game files) | Needs the WebView2 runtime. Windows 10 and 11 normally have it; for portable builds, bundle a fixed-version runtime in the folder (Tauri supports this; it adds well over 100 MB). An unsigned exe shows a SmartScreen warning. |
+| Windows | A folder or zip with the `.exe` (Tauri embeds the game files) | Needs the WebView2 runtime. Windows 10 and 11 normally have it. Where it is missing or disabled, a separate build with a fixed-version runtime in the folder would be needed (Tauri sets this at build time; it adds well over 100 MB); only make that variant if a real machine needs it. An unsigned exe shows a SmartScreen warning. |
 | macOS | A `.app` in a zip, run from any folder | Unsigned: first launch needs right-click > Open. macOS runs a quarantined app from a hidden read-only copy (App Translocation), so portable saves beside the app only work once the app is moved by the user or the quarantine flag is cleared; fall back to the normal location otherwise. |
 | Linux / Deck | AppImage: mark executable and run; add to Steam as a non-Steam game | General knowledge: Tauri's AppImage bundles WebKitGTK, so it is large. Not verified in Game Mode. |
 
-**Portable mode.** If a marker exists next to the program (a `portable` file or a `netling-data` folder; name to be set), everything goes there instead of the OS's app data folder: the save, and the webview's own data folder (Tauri lets a window's webview data directory be set). To make this clean, saves on desktop go through a file backend behind the existing `store` abstraction (rule 4 already routes every write through it), not the webview's `localStorage`. Android can use the same backend shape (Capacitor Filesystem or Preferences), which also guards against a webview data clear.
+**Portable mode (decided).** The marker is a folder named `netling-data` next to the program, the way VS Code's portable mode uses its `data` folder. If it exists, everything goes into it instead of the OS's app data folder: the save, and the webview's own data folder (Tauri lets a window's webview data directory be set). To make this clean, saves on desktop go through a file backend behind the existing `store` abstraction (rule 4 already routes every write through it), not the webview's `localStorage`. Android can use the same backend shape (Capacitor Filesystem or Preferences), which also guards against a webview data clear.
+
+Portable is not a separate build: the portable download is the same program zipped with an empty `netling-data` folder beside it, and the normal download leaves the folder out. Creating the folder makes an install portable; moving or deleting it stops that, and deleting it deletes those saves (say so in the release notes or readme).
 
 **Locked-down work computers (the maintainer's Windows work machine).** Best effort; failing there is acceptable. Likely blockers: AppLocker or WDAC policies that refuse unsigned executables from user folders; WebView2 missing or disabled by policy (the bundled fixed runtime helps with that one only); SmartScreen set to block rather than warn. Native-only means there is no browser fallback. Signing would help with the first and third and costs money (see Signing).
 
@@ -66,7 +68,6 @@ Home-screen widgets cannot host a webview.
 ## Open questions
 
 - The new repository's visibility. Leaning private (maintainer). Recommendation: private source plus a separate public repository (or an itch.io page) that only holds releases, since a private repository's release files cannot be downloaded by players. Private repositories also have limited free Actions minutes, with macOS runners billed at a multiple (general knowledge, check current GitHub pricing); building the Mac app on the maintainer's Mac is the fallback.
-- The portable marker's name, and whether portable is a separate download or the same build plus a marker.
 
 ## Build order
 
