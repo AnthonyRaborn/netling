@@ -23,6 +23,7 @@ When code and a doc disagree, the code is right: fix the doc.
 | Look up the background music (tracks, variants, unlocks, how it plays) | [MUSIC.md](MUSIC.md) |
 | Review the art (forms, wearables, props, icons, crests) and see what is open | [SPRITES.md](SPRITES.md) |
 | Plan native apps and store releases | [PLATFORMS.md](PLATFORMS.md) |
+| Plan how Netling 2.0 ships (native apps only: Capacitor on Android, Tauri on desktop with the pet window and portable mode, notifications by forecast, the widget) | [NETLING_2_DEPLOY.md](NETLING_2_DEPLOY.md) |
 | Read how the Mainframe stage and the Source were decided, built and measured | [SOURCE_PLAN.md](SOURCE_PLAN.md) |
 | Look up the source vocabulary behind the Netling 2.0 names and failure models (Jargon File, CP2020 slang, FDA glossary) | [SECOND_EGG_IDEAS.md](SECOND_EGG_IDEAS.md) |
 | Continue the Netling 2.0 planning (separate app, three eggs) | [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md) |
