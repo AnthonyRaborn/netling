@@ -42,6 +42,7 @@ import './ready.js'; // first: the wearable code must see the authored anchors (
 import { SPRITES, drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../../src/sprites.js';
 import { drawWorn, drawProp, placeWorn, accessoryById, DIM_WEARABLE, PROPS, PROP_FLOOR as PROP_FLOOR_1 } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
+import { deltaE } from '../../src/colors.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
 import { idleOffset, idleFacing } from './idle.js';
 import { visitLayers, visitMotion } from './visit.js';
@@ -104,11 +105,14 @@ const frameOf = (time) => Math.floor(time / 500) % 2;
 export function composeLCD(pet, time, opts = {}) {
   const { form, egg, palette = 0, pose = 'awake', lightsOn = true, seed = 0, worn = [], prop = null, propExtra = null, death = null } = pet;
   const { reduced = false, idleHold = 'held', idleActions = true, burnStart = null, tint = null } = opts;
-  const pal = PALETTES[palette] ?? PALETTES[0];
-  const colors = paletteColors(pal);
   const dead = pose === 'dead';
   const rest = pose === 'sleep';
   const dark = !lightsOn && !dead;
+  // A light screen (Paper, style-ideas.js) re-colours the palette by role and darkens everything else at paint time; not in the dark.
+  const paper = Boolean(tint?.light) && !dark;
+  const pal = paper ? tint.repalette(PALETTES[palette] ?? PALETTES[0]) : PALETTES[palette] ?? PALETTES[0];
+  const colors = paletteColors(pal);
+  const recolor = paper ? { map: tint.remap, keep: new Set([tint.lcd, ...Object.values(colors), pal.ink ?? pal.accent]), main: pal.main, lcd: tint.lcd, body: null } : null;
   const dimPet = dark && rest;
   const bg = dark ? tint?.dark ?? LCD_BG_DARK : tint?.lcd ?? LCD_BG;
   const ops = [];
@@ -130,7 +134,8 @@ export function composeLCD(pet, time, opts = {}) {
     }
     box = { x: ops[0].x, y: ops[0].y, w: ops[0].rows[0].length, h: ops[0].rows.length };
     ops.push({ op: 'rect', x: 0, y: 23 + TOP, w: LCD_W, h: 1, color: pal.ink ?? pal.accent }); // 8. the flatline (`ink`: a palette's colour for what is drawn on the screen, palettes.js)
-    return { bg, ops, box };
+    if (recolor) recolor.body = new Set(); // the dead pose has no body to blend into
+    return { bg, ops, box, recolor };
   }
 
   const awake = pose === 'awake';
@@ -233,7 +238,8 @@ export function composeLCD(pet, time, opts = {}) {
 
   // 8. The Z while resting.
   if (rest) ops.push({ op: 'rows', rows: SPRITES.z, x: 30, y: 3 + TOP + frame, colors: { '#': dimPet ? Z_DIM : pal.main } });
-  return { bg, ops, box };
+  if (recolor) recolor.body = bodyCells(ops, colors);
+  return { bg, ops, box, recolor };
 }
 
 // A wearable can name a calmer stand-in: `quietId` drawn while resting or in a visit, `stillId` with reduced motion (so far only the style
@@ -270,7 +276,61 @@ export function exclusiveWorn(list, sprite, { frame = 0, time = 0, pal = null } 
 }
 
 // Runs a scene on a 2D context whose cells are the LCD's (LCD_W x LCD_H; scale with the canvas size or a transform).
-export function paintLCD(ctx, { bg, ops }) {
+// The cells the living pet's own sprite fills, "x,y" (the paper tint swaps what touches it).
+const bodyCells = (ops, colors) => {
+  const cells = new Set();
+  for (const o of ops) if (o.op === 'rows' && o.colors === colors) o.rows.forEach((r, y) => [...r].forEach((c, x) => { if (c !== '.') cells.add(`${o.x + x},${o.y + y}`); }));
+  return cells;
+};
+const PAPER_INK = ['#0d0d12', '#f4f2e6'];
+
+// With `recolor` ({ map, keep }: a light screen), every #rrggbb fill goes through map, except the colours in keep (already the screen's own).
+const recoloring = (ctx, { map, keep, main, lcd, body }) => {
+  const cache = new Map();
+  let kept = true; // whether the current fill colour is one of the screen's own
+  let off = [0, 0]; // translate() offsets, so a cell is checked where it lands (props are shifted by TOP)
+  const stack = [];
+  const mapped = (v) => {
+    if (typeof v !== 'string' || !/^#[0-9a-f]{6}$/i.test(v)) { kept = true; return v; }
+    kept = keep.has(v.toLowerCase());
+    if (kept) return v;
+    if (!cache.has(v)) cache.set(v, map(v.toLowerCase()));
+    return cache.get(v);
+  };
+  // 1.0's blend swap, on paper: a recoloured cell on or beside the body that falls within 25 of the body's colour (or, off the body, of the paper)
+  // is drawn in the better of near-black and paper white.
+  const touches = (x, y) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => body.has(`${x + dx},${y + dy}`));
+  const fix = (color, x, y) => {
+    if (!touches(x, y)) return color;
+    const inside = body.has(`${x},${y}`);
+    const score = (c) => Math.min(deltaE(c, main), inside ? 99 : deltaE(c, lcd));
+    if (score(color) >= 25) return color;
+    return PAPER_INK.reduce((best, c) => (score(c) > score(best) ? c : best));
+  };
+  return new Proxy(ctx, {
+    set(target, key, value) { target[key] = key === 'fillStyle' || key === 'strokeStyle' ? mapped(value) : value; return true; },
+    get(target, key) {
+      const v = target[key];
+      if (key === 'save') return () => { stack.push(off); target.save(); };
+      if (key === 'restore') return () => { off = stack.pop() ?? [0, 0]; target.restore(); };
+      if (key === 'translate') return (x, y) => { off = [off[0] + x, off[1] + y]; target.translate(x, y); };
+      if (key === 'fillRect') {
+        return (x, y, w, h) => {
+          if (!kept && w === 1 && h === 1 && typeof target.fillStyle === 'string') {
+            const was = target.fillStyle;
+            const fixed = fix(was, x + off[0], y + off[1]);
+            if (fixed !== was) { target.fillStyle = fixed; v.call(target, x, y, w, h); target.fillStyle = was; return; }
+          }
+          v.call(target, x, y, w, h);
+        };
+      }
+      return typeof v === 'function' ? v.bind(target) : v;
+    },
+  });
+};
+
+export function paintLCD(context, { bg, ops, recolor = null }) {
+  const ctx = recolor ? recoloring(context, recolor) : context;
   ctx.globalAlpha = 1;
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, LCD_W, LCD_H);

@@ -6,7 +6,11 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { IDEA_SHELLS, IDEA_TINTS, IDEA_EFFECTS, IDEA_LABELS, STERILE, SHELLS_1_0, LIGHT_SHELLS_1_0, infraredMap, luminance } from './style-ideas.js';
+import { IDEA_SHELLS, IDEA_TINTS, IDEA_EFFECTS, IDEA_LABELS, STERILE, SHELLS_1_0, LIGHT_SHELLS_1_0, infraredMap, luminance, PAPER, PAPER_BODIES, paperPalette, paperMap } from './style-ideas.js';
+import { registerIdeas } from './accessory-ideas.js';
+import { composeLCD, paintLCD } from './render.js';
+import { forms } from './models.js';
+import { ACCESSORIES, PROPS } from '../../src/accessories.js';
 import { createGhosting, GHOST_MS, mixHex } from './ghosting.js';
 import { registerPalettes } from './palettes.js';
 import { PALETTES } from '../../src/sim.js';
@@ -15,6 +19,7 @@ import { deltaE } from '../../src/colors.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
 
 registerPalettes();
+registerIdeas();
 const doc = readFileSync(new URL('../../docs/NETLING_2_ACCESSORY_IDEAS.md', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./style-ideas.css', import.meta.url), 'utf8');
 const base = readFileSync(new URL('../../style.css', import.meta.url), 'utf8');
@@ -100,7 +105,7 @@ test('the tints hold every palette at 1.0\'s contrast on the screen colour, and 
   for (const t of IDEA_TINTS) {
     assert.match(t.lcd, /^#[0-9a-f]{6}$/);
     assert.ok(luminance(t.dark) < luminance(t.lcd), `${t.id}: lights off is darker`);
-    for (const p of PALETTES) {
+    for (const p of t.light ? PALETTES.map(t.repalette) : PALETTES) { // a light screen is read in its own palette colours (the Paper test)
       assert.ok(ratio(p.main, t.lcd) >= 4.5, `${t.id} / ${p.name} main: ${ratio(p.main, t.lcd).toFixed(2)}`);
       assert.ok(ratio(p.ink ?? p.accent, t.lcd) >= 4.4, `${t.id} / ${p.name} on-screen colour: ${ratio(p.ink ?? p.accent, t.lcd).toFixed(2)}`);
     }
@@ -185,7 +190,7 @@ test('Sterile keeps every palette readable once the wash is laid over both the b
   const worst = Math.max(...[...css.match(/\.screen\.fx-sterile \.fx-layer \{[^}]*\}/)[0].matchAll(/rgba\([^)]*,\s*([\d.]+)\)/g)].map((m) => Number(m[1])));
   assert.equal(worst, STERILE.alpha, 'the CSS never exceeds the alpha the test uses');
   for (const t of [...COSMETICS.tint, ...IDEA_TINTS]) {
-    for (const p of PALETTES) {
+    for (const p of t.light ? PALETTES.map(t.repalette) : PALETTES) {
       // 3:1, the bar graphics are asked for; the wash costs about a third of the margin, so the body (4.5:1 before) still clears it.
       assert.ok(ratio(wash(p.main), wash(t.lcd)) >= 3, `${p.name} body on ${t.id} under Sterile: ${ratio(wash(p.main), wash(t.lcd)).toFixed(2)}`);
       assert.ok(ratio(wash(p.ink ?? p.accent), wash(t.lcd)) >= 3, `${p.name} on-screen colour on ${t.id} under Sterile`);
@@ -209,4 +214,68 @@ test('the dead cells are one LCD cell each, still on the grid, and the split ton
     assert.ok(Math.abs(Number(y) / 100 * 29 - Math.round(Number(y) / 100 * 29)) < 0.1, `row at ${y}%`);
   }
   for (const m of ruleFor('.screen.fx-splittone .fx-layer')[0][1].matchAll(/rgba\(\d+, \d+, \d+, ([\d.]+)\)/g)) assert.ok(Number(m[1]) <= 0.12, 'quiet halves');
+});
+
+// A fake 2D context that records the last colour drawn into each cell (alpha draws, the glows, are left out), for the Paper tests.
+const recorder = () => {
+  const cells = new Map();
+  const ctx = { globalAlpha: 1, fillStyle: '#000000', save() {}, restore() {}, translate() {}, scale() {}, fillRect(x, y, w, h) { if (this.globalAlpha < 1) return; for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) cells.set(`${x + i},${y + j}`, this.fillStyle); } };
+  return { ctx, cells };
+};
+
+test('Paper, the light screen: every palette is darkened by role and clears the bars a dark screen is held to, with its eyes pale on a dark body', () => {
+  const paper = IDEA_TINTS.find((t) => t.id === 'paper');
+  assert.ok(paper.light && paper.repalette === paperPalette && paper.remap === paperMap);
+  assert.equal(paper.lcd, PAPER.lcd);
+  assert.ok(luminance(PAPER.lcd) > 0.5, 'a light screen');
+  assert.ok(ratio(PAPER.dark, PAPER.lcd) > 10 && luminance(PAPER.dark) < 0.02, 'lights off is a dark screen');
+  const bodies = [];
+  for (const p of PALETTES) {
+    const q = paperPalette(p);
+    assert.ok(PAPER_BODIES[p.name], `${p.name} has a hand-picked paper body`);
+    assert.ok(ratio(q.main, PAPER.lcd) >= 4.5, `${p.name} body on paper: ${ratio(q.main, PAPER.lcd).toFixed(2)}`);
+    assert.ok(ratio(q.ink, PAPER.lcd) >= 4.4, `${p.name} on-screen colour on paper: ${ratio(q.ink, PAPER.lcd).toFixed(2)}`);
+    assert.ok(ratio(q.accent, q.main) >= 3, `${p.name} eyes on the body: ${ratio(q.accent, q.main).toFixed(2)}`);
+    assert.ok(ratio(q.mark, q.main) >= 3, `${p.name} marks on the body`);
+    bodies.push([p.name, q.main]);
+  }
+  for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) assert.ok(deltaE(bodies[i][1], bodies[j][1]) >= 25, `${bodies[i][0]} and ${bodies[j][0]} look alike on paper`);
+  // The map darkens: a brighter input never comes out brighter than a darker one, and white lands near black.
+  const lum = (c) => luminance(paperMap(c));
+  assert.ok(lum('#ffffff') < lum('#808080') && lum('#808080') < lum('#101010'), 'inverts brightness');
+  assert.ok(ratio(paperMap('#101010'), PAPER.lcd) >= 3 && ratio(paperMap('#ffffff'), PAPER.lcd) >= 3, 'both ends read on paper');
+});
+
+test('Paper is applied by the renderer with the lights on only, and in the dark the palette\'s own colours return', () => {
+  const paper = IDEA_TINTS.find((t) => t.id === 'paper');
+  const form = forms('B').ironAdultBreachStreet;
+  const lit = composeLCD({ form, egg: 'iron', idle: 'none', palette: 1 }, 800, { tint: paper });
+  assert.equal(lit.bg, PAPER.lcd);
+  assert.ok(lit.recolor);
+  assert.equal(lit.ops.find((o) => o.op === 'rows').colors['#'], PAPER_BODIES[PALETTES[1].name], 'the body is the paper body');
+  const dark = composeLCD({ form, egg: 'iron', idle: 'none', palette: 1, lightsOn: false }, 800, { tint: paper });
+  assert.equal(dark.bg, PAPER.dark);
+  assert.equal(dark.recolor, null);
+  assert.equal(dark.ops.find((o) => o.op === 'rows').colors['#'], PALETTES[1].main, 'the palette\'s own body in the dark');
+  assert.equal(composeLCD({ form, egg: 'iron', idle: 'none', palette: 1 }, 800, { tint: IDEA_TINTS.find((t) => t.id === 'sepia') }).recolor, null, 'a dark tint changes nothing');
+  assert.equal(composeLCD({ form, egg: 'iron', idle: 'none', palette: 1, pose: 'dead' }, 800, { tint: paper }).ops.find((o) => o.op === 'rect').color, paperPalette(PALETTES[1]).ink, 'the flatline is the dark ink');
+});
+
+test('on Paper no worn item blends into the body and no prop falls under 2.5:1 on the screen', () => {
+  const paper = IDEA_TINTS.find((t) => t.id === 'paper');
+  const form = forms('B').ironAdultBreachStreet;
+  const scene = (pet) => { const { ctx, cells } = recorder(); paintLCD(ctx, composeLCD({ form, egg: 'iron', idle: 'none', ...pet }, 800, { tint: paper })); return cells; };
+  for (const [pi, pal] of PALETTES.entries()) {
+    const main = paperPalette(pal).main;
+    const base = scene({ palette: pi });
+    const body = composeLCD({ form, egg: 'iron', idle: 'none', palette: pi }, 800, { tint: paper }).recolor.body;
+    const touches = (k) => { const [x, y] = k.split(',').map(Number); return [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => body.has(`${x + dx},${y + dy}`)); };
+    for (const a of ACCESSORIES.filter((x) => x.slot)) {
+      for (const [k, c] of scene({ palette: pi, worn: [{ id: a.id }] })) {
+        if (base.get(k) !== c && touches(k)) assert.ok(deltaE(c, main) >= 20 || (!body.has(k) && deltaE(c, PAPER.lcd) >= 20), `${pal.name} ${a.id} at ${k}: ${c} on ${main}`);
+      }
+    }
+  }
+  const base = scene({ palette: 0 });
+  for (const pr of PROPS) for (const [k, c] of scene({ palette: 0, prop: pr.id })) if (base.get(k) !== c) assert.ok(ratio(c, PAPER.lcd) >= 2.5, `${pr.id} at ${k}: ${c} is ${ratio(c, PAPER.lcd).toFixed(2)}:1 on paper`);
 });

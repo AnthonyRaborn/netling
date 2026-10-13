@@ -22,7 +22,7 @@
 <script type="module">
 // Review renders (style-ideas.js, style-ideas.css, ghosting.js, the Lava lamp glow). Sections by the hash (scale=n):
 //   #sec=shells  every new shell beside Brushed chrome and the default, with the HUD text on it
-//   #sec=tints   every new tint on all eight palettes (Infrared recolours the canvas pixels)
+//   #sec=tints   every new tint on all palettes (Infrared recolours the canvas pixels; Paper is applied by the renderer, with lights off, dead and a prop and wearable too)
 //   #sec=effects every new effect on a screen with a walking netling; Ghosting runs the real ghosting.js on the canvas cells
 //   #sec=labels  the three labels on a dark and a light shell
 //   #sec=glow    the eight props with a glow (Lava lamp, Mini arcade cabinet, Server tower, Desk terminal, Cyberdeck, Boom box, Petri dish, Fishbowl): lights on, off with the glow, off with it switched off
@@ -51,8 +51,8 @@ const paint = (c, pet, t, tint) => {
   const g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
   g.save(); g.scale(10, 10);
-  const scene = composeLCD({ ...FORM, idle: 'none', ...pet }, t);
-  if (tint) scene.bg = tint.lcd;
+  const scene = composeLCD({ ...FORM, idle: 'none', ...pet }, t, tint?.light ? { tint } : {}); // Paper is applied by the renderer
+  if (tint && !tint.light) scene.bg = tint.lcd;
   paintLCD(g, scene);
   g.restore();
 };
@@ -94,6 +94,13 @@ if (SEC === 'shells') {
       cell.style.width = '150px';
       r.append(cell);
     });
+    if (t.light) { // lights off: the dark screen and the palette's own colours; dead: the dark ink flatline
+      for (const [name, pet] of [['lights off', { lightsOn: false }], ['dead', { pose: 'dead', death: { cause: 'starved', diedAt: 0 } }], ['with a prop', { prop: 'lavalamp', worn: [{ id: 'goggles' }] }]]) {
+        const cell = el('div', 'cell'); const c = lcdCanvas();
+        paint(c, { palette: 1, ...pet }, FIXED ?? 1000, t);
+        cell.append(c, el('p', '', `${t.name}, ${name}`)); cell.style.width = '150px'; r.append(cell);
+      }
+    }
   }
 } else if (SEC === 'effects') {
   const r = section('Screen effects (the netling walks; scale the clock with t=ms)');

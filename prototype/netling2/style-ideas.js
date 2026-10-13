@@ -39,11 +39,62 @@ const hexMix = (a, b, t) => `#${[0, 1, 2].map((i) => Math.round(parseInt(a.slice
 export const INFRARED = { low: '#8a1414', high: '#ffe08a' };
 export const infraredMap = (color) => hexMix(INFRARED.low, INFRARED.high, Math.min(1, Math.sqrt(lumOf(color))));
 
+// Paper: the one light screen. A pale reflective LCD, so everything drawn on it goes dark: `repalette` gives a palette its on-paper colours
+// (the roles matter: a body, the eyes on it and the colour for what is drawn straight on the screen are three different jobs, and one hex
+// can hold two of them), and `remap` darkens every other colour (props, wearables, the dead grey) by inverting its lightness.
+// Applied by render.js only with the lights on: in the dark the screen is `dark` and the colours are the palette's own.
+const hexRgb = (c) => [0, 1, 2].map((i) => parseInt(c.slice(1 + i * 2, 3 + i * 2), 16));
+const rgbHex = (v) => `#${v.map((x) => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, '0')).join('')}`;
+const toHsl = (c) => {
+  const [r, g, b] = hexRgb(c).map((v) => v / 255);
+  const mx = Math.max(r, g, b);
+  const mn = Math.min(r, g, b);
+  const l = (mx + mn) / 2;
+  if (mx === mn) return [0, 0, l];
+  const d = mx - mn;
+  const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  const h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [h / 6, s, l];
+};
+const fromHsl = ([h, s, l]) => {
+  if (!s) return rgbHex([l * 255, l * 255, l * 255]);
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return rgbHex([f(h + 1 / 3), f(h), f(h - 1 / 3)].map((v) => v * 255));
+};
+// The colour of `c`'s hue and saturation whose relative luminance is `target` (bisection on HSL lightness).
+const atLuminance = (c, target) => {
+  const [h, s] = toHsl(c);
+  let [lo, hi] = [0, 1];
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (lumOf(fromHsl([h, s, m])) < target) lo = m; else hi = m; }
+  return fromHsl([h, s, (lo + hi) / 2]);
+};
+export const PAPER = { lcd: '#d4dac2', dark: '#10120c', mark: '#f4f2e6' };
+// Each palette's body on paper: hue kept, luminance 0.1 or less (4.5:1 on the screen), picked by eye so no two bodies sit closer than 25 apart.
+export const PAPER_BODIES = {
+  ice: '#025e65', neon: '#ab0036', acid: '#5b5701', toxic: '#2f6200', ultra: '#762acb', ember: '#914200',
+  cobalt: '#0048ca', mint: '#00663f', peach: '#7a4c2c', rose: '#873f62', origin: '#4a5a82',
+};
+// The eyes (the accent) go pale, hue kept, since they sit on a dark body; `ink` (what is drawn on the screen: the flatline) goes dark.
+export const paperPalette = (pal) => ({
+  ...pal,
+  main: PAPER_BODIES[pal.name] ?? atLuminance(pal.main, 0.09),
+  accent: atLuminance(pal.accent, 0.75),
+  ink: atLuminance(pal.ink ?? pal.accent, 0.07),
+  mark: PAPER.mark,
+});
+export const paperMap = (color) => {
+  const [h, s, l] = toHsl(color);
+  return fromHsl([h, s, Math.max(0.02, 0.36 - 0.34 * l)]);
+};
+
 export const IDEA_TINTS = [
   { id: 'scrubs', name: 'Scrub green', swatch: '#0a241d', lcd: '#0a241d', dark: '#030b09', hint: 'everyone ends up at the clinic.', unlock: 'first clinic visit' },
   { id: 'infrared', name: 'Infrared', swatch: '#2a0606', lcd: '#2a0606', dark: '#0c0202', hint: 'stay cold while they look for you.', unlock: 'survive 10 Rogue sweeps', remap: infraredMap },
   { id: 'sepia', name: 'Sepia', swatch: '#231b14', lcd: '#231b14', dark: '#0a0705', hint: 'learn where the first one came from.', unlock: 'read every NL-0 page' },
   { id: 'nightshift', name: 'Night shift', swatch: '#0a1230', lcd: '#0a1230', dark: '#030510', hint: 'turn the lights off when it sleeps.', unlock: '30 nights slept with the lights off (always available)' },
+  { id: 'paper', name: 'Paper', swatch: '#d4dac2', lcd: PAPER.lcd, dark: PAPER.dark, hint: 'read it in the daylight.', unlock: 'free, or 100 hours awake with the lights on', light: true, repalette: paperPalette, remap: paperMap },
 ];
 
 // --- screen effects ---------------------------------------------------------------------------------------------------------------
