@@ -101,6 +101,9 @@ function build(id) {
     anchors: { a, b: a, sleep: a },
     // Whisper's echo (decided): a fork lagging behind it. A layer over the sprite; the frames above obey the frame rules.
     ...(id === 'ghostElder' ? { motion: whisperEcho } : {}),
+    // Worm's and Fork's tail flick is drawn heading right; the renderer mirrors the rows from the one under the neck down while the
+    // idle carries it left (render.js, idle.js idleFacing; maintainer's review). The head never turns, so wearables are unaffected.
+    ...(id === 'worm' || id === 'wormElder' ? { faceFrom: a.neckRow + 1 } : {}),
   };
 }
 let cache;

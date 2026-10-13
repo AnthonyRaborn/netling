@@ -168,13 +168,13 @@ test('the room: lights off darkens it, a netling asleep in the dark is dimmed, t
   assert.equal(composeLCD({ form, egg: 'program', pose: 'dead' }, 0).ops.at(-1).w, LCD_W, 'the flatline');
 });
 
-test('the idle hold switch: held (decided) holds around the settle, drift steps and hops; steady is the earlier rule; none is 1.0', () => {
-  assert.deepEqual(Object.keys(IDLE_HOLDS), ['held', 'steady', 'none']);
+test('the idle hold switch: held (decided) holds around the settle, drift steps, hops and idle actions; tell leaves the actions out; steady is the earlier rule; none is 1.0', () => {
+  assert.deepEqual(Object.keys(IDLE_HOLDS), ['held', 'tell', 'steady', 'none']);
   const form = SETS.iron.ironAdultBreachStreet;
   let moved = 0;
   for (let t = 6000 - 200; t < 6000 + 600; t += 50) {
     const pet = { form, egg: 'iron', level: 1, idle: 'sway' };
-    for (const hold of ['held', 'steady']) {
+    for (const hold of ['held', 'tell', 'steady']) {
       assert.equal(composeLCD(pet, t, { idleHold: hold }).box.x, composeLCD(pet, 6000 - 200, { idleHold: hold }).box.x, `${hold}: moved at ${t}`);
     }
     if (composeLCD(pet, t, { idleHold: 'none' }).box.x !== composeLCD(pet, 6000 - 200, { idleHold: 'none' }).box.x) moved++;
@@ -189,10 +189,10 @@ test('the idle hold switch: held (decided) holds around the settle, drift steps 
   for (let t = hop - 200; t < hop + 600; t += 50) assert.equal(at(t, 'held').x, at(hop - 200, 'held').x, `held: moved at ${t}`);
   assert.equal(at(hop, 'held').y, at(hop - 200, 'held').y - 1, 'the hop is a row up on a still idle');
   assert.deepEqual(at(hop + 50, 'steady'), at(hop + 50, 'none'), 'steady does not hold a Program');
-  // Wetware and Rogue never hold.
+  // The tell never holds Wetware or Rogue (their idle actions do: idle-actions.test.js).
   for (const egg of ['wetware', 'rogue']) for (const level of [-2, 2]) for (const t of [5900, 6100, 6400]) {
     const p = { form: Object.values(SETS[egg])[3], egg, level, idle: 'sway', seed: 1 };
-    assert.deepEqual(composeLCD(p, t).box, composeLCD(p, t, { idleHold: 'none' }).box);
+    assert.deepEqual(composeLCD(p, t, { idleHold: 'tell', idleActions: false }).box, composeLCD(p, t, { idleHold: 'none', idleActions: false }).box);
   }
   assert.equal(BEAT_MS[1], 6000);
 });
@@ -293,5 +293,80 @@ test('the same pet at the same time draws the same screen (no hidden state)', ()
   for (const { egg, form } of ALL.slice(0, 20)) {
     const pet = { form, egg, level: -1, idle: 'walk', bugs: 2, neglect: 1, worn: WORN, states: STATES };
     assert.deepEqual(screen(pet, 7777), screen(pet, 7777));
+  }
+});
+
+test('Cipher\'s neglect shows through its camouflage at every step, and the still camouflage keeps the usual patches (maintainer\'s review)', () => {
+  const W = wetwareForms();
+  const form = W.wetwareElderHidden;
+  assert.ok(form.motion && form.neglectOverMotion);
+  const spriteRows = (s) => s.ops.find((o) => o.op === 'rows').rows;
+  const diff = (a, b) => a.reduce((n, r, y) => n + [...r].filter((c, x) => c !== b[y][x]).length, 0);
+  for (const reduced of [false, true]) {
+    for (let t = 0; t < 4800; t += 400) {
+      const pet = { form, egg: 'wetware', level: 0, idle: 'none' };
+      const clean = spriteRows(composeLCD({ ...pet, neglect: 0 }, t, { reduced }));
+      const one = diff(clean, spriteRows(composeLCD({ ...pet, neglect: 1 }, t, { reduced })));
+      const two = diff(clean, spriteRows(composeLCD({ ...pet, neglect: 2 }, t, { reduced })));
+      assert.ok(one >= 3 && two > one, `reduced ${reduced}, t ${t}: ${one} then ${two} cells`);
+    }
+  }
+  // moving, the patches are dim cells only, and the outline is the camouflage's own
+  const pet = { form, egg: 'wetware', level: 0, idle: 'none' };
+  for (let t = 0; t < 4800; t += 400) {
+    const [clean, worn] = [0, 2].map((neglect) => spriteRows(composeLCD({ ...pet, neglect }, t)));
+    clean.forEach((r, y) => [...r].forEach((c, x) => {
+      if (c !== worn[y][x]) assert.ok(c === '#' && worn[y][x] === 'x', `t ${t} (${x}, ${y}): ${c} to ${worn[y][x]}`);
+    }));
+  }
+});
+
+test('facing: the idle\'s facing matches every sideways step it takes, and never turns twice within FLASH_TOGGLE_MS', async () => {
+  const { idleOffset, idleFacing, QUIRKS } = await import('./idle.js');
+  const { FLASH_TOGGLE_MS } = await import('../../src/games/common.js');
+  for (const quirk of QUIRKS) {
+    let lastTurn = -Infinity;
+    let steps = 0;
+    for (let t = 100; t < 600_000; t += 10) {
+      const [x0, x1] = [idleOffset(quirk, 14, t - 10).x, idleOffset(quirk, 14, t).x];
+      if (x1 !== x0) { steps++; assert.equal(idleFacing(quirk, t), Math.sign(x1 - x0), `${quirk} at ${t}`); }
+      if (idleFacing(quirk, t) !== idleFacing(quirk, t - 10)) {
+        assert.ok(t - lastTurn >= FLASH_TOGGLE_MS, `${quirk} turned twice within ${t - lastTurn} ms`);
+        lastTurn = t;
+      }
+    }
+    assert.ok(steps > 100, quirk);
+  }
+});
+
+test('facing: Worm and Fork turn their tail rows (only) the way the idle carries them; still, asleep or visiting they keep the drawn frames', async () => {
+  const { idleFacing } = await import('./idle.js');
+  const P = programForms();
+  const spriteRows = (s) => s.ops.find((o) => o.op === 'rows').rows;
+  for (const id of ['programAdultBreachStreet', 'programElderBreachStreet']) {
+    const form = P[id];
+    assert.equal(form.faceFrom, form.anchors.a.neckRow + 1, id);
+    const seen = new Set();
+    for (const idle of ['walk', 'sway', 'hover']) {
+      for (let t = 0; t < 60_000; t += 250) {
+        const pet = { form, egg: 'program', level: 0, idle };
+        const rows = spriteRows(composeLCD(pet, t, { idleActions: false }));
+        const drawn = form[Math.floor(t / 500) % 2 ? 'b' : 'a'];
+        const facing = idleFacing(idle, t);
+        seen.add(facing);
+        rows.forEach((r, y) => assert.equal(r, y >= form.faceFrom && facing < 0 ? [...drawn[y]].reverse().join('') : drawn[y], `${id} ${idle} ${t} row ${y}`));
+      }
+    }
+    assert.deepEqual([...seen].sort(), [-1, 1], `${id} faces both ways`);
+    // the B frame's tail really is one-sided, so the turn shows
+    assert.notEqual(form.b.at(-1), [...form.b.at(-1)].reverse().join(''), id);
+    for (const t of [0, 7000, 31_000]) {
+      for (const over of [{ idle: 'none' }, { idle: 'walk', pose: 'sleep' }, { idle: 'walk', visit: true }]) {
+        const rows = spriteRows(composeLCD({ form, egg: 'program', level: 0, ...over }, t, { idleActions: false }));
+        const pose = over.pose ?? 'awake';
+        if (pose === 'awake') assert.ok(rows.join() === form.a.join() || rows.join() === form.b.join(), `${id} ${JSON.stringify(over)} ${t}`);
+        else assert.deepEqual(rows, form.sleep);
+      }
+    }
   }
 });

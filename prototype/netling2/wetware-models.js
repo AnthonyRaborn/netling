@@ -127,7 +127,7 @@ function build(id) {
     dead: wetwarePose(frames.a, a, 'dead', id),
     anchors: { a, b: a, sleep: a },
     // Blank's elder carries a motion layer that changes its outline on purpose (see blank-motion.js); the frames above obey the frame rules.
-    ...(id === 'blankElder' ? { motion: blankMotion } : {}),
+    ...(id === 'blankElder' ? { motion: blankMotion, neglectOverMotion: true } : {}),
   };
 }
 let cache;

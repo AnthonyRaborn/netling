@@ -1,7 +1,7 @@
 // Tests for metronome.js: the Metronome prop's pendulum. Deterministic: no clock, no Math.random.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { metronome, SLOT_MS, WINDOW_MS } from './metronome.js';
+import { metronome, SLOT_MS, WINDOW_MS, STEADY_MS, swingRange } from './metronome.js';
 import { BEAT_MS } from './tell.js';
 
 const trace = (level, seed, ms = 300_000, step = 25, reduced = false) => {
@@ -16,9 +16,9 @@ test('the middle is upright and still, and the function is pure', () => {
   for (const level of [-2, -1, 1, 2]) assert.deepEqual(metronome({ level, time: 12345, seed: 3 }), metronome({ level, time: 12345, seed: 3 }));
 });
 
-test('steady: it swings on exactly the tell beat, alternating sides, whatever the seed', () => {
+test('steady: it swings on its own even beat, alternating sides, whatever the seed', () => {
   for (const level of [1, 2]) {
-    const interval = BEAT_MS[level];
+    const interval = STEADY_MS[level];
     for (const seed of [0, 5, 99]) {
       const c = changes(trace(level, seed, interval * 20, 25));
       assert.ok(c.length >= 18, `${level}: ${c.length} swings`);
@@ -30,8 +30,10 @@ test('steady: it swings on exactly the tell beat, alternating sides, whatever th
   }
 });
 
-test('strongly steady beats twice as fast as steady', () => {
-  assert.equal(BEAT_MS[1], 2 * BEAT_MS[2]);
+test('strongly steady beats twice as fast as steady, once a second at most twice (maintainer: the tell beat was too slow), and the tell lands on a tick', () => {
+  assert.equal(STEADY_MS[1], 2 * STEADY_MS[2]);
+  assert.ok(STEADY_MS[1] <= 1000 && STEADY_MS[2] >= 2 * SLOT_MS);
+  for (const level of [1, 2]) assert.equal(BEAT_MS[level] % STEADY_MS[level], 0);
 });
 
 test('unsteady: swings at irregular moments, differently by seed, strongly more often', () => {
@@ -51,7 +53,7 @@ test('flash budget: it never changes side within FLASH_TOGGLE_MS, in any level, 
     }
     if (level < 0) {
       const c = changes(trace(level, 7, 600_000, 10));
-      for (let i = 1; i < c.length; i++) assert.ok(c[i] - c[i - 1] >= WINDOW_MS[level] * 0.4 - 10, 'unsteady swings keep a 40% window gap');
+      for (let i = 1; i < c.length; i++) assert.ok(c[i] - c[i - 1] >= WINDOW_MS[level] - swingRange(WINDOW_MS[level]) - 10, 'unsteady swings keep the gap the range leaves');
     }
   }
 });

@@ -6,7 +6,7 @@ How Netling gets from "a folder of static files" to apps on Android, Windows, ma
 
 Test devices available: Android phone, Windows PC, Mac, Steam Deck (the only Linux device).
 
-**After the freeze:** tier 2 is not planned. The game stays a web app (optionally with a free itch.io page linking to GitHub Pages). If closed-app notifications turn out to matter, a Capacitor APK on GitHub Releases is the cheapest step; check Google's developer verification rules for sideloaded apps first. This file is kept as a reference.
+**After the freeze:** tier 2 is not planned. The game stays a web app (optionally with a free itch.io page linking to GitHub Pages). If closed-app notifications turn out to matter, a Capacitor APK on GitHub Releases is the cheapest step; check Google's developer verification rules for sideloaded apps first. This file is kept as a reference. Netling 2.0 ships differently (native apps only): see [NETLING_2_DEPLOY.md](NETLING_2_DEPLOY.md).
 
 ## Tier 1: GitHub Pages + installable web app
 

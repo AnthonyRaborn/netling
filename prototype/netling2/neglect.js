@@ -48,3 +48,19 @@ export function neglected(sprite, anchors, level, seed = 0) {
   const flipped = new Set(cells.slice(0, Math.max(1, Math.round(cells.length * share))).map((c) => `${c.x},${c.y}`));
   return sprite.map((row, y) => [...row].map((ch, x) => (flipped.has(`${x},${y}`) ? to : ch)).join(''));
 }
+
+// Cipher (Wetware's hidden elder) runs a camouflage layer that repaints every body cell (blank-motion.js: solid above the scan band,
+// checker holes below it), so patches drawn before it were wiped, and brightened ones could not show on the solid body anyway
+// (maintainer's review: Cipher's neglect was nearly invisible). A form with `neglectOverMotion` takes its neglect after the motion layer
+// instead, while that layer moves: dim patches on the cells the camouflage left solid. The cells are the usual ones (lower rows first,
+// level 2's include level 1's), picked on the body as if it were solid, so they do not depend on the camouflage's step. `rows` are the
+// motion layer's padded rows, `pad` the columns added on each side.
+export function neglectedOverMotion(rows, sprite, anchors, level, seed = 0, pad = 0) {
+  const solid = sprite.map((r) => r.replace(/x/g, '#'));
+  const patched = neglected(solid, anchors, level, seed);
+  const out = rows.map((r) => [...r]);
+  patched.forEach((r, y) => [...r].forEach((ch, x) => {
+    if (ch === 'x' && solid[y][x] === '#' && out[y]?.[x + pad] === '#') out[y][x + pad] = 'x';
+  }));
+  return out.map((r) => r.join(''));
+}

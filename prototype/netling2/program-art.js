@@ -103,7 +103,9 @@ export const PROGRAM_ADULTS = {
       '...##......##...',
     ],
   },
-  // Worm (Breach, street): a head with jaws on a narrower column, striped down the body (the stripes step between frames) and a tail that swishes.
+  // Worm (Breach, street): a head with jaws on a narrower column, striped down the body (the stripes step between frames) and a tail that swishes. The flick
+  // is drawn for a Worm heading right; the renderer mirrors the tail when it heads left (`faceFrom`, render.js; maintainer's review:
+  // a one-sided flick read as a moonwalk going the other way, and a symmetric wag or a body wave lost the original's read).
   worm: {
     a: [
       '......#..#......',

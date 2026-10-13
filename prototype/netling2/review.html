@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Netling 2.0 Focus Review</title>
+    <style>
+      @font-face { font-family: 'VT323'; font-weight: 400; font-display: swap; src: url(../../fonts/VT323-latin.woff2) format('woff2'); }
+      :root { --dim: #809fa6; --line: #2a2240; --pink: #ff2a6d; --cyan: #05d9e8; --yellow: #f9f002; }
+      body { background: #07070c; color: #c7f9ff; font-family: 'VT323', monospace; font-size: 18px; margin: 0; }
+      h1 { color: var(--pink); font-weight: normal; letter-spacing: 4px; margin: 0; font-size: 26px; }
+      h3 { color: var(--pink); font-weight: normal; letter-spacing: 2px; margin: 0 0 4px; font-size: 18px; }
+      .note { color: var(--dim); }
+      select, input, button { font: inherit; background: #14121f; color: #c7f9ff; border: 1px solid var(--line); padding: 1px 6px; }
+      button.on { border-color: var(--cyan); color: var(--cyan); }
+      label { color: var(--dim); display: inline-flex; gap: 4px; align-items: center; }
+      #layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
+      #side { border-right: 1px solid var(--line); padding: 12px; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; box-sizing: border-box; }
+      #side section { margin-bottom: 14px; }
+      #side .ctl { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 4px 0; }
+      #main { padding: 12px 16px; min-width: 0; }
+      #top { position: sticky; top: 0; z-index: 5; background: #07070cee; padding: 6px 0 8px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+      #picked { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+      .chip { border: 1px solid var(--line); padding: 0 4px; cursor: pointer; }
+      .chip:hover { border-color: var(--pink); }
+      details { margin: 2px 0; }
+      summary { cursor: pointer; color: var(--cyan); }
+      .forms label { display: flex; color: #c7f9ff; }
+      .forms label small { color: var(--dim); margin-left: auto; }
+      canvas { image-rendering: pixelated; display: block; }
+      .form { border-top: 1px solid var(--line); padding: 8px 0 12px; }
+      .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+      figure { margin: 0; }
+      figcaption { color: var(--dim); font-size: 16px; }
+      .track { cursor: crosshair; border: 1px solid var(--line); margin-top: 4px; }
+      .legend span { margin-right: 10px; }
+      #fail { display: none; border: 2px solid var(--pink); padding: 10px 14px; margin: 12px; color: #f5f5f5; }
+      .readout { font-size: 16px; color: var(--dim); white-space: pre; }
+      @media (max-width: 800px) { #layout { grid-template-columns: 1fr; } #side { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); } }
+    </style>
+  </head>
+  <body>
+    <div id="fail" role="alert"></div>
+    <div id="layout">
+      <aside id="side">
+        <h1>FOCUS REVIEW</h1>
+        <p class="note">Netling 2.0 prototype; spoilers. Pick forms and one aspect. Every setting is in the link. Drawn by <code>render.js</code>.</p>
+        <section>
+          <h3>FORMS</h3>
+          <div class="ctl" id="presetCtl"></div>
+          <div id="picked"></div>
+          <div class="forms" id="formList"></div>
+        </section>
+        <section>
+          <h3>LOOK</h3>
+          <div class="ctl" id="lookCtl"></div>
+        </section>
+        <section>
+          <h3>BEHAVIOUR</h3>
+          <div class="ctl" id="behaveCtl"></div>
+        </section>
+        <section>
+          <h3>VIEW OPTIONS</h3>
+          <div class="ctl" id="viewCtl"></div>
+        </section>
+      </aside>
+      <main id="main">
+        <div id="top"></div>
+        <div id="stage"></div>
+      </main>
+    </div>
+
+    <script type="module">
+      import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
+      const fail = (e) => {
+        const box = document.getElementById('fail');
+        box.style.display = 'block';
+        box.textContent = `The review page failed: ${e.stack ?? e.message ?? e}. Serve the repository root (npm run serve) rather than opening the file.`;
+        console.error(e);
+      };
+      try {
+        const { drawSprite, paletteColors, DEAD_COLORS } = await import('../../src/sprites.js');
+        const { PALETTES } = await import('../../src/sim.js');
+        const { ACCESSORIES } = await import('../../src/accessories.js');
+        const { drawLCD, IDLE_HOLDS, LCD_W, LCD_H, TOP, BURN_MS } = await import('./render.js');
+        const { temperTell } = await import('./tell.js');
+        const { actionAt } = await import('./idle-actions.js');
+        const { QUIRKS } = await import('./idle.js');
+        const { KINDS } = await import('./marks.js');
+        const { MAX_BUGS } = await import('./glitch.js');
+        const { nameOf } = await import('./form-ids.js');
+        const R = await import('./review.js');
+
+        const ALL = R.allForms();
+        let S = R.parseState(location.hash);
+        if (!S.ids.length) S.ids = R.preset('line', { id: 'ironAdultBreachStreet' });
+
+        // --- state and the link ---
+        let rebuildNeeded = true;
+        const set = (patch, rebuild = true) => {
+          Object.assign(S, patch);
+          if (rebuild) rebuildNeeded = true;
+          writeHash();
+          syncControls();
+        };
+        const writeHash = () => history.replaceState(null, '', R.stateHash({ ...S, t: S.play ? 0 : Math.round(S.t) }));
+        window.addEventListener('hashchange', () => {
+          S = R.parseState(location.hash);
+          rebuildNeeded = true;
+          syncControls();
+        });
+
+        // --- small control helpers ---
+        const el = (tag, props = {}, ...kids) => {
+          const e = Object.assign(document.createElement(tag), props);
+          e.append(...kids);
+          return e;
+        };
+        const syncers = [];
+        const syncControls = () => syncers.forEach((f) => f());
+        const select = (host, key, options, label, { number = typeof R.DEFAULTS[key] === 'number', rebuild = true, show = null } = {}) => {
+          const s = el('select');
+          for (const [v, text] of options) s.append(new Option(text, v));
+          s.onchange = () => set({ [key]: number ? Number(s.value) : s.value }, rebuild);
+          const l = el('label', {}, label, s);
+          syncers.push(() => {
+            s.value = String(S[key]);
+            if (show) l.style.display = show() ? '' : 'none';
+          });
+          host.append(l);
+          return s;
+        };
+        const check = (host, key, label, { rebuild = true, show = null } = {}) => {
+          const c = el('input', { type: 'checkbox' });
+          c.onchange = () => set({ [key]: c.checked ? 1 : 0 }, rebuild);
+          const l = el('label', {}, c, label);
+          syncers.push(() => {
+            c.checked = Boolean(S[key]);
+            if (show) l.style.display = show() ? '' : 'none';
+          });
+          host.append(l);
+        };
+        const number = (host, key, label, { min = 0, max = 99, step = 1, width = '4em', show = null } = {}) => {
+          const n = el('input', { type: 'number', min, max, step, style: `width: ${width}` });
+          n.onchange = () => set({ [key]: Number(n.value) || 0 });
+          const l = el('label', {}, label, n);
+          syncers.push(() => {
+            n.value = S[key];
+            if (show) l.style.display = show() ? '' : 'none';
+          });
+          host.append(l);
+        };
+        const button = (host, text, onclick, title = '') => {
+          const b = el('button', { textContent: text, onclick, title });
+          host.append(b);
+          return b;
+        };
+        const isView = (...v) => () => v.includes(S.view);
+
+        // --- top bar: the aspect, the clock and the link ---
+        const top = document.getElementById('top');
+        for (const v of R.VIEWS) {
+          const b = button(top, v, () => set({ view: v }));
+          syncers.push(() => b.classList.toggle('on', S.view === v));
+        }
+        top.append(el('span', { textContent: ' | ' }));
+        const playBtn = button(top, 'pause', () => set({ play: S.play ? 0 : 1 }, false), 'space');
+        syncers.push(() => (playBtn.textContent = S.play ? 'pause' : 'play'));
+        const seek = (t) => set({ t: Math.max(0, Math.round(t)), play: 0 }, false);
+        button(top, '<<', () => seek(prevChange(S.t)), 'previous change on any shown form (,)');
+        button(top, '-100', () => seek(S.t - 100), 'left arrow');
+        button(top, '+100', () => seek(S.t + 100), 'right arrow');
+        button(top, '>>', () => seek(nextChange(S.t)), 'next change on any shown form (.)');
+        select(top, 'speed', [[0.1, '0.1x'], [0.25, '0.25x'], [0.5, '0.5x'], [1, '1x'], [2, '2x']], 'speed ', { rebuild: false });
+        const tInput = el('input', { type: 'number', min: 0, step: 100, style: 'width: 6em' });
+        tInput.onchange = () => seek(Number(tInput.value) || 0);
+        top.append(el('label', {}, 't ms ', tInput));
+        button(top, 'copy link', async () => {
+          const was = S.play;
+          S.play = 0;
+          writeHash();
+          try { await navigator.clipboard.writeText(location.href); } catch { /* the address bar has it */ }
+          S.play = was;
+          writeHash();
+        }, 'pauses the clock into the link');
+        document.addEventListener('keydown', (e) => {
+          if (e.target.matches('input, select')) return;
+          if (e.key === ' ') { e.preventDefault(); set({ play: S.play ? 0 : 1 }, false); }
+          else if (e.key === 'ArrowLeft') seek(S.t - (e.shiftKey ? 500 : 100));
+          else if (e.key === 'ArrowRight') seek(S.t + (e.shiftKey ? 500 : 100));
+          else if (e.key === ',') seek(prevChange(S.t));
+          else if (e.key === '.') seek(nextChange(S.t));
+        });
+
+        // --- forms: presets, the picked list, every form by egg ---
+        const presetCtl = document.getElementById('presetCtl');
+        const pEgg = el('select');
+        for (const e of R.EGG_LIST) pEgg.append(new Option(e, e));
+        const pStage = el('select');
+        for (const s of R.STAGES) pStage.append(new Option(s, s));
+        pStage.value = 'adult';
+        presetCtl.append(pEgg, pStage);
+        const first = () => S.ids[0];
+        button(presetCtl, 'egg', () => set({ ids: R.preset('egg', { egg: pEgg.value }) }), 'every form of the egg');
+        button(presetCtl, 'stage', () => set({ ids: R.preset('stage', { egg: pEgg.value, stage: pStage.value }) }), 'the egg at the stage');
+        button(presetCtl, 'across eggs', () => set({ ids: R.preset('across', { stage: pStage.value }) }), 'the stage on all four eggs');
+        button(presetCtl, 'line', () => set({ ids: R.preset('line', { id: first() }) }), "the first picked form's line");
+        button(presetCtl, 'adult+elder', () => set({ ids: R.preset('pair', { id: first() }) }), 'the first picked adult and its elder');
+        button(presetCtl, 'clear', () => set({ ids: [] }));
+        const picked = document.getElementById('picked');
+        syncers.push(() => {
+          picked.replaceChildren(...S.ids.map((id, i) => el('span', {
+            className: 'chip', textContent: `${id} x`, title: 'click to remove; shift-click to move first',
+            onclick: (e) => set({ ids: e.shiftKey ? [id, ...S.ids.filter((x) => x !== id)] : S.ids.filter((_, j) => j !== i) }),
+          })));
+        });
+        const list = document.getElementById('formList');
+        for (const egg of R.EGG_LIST) {
+          const d = el('details', {}, el('summary', { textContent: egg }));
+          for (const [id, { form }] of ALL) {
+            if (ALL.get(id).egg !== egg) continue;
+            const c = el('input', { type: 'checkbox' });
+            c.onchange = () => set({ ids: c.checked ? [...S.ids, id] : S.ids.filter((x) => x !== id) });
+            syncers.push(() => (c.checked = S.ids.includes(id)));
+            d.append(el('label', {}, c, id, el('small', { textContent: `${nameOf(id)} ${form.a[0].length}x${form.a.length}` })));
+          }
+          list.append(d);
+        }
+
+        // --- look, behaviour, view options ---
+        const look = document.getElementById('lookCtl');
+        select(look, 'palette', PALETTES.map((p, i) => [i, p.name]), 'palette ');
+        select(look, 'scale', [[0, 'auto'], ...[2, 3, 4, 5, 6, 8, 10, 12, 16, 20].map((n) => [n, `${n}x`])], 'scale ');
+        select(look, 'pose', [['awake', 'awake'], ['sleep', 'asleep'], ['dead', 'dead'], ['captured', 'captured (Rogue burn from t=0)']], 'pose ', { show: isView('motion', 'damage', 'wear') });
+        check(look, 'dark', 'lights off', { show: isView('motion', 'damage', 'wear') });
+        check(look, 'anchors', 'anchor rows');
+        check(look, 'grid', 'cell grid', { show: isView('frames') });
+        check(look, 'diff', 'A/B diff', { show: isView('frames') });
+        const behave = document.getElementById('behaveCtl');
+        const notFrames = isView('motion', 'damage', 'wear');
+        select(behave, 'level', [[-2, '-2 strongly unsteady'], [-1, '-1 unsteady'], [0, '0 middle'], [1, '+1 steady'], [2, '+2 strongly steady']], 'temper ', { show: notFrames });
+        select(behave, 'idle', [['none', 'none'], ...QUIRKS.map((q) => [q, q])], '1.0 idle ', { show: notFrames });
+        select(behave, 'idleHold', Object.keys(IDLE_HOLDS).map((k) => [k, k]), 'idle hold ', { show: notFrames });
+        check(behave, 'actions', 'idle actions', { show: notFrames });
+        check(behave, 'reduced', 'reduced motion', { show: notFrames });
+        check(behave, 'visit', 'visit', { show: notFrames });
+        number(behave, 'seed', 'seed ', { show: notFrames });
+        select(behave, 'neglect', [[0, '0'], [1, '1'], [2, '2']], 'neglect ', { show: notFrames });
+        select(behave, 'bugs', Array.from({ length: MAX_BUGS + 1 }, (_, i) => [i, String(i)]), 'bugs ', { show: notFrames });
+        select(behave, 'seams', [[0, '0'], [1, '1'], [2, '2']], 'seams ', { show: notFrames });
+        select(behave, 'marks', [['', 'none'], ...KINDS.map((k) => [k, k]), ['all', 'all']], 'state marks ', { show: notFrames });
+        select(behave, 'prop', [['', 'none'], ['metronome', 'Metronome (draft)'], ...ACCESSORIES.filter((a) => a.slot === 'prop').map((a) => [a.id, a.id])], 'prop ', { show: notFrames });
+        const view = document.getElementById('viewCtl');
+        select(view, 'damage', R.DAMAGE.map((d) => [d, d]), 'compare ', { show: isView('damage') });
+        number(view, 'strip', 'filmstrip frames ', { max: 60, show: isView('motion') });
+        number(view, 'stripMs', 'every ms ', { min: 50, max: 5000, step: 50, width: '5em', show: isView('motion') });
+        select(view, 'span', [[6000, '6 s'], [12000, '12 s'], [24000, '24 s'], [60000, '60 s']], 'change track ', { show: isView('motion') });
+        check(view, 'wearAll', 'every wearable, one per cell', { show: isView('wear') });
+        const wearBox = el('select', { multiple: true, size: 10, style: 'width: 100%' });
+        for (const a of ACCESSORIES.filter((a) => a.slot !== 'prop')) wearBox.append(new Option(`${a.id} (${a.slot})`, a.id));
+        wearBox.onchange = () => set({ wear: [...wearBox.selectedOptions].map((o) => o.value) });
+        const wearLabel = el('label', { style: 'flex-direction: column; align-items: stretch; width: 100%' }, 'wear (ctrl/cmd-click for several)', wearBox);
+        syncers.push(() => {
+          for (const o of wearBox.options) o.selected = S.wear.includes(o.value);
+          wearLabel.style.display = S.view !== 'frames' && !(S.view === 'wear' && S.wearAll) ? 'flex' : 'none';
+        });
+        view.append(wearLabel);
+
+        // --- drawing ---
+        const SCALE = { frames: 12, motion: 8, damage: 5, wear: 5 };
+        const scale = () => S.scale || (S.view === 'wear' && S.wearAll ? 3 : SCALE[S.view]);
+        const CROP = { x: 5, y: 0, w: 30, h: 24 + TOP }; // the part of the screen a pet uses (as the galleries' layers section)
+        const FULL = { x: 0, y: 0, w: LCD_W, h: LCD_H };
+
+        const petOf = (id, over = {}) => {
+          const { form, egg } = ALL.get(id);
+          const captured = S.pose === 'captured';
+          return {
+            form, egg, palette: S.palette, pose: captured ? 'dead' : S.pose, lightsOn: !S.dark, level: S.level, seed: S.seed, idle: S.idle,
+            neglect: S.neglect, bugs: S.bugs, seams: S.seams, visit: Boolean(S.visit),
+            states: S.marks === 'all' ? KINDS.map((kind) => ({ kind })) : S.marks ? [{ kind: S.marks }] : [],
+            worn: S.wear.map((w) => ({ id: w })), prop: S.prop || null,
+            death: { cause: captured ? 'captured' : 'old age', diedAt: S.seed },
+            ...over,
+          };
+        };
+        const optsOf = () => ({ reduced: Boolean(S.reduced), idleHold: S.idleHold, idleActions: Boolean(S.actions), burnStart: S.pose === 'captured' ? 0 : null });
+
+        const lcd = (crop, sc) => {
+          const c = el('canvas', { width: crop.w, height: crop.h });
+          c.style.width = `${crop.w * sc}px`;
+          c.style.height = `${crop.h * sc}px`;
+          return c;
+        };
+        const ANCHOR_COLORS = [['headTop', '#f9f002'], ['eyeRow', '#ff2a6d'], ['mouthRow', '#39ff14'], ['neckRow', '#b967ff']];
+        // A live (or still) screen: redrawn each animation frame from the shared clock.
+        const live = [];
+        const screen = (host, caption, id, over = {}, crop = S.visit ? FULL : CROP, timeOf = () => S.t) => {
+          const c = lcd(crop, scale());
+          const g = c.getContext('2d');
+          host.append(el('figure', {}, c, el('figcaption', { textContent: caption })));
+          live.push(() => {
+            g.setTransform(1, 0, 0, 1, -crop.x, -crop.y);
+            const pet = petOf(id, over);
+            const { box } = drawLCD(g, pet, timeOf(), optsOf());
+            if (S.anchors && box && pet.pose !== 'dead') {
+              const a = pet.form.anchors[pet.pose === 'sleep' ? 'sleep' : 'a'] ?? pet.form.anchors.a;
+              g.globalAlpha = 0.7;
+              for (const [k, color] of ANCHOR_COLORS) {
+                g.fillStyle = color;
+                g.fillRect(crop.x, box.y + a[k], 1, 1);
+                g.fillRect(crop.x + crop.w - 1, box.y + a[k], 1, 1);
+              }
+              g.globalAlpha = 1;
+            }
+          });
+        };
+
+        // Frames: the registered sprites alone, large, with the cell grid, the anchor rows and the cells that differ between A and B.
+        function framesView(host, id) {
+          const { form, egg } = ALL.get(id);
+          const pal = PALETTES[S.palette] ?? PALETTES[0];
+          const keys = ['a', 'b', 'sleep', 'dead', ...(form.captured ? ['captured'] : [])];
+          const diff = new Set();
+          if (S.diff) form.a.forEach((r, y) => [...r].forEach((ch, x) => ch !== form.b[y]?.[x] && diff.add(`${x},${y}`)));
+          const row = el('div', { className: 'row' });
+          for (const k of keys) {
+            const rows = form[k];
+            const w = rows[0].length;
+            const h = rows.length;
+            const sc = scale();
+            const c = el('canvas', { width: (w + 2) * sc, height: (h + 2) * sc });
+            const g = c.getContext('2d');
+            g.fillStyle = '#0b2226';
+            g.fillRect(0, 0, c.width, c.height);
+            g.save();
+            g.scale(sc, sc);
+            g.translate(1, 1);
+            drawSprite(g, rows, 0, 0, k === 'dead' || k === 'captured' ? DEAD_COLORS : paletteColors(pal));
+            g.restore();
+            if (S.grid && sc >= 6) {
+              g.strokeStyle = 'rgba(255,255,255,0.08)';
+              g.lineWidth = 1;
+              g.beginPath();
+              for (let x = 0; x <= w; x++) { g.moveTo((x + 1) * sc + 0.5, sc); g.lineTo((x + 1) * sc + 0.5, (h + 1) * sc); }
+              for (let y = 0; y <= h; y++) { g.moveTo(sc, (y + 1) * sc + 0.5); g.lineTo((w + 1) * sc, (y + 1) * sc + 0.5); }
+              g.stroke();
+            }
+            if (S.diff && (k === 'a' || k === 'b')) {
+              g.strokeStyle = '#f9f002';
+              g.lineWidth = Math.max(1, sc / 6);
+              for (const p of diff) {
+                const [x, y] = p.split(',').map(Number);
+                g.strokeRect((x + 1) * sc + 1, (y + 1) * sc + 1, sc - 2, sc - 2);
+              }
+            }
+            const a = form.anchors[k] ?? (k === 'dead' || k === 'captured' ? null : form.anchors.a);
+            if (S.anchors && a) {
+              for (const [name, color] of ANCHOR_COLORS) {
+                g.fillStyle = color;
+                g.fillRect(0, (a[name] + 1) * sc, sc * 0.6, sc);
+                g.fillRect((w + 1.4) * sc, (a[name] + 1) * sc, sc * 0.6, sc);
+              }
+            }
+            row.append(el('figure', {}, c, el('figcaption', { textContent: `${k} ${w}x${h}${k === 'b' && S.diff ? `, ${diff.size} cells differ from A` : ''}` })));
+          }
+          host.append(row);
+          if (S.anchors) host.append(el('div', { className: 'note legend', innerHTML: ANCHOR_COLORS.map(([n, c]) => `<span style="color:${c}">${n}</span>`).join('') }));
+        }
+
+        // Motion: the live screen, a readout of the tell, an optional filmstrip, and the change track below.
+        const tracks = [];
+        const TRACK_COLORS = { picture: '#05d9e8', place: '#ff2a6d', shade: '#b967ff', worn: '#f9f002', marks: '#39ff14', props: '#ff9f1c' };
+        function motionView(host, id) {
+          const row = el('div', { className: 'row' });
+          screen(row, 'live', id, {}, FULL);
+          const readout = el('div', { className: 'readout' });
+          row.append(readout);
+          live.push(() => {
+            const { form, egg } = ALL.get(id);
+            const tell = temperTell({ egg, level: S.visit ? 0 : S.level, time: S.t, reduced: Boolean(S.reduced), seed: S.seed });
+            const act = S.actions && !S.visit && S.pose === 'awake' ? actionAt({ egg, level: S.level, time: S.t, seed: S.seed, reduced: Boolean(S.reduced), form }) : null;
+            readout.textContent = [
+              `t ${Math.round(S.t)} ms`,
+              `frame ${tell.frame ? 'B' : 'A'}${tell.blink ? ' (blink)' : ''}`,
+              `tell dx ${tell.dx} dy ${tell.dy} shade ${tell.shade.toFixed(2)}${tell.glance ? ` glance ${tell.glance}` : ''}`,
+              `action ${act ? `${act.name} ${Math.round(act.elapsed)}/${Math.round(act.span)} ms` : '-'}`,
+            ].join('\n');
+          });
+          host.append(row);
+          if (S.strip > 0) {
+            const film = el('div', { className: 'row' });
+            for (let i = 0; i < S.strip; i++) screen(film, `+${i * S.stripMs}`, id, {}, S.visit ? FULL : CROP, () => S.t + i * S.stripMs);
+            host.append(film);
+          }
+          const tc = el('canvas', { className: 'track', width: 720, height: 46 });
+          tc.style.width = '720px';
+          tc.style.height = '46px';
+          const track = { id, canvas: tc, key: '', changes: [], from: 0 };
+          tc.onclick = (e) => seek(track.from + (e.offsetX / 720) * S.span);
+          tracks.push(track);
+          host.append(tc);
+        }
+        const legend = () => el('div', { className: 'note legend', innerHTML: `change track (click to seek; , and . step between changes): ${Object.entries(TRACK_COLORS).map(([k, c]) => `<span style="color:${c}">${k}</span>`).join('')}` });
+        const KINDS_ORDER = Object.keys(TRACK_COLORS);
+        function drawTrack(track) {
+          const from = Math.floor(S.t / S.span) * S.span;
+          const key = `${from}|${location.hash.replace(/(^|&|#)(t|play|speed)=[^&]*/g, '')}`;
+          if (track.key !== key) {
+            track.key = key;
+            track.from = from;
+            track.changes = R.changeTrack(petOf(track.id), optsOf(), { from, to: from + S.span, step: 50 });
+          }
+          const g = track.canvas.getContext('2d');
+          g.fillStyle = '#0b0b14';
+          g.fillRect(0, 0, 720, 46);
+          const lane = 46 / KINDS_ORDER.length;
+          for (const { t, what } of track.changes) {
+            const x = Math.floor(((t - from) / S.span) * 720);
+            for (const w of what) {
+              g.fillStyle = TRACK_COLORS[w];
+              g.fillRect(x, KINDS_ORDER.indexOf(w) * lane, 1, lane - 1);
+            }
+          }
+          g.fillStyle = '#ffffff';
+          g.fillRect(Math.floor(((S.t - from) / S.span) * 720), 0, 1, 46);
+        }
+        const allChanges = () => tracks.flatMap((tr) => tr.changes.map((c) => c.t)).sort((a, b) => a - b);
+        const nextChange = (t) => allChanges().find((x) => x > t) ?? Math.floor(t / S.span + 1) * S.span;
+        const prevChange = (t) => allChanges().reverse().find((x) => x < t) ?? Math.max(0, Math.floor(t / S.span) * S.span - 50);
+
+        // Damage: the chosen layer at every level, the rest of the settings as set.
+        const DAMAGE_STEPS = {
+          neglect: [0, 1, 2].map((n) => [`neglect ${n}`, { neglect: n }]),
+          bugs: Array.from({ length: MAX_BUGS + 1 }, (_, n) => [`bugs ${n}`, { bugs: n }]),
+          seams: [0, 1, 2].map((n) => [`seams ${n}`, { seams: n }]),
+          marks: [['none', { states: [] }], ...KINDS.map((k) => [k, { states: [{ kind: k }] }]), ['all', { states: KINDS.map((kind) => ({ kind })) }]],
+        };
+        function damageView(host, id) {
+          const row = el('div', { className: 'row' });
+          for (const [caption, over] of DAMAGE_STEPS[S.damage]) screen(row, caption, id, over);
+          host.append(row);
+        }
+
+        // Wear: the picked wearables, or every wearable one per cell.
+        function wearView(host, id) {
+          const row = el('div', { className: 'row' });
+          if (S.wearAll) for (const a of ACCESSORIES.filter((x) => x.slot !== 'prop')) screen(row, a.id, id, { worn: [{ id: a.id }] });
+          else screen(row, S.wear.join(', ') || 'no wearable picked', id);
+          host.append(row);
+        }
+
+        const VIEW_FNS = { frames: framesView, motion: motionView, damage: damageView, wear: wearView };
+        function rebuild() {
+          rebuildNeeded = false;
+          live.length = 0;
+          tracks.length = 0;
+          const stage = document.getElementById('stage');
+          stage.replaceChildren();
+          if (!S.ids.length) stage.append(el('p', { className: 'note', textContent: 'No forms picked: use a preset or tick forms on the left.' }));
+          if (S.view === 'motion' && S.ids.length) stage.append(legend());
+          for (const id of S.ids) {
+            const { form, egg } = ALL.get(id);
+            const box = el('div', { className: 'form' });
+            box.append(el('h3', { textContent: `${id}  ${nameOf(id)}  (${egg}, ${R.stageOf(form)}, ${form.a[0].length}x${form.a.length}${form.motion ? ', motion layer' : ''})` }));
+            VIEW_FNS[S.view](box, id);
+            stage.append(box);
+          }
+        }
+
+        let last = null;
+        function tick(now) {
+          try {
+            if (last != null && S.play) S.t += (now - last) * S.speed;
+            last = now;
+            if (rebuildNeeded) rebuild();
+            if (document.activeElement !== tInput) tInput.value = Math.round(S.t);
+            for (const f of live) f();
+            for (const tr of tracks) drawTrack(tr);
+          } catch (e) {
+            fail(e);
+            return;
+          }
+          requestAnimationFrame(tick);
+        }
+        syncControls();
+        writeHash();
+        requestAnimationFrame(tick);
+        window.__review = { get state() { return S; }, set, rebuild: () => (rebuildNeeded = true) };
+      } catch (e) {
+        fail(e);
+      }
+    </script>
+  </body>
+</html>

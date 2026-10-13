@@ -63,8 +63,9 @@ const STRAY_MIN_MS = 2500;
 const STRAY_SPAN_MS = 1500; // a stray lasts 2.5 to 4 s
 const STRAY_MAX_MS = STRAY_MIN_MS + STRAY_SPAN_MS;
 
-// -> null (nothing happening) or { action, scheduled, progress (0 to 1 through the action), aborted, step }.
-// `step` is the routine position for a scheduled action, so a test (or a status line) can count it.
+// -> null (nothing happening) or { action, scheduled, progress (0 to 1 through the action), aborted, step, elapsed, shown }.
+// `step` is the routine position for a scheduled action, so a test (or a status line) can count it. `elapsed` is the ms since the
+// action began and `shown` the ms it is shown for (a stray is dropped before its full length), for idle-actions.js.
 export function idleBehavior({ egg, level, time, seed = 0 }) {
   if (level === 0) return null;
   if (level > 0) {
@@ -74,7 +75,7 @@ export function idleBehavior({ egg, level, time, seed = 0 }) {
     const into = time % stepMs;
     if (into >= stepMs * ACTIVE_FRACTION) return null;
     // Steady ignores the seed on purpose: it is predictable.
-    return { action: routine[at % routine.length], scheduled: true, progress: into / (stepMs * ACTIVE_FRACTION), aborted: false, step: at % routine.length };
+    return { action: routine[at % routine.length], scheduled: true, progress: into / (stepMs * ACTIVE_FRACTION), aborted: false, step: at % routine.length, elapsed: into, shown: stepMs * ACTIVE_FRACTION };
   }
   const window = STRAY_WINDOW_MS[level];
   const w = Math.floor(time / window);
@@ -86,7 +87,7 @@ export function idleBehavior({ egg, level, time, seed = 0 }) {
   const into = time - start;
   if (into < 0 || into >= shown) return null;
   const strays = STRAYS[egg];
-  return { action: strays[Math.floor(hash(w * 59 + seed) * strays.length)], scheduled: false, progress: into / length, aborted: true, step: -1 };
+  return { action: strays[Math.floor(hash(w * 59 + seed) * strays.length)], scheduled: false, progress: into / length, aborted: true, step: -1, elapsed: into, shown };
 }
 
 // --- chatter tone ------------------------------------------------------------------------------------------------------------

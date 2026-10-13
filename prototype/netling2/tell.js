@@ -243,3 +243,30 @@ export function idleClock({ egg, level, time, seed = 0, reduced = false }) {
   if (holdsUnsteady(egg, level, reduced)) return time - unsteadyPausedBy(egg, level, seed, time);
   return time;
 }
+
+// The tell's hold windows [start, end) inside [from, to), ascending and merged: the same pauses idleClock counts, as intervals, so another
+// layer that also holds the idle (idle-actions.js, the idle actions) can take their union with its own.
+export function tellHoldWindows({ egg, level, seed = 0, reduced = false, from, to }) {
+  const raw = [];
+  if (holdsSteady(egg, level)) {
+    const interval = BEAT_MS[level];
+    for (let k = Math.max(1, Math.floor((from + HOLD_BEFORE_MS) / interval)); k * interval - HOLD_BEFORE_MS < to; k++) raw.push([k * interval - HOLD_BEFORE_MS, k * interval + HOLD_AFTER_MS]);
+  } else if (holdsUnsteady(egg, level, reduced)) {
+    for (const e of unsteadyEvents({ egg, level, seed, from: from - HOLD_AFTER_MS, to: to + HOLD_BEFORE_MS })) raw.push([e - HOLD_BEFORE_MS, e + HOLD_AFTER_MS]);
+  }
+  return mergeWindows(raw, from, to);
+}
+
+// Sorts, clips to [from, to) and merges overlapping windows.
+export function mergeWindows(list, from, to) {
+  const out = [];
+  for (const [a0, b0] of [...list].sort((p, q) => p[0] - q[0])) {
+    const a = Math.max(from, a0);
+    const b = Math.min(to, b0);
+    if (b <= a) continue;
+    const last = out.at(-1);
+    if (last && a <= last[1]) last[1] = Math.max(last[1], b);
+    else out.push([a, b]);
+  }
+  return out;
+}

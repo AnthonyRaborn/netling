@@ -201,11 +201,28 @@ test('the nine adults are distinct from one another (under 1.0\'s 0.82 for a sam
 
 test('each corp adult carries its motif: Razor blade forearms, Wired a visor, Mentat an oversized cortex, Nutri a wide mouth and a dark belly band', () => {
   const cells = (rows, re) => rows.join('').split('').filter((c) => re.test(c)).length;
-  assert.ok(set.wetwareAdultBreachCorp.a.slice(10).join('').split('+').length - 1 >= 4, 'Razor: blade strips by the body');
+  assert.ok(set.wetwareAdultBreachCorp.a.slice(10).join('').split('o').length - 1 >= 4, 'Razor: blade strips by the body');
   assert.ok(set.wetwareAdultDodgeCorp.a[set.wetwareAdultDodgeCorp.anchors.a.eyeRow].replace(/[.#]/g, '').length >= 8, 'Wired: one wide visor band');
   assert.ok(cells(set.wetwareAdultTuneCorp.a.slice(0, 3), /x/) > cells(set.wetwareAdultFeastCorp.a.slice(0, 3), /x/) && cells(set.wetwareAdultTuneCorp.a.slice(0, 3), /x/) >= 8, 'Mentat: the biggest cortex');
   assert.ok(set.wetwareAdultFeastCorp.a[set.wetwareAdultFeastCorp.anchors.a.mouthRow].split('+').length - 1 >= 6, 'Nutri: a wide mouth');
   assert.ok(set.wetwareAdultFeastCorp.a.some((r) => r.includes('xxxxxxxx')), 'Nutri: a dark belly band');
+});
+
+test('Razor\'s and its elder\'s blades read on every palette: accent, 3:1 or more against both screens (maintainer\'s review)', async () => {
+  const { PALETTES } = await import('../../src/sim.js');
+  const { paletteColors } = await import('../../src/sprites.js');
+  const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const lum = (c) => rgb(c).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((n, v, i) => n + v * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  for (const id of ['wetwareAdultBreachCorp', 'wetwareElderBreachCorp']) for (const f of ['a', 'b']) {
+    const rows = set[id][f];
+    const blades = rows.slice(10).flatMap((r) => [r[0], r[r.length - 1]]).filter((c) => c !== '.');
+    assert.ok(blades.length >= 6 && blades.every((c) => c === 'o'), `${id} ${f}: ${blades.join('')}`);
+    for (const bg of ['#0b2226', '#03090a']) for (const p of PALETTES) { // src/render.js LCD_BG and LCD_BG_DARK
+      const r = ratio(paletteColors(p).o, bg);
+      assert.ok(r >= 3, `${id} on ${p.name}, ${bg}: ${r.toFixed(2)}`);
+    }
+  }
 });
 
 // --- street adults -------------------------------------------------------------------------------------------------------------
