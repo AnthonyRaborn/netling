@@ -18,8 +18,19 @@ async function loadPlaywright() {
   try {
     return await import('playwright');
   } catch {
-    const globalRoot = execSync('npm root -g').toString().trim(); // a global install works too
-    return import(pathToFileURL(join(globalRoot, 'playwright', 'index.mjs')));
+    // a global install works too
+  }
+  try {
+    const globalRoot = execSync('npm root -g', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    return await import(pathToFileURL(join(globalRoot, 'playwright', 'index.mjs')));
+  } catch {
+    console.error(
+      'Playwright is not installed (looked in this repo and in the global npm folder). From the repo folder, run:\n' +
+        '  npm install --no-save playwright@1.56.1\n' +
+        '  npx playwright install chromium\n' +
+        'then npm run smoke again. A later npm install or npm ci removes it; run the first line again then.',
+    );
+    process.exit(1);
   }
 }
 const { chromium } = await loadPlaywright();
