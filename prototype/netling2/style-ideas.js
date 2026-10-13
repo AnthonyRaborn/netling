@@ -55,8 +55,13 @@ export const IDEA_EFFECTS = [
   { id: 'thermal', name: 'Thermal', hint: 'it hides from heat, not light.', unlock: 'see a Rogue form', css: true, moves: null },
   { id: 'vignette', name: 'Vignette', hint: '', unlock: 'free', css: true, moves: null },
   { id: 'interference', name: 'Interference', hint: 'leave by the back door, ten times.', unlock: '10 relay jack-outs', css: true, moves: { name: 'interference', seconds: 10 }, paid: 'split' },
-  { id: 'burnin', name: 'Burn-in', hint: 'leave a mark.', unlock: 'see a Rogue self-destruct once (with the Scorched shell)', css: true, moves: null },
-  { id: 'sterile', name: 'Sterile', hint: 'keep it spotless.', unlock: 'clear 10 bugs at the clinic, across lives', css: true, moves: null },
+  { id: 'burnin', name: 'Burn-in', hint: 'leave a mark.', unlock: 'see a Rogue self-destruct once (with the Scorched shell)', css: true, moves: null, shell: 'scorched' },
+  { id: 'sterile', name: 'Sterile', hint: 'keep it spotless.', unlock: 'clear 10 bugs at the clinic, across lives', css: true, moves: null, shell: 'clinicwhite' },
+  { id: 'brushed', name: 'Brushed', hint: 'wear it down twice.', unlock: 'raise two Iron lines to their elder', css: true, moves: null, shell: 'rivet' },
+  { id: 'pulse', name: 'Pulse', hint: 'keep it alive twice over.', unlock: 'raise two Wetware lines to their elder', css: true, moves: { name: 'pulse', seconds: 6 }, paid: 'split', shell: 'membrane' },
+  { id: 'dust', name: 'Dust', hint: 'leave it on the desk.', unlock: 'raise two Program lines to their elder', css: true, moves: null, shell: 'beige' },
+  { id: 'deadcells', name: 'Dead cells', hint: 'let it rot a little.', unlock: 'carry 5 bugs at once and live, twice', css: true, moves: null, shell: 'bugeaten' },
+  { id: 'splittone', name: 'Split tone', hint: 'one half each.', unlock: 'hold both Standing tracks within 1 for two whole adulthoods', css: true, moves: null, shell: 'evenkeel' },
 ];
 
 // The Sterile wash's strongest colour and alpha, which style-ideas.css must not exceed (the test composites it over every tint and palette).

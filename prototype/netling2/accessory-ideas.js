@@ -718,11 +718,14 @@ export const IDEA_PROPS = [
     // review; in a game it would be the life's age, reset with each new life). Still from moment to moment.
     draw: (px, frame, time = 0, extra = null) => {
       grid(px, 0, 0, ['g.....g', 'g.....g', '.ggggg.'], { g: '#a8d8e8' });
-      const growth = extra?.growth ?? ((time ?? 0) % 86_400_000) / 86_400_000;
-      const SPOTS = [[3, 1, '#39ff14'], [2, 1, '#39ff14'], [4, 1, '#f9f002'], [1, 1, '#39ff14'], [3, 0, '#ff2a6d'], [5, 1, '#f9f002'], [2, 0, '#39ff14'], [4, 0, '#39ff14'], [1, 0, '#f9f002'], [5, 0, '#ff2a6d']];
-      const n = 1 + Math.floor(growth * (SPOTS.length - 1) + 1e-9);
-      for (const [x, y, c] of SPOTS.slice(0, n)) px(x, y, c);
+      for (const [x, y, c] of cultureSpots(extra, time)) px(x, y, c);
     },
+    // Lights off, glow on: the dish dims and the culture glows where it has spread, a faint green pool on the floor.
+    glowDraw: (px, frame, time = 0, extra = null) => litInTheDark(px, {
+      w: 7, h: 3, rgb: [57, 255, 20], peak: 0.12,
+      body: (p) => grid(p, 0, 0, ['g.....g', 'g.....g', '.ggggg.'], { g: '#0' }),
+      lit: (p) => { for (const [x, y, c] of cultureSpots(extra, time)) p(x, y, c); },
+    }),
   },
   {
     id: 'terminal',
@@ -855,12 +858,21 @@ export const IDEA_PROPS = [
     draw: (px, frame, time = 0) => {
       // A round bowl, one pixel fish swimming left and right a cell every 800 ms and turning at the glass.
       grid(px, 0, 0, ['.g...g.', 'gwwwwwg', 'gwwwwwg', 'gwwwwwg', '.gwwwg.', '..ggg..'], { g: '#a8d8e8', w: '#1a4a6a' });
-      // Head positions: right 2..5, then left 4..1, then over (8 steps).
-      const PATH = [[2, 1], [3, 1], [4, 1], [5, 1], [4, -1], [3, -1], [2, -1], [1, -1]];
-      const [x, dir] = PATH[step(time, 800) % PATH.length];
+      const [x, dir] = fishAt(time);
       px(x, 2, '#ff8a1a');
       px(x - dir, 2, '#c85a10');
     },
+    // Lights off, glow on: the bowl dims, the water takes a faint blue and the fish stays lit, a faint blue pool on the floor.
+    glowDraw: (px, frame, time = 0) => litInTheDark(px, {
+      w: 7, h: 6, rgb: [110, 190, 255], peak: 0.14,
+      body: (p) => grid(p, 0, 0, ['.g...g.', 'gwwwwwg', 'gwwwwwg', 'gwwwwwg', '.gwwwg.', '..ggg..'], { g: '#0', w: '#0' }),
+      lit: (p) => {
+        for (let y = 1; y <= 3; y++) for (let x = 1; x <= 5; x++) p(x, y, '#12384e');
+        const [x, dir] = fishAt(time);
+        p(x, 2, '#e07a1a');
+        p(x - dir, 2, '#a85a10');
+      },
+    }),
   },
   {
     id: 'jammer',
@@ -915,6 +927,15 @@ function litInTheDark(px, { w, h, body, lit, rgb, peak }) {
   for (const [dx, dy, a] of poolCells(w, peak)) px(dx, h + dy, `rgba(${rgb.join(',')},${a})`);
 }
 const LAMP_ART = (px) => grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: '#0', g: '#0' });
+// The Petri dish's culture: which spots have grown, from extra.growth (0 to 1) or the time over a day of real time.
+const CULTURE = [[3, 1, '#39ff14'], [2, 1, '#39ff14'], [4, 1, '#f9f002'], [1, 1, '#39ff14'], [3, 0, '#ff2a6d'], [5, 1, '#f9f002'], [2, 0, '#39ff14'], [4, 0, '#39ff14'], [1, 0, '#f9f002'], [5, 0, '#ff2a6d']];
+function cultureSpots(extra, time) {
+  const growth = extra?.growth ?? ((time ?? 0) % 86_400_000) / 86_400_000;
+  return CULTURE.slice(0, 1 + Math.floor(growth * (CULTURE.length - 1) + 1e-9));
+}
+// The Fishbowl's fish: head positions right 2..5, then left 4..1, then over (8 steps of 800 ms); [x, direction].
+const FISH_PATH = [[2, 1], [3, 1], [4, 1], [5, 1], [4, -1], [3, -1], [2, -1], [1, -1]];
+const fishAt = (time) => FISH_PATH[step(time, 800) % FISH_PATH.length];
 function lampInTheDark(px, blobs) {
   litInTheDark(px, { w: 5, h: 10, body: LAMP_ART, lit: (p) => blobs((x, y) => p(x, y, LAMP_BLOB_DARK)), rgb: [255, 107, 42] });
 }
@@ -1019,6 +1040,21 @@ export const RING_AUTO = [
 
 // Adds every entry to 1.0's tables (idempotent). The Leash cable needs the sprite's last row, which 1.0's anchors do not keep: `bottom`
 // is added to the anchors the draw sees. Call it from the review page and the tests only, never from anything the 1.0 tests load.
+// Glows for two of 1.0's props, attached to their entries at run time (src/ is untouched; the renderer reads `glowDraw`). The Cyberdeck's
+// screen stays lit (its white blink keeps 1.0's 500 ms frame), the Boom box's speakers pulse on the same frame and its display stays lit.
+const DECK_ROWS = ['.#####.', '.#ooo#.', '.#ooo#.', '#######', '#+#+#+#'];
+const BOOM_ROWS = ['.#...#.', '..###..', '#######', '#o#+#o#', '#######'];
+const dimRows = (rows) => (p) => rows.forEach((r, y) => [...r].forEach((ch, x) => ch !== '.' && p(x, y, '#0')));
+export const GLOW_1_0 = {
+  deck: (px, frame = 0) => litInTheDark(px, {
+    w: 7, h: 5, rgb: [5, 217, 232], peak: 0.18, body: dimRows(DECK_ROWS),
+    lit: (p) => { for (let y = 1; y <= 2; y++) for (let x = 2; x <= 4; x++) p(x, y, frame % 2 && x === 3 && y === 2 ? '#e8ffff' : '#05a9b8'); },
+  }),
+  boombox: (px, frame = 0) => litInTheDark(px, {
+    w: 7, h: 5, rgb: [185, 103, 255], peak: 0.2, body: dimRows(BOOM_ROWS),
+    lit: (p) => { p(3, 3, '#b8b000'); for (const x of [1, 5]) p(x, 3, frame % 2 ? '#c2204f' : '#1a0d26'); },
+  }),
+};
 let registered = false;
 export function registerIdeas() {
   if (registered) return;
@@ -1040,6 +1076,7 @@ export function registerIdeas() {
     if (dir) ROOM[x.id] = dir;
   }
   for (const id of ['laughingring', 'laughingring.cap', 'laughingring.quiet', 'laughingring.still']) AUTO_COLORS[id] = RING_AUTO;
+  for (const [id, glow] of Object.entries(GLOW_1_0)) PROPS.find((x) => x.id === id).glowDraw = glow;
   // anchorsFor caches one object per sprite, so the row is added once to every registered sprite (1.0's and the prototype's).
   for (const s of Object.values(SPRITES)) {
     if (!Array.isArray(s) || typeof s[0] !== 'string') continue;

@@ -5,7 +5,7 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM, LAMP_DIM, LAMP_BLOB_DARK } from './accessory-ideas.js';
+import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM, GLOW_1_0, LAMP_DIM, LAMP_BLOB_DARK } from './accessory-ideas.js';
 import { ACCESSORIES, PROPS, PROP_FLOOR, ROOM, placeWorn, anchorsFor, accessoryColors } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { registerPalettes } from './palettes.js';
@@ -343,8 +343,8 @@ test('the Lava lamp glows on the floor with the lights off when its switch is on
   assert.ok(lamp(off).length > 0 && lamp(off).every((c) => c === '#1c3a3f'), 'switched off: 1.0\'s dim prop');
   // Lights on: the same as without the option, glow or not.
   assert.deepEqual(cellsOf({ lightsOn: true }), cellsOf({ lightsOn: true, propGlow: false }));
-  // Another prop is untouched by the switch.
-  assert.deepEqual(cellsOf({ prop: 'deck' }), cellsOf({ prop: 'deck', propGlow: false }));
+  // A prop with no glow (the Coffee mug) is untouched by the switch.
+  assert.deepEqual(cellsOf({ prop: 'mug' }), cellsOf({ prop: 'mug', propGlow: false }));
   // The free (plain) lamp glows too, with its one resting blob.
   const plain = cellsOf({ prop: 'lavalamp.free' });
   assert.ok(pool(plain).length >= 12);
@@ -371,10 +371,10 @@ test('the Goggles, Hard hat, Hood and Dog tags are recolorable: every slot is dr
   }
 });
 
-test('every prop with a glow (the lamp, the cabinet, the tower, the terminal) lights its own parts in the dark, throws a faint pool on the floor, and is 1.0\'s dim prop with the switch off', () => {
+test('every prop with a glow (the lamp, cabinet, tower, terminal, dish, bowl, and the deck and boom box of 1.0) lights its own parts in the dark, throws a faint pool on the floor, and is 1.0\'s dim prop with the switch off', () => {
   const form = SETS.iron.ironAdultBreachStreet;
-  const glowing = PROP_ENTRIES.filter((e) => e.glowDraw);
-  assert.deepEqual([...new Set(glowing.map((e) => e.base))].sort(), ['lavalamp', 'minicab', 'servertower', 'terminal']);
+  const glowing = [...PROP_ENTRIES, ...PROPS.filter((p) => GLOW_1_0[p.id])].filter((e) => e.glowDraw);
+  assert.deepEqual([...new Set(glowing.map((e) => e.base ?? e.id))].sort(), ['boombox', 'deck', 'fishbowl', 'lavalamp', 'minicab', 'petridish', 'servertower', 'terminal']);
   const paintDark = (id, pet, t) => {
     const cells = Array.from({ length: LCD_H }, () => Array(LCD_W).fill(null));
     const off = { y: 0 };
@@ -416,7 +416,7 @@ test('every prop with a glow (the lamp, the cabinet, the tower, the terminal) li
 });
 
 test('nothing in a glow toggles faster than the flash rule: every cell holds each colour at least FLASH_TOGGLE_MS', () => {
-  for (const e of PROP_ENTRIES.filter((x) => x.glowDraw)) {
+  for (const e of [...PROP_ENTRIES, ...PROPS.filter((p) => GLOW_1_0[p.id])].filter((x) => x.glowDraw)) {
     const seen = [];
     for (let t = 0; t < 40_000; t += 25) {
       const m = new Map();

@@ -25,9 +25,9 @@
 //   #sec=tints   every new tint on all eight palettes (Infrared recolours the canvas pixels)
 //   #sec=effects every new effect on a screen with a walking netling; Ghosting runs the real ghosting.js on the canvas cells
 //   #sec=labels  the three labels on a dark and a light shell
-//   #sec=glow    the four props with a glow (Lava lamp, Mini arcade cabinet, Server tower, Desk terminal): lights on, off with the glow, off with it switched off
+//   #sec=glow    the eight props with a glow (Lava lamp, Mini arcade cabinet, Server tower, Desk terminal, Cyberdeck, Boom box, Petri dish, Fishbowl): lights on, off with the glow, off with it switched off
 import './ready.js';
-import { registerIdeas } from './accessory-ideas.js';
+import { registerIdeas, PROP_ENTRIES } from './accessory-ideas.js';
 import { registerPalettes } from './palettes.js';
 import { composeLCD, paintLCD, LCD_W, LCD_H } from './render.js';
 import { IDEA_SHELLS, IDEA_TINTS, IDEA_EFFECTS, IDEA_LABELS, infraredMap } from './style-ideas.js';
@@ -122,9 +122,9 @@ if (SEC === 'shells') {
   const r = section('Labels on a dark and a light shell');
   for (const sh of ['', 'shell-clinicwhite', 'shell-rivet', 'shell-chrome']) for (const l of IDEA_LABELS) { const d = device(`${sh} label-${l.id}`, l.name, sh || 'standard'); d.dev.style.setProperty('--skin', '#05d9e8'); r.append(d.cell); }
 } else if (SEC === 'glow') {
-  for (const id of ['lavalamp', 'minicab', 'servertower', 'terminal']) {
+  for (const id of ['lavalamp', 'minicab', 'servertower', 'terminal', 'deck', 'boombox', 'petridish', 'fishbowl']) {
     const r = section(`${id}: lights on, lights off with the glow, lights off with the glow switched off, and the free version in the dark`);
-    for (const [name, pet] of [['lights on', { lightsOn: true }], ['dark, glow on', { lightsOn: false }], ['dark, glow off', { lightsOn: false, propGlow: false }], ['dark, free version', { lightsOn: false, prop: `${id}.free` }]]) {
+    for (const [name, pet] of [['lights on', { lightsOn: true }], ['dark, glow on', { lightsOn: false }], ['dark, glow off', { lightsOn: false, propGlow: false }], ...(PROP_ENTRIES.some((e) => e.id === `${id}.free`) ? [['dark, free version', { lightsOn: false, prop: `${id}.free` }]] : [])]) {
       const cell = el('div', 'cell'); const c = lcdCanvas();
       paint(c, { prop: id, ...pet }, FIXED ?? 1000);
       cell.append(c, el('p', '', name)); cell.style.width = '300px'; r.append(cell);

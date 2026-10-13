@@ -303,7 +303,7 @@ export function paintLCD(ctx, { bg, ops }) {
         lit((x, y, color) => {
           ctx.fillStyle = color;
           ctx.fillRect(ox + x, oy + y, 1, 1);
-        }, o.frame, o.time);
+        }, o.frame, o.time, o.extra);
       } else drawProp(ctx, o.id, LCD_W, o.frame, o.time, o.extra, o.dim);
       ctx.restore();
     }

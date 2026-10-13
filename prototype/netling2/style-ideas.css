@@ -172,6 +172,58 @@
   background: linear-gradient(to bottom, rgba(225, 240, 255, 0.12), rgba(225, 240, 255, 0.06) 45%, rgba(225, 240, 255, 0.12));
 }
 
+/* Brushed: the Rivet plate's metal on the glass. Fine horizontal grain and one soft diagonal sheen. Still. */
+.screen.fx-brushed .fx-layer {
+  background:
+    linear-gradient(105deg, transparent 32%, rgba(220, 230, 245, 0.07) 46%, transparent 60%),
+    repeating-linear-gradient(to bottom, rgba(220, 230, 245, 0.045) 0 1px, transparent 1px 3px);
+}
+
+/* Pulse: the Membrane's slow throb. A warm red-pink glow at the edges that swells and settles every 6 s, soft enough that nothing in it is a
+   flash (a 3 s ease each way). Calm holds it at its full strength, still. */
+.screen.fx-pulse .fx-layer {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(200, 60, 100, 0.2) 100%);
+  animation: pulse 6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Dust: Terminal beige's years on a desk. A few still specks and two hairlines on the glass. */
+.screen.fx-dust .fx-layer {
+  background:
+    radial-gradient(circle at 14% 22%, rgba(225, 218, 190, 0.28) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 81% 17%, rgba(225, 218, 190, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 63% 71%, rgba(225, 218, 190, 0.26) 0 1.2px, transparent 1.8px),
+    radial-gradient(circle at 27% 84%, rgba(225, 218, 190, 0.2) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 90% 58%, rgba(225, 218, 190, 0.24) 0 1px, transparent 1.6px),
+    linear-gradient(76deg, transparent 49.7%, rgba(225, 218, 190, 0.16) 50%, transparent 50.3%) 8% 12% / 22% 30% no-repeat,
+    linear-gradient(112deg, transparent 49.7%, rgba(225, 218, 190, 0.13) 50%, transparent 50.3%) 78% 62% / 18% 28% no-repeat;
+}
+
+/* Dead cells: Bug-eaten on the glass. A few cells that will not light (a dark patch over whatever is under them) and one stuck lit. One cell
+   is one LCD pixel (1/40 of the width, 1/30 of the height). Still. */
+.screen.fx-deadcells .fx-layer {
+  background:
+    linear-gradient(rgba(199, 249, 255, 0.4), rgba(199, 249, 255, 0.4)) 5.1% 69% / calc(100% / var(--lcd-cols)) calc(100% / var(--lcd-rows)) no-repeat,
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)) 28.2% 31% / calc(100% / var(--lcd-cols)) calc(100% / var(--lcd-rows)) no-repeat,
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)) 51.3% 48.3% / calc(100% / var(--lcd-cols)) calc(100% / var(--lcd-rows)) no-repeat,
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)) 66.7% 20.7% / calc(100% / var(--lcd-cols)) calc(100% / var(--lcd-rows)) no-repeat,
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)) 82.1% 62.1% / calc(100% / var(--lcd-cols)) calc(100% / var(--lcd-rows)) no-repeat;
+}
+
+/* Split tone: Even keel's two halves on the glass, a cool corp grey over the left half and a street violet over the right, meeting in a
+   hairline seam in the middle. Still, and under 10% either side. */
+.screen.fx-splittone .fx-layer {
+  background: linear-gradient(90deg, rgba(130, 150, 180, 0.09) 0 49.6%, rgba(0, 0, 0, 0.12) 49.6% 50.4%, rgba(150, 90, 210, 0.09) 50.4% 100%);
+}
+
 /* Interference: a thin band of noise drifting down the screen once every 10 s. Off with motion calmed. */
 .screen.fx-interference .fx-layer::before {
   content: '';

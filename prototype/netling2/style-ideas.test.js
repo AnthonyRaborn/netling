@@ -192,3 +192,21 @@ test('Sterile keeps every palette readable once the wash is laid over both the b
     }
   }
 });
+
+test('every new shell has an effect paired with it, and the pairs are one to one', () => {
+  const pairs = IDEA_EFFECTS.filter((e) => e.shell);
+  assert.deepEqual(pairs.map((e) => e.shell).sort(), IDEA_SHELLS.map((s) => s.id).sort());
+  assert.equal(new Set(pairs.map((e) => e.shell)).size, pairs.length);
+});
+
+test('the dead cells are one LCD cell each, still on the grid, and the split tone is two quiet halves', () => {
+  const body = ruleFor('.screen.fx-deadcells .fx-layer')[0][1];
+  const cells = [...body.matchAll(/(\d+\.?\d*)% (\d+\.?\d*)% \/ calc\(100% \/ var\(--lcd-cols\)\) calc\(100% \/ var\(--lcd-rows\)\)/g)];
+  assert.equal(cells.length, 5);
+  // A cell lands on the grid when its position is col/(cols-1) of the width (the percentage rule for a background smaller than its box).
+  for (const [, x, y] of cells) {
+    assert.ok(Math.abs(Number(x) / 100 * 39 - Math.round(Number(x) / 100 * 39)) < 0.1, `column at ${x}%`);
+    assert.ok(Math.abs(Number(y) / 100 * 29 - Math.round(Number(y) / 100 * 29)) < 0.1, `row at ${y}%`);
+  }
+  for (const m of ruleFor('.screen.fx-splittone .fx-layer')[0][1].matchAll(/rgba\(\d+, \d+, \d+, ([\d.]+)\)/g)) assert.ok(Number(m[1]) <= 0.12, 'quiet halves');
+});
