@@ -1,6 +1,6 @@
 # Netling 2.0 accessory and style ideas (drafts; first art in the prototype)
 
-An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0's 41 carry over unchanged; [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), "Wearables (41) and props (8)"), props, and the wardrobe's other categories (shell, tint, screen effect, sound, crest, music, label; [NETLING_2_UI.md](NETLING_2_UI.md), "STYLE (the wardrobe)"). 26 wearables, 10 props and 37 other style items (73 in all), plus three bigger asks, and a planning note on which could be paid (Paid options). **Nothing here is decided or shipped.** First art drafts of the wearables, props and crests exist in the prototype (Art drafts, below); shells, tints, effects, sounds, music and labels are text only. Names and ids are suggestions: an id becomes permanent only once it ships (CLAUDE.md rule 1), so none is reserved yet. Spoilers for the hidden forms where noted.
+An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0's 41 carry over unchanged; [NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), "Wearables (41) and props (8)"), props, and the wardrobe's other categories (shell, tint, screen effect, sound, crest, music, label; [NETLING_2_UI.md](NETLING_2_UI.md), "STYLE (the wardrobe)"). 26 wearables, 10 props and 35 other style items (71 in all, after the two duplicates were dropped on 2026-10-13), plus three bigger asks, and a planning note on which could be paid (Paid options). **Nothing here is decided or shipped.** First art drafts of the wearables, props and crests exist in the prototype (Art drafts, below), and the shells, tints, screen effects and device labels are built there too (Build pass, below); sounds and music are text only. Names and ids are suggestions: an id becomes permanent only once it ships (CLAUDE.md rule 1), so none is reserved yet. Spoilers for the hidden forms where noted.
 
 ## How to read the entries (wearables)
 
@@ -73,7 +73,7 @@ An idea list for style items that 2.0 could add on top of 1.0's: wearables (1.0'
 | Fishbowl (`fishbowl`) | very rare, the Deep | any | A round bowl with one pixel fish that swims left and right and turns at the glass. The only other living thing on screen, so it should stay small and slow. | split |
 | Signal jammer (`jammer`) | very rare, earned | Rogue | A squat box with two stubby antennas and a red light that pulses once a second. Earned by Rogue only, if egg-only rewards are wanted (see Open questions); otherwise a Darknet Bazaar drop. | free (earn) |
 
-## Shells (8)
+## Shells (7)
 
 In 2.0 the shell recolors the UI surfaces (strip, lane, dock, trays, rows), and the default shell defers to the egg skin. 10 of 1.0's 15 shells unlock by discovering a 1.0 form and need new conditions ([NETLING_2_SKETCH.md](NETLING_2_SKETCH.md), the table near "Shells (15)"). These ideas could fill those slots or sit beside them. Hints are in 1.0's voice (lowercase, short, no form names).
 
@@ -86,9 +86,8 @@ In 2.0 the shell recolors the UI surfaces (strip, lane, dock, trays, rows), and 
 | Clinic white (`clinicwhite`) | Clear 25 bugs at the clinic, across lives | "get it fixed, twenty-five times." | Clean white with one pink cross in a corner. A light shell, so its labels darken (as 1.0's Platinum). | free (earn) |
 | Bug-eaten (`bugeaten`) | Carry 5 bugs at once and live | "let it break, and keep going." | The default shell with a few small holes eaten out of the edges, the bug tears' look on the casing. | free (earn) |
 | Even keel (`evenkeel`) | Hold both Standing tracks within 1 for a whole adulthood | "never lean either way." | A split shell, corp grey on one half and street violet on the other, meeting exactly in the middle. | free (earn) |
-| Three of a kind (`tricolor`) | A full life on each of the three launch eggs | "raise one of every kind." | Three stripes, one in each egg skin's colour. | free (earn) |
 
-## Tints (5)
+## Tints (4)
 
 Tints colour the LCD. 1.0's 10 carry over unchanged.
 
@@ -96,7 +95,6 @@ Tints colour the LCD. 1.0's 10 carry over unchanged.
 |---|---|---|---|---|
 | Scrub green (`scrubs`) | First clinic visit | "everyone ends up at the clinic." | The muted green of hospital scrubs. | free (earn) |
 | Infrared (`infrared`) | Survive 10 Rogue sweeps | "stay cold while they look for you." | A dark red screen with the brightest cells turning orange, like a thermal camera. Needs the 3:1 contrast check on every palette. | free (earn) |
-| Hazard orange (`hazard`) | 24 hours in Overclock, across lives | "run it past the red line." | Warning orange, darker at the edges. Overlaps 1.0's Heatwave effect in spirit; pick one. | free (earn) |
 | Sepia (`sepia`) | Read every NL-0 page | "learn where the first one came from." | Old photograph brown, for the story pages. | free (earn) |
 | Night shift (`nightshift`) | 30 nights slept with the lights off | "turn the lights off when it sleeps." | A deep blue that keeps the netling readable at low brightness. A care-habit reward rather than a skill one. | free (always) |
 
@@ -131,7 +129,7 @@ Crests are line goals read from the lineage records (1.0). Two of 1.0's 11 (Full
 
 | Name (suggested id) | Unlock (suggestion) | Hint | Shape | Paid? |
 |---|---|---|---|---|
-| Three eggs (`threeeggs`) | A finished life on each launch egg, anywhere in the line's history | "raise one of every kind." | Three small eggs in a row. Overlaps the Three of a kind shell; pick one. | free (earn) |
+| Three eggs (`threeeggs`) | A finished life on each launch egg, anywhere in the line's history | "raise one of every kind." | Three small eggs in a row. The shell with the same idea was dropped. | free (earn) |
 | Scales (`scales`) | An adult with both Standing tracks within 1 | "neither side owns it." | A balance with its pans level. | free (earn) |
 | Plus (`plus`) | A whole life with no bug left untreated for a day | "fix it before it sets in." | A clinic cross. | free (earn) |
 | Wanted (`wanted`) | A Rogue line three generations long | "keep running, three times over." | A torn poster corner with a dot for a face. Spoiler-light. | free (earn) |
@@ -156,7 +154,7 @@ Home background music, as 1.0's `tracks.js` (netruns play their own). The sketch
 | Name (suggested id) | Unlock (suggestion) | Description | Paid? |
 |---|---|---|---|
 | Label tape (`labeltape`) | With the label | The label in raised white letters on a strip of black embossing tape, slightly crooked. | paid |
-| Etched (`etched`) | A line ten generations long | The label cut into the shell, darker than the shell colour, no background. | free (earn) |
+| Etched (`etched`) | A line ten generations long | The label cut into the shell, no background. Built as lettering a step lighter than the shell with a dark inner edge, not "darker than the shell colour" as first written: darker lettering cannot reach 3:1 on a dark shell. On a light shell it stays dark. | free (earn) |
 | Sticker (`sticker`) | 5 visitors greeted | A peeling sticker with a curled corner, in the egg skin's colour. | paid |
 
 ## Bigger asks (new categories)
@@ -214,12 +212,35 @@ First drafts of every wearable (26, the Light ring in two versions), prop (10) a
 - **Room rules (every body and float idea).** 1.0's `ROOM` table (which items slide down past face and head items, or lift over hats) is now exported from `src/accessories.js` (the one `src/` change in this work: `const` to `export const`, no behaviour change) and `registerIdeas()` adds the ideas: the Dog tags, Hazard sash, Pulse patch, Heat sink and Visitor pass slide down; the Leash cable lifts (sliding down left it on the jaw items four times as often); the Loading spinner, Notification badge, Thought bubble and Padlock lift over hats; the two orbiters (Bit swarm, Mini satellite) make no room, as 1.0's. Measured against every non-orbiting head and face wearable on a third of the forms, the room cut how often an item is covered by a factor of three or more, and no idea is covered more than 6% of the time on that sample (the Notification badge 5.6%, the Visitor pass 3.8%, the rest under 3%; 1.0's Scarf: 1.7%). The test requires 6% or less. `#sec=room` shows it. Two revisions came out of it: the **Dog tags** hang one row shorter (the plates at 1 to 2 and 2 to 3 rows under the neck, not 2 to 3 and 3 to 4), and the **Notification badge** sits on the head's top right corner half outside it, as on an app icon (it was over the head and met wide hats such as the Cat-ear headset and the Satellite dish 13% of the time; now 6%).
 - **Judgement calls to review:** War paint is dark by default (the doc's contrasting colour; pink merged with the default eyes); the Notification badge is 5x7 to fit a readable digit; the Thought bubble's chip, heart and skull are 5x3; the Bit swarm and Mini satellite step a cell every 400 ms (1.0's Drone moves continuously) so the flash test holds.
 
+## Palettes (2026-10-13)
+
+Two more netling palettes, built in `prototype/netling2/palettes.js` (`registerPalettes()`; `src/` untouched). 1.0 has six (ice cyan, neon pink, acid yellow, toxic green, ultra violet, and origin's pale lilac, root-only); the gaps are orange and a true blue.
+
+| Name (id) | Body | Eyes (accent) | Why |
+|---|---|---|---|
+| Ember (`ember`) | `#ff8a1a` orange | `#fff3d6` warm white | Fills the gap between neon and acid. A mid-tone accent cannot be 2.1:1 on a body this bright and 4.4:1 on the dark screen at once, so the eyes are warm white. |
+| Cobalt (`cobalt`) | `#4d8dff` blue | `#f9f002` yellow | Fills the gap between ice and ultra. Yellow eyes, as ultra's. |
+
+Bars, from the six: the body 4.5:1 and the accent 4.4:1 against every tint's screen colour, the accent 2.1:1 against the body, and the body at least 35 apart (CIE76) from every other body. Both pass (palettes.test.js), and so does the wearables' blend check on every form (1.0's, the ideas, and the recolorable ones through automatic colours computed by `tools/wearable-colors.mjs`'s own method). Candidates dropped: coral and rose (their accents fail the screen contrast), aqua (too near toxic), a darker cobalt (`#3d7bff`, 4.2:1 on the screen). **Not done:** 1.0's `rollQuirk` rolls only the palettes that existed when `sim.js` loaded (`BASE_PALETTES`), so a newly hatched netling does not roll them until the real sim changes; the palettes are placed before `origin`, so `origin` moves from index 5 to 7, which a save-format change in 2.0 must account for (`quirk.palette` is an index); the wearables' automatic colours, the gallery and the field manual would be regenerated; no device look.
+
+## Build pass: shells, tints, effects, labels, the Lava lamp glow (2026-10-13)
+
+Built in the prototype, in 1.0's shapes so they could move to `src/` and `style.css` unchanged. Sounds and music are not built (nothing here can be heard).
+
+- **Files.** `style-ideas.css` (shells `.device.shell-<id>`, effects `.screen.fx-<id>`, labels `.device.label-<id>`; load after `style.css`), `style-ideas.js` (ids, names, hints, unlock text and the colours the tests measure; Infrared's recolour), `ghosting.js` (the one pixel effect), `style-ideas-preview.html` (`#sec=shells`, `tints`, `effects`, `labels`, `glow`; `scale=n`). Tests: `style-ideas.test.js` (9), `palettes.test.js` (4), and, for the glow, one in `accessory-ideas.test.js`.
+- **Shells (7).** Terminal beige, Rivet plate, Membrane, Scorched, Clinic white, Bug-eaten, Even keel. The three light ones (beige, membrane, clinic white) darken the dim colour and the logo as Brushed chrome does. Rivet plate and Even keel were darkened until the HUD text and the dim colour held 4.5:1 (the first rivet grey gave 4.1:1; Even keel's grey half 2.8:1). The corp grey half of Even keel is therefore dark: `#2b3039`.
+- **Tints (4).** Scrub green, Infrared, Sepia, Night shift, each 4.5:1 for every palette's body and 4.4:1 for its accent (all eight palettes), and at least 6 apart from every 1.0 tint. Scrub green and Sepia were darkened from first picks that missed 4.4:1 for ice's pink accent or sat too near Amber. **Infrared** is a recolour by brightness (`infraredMap`: deep red `#8a1414` to pale orange `#ffe08a`, square root of luminance); every palette's body holds 4.5:1 and its eyes 3:1 on the screen, and the eyes 1.5:1 on the body (1.0's palettes are 2.1:1 or better in their own colours, so Infrared reads flatter by design). Its recolour is a function, not wired into the canvas pass.
+- **Screen effects (6).** Dot matrix (a grid between cells, in place of the scanlines; still), Ghosting (a cell that turns off fades over 200 ms: `createGhosting().step(cells, now)`, a fade in one direction only so it adds no flashes, off with reduced motion), Condensation (still droplets; one runs down every 30 s, a 3 s slide with 0.6 s fades), Thermal (a still heat wash, no overlay above 0.2 alpha), Vignette (still; 0.42 at the very corners, the middle 58% untouched), Interference (a thin noise band drifting down every 10 s; hidden with motion calmed). No animation runs a cycle under 1 s and none is stepped; the test reads the CSS to check that.
+- **Device labels (3).** Label tape, Etched (revised, see its row) and Sticker (in `--skin`, the egg skin colour; dark lettering reads 4.5:1 on every palette's body). Their CSS is for the label's look only; what the label says is 1.0's.
+- **Lava lamp floor glow.** With the lights off and the lamp's own switch on (`propGlow`, on by default; the pet field `render.js` reads), the lamp's glass and caps dim as every prop's do, its blobs stay lit a step deeper than by day, and an orange pool (alpha 0.06 to 0.22, two rows) lies on the floor under and beside it. Still, apart from the blobs' 800 ms step. Switched off, or in light, it is 1.0's dim prop as before; the plain (free) lamp glows the same way with its one resting blob. The switch is per prop, as asked: nothing is stored here, and where the switch lives in the wardrobe (a toggle on the prop's row) is for the UI doc.
+- **Not done:** the effects were checked by reading the CSS and in screenshots, not run through the flash test on a composed canvas (the CSS ones are not canvas; Ghosting's test is pure); no device look; `ghosting.js` and Infrared are not wired into the real canvas loop; the UI for the lamp's switch; unlocks are the doc's placeholders in words.
+
 ## Open questions
 
-- **How many to add, if any.** 1.0 has 41 wearables and 49 style items in all; this list has 73. A handful per category would keep the wardrobe readable; the maintainer picks.
+- **How many to add, if any.** 1.0 has 41 wearables and 49 style items in all; this list has 71. A handful per category would keep the wardrobe readable; the maintainer picks.
 - **Where props live in the 2.0 wardrobe.** The UI's decided tabs are HEAD, FACE, BACK, SHELL, TINT, FX, SOUND, CREST, MUSIC and LABEL ([NETLING_2_UI.md](NETLING_2_UI.md)); props and two of 1.0's wear slots (body, float) are not named there. Worth settling before any are added.
 - **Unlocks are placeholders.** Every condition above uses 2.0 mechanics as they stand in the simulator (Standing, the clinic, bugs, the egg pressures, the Rogue hunt) and would need the same measuring as 1.0's (how many lives a casual or attentive player takes to get one).
-- **Duplicates to resolve:** Three of a kind (shell) against Three eggs (crest); Hazard orange (tint) against Heatwave (effect). Recommendation, for the maintainer to take or leave: keep the crest (it is drawn) and drop the shell, and keep 1.0's Heatwave and drop the tint; each removal takes one from the count of 73. The third duplicate, the Clinic sound against the Waiting room track, shared the hint "take a number."; the sound's hint is now "listen for your name." so the two no longer give the same clue.
+- **Duplicates (resolved 2026-10-13, maintainer):** the Three of a kind shell is dropped (the Three eggs crest stays) and the Hazard orange tint is dropped (1.0's Heatwave stays). The Clinic sound's hint no longer repeats the Waiting room track's.
 - **Egg ties.** Whether 2.0 should give each egg a few items that only it can find or earn (a source rule, not a wear rule). The "Fits" column is written so it could become one, but nothing here assumes it.
 - **Overlaps, checked in screenshots only** (now that the drafts exist): the Hood and Rogue's outline (stays on screen on every form), the Scan visor and the Visor (one line that keeps the eyes, against three that hide them), the Pulse patch and Wetware's shade, the Bit swarm and the Glitch moth, the Censor bar and the mouth-less forms (Blank, Cipher). None was judged on a device.
 

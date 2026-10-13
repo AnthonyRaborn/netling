@@ -1,0 +1,232 @@
+/* Netling 2.0 style ideas (docs/NETLING_2_ACCESSORY_IDEAS.md): the shells, screen effects and device labels, written as 1.0's are in style.css
+   (.device.shell-<id>, .screen.fx-<id>) so they would move there unchanged. Prototype only: not loaded by the game, not in sw.js. Load it
+   after style.css. The tints are data (style-ideas.js: a tint is just two colours) and Ghosting is a pixel effect (ghosting.js), so
+   neither is here. Every rule below is checked by style-ideas.test.js: the ids, the light shells' dimmer colour, how fast anything moves
+   (nothing under 1 s a cycle: CLAUDE.md rule 7), and how dark any overlay gets. */
+
+:root {
+  --lcd-cols: 40;
+  --lcd-rows: 30; /* 2.0's screen is 1.0's 40x28 with 2 rows of headroom (render.js TOP) */
+}
+
+/* ---- shells ---- */
+
+/* Terminal beige: the yellowed office-terminal beige with a darker band like a keyboard tray. A light shell: the dim label colour and
+   the logo go dark, as Brushed chrome's do. */
+.device.shell-beige {
+  background:
+    linear-gradient(transparent 86%, rgba(70, 58, 24, 0.28) 86% 89%, transparent 89%),
+    linear-gradient(160deg, #e6dcba, #d3c89f 55%, #aa9e78);
+  border-color: #f2ead0;
+  --dim: #2a2414;
+}
+.device.shell-beige .logo {
+  color: #2a2414;
+  text-shadow: 1px 1px 0 #f2ead0;
+}
+
+/* Rivet plate: gunmetal, a row of rivets along the top and bottom edges, one rivet missing (a dark socket where it was). */
+.device.shell-rivet {
+  background:
+    radial-gradient(circle, #1a1d23 0 2px, transparent 2.5px) 148px 5px / 24px 10px no-repeat,
+    radial-gradient(circle, #aab3c2 0 2px, transparent 2.5px) 0 5px / 24px 10px repeat-x,
+    radial-gradient(circle, #aab3c2 0 2px, transparent 2.5px) 0 calc(100% - 5px) / 24px 10px repeat-x,
+    linear-gradient(160deg, #3f444e, #2c3037 60%, #1c1f24);
+  border-color: #6c7380;
+}
+
+/* Membrane: a pale, slightly translucent pink with faint veins near the corners. A light shell. */
+.device.shell-membrane {
+  background:
+    radial-gradient(ellipse at 0 0, rgba(176, 56, 96, 0.28), transparent 28%),
+    radial-gradient(ellipse at 100% 100%, rgba(176, 56, 96, 0.28), transparent 30%),
+    repeating-linear-gradient(35deg, transparent 0 17px, rgba(176, 56, 96, 0.1) 17px 18px),
+    linear-gradient(160deg, #f0c4cf, #e4a9b8 60%, #c98598);
+  border-color: #f8dbe2;
+  --dim: #3a1420;
+}
+.device.shell-membrane .logo {
+  color: #3a1420;
+  text-shadow: 1px 1px 0 #f8dbe2;
+}
+
+/* Scorched: black with a burnt orange edge, as if the casing had been through a fire. */
+.device.shell-scorched {
+  background:
+    radial-gradient(ellipse at 50% 125%, rgba(255, 120, 30, 0.3), transparent 55%),
+    linear-gradient(160deg, #1b1411, #0d0908 60%, #050303);
+  border-color: #b4551c;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 0 22px rgba(255, 110, 20, 0.3);
+}
+
+/* Clinic white: clean white with one pink cross in the bottom corner, in the padding under the screen. A light shell. */
+.device.shell-clinicwhite {
+  background:
+    linear-gradient(#d94a78, #d94a78) right 20px bottom 5px / 5px 15px no-repeat,
+    linear-gradient(#d94a78, #d94a78) right 15px bottom 10px / 15px 5px no-repeat,
+    linear-gradient(160deg, #fbfbfd, #e6e9ee 60%, #c6cbd4);
+  border-color: #ffffff;
+  --dim: #1c2129;
+}
+.device.shell-clinicwhite .logo {
+  color: #1a1d24;
+  text-shadow: 1px 1px 0 #ffffff;
+}
+
+/* Bug-eaten: the default shell with a few small holes eaten out of the edges, the bug tears' look on the casing. */
+.device.shell-bugeaten {
+  background:
+    radial-gradient(circle at 2% 22%, #07070c 0 4px, transparent 4.5px),
+    radial-gradient(circle at 98% 61%, #07070c 0 5px, transparent 5.5px),
+    radial-gradient(circle at 4% 78%, #07070c 0 3px, transparent 3.5px),
+    radial-gradient(circle at 70% 99%, #07070c 0 4px, transparent 4.5px),
+    radial-gradient(circle at 36% 1%, #07070c 0 3px, transparent 3.5px),
+    linear-gradient(160deg, #1d1830, #14121f 60%, #0d0b15);
+}
+
+/* Even keel: corp grey on one half and street violet on the other, meeting exactly in the middle. */
+.device.shell-evenkeel {
+  background: linear-gradient(90deg, #2b3039 0 50%, #3b1f5c 50% 100%);
+  border-color: #6c7380 #7a54a8 #7a54a8 #6c7380;
+}
+
+/* ---- screen effects ---- */
+
+/* Dot matrix: a fine grid between the cells, so each pixel reads as its own LCD dot. Still. It takes the place of the scanlines. */
+.screen.fx-dotmatrix .scanlines {
+  background:
+    linear-gradient(to right, transparent calc(100% - 1px), rgba(0, 0, 0, 0.32) 0) 0 0 / calc(100% / var(--lcd-cols)) 100%,
+    linear-gradient(to bottom, transparent calc(100% - 1px), rgba(0, 0, 0, 0.32) 0) 0 0 / 100% calc(100% / var(--lcd-rows));
+}
+
+/* Ghosting: old LCD lag. A pixel effect on the canvas (ghosting.js), not a layer: a cell that turns off fades over 200 ms instead of
+   snapping. Nothing here; the class only picks it. */
+
+/* Condensation: still droplets near the edges. With motion on, one runs down the glass every 30 s (a 3 s slide, then it is gone). */
+.screen.fx-condensation .fx-layer {
+  background:
+    radial-gradient(circle at 5% 14%, rgba(199, 249, 255, 0.34) 0 2px, transparent 3px),
+    radial-gradient(circle at 9% 63%, rgba(199, 249, 255, 0.26) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 94% 22%, rgba(199, 249, 255, 0.3) 0 2px, transparent 3px),
+    radial-gradient(circle at 96% 71%, rgba(199, 249, 255, 0.36) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 52% 94%, rgba(199, 249, 255, 0.24) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 17% 91%, rgba(199, 249, 255, 0.28) 0 2px, transparent 3px);
+}
+.screen.fx-condensation .fx-layer::before {
+  content: '';
+  position: absolute;
+  left: 93%;
+  top: -4%;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(199, 249, 255, 0.4));
+  opacity: 0;
+  animation: condensation-run 30s linear infinite;
+}
+@keyframes condensation-run {
+  /* Hidden for most of the cycle; fades in over 0.6 s, slides down the glass over 3 s, fades out over 0.6 s. */
+  0% {
+    opacity: 0;
+    top: -4%;
+  }
+  2% {
+    opacity: 1;
+  }
+  8% {
+    opacity: 1;
+  }
+  10% {
+    opacity: 0;
+    top: 96%;
+  }
+  100% {
+    opacity: 0;
+    top: 96%;
+  }
+}
+
+/* Thermal: a soft heat-map wash, warmer where the netling stands and cooler toward the edges. Still. */
+.screen.fx-thermal .fx-layer {
+  background: radial-gradient(ellipse at 50% 58%, rgba(255, 159, 28, 0.2), rgba(255, 42, 109, 0.1) 38%, rgba(40, 60, 190, 0.16) 100%);
+}
+
+/* Vignette: darker corners, as on an old tube. Still. */
+.screen.fx-vignette .fx-layer {
+  background: radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+/* Interference: a thin band of noise drifting down the screen once every 10 s. Off with motion calmed. */
+.screen.fx-interference .fx-layer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8%;
+  height: 7%;
+  background:
+    repeating-linear-gradient(90deg, rgba(199, 249, 255, 0.12) 0 2px, transparent 2px 7px),
+    linear-gradient(to bottom, transparent, rgba(199, 249, 255, 0.1), transparent);
+  animation: interference 10s linear infinite;
+}
+@keyframes interference {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(1500%);
+  }
+}
+body.calm .screen.fx-interference .fx-layer::before {
+  display: none;
+}
+
+/* ---- device labels (the look of the label, not what it says) ---- */
+
+/* Label tape: raised white letters on a strip of black embossing tape, slightly crooked. */
+.device.label-tape .logo {
+  display: inline-block;
+  padding: 1px 8px 0;
+  background: #0a0a0e;
+  color: #f4f4f8;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 0 #6a6a76;
+  transform: rotate(-1.2deg);
+}
+
+/* Etched: the label cut into the shell, no background. The lettering is a step lighter than the shell with a dark inner edge, not
+   darker than it as the doc first said: darker lettering cannot reach 3:1 on a dark shell. */
+.device.label-etched .logo {
+  color: color-mix(in srgb, var(--shell-edge) 35%, #ffffff);
+  letter-spacing: 4px;
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Sticker: a peeling sticker in the egg skin's colour (--skin, set from the egg), its lower right corner curled. */
+.device.label-sticker .logo {
+  display: inline-block;
+  padding: 2px 10px 1px;
+  background:
+    linear-gradient(135deg, transparent calc(100% - 7px), rgba(0, 0, 0, 0.35) calc(100% - 7px) calc(100% - 6px), rgba(255, 255, 255, 0.6) calc(100% - 6px)),
+    var(--skin, #05d9e8);
+  color: #0b0b0e;
+  letter-spacing: 3px;
+  text-shadow: none;
+  border-radius: 2px 2px 7px 2px;
+}
+/* On a light shell the etched lettering stays dark, as the shell's own logo colour is (the light shells' rules above and in style.css). */
+.device.label-etched.shell-chrome .logo,
+.device.label-etched.shell-gold .logo,
+.device.label-etched.shell-platinum .logo,
+.device.label-etched.shell-beige .logo,
+.device.label-etched.shell-membrane .logo,
+.device.label-etched.shell-clinicwhite .logo {
+  color: #1a1d24;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 -1px 0 rgba(0, 0, 0, 0.25);
+}

@@ -5,12 +5,12 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM } from './accessory-ideas.js';
-import { ACCESSORIES, PROPS, ROOM, placeWorn, anchorsFor } from '../../src/accessories.js';
+import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM, LAMP_DIM, LAMP_BLOB_DARK } from './accessory-ideas.js';
+import { ACCESSORIES, PROPS, PROP_FLOOR, ROOM, placeWorn, anchorsFor } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { deltaE } from '../../src/colors.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
-import { composeLCD, exclusiveWorn, calmWorn } from './render.js';
+import { composeLCD, paintLCD, exclusiveWorn, calmWorn, LCD_W, LCD_H, TOP } from './render.js';
 import { forms } from './models.js';
 import { programForms } from './program-models.js';
 import { wetwareForms } from './wetware-models.js';
@@ -309,4 +309,41 @@ test('the body and float ideas make room: every version is in 1.0\'s ROOM table,
     assert.ok(withRoom < without, `${e.id}: room helps (${withRoom} against ${without})`);
     assert.ok(withRoom <= 0.06, `${e.id}: ${(withRoom * 100).toFixed(1)}% still covered`);
   }
+});
+
+test('the Lava lamp glows on the floor with the lights off when its switch is on, and is 1.0\'s dim prop when it is off', () => {
+  const form = SETS.iron.ironAdultBreachStreet;
+  const cellsOf = (pet, t = 1000) => {
+    const cells = Array.from({ length: LCD_H }, () => Array(LCD_W).fill(null));
+    const off = { y: 0 };
+    const ctx = { fillStyle: null, globalAlpha: 1, save() {}, restore() { off.y = 0; }, translate(x, y) { off.y += y; }, fillRect(x, y) { const j = y + off.y; if (j >= 0 && j < LCD_H && x >= 0 && x < LCD_W) cells[j][x] = this.fillStyle; } };
+    paintLCD(ctx, composeLCD({ form, egg: 'iron', idle: 'none', prop: 'lavalamp', lightsOn: false, ...pet }, t));
+    return cells;
+  };
+  const prop = PROP_ENTRIES.find((e) => e.id === 'lavalamp');
+  const [w, h] = prop.size;
+  const ox = LCD_W - w - 2;
+  const floor = PROP_FLOOR + TOP; // the row under the lamp's feet
+  const on = cellsOf({});
+  const off = cellsOf({ propGlow: false });
+  // The pool: orange, faint, on the two floor rows, wider than the lamp, still there at every time.
+  const pool = (cells) => cells.flatMap((row, y) => row.map((c, x) => [x, y, c])).filter(([, , c]) => typeof c === 'string' && c.startsWith('rgba(255,107,42,'));
+  assert.ok(pool(on).length >= 12 && pool(off).length === 0);
+  for (const [x, y, c] of pool(on)) {
+    assert.ok(y === floor || y === floor + 1, `pool row ${y}`);
+    assert.ok(x >= ox - 2 && x <= ox + w + 1, `pool column ${x}`);
+    assert.ok(Number(c.slice(16, -1)) <= 0.22, `${c} stays faint`);
+  }
+  for (const t of [0, 800, 1600, 4000]) assert.equal(pool(cellsOf({}, t)).length, pool(on).length, 'the pool does not flicker');
+  // The blobs stay lit in the dark with the glow on; with it off the whole lamp is the one dim colour.
+  const lamp = (cells) => cells.slice(floor - h, floor).flatMap((row) => row.slice(ox, ox + w)).filter((c) => c);
+  assert.ok(lamp(on).includes(LAMP_BLOB_DARK) && lamp(on).every((c) => c === LAMP_DIM || c === LAMP_BLOB_DARK));
+  assert.ok(lamp(off).length > 0 && lamp(off).every((c) => c === '#1c3a3f'), 'switched off: 1.0\'s dim prop');
+  // Lights on: the same as without the option, glow or not.
+  assert.deepEqual(cellsOf({ lightsOn: true }), cellsOf({ lightsOn: true, propGlow: false }));
+  // Another prop is untouched by the switch.
+  assert.deepEqual(cellsOf({ prop: 'deck' }), cellsOf({ prop: 'deck', propGlow: false }));
+  // The free (plain) lamp glows too, with its one resting blob.
+  const plain = cellsOf({ prop: 'lavalamp.free' });
+  assert.ok(pool(plain).length >= 12);
 });

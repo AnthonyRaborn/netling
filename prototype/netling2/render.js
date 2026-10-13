@@ -36,7 +36,7 @@
 // (cache, virus, events, the attention mark), action reactions, the flow glow, the evolution strobe, the heat wash and the glitch shake.
 import './ready.js'; // first: the wearable code must see the authored anchors (see ready.js)
 import { SPRITES, drawSprite, paletteColors, DEAD_COLORS, DIM_COLORS } from '../../src/sprites.js';
-import { drawWorn, drawProp, placeWorn, accessoryById } from '../../src/accessories.js';
+import { drawWorn, drawProp, placeWorn, accessoryById, PROPS, PROP_FLOOR as PROP_FLOOR_1 } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
 import { temperTell, tellPose, idleClock, driftWithin } from './tell.js';
 import { idleOffset } from './idle.js';
@@ -89,6 +89,7 @@ const frameOf = (time) => Math.floor(time / 500) % 2;
 //   states = [],          [{ kind: 'overclock' | 'overdrive' | 'overlink', strained }]
 //   worn = [],            [{ id, colors? }] as 1.0's drawWorn
 //   prop = null,          'metronome' or a 1.0 prop id; propExtra as 1.0's drawProp
+//   propGlow = true,      the prop's own switch for its light in the dark (the Lava lamp's floor glow); off draws 1.0's dim prop
 //   visit = false,        a visit is on: the motion layers pause and the netling plays 1.0's bounce
 //   visitorWidth = 16,
 //   death = null,         { cause, diedAt } when pose is 'dead'
@@ -192,7 +193,7 @@ export function composeLCD(pet, time, opts = {}) {
     const c = dark ? Object.fromEntries(Object.keys(METRONOME_COLORS).map((k) => [k, DIM_COLORS['#']])) : METRONOME_COLORS;
     ops.push({ op: 'rows', rows: art, x: LCD_W - METRONOME_SIZE.w - 2, y: PROP_FLOOR - METRONOME_SIZE.h, colors: c });
   } else if (prop) {
-    ops.push({ op: 'prop', id: prop, frame, time, extra: propExtra, dim: dark });
+    ops.push({ op: 'prop', id: prop, frame, time, extra: propExtra, dim: dark, glow: pet.propGlow !== false });
   }
 
   // 8. The Z while resting.
@@ -248,7 +249,18 @@ export function paintLCD(ctx, { bg, ops }) {
       // 1.0's props stand on 1.0's floor; move them down with it.
       ctx.save();
       ctx.translate(0, TOP);
-      drawProp(ctx, o.id, LCD_W, o.frame, o.time, o.extra, o.dim);
+      const lit = o.dim && o.glow ? PROPS.find((x) => x.id === o.id)?.glowDraw : null;
+      if (lit) {
+        // A prop with its own light in the dark (the Lava lamp, with its glow switched on): its own dark picture and floor glow
+        // instead of 1.0's one dim colour. Placed as drawProp places it.
+        const [w, h] = PROPS.find((x) => x.id === o.id).size;
+        const ox = LCD_W - w - 2;
+        const oy = PROP_FLOOR_1 - h;
+        lit((x, y, color) => {
+          ctx.fillStyle = color;
+          ctx.fillRect(ox + x, oy + y, 1, 1);
+        }, o.frame, o.time);
+      } else drawProp(ctx, o.id, LCD_W, o.frame, o.time, o.extra, o.dim);
       ctx.restore();
     }
     else if (o.op === 'rect') {

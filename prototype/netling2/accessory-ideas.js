@@ -759,8 +759,8 @@ export const IDEA_PROPS = [
     paid: 'paid',
     size: [5, 10],
     draw: (px, frame, time = 0) => {
-      // A tall lamp, two blobs rising and sinking out of step, one cell every 800 ms. (The faint glow on the floor with the lights off
-      // needs the renderer to tell a prop the lights are off; 1.0's drawProp dims every prop instead, so it is not drawn here.)
+      // A tall lamp, two blobs rising and sinking out of step, one cell every 800 ms. With the lights off, glowDraw (below) is used
+      // instead when the player has the lamp's glow on (render.js paintLCD): 1.0's drawProp would dim the whole prop to one colour.
       lavalamp(px);
       const s = step(time, 800);
       const cells = [[1, 7, 2], [3, 2, 7]]; // [x, top, bottom] of each blob's path
@@ -775,6 +775,21 @@ export const IDEA_PROPS = [
       lavalamp(px);
       for (const x of [1, 2, 3]) px(x, 7, '#ff6b2a');
     },
+    // With the lights off and the glow on (the lamp's own switch, `propGlow` in the pet, on by default): the lamp's glass and caps dim
+    // as every prop's do, the blobs stay lit (a little deeper than by day) and a faint orange pool lies on the floor under and beside it,
+    // two rows deep and fading out to the sides, which is what the doc asked for ("glows faintly on the floor with the lights off").
+    // Still, so it adds no flashing; the blobs keep their 800 ms step. Cells outside the prop's 5x10 box are the floor glow, in prop-local
+    // coordinates (the floor is row 10).
+    glowDraw: (px, frame, time = 0) => lampInTheDark(px, (p) => {
+      const s = step(time, 800);
+      const cells = [[1, 7, 2], [3, 2, 7]];
+      cells.forEach(([x, y0, y1], i) => {
+        const y = i === 0 ? y1 - pingPong(s, y1 - y0 + 1) : y0 + pingPong(s, y1 - y0 + 1);
+        p(x, y);
+        p(2, Math.min(y1, Math.max(y0, y)));
+      });
+    }),
+    plainGlowDraw: (px) => lampInTheDark(px, (p) => [1, 2, 3].forEach((x) => p(x, 7))),
   },
   {
     id: 'minicab',
@@ -844,6 +859,19 @@ function noodles(px, full) {
 function lavalamp(px) {
   grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: STEEL, g: '#4a1a4a' });
 }
+export const LAMP_DIM = '#1c3a3f'; // 1.0's dimmed prop colour (src/accessories.js drawProp)
+export const LAMP_BLOB_DARK = '#c2501f'; // the blobs by night: their day colour #ff6b2a, a step down
+// [dx from the lamp's left column, dy below its feet, alpha] of the orange pool on the floor, strongest right under the lamp.
+const pool = (dx, dy) => (dy === 0 ? (dx >= 0 && dx <= 4 ? 0.22 : dx === -2 || dx === 6 ? 0.07 : 0.12) : dx >= 0 && dx <= 4 ? 0.1 : 0.06);
+export const LAMP_POOL = [
+  ...[-2, -1, 0, 1, 2, 3, 4, 5, 6].map((dx) => [dx, 0, pool(dx, 0)]),
+  ...[-1, 0, 1, 2, 3, 4, 5].map((dx) => [dx, 1, pool(dx, 1)]),
+];
+function lampInTheDark(px, blobs) {
+  grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: LAMP_DIM, g: LAMP_DIM });
+  blobs((x, y) => px(x, y, LAMP_BLOB_DARK));
+  for (const [dx, dy, a] of LAMP_POOL) px(dx, 10 + dy, `rgba(255,107,42,${a})`);
+}
 function cabinet(px, full) {
   grid(px, 0, 0, ['mmmmmm', '#....#', '#ssss#', '#ssss#', '#ssss#', '######', full ? '#j#b##' : '######', '######', '##..##', '######'], {
     m: full ? '#05d9e8' : '#4a3a7a',
@@ -909,7 +937,7 @@ const versions = (list, args) =>
     if (x.variants) return x.variants.map((v) => ({ ...base, id: v.id, name: v.name, version: 'only', draw: args === 'wear' ? ringWithFace(v.style) : x.draw }));
     if (x.paid !== 'split' && x.paid !== 'paid') return [{ ...base, version: 'only' }];
     return [
-      { ...base, id: x.id + FREE, name: `${x.name} (free)`, version: 'free', draw: freeOf(x, args) },
+      { ...base, id: x.id + FREE, name: `${x.name} (free)`, version: 'free', draw: freeOf(x, args), glowDraw: x.plainGlowDraw ?? x.glowDraw },
       { ...base, name: `${x.name} (paid)`, version: 'paid' },
     ];
   });
