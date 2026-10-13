@@ -10,6 +10,8 @@ How Netling 2.0 reaches players, decided with the maintainer on 2026-10-13 befor
 4. **Desktop: Tauri,** with the **desktop pet window in the first release** and a **true portable mode** (below).
 5. **Closed-app notifications by forecast, with the seed re-randomized at every open** (below). This is an engine rule in the 2.0 sim, not a wrapper feature.
 6. **Android widget: a static snapshot first**, with a short frame loop as a stretch goal.
+7. **A new repository** for the 2.0 app (not yet created). The prototype in `prototype/netling2/` and 1.0's `src/` here are its starting points.
+8. **1.0 saves do not carry over** to 2.0. No import path, no migration from 1.0's save format.
 
 Why Capacitor on Android and not Tauri everywhere: Capacitor's local-notification plugin is mature (scheduling, channels, inexact alarms). Tauri 2's mobile plugins are younger. The widget is native Kotlin in either case. Tauri wins on desktop: small builds and built-in transparent, borderless, always-on-top windows.
 
@@ -17,9 +19,9 @@ Why Capacitor on Android and not Tauri everywhere: Capacitor's local-notificatio
 
 Stage care relies on notifications while the app is closed (the rest call; the Events, Care and Cooldowns classes; [NETLING_2_STAGE_CARE_DRAFTS.md](NETLING_2_STAGE_CARE_DRAFTS.md), 2.6). No shell runs the game's JS reliably in the background, and 1.0 rolls events with `Math.random` during catch-up, so nothing knows ahead of time when an event will happen. The design:
 
-1. **On going to the background,** draw a fresh seed (`crypto.getRandomValues`) and store it in the save. Simulate forward from the current state with an RNG built from that seed over a fixed **horizon** (24 to 48 hours; to be set). The player cannot act while the app is closed, so the forecast is exact. Schedule a notification for each notifying item in it, within the per-class rules and the budget of 6 a day for Events.
+1. **On going to the background,** draw a fresh seed (`crypto.getRandomValues`) and store it in the save. Simulate forward from the current state with an RNG built from that seed over a fixed **horizon of 36 hours** (decided; an unattended netling is not expected to last much past 24 hours unless hibernated, and 36 leaves a margin). The player cannot act while the app is closed, so the forecast is exact. Schedule a notification for each notifying item in it, within the per-class rules and the budget of 6 a day for Events.
 2. **On reopening,** catch-up runs the elapsed time with the same seeded RNG, so it reproduces the forecast exactly. Then the seed is discarded, every pending notification is cancelled, and play continues on a fresh seed.
-3. **Past the horizon,** catch-up keeps rolling with the stored seed's RNG, and that time gets no notifications. A player gone that long already has worse problems than a missed alert.
+3. **Past the horizon,** catch-up keeps rolling with the stored seed's RNG, and that time gets no notifications. A player gone that long already has worse problems than a missed alert. A hibernating netling's clock is frozen, so its forecast is empty and it schedules nothing.
 
 Properties:
 - The future is fixed only for the time the app is closed, and the seed changes at every open. A player who reads their own save can predict up to the horizon, not further. A per-day seed chain would be weaker, since every later seed would follow from one value.
@@ -63,10 +65,8 @@ Home-screen widgets cannot host a webview.
 
 ## Open questions
 
-- Where the 2.0 app code lives: a folder in this repo or a new repo. The prototype in `prototype/netling2/` and 1.0's `src/` are the starting points either way.
-- The forecast horizon (24 or 48 hours, or until the next sleep plus a margin).
+- The new repository's visibility. Leaning private (maintainer). Recommendation: private source plus a separate public repository (or an itch.io page) that only holds releases, since a private repository's release files cannot be downloaded by players. Private repositories also have limited free Actions minutes, with macOS runners billed at a multiple (general knowledge, check current GitHub pricing); building the Mac app on the maintainer's Mac is the fallback.
 - The portable marker's name, and whether portable is a separate download or the same build plus a marker.
-- Whether 1.0 saves carry into 2.0 at all (a design question, not a deployment one).
 
 ## Build order
 
