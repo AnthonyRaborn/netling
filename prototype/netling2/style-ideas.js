@@ -55,7 +55,12 @@ export const IDEA_EFFECTS = [
   { id: 'thermal', name: 'Thermal', hint: 'it hides from heat, not light.', unlock: 'see a Rogue form', css: true, moves: null },
   { id: 'vignette', name: 'Vignette', hint: '', unlock: 'free', css: true, moves: null },
   { id: 'interference', name: 'Interference', hint: 'leave by the back door, ten times.', unlock: '10 relay jack-outs', css: true, moves: { name: 'interference', seconds: 10 }, paid: 'split' },
+  { id: 'burnin', name: 'Burn-in', hint: 'leave a mark.', unlock: 'see a Rogue self-destruct once (with the Scorched shell)', css: true, moves: null },
+  { id: 'sterile', name: 'Sterile', hint: 'keep it spotless.', unlock: 'clear 10 bugs at the clinic, across lives', css: true, moves: null },
 ];
+
+// The Sterile wash's strongest colour and alpha, which style-ideas.css must not exceed (the test composites it over every tint and palette).
+export const STERILE = { rgb: [225, 240, 255], alpha: 0.12 };
 
 // --- device labels ----------------------------------------------------------------------------------------------------------------
 // `ink` and `field`: the lettering and what it sits on, where the label brings its own (the tape, the sticker). The Etched label has none:

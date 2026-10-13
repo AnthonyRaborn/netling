@@ -25,7 +25,7 @@
 //   #sec=tints   every new tint on all eight palettes (Infrared recolours the canvas pixels)
 //   #sec=effects every new effect on a screen with a walking netling; Ghosting runs the real ghosting.js on the canvas cells
 //   #sec=labels  the three labels on a dark and a light shell
-//   #sec=glow    the Lava lamp with the lights on and off, glow on and off
+//   #sec=glow    the four props with a glow (Lava lamp, Mini arcade cabinet, Server tower, Desk terminal): lights on, off with the glow, off with it switched off
 import './ready.js';
 import { registerIdeas } from './accessory-ideas.js';
 import { registerPalettes } from './palettes.js';
@@ -98,7 +98,7 @@ if (SEC === 'shells') {
 } else if (SEC === 'effects') {
   const r = section('Screen effects (the netling walks; scale the clock with t=ms)');
   for (const e of [{ id: 'scanlines', name: 'Scanlines (1.0)' }, ...IDEA_EFFECTS]) {
-    const d = device('', e.name, e.pixel ? 'pixel effect' : '');
+    const d = device(hash.get('shell') ?? '', e.name, e.pixel ? 'pixel effect' : ''); // shell=shell-clinicwhite puts them on a light shell
     d.scr.className = `screen fx-${e.id}`;
     r.append(d.cell);
     const ghost = e.id === 'ghosting' ? createGhosting() : null;
@@ -122,11 +122,13 @@ if (SEC === 'shells') {
   const r = section('Labels on a dark and a light shell');
   for (const sh of ['', 'shell-clinicwhite', 'shell-rivet', 'shell-chrome']) for (const l of IDEA_LABELS) { const d = device(`${sh} label-${l.id}`, l.name, sh || 'standard'); d.dev.style.setProperty('--skin', '#05d9e8'); r.append(d.cell); }
 } else if (SEC === 'glow') {
-  const r = section('Lava lamp: lights on, lights off with the glow, lights off with the glow switched off (and the plain lamp)');
-  for (const [name, pet] of [['lights on', { lightsOn: true }], ['dark, glow on', { lightsOn: false }], ['dark, glow off', { lightsOn: false, propGlow: false }], ['dark, free lamp, glow on', { lightsOn: false, prop: 'lavalamp.free' }]]) {
-    const cell = el('div', 'cell'); const c = lcdCanvas();
-    paint(c, { prop: 'lavalamp', ...pet }, FIXED ?? 1000);
-    cell.append(c, el('p', '', name)); cell.style.width = '300px'; r.append(cell);
+  for (const id of ['lavalamp', 'minicab', 'servertower', 'terminal']) {
+    const r = section(`${id}: lights on, lights off with the glow, lights off with the glow switched off, and the free version in the dark`);
+    for (const [name, pet] of [['lights on', { lightsOn: true }], ['dark, glow on', { lightsOn: false }], ['dark, glow off', { lightsOn: false, propGlow: false }], ['dark, free version', { lightsOn: false, prop: `${id}.free` }]]) {
+      const cell = el('div', 'cell'); const c = lcdCanvas();
+      paint(c, { prop: id, ...pet }, FIXED ?? 1000);
+      cell.append(c, el('p', '', name)); cell.style.width = '300px'; r.append(cell);
+    }
   }
 }
 document.title += ' (ready)';

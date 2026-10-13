@@ -158,6 +158,20 @@
   background: radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.42) 100%);
 }
 
+/* Burn-in: the Scorched shell's look on the glass. A warm orange glow creeping in from the edges, darker at the corners, and a faint band
+   burnt in along the bottom where the status text sits. Still. */
+.screen.fx-burnin .fx-layer {
+  background:
+    linear-gradient(to top, rgba(255, 150, 60, 0.07) 0 11%, transparent 11%),
+    radial-gradient(ellipse at center, transparent 52%, rgba(255, 110, 20, 0.14) 84%, rgba(90, 30, 0, 0.4) 100%);
+}
+
+/* Sterile: a cool white wash over the whole glass, a little brighter at the top and bottom, like clinic lighting. Still. 12% white at most
+   (STERILE in style-ideas.js): it raises the black level, so the test composites it over every tint and palette. */
+.screen.fx-sterile .fx-layer {
+  background: linear-gradient(to bottom, rgba(225, 240, 255, 0.12), rgba(225, 240, 255, 0.06) 45%, rgba(225, 240, 255, 0.12));
+}
+
 /* Interference: a thin band of noise drifting down the screen once every 10 s. Off with motion calmed. */
 .screen.fx-interference .fx-layer::before {
   content: '';

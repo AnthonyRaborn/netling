@@ -699,6 +699,15 @@ export const IDEA_PROPS = [
       const lit = step(time, 400) % 7;
       px(1, 2 + lit, '#05d9e8');
     },
+    // Lights off, glow on: the case dims, the green light and the stepping cyan one stay lit, and a faint green pool lies on the floor.
+    glowDraw: (px, frame, time = 0) => litInTheDark(px, {
+      w: 5, h: 11, rgb: [57, 255, 20], peak: 0.16,
+      body: (p) => grid(p, 0, 0, ['#####', '#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '#####', '#.#.#'], { '#': '#0', '.': '#0' }),
+      lit: (p) => {
+        p(2, 1, '#39ff14');
+        p(1, 2 + (step(time, 400) % 7), '#05d9e8');
+      },
+    }),
   },
   {
     id: 'petridish',
@@ -726,6 +735,17 @@ export const IDEA_PROPS = [
       if (step(time, 500) % 2 === 0) px(3, 3, '#39ff14');
     },
     plain: (px) => terminal(px, false), // the plainer free picture: no stand, no shading, no cursor
+    // Lights off, glow on: the case dims, the screen stays a deep green with its prompt lit and the cursor blinking, a green pool on the floor.
+    glowDraw: (px, frame, time = 0) => litInTheDark(px, {
+      w: 7, h: 8, rgb: [57, 255, 20], peak: 0.2,
+      body: (p) => terminal(p, true),
+      lit: (p) => {
+        for (let y = 1; y <= 3; y++) for (let x = 1; x <= 5; x++) p(x, y, '#0c2a0c');
+        p(1, 2, '#39ff14');
+        if (step(time, 500) % 2 === 0) p(3, 3, '#39ff14');
+      },
+    }),
+    plainGlowDraw: (px) => litInTheDark(px, { w: 7, h: 8, rgb: [57, 255, 20], peak: 0.2, body: (p) => terminal(p, false), lit: (p) => p(1, 5, '#39ff14') }),
   },
   {
     id: 'cardboardbox',
@@ -808,16 +828,23 @@ export const IDEA_PROPS = [
       // A knee-high cabinet whose screen cycles still pictures of the four home games, one every 3 s: Breach's bricks and ball,
       // Dodge's falling blocks, Feast's dots, Tune's notes.
       cabinet(px, true);
-      const PICS = [
-        { rows: ['####', '.#.#', '..o.'], c: { '#': '#ff2a6d', o: '#ffffff' } },
-        { rows: ['#..#', '..#.', '.o..'], c: { '#': '#f9f002', o: '#39ff14' } },
-        { rows: ['o.o.', '.o.o', 'o.o.'], c: { o: '#f9f002' } },
-        { rows: ['.#..', '.#.#', '##.#'], c: { '#': '#05d9e8' } },
-      ];
-      const pic = PICS[step(time, 3000) % 4];
+      const pic = CAB_PICS[step(time, 3000) % 4];
       grid(px, 1, 2, pic.rows, pic.c);
     },
     plain: (px) => cabinet(px, false), // the plainer free picture: a plain case, a dark screen
+    // Lights off, glow on: the case dims, the screen stays lit with its picture, and the floor takes the picture's colour (it changes with the
+    // picture, once every 3 s). The plain cabinet has a dark screen, so it has no glow.
+    glowDraw: (px, frame, time = 0) => {
+      const pic = CAB_PICS[step(time, 3000) % 4];
+      litInTheDark(px, {
+        w: 6, h: 10, rgb: pic.rgb, peak: 0.18,
+        body: (p) => cabinet(p, true),
+        lit: (p) => {
+          for (let y = 2; y <= 4; y++) for (let x = 1; x <= 4; x++) p(x, y, '#10182c');
+          grid(p, 1, 2, pic.rows, pic.c);
+        },
+      });
+    },
   },
   {
     id: 'fishbowl',
@@ -867,19 +894,37 @@ function noodles(px, full) {
 function lavalamp(px) {
   grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: STEEL, g: '#4a1a4a' });
 }
-export const LAMP_DIM = '#1c3a3f'; // 1.0's dimmed prop colour (src/accessories.js drawProp)
-export const LAMP_BLOB_DARK = '#c2501f'; // the blobs by night: their day colour #ff6b2a, a step down
-// [dx from the lamp's left column, dy below its feet, alpha] of the orange pool on the floor, strongest right under the lamp.
-const pool = (dx, dy) => (dy === 0 ? (dx >= 0 && dx <= 4 ? 0.22 : dx === -2 || dx === 6 ? 0.07 : 0.12) : dx >= 0 && dx <= 4 ? 0.1 : 0.06);
-export const LAMP_POOL = [
-  ...[-2, -1, 0, 1, 2, 3, 4, 5, 6].map((dx) => [dx, 0, pool(dx, 0)]),
-  ...[-1, 0, 1, 2, 3, 4, 5].map((dx) => [dx, 1, pool(dx, 1)]),
-];
-function lampInTheDark(px, blobs) {
-  grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: LAMP_DIM, g: LAMP_DIM });
-  blobs((x, y) => px(x, y, LAMP_BLOB_DARK));
-  for (const [dx, dy, a] of LAMP_POOL) px(dx, 10 + dy, `rgba(255,107,42,${a})`);
+export const LAMP_DIM = '#1c3a3f'; // 1.0's dimmed prop colour (src/accessories.js drawProp); every prop's body is this in the dark
+export const LAMP_BLOB_DARK = '#c2501f'; // the lamp's blobs by night: their day colour #ff6b2a, a step down
+// The pool of light on the floor under and beside a prop that glows in the dark: [dx from the prop's left column, dy below its feet, alpha],
+// two rows, strongest right under the prop and fading to the sides. `peak` is the strongest alpha (0.22 for the lamp).
+export function poolCells(w, peak = 0.22) {
+  const a = (k) => Number((peak * k).toFixed(2));
+  const cells = [];
+  for (let dx = -2; dx <= w + 1; dx++) cells.push([dx, 0, dx >= 0 && dx < w ? peak : dx === -2 || dx === w + 1 ? a(0.32) : a(0.55)]);
+  for (let dx = -1; dx <= w; dx++) cells.push([dx, 1, dx >= 0 && dx < w ? a(0.45) : a(0.27)]);
+  return cells;
 }
+export const LAMP_POOL = poolCells(5);
+// A prop lit in the dark with its glow switch on (render.js paintLCD): the body dimmed to 1.0's one dim colour, its lit parts drawn over it
+// by `lit(px)`, and a pool of `rgb` light on the floor. Prop-local coordinates, floor row = the prop's height. Shared by the Lava lamp, the
+// Mini arcade cabinet, the Server tower and the Desk terminal.
+function litInTheDark(px, { w, h, body, lit, rgb, peak }) {
+  body((x, y) => px(x, y, LAMP_DIM));
+  lit(px);
+  for (const [dx, dy, a] of poolCells(w, peak)) px(dx, h + dy, `rgba(${rgb.join(',')},${a})`);
+}
+const LAMP_ART = (px) => grid(px, 0, 0, ['.mmm.', '.ggg.', '.ggg.', '.ggg.', 'ggggg', 'ggggg', 'ggggg', '.ggg.', '.mmm.', 'mmmmm'], { m: '#0', g: '#0' });
+function lampInTheDark(px, blobs) {
+  litInTheDark(px, { w: 5, h: 10, body: LAMP_ART, lit: (p) => blobs((x, y) => p(x, y, LAMP_BLOB_DARK)), rgb: [255, 107, 42] });
+}
+// The cabinet's four pictures, and the colour of light each throws on the floor in the dark.
+const CAB_PICS = [
+  { rows: ['####', '.#.#', '..o.'], c: { '#': '#ff2a6d', o: '#ffffff' }, rgb: [255, 42, 109] },
+  { rows: ['#..#', '..#.', '.o..'], c: { '#': '#f9f002', o: '#39ff14' }, rgb: [249, 240, 2] },
+  { rows: ['o.o.', '.o.o', 'o.o.'], c: { o: '#f9f002' }, rgb: [249, 240, 2] },
+  { rows: ['.#..', '.#.#', '##.#'], c: { '#': '#05d9e8' }, rgb: [5, 217, 232] },
+];
 function cabinet(px, full) {
   grid(px, 0, 0, ['mmmmmm', '#....#', '#ssss#', '#ssss#', '#ssss#', '######', full ? '#j#b##' : '######', '######', '##..##', '######'], {
     m: full ? '#05d9e8' : '#4a3a7a',
@@ -939,13 +984,16 @@ const freeOf = (x, args) =>
       ? (px, a, frame, time, colors) => x.draw(px, a, 0, x.stillAt, colors)
       : (px, frame, time, extra) => x.draw(px, 0, x.stillAt, extra)
     : x.plain;
+// The free version's glow: a split prop's is its animated glow at its still frame (the reduced-motion picture); a paid one's is its plainer
+// glow if it has one, else none (the plain Mini arcade cabinet has a dark screen, so nothing to glow).
+const freeGlow = (x, args) => (args === 'wear' ? undefined : x.paid === 'split' ? x.glowDraw && ((px, frame, time, extra) => x.glowDraw(px, 0, x.stillAt, extra)) : x.plainGlowDraw);
 const versions = (list, args) =>
   list.flatMap((x) => {
     const base = { ...x, base: x.id };
     if (x.variants) return x.variants.map((v) => ({ ...base, id: v.id, name: v.name, version: 'only', draw: args === 'wear' ? ringWithFace(v.style) : x.draw }));
     if (x.paid !== 'split' && x.paid !== 'paid') return [{ ...base, version: 'only' }];
     return [
-      { ...base, id: x.id + FREE, name: `${x.name} (free)`, version: 'free', draw: freeOf(x, args), glowDraw: x.plainGlowDraw ?? x.glowDraw },
+      { ...base, id: x.id + FREE, name: `${x.name} (free)`, version: 'free', draw: freeOf(x, args), glowDraw: freeGlow(x, args) },
       { ...base, name: `${x.name} (paid)`, version: 'paid' },
     ];
   });

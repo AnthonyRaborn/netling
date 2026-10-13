@@ -370,3 +370,67 @@ test('the Goggles, Hard hat, Hood and Dog tags are recolorable: every slot is dr
     assert.deepEqual(accessoryColors(id, e.colors.map(() => '#123456'), PALETTES[0]), e.colors.map(() => '#123456'));
   }
 });
+
+test('every prop with a glow (the lamp, the cabinet, the tower, the terminal) lights its own parts in the dark, throws a faint pool on the floor, and is 1.0\'s dim prop with the switch off', () => {
+  const form = SETS.iron.ironAdultBreachStreet;
+  const glowing = PROP_ENTRIES.filter((e) => e.glowDraw);
+  assert.deepEqual([...new Set(glowing.map((e) => e.base))].sort(), ['lavalamp', 'minicab', 'servertower', 'terminal']);
+  const paintDark = (id, pet, t) => {
+    const cells = Array.from({ length: LCD_H }, () => Array(LCD_W).fill(null));
+    const off = { y: 0 };
+    const ctx = { fillStyle: null, globalAlpha: 1, save() {}, restore() { off.y = 0; }, translate(x, y) { off.y += y; }, fillRect(x, y) { const j = y + off.y; if (j >= 0 && j < LCD_H && x >= 0 && x < LCD_W) cells[j][x] = this.fillStyle; } };
+    paintLCD(ctx, composeLCD({ form, egg: 'iron', idle: 'none', prop: id, lightsOn: false, ...pet }, t));
+    return cells;
+  };
+  for (const e of glowing) {
+    const [w, h] = e.size;
+    const ox = LCD_W - w - 2;
+    const floor = PROP_FLOOR + TOP;
+    const isPool = (c) => typeof c === 'string' && c.startsWith('rgba(');
+    for (const t of [0, 800, 1600, 3100, 6200]) {
+      const on = paintDark(e.id, {}, t);
+      const poolCells = on.flatMap((row, y) => row.map((c, x) => [x, y, c])).filter(([, , c]) => isPool(c));
+      assert.ok(poolCells.length >= 12, `${e.id} at ${t}: a pool`);
+      for (const [x, y, c] of poolCells) {
+        assert.ok(y === floor || y === floor + 1, `${e.id}: pool row ${y}`);
+        assert.ok(x >= ox - 2 && x <= ox + w + 1, `${e.id}: pool column ${x}`);
+        assert.ok(Number(c.slice(c.lastIndexOf(',') + 1, -1)) <= 0.22, `${e.id}: ${c} stays faint`);
+      }
+      // Above the floor only the dim body and its lit parts: at least one colour that is not the dim one, and the body never goes blank.
+      const body = on.slice(floor - h, floor).flatMap((row) => row.slice(ox, ox + w)).filter((c) => c);
+      assert.ok(body.some((c) => c !== LAMP_DIM) && body.some((c) => c === LAMP_DIM), `${e.id} at ${t}: lit parts over a dim body`);
+      // The switch off, or the lights on: 1.0's dim prop, no pool, and the same lights-on picture either way.
+      const offCells = paintDark(e.id, { propGlow: false }, t);
+      assert.ok(!offCells.flat().some(isPool));
+      assert.ok(offCells.slice(floor - h, floor).flatMap((row) => row.slice(ox, ox + w)).filter((c) => c).every((c) => c === '#1c3a3f'), `${e.id}: switched off is dim`);
+      assert.deepEqual(paintDark(e.id, { lightsOn: true }, t), paintDark(e.id, { lightsOn: true, propGlow: false }, t));
+    }
+  }
+  // A paid prop's free picture has a glow only if it has a plainer one: the plain cabinet's screen is dark, so it has none.
+  assert.ok(PROP_ENTRIES.find((e) => e.id === 'minicab.free') && !PROP_ENTRIES.find((e) => e.id === 'minicab.free').glowDraw);
+  assert.ok(PROP_ENTRIES.find((e) => e.id === 'terminal.free').glowDraw && PROP_ENTRIES.find((e) => e.id === 'lavalamp.free').glowDraw);
+  // A split prop's free glow is its animated glow at its still frame.
+  const tower = PROP_ENTRIES.find((e) => e.id === 'servertower');
+  const freeTower = PROP_ENTRIES.find((e) => e.id === 'servertower.free');
+  assert.equal(pixels((px) => freeTower.glowDraw(px, 0, 9999, null)), pixels((px) => tower.glowDraw(px, 0, tower.stillAt, null)));
+});
+
+test('nothing in a glow toggles faster than the flash rule: every cell holds each colour at least FLASH_TOGGLE_MS', () => {
+  for (const e of PROP_ENTRIES.filter((x) => x.glowDraw)) {
+    const seen = [];
+    for (let t = 0; t < 40_000; t += 25) {
+      const m = new Map();
+      e.glowDraw((x, y, c) => m.set(`${x},${y}`, c), Math.floor(t / 500) % 2, t, null);
+      seen.push(m);
+    }
+    for (const k of new Set(seen.flatMap((m) => [...m.keys()]))) {
+      let since = 0;
+      let changes = 0;
+      for (let i = 1; i < seen.length; i++) {
+        if ((seen[i].get(k) ?? null) === (seen[i - 1].get(k) ?? null)) continue;
+        if (changes++ > 0) assert.ok((i - since) * 25 >= FLASH_TOGGLE_MS, `${e.id} glow cell ${k} changes after ${(i - since) * 25} ms`);
+        since = i;
+      }
+    }
+  }
+});

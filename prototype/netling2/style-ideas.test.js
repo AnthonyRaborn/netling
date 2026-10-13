@@ -6,7 +6,7 @@ import './ready.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { IDEA_SHELLS, IDEA_TINTS, IDEA_EFFECTS, IDEA_LABELS, SHELLS_1_0, LIGHT_SHELLS_1_0, infraredMap, luminance } from './style-ideas.js';
+import { IDEA_SHELLS, IDEA_TINTS, IDEA_EFFECTS, IDEA_LABELS, STERILE, SHELLS_1_0, LIGHT_SHELLS_1_0, infraredMap, luminance } from './style-ideas.js';
 import { createGhosting, GHOST_MS, mixHex } from './ghosting.js';
 import { registerPalettes } from './palettes.js';
 import { PALETTES } from '../../src/sim.js';
@@ -177,4 +177,18 @@ test('the labels read on every shell: the tape and the sticker bring their own f
   const darkRule = rules.find(([s]) => lightIds.every((id) => s.includes(`.device.label-etched.shell-${id} .logo`)));
   assert.ok(darkRule, 'etched on a light shell keeps its dark lettering');
   assert.match(css, /color-mix\(in srgb, var\(--shell-edge\) 35%, #ffffff\)/);
+});
+
+test('Sterile keeps every palette readable once the wash is laid over both the body and the screen, on every tint', () => {
+  const wash = (c, [r, g, b] = STERILE.rgb, a = STERILE.alpha) => `#${[r, g, b].map((v, i) => Math.round(parseInt(c.slice(1 + i * 2, 3 + i * 2), 16) * (1 - a) + v * a).toString(16).padStart(2, '0')).join('')}`;
+  assert.match(css, /\.screen\.fx-sterile \.fx-layer \{[^}]*rgba\(225, 240, 255, 0\.12\)/);
+  const worst = Math.max(...[...css.match(/\.screen\.fx-sterile \.fx-layer \{[^}]*\}/)[0].matchAll(/rgba\([^)]*,\s*([\d.]+)\)/g)].map((m) => Number(m[1])));
+  assert.equal(worst, STERILE.alpha, 'the CSS never exceeds the alpha the test uses');
+  for (const t of [...COSMETICS.tint, ...IDEA_TINTS]) {
+    for (const p of PALETTES) {
+      // 3:1, the bar graphics are asked for; the wash costs about a third of the margin, so the body (4.5:1 before) still clears it.
+      assert.ok(ratio(wash(p.main), wash(t.lcd)) >= 3, `${p.name} body on ${t.id} under Sterile: ${ratio(wash(p.main), wash(t.lcd)).toFixed(2)}`);
+      assert.ok(ratio(wash(p.ink ?? p.accent), wash(t.lcd)) >= 3, `${p.name} on-screen colour on ${t.id} under Sterile`);
+    }
+  }
 });
