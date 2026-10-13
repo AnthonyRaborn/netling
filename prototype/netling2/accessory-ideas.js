@@ -994,6 +994,43 @@ export const IDEA_CRESTS = [
     // A small tree: nine leaves in a diamond over a trunk.
     pixels: ['....#....', '...#.#...', '..#.#.#..', '...#.#...', '....#....', '....#....', '....#....', '...###...', '.#######.'],
   },
+  // The crests for the 2.0 mechanics the first five leave out (2026-10-13): the Rogue self-destruct, the clinic, the two Standing tracks and the
+  // Rogue good end. Each is a line goal like 1.0's, so each needs a field in the lineage record that 1.0's does not keep (the doc lists them).
+  {
+    id: 'fuse',
+    name: 'Fuse',
+    paid: 'free (earn)',
+    // A round bomb with a short fuse and a spark: the Rogue self-destruct.
+    pixels: ['.....#.#.', '......#..', '.....#...', '...#####.', '..#######', '..#######', '..#######', '...#####.', '.........'],
+  },
+  {
+    id: 'ticket',
+    name: 'Ticket',
+    paid: 'free (earn)',
+    // A queue ticket with a notch in each side and a number: the clinic's waiting room.
+    pixels: ['.........', '#########', '#.......#', '#.#####.#', '.#.....#.', '#.#####.#', '#.......#', '#########', '.........'],
+  },
+  {
+    id: 'keycard',
+    name: 'Keycard',
+    paid: 'free (earn)',
+    // A corp pass on a clip, its chip a small grid: the corp side of Standing.
+    pixels: ['....#....', '.#######.', '.#.....#.', '.#.###.#.', '.#.#.#.#.', '.#.###.#.', '.#.....#.', '.#######.', '.........'],
+  },
+  {
+    id: 'streettag',
+    name: 'Street tag',
+    paid: 'free (earn)',
+    // A sprayed X with paint running from its lower ends: the street side of Standing.
+    pixels: ['#.......#', '.#.....#.', '..#...#..', '...#.#...', '....#....', '...#.#...', '..#...#..', '.#.....#.', '#.#...#.#'],
+  },
+  {
+    id: 'door',
+    name: 'Open door',
+    paid: 'free (earn)',
+    // A door frame with the door swung open, a gap of light beside it: the Rogue good end. Spoiler-light.
+    pixels: ['.#######.', '.#.....#.', '.#.##..#.', '.#.###.#.', '.#.###.#.', '.#.###.#.', '.#.##..#.', '.#.....#.', '#########'],
+  },
 ];
 
 // --- registration --------------------------------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { ringCells, faceFeatures, faceMask, ringInside, FACE_MS, registerIdeas, IDEA_WEARABLES, IDEA_PROPS, IDEA_CRESTS, WEARABLE_ENTRIES, PROP_ENTRIES, HEATSINK_HOT, FREE, IDEA_ROOM, GLOW_1_0, LAMP_DIM, LAMP_BLOB_DARK } from './accessory-ideas.js';
 import { ACCESSORIES, PROPS, PROP_FLOOR, ROOM, placeWorn, anchorsFor, accessoryColors } from '../../src/accessories.js';
 import { PALETTES } from '../../src/sim.js';
+import { COSMETICS } from '../../src/cosmetics.js';
 import { registerPalettes } from './palettes.js';
 import { deltaE } from '../../src/colors.js';
 import { FLASH_TOGGLE_MS } from '../../src/games/common.js';
@@ -431,6 +432,21 @@ test('nothing in a glow toggles faster than the flash rule: every cell holds eac
         if (changes++ > 0) assert.ok((i - since) * 25 >= FLASH_TOGGLE_MS, `${e.id} glow cell ${k} changes after ${(i - since) * 25} ms`);
         since = i;
       }
+    }
+  }
+});
+
+test('the crests read as ten different shapes: none within 10 cells of another or of 1.0\'s, each 14 to 45 cells lit', () => {
+  const ones = (rows) => rows.flatMap((r, y) => [...r].map((ch, x) => (ch === '#' ? y * 9 + x : -1))).filter((i) => i >= 0);
+  const all = [...IDEA_CRESTS.map((c) => [c.id, c.pixels]), ...COSMETICS.crest.filter((c) => c.pixels).map((c) => [c.id, c.pixels])];
+  assert.equal(IDEA_CRESTS.length, 10);
+  for (const [id, rows] of all) assert.ok(ones(rows).length >= 14 && ones(rows).length <= 45, `${id}: ${ones(rows).length} cells lit`);
+  for (let i = 0; i < all.length; i++) {
+    for (let j = i + 1; j < all.length; j++) {
+      const a = new Set(ones(all[i][1]));
+      const b = new Set(ones(all[j][1]));
+      const diff = [...a].filter((x) => !b.has(x)).length + [...b].filter((x) => !a.has(x)).length;
+      assert.ok(diff >= 10, `${all[i][0]} and ${all[j][0]} differ by only ${diff} cells`);
     }
   }
 });
