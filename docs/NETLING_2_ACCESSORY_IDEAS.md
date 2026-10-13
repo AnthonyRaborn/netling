@@ -270,8 +270,36 @@ Found by looking for gaps once the first builds were done. Items 1 and 6 were bu
 4. **Crests for the new mechanics.** Done (2026-10-13): Fuse, Ticket, Keycard, Street tag and Open door (Crests). Left: the lineage-record fields and the thresholds, which need the simulator.
 5. **A "lit in the dark" flag for more props.** Done (2026-10-13): eight props share the lamp's glow and switch (Build pass). Left: the other 1.0 props (Coffee mug, Briefcase, Burner phone, Spray can), the Cardboard box, Toolbox, Noodle cup, Signal jammer; most have nothing that would light.
 6. **Wearable colourways.** Done for the Goggles, Hard hat, Hood and Dog tags. Cheap candidates left: the Cat-ear headset, Hazard sash, Visitor pass, Cable tangle, Teardrop code, Censor bar.
-7. **Eggs as a style axis.** The open "egg ties" question: one or two items only an egg can earn, so the egg choice has an aesthetic meaning.
+7. **Eggs as a style axis.** Planned (2026-10-13), not built: a source rule, two earned items per egg, Rogue included; the ideas already meet it. See Egg ties: the plan.
 8. **Light-shell checks for the new effects.** Looked at on Clinic white (2026-10-13): an effect sits inside the screen, so the shell does not change it. Beige and Membrane were not separately looked at.
+
+## Egg ties: the plan (2026-10-13, further option 7; planning only, nothing built)
+
+Decided with the maintainer on 2026-10-13: (1) an egg tie is a **source rule**: only a line of that egg can earn the item, but once earned it sits in the shared wardrobe and any netling can wear it (no wear rule, so a look is never locked to an egg's forms); (2) the aim is **two earned items per egg**; (3) the hidden Rogue egg is **in the plan**, flagged as spoilers.
+
+**What already exists.** Counting the ideas' unlock text, every egg is already tied to at least two items, so item 7 is mostly a matter of naming the rule, balancing the counts and checking them, not of drawing anything new.
+
+| Egg | Shell and its effect | Other earned ties | Count |
+|---|---|---|---|
+| Program | Terminal beige, Dust | Modem sound pack (50 Program feeds), Compile track (a Program adult) | 4 |
+| Iron | Rivet plate, Brushed | Relay sound pack, Foundry track | 4 |
+| Wetware | Membrane, Pulse | Condensation effect, Wet sound pack, Culture track | 5 |
+| Rogue (spoilers) | Scorched, Burn-in | Infrared and Thermal tints and effects, Muffled sound pack, On the run track, the Fuse, Open door and Wanted crests, the Signal jammer prop (floated) | 9 or 10 |
+
+Props and wearables carry an egg in their "Fits" column, which is a look and a source-by-find rule (a drop, the Bazaar), not an egg tie. The Cardboard box and Signal jammer are the only prop ties, both Rogue.
+
+**Rules to settle before building** (each is a short doc edit, none a code change):
+
+1. **Two kinds of tie, named apart.** An *egg-choice* tie is earned by raising lines of that egg (the shells, their paired effects, the sound packs, the tracks, Condensation). A *mechanic* tie is earned by a mechanic that only one egg has (Rogue's self-destruct, sweeps, hides and good end). Both are source rules, but only the first is a decision the player makes at the egg choice; the second follows from having made it. The table above counts both.
+2. **Rogue is over the target and the others are at it.** Two per egg is already met everywhere, so nothing needs adding to hit the aim. Wetware is one over, and its extra is Condensation, whose hint ("keep it warm and wet.") is a care habit, not a Wetware achievement. Suggested: change its unlock to a care habit open to every egg, which leaves Wetware with the shell, the effect and its two audio items, in line with Program and Iron. Rogue's counts are fine to leave high: the hidden egg is a second game in 2.0 and its mechanics are its own.
+3. **A tie is read from a per-egg record.** The unlocks say "raise a Program line to its elder" and "raise two Iron lines to their elder"; 1.0's lineage record counts adults raised, not which egg. 2.0 needs an elders-by-egg count (and the feeds, hides, sweeps and self-destructs the audio and Rogue items read) in the record, the same save-format addition the crests need (Crests).
+4. **One egg per item.** No item is tied to two eggs, and an unlock names exactly one. A test can check this when the items are built: doc ids match data (as now), every egg has at least two ties, and no unlock text names two eggs.
+5. **The wardrobe shows ties from the start.** Per the UI doc, locked items stay listed with their hint, so the egg-tied items appear before the egg is chosen; the hints are written not to name the egg (see "see a program through to the last version"), and the Rogue ones follow 1.0's rule for hidden entries (`mainframe` items are hidden while that stage is off; the Rogue items would be hidden until the egg is discovered). Open: whether Scorched, Infrared and the rest are listed, corrupted or hidden before then.
+6. **A mild identity, said plainly.** Because the wardrobe is shared and a player who raises every egg earns everything, an egg tie is a record of what a player has lived through, not a lock on a look. Its effect on the egg choice is small: it nudges which egg to raise first, since a player who wants Terminal beige and Dust starts with Program. If the maintainer wants the choice itself to matter more, the stronger option (a wear rule, or a tie no other egg can ever earn) is on the table but was not chosen.
+
+**Pacing, from the simulator (stand-ins for 1.0's, not 2.0's).** A first elder lands in life 3 for attentive play and 5 for casual, and a life is about 5 real days, so a first shell takes roughly two to four weeks and the "twice" effects (two elders of one egg) several weeks more; Rogue's gate takes longer still (a median 7 lives attentive). These are the same measurements the other unlocks are waiting on and have not been checked against 2.0's own rules.
+
+**Left open:** the unlock wording of every item (still placeholders); whether Program and Iron should get a tint or a crest of their own so every egg has one of every kind (the table shows only Wetware and Rogue with a tint or effect outside the shell pair; this is a want, not a need); where an egg-choice card (UI) could preview its ties; and the check on the wardrobe's counts once the items are built.
 
 ## Open questions
 
@@ -279,7 +307,7 @@ Found by looking for gaps once the first builds were done. Items 1 and 6 were bu
 - **Where props live in the 2.0 wardrobe.** The UI's decided tabs are HEAD, FACE, BACK, SHELL, TINT, FX, SOUND, CREST, MUSIC and LABEL ([NETLING_2_UI.md](NETLING_2_UI.md)); props and two of 1.0's wear slots (body, float) are not named there. Worth settling before any are added.
 - **Unlocks are placeholders.** Every condition above uses 2.0 mechanics as they stand in the simulator (Standing, the clinic, bugs, the egg pressures, the Rogue hunt) and would need the same measuring as 1.0's (how many lives a casual or attentive player takes to get one).
 - **Duplicates (resolved 2026-10-13, maintainer):** the Three of a kind shell is dropped (the Three eggs crest stays) and the Hazard orange tint is dropped (1.0's Heatwave stays). The Clinic sound's hint no longer repeats the Waiting room track's.
-- **Egg ties.** Whether 2.0 should give each egg a few items that only it can find or earn (a source rule, not a wear rule). The "Fits" column is written so it could become one, but nothing here assumes it.
+- **Egg ties.** Planned, not built (Egg ties: the plan, above): a source rule, two per egg, Rogue included. Still open: the unlock wording, Condensation's unlock, and when the Rogue ties become visible.
 - **Overlaps, checked in screenshots only** (now that the drafts exist): the Hood and Rogue's outline (stays on screen on every form), the Scan visor and the Visor (one line that keeps the eyes, against three that hide them), the Pulse patch and Wetware's shade, the Bit swarm and the Glitch moth, the Censor bar and the mouth-less forms (Blank, Cipher). None was judged on a device.
 
 ## Next steps (if the maintainer picks any)
